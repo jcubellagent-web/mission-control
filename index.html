@@ -192,6 +192,7 @@
         .alert-item a:hover { text-decoration: underline; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
         @media (max-width: 900px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; }
             .header-status {
@@ -205,6 +206,7 @@
             .refresh-btn { flex: 1; justify-content: center; }
             .last-updated { order: 3; width: 100%; text-align: right; font-size: 0.8rem; }
         }
+        @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
         @media (max-width: 480px) {
             .password-box { padding: 28px 20px; }
@@ -235,6 +237,16 @@
             pointer-events: none;
         }
         .card-focus { border-color: rgba(255, 130, 90, 0.6); box-shadow: 0 15px 45px rgba(255, 130, 90, 0.25); }
+        .card-brain {
+            background: linear-gradient(180deg, rgba(24, 8, 8, 0.96), rgba(10, 10, 15, 0.98));
+            border-color: rgba(255, 77, 58, 0.42);
+            box-shadow: 0 0 0 1px rgba(255, 77, 58, 0.18), 0 0 36px rgba(255, 77, 58, 0.22), inset 0 0 36px rgba(255, 77, 58, 0.08);
+        }
+        .card-jobs {
+            background: linear-gradient(180deg, rgba(8, 16, 18, 0.96), rgba(8, 10, 15, 0.98));
+            border-color: rgba(73, 211, 255, 0.2);
+            box-shadow: 0 0 0 1px rgba(73, 211, 255, 0.08), 0 0 28px rgba(73, 211, 255, 0.08), inset 0 0 24px rgba(73, 211, 255, 0.05);
+        }
         .card-model { border-color: rgba(255, 179, 71, 0.55); box-shadow: 0 15px 45px rgba(255, 179, 71, 0.2); }
         .card-events { border-color: rgba(255, 77, 109, 0.55); box-shadow: 0 15px 45px rgba(255, 77, 109, 0.25); }
         .card-devices { border-color: rgba(74, 222, 128, 0.35); box-shadow: 0 15px 45px rgba(74, 222, 128, 0.2); }
@@ -362,6 +374,67 @@
         .focus-meter-bar span { display: block; height: 100%; background: var(--accent-focus); border-radius: 999px; }
         .focus-meter-value { font-weight: 600; color: var(--accent-focus); }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
+        .brain-feed { display: flex; flex-direction: column; gap: 16px; }
+        .brain-hero {
+            background: linear-gradient(180deg, rgba(255, 77, 58, 0.08), rgba(255, 77, 58, 0.02));
+            border: 1px solid rgba(255, 77, 58, 0.18);
+            border-radius: 16px;
+            padding: 18px 18px 16px;
+        }
+        .brain-kicker {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 10px; border-radius: 999px;
+            border: 1px solid rgba(255, 77, 58, 0.22);
+            background: rgba(255, 77, 58, 0.06);
+            color: #ff8c7a; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .brain-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            line-height: 1.05; font-weight: 600; color: #ff6958; margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 77, 58, 0.18);
+        }
+        .brain-meta { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-muted); font-size: 0.82rem; }
+        .brain-stream, .jobs-shell {
+            background: rgba(6, 8, 12, 0.76);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .section-label {
+            font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .feed-list { display: flex; flex-direction: column; gap: 10px; }
+        .feed-item {
+            display: grid; grid-template-columns: 82px 1fr; gap: 12px; align-items: start;
+            padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+        }
+        .feed-time { color: #ff8c7a; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; }
+        .feed-text { color: var(--text-secondary); font-size: 0.9rem; }
+        .signal-strip { display: flex; flex-wrap: wrap; gap: 10px; }
+        .signal-pill {
+            padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07); color: var(--text-secondary); font-size: 0.78rem;
+        }
+        .jobs-shell { display: flex; flex-direction: column; gap: 14px; }
+        .job-group { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
+        .job-group:first-child { border-top: 0; padding-top: 0; }
+        .job-group-title { color: #9fe7ff; font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px; }
+        .job-row {
+            display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .job-row:last-child { border-bottom: 0; }
+        .job-name { font-size: 0.92rem; color: var(--text-primary); }
+        .job-detail { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .job-chip {
+            padding: 6px 10px; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em;
+            border: 1px solid rgba(255,255,255,0.08); color: var(--text-secondary);
+        }
+        .job-chip.ok { color: #86efac; border-color: rgba(134,239,172,0.18); background: rgba(34,197,94,0.08); }
+        .job-chip.paused { color: #fde68a; border-color: rgba(253,230,138,0.18); background: rgba(245,158,11,0.08); }
+        .job-chip.error { color: #fca5a5; border-color: rgba(252,165,165,0.18); background: rgba(239,68,68,0.08); }
 
         .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 12px; }
         .model-pill { background: var(--bg-tertiary); border-radius: 10px; padding: 12px; }
@@ -440,14 +513,24 @@
 
         <div class="stats-row" id="stats-row"></div>
 
-        <div class="grid priority-grid">
-            <div class="card card-focus">
+        <div class="hero-grid">
+            <div class="card card-brain">
                 <div class="card-header">
                     <span class="icon">🧠</span>
-                    <h2>Focus &amp; Energy</h2>
+                    <h2>Brain Feed</h2>
                 </div>
-                <div id="focus-card"></div>
+                <div id="brain-feed-card"></div>
             </div>
+            <div class="card card-jobs">
+                <div class="card-header">
+                    <span class="icon">⚡</span>
+                    <h2>Today's Jobs</h2>
+                </div>
+                <div id="today-jobs-card"></div>
+            </div>
+        </div>
+
+        <div class="grid priority-grid">
             <div class="card card-model">
                 <div class="card-header">
                     <span class="icon">💸</span>
@@ -465,43 +548,27 @@
             <div class="card card-devices">
                 <div class="card-header">
                     <span class="icon">🖥️</span>
-                    <h2>Devices &amp; Watchdogs</h2>
+                    <h2>Devices</h2>
                 </div>
                 <div id="device-list"></div>
             </div>
         </div>
 
         <div class="grid">
-            <div class="card card-active">
+            <div class="card card-products">
                 <div class="card-header">
-                    <span class="icon">⚡</span>
-                    <h2>Active Now</h2>
+                    <span class="icon">📊</span>
+                    <h2>Products</h2>
                 </div>
-                <div id="active-tasks"></div>
+                <div class="product-grid" id="products-grid"></div>
             </div>
-            <div class="card card-activity">
+            <div class="card card-cron">
                 <div class="card-header">
-                    <span class="icon">📋</span>
-                    <h2>Recent Activity</h2>
+                    <span class="icon">⏰</span>
+                    <h2>Cron Jobs</h2>
                 </div>
-                <div class="activity-list" id="activity-list"></div>
+                <div class="cron-table" id="cron-table"></div>
             </div>
-        </div>
-
-        <div class="card card-products" style="margin-bottom: 24px;">
-            <div class="card-header">
-                <span class="icon">📊</span>
-                <h2>Products</h2>
-            </div>
-            <div class="product-grid" id="products-grid"></div>
-        </div>
-
-        <div class="card card-cron">
-            <div class="card-header">
-                <span class="icon">⏰</span>
-                <h2>Cron Jobs</h2>
-            </div>
-            <div class="cron-table" id="cron-table"></div>
         </div>
     </div>
 
@@ -686,22 +753,50 @@
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Errors</span></div>` : ''}
             `;
 
-            // Focus & Energy
-            const focusCard = document.getElementById('focus-card');
-            if (data.focus) {
-                const percent = Math.max(0, Math.min(100, Math.round((data.focus.runway || 0) * 100)));
-                focusCard.innerHTML = `
-                    <div class="focus-status">${escapeHtml(data.focus.status || '')}</div>
-                    <p class="focus-context">${escapeHtml(data.focus.context || '')}</p>
-                    <div class="focus-meter">
-                        <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
-                        <span class="focus-meter-value">${percent}%</span>
+            // Brain Feed
+            const brainFeedCard = document.getElementById('brain-feed-card');
+            const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
+            const feedItems = (data.recentActivity || []).slice(0, 6);
+            const liveSignals = [
+                data.modelUsage ? `Session ${formatCurrencyValue(data.modelUsage.session)}` : null,
+                data.modelUsage ? `Daily ${formatCurrencyValue(data.modelUsage.daily)}` : null,
+                (data.crons || []).length ? `${(data.crons || []).filter(c => c.status === 'ok').length} active crons` : null,
+                (data.products || []).length ? `${(data.products || []).filter(p => p.status === 'live').length} live products` : null
+            ].filter(Boolean);
+            brainFeedCard.innerHTML = `
+                <div class="brain-feed">
+                    <div class="brain-hero">
+                        <div class="brain-kicker">Live Operator State</div>
+                        <div class="brain-title">${escapeHtml((data.focus && data.focus.status) || 'Mission Control Online')}</div>
+                        <p class="focus-context">${escapeHtml((data.focus && data.focus.context) || 'No current context')}</p>
+                        <div class="focus-meter">
+                            <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
+                            <span class="focus-meter-value">${percent}%</span>
+                        </div>
+                        <div class="brain-meta">
+                            <span>${data.focus && data.focus.updatedAt ? `Updated ${formatTime(data.focus.updatedAt)}` : 'Awaiting refresh'}</span>
+                            ${data.modelUsage && data.modelUsage.lastUpdated ? `<span>Telemetry ${formatTime(data.modelUsage.lastUpdated)}</span>` : ''}
+                        </div>
                     </div>
-                    <p class="focus-updated">${data.focus.updatedAt ? `Updated ${formatTime(data.focus.updatedAt)}` : ''}</p>
-                `;
-            } else {
-                focusCard.innerHTML = '<div class="empty-state">No focus data</div>';
-            }
+                    <div class="brain-stream">
+                        <div class="section-label">Recent Feed</div>
+                        <div class="feed-list">
+                            ${feedItems.length ? feedItems.map(item => `
+                                <div class="feed-item">
+                                    <div class="feed-time">${formatTime(item.time)}</div>
+                                    <div class="feed-text">${escapeHtml(item.event)}</div>
+                                </div>
+                            `).join('') : '<div class="empty-state">No feed events yet</div>'}
+                        </div>
+                    </div>
+                    <div class="brain-stream">
+                        <div class="section-label">Signal Layer</div>
+                        <div class="signal-strip">
+                            ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
 
             // Model usage snapshot
             const modelUsageCard = document.getElementById('model-usage-card');
@@ -762,25 +857,54 @@
                 deviceList.innerHTML = '<div class="empty-state">No device data</div>';
             }
 
-            // Active Now
-            const activeTasks = document.getElementById('active-tasks');
-            if (data.activeNow && data.activeNow.length > 0) {
-                activeTasks.innerHTML = data.activeNow.map(task => {
-                    const started = new Date(task.startedAt);
-                    const mins = Math.floor((now - started) / 60000);
-                    return `
-                        <div class="active-task">
-                            <div class="active-indicator"></div>
-                            <div class="active-task-info">
-                                <div class="active-task-name">${escapeHtml(task.task)}</div>
-                                <div class="active-task-meta">${escapeHtml(task.model || '')} · ${mins}m</div>
-                            </div>
+            // Today's Jobs
+            const todayJobsCard = document.getElementById('today-jobs-card');
+            const cronRows = (data.crons || []).slice(0, 6).map(cron => {
+                const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
+                return `
+                    <div class="job-row">
+                        <div>
+                            <div class="job-name">${escapeHtml(cron.name)}</div>
+                            <div class="job-detail">${escapeHtml(cron.schedule || 'No schedule')}</div>
                         </div>
-                    `;
-                }).join('');
-            } else {
-                activeTasks.innerHTML = '<div class="empty-state">✨ All quiet — no active tasks</div>';
-            }
+                        <div class="job-chip ${chipClass}">${escapeHtml(cron.status || 'unknown')}</div>
+                    </div>
+                `;
+            }).join('');
+            const eventRows = (data.upcomingEvents || []).slice(0, 4).map(event => `
+                <div class="job-row">
+                    <div>
+                        <div class="job-name">${escapeHtml(event.title || 'Untitled event')}</div>
+                        <div class="job-detail">${escapeHtml(event.source || '')}</div>
+                    </div>
+                    <div class="job-chip">${escapeHtml(formatEventTime(event.time))}</div>
+                </div>
+            `).join('');
+            const actionRows = (data.actionRequired || []).slice(0, 4).map(item => `
+                <div class="job-row">
+                    <div>
+                        <div class="job-name">${escapeHtml(item.title || 'Action')}</div>
+                        <div class="job-detail">${escapeHtml(item.priority || 'queued')}</div>
+                    </div>
+                    <div class="job-chip error">${escapeHtml(item.priority || 'alert')}</div>
+                </div>
+            `).join('');
+            todayJobsCard.innerHTML = `
+                <div class="jobs-shell">
+                    <div class="job-group">
+                        <div class="job-group-title">Automation Queue</div>
+                        ${cronRows || '<div class="empty-state">No scheduled jobs</div>'}
+                    </div>
+                    <div class="job-group">
+                        <div class="job-group-title">Calendar / Triggers</div>
+                        ${eventRows || '<div class="empty-state">No upcoming events</div>'}
+                    </div>
+                    <div class="job-group">
+                        <div class="job-group-title">Action Required</div>
+                        ${actionRows || '<div class="empty-state">Nothing urgent</div>'}
+                    </div>
+                </div>
+            `;
 
             // Products
             const productsGrid = document.getElementById('products-grid');
@@ -827,23 +951,6 @@
                 cronTable.innerHTML = '<div class="empty-state">No cron jobs configured</div>';
             }
 
-            // Recent Activity
-            const activityList = document.getElementById('activity-list');
-            if (data.recentActivity && data.recentActivity.length > 0) {
-                activityList.innerHTML = data.recentActivity.slice(0, 10).map(activity => {
-                    const time = new Date(activity.time);
-                    const hours = time.getHours().toString().padStart(2, '0');
-                    const mins = time.getMinutes().toString().padStart(2, '0');
-                    return `
-                        <div class="activity-item">
-                            <div class="activity-time">${hours}:${mins}</div>
-                            <div class="activity-event">${escapeHtml(activity.event)}</div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                activityList.innerHTML = '<div class="empty-state">No recent activity</div>';
-            }
         }
 
         function formatTime(isoString) {
