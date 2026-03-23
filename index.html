@@ -15,27 +15,25 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-primary: #05060b;
-            --bg-secondary: #090b13;
-            --bg-tertiary: rgba(14, 16, 24, 0.88);
-            --bg-card: rgba(12, 14, 22, 0.8);
-            --bg-hover: rgba(255, 77, 58, 0.08);
-            --border: rgba(255, 255, 255, 0.12);
-            --text-primary: #f8f5ff;
-            --text-secondary: rgba(255, 214, 200, 0.85);
-            --text-muted: rgba(255, 255, 255, 0.55);
-            --accent-focus: #ff825a;
-            --accent-model: #ffb347;
-            --accent-events: #ff4d6d;
-            --accent-devices: #4ade80;
-            --accent-active: #60a5fa;
-            --accent-cron: #fde047;
+            --bg-primary: #0a0b0f;
+            --bg-secondary: #0f1117;
+            --bg-tertiary: #141720;
+            --bg-card: #12151d;
+            --bg-hover: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: rgba(243, 244, 246, 0.82);
+            --text-muted: rgba(243, 244, 246, 0.48);
+            --accent-focus: #8b5cf6;
+            --accent-model: #f59e0b;
+            --accent-events: #ef4444;
+            --accent-devices: #22c55e;
+            --accent-active: #3b82f6;
+            --accent-cron: #a78bfa;
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(255, 77, 58, 0.25), transparent 50%),
-                        radial-gradient(circle at 80% 0%, rgba(255, 125, 85, 0.18), transparent 45%),
-                        linear-gradient(135deg, #05060b 0%, #090b13 60%, #05060b 100%);
+            background: linear-gradient(180deg, #090b10 0%, #0b0d13 100%);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.5;
@@ -219,41 +217,26 @@
         .card {
             position: relative;
             background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
             padding: 24px;
             display: flex;
             flex-direction: column;
             height: 100%;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(18px);
+            box-shadow: none;
+            backdrop-filter: none;
         }
-        .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            pointer-events: none;
-        }
-        .card-focus { border-color: rgba(255, 130, 90, 0.6); box-shadow: 0 15px 45px rgba(255, 130, 90, 0.25); }
-        .card-brain {
-            background: linear-gradient(180deg, rgba(24, 8, 8, 0.96), rgba(10, 10, 15, 0.98));
-            border-color: rgba(255, 77, 58, 0.42);
-            box-shadow: 0 0 0 1px rgba(255, 77, 58, 0.18), 0 0 36px rgba(255, 77, 58, 0.22), inset 0 0 36px rgba(255, 77, 58, 0.08);
-        }
-        .card-jobs {
-            background: linear-gradient(180deg, rgba(8, 16, 18, 0.96), rgba(8, 10, 15, 0.98));
-            border-color: rgba(73, 211, 255, 0.2);
-            box-shadow: 0 0 0 1px rgba(73, 211, 255, 0.08), 0 0 28px rgba(73, 211, 255, 0.08), inset 0 0 24px rgba(73, 211, 255, 0.05);
-        }
-        .card-model { border-color: rgba(255, 179, 71, 0.55); box-shadow: 0 15px 45px rgba(255, 179, 71, 0.2); }
-        .card-events { border-color: rgba(255, 77, 109, 0.55); box-shadow: 0 15px 45px rgba(255, 77, 109, 0.25); }
-        .card-devices { border-color: rgba(74, 222, 128, 0.35); box-shadow: 0 15px 45px rgba(74, 222, 128, 0.2); }
-        .card-active { border-color: rgba(96, 165, 250, 0.35); }
-        .card-activity { border-color: rgba(255, 255, 255, 0.08); }
-        .card-products { border-color: rgba(255, 125, 85, 0.3); }
-        .card-cron { border-color: rgba(253, 224, 71, 0.3); }
+        .card::after { display: none; }
+        .card-focus,
+        .card-brain,
+        .card-jobs,
+        .card-model,
+        .card-events,
+        .card-devices,
+        .card-active,
+        .card-activity,
+        .card-products,
+        .card-cron { border-color: var(--border); box-shadow: none; }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
         .card-header h2 { font-size: 1rem; font-weight: 600; color: var(--text-secondary); }
         .card-header .icon { font-size: 1.125rem; }
@@ -358,9 +341,9 @@
         .stat-pill {
             display: flex; align-items: center; gap: 8px;
             padding: 8px 16px;
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 20px;
+            border-radius: 999px;
             font-size: 0.875rem;
         }
         .stat-pill .num { font-weight: 600; }
@@ -376,29 +359,28 @@
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 16px; }
         .brain-hero {
-            background: linear-gradient(180deg, rgba(255, 77, 58, 0.08), rgba(255, 77, 58, 0.02));
-            border: 1px solid rgba(255, 77, 58, 0.18);
-            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             padding: 18px 18px 16px;
         }
         .brain-kicker {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 6px 10px; border-radius: 999px;
-            border: 1px solid rgba(255, 77, 58, 0.22);
-            background: rgba(255, 77, 58, 0.06);
-            color: #ff8c7a; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
             margin-bottom: 14px;
         }
         .brain-title {
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
-            line-height: 1.05; font-weight: 600; color: #ff6958; margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 77, 58, 0.18);
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            line-height: 1.05; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;
         }
         .brain-meta { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-muted); font-size: 0.82rem; }
         .brain-stream, .jobs-shell {
-            background: rgba(6, 8, 12, 0.76);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
             padding: 14px;
         }
         .section-label {
@@ -408,9 +390,9 @@
         .feed-list { display: flex; flex-direction: column; gap: 10px; }
         .feed-item {
             display: grid; grid-template-columns: 82px 1fr; gap: 12px; align-items: start;
-            padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);
+            padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03);
         }
-        .feed-time { color: #ff8c7a; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; }
+        .feed-time { color: var(--text-muted); font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; }
         .feed-text { color: var(--text-secondary); font-size: 0.9rem; }
         .signal-strip { display: flex; flex-wrap: wrap; gap: 10px; }
         .signal-pill {
@@ -420,7 +402,7 @@
         .jobs-shell { display: flex; flex-direction: column; gap: 14px; }
         .job-group { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
         .job-group:first-child { border-top: 0; padding-top: 0; }
-        .job-group-title { color: #9fe7ff; font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px; }
+        .job-group-title { color: var(--text-muted); font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 10px; }
         .job-row {
             display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
             padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);

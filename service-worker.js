@@ -1,4 +1,4 @@
-const CACHE_NAME = "mission-control-pwa-v2";
+const CACHE_NAME = "mission-control-pwa-v3";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
