@@ -422,8 +422,15 @@
         .model-pill { background: var(--bg-tertiary); border-radius: 10px; padding: 12px; }
         .model-pill h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.2em; margin-bottom: 4px; }
         .model-pill .value { font-size: 1.1rem; font-weight: 600; }
-        .model-list { display: flex; flex-direction: column; gap: 8px; }
-        .model-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); }
+        .model-list { display: flex; flex-direction: column; gap: 10px; }
+        .model-row { display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; color: var(--text-secondary); padding: 12px 14px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border); }
+        .model-row-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .model-name-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .model-source { font-size: 0.72rem; color: var(--text-muted); border: 1px solid var(--border); border-radius: 999px; padding: 4px 8px; }
+        .model-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+        .model-breakdown-cell { background: rgba(255,255,255,0.02); border-radius: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.03); }
+        .model-breakdown-cell .label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+        .model-breakdown-cell .value { font-size: 0.86rem; color: var(--text-primary); }
 
         .event-item { display: flex; gap: 12px; padding: 10px 12px; background: var(--bg-tertiary); border-radius: 10px; }
         .event-time { font-weight: 600; font-size: 0.85rem; color: var(--text-primary); min-width: 90px; }
@@ -790,18 +797,28 @@
                         <div class="model-pill"><h3>Weekly</h3><div class="value">${formatCurrencyValue(data.modelUsage.weekly)}</div></div>
                     </div>
                 `;
-                const top = (data.modelUsage.topModels && data.modelUsage.topModels.length) ? `
+                const breakdownRows = (data.modelUsage.breakdown && data.modelUsage.breakdown.length) ? `
                     <div class="model-list">
-                        ${data.modelUsage.topModels.map(model => `
+                        ${data.modelUsage.breakdown.map(model => `
                             <div class="model-row">
-                                <span>${escapeHtml(model.name)}</span>
-                                <span>${formatCurrencyValue(model.cost)}${model.window ? ` (${escapeHtml(model.window)})` : ''}</span>
+                                <div class="model-row-head">
+                                    <div class="model-name-wrap">
+                                        <span>${escapeHtml(model.name)}</span>
+                                        <span class="model-source">${escapeHtml(model.source || 'Unknown')}</span>
+                                    </div>
+                                    <span>${formatCurrencyValue((model.dailyCost || 0) + (model.sessionCost || 0))}</span>
+                                </div>
+                                <div class="model-breakdown">
+                                    <div class="model-breakdown-cell"><span class="label">Session</span><span class="value">${formatCurrencyValue(model.sessionCost || 0)}</span></div>
+                                    <div class="model-breakdown-cell"><span class="label">Daily</span><span class="value">${formatCurrencyValue(model.dailyCost || 0)}</span></div>
+                                    <div class="model-breakdown-cell"><span class="label">Weekly</span><span class="value">${formatCurrencyValue(model.weeklyCost || 0)}</span></div>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 ` : '<div class="empty-state">No model calls yet</div>';
                 const updated = data.modelUsage.lastUpdated ? `<div class="focus-updated">Updated ${formatTime(data.modelUsage.lastUpdated)}</div>` : '';
-                modelUsageCard.innerHTML = totals + top + updated;
+                modelUsageCard.innerHTML = totals + breakdownRows + updated;
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
             }
