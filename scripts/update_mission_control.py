@@ -21,6 +21,11 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 DASHBOARD_PATH = ROOT.parent / "data" / "dashboard-data.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 
+CRON_TARGETS = [
+    {"name": "Chiro invite sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly"},
+    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/30 * * * *"}
+]
+
 
 def fetch_next(endpoint: str) -> Dict[str, Any] | None:
     url = f"{NEXT_BASE}{endpoint}"
@@ -169,6 +174,24 @@ def peekaboo_status() -> Dict[str, str]:
         return {"name": "Peekaboo", "status": "attention", "detail": f"permissions check failed ({exc.returncode})"}
 
 
+def fetch_crons() -> List[Dict[str, Any]]:
+    try:
+        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True)
+        listing = result.stdout
+    except subprocess.CalledProcessError:
+        listing = ""
+    rows = []
+    for target in CRON_TARGETS:
+        present = target['pattern'] in listing
+        rows.append({
+            'name': target['name'],
+            'schedule': target['schedule'],
+            'status': 'ok' if present else 'paused',
+            'errors': 0,
+            'lastError': None
+        })
+    return rows
+
 def build_devices() -> List[Dict[str, str]]:
     return [airpoint_status(), caffeinate_status(), peekaboo_status()]
 
@@ -192,6 +215,8 @@ def main() -> None:
     dashboard["upcomingEvents"] = events
 
     dashboard["devices"] = build_devices()
+
+    dashboard["crons"] = fetch_crons()
 
     dashboard["lastUpdated"] = utc_iso()
 

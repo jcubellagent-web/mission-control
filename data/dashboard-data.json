@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-23T03:30:01Z",
+  "lastUpdated": "2026-03-23T03:38:44Z",
   "actionRequired": [],
   "activeNow": [
     {
@@ -17,7 +17,7 @@
     "status": "Dashboard sprint",
     "context": "Polishing night mode + live brain feed",
     "runway": 0.88,
-    "updatedAt": "2026-03-23T03:30:00Z"
+    "updatedAt": "2026-03-23T03:38:43Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -36,12 +36,12 @@
     {
       "name": "caffeinate (neat-otter)",
       "status": "ok",
-      "detail": "PID 18376 \u00b7 up 03:31:20"
+      "detail": "PID 18376 \u00b7 up 03:40:03"
     },
     {
       "name": "Peekaboo",
-      "status": "attention",
-      "detail": "Missing: Screen Recording, Accessibility"
+      "status": "ok",
+      "detail": "Permissions granted"
     }
   ],
   "products": [
@@ -66,17 +66,8 @@
   ],
   "crons": [
     {
-      "name": "Heartbeat monitor",
-      "schedule": "Every 30 min",
-      "lastRun": "2026-03-23T02:30:00Z",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
       "name": "Chiro invite sync",
       "schedule": "Hourly",
-      "lastRun": "2026-03-23T02:00:00Z",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -84,18 +75,9 @@
     {
       "name": "Mission Control refresh",
       "schedule": "*/30 * * * *",
-      "lastRun": null,
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
-    },
-    {
-      "name": "Peekaboo recorder",
-      "schedule": "On demand",
-      "lastRun": null,
-      "status": "error",
-      "errors": 1,
-      "lastError": "Needs macOS screen recording permissions"
     }
   ],
   "recentActivity": [
