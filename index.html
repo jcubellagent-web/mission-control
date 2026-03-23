@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mission Control</title>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#05060b">
+    <link rel="apple-touch-icon" href="assets/logo-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -34,6 +39,9 @@
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.5;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            overscroll-behavior-y: contain;
         }
         #password-overlay {
             position: fixed; inset: 0;
@@ -77,7 +85,7 @@
         .password-box button:hover { opacity: 0.9; }
         .password-error { color: var(--accent-red); font-size: 0.875rem; margin-top: 12px; display: none; }
         
-        .container { max-width: 1680px; width: min(95vw, 1680px); margin: 0 auto; padding: 32px 40px 48px; }
+        .container { width: min(100%, 1200px); margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
         header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
@@ -104,9 +112,37 @@
             font-size: 0.8rem; font-weight: 500;
             color: var(--accent-yellow);
             border-color: var(--accent-yellow);
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+        .connection-status.offline {
+            color: var(--accent-events);
+            border-color: var(--accent-events);
+        }
+        .connection-status.degraded {
+            color: var(--accent-cron);
+            border-color: var(--accent-cron);
         }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
         .last-updated { color: var(--text-muted); font-size: 0.875rem; }
+        .pull-indicator {
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px));
+            left: 0; right: 0;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-40px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 900;
+        }
+        .pull-indicator.visible {
+            opacity: 1;
+        }
         .refresh-btn {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 8px 14px;
@@ -156,7 +192,27 @@
         .alert-item a:hover { text-decoration: underline; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 900px) {
+            header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .header-status {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                background: var(--bg-tertiary);
+                border-radius: 16px;
+                padding: 12px;
+            }
+            .refresh-btn { flex: 1; justify-content: center; }
+            .last-updated { order: 3; width: 100%; text-align: right; font-size: 0.8rem; }
+        }
         @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) {
+            .password-box { padding: 28px 20px; }
+            .logo h1 { font-size: 1.25rem; }
+            .stats-row { gap: 8px; }
+            .card { padding: 18px; }
+            .product-grid { grid-template-columns: 1fr; }
+        }
         
         .card {
             position: relative;
@@ -351,6 +407,8 @@
         </div>
     </div>
 
+    <div id="pull-indicator" class="pull-indicator">Pull to refresh</div>
+
     <!-- Main Content -->
     <div class="container" id="main-content" style="display: none;">
         <header>
@@ -364,9 +422,9 @@
                     <span class="spinner">⟳</span>
                     Update
                 </button>
-                <div class="connection-status">
+                <div class="connection-status" id="connection-status">
                     <span class="status-dot"></span>
-                    <span>Polling</span>
+                    <span class="status-label">Polling</span>
                 </div>
                 <div class="last-updated" id="last-updated-text">Loading...</div>
             </div>
@@ -458,8 +516,68 @@
         };
         // ============================================
 
+        const pullIndicator = document.getElementById('pull-indicator');
+        let pullStartY = null;
+        let pullDistance = 0;
+        const PULL_THRESHOLD = 70;
+
         let lastUpdateTime = null;
         let updateTickerInterval;
+
+        function setConnectionStatus(state) {
+            const statusEl = document.getElementById('connection-status');
+            if (!statusEl) return;
+            statusEl.classList.remove('offline', 'degraded');
+            if (state === 'offline') {
+                statusEl.classList.add('offline');
+            } else if (state === 'degraded') {
+                statusEl.classList.add('degraded');
+            }
+            const label = statusEl.querySelector('.status-label');
+            if (label) {
+                label.textContent = state === 'offline' ? 'Offline' : state === 'degraded' ? 'Retrying' : 'Polling';
+            }
+        }
+
+        function handleTouchStart(event) {
+            if (window.scrollY === 0 && sessionStorage.getItem('mc_authenticated') === 'true') {
+                pullStartY = event.touches[0].clientY;
+            } else {
+                pullStartY = null;
+            }
+        }
+
+        function handleTouchMove(event) {
+            if (pullStartY === null || !pullIndicator) return;
+            pullDistance = event.touches[0].clientY - pullStartY;
+            if (pullDistance > 0) {
+                event.preventDefault();
+                const offset = Math.min(pullDistance, 120);
+                pullIndicator.style.transform = `translateY(${offset}px)`;
+                pullIndicator.classList.add('visible');
+                pullIndicator.textContent = pullDistance > PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh';
+            }
+        }
+
+        function handleTouchEnd() {
+            if (pullIndicator) {
+                pullIndicator.classList.remove('visible');
+                pullIndicator.style.transform = '';
+            }
+            if (pullDistance > PULL_THRESHOLD) {
+                forceUpdate();
+            }
+            pullStartY = null;
+            pullDistance = 0;
+        }
+
+        function attachPullToRefresh() {
+            if (window.__mcPullAttached || !pullIndicator) return;
+            window.addEventListener('touchstart', handleTouchStart, { passive: true });
+            window.addEventListener('touchmove', handleTouchMove, { passive: false });
+            window.addEventListener('touchend', handleTouchEnd);
+            window.__mcPullAttached = true;
+        }
 
         function checkPassword() {
             const input = document.getElementById('pin-input').value;
@@ -478,6 +596,10 @@
         document.getElementById('pin-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkPassword();
         });
+
+        setConnectionStatus(navigator.onLine ? 'online' : 'offline');
+        window.addEventListener('online', () => setConnectionStatus('online'));
+        window.addEventListener('offline', () => setConnectionStatus('offline'));
 
         if (sessionStorage.getItem('mc_authenticated') === 'true') {
             document.getElementById('password-overlay').style.display = 'none';
@@ -505,11 +627,13 @@
                 const data = await response.json();
                 lastUpdateTime = new Date(data.lastUpdated || Date.now());
                 renderDashboard(data);
+                setConnectionStatus('online');
                 document.getElementById('main-content').classList.add('flash-update');
                 setTimeout(() => document.getElementById('main-content').classList.remove('flash-update'), 1000);
                 return true;
             } catch (err) {
                 console.error('Failed to fetch dashboard data:', err);
+                setConnectionStatus(navigator.onLine ? 'degraded' : 'offline');
                 return false;
             }
         }
@@ -526,6 +650,7 @@
             updateLastUpdatedTicker();
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
+            attachPullToRefresh();
         }
 
         function renderDashboard(data) {
@@ -751,6 +876,15 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').catch(err => {
+                    console.error('Service worker registration failed', err);
+                });
+            });
         }
     </script>
 </body>
