@@ -1,23 +1,12 @@
 {
-  "lastUpdated": "2026-03-23T22:10:01Z",
   "actionRequired": [],
-  "activeNow": [
-    {
-      "task": "Mission Control dashboard setup",
-      "model": "claude-3.5-sonnet",
-      "startedAt": "2026-03-23T02:40:00Z"
-    },
-    {
-      "task": "Kiosk UI polish",
-      "model": "gpt-5.1",
-      "startedAt": "2026-03-23T02:20:00Z"
-    }
-  ],
+  "activeNow": [],
+  "upcomingEvents": [],
   "focus": {
-    "status": "Dashboard sprint",
-    "context": "Polishing night mode + live brain feed",
-    "runway": 0.88,
-    "updatedAt": "2026-03-23T16:30:00Z"
+    "status": "System nominal",
+    "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
+    "runway": 0.98,
+    "updatedAt": "2026-03-23T22:10:51Z"
   },
   "modelUsage": {
     "session": 0.0549164,
@@ -40,44 +29,33 @@
         "cost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-23T22:10:00.582Z"
+    "lastUpdated": "2026-03-23T22:10:51.210Z"
   },
-  "upcomingEvents": [],
   "devices": [
     {
       "name": "Airpoint",
       "status": "ok",
       "detail": "v1.3.23"
-    },
-    {
-      "name": "caffeinate (neat-otter)",
-      "status": "attention",
-      "detail": "Not running"
-    },
-    {
-      "name": "Peekaboo",
-      "status": "attention",
-      "detail": "Missing: Screen Recording"
     }
   ],
   "products": [
     {
-      "name": "Kiosk dashboard",
-      "url": "http://192.168.4.40:3030",
-      "status": "live",
-      "lastChecked": "2026-03-23T02:50:00Z"
-    },
-    {
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
-      "status": "testing",
-      "lastChecked": "2026-03-23T02:55:00Z"
+      "status": "live",
+      "lastChecked": "2026-03-23T22:10:51Z"
     },
     {
-      "name": "Mobile / PWA",
-      "url": "https://todo",
+      "name": "Mission Control PWA",
+      "url": "https://jcubellagent-web.github.io/mission-control/",
+      "status": "live",
+      "lastChecked": "2026-03-23T22:10:51Z"
+    },
+    {
+      "name": "Kiosk dashboard",
+      "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-22T20:00:00Z"
+      "lastChecked": "2026-03-23T22:10:51Z"
     }
   ],
   "crons": [
@@ -98,24 +76,13 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-23T02:45:00Z",
-      "event": "\ud83e\udde9 Installed agent-dashboard skill"
+      "time": "2026-03-23T22:10:51.210Z",
+      "event": "\ud83d\udcb8 Synced live CodexBar model usage"
     },
     {
-      "time": "2026-03-23T02:35:00Z",
-      "event": "\ud83c\udfa8 Refreshed kiosk UI layout"
-    },
-    {
-      "time": "2026-03-23T02:20:00Z",
-      "event": "\ud83d\udcdd Updated memory with kiosk/skill context"
-    },
-    {
-      "time": "2026-03-23T01:55:00Z",
-      "event": "\u2699\ufe0f Night mode overlay validated"
-    },
-    {
-      "time": "2026-03-23T01:30:00Z",
-      "event": "\ud83d\udce1 Airpoint CLI test succeeded"
+      "time": "2026-03-23T22:10:51Z",
+      "event": "\ud83d\ude80 Published Mission Control refresh"
     }
-  ]
+  ],
+  "lastUpdated": "2026-03-23T22:10:51Z"
 }
