@@ -800,7 +800,8 @@
                         `).join('')}
                     </div>
                 ` : '<div class="empty-state">No model calls yet</div>';
-                modelUsageCard.innerHTML = totals + top;
+                const updated = data.modelUsage.lastUpdated ? `<div class="focus-updated">Updated ${formatTime(data.modelUsage.lastUpdated)}</div>` : '';
+                modelUsageCard.innerHTML = totals + top + updated;
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
             }
@@ -948,6 +949,8 @@
 
         function formatCurrencyValue(value) {
             if (typeof value !== 'number') return '$0.00';
+            if (value === 0) return '$0.00';
+            if (value < 1) return `${(value * 100).toFixed(2)}¢`;
             return `$${value.toFixed(2)}`;
         }
 
