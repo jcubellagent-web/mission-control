@@ -6,17 +6,27 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-24T21:40:00Z"
+    "updatedAt": "2026-03-24T21:45:00Z"
   },
   "modelUsage": {
-    "session": 0.0878289,
-    "daily": 0.0878289,
-    "weekly": 0.12979490000000002,
+    "session": 0.4396364,
+    "daily": 0.4396364,
+    "weekly": 0.4816024,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "weekly",
-        "cost": 0.07487850000000001
+        "cost": 0.426686
+      },
+      {
+        "name": "gpt-5.4",
+        "window": "session",
+        "cost": 0.38472
+      },
+      {
+        "name": "gpt-5.4",
+        "window": "daily",
+        "cost": 0.38472
       },
       {
         "name": "gpt-5.3-codex",
@@ -27,35 +37,25 @@
         "name": "gpt-5.3-codex",
         "window": "daily",
         "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.3-codex",
-        "window": "weekly",
-        "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.4",
-        "window": "session",
-        "cost": 0.032912500000000004
       }
     ],
     "breakdown": [
+      {
+        "name": "gpt-5.4",
+        "source": "OpenClaw",
+        "sessionCost": 0.38472,
+        "dailyCost": 0.38472,
+        "weeklyCost": 0.426686
+      },
       {
         "name": "gpt-5.3-codex",
         "source": "CodexBar",
         "sessionCost": 0.0549164,
         "dailyCost": 0.0549164,
         "weeklyCost": 0.0549164
-      },
-      {
-        "name": "gpt-5.4",
-        "source": "OpenClaw",
-        "sessionCost": 0.032912500000000004,
-        "dailyCost": 0.032912500000000004,
-        "weeklyCost": 0.07487850000000001
       }
     ],
-    "lastUpdated": "2026-03-24T21:40:00.532Z"
+    "lastUpdated": "2026-03-24T21:45:00.704Z"
   },
   "devices": [
     {
@@ -69,19 +69,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T21:40:00Z"
+      "lastChecked": "2026-03-24T21:45:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T21:40:00Z"
+      "lastChecked": "2026-03-24T21:45:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-24T21:40:00Z"
+      "lastChecked": "2026-03-24T21:45:00Z"
     }
   ],
   "crons": [
@@ -102,13 +102,13 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-24T21:40:00.532Z",
+      "time": "2026-03-24T21:45:00.704Z",
       "event": "\ud83d\udcb8 Synced live CodexBar model usage"
     },
     {
-      "time": "2026-03-24T21:40:00Z",
+      "time": "2026-03-24T21:45:00Z",
       "event": "\ud83d\ude80 Published Mission Control refresh"
     }
   ],
-  "lastUpdated": "2026-03-24T21:40:00Z"
+  "lastUpdated": "2026-03-24T21:45:00Z"
 }
