@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mission Control</title>
     <link rel="manifest" href="./manifest.webmanifest">
-    <meta name="theme-color" content="#05060b">
+    <meta name="theme-color" content="#050814">
     <link rel="apple-touch-icon" href="assets/logo-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,27 +15,41 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-primary: #0a0b0f;
-            --bg-secondary: #0f1117;
-            --bg-tertiary: #141720;
-            --bg-card: #12151d;
-            --bg-hover: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f3f4f6;
-            --text-secondary: rgba(243, 244, 246, 0.82);
-            --text-muted: rgba(243, 244, 246, 0.48);
-            --accent-focus: #8b5cf6;
-            --accent-model: #f59e0b;
-            --accent-events: #ef4444;
-            --accent-devices: #22c55e;
-            --accent-active: #3b82f6;
-            --accent-cron: #a78bfa;
+            --bg-primary: #04070f;
+            --bg-secondary: rgba(12, 19, 35, 0.78);
+            --bg-tertiary: rgba(18, 28, 48, 0.8);
+            --bg-card: rgba(14, 20, 37, 0.7);
+            --bg-hover: rgba(125, 211, 252, 0.08);
+            --border: rgba(148, 163, 184, 0.16);
+            --text-primary: #edf4ff;
+            --text-secondary: rgba(226, 232, 240, 0.84);
+            --text-muted: rgba(191, 203, 223, 0.56);
+            --accent-focus: #38bdf8;
+            --accent-model: #a78bfa;
+            --accent-events: #f87171;
+            --accent-devices: #22d3ee;
+            --accent-active: #4ade80;
+            --accent-cron: #facc15;
+            --accent-blue: #60a5fa;
+            --accent-red: #f87171;
+            --accent-orange: #fb923c;
+            --accent-yellow: #facc15;
+            --accent-green: #4ade80;
+            --surface-glow: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 46%);
+        }
+        html {
+            min-height: 100%;
+            background: var(--bg-primary);
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(180deg, #090b10 0%, #0b0d13 100%);
+            background:
+                radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 34%),
+                radial-gradient(circle at top right, rgba(168, 85, 247, 0.12), transparent 28%),
+                linear-gradient(180deg, #050814 0%, #05070d 52%, #02040a 100%);
             color: var(--text-primary);
             min-height: 100vh;
+            min-height: 100dvh;
             line-height: 1.5;
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -97,7 +111,11 @@
         .password-box button:hover { opacity: 0.9; }
         .password-error { color: var(--accent-red); font-size: 0.875rem; margin-top: 12px; display: none; }
         
-        .container { width: min(100%, 1200px); margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
+        .container {
+            width: min(100%, 1560px);
+            margin: 0 auto;
+            padding: clamp(18px, 3vw, 36px);
+        }
         header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
@@ -230,15 +248,19 @@
         
         .card {
             position: relative;
-            background: var(--bg-card);
+            background:
+                linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(9, 14, 27, 0.9)),
+                var(--surface-glow);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 24px;
+            border-radius: 22px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
             height: 100%;
-            box-shadow: none;
-            backdrop-filter: none;
+            min-height: 0;
+            box-shadow: 0 20px 48px rgba(2, 6, 23, 0.42);
+            backdrop-filter: blur(20px) saturate(130%);
+            -webkit-backdrop-filter: blur(20px) saturate(130%);
         }
         .card::after { display: none; }
         .card-focus,
@@ -373,17 +395,17 @@
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 16px; }
         .brain-hero {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(14, 165, 233, 0.16), rgba(59, 130, 246, 0.08) 45%, rgba(15, 23, 42, 0.2));
+            border: 1px solid rgba(125, 211, 252, 0.18);
+            border-radius: 18px;
             padding: 18px 18px 16px;
         }
         .brain-kicker {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 6px 10px; border-radius: 999px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+            border: 1px solid rgba(125, 211, 252, 0.18);
+            background: rgba(125, 211, 252, 0.08);
+            color: #d9f4ff; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
             margin-bottom: 14px;
         }
         .brain-title {
@@ -464,85 +486,144 @@
             .card { padding: 20px; }
             .cron-row { grid-template-columns: 1fr auto; }
             .cron-schedule { display: none; }
-            .header-status { flex-direction: column; align-items: flex-end; gap: 8px; }
-        }
-        @media (min-width: 1400px) and (min-height: 880px) {
-            body {
-                overflow: hidden;
-                zoom: 0.88;
-            }
-            .container {
-                width: min(100%, 1860px);
-                min-height: 100vh;
-                padding: 16px 20px 16px;
-                display: flex;
-                flex-direction: column;
-            }
-            header,
-            .stats-row,
-            .hero-grid,
-            .grid {
-                margin-bottom: 12px;
-            }
-            .hero-grid,
-            .grid {
-                gap: 12px;
-            }
-            .card {
-                padding: 14px;
-                border-radius: 14px;
-            }
-            .brain-title {
-                font-size: clamp(1.35rem, 1.9vw, 2rem);
-                margin-bottom: 8px;
-            }
-            .focus-context,
-            .feed-text,
-            .job-name,
-            .event-detail,
-            .device-detail {
-                font-size: 0.84rem;
-            }
-            .brain-hero,
-            .brain-stream,
-            .jobs-shell,
-            .model-pill,
-            .model-row,
-            .event-item,
-            .device-item,
-            .product-card {
-                padding: 10px;
-            }
-            .feed-item,
-            .job-row,
-            .cron-row,
-            .activity-item {
-                padding-top: 6px;
-                padding-bottom: 6px;
-            }
-            .signal-pill,
-            .stat-pill,
-            .refresh-btn,
+            .header-status { flex-direction: column; align-items: stretch; gap: 8px; }
             .connection-status,
-            .model-source,
-            .job-chip {
-                font-size: 0.72rem;
-            }
-            .product-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-            .priority-grid {
-                grid-template-columns: 1.15fr 0.95fr 0.9fr;
-            }
-            .model-breakdown {
-                gap: 8px;
-            }
-            .model-breakdown-cell {
-                padding: 7px 8px;
-            }
-            .empty-state {
-                padding: 14px;
-            }
+            .refresh-btn,
+            .last-updated { width: 100%; justify-content: center; text-align: center; }
+            .brain-title { font-size: clamp(1.3rem, 8vw, 2rem); }
+            .feed-item { grid-template-columns: 70px 1fr; }
+            .event-item { flex-direction: column; gap: 6px; }
+            .event-time { min-width: 0; }
+            .model-breakdown { grid-template-columns: 1fr; }
+        }
+        body.phone-mode .container {
+            width: min(100%, 430px);
+            padding: max(12px, env(safe-area-inset-top, 0px)) 14px max(18px, env(safe-area-inset-bottom, 0px)) 14px;
+        }
+        body.phone-mode header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            padding: 10px 0 2px;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, rgba(5, 8, 20, 0.96), rgba(5, 8, 20, 0.82), rgba(5, 8, 20, 0));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        body.phone-mode .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+        }
+        body.phone-mode .logo h1 {
+            font-size: 1.12rem;
+        }
+        body.phone-mode .card {
+            border-radius: 20px;
+            padding: 18px;
+        }
+        body.phone-mode .brain-stream,
+        body.phone-mode .jobs-shell,
+        body.phone-mode .brain-hero {
+            border-radius: 16px;
+        }
+        body.kiosk-mode {
+            overflow: hidden;
+        }
+        body.kiosk-mode .container {
+            width: min(100%, 1760px);
+            height: 100vh;
+            height: 100dvh;
+            padding: 14px 18px;
+            display: grid;
+            grid-template-rows: auto auto auto minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.95fr);
+            gap: 12px;
+        }
+        body.kiosk-mode header,
+        body.kiosk-mode .alert-banner,
+        body.kiosk-mode .stats-row,
+        body.kiosk-mode .hero-grid,
+        body.kiosk-mode .grid {
+            margin-bottom: 0;
+        }
+        body.kiosk-mode .hero-grid,
+        body.kiosk-mode .priority-grid,
+        body.kiosk-mode .grid {
+            min-height: 0;
+            gap: 12px;
+        }
+        body.kiosk-mode .priority-grid {
+            grid-template-columns: 1.15fr 0.9fr 0.9fr;
+        }
+        body.kiosk-mode .card {
+            padding: 16px;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        body.kiosk-mode .card-header {
+            margin-bottom: 12px;
+        }
+        body.kiosk-mode .brain-title {
+            font-size: clamp(1.3rem, 1.8vw, 1.9rem);
+            margin-bottom: 8px;
+        }
+        body.kiosk-mode .focus-context,
+        body.kiosk-mode .feed-text,
+        body.kiosk-mode .job-name,
+        body.kiosk-mode .event-detail,
+        body.kiosk-mode .device-detail,
+        body.kiosk-mode .product-name {
+            font-size: 0.83rem;
+        }
+        body.kiosk-mode .brain-hero,
+        body.kiosk-mode .brain-stream,
+        body.kiosk-mode .jobs-shell,
+        body.kiosk-mode .model-pill,
+        body.kiosk-mode .model-row,
+        body.kiosk-mode .event-item,
+        body.kiosk-mode .device-item,
+        body.kiosk-mode .product-card,
+        body.kiosk-mode .alert-item {
+            padding: 10px 12px;
+        }
+        body.kiosk-mode .feed-item,
+        body.kiosk-mode .job-row,
+        body.kiosk-mode .cron-row,
+        body.kiosk-mode .activity-item {
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+        body.kiosk-mode .signal-pill,
+        body.kiosk-mode .stat-pill,
+        body.kiosk-mode .refresh-btn,
+        body.kiosk-mode .connection-status,
+        body.kiosk-mode .model-source,
+        body.kiosk-mode .job-chip,
+        body.kiosk-mode .last-updated {
+            font-size: 0.72rem;
+        }
+        body.kiosk-mode .product-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        body.kiosk-mode .model-breakdown {
+            gap: 8px;
+        }
+        body.kiosk-mode .model-breakdown-cell {
+            padding: 7px 8px;
+        }
+        body.kiosk-mode .empty-state {
+            padding: 12px;
+        }
+        body.kiosk-mode #brain-feed-card,
+        body.kiosk-mode #today-jobs-card,
+        body.kiosk-mode #model-usage-card,
+        body.kiosk-mode #events-list,
+        body.kiosk-mode #device-list,
+        body.kiosk-mode #products-grid,
+        body.kiosk-mode #cron-table {
+            min-height: 0;
+            overflow: auto;
+            padding-right: 4px;
         }
         
         @keyframes flash-update { 0% { background-color: rgba(34,197,94,0.2); } 100% { background-color: transparent; } }
@@ -672,6 +753,19 @@
         let lastUpdateTime = null;
         let updateTickerInterval;
 
+        function isKioskMode() {
+            return window.matchMedia('(min-width: 1400px) and (min-height: 880px)').matches;
+        }
+
+        function isPhoneMode() {
+            return window.matchMedia('(max-width: 480px)').matches;
+        }
+
+        function syncViewportMode() {
+            document.body.classList.toggle('kiosk-mode', isKioskMode());
+            document.body.classList.toggle('phone-mode', isPhoneMode());
+        }
+
         function setConnectionStatus(state) {
             const statusEl = document.getElementById('connection-status');
             if (!statusEl) return;
@@ -745,9 +839,12 @@
             if (e.key === 'Enter') checkPassword();
         });
 
+        syncViewportMode();
         setConnectionStatus(navigator.onLine ? 'online' : 'offline');
         window.addEventListener('online', () => setConnectionStatus('online'));
         window.addEventListener('offline', () => setConnectionStatus('offline'));
+        window.addEventListener('resize', syncViewportMode);
+        window.addEventListener('orientationchange', syncViewportMode);
 
         if (sessionStorage.getItem('mc_authenticated') === 'true') {
             document.getElementById('password-overlay').style.display = 'none';
@@ -803,6 +900,9 @@
 
         function renderDashboard(data) {
             const now = new Date();
+            const kioskMode = isKioskMode();
+            const phoneMode = isPhoneMode();
+            const compactMode = kioskMode || phoneMode;
 
             // Action Required
             const actionBanner = document.getElementById('action-required');
@@ -837,8 +937,7 @@
             // Brain Feed
             const brainFeedCard = document.getElementById('brain-feed-card');
             const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
-            const desktopKiosk = window.matchMedia('(min-width: 1400px) and (min-height: 880px)').matches;
-            const feedItems = (data.recentActivity || []).slice(0, desktopKiosk ? 4 : 6);
+            const feedItems = (data.recentActivity || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
             const liveSignals = [
                 data.modelUsage ? `Session ${formatCurrencyValue(data.modelUsage.session)}` : null,
                 data.modelUsage ? `Daily ${formatCurrencyValue(data.modelUsage.daily)}` : null,
@@ -919,7 +1018,7 @@
             // Upcoming events
             const eventsList = document.getElementById('events-list');
             if (data.upcomingEvents && data.upcomingEvents.length > 0) {
-                eventsList.innerHTML = data.upcomingEvents.slice(0, 4).map(event => `
+                eventsList.innerHTML = data.upcomingEvents.slice(0, compactMode ? 3 : 4).map(event => `
                     <div class="event-item">
                         <div class="event-time">${formatEventTime(event.time)}</div>
                         <div class="event-detail">
@@ -952,7 +1051,7 @@
 
             // Today's Jobs
             const todayJobsCard = document.getElementById('today-jobs-card');
-            const cronRows = (data.crons || []).slice(0, desktopKiosk ? 4 : 6).map(cron => {
+            const cronRows = (data.crons || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6).map(cron => {
                 const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
                 return `
                     <div class="job-row">
@@ -964,7 +1063,7 @@
                     </div>
                 `;
             }).join('');
-            const eventRows = (data.upcomingEvents || []).slice(0, desktopKiosk ? 3 : 4).map(event => `
+            const eventRows = (data.upcomingEvents || []).slice(0, compactMode ? 3 : 4).map(event => `
                 <div class="job-row">
                     <div>
                         <div class="job-name">${escapeHtml(event.title || 'Untitled event')}</div>
@@ -973,7 +1072,7 @@
                     <div class="job-chip">${escapeHtml(formatEventTime(event.time))}</div>
                 </div>
             `).join('');
-            const actionRows = (data.actionRequired || []).slice(0, 4).map(item => `
+            const actionRows = (data.actionRequired || []).slice(0, compactMode ? 3 : 4).map(item => `
                 <div class="job-row">
                     <div>
                         <div class="job-name">${escapeHtml(item.title || 'Action')}</div>
@@ -1002,7 +1101,7 @@
             // Products
             const productsGrid = document.getElementById('products-grid');
             if (data.products && data.products.length > 0) {
-                productsGrid.innerHTML = data.products.map(product => `
+                productsGrid.innerHTML = data.products.slice(0, kioskMode ? 6 : phoneMode ? 4 : data.products.length).map(product => `
                     <a href="${escapeHtml(product.url)}" target="_blank" rel="noopener" class="product-card">
                         <div class="product-name">${escapeHtml(product.name)}</div>
                         <div class="product-status ${product.status}">
@@ -1025,7 +1124,7 @@
                     if (a.status === 'paused' && b.status !== 'paused') return 1;
                     if (b.status === 'paused' && a.status !== 'paused') return -1;
                     return 0;
-                });
+                }).slice(0, kioskMode ? 6 : phoneMode ? 5 : data.crons.length);
                 cronTable.innerHTML = sortedCrons.map(cron => {
                     const statusIcon = cron.status === 'ok' ? '✅' : cron.status === 'error' ? '❌' : cron.status === 'paused' ? '⏸️' : '⚪';
                     return `
