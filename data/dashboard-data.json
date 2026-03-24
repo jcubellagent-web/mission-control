@@ -6,27 +6,22 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-24T03:55:01Z"
+    "updatedAt": "2026-03-24T04:00:01Z"
   },
   "modelUsage": {
-    "session": 0.4248039,
-    "daily": 0.4667699,
-    "weekly": 0.4667699,
+    "session": 1.8273509000000001,
+    "daily": 0.0549164,
+    "weekly": 1.8693169,
     "topModels": [
       {
         "name": "gpt-5.4",
-        "window": "daily",
-        "cost": 0.41185350000000004
-      },
-      {
-        "name": "gpt-5.4",
         "window": "weekly",
-        "cost": 0.41185350000000004
+        "cost": 1.8144005
       },
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 0.36988750000000004
+        "cost": 1.7724345000000001
       },
       {
         "name": "gpt-5.3-codex",
@@ -36,10 +31,15 @@
       {
         "name": "gpt-5.3-codex",
         "window": "daily",
+        "cost": 0.0549164
+      },
+      {
+        "name": "gpt-5.3-codex",
+        "window": "weekly",
         "cost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-24T03:55:01.124Z"
+    "lastUpdated": "2026-03-24T04:00:01.042Z"
   },
   "devices": [
     {
@@ -53,19 +53,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T03:55:01Z"
+      "lastChecked": "2026-03-24T04:00:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T03:55:01Z"
+      "lastChecked": "2026-03-24T04:00:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-24T03:55:01Z"
+      "lastChecked": "2026-03-24T04:00:01Z"
     }
   ],
   "crons": [
@@ -86,13 +86,13 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-24T03:55:01.124Z",
+      "time": "2026-03-24T04:00:01.042Z",
       "event": "\ud83d\udcb8 Synced live CodexBar model usage"
     },
     {
-      "time": "2026-03-24T03:55:01Z",
+      "time": "2026-03-24T04:00:01Z",
       "event": "\ud83d\ude80 Published Mission Control refresh"
     }
   ],
-  "lastUpdated": "2026-03-24T03:55:01Z"
+  "lastUpdated": "2026-03-24T04:00:01Z"
 }
