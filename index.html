@@ -41,6 +41,20 @@
             padding-bottom: env(safe-area-inset-bottom, 0px);
             overscroll-behavior-y: contain;
         }
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+        body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.75), rgba(59, 130, 246, 0.75));
+            border-radius: 999px;
+            border: 2px solid rgba(10, 11, 15, 0.95);
+        }
+        body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.95), rgba(59, 130, 246, 0.95));
+        }
         #password-overlay {
             position: fixed; inset: 0;
             background: var(--bg-primary);
@@ -452,6 +466,83 @@
             .cron-schedule { display: none; }
             .header-status { flex-direction: column; align-items: flex-end; gap: 8px; }
         }
+        @media (min-width: 1400px) and (min-height: 880px) {
+            body {
+                overflow: hidden;
+            }
+            .container {
+                width: min(100%, 1860px);
+                min-height: 100vh;
+                padding: 18px 24px 20px;
+                display: flex;
+                flex-direction: column;
+            }
+            header,
+            .stats-row,
+            .hero-grid,
+            .grid {
+                margin-bottom: 16px;
+            }
+            .hero-grid,
+            .grid {
+                gap: 16px;
+            }
+            .card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+            .brain-title {
+                font-size: clamp(1.35rem, 1.9vw, 2rem);
+                margin-bottom: 8px;
+            }
+            .focus-context,
+            .feed-text,
+            .job-name,
+            .event-detail,
+            .device-detail {
+                font-size: 0.84rem;
+            }
+            .brain-hero,
+            .brain-stream,
+            .jobs-shell,
+            .model-pill,
+            .model-row,
+            .event-item,
+            .device-item,
+            .product-card {
+                padding: 12px;
+            }
+            .feed-item,
+            .job-row,
+            .cron-row,
+            .activity-item {
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+            .signal-pill,
+            .stat-pill,
+            .refresh-btn,
+            .connection-status,
+            .model-source,
+            .job-chip {
+                font-size: 0.72rem;
+            }
+            .product-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .priority-grid {
+                grid-template-columns: 1.15fr 0.95fr 0.9fr;
+            }
+            .model-breakdown {
+                gap: 8px;
+            }
+            .model-breakdown-cell {
+                padding: 7px 8px;
+            }
+            .empty-state {
+                padding: 14px;
+            }
+        }
         
         @keyframes flash-update { 0% { background-color: rgba(34,197,94,0.2); } 100% { background-color: transparent; } }
         .flash-update { animation: flash-update 1s ease-out; }
@@ -745,7 +836,8 @@
             // Brain Feed
             const brainFeedCard = document.getElementById('brain-feed-card');
             const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
-            const feedItems = (data.recentActivity || []).slice(0, 6);
+            const desktopKiosk = window.matchMedia('(min-width: 1400px) and (min-height: 880px)').matches;
+            const feedItems = (data.recentActivity || []).slice(0, desktopKiosk ? 4 : 6);
             const liveSignals = [
                 data.modelUsage ? `Session ${formatCurrencyValue(data.modelUsage.session)}` : null,
                 data.modelUsage ? `Daily ${formatCurrencyValue(data.modelUsage.daily)}` : null,
@@ -792,9 +884,9 @@
             if (data.modelUsage) {
                 const totals = `
                     <div class="model-usage-grid">
-                        <div class="model-pill"><h3>Session</h3><div class="value">${formatCurrencyValue(data.modelUsage.session)}</div></div>
-                        <div class="model-pill"><h3>Daily</h3><div class="value">${formatCurrencyValue(data.modelUsage.daily)}</div></div>
-                        <div class="model-pill"><h3>Weekly</h3><div class="value">${formatCurrencyValue(data.modelUsage.weekly)}</div></div>
+                        <div class="model-pill"><h3>Tracked Session</h3><div class="value">${formatCurrencyValue(data.modelUsage.session)}</div></div>
+                        <div class="model-pill"><h3>Tracked Daily</h3><div class="value">${formatCurrencyValue(data.modelUsage.daily)}</div></div>
+                        <div class="model-pill"><h3>Tracked Weekly</h3><div class="value">${formatCurrencyValue(data.modelUsage.weekly)}</div></div>
                     </div>
                 `;
                 const breakdownRows = (data.modelUsage.breakdown && data.modelUsage.breakdown.length) ? `
@@ -817,7 +909,7 @@
                         `).join('')}
                     </div>
                 ` : '<div class="empty-state">No model calls yet</div>';
-                const updated = data.modelUsage.lastUpdated ? `<div class="focus-updated">Updated ${formatTime(data.modelUsage.lastUpdated)}</div>` : '';
+                const updated = data.modelUsage.lastUpdated ? `<div class="focus-updated">Updated ${formatTime(data.modelUsage.lastUpdated)} · totals reflect tracked models only</div>` : '';
                 modelUsageCard.innerHTML = totals + breakdownRows + updated;
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
@@ -859,7 +951,7 @@
 
             // Today's Jobs
             const todayJobsCard = document.getElementById('today-jobs-card');
-            const cronRows = (data.crons || []).slice(0, 6).map(cron => {
+            const cronRows = (data.crons || []).slice(0, desktopKiosk ? 4 : 6).map(cron => {
                 const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
                 return `
                     <div class="job-row">
@@ -871,7 +963,7 @@
                     </div>
                 `;
             }).join('');
-            const eventRows = (data.upcomingEvents || []).slice(0, 4).map(event => `
+            const eventRows = (data.upcomingEvents || []).slice(0, desktopKiosk ? 3 : 4).map(event => `
                 <div class="job-row">
                     <div>
                         <div class="job-name">${escapeHtml(event.title || 'Untitled event')}</div>
