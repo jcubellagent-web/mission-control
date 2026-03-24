@@ -81,6 +81,7 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
         "daily": normalize(data.get("daily", {})),
         "weekly": normalize(data.get("weekly", {})),
         "topModels": rows[:5],
+        "breakdown": data.get("breakdown", []),
         "lastUpdated": data.get("lastUpdated"),
     }
 
