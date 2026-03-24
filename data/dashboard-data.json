@@ -6,22 +6,17 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-24T11:10:01Z"
+    "updatedAt": "2026-03-24T11:15:01Z"
   },
   "modelUsage": {
-    "session": 0.0549164,
-    "daily": 0.12034790000000001,
-    "weekly": 0.1623139,
+    "session": 0.10572189999999998,
+    "daily": 0.10572189999999998,
+    "weekly": 0.14768789999999998,
     "topModels": [
       {
-        "name": "gpt-5.1-codex",
+        "name": "gpt-5.4",
         "window": "weekly",
-        "cost": 0.1073975
-      },
-      {
-        "name": "gpt-5.1-codex",
-        "window": "daily",
-        "cost": 0.0654315
+        "cost": 0.09277149999999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -37,15 +32,20 @@
         "name": "gpt-5.3-codex",
         "window": "weekly",
         "cost": 0.0549164
+      },
+      {
+        "name": "gpt-5.4",
+        "window": "session",
+        "cost": 0.05080549999999999
       }
     ],
     "breakdown": [
       {
-        "name": "gpt-5.1-codex",
+        "name": "gpt-5.4",
         "source": "OpenClaw",
-        "sessionCost": 0,
-        "dailyCost": 0.0654315,
-        "weeklyCost": 0.1073975
+        "sessionCost": 0.05080549999999999,
+        "dailyCost": 0.05080549999999999,
+        "weeklyCost": 0.09277149999999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -55,7 +55,7 @@
         "weeklyCost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-24T11:10:01.003Z"
+    "lastUpdated": "2026-03-24T11:15:00.949Z"
   },
   "devices": [
     {
@@ -69,19 +69,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T11:10:01Z"
+      "lastChecked": "2026-03-24T11:15:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-24T11:10:01Z"
+      "lastChecked": "2026-03-24T11:15:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-24T11:10:01Z"
+      "lastChecked": "2026-03-24T11:15:01Z"
     }
   ],
   "crons": [
@@ -102,13 +102,13 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-24T11:10:01.003Z",
+      "time": "2026-03-24T11:15:00.949Z",
       "event": "\ud83d\udcb8 Synced live CodexBar model usage"
     },
     {
-      "time": "2026-03-24T11:10:01Z",
+      "time": "2026-03-24T11:15:01Z",
       "event": "\ud83d\ude80 Published Mission Control refresh"
     }
   ],
-  "lastUpdated": "2026-03-24T11:10:01Z"
+  "lastUpdated": "2026-03-24T11:15:01Z"
 }
