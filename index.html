@@ -223,7 +223,6 @@
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
         .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
-        .bottom-grid { grid-template-columns: minmax(0, 1fr); }
         @media (max-width: 900px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; }
             .header-status {
@@ -378,7 +377,7 @@
         .activity-time { font-size: 0.75rem; color: var(--text-muted); min-width: 60px; }
         .activity-event { font-size: 0.875rem; color: var(--text-secondary); }
         
-        .stats-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         .stat-pill {
             display: flex; align-items: center; gap: 8px;
             padding: 8px 16px;
@@ -539,10 +538,10 @@
             width: min(100%, 1760px);
             height: 100vh;
             height: 100dvh;
-            padding: 14px 18px;
+            padding: 10px 14px;
             display: grid;
-            grid-template-rows: auto auto auto minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.95fr);
-            gap: 12px;
+            grid-template-rows: auto auto auto minmax(0, 1.08fr) minmax(0, 0.92fr);
+            gap: 10px;
         }
         body.kiosk-mode header,
         body.kiosk-mode .alert-banner,
@@ -555,21 +554,18 @@
         body.kiosk-mode .priority-grid,
         body.kiosk-mode .grid {
             min-height: 0;
-            gap: 12px;
+            gap: 10px;
         }
         body.kiosk-mode .priority-grid {
-            grid-template-columns: 1.2fr 0.88fr 0.88fr;
-        }
-        body.kiosk-mode .bottom-grid {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: 1.35fr 0.85fr 0.85fr;
         }
         body.kiosk-mode .card {
-            padding: 16px;
+            padding: 14px;
             border-radius: 18px;
             overflow: hidden;
         }
         body.kiosk-mode .card-header {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         body.kiosk-mode .brain-title {
             font-size: clamp(1.3rem, 1.8vw, 1.9rem);
@@ -579,9 +575,8 @@
         body.kiosk-mode .feed-text,
         body.kiosk-mode .job-name,
         body.kiosk-mode .event-detail,
-        body.kiosk-mode .device-detail,
-        body.kiosk-mode .product-name {
-            font-size: 0.83rem;
+        body.kiosk-mode .device-detail {
+            font-size: 0.8rem;
         }
         body.kiosk-mode .brain-hero,
         body.kiosk-mode .brain-stream,
@@ -590,16 +585,15 @@
         body.kiosk-mode .model-row,
         body.kiosk-mode .event-item,
         body.kiosk-mode .device-item,
-        body.kiosk-mode .product-card,
         body.kiosk-mode .alert-item {
-            padding: 10px 12px;
+            padding: 9px 11px;
         }
         body.kiosk-mode .feed-item,
         body.kiosk-mode .job-row,
         body.kiosk-mode .cron-row,
         body.kiosk-mode .activity-item {
-            padding-top: 8px;
-            padding-bottom: 8px;
+            padding-top: 6px;
+            padding-bottom: 6px;
         }
         body.kiosk-mode .signal-pill,
         body.kiosk-mode .stat-pill,
@@ -608,7 +602,7 @@
         body.kiosk-mode .model-source,
         body.kiosk-mode .job-chip,
         body.kiosk-mode .last-updated {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
         }
         body.kiosk-mode .product-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -620,14 +614,13 @@
             padding: 7px 8px;
         }
         body.kiosk-mode .empty-state {
-            padding: 12px;
+            padding: 10px;
         }
         body.kiosk-mode #brain-feed-card,
         body.kiosk-mode #today-jobs-card,
         body.kiosk-mode #model-usage-card,
         body.kiosk-mode #events-list,
-        body.kiosk-mode #device-list,
-        body.kiosk-mode #cron-table {
+        body.kiosk-mode #device-list {
             min-height: 0;
             overflow: auto;
             padding-right: 4px;
@@ -723,15 +716,6 @@
             </div>
         </div>
 
-        <div class="grid bottom-grid">
-            <div class="card card-cron">
-                <div class="card-header">
-                    <span class="icon">⏰</span>
-                    <h2>Cron Jobs</h2>
-                </div>
-                <div class="cron-table" id="cron-table"></div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -927,11 +911,14 @@
             const enabledCrons = data.crons?.filter(c => c.status !== 'paused').length || 0;
             const pausedCrons = data.crons?.filter(c => c.status === 'paused').length || 0;
             const errorCrons = data.crons?.filter(c => c.errors > 0).length || 0;
+            const upcomingCount = data.upcomingEvents?.length || 0;
+            const deviceAttention = data.devices?.filter(d => d.status && d.status !== 'ok').length || 0;
             statsRow.innerHTML = `
-                <div class="stat-pill"><span class="num">${data.products?.length || 0}</span><span class="label">Products</span></div>
                 <div class="stat-pill"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
                 <div class="stat-pill"><span class="num">${pausedCrons}</span><span class="label">Paused</span></div>
-                ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Errors</span></div>` : ''}
+                <div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>
+                <div class="stat-pill"><span class="num">${deviceAttention}</span><span class="label">Device Alerts</span></div>
+                ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
             `;
 
             // Brain Feed
@@ -1051,13 +1038,14 @@
 
             // Today's Jobs
             const todayJobsCard = document.getElementById('today-jobs-card');
-            const cronRows = (data.crons || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6).map(cron => {
+            const cronRows = (data.crons || []).slice(0, kioskMode ? 3 : phoneMode ? 3 : 5).map(cron => {
                 const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
+                const cronMeta = [cron.schedule || 'No schedule', cron.errors > 0 ? `${cron.errors} error${cron.errors === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ');
                 return `
                     <div class="job-row">
                         <div>
                             <div class="job-name">${escapeHtml(cron.name)}</div>
-                            <div class="job-detail">${escapeHtml(cron.schedule || 'No schedule')}</div>
+                            <div class="job-detail">${escapeHtml(cronMeta)}</div>
                         </div>
                         <div class="job-chip ${chipClass}">${escapeHtml(cron.status || 'unknown')}</div>
                     </div>
@@ -1097,35 +1085,6 @@
                     </div>
                 </div>
             `;
-
-            // Cron Jobs
-            const cronTable = document.getElementById('cron-table');
-            if (data.crons && data.crons.length > 0) {
-                const sortedCrons = [...data.crons].sort((a, b) => {
-                    if (a.errors > 0 && b.errors === 0) return -1;
-                    if (b.errors > 0 && a.errors === 0) return 1;
-                    if (a.status === 'paused' && b.status !== 'paused') return 1;
-                    if (b.status === 'paused' && a.status !== 'paused') return -1;
-                    return 0;
-                }).slice(0, kioskMode ? 8 : phoneMode ? 5 : data.crons.length);
-                cronTable.classList.toggle('compact', kioskMode);
-                cronTable.innerHTML = sortedCrons.map(cron => {
-                    const statusIcon = cron.status === 'ok' ? '✅' : cron.status === 'error' ? '❌' : cron.status === 'paused' ? '⏸️' : '⚪';
-                    return `
-                        <div class="cron-row ${cron.errors > 0 ? 'has-error' : ''}" onclick="this.classList.toggle('expanded')">
-                            <div>
-                                <div class="cron-name">${escapeHtml(cron.name)}</div>
-                                <div class="cron-schedule">${escapeHtml(cron.schedule)}</div>
-                            </div>
-                            <div class="cron-status">${statusIcon}</div>
-                            ${cron.errors > 0 ? `<div class="cron-errors">${cron.errors} errors</div>` : ''}
-                            ${cron.lastError ? `<div class="cron-error-detail">${escapeHtml(cron.lastError)}</div>` : ''}
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                cronTable.innerHTML = '<div class="empty-state">No cron jobs configured</div>';
-            }
 
         }
 
