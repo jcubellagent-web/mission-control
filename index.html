@@ -222,7 +222,8 @@
         .alert-item a:hover { text-decoration: underline; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
-        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
+        .bottom-grid { grid-template-columns: minmax(0, 1fr); }
         @media (max-width: 900px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; }
             .header-status {
@@ -328,6 +329,10 @@
         .product-checked { font-size: 0.75rem; color: var(--text-muted); }
         
         .cron-table { width: 100%; }
+        .cron-table.compact .cron-row {
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
         .cron-row {
             display: grid;
             grid-template-columns: 1fr auto auto auto;
@@ -553,7 +558,10 @@
             gap: 12px;
         }
         body.kiosk-mode .priority-grid {
-            grid-template-columns: 1.15fr 0.9fr 0.9fr;
+            grid-template-columns: 1.2fr 0.88fr 0.88fr;
+        }
+        body.kiosk-mode .bottom-grid {
+            grid-template-columns: minmax(0, 1fr);
         }
         body.kiosk-mode .card {
             padding: 16px;
@@ -619,7 +627,6 @@
         body.kiosk-mode #model-usage-card,
         body.kiosk-mode #events-list,
         body.kiosk-mode #device-list,
-        body.kiosk-mode #products-grid,
         body.kiosk-mode #cron-table {
             min-height: 0;
             overflow: auto;
@@ -716,14 +723,7 @@
             </div>
         </div>
 
-        <div class="grid">
-            <div class="card card-products">
-                <div class="card-header">
-                    <span class="icon">📊</span>
-                    <h2>Products</h2>
-                </div>
-                <div class="product-grid" id="products-grid"></div>
-            </div>
+        <div class="grid bottom-grid">
             <div class="card card-cron">
                 <div class="card-header">
                     <span class="icon">⏰</span>
@@ -1098,23 +1098,6 @@
                 </div>
             `;
 
-            // Products
-            const productsGrid = document.getElementById('products-grid');
-            if (data.products && data.products.length > 0) {
-                productsGrid.innerHTML = data.products.slice(0, kioskMode ? 6 : phoneMode ? 4 : data.products.length).map(product => `
-                    <a href="${escapeHtml(product.url)}" target="_blank" rel="noopener" class="product-card">
-                        <div class="product-name">${escapeHtml(product.name)}</div>
-                        <div class="product-status ${product.status}">
-                            <span class="dot"></span>
-                            ${product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                        </div>
-                        <div class="product-checked">Checked ${formatTime(product.lastChecked)}</div>
-                    </a>
-                `).join('');
-            } else {
-                productsGrid.innerHTML = '<div class="empty-state">No products configured</div>';
-            }
-
             // Cron Jobs
             const cronTable = document.getElementById('cron-table');
             if (data.crons && data.crons.length > 0) {
@@ -1124,7 +1107,8 @@
                     if (a.status === 'paused' && b.status !== 'paused') return 1;
                     if (b.status === 'paused' && a.status !== 'paused') return -1;
                     return 0;
-                }).slice(0, kioskMode ? 6 : phoneMode ? 5 : data.crons.length);
+                }).slice(0, kioskMode ? 8 : phoneMode ? 5 : data.crons.length);
+                cronTable.classList.toggle('compact', kioskMode);
                 cronTable.innerHTML = sortedCrons.map(cron => {
                     const statusIcon = cron.status === 'ok' ? '✅' : cron.status === 'error' ? '❌' : cron.status === 'paused' ? '⏸️' : '⚪';
                     return `
