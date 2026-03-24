@@ -213,13 +213,56 @@ def build_products(now_iso: str) -> List[Dict[str, str]]:
     ]
 
 
-def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None) -> List[Dict[str, str]]:
-    items = [
-        {"time": now_iso, "event": "🚀 Published Mission Control refresh"},
-    ]
+def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focus: Dict[str, Any] | None, events: List[Dict[str, Any]], crons: List[Dict[str, Any]], devices: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    items: List[Dict[str, str]] = []
+
+    if focus and focus.get("status"):
+        items.append({
+            "time": focus.get("updatedAt") or now_iso,
+            "event": f"🧠 {focus.get('status')}",
+        })
+
+    if events:
+        next_event = events[0]
+        items.append({
+            "time": next_event.get("time") or now_iso,
+            "event": f"📅 Upcoming: {next_event.get('title') or 'Calendar event'}",
+        })
+
     if model_usage:
-        items.insert(0, {"time": model_usage.get("lastUpdated") or now_iso, "event": "💸 Synced live CodexBar model usage"})
-    return items
+        session_cost = model_usage.get("session") or 0
+        items.append({
+            "time": model_usage.get("lastUpdated") or now_iso,
+            "event": f"💸 Session spend now ${session_cost:.2f}",
+        })
+
+    error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
+    if error_crons:
+        items.append({
+            "time": now_iso,
+            "event": f"⚠️ {len(error_crons)} cron job{'s' if len(error_crons) != 1 else ''} need attention",
+        })
+    else:
+        items.append({
+            "time": now_iso,
+            "event": f"✅ {len(crons)} scheduled job{'s' if len(crons) != 1 else ''} healthy",
+        })
+
+    if devices:
+        attention = [device for device in devices if device.get("status") not in (None, "ok")]
+        if attention:
+            items.append({
+                "time": now_iso,
+                "event": f"🖥️ {len(attention)} device alert{'s' if len(attention) != 1 else ''}",
+            })
+        else:
+            items.append({
+                "time": now_iso,
+                "event": "🖥️ Device layer nominal",
+            })
+
+    items.append({"time": now_iso, "event": "🚀 Mission Control refresh published"})
+    return items[:6]
 
 
 def main() -> None:
@@ -247,7 +290,14 @@ def main() -> None:
     dashboard["devices"] = build_devices()
     dashboard["products"] = build_products(now_iso)
     dashboard["crons"] = fetch_crons()
-    dashboard["recentActivity"] = build_recent_activity(now_iso, model_usage)
+    dashboard["recentActivity"] = build_recent_activity(
+        now_iso,
+        model_usage,
+        dashboard["focus"],
+        dashboard["upcomingEvents"],
+        dashboard["crons"],
+        dashboard["devices"],
+    )
     dashboard["lastUpdated"] = now_iso
 
     DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))

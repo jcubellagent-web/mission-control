@@ -377,7 +377,7 @@
         .activity-time { font-size: 0.75rem; color: var(--text-muted); min-width: 60px; }
         .activity-event { font-size: 0.875rem; color: var(--text-secondary); }
         
-        .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stats-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
         .stat-pill {
             display: flex; align-items: center; gap: 8px;
             padding: 8px 16px;
@@ -538,10 +538,10 @@
             width: min(100%, 1760px);
             height: 100vh;
             height: 100dvh;
-            padding: 10px 14px;
+            padding: 12px 18px;
             display: grid;
-            grid-template-rows: auto auto auto minmax(0, 1.08fr) minmax(0, 0.92fr);
-            gap: 10px;
+            grid-template-rows: auto auto auto minmax(0, 1.04fr) minmax(0, 0.96fr);
+            gap: 14px;
         }
         body.kiosk-mode header,
         body.kiosk-mode .alert-banner,
@@ -554,18 +554,18 @@
         body.kiosk-mode .priority-grid,
         body.kiosk-mode .grid {
             min-height: 0;
-            gap: 10px;
+            gap: 14px;
         }
         body.kiosk-mode .priority-grid {
             grid-template-columns: 1.35fr 0.85fr 0.85fr;
         }
         body.kiosk-mode .card {
-            padding: 14px;
-            border-radius: 18px;
+            padding: 16px;
+            border-radius: 20px;
             overflow: hidden;
         }
         body.kiosk-mode .card-header {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         body.kiosk-mode .brain-title {
             font-size: clamp(1.3rem, 1.8vw, 1.9rem);
@@ -586,14 +586,14 @@
         body.kiosk-mode .event-item,
         body.kiosk-mode .device-item,
         body.kiosk-mode .alert-item {
-            padding: 9px 11px;
+            padding: 11px 13px;
         }
         body.kiosk-mode .feed-item,
         body.kiosk-mode .job-row,
         body.kiosk-mode .cron-row,
         body.kiosk-mode .activity-item {
-            padding-top: 6px;
-            padding-bottom: 6px;
+            padding-top: 7px;
+            padding-bottom: 7px;
         }
         body.kiosk-mode .signal-pill,
         body.kiosk-mode .stat-pill,
@@ -602,7 +602,7 @@
         body.kiosk-mode .model-source,
         body.kiosk-mode .job-chip,
         body.kiosk-mode .last-updated {
-            font-size: 0.68rem;
+            font-size: 0.72rem;
         }
         body.kiosk-mode .product-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
