@@ -6,7 +6,42 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-25T02:28:14Z"
+    "updatedAt": "2026-03-25T02:30:00Z"
+  },
+  "brainFeed": {
+    "active": true,
+    "messageReceived": "2026-03-25T02:28:00Z",
+    "objective": "Overhaul Brain Feed and Model Usage widgets in Mission Control",
+    "status": "working",
+    "steps": [
+      {
+        "label": "Reading current dashboard code",
+        "status": "done",
+        "tool": "read"
+      },
+      {
+        "label": "Analyzing Model Usage screenshot",
+        "status": "done",
+        "tool": "image"
+      },
+      {
+        "label": "Building new Brain Feed UI",
+        "status": "done",
+        "tool": "claude-sonnet"
+      },
+      {
+        "label": "Overhauling Model Usage widget",
+        "status": "done",
+        "tool": "claude-sonnet"
+      },
+      {
+        "label": "Pushing to GitHub Pages",
+        "status": "active",
+        "tool": "git"
+      }
+    ],
+    "currentTool": "git",
+    "updatedAt": "2026-03-25T02:29:00Z"
   },
   "modelUsage": {
     "session": 0.0549164,
@@ -50,7 +85,7 @@
         "weeklyCost": 0.041966
       }
     ],
-    "lastUpdated": "2026-03-25T02:28:14.257Z"
+    "lastUpdated": "2026-03-25T02:30:00.737Z"
   },
   "devices": [
     {
@@ -64,19 +99,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T02:28:14Z"
+      "lastChecked": "2026-03-25T02:30:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T02:28:14Z"
+      "lastChecked": "2026-03-25T02:30:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-25T02:28:14Z"
+      "lastChecked": "2026-03-25T02:30:00Z"
     }
   ],
   "crons": [
@@ -97,25 +132,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-25T02:28:14Z",
+      "time": "2026-03-25T02:30:00Z",
       "event": "\ud83e\udde0 System nominal"
     },
     {
-      "time": "2026-03-25T02:28:14.257Z",
+      "time": "2026-03-25T02:30:00.737Z",
       "event": "\ud83d\udcb8 Session spend now $0.05"
     },
     {
-      "time": "2026-03-25T02:28:14Z",
+      "time": "2026-03-25T02:30:00Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-25T02:28:14Z",
+      "time": "2026-03-25T02:30:00Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-25T02:28:14Z",
+      "time": "2026-03-25T02:30:00Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-25T02:28:14Z"
+  "lastUpdated": "2026-03-25T02:30:00Z"
 }
