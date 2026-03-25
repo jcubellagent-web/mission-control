@@ -265,6 +265,33 @@ def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focu
     return items[:6]
 
 
+BRAIN_FEED_PATH = ROOT.parent / "data" / "brain-feed.json"
+
+
+def load_brain_feed_file() -> Dict[str, Any] | None:
+    """Load brainFeed state from the sidecar file written by the agent."""
+    if not BRAIN_FEED_PATH.exists():
+        return None
+    try:
+        data = json.loads(BRAIN_FEED_PATH.read_text())
+        if not isinstance(data, dict):
+            return None
+        # Auto-expire: if updatedAt is older than 10 minutes, mark inactive
+        updated = data.get("updatedAt")
+        if updated:
+            try:
+                ts = dt.datetime.fromisoformat(updated.replace("Z", "+00:00"))
+                age = dt.datetime.now(dt.timezone.utc) - ts
+                if age.total_seconds() > 600:  # 10 min stale threshold
+                    data["active"] = False
+            except (ValueError, TypeError):
+                pass
+        return data
+    except (json.JSONDecodeError, OSError) as exc:
+        print(f"[warn] failed to read {BRAIN_FEED_PATH}: {exc}", file=sys.stderr)
+        return None
+
+
 def main() -> None:
     DASHBOARD_PATH.parent.mkdir(parents=True, exist_ok=True)
     now_iso = utc_iso()
@@ -281,6 +308,17 @@ def main() -> None:
         "runway": 0.98,
         "updatedAt": now_iso,
     }
+
+    # Preserve brainFeed from sidecar file or existing dashboard
+    brain_feed = load_brain_feed_file()
+    if not brain_feed and DASHBOARD_PATH.exists():
+        try:
+            existing = json.loads(DASHBOARD_PATH.read_text())
+            brain_feed = existing.get("brainFeed")
+        except (json.JSONDecodeError, OSError):
+            pass
+    if brain_feed:
+        dashboard["brainFeed"] = brain_feed
 
     model_usage = fetch_model_usage()
     if model_usage:

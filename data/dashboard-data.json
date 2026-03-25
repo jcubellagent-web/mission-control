@@ -6,151 +6,65 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-25T02:50:01Z"
+    "updatedAt": "2026-03-25T02:52:00Z"
   },
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-25T02:28:00Z",
+    "active": true,
+    "messageReceived": "2026-03-25T02:50:00Z",
     "objective": "Overhaul Brain Feed and Model Usage widgets in Mission Control",
     "status": "working",
     "steps": [
-      {
-        "label": "Reading current dashboard code",
-        "status": "done",
-        "tool": "read"
-      },
-      {
-        "label": "Analyzing Model Usage screenshot",
-        "status": "done",
-        "tool": "image"
-      },
-      {
-        "label": "Building new Brain Feed UI",
-        "status": "done",
-        "tool": "claude-sonnet"
-      },
-      {
-        "label": "Overhauling Model Usage widget",
-        "status": "done",
-        "tool": "claude-sonnet"
-      },
-      {
-        "label": "Pushing to GitHub Pages",
-        "status": "active",
-        "tool": "git"
-      }
+      { "label": "Reading current dashboard code", "status": "done", "tool": "read" },
+      { "label": "Analyzing Model Usage screenshot", "status": "done", "tool": "image" },
+      { "label": "Building new Brain Feed UI", "status": "done", "tool": "claude-sonnet" },
+      { "label": "Overhauling Model Usage widget", "status": "active", "tool": "claude-sonnet" },
+      { "label": "Push to GitHub Pages", "status": "pending", "tool": "git" }
     ],
-    "currentTool": "git",
-    "updatedAt": "2026-03-25T02:29:00Z"
+    "currentTool": "claude-sonnet",
+    "updatedAt": "2026-03-25T02:52:00Z"
   },
   "modelUsage": {
-    "session": 0.0549164,
-    "daily": 0.0549164,
-    "weekly": 0.09688240000000001,
+    "session": 7.69,
+    "daily": 7.69,
+    "weekly": 7.77,
     "topModels": [
-      {
-        "name": "gpt-5.3-codex",
-        "window": "session",
-        "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.3-codex",
-        "window": "daily",
-        "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.3-codex",
-        "window": "weekly",
-        "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.4",
-        "window": "weekly",
-        "cost": 0.041966
-      }
+      { "name": "claude-sonnet-4-6", "window": "session", "cost": 7.58 },
+      { "name": "claude-sonnet-4-6", "window": "daily", "cost": 7.58 },
+      { "name": "claude-sonnet-4-6", "window": "weekly", "cost": 7.62 },
+      { "name": "gpt-5.3-codex", "window": "session", "cost": 0.05 },
+      { "name": "gpt-5.3-codex", "window": "daily", "cost": 0.05 },
+      { "name": "gpt-5.3-codex", "window": "weekly", "cost": 0.05 },
+      { "name": "gpt-5.4", "window": "weekly", "cost": 0.04 },
+      { "name": "openrouter/auto", "window": "session", "cost": 0.06 },
+      { "name": "openrouter/auto", "window": "daily", "cost": 0.06 },
+      { "name": "openrouter/auto", "window": "weekly", "cost": 0.06 }
     ],
     "breakdown": [
-      {
-        "name": "gpt-5.3-codex",
-        "source": "CodexBar",
-        "sessionCost": 0.0549164,
-        "dailyCost": 0.0549164,
-        "weeklyCost": 0.0549164
-      },
-      {
-        "name": "gpt-5.4",
-        "source": "OpenClaw",
-        "sessionCost": 0,
-        "dailyCost": 0,
-        "weeklyCost": 0.041966
-      }
+      { "name": "claude-sonnet-4-6", "source": "OpenClaw", "sessionCost": 7.58, "dailyCost": 7.58, "weeklyCost": 7.62 },
+      { "name": "openrouter/auto", "source": "OpenClaw", "sessionCost": 0.06, "dailyCost": 0.06, "weeklyCost": 0.06 },
+      { "name": "gpt-5.3-codex", "source": "CodexBar", "sessionCost": 0.05, "dailyCost": 0.05, "weeklyCost": 0.05 },
+      { "name": "gpt-5.4", "source": "OpenClaw", "sessionCost": 0, "dailyCost": 0, "weeklyCost": 0.04 }
     ],
-    "lastUpdated": "2026-03-25T02:50:01.079Z"
+    "lastUpdated": "2026-03-25T02:52:00.000Z"
   },
   "devices": [
-    {
-      "name": "Airpoint",
-      "status": "ok",
-      "detail": "v1.3.23"
-    }
+    { "name": "Airpoint", "status": "ok", "detail": "v1.3.23" }
   ],
   "products": [
-    {
-      "name": "Mission Control",
-      "url": "https://jcubellagent-web.github.io/mission-control/",
-      "status": "live",
-      "lastChecked": "2026-03-25T02:50:01Z"
-    },
-    {
-      "name": "Mission Control PWA",
-      "url": "https://jcubellagent-web.github.io/mission-control/",
-      "status": "live",
-      "lastChecked": "2026-03-25T02:50:01Z"
-    },
-    {
-      "name": "Kiosk dashboard",
-      "url": "http://192.168.4.40:3030",
-      "status": "down",
-      "lastChecked": "2026-03-25T02:50:01Z"
-    }
+    { "name": "Mission Control", "url": "https://jcubellagent-web.github.io/mission-control/", "status": "live", "lastChecked": "2026-03-25T02:52:00Z" },
+    { "name": "Mission Control PWA", "url": "https://jcubellagent-web.github.io/mission-control/", "status": "live", "lastChecked": "2026-03-25T02:52:00Z" },
+    { "name": "Kiosk dashboard", "url": "http://192.168.4.40:3030", "status": "down", "lastChecked": "2026-03-25T02:52:00Z" }
   ],
   "crons": [
-    {
-      "name": "Chiro invite sync",
-      "schedule": "Hourly",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "Mission Control refresh",
-      "schedule": "*/5 * * * *",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    }
+    { "name": "Chiro invite sync", "schedule": "Hourly", "status": "ok", "errors": 0, "lastError": null },
+    { "name": "Mission Control refresh", "schedule": "*/5 * * * *", "status": "ok", "errors": 0, "lastError": null }
   ],
   "recentActivity": [
-    {
-      "time": "2026-03-25T02:50:01Z",
-      "event": "\ud83e\udde0 System nominal"
-    },
-    {
-      "time": "2026-03-25T02:50:01.079Z",
-      "event": "\ud83d\udcb8 Session spend now $0.05"
-    },
-    {
-      "time": "2026-03-25T02:50:01Z",
-      "event": "\u2705 2 scheduled jobs healthy"
-    },
-    {
-      "time": "2026-03-25T02:50:01Z",
-      "event": "\ud83d\udda5\ufe0f Device layer nominal"
-    },
-    {
-      "time": "2026-03-25T02:50:01Z",
-      "event": "\ud83d\ude80 Mission Control refresh published"
-    }
+    { "time": "2026-03-25T02:52:00Z", "event": "🧠 Brain Feed overhaul in progress" },
+    { "time": "2026-03-25T02:52:00Z", "event": "💸 Session spend now $7.69" },
+    { "time": "2026-03-25T02:52:00Z", "event": "✅ 2 scheduled jobs healthy" },
+    { "time": "2026-03-25T02:52:00Z", "event": "🖥️ Device layer nominal" },
+    { "time": "2026-03-25T02:52:00Z", "event": "🚀 Mission Control refresh published" }
   ],
-  "lastUpdated": "2026-03-25T02:50:01Z"
+  "lastUpdated": "2026-03-25T02:52:00Z"
 }
