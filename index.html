@@ -1268,9 +1268,6 @@
         window.addEventListener('resize', syncViewportMode);
         window.addEventListener('orientationchange', syncViewportMode);
 
-        // Auto-start dashboard (no PIN gate)
-        initDashboard();
-
         function updateLastUpdatedTicker() {
             if (!lastUpdateTime) return;
             const now = new Date();
@@ -1887,6 +1884,8 @@
             div.textContent = str;
             return div.innerHTML;
         }
+        // === AUTO-INIT (after all functions defined) ===
+        initDashboard();
     </script>
     <script>
         if ('serviceWorker' in navigator) {
