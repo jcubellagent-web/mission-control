@@ -52,21 +52,33 @@ def fetch_brain_feed() -> Dict[str, Any] | None:
     }
 
 
+def is_valid_iso8601(ts: Any) -> bool:
+    """Return True if ts is a non-empty string that can be parsed as ISO 8601."""
+    if not isinstance(ts, str) or not ts:
+        return False
+    try:
+        dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
 def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
     def normalize(bucket: Dict[str, Any]) -> float:
         return float(bucket.get("totalCost") or 0)
 
+    # Collect breakdown per model, deduplicating by (model_name, window)
     rows: List[Dict[str, Any]] = []
-    seen = set()
+    seen_name_window: set = set()
     for bucket_name in ("session", "daily", "weekly"):
         for model in data.get(bucket_name, {}).get("models", []):
             name = model.get("name") or ""
             if not name:
                 continue
             key = (bucket_name, name)
-            if key in seen:
+            if key in seen_name_window:
                 continue
-            seen.add(key)
+            seen_name_window.add(key)
             amount = model.get(f"{bucket_name}Cost")
             if amount is None:
                 amount = model.get("sessionCost")
@@ -76,13 +88,31 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
                 "cost": float(amount or 0),
             })
     rows.sort(key=lambda row: row["cost"], reverse=True)
+
+    # Deduplicate breakdown entries by model name (keep latest / highest cost entry)
+    raw_breakdown: List[Dict[str, Any]] = data.get("breakdown", [])
+    seen_model_names: dict = {}
+    for entry in raw_breakdown:
+        mname = entry.get("name") or ""
+        if not mname:
+            continue
+        existing = seen_model_names.get(mname)
+        if existing is None or (entry.get("weeklyCost") or 0) >= (existing.get("weeklyCost") or 0):
+            seen_model_names[mname] = entry
+    deduped_breakdown = list(seen_model_names.values())
+
+    # Validate / normalise timestamps
+    last_updated = data.get("lastUpdated")
+    if not is_valid_iso8601(last_updated):
+        last_updated = utc_iso()
+
     return {
         "session": normalize(data.get("session", {})),
         "daily": normalize(data.get("daily", {})),
         "weekly": normalize(data.get("weekly", {})),
         "topModels": rows[:5],
-        "breakdown": data.get("breakdown", []),
-        "lastUpdated": data.get("lastUpdated"),
+        "breakdown": deduped_breakdown,
+        "lastUpdated": last_updated,
     }
 
 
@@ -292,6 +322,54 @@ def load_brain_feed_file() -> Dict[str, Any] | None:
         return None
 
 
+DEFAULT_BRAIN_FEED: Dict[str, Any] = {
+    "active": False,
+    "messageReceived": None,
+    "objective": "",
+    "status": "idle",
+    "steps": [],
+    "currentTool": None,
+    "updatedAt": None,
+}
+
+REQUIRED_DASHBOARD_FIELDS = [
+    "actionRequired", "activeNow", "upcomingEvents", "focus",
+    "brainFeed", "devices", "products", "crons", "recentActivity", "lastUpdated",
+]
+
+
+def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
+    """Ensure all required fields are present; fill defaults if missing."""
+    defaults: Dict[str, Any] = {
+        "actionRequired": [],
+        "activeNow": [],
+        "upcomingEvents": [],
+        "focus": {
+            "status": "System nominal",
+            "context": "Mission Control is running.",
+            "runway": 0.98,
+            "updatedAt": now_iso,
+        },
+        "brainFeed": dict(DEFAULT_BRAIN_FEED),
+        "devices": [],
+        "products": [],
+        "crons": [],
+        "recentActivity": [],
+        "lastUpdated": now_iso,
+    }
+    for field, default in defaults.items():
+        if field not in dashboard or dashboard[field] is None:
+            print(f"[warn] dashboard missing required field '{field}', using default", file=sys.stderr)
+            dashboard[field] = default
+
+    # Validate top-level timestamps
+    if not is_valid_iso8601(dashboard.get("lastUpdated")):
+        dashboard["lastUpdated"] = now_iso
+    focus_ts = dashboard.get("focus", {}).get("updatedAt")
+    if not is_valid_iso8601(focus_ts):
+        dashboard["focus"]["updatedAt"] = now_iso
+
+
 def main() -> None:
     DASHBOARD_PATH.parent.mkdir(parents=True, exist_ok=True)
     now_iso = utc_iso()
@@ -309,7 +387,7 @@ def main() -> None:
         "updatedAt": now_iso,
     }
 
-    # Preserve brainFeed from sidecar file or existing dashboard
+    # Always populate brainFeed — load sidecar, fall back to existing dashboard, then empty default
     brain_feed = load_brain_feed_file()
     if not brain_feed and DASHBOARD_PATH.exists():
         try:
@@ -317,8 +395,7 @@ def main() -> None:
             brain_feed = existing.get("brainFeed")
         except (json.JSONDecodeError, OSError):
             pass
-    if brain_feed:
-        dashboard["brainFeed"] = brain_feed
+    dashboard["brainFeed"] = brain_feed or dict(DEFAULT_BRAIN_FEED)
 
     model_usage = fetch_model_usage()
     if model_usage:
@@ -337,6 +414,9 @@ def main() -> None:
         dashboard["devices"],
     )
     dashboard["lastUpdated"] = now_iso
+
+    # Final validation — fills any missing required fields with safe defaults
+    validate_dashboard(dashboard, now_iso)
 
     DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))
     print(f"Updated {DASHBOARD_PATH}")

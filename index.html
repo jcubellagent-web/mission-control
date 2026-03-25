@@ -796,6 +796,87 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== Card content overflow fixes ===== */
+        #brain-feed-card { overflow-y: auto; max-height: 540px; }
+        #today-jobs-card { overflow-y: auto; max-height: 540px; }
+        #model-usage-card { overflow-y: auto; max-height: 440px; }
+        #events-list { overflow-y: auto; max-height: 320px; }
+        #device-list { overflow-y: auto; max-height: 320px; }
+        .priority-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        @media (min-width: 700px) and (max-width: 1099px) { .priority-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 699px) { .priority-grid { grid-template-columns: 1fr; } }
+
+        /* ===== Data freshness badge ===== */
+        .freshness-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: 0.72rem; font-weight: 500;
+            border: 1px solid transparent;
+            transition: color 0.5s ease, border-color 0.5s ease, background 0.5s ease;
+        }
+        .freshness-badge.fresh { color: #4ade80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.06); }
+        .freshness-badge.stale { color: #fbbf24; border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.06); }
+        .freshness-badge.old   { color: #e53e3e; border-color: rgba(229,62,62,0.25);  background: rgba(229,62,62,0.06); }
+        .freshness-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        /* ===== God mode badge ===== */
+        .god-mode-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 11px;
+            background: rgba(229,62,62,0.08);
+            border: 1px solid rgba(229,62,62,0.2);
+            border-radius: 999px;
+            font-size: 0.7rem; font-weight: 700;
+            color: rgba(229,62,62,0.85);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ===== Brain feed freshness strip ===== */
+        .bf-freshness-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 8px;
+            font-size: 0.72rem;
+            margin-bottom: 10px;
+        }
+        .bf-fresh-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            flex-shrink: 0;
+            transition: background 0.5s ease;
+        }
+        .bf-freshness-label { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
+        #bf-last-updated { color: var(--text-secondary); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+        /* ===== Offline/degraded banner improvements ===== */
+        .connection-status.offline {
+            background: rgba(229,62,62,0.08);
+            border-color: rgba(229,62,62,0.3);
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .connection-status.degraded {
+            background: rgba(251,191,36,0.05);
+            border-color: rgba(251,191,36,0.25);
+            color: #fbbf24;
+        }
+
+        /* ===== Brain feed title & text overflow ===== */
+        .brain-title, .bf-objective-text { word-break: break-word; overflow-wrap: anywhere; }
+
+        /* ===== Model Usage responsive ===== */
+        .mu-model-name { max-width: 160px; }
+        @media (max-width: 400px) {
+            .mu-model-breakdown-row { flex-direction: column; gap: 4px; }
+            .mu-summary-row { flex-direction: column; }
+            .mu-summary-cell { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .mu-summary-cell:last-child { border-bottom: none; }
+        }
+
         /* ============ MODEL USAGE — REDESIGN ============ */
         .mu-header-row {
             display: flex;
@@ -939,6 +1020,8 @@
                 <h1>Mission Control</h1>
             </div>
             <div class="header-status">
+                <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
+                <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">–</span></div>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
                     <span class="spinner">↻</span>
@@ -1011,7 +1094,9 @@
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
-            REFRESH_INTERVAL: 30000  // 30 seconds
+            BRAIN_FEED_URL: './data/brain-feed.json',  // Fast-polled brain-feed sidecar
+            REFRESH_INTERVAL: 10000,   // 10 seconds — full dashboard poll
+            BRAIN_FEED_INTERVAL: 4000, // 4 seconds — brain feed only
         };
         // ============================================
 
@@ -1021,6 +1106,10 @@
         const PULL_THRESHOLD = 70;
 
         let lastUpdateTime = null;
+        let lastDashboardHash = {};  // section-level cache for diff
+        let lastBrainFeedHash = null;
+        let bfLastUpdatedTs = null;
+        let bfCounterInterval = null;
         let updateTickerInterval;
 
         function isKioskMode() {
@@ -1047,7 +1136,27 @@
             }
             const label = statusEl.querySelector('.status-label');
             if (label) {
-                label.textContent = state === 'offline' ? 'Offline' : state === 'degraded' ? 'Retrying' : 'Polling';
+                const labels = { offline: '⚡ Offline', degraded: '⚠ Retrying…', online: 'Polling' };
+                label.textContent = labels[state] || 'Polling';
+            }
+        }
+
+        function updateFreshnessBadge() {
+            if (!lastUpdateTime) return;
+            const badge = document.getElementById('freshness-badge');
+            const text = document.getElementById('freshness-text');
+            if (!badge || !text) return;
+            const ageSecs = (Date.now() - lastUpdateTime) / 1000;
+            badge.classList.remove('fresh', 'stale', 'old');
+            if (ageSecs < 60) {
+                badge.classList.add('fresh');
+                text.textContent = ageSecs < 5 ? 'Fresh' : `${Math.floor(ageSecs)}s ago`;
+            } else if (ageSecs < 300) {
+                badge.classList.add('stale');
+                text.textContent = `${Math.floor(ageSecs / 60)}m ago`;
+            } else {
+                badge.classList.add('old');
+                text.textContent = `${Math.floor(ageSecs / 60)}m ago`;
             }
         }
 
@@ -1132,16 +1241,31 @@
             else if (diffSecs < 3600) text = `${Math.floor(diffSecs / 60)}m ago`;
             else text = `${Math.floor(diffSecs / 3600)}h ago`;
             document.getElementById('last-updated-text').textContent = `Updated ${text}`;
+            updateFreshnessBadge();
+            updateBfCounter();
+        }
+
+        function updateBfCounter() {
+            const el = document.getElementById('bf-last-updated');
+            if (!el || !bfLastUpdatedTs) return;
+            const diffSecs = Math.floor((Date.now() - bfLastUpdatedTs) / 1000);
+            if (diffSecs < 5) el.textContent = 'just now';
+            else if (diffSecs < 60) el.textContent = `${diffSecs}s ago`;
+            else el.textContent = `${Math.floor(diffSecs / 60)}m ago`;
         }
 
         async function fetchData() {
+            const t0 = performance.now();
             try {
                 const cacheBuster = `?_=${Date.now()}`;
                 const response = await fetch(CONFIG.DATA_URL + cacheBuster);
                 if (!response.ok) throw new Error('Failed to fetch');
                 const data = await response.json();
+                const latency = Math.round(performance.now() - t0);
+                console.debug(`[MC] dashboard-data.json fetched in ${latency}ms`);
                 lastUpdateTime = new Date(data.lastUpdated || Date.now());
                 renderDashboard(data);
+                updateFreshnessBadge();
                 setConnectionStatus('online');
                 document.getElementById('main-content').classList.add('flash-update');
                 setTimeout(() => document.getElementById('main-content').classList.remove('flash-update'), 1000);
@@ -1150,6 +1274,46 @@
                 console.error('Failed to fetch dashboard data:', err);
                 setConnectionStatus(navigator.onLine ? 'degraded' : 'offline');
                 return false;
+            }
+        }
+
+        // Fast brain-feed poll — only updates the Brain Feed card
+        async function fetchBrainFeed() {
+            const t0 = performance.now();
+            try {
+                const cacheBuster = `?_=${Date.now()}`;
+                const response = await fetch(CONFIG.BRAIN_FEED_URL + cacheBuster);
+                if (!response.ok) return;
+                const bf = await response.json();
+                const latency = Math.round(performance.now() - t0);
+                console.debug(`[MC] brain-feed.json fetched in ${latency}ms`);
+                const newHash = JSON.stringify(bf);
+                if (newHash === lastBrainFeedHash) return; // no change
+                lastBrainFeedHash = newHash;
+                bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
+                renderBrainFeed(bf);
+                updateBfFreshness(bf);
+            } catch (err) {
+                // non-fatal — full poll still runs every 10s
+            }
+        }
+
+        function updateBfFreshness(bf) {
+            const dot = document.querySelector('.bf-fresh-dot');
+            const label = document.getElementById('bf-freshness-label-text');
+            if (!dot) return;
+            const isActive = bf && bf.active;
+            const ageSecs = bfLastUpdatedTs ? (Date.now() - bfLastUpdatedTs) / 1000 : 9999;
+            const isFresh = ageSecs < 60;
+            if (isActive && isFresh) {
+                dot.style.background = '#e53e3e';
+                if (label) label.textContent = 'Live';
+            } else if (isActive) {
+                dot.style.background = '#fbbf24';
+                if (label) label.textContent = 'Active';
+            } else {
+                dot.style.background = 'rgba(255,255,255,0.2)';
+                if (label) label.textContent = 'Idle';
             }
         }
 
@@ -1162,10 +1326,15 @@
 
         function initDashboard() {
             fetchData();
+            fetchBrainFeed();
             updateLastUpdatedTicker();
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
+            setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             attachPullToRefresh();
+            // Show god mode badge (visual only)
+            const godBadge = document.getElementById('god-mode-badge');
+            if (godBadge) godBadge.style.display = 'inline-flex';
         }
 
         function iconMarkup(name) {
@@ -1176,14 +1345,161 @@
             return String(text || '').replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
         }
 
+        // ===== Brain Feed renderer (called both from fast-poll and full render) =====
+        function toolPillClass(tool) {
+            if (!tool) return 'tool-default';
+            const t = tool.toLowerCase();
+            if (t === 'read' || t === 'write' || t === 'edit') return 'tool-read';
+            if (t === 'image' || t === 'image_generate') return 'tool-image';
+            if (t.includes('claude') || t.includes('sonnet') || t.includes('gpt') || t.includes('gemini')) return 'tool-claude';
+            if (t === 'git' || t === 'github') return 'tool-git';
+            if (t === 'exec' || t === 'process') return 'tool-exec';
+            if (t.includes('web') || t === 'fetch' || t === 'search') return 'tool-web';
+            return 'tool-default';
+        }
+
+        function renderBrainFeed(bf) {
+            const brainFeedCard = document.getElementById('brain-feed-card');
+            if (!brainFeedCard) return;
+            const brainCard = brainFeedCard.closest('.card-brain');
+            const kioskMode = isKioskMode();
+            const phoneMode = isPhoneMode();
+
+            // Freshness strip HTML (always present)
+            const freshnessStrip = `<div class="bf-freshness-row">
+                <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
+                <span class="bf-freshness-label" id="bf-freshness-label-text">${bf && bf.active ? 'Live' : 'Idle'}</span>
+                <span id="bf-last-updated">${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '–'}</span>
+            </div>`;
+
+            if (bf && bf.active) {
+                brainCard.classList.add('brain-active');
+                const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
+                const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
+                const stepsHtml = (bf.steps || []).map(step => {
+                    const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
+                    const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
+                    const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
+                    const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                    return `<div class="bf-step ${stepClass}">
+                        <div class="bf-step-icon ${iconClass}">${iconChar}</div>
+                        <div class="bf-step-body">
+                            <div class="bf-step-label">${escapeHtml(step.label)}</div>
+                            ${toolHtml}
+                        </div>
+                    </div>`;
+                }).join('');
+                brainFeedCard.innerHTML = `
+                    ${freshnessStrip}
+                    <div class="bf-container">
+                        <div class="bf-msg-banner">
+                            <span class="bf-msg-dot"></span>
+                            <span class="bf-msg-label">Message Received</span>
+                            <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
+                        </div>
+                        <div class="bf-objective">
+                            <div class="bf-objective-kicker">Current Objective</div>
+                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing…')}</div>
+                        </div>
+                        ${bf.currentTool ? `
+                        <div class="bf-current-tool-bar">
+                            <span class="bf-ct-pulse"></span>
+                            <span class="bf-ct-label">Active tool</span>
+                            <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
+                            ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
+                        </div>` : ''}
+                        <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
+                    </div>
+                `;
+            } else {
+                brainCard.classList.remove('brain-active');
+                // Use cached focus/activity data if available
+                const focusData = window._mcLastFocus;
+                const activityData = window._mcLastActivity;
+                const modelUsageData = window._mcLastModelUsage;
+                const cronsData = window._mcLastCrons;
+                const productsData = window._mcLastProducts;
+                const percent = Math.max(0, Math.min(100, Math.round(((focusData && focusData.runway) || 0) * 100)));
+                const feedItems = (activityData || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
+                const liveSignals = [
+                    modelUsageData ? `Session ${formatCurrencyAlways(modelUsageData.session)}` : null,
+                    modelUsageData ? `Daily ${formatCurrencyAlways(modelUsageData.daily)}` : null,
+                    (cronsData || []).length ? `${(cronsData || []).filter(c => c.status === 'ok').length} active crons` : null,
+                    (productsData || []).length ? `${(productsData || []).filter(p => p.status === 'live').length} live products` : null
+                ].filter(Boolean);
+                brainFeedCard.innerHTML = `
+                    ${freshnessStrip}
+                    <div class="bf-idle-container brain-feed">
+                        <div class="brain-hero">
+                            <div class="brain-kicker">Live Operator State</div>
+                            <div class="brain-title">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
+                            <p class="focus-context">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
+                            <div class="focus-meter">
+                                <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
+                                <span class="focus-meter-value">${percent}%</span>
+                            </div>
+                            <div class="brain-meta">
+                                <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
+                                ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="brain-stream">
+                            <div class="section-label">Recent Feed</div>
+                            <div class="feed-list">
+                                ${feedItems.length ? feedItems.map(item => `
+                                    <div class="feed-item">
+                                        <div class="feed-time">${formatTime(item.time)}</div>
+                                        <div class="feed-text">${escapeHtml(item.event)}</div>
+                                    </div>
+                                `).join('') : '<div class="empty-state">No feed events yet</div>'}
+                            </div>
+                        </div>
+                        <div class="brain-stream">
+                            <div class="section-label">Signal Layer</div>
+                            <div class="signal-strip">
+                                ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            // After DOM update, reapply freshness dot state
+            if (bfLastUpdatedTs) updateBfFreshness(bf);
+        }
+
+        // ===== Section-level diff helpers =====
+        function sectionChanged(key, newData) {
+            const h = JSON.stringify(newData);
+            if (lastDashboardHash[key] === h) return false;
+            lastDashboardHash[key] = h;
+            return true;
+        }
+
         function renderDashboard(data) {
             const now = new Date();
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
             const compactMode = kioskMode || phoneMode;
 
-            // Action Required
-            const actionBanner = document.getElementById('action-required');
+            // Cache context data for idle brain feed renderer
+            window._mcLastFocus = data.focus;
+            window._mcLastActivity = data.recentActivity;
+            window._mcLastModelUsage = data.modelUsage;
+            window._mcLastCrons = data.crons;
+            window._mcLastProducts = data.products;
+
+            // Brain Feed — delegate to dedicated renderer (fast-poll may have already done this)
+            if (sectionChanged('brainFeed', data.brainFeed)) {
+                renderBrainFeed(data.brainFeed);
+                if (data.brainFeed) {
+                    bfLastUpdatedTs = data.brainFeed.updatedAt ? new Date(data.brainFeed.updatedAt).getTime() : null;
+                    updateBfFreshness(data.brainFeed);
+                }
+            }
+
+            // Action Required (diff-guarded)
+            if (!sectionChanged('actionRequired', data.actionRequired)) { /* skip */ } else
+            { const actionBanner = document.getElementById('action-required');
             const actionItems = document.getElementById('action-items');
             if (data.actionRequired && data.actionRequired.length > 0) {
                 actionBanner.classList.remove('empty');
@@ -1198,9 +1514,9 @@
                 `).join('');
             } else {
                 actionBanner.classList.add('empty');
-            }
+            } }
 
-            // Stats Row
+            // Stats Row (diff-guarded)
             const statsRow = document.getElementById('stats-row');
             const enabledCrons = data.crons?.filter(c => c.status !== 'paused').length || 0;
             const pausedCrons = data.crons?.filter(c => c.status === 'paused').length || 0;
@@ -1315,7 +1631,8 @@
                 `;
             }
 
-            // Model usage snapshot — redesigned
+            // Model usage snapshot — redesigned (diff-guarded)
+            if (sectionChanged('modelUsage', data.modelUsage)) {
             const modelUsageCard = document.getElementById('model-usage-card');
             if (data.modelUsage) {
                 const mu = data.modelUsage;
@@ -1386,8 +1703,10 @@
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
             }
+            } // end model usage diff guard
 
-            // Upcoming events
+            // Upcoming events (diff-guarded)
+            if (sectionChanged('upcomingEvents', data.upcomingEvents)) {
             const eventsList = document.getElementById('events-list');
             if (data.upcomingEvents && data.upcomingEvents.length > 0) {
                 eventsList.innerHTML = data.upcomingEvents.slice(0, compactMode ? 3 : 4).map(event => `
@@ -1402,8 +1721,10 @@
             } else {
                 eventsList.innerHTML = '<div class="empty-state">No upcoming events</div>';
             }
+            } // end events diff guard
 
-            // Device & watchdog status
+            // Device & watchdog status (diff-guarded)
+            if (sectionChanged('devices', data.devices)) {
             const deviceList = document.getElementById('device-list');
             if (data.devices && data.devices.length > 0) {
                 deviceList.innerHTML = data.devices.map(device => {
@@ -1420,8 +1741,10 @@
             } else {
                 deviceList.innerHTML = '<div class="empty-state">No device data</div>';
             }
+            } // end devices diff guard
 
-            // Today's Jobs
+            // Today's Jobs (diff-guarded)
+            if (sectionChanged('crons', data.crons)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
             const cronRows = (data.crons || []).slice(0, kioskMode ? 3 : phoneMode ? 3 : 5).map(cron => {
                 const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
@@ -1470,6 +1793,7 @@
                     </div>
                 </div>
             `;
+            } // end crons diff guard
 
         }
 
