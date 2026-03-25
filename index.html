@@ -605,6 +605,316 @@
         
         @keyframes flash-update { 0% { background-color: rgba(34,197,94,0.2); } 100% { background-color: transparent; } }
         .flash-update { animation: flash-update 1s ease-out; }
+
+        /* ============ BRAIN FEED — ACTIVE LASER STATE ============ */
+        .card-brain.brain-active {
+            border-color: transparent;
+            overflow: hidden;
+        }
+        .card-brain.brain-active::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: conic-gradient(from 0deg,
+                transparent 0deg,
+                transparent 330deg,
+                rgba(229,62,62,0.2) 345deg,
+                #e53e3e 352deg,
+                #ff6b6b 356deg,
+                #e53e3e 360deg
+            );
+            animation: bf-laser-spin 2.8s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .card-brain.brain-active::after {
+            display: block !important;
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #111111;
+            border-radius: 12px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .card-brain.brain-active .card-header,
+        .card-brain.brain-active #brain-feed-card {
+            position: relative;
+            z-index: 2;
+        }
+        @keyframes bf-laser-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        /* Brain Feed Active — content */
+        .bf-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: bf-fade-in 0.45s ease;
+        }
+        .bf-idle-container {
+            animation: bf-fade-in 0.45s ease;
+        }
+        .bf-msg-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(229,62,62,0.06);
+            border: 1px solid rgba(229,62,62,0.15);
+            border-radius: 8px;
+        }
+        .bf-msg-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #e53e3e;
+            animation: pulse 1.5s infinite;
+            flex-shrink: 0;
+        }
+        .bf-msg-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #e53e3e;
+        }
+        .bf-msg-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+        .bf-objective {
+            padding: 16px 18px;
+            background: #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .bf-objective-kicker {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .bf-objective-text {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.35;
+        }
+        .bf-current-tool-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(229,62,62,0.05);
+            border: 1px solid rgba(229,62,62,0.12);
+            border-radius: 8px;
+        }
+        .bf-ct-pulse {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #e53e3e;
+            animation: pulse 1s infinite;
+            flex-shrink: 0;
+        }
+        .bf-ct-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .bf-ct-tool {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #e53e3e;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+        }
+        .bf-timeline {
+            display: flex;
+            flex-direction: column;
+            background: #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .bf-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 9px 0;
+        }
+        .bf-step + .bf-step {
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+        .bf-step-icon {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .bf-step-icon.done   { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+        .bf-step-icon.active { background: rgba(229,62,62,0.1);  color: #e53e3e; border: 1px solid rgba(229,62,62,0.3); animation: pulse 1.2s infinite; }
+        .bf-step-icon.pending{ background: rgba(255,255,255,0.03); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+        .bf-step-body { flex: 1; min-width: 0; }
+        .bf-step-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.35;
+        }
+        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.85); font-weight: 500; }
+        .bf-step.pending-step .bf-step-label { color: var(--text-muted); }
+        .bf-tool-pill {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 4px;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.68rem;
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-weight: 500;
+        }
+        .bf-tool-pill.tool-read   { background: rgba(99,179,237,0.1);  color: #63b3ed; border: 1px solid rgba(99,179,237,0.2); }
+        .bf-tool-pill.tool-image  { background: rgba(154,117,245,0.1); color: #9a75f5; border: 1px solid rgba(154,117,245,0.2); }
+        .bf-tool-pill.tool-claude { background: rgba(229,62,62,0.1);   color: #e53e3e; border: 1px solid rgba(229,62,62,0.2); }
+        .bf-tool-pill.tool-git    { background: rgba(249,115,22,0.1);  color: #f97316; border: 1px solid rgba(249,115,22,0.2); }
+        .bf-tool-pill.tool-exec   { background: rgba(74,222,128,0.1);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+        .bf-tool-pill.tool-web    { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .bf-tool-pill.tool-default{ background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+        @keyframes bf-fade-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============ MODEL USAGE — REDESIGN ============ */
+        .mu-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .mu-updated {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .mu-summary-row {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            background: #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .mu-summary-cell {
+            flex: 1;
+            padding: 14px 12px;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .mu-summary-cell:last-child { border-right: none; }
+        .mu-summary-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .mu-summary-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.82);
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-model-list { display: flex; flex-direction: column; }
+        .mu-model-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mu-model-item:last-child { border-bottom: none; }
+        .mu-model-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .mu-model-name-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex: 1;
+        }
+        .mu-model-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .mu-model-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.75);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mu-source-tag {
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .mu-source-tag.openclaw { background: rgba(229,62,62,0.08); color: rgba(229,62,62,0.75); border: 1px solid rgba(229,62,62,0.15); }
+        .mu-source-tag.codexbar { background: rgba(99,179,237,0.08); color: rgba(99,179,237,0.75); border: 1px solid rgba(99,179,237,0.15); }
+        .mu-source-tag.other    { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.07); }
+        .mu-model-total {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.8);
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .mu-model-bar-wrap {
+            height: 3px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .mu-model-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 0.6s ease;
+        }
+        .mu-model-breakdown-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+        }
+        .mu-bd-cell {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .mu-bd-label { font-size: 0.68rem; color: var(--text-muted); }
+        .mu-bd-value { font-size: 0.78rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+        .mu-footer {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -907,81 +1217,172 @@
 
             // Brain Feed
             const brainFeedCard = document.getElementById('brain-feed-card');
-            const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
-            const feedItems = (data.recentActivity || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
-            const liveSignals = [
-                data.modelUsage ? `Session ${formatCurrencyValue(data.modelUsage.session)}` : null,
-                data.modelUsage ? `Daily ${formatCurrencyValue(data.modelUsage.daily)}` : null,
-                (data.crons || []).length ? `${(data.crons || []).filter(c => c.status === 'ok').length} active crons` : null,
-                (data.products || []).length ? `${(data.products || []).filter(p => p.status === 'live').length} live products` : null
-            ].filter(Boolean);
-            brainFeedCard.innerHTML = `
-                <div class="brain-feed">
-                    <div class="brain-hero">
-                        <div class="brain-kicker">Live Operator State</div>
-                        <div class="brain-title">${escapeHtml((data.focus && data.focus.status) || 'Mission Control Online')}</div>
-                        <p class="focus-context">${escapeHtml((data.focus && data.focus.context) || 'No current context')}</p>
-                        <div class="focus-meter">
-                            <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
-                            <span class="focus-meter-value">${percent}%</span>
+            const brainCard = brainFeedCard.closest('.card-brain');
+            const bf = data.brainFeed;
+            if (bf && bf.active) {
+                brainCard.classList.add('brain-active');
+                // Tool pill class helper
+                function toolPillClass(tool) {
+                    if (!tool) return 'tool-default';
+                    const t = tool.toLowerCase();
+                    if (t === 'read' || t === 'write' || t === 'edit') return 'tool-read';
+                    if (t === 'image' || t === 'image_generate') return 'tool-image';
+                    if (t.includes('claude') || t.includes('sonnet') || t.includes('gpt') || t.includes('gemini')) return 'tool-claude';
+                    if (t === 'git' || t === 'github') return 'tool-git';
+                    if (t === 'exec' || t === 'process') return 'tool-exec';
+                    if (t.includes('web') || t === 'fetch' || t === 'search') return 'tool-web';
+                    return 'tool-default';
+                }
+                const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
+                const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
+                const stepsHtml = (bf.steps || []).map(step => {
+                    const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
+                    const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
+                    const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
+                    const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                    return `<div class="bf-step ${stepClass}">
+                        <div class="bf-step-icon ${iconClass}">${iconChar}</div>
+                        <div class="bf-step-body">
+                            <div class="bf-step-label">${escapeHtml(step.label)}</div>
+                            ${toolHtml}
                         </div>
-                        <div class="brain-meta">
-                            <span>${data.focus && data.focus.updatedAt ? `Updated ${formatTime(data.focus.updatedAt)}` : 'Awaiting refresh'}</span>
-                            ${data.modelUsage && data.modelUsage.lastUpdated ? `<span>Telemetry ${formatTime(data.modelUsage.lastUpdated)}</span>` : ''}
+                    </div>`;
+                }).join('');
+                brainFeedCard.innerHTML = `
+                    <div class="bf-container">
+                        <div class="bf-msg-banner">
+                            <span class="bf-msg-dot"></span>
+                            <span class="bf-msg-label">Message Received</span>
+                            <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
                         </div>
-                    </div>
-                    <div class="brain-stream">
-                        <div class="section-label">Recent Feed</div>
-                        <div class="feed-list">
-                            ${feedItems.length ? feedItems.map(item => `
-                                <div class="feed-item">
-                                    <div class="feed-time">${formatTime(item.time)}</div>
-                                    <div class="feed-text">${escapeHtml(item.event)}</div>
-                                </div>
-                            `).join('') : '<div class="empty-state">No feed events yet</div>'}
+                        <div class="bf-objective">
+                            <div class="bf-objective-kicker">Current Objective</div>
+                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing…')}</div>
                         </div>
-                    </div>
-                    <div class="brain-stream">
-                        <div class="section-label">Signal Layer</div>
-                        <div class="signal-strip">
-                            ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Model usage snapshot
-            const modelUsageCard = document.getElementById('model-usage-card');
-            if (data.modelUsage) {
-                const totals = `
-                    <div class="model-usage-grid">
-                        <div class="model-pill"><h3>Tracked Session</h3><div class="value">${formatCurrencyValue(data.modelUsage.session)}</div></div>
-                        <div class="model-pill"><h3>Tracked Daily</h3><div class="value">${formatCurrencyValue(data.modelUsage.daily)}</div></div>
-                        <div class="model-pill"><h3>Tracked Weekly</h3><div class="value">${formatCurrencyValue(data.modelUsage.weekly)}</div></div>
+                        ${bf.currentTool ? `
+                        <div class="bf-current-tool-bar">
+                            <span class="bf-ct-pulse"></span>
+                            <span class="bf-ct-label">Active tool</span>
+                            <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
+                            ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
+                        </div>` : ''}
+                        <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
                     </div>
                 `;
-                const breakdownRows = (data.modelUsage.breakdown && data.modelUsage.breakdown.length) ? `
-                    <div class="model-list">
-                        ${data.modelUsage.breakdown.map(model => `
-                            <div class="model-row">
-                                <div class="model-row-head">
-                                    <div class="model-name-wrap">
-                                        <span>${escapeHtml(model.name)}</span>
-                                        <span class="model-source">${escapeHtml(model.source || 'Unknown')}</span>
-                                    </div>
-                                    <span>${formatCurrencyValue((model.dailyCost || 0) + (model.sessionCost || 0))}</span>
-                                </div>
-                                <div class="model-breakdown">
-                                    <div class="model-breakdown-cell"><span class="label">Session</span><span class="value">${formatCurrencyValue(model.sessionCost || 0)}</span></div>
-                                    <div class="model-breakdown-cell"><span class="label">Daily</span><span class="value">${formatCurrencyValue(model.dailyCost || 0)}</span></div>
-                                    <div class="model-breakdown-cell"><span class="label">Weekly</span><span class="value">${formatCurrencyValue(model.weeklyCost || 0)}</span></div>
-                                </div>
+            } else {
+                brainCard.classList.remove('brain-active');
+                const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
+                const feedItems = (data.recentActivity || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
+                const liveSignals = [
+                    data.modelUsage ? `Session ${formatCurrencyAlways(data.modelUsage.session)}` : null,
+                    data.modelUsage ? `Daily ${formatCurrencyAlways(data.modelUsage.daily)}` : null,
+                    (data.crons || []).length ? `${(data.crons || []).filter(c => c.status === 'ok').length} active crons` : null,
+                    (data.products || []).length ? `${(data.products || []).filter(p => p.status === 'live').length} live products` : null
+                ].filter(Boolean);
+                brainFeedCard.innerHTML = `
+                    <div class="bf-idle-container brain-feed">
+                        <div class="brain-hero">
+                            <div class="brain-kicker">Live Operator State</div>
+                            <div class="brain-title">${escapeHtml((data.focus && data.focus.status) || 'Mission Control Online')}</div>
+                            <p class="focus-context">${escapeHtml((data.focus && data.focus.context) || 'No current context')}</p>
+                            <div class="focus-meter">
+                                <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
+                                <span class="focus-meter-value">${percent}%</span>
                             </div>
-                        `).join('')}
+                            <div class="brain-meta">
+                                <span>${data.focus && data.focus.updatedAt ? `Updated ${formatTime(data.focus.updatedAt)}` : 'Awaiting refresh'}</span>
+                                ${data.modelUsage && data.modelUsage.lastUpdated ? `<span>Telemetry ${formatTime(data.modelUsage.lastUpdated)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="brain-stream">
+                            <div class="section-label">Recent Feed</div>
+                            <div class="feed-list">
+                                ${feedItems.length ? feedItems.map(item => `
+                                    <div class="feed-item">
+                                        <div class="feed-time">${formatTime(item.time)}</div>
+                                        <div class="feed-text">${escapeHtml(item.event)}</div>
+                                    </div>
+                                `).join('') : '<div class="empty-state">No feed events yet</div>'}
+                            </div>
+                        </div>
+                        <div class="brain-stream">
+                            <div class="section-label">Signal Layer</div>
+                            <div class="signal-strip">
+                                ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
+                            </div>
+                        </div>
                     </div>
-                ` : '<div class="empty-state">No model calls yet</div>';
-                const updated = data.modelUsage.lastUpdated ? `<div class="focus-updated">Updated ${formatTime(data.modelUsage.lastUpdated)} · totals reflect tracked models only</div>` : '';
-                modelUsageCard.innerHTML = totals + breakdownRows + updated;
+                `;
+            }
+
+            // Model usage snapshot — redesigned
+            const modelUsageCard = document.getElementById('model-usage-card');
+            if (data.modelUsage) {
+                const mu = data.modelUsage;
+                const updatedStr = mu.lastUpdated ? formatTime(mu.lastUpdated) : null;
+                // Update card header to show timestamp on right
+                const muHeader = modelUsageCard.closest('.card')?.querySelector('.card-header h2');
+                if (muHeader && updatedStr) {
+                    if (!muHeader.parentElement.querySelector('.mu-header-ts')) {
+                        const ts = document.createElement('span');
+                        ts.className = 'mu-updated mu-header-ts';
+                        ts.style.marginLeft = 'auto';
+                        muHeader.parentElement.appendChild(ts);
+                    }
+                    const tsEl = muHeader.parentElement.querySelector('.mu-header-ts');
+                    if (tsEl) tsEl.textContent = updatedStr;
+                }
+                const summaryHtml = `
+                    <div class="mu-summary-row">
+                        <div class="mu-summary-cell">
+                            <div class="mu-summary-label">Session</div>
+                            <div class="mu-summary-value">${formatCurrencyAlways(mu.session)}</div>
+                        </div>
+                        <div class="mu-summary-cell">
+                            <div class="mu-summary-label">Daily</div>
+                            <div class="mu-summary-value">${formatCurrencyAlways(mu.daily)}</div>
+                        </div>
+                        <div class="mu-summary-cell">
+                            <div class="mu-summary-label">Weekly</div>
+                            <div class="mu-summary-value">${formatCurrencyAlways(mu.weekly)}</div>
+                        </div>
+                    </div>
+                `;
+                let breakdownHtml = '<div class="empty-state">No model calls yet</div>';
+                if (mu.breakdown && mu.breakdown.length) {
+                    // Sort by weekly cost desc (best proxy for total)
+                    const sorted = [...mu.breakdown].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
+                    const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
+                    // Generate a color per model
+                    const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24'];
+                    breakdownHtml = `<div class="mu-model-list">${sorted.map((model, i) => {
+                        const total = model.weeklyCost || 0;
+                        const pct = Math.max(2, (total / maxCost) * 100).toFixed(1);
+                        const color = palette[i % palette.length];
+                        const src = (model.source || '').toLowerCase();
+                        const srcClass = src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
+                        const srcLabel = model.source || 'Unknown';
+                        return `<div class="mu-model-item">
+                            <div class="mu-model-top">
+                                <div class="mu-model-name-group">
+                                    <span class="mu-model-dot" style="background:${color}"></span>
+                                    <span class="mu-model-name" title="${escapeHtml(model.name)}">${escapeHtml(model.name)}</span>
+                                    <span class="mu-source-tag ${srcClass}">${escapeHtml(srcLabel)}</span>
+                                </div>
+                                <span class="mu-model-total">${formatCurrencyAlways(total)}</span>
+                            </div>
+                            <div class="mu-model-bar-wrap">
+                                <div class="mu-model-bar-fill" style="width:${pct}%;background:${color};opacity:0.6"></div>
+                            </div>
+                            <div class="mu-model-breakdown-row">
+                                <span class="mu-bd-cell"><span class="mu-bd-label">Session</span><span class="mu-bd-value">${formatCurrencyAlways(model.sessionCost || 0)}</span></span>
+                                <span class="mu-bd-cell"><span class="mu-bd-label">Daily</span><span class="mu-bd-value">${formatCurrencyAlways(model.dailyCost || 0)}</span></span>
+                                <span class="mu-bd-cell"><span class="mu-bd-label">Weekly</span><span class="mu-bd-value">${formatCurrencyAlways(model.weeklyCost || 0)}</span></span>
+                            </div>
+                        </div>`;
+                    }).join('')}</div>`;
+                }
+                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + `<div class="mu-footer">Totals reflect tracked models only</div>`;
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
             }
@@ -1088,6 +1489,21 @@
             if (value === 0) return '$0.00';
             if (value < 1) return `${(value * 100).toFixed(2)}¢`;
             return `$${value.toFixed(2)}`;
+        }
+
+        function formatCurrencyAlways(value) {
+            if (typeof value !== 'number' || isNaN(value)) return '$0.00';
+            if (value === 0) return '$0.00';
+            if (value >= 0.01) return `$${value.toFixed(2)}`;
+            // Show more precision for sub-cent values
+            return `$${value.toFixed(4)}`;
+        }
+
+        function formatAbsoluteTime(isoString) {
+            if (!isoString) return '';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
         }
 
         function formatEventTime(isoString) {
