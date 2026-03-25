@@ -1,5 +1,5 @@
 {
-  "session": 1.5208232,
+  "session": 0.0549164,
   "daily": 4.5083164,
   "weekly": 6.511688999999999,
   "topModels": [
@@ -20,12 +20,12 @@
     },
     {
       "name": "openrouter/openrouter/auto",
-      "window": "session",
+      "window": "daily",
       "cost": 1.4659068
     },
     {
       "name": "openrouter/openrouter/auto",
-      "window": "daily",
+      "window": "weekly",
       "cost": 1.4659068
     }
   ],
@@ -38,18 +38,18 @@
       "weeklyCost": 3.3352772999999996
     },
     {
-      "name": "openrouter/openrouter/auto",
-      "source": "OpenRouter",
-      "sessionCost": 1.4659068,
-      "dailyCost": 1.4659068,
-      "weeklyCost": 1.4659068
-    },
-    {
       "name": "gpt-5.4",
       "source": "OpenClaw",
       "sessionCost": 0,
       "dailyCost": 1.6136225,
       "weeklyCost": 1.6555885
+    },
+    {
+      "name": "openrouter/openrouter/auto",
+      "source": "OpenRouter",
+      "sessionCost": 0,
+      "dailyCost": 1.4659068,
+      "weeklyCost": 1.4659068
     },
     {
       "name": "gpt-5.3-codex",
@@ -59,5 +59,5 @@
       "weeklyCost": 0.0549164
     }
   ],
-  "lastUpdated": "2026-03-25T13:45:00.634Z"
+  "lastUpdated": "2026-03-25T13:50:01.064Z"
 }
