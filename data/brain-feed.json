@@ -1,15 +1,15 @@
 {
   "active": true,
-  "messageReceived": "2026-03-25T04:20:00Z",
-  "objective": "Adding lobster background and laser borders to Mission Control",
+  "messageReceived": "2026-03-25T04:27:00Z",
+  "objective": "Boosting lobster background visibility and fixing real-time brain feed pipeline",
   "status": "working",
   "steps": [
-    {"label": "Copying lobster background asset", "status": "done", "tool": "exec"},
-    {"label": "Adding CSS background layer with pulse animation", "status": "done", "tool": "claude-sonnet"},
-    {"label": "Re-enabling desktop Brain Feed laser border", "status": "done", "tool": "claude-sonnet"},
-    {"label": "Pushing updates to GitHub Pages", "status": "active", "tool": "git"},
-    {"label": "Verifying live site renders correctly", "status": "pending", "tool": "web"}
+    {"label": "Copied lobster background asset to repo", "status": "done", "tool": "exec"},
+    {"label": "Added CSS background layer with pulse animation", "status": "done", "tool": "claude-sonnet"},
+    {"label": "Raised opacity to 0.12 subtle/moderate", "status": "done", "tool": "claude-sonnet"},
+    {"label": "Fixing brain-feed auto-push in cron script", "status": "active", "tool": "exec"},
+    {"label": "Verifying live site updates in real-time", "status": "pending", "tool": "web"}
   ],
-  "currentTool": "git",
-  "updatedAt": "2026-03-25T04:21:00Z"
+  "currentTool": "exec",
+  "updatedAt": "2026-03-25T04:27:00Z"
 }
