@@ -85,47 +85,7 @@
         body::-webkit-scrollbar-thumb:hover {
             background: rgba(255,255,255,0.18);
         }
-        #password-overlay {
-            position: fixed; inset: 0;
-            background: var(--bg-primary);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000;
-        }
-        .password-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            max-width: 380px;
-            width: 90%;
-        }
-        .password-box h2 { font-size: 1.5rem; margin-bottom: 8px; }
-        .password-box p { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 24px; }
-        .password-box input {
-            width: 100%; padding: 12px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            margin-bottom: 16px;
-            text-align: center;
-            letter-spacing: 4px;
-        }
-        .password-box input:focus { outline: none; border-color: var(--accent-blue); }
-        .password-box button {
-            width: 100%; padding: 12px 24px;
-            background: var(--accent-blue);
-            color: white; border: none;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .password-box button:hover { opacity: 0.9; }
-        .password-error { color: var(--accent-red); font-size: 0.875rem; margin-top: 12px; display: none; }
+        /* PIN overlay removed — open access */
         
         .container {
             width: min(100%, 1560px);
@@ -274,6 +234,11 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.5);
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.14);
+            box-shadow: 0 0 0 1px rgba(229,62,62,0.08), 0 4px 20px rgba(0,0,0,0.6);
         }
         .card::after { display: none; }
         .card-focus,
@@ -905,7 +870,17 @@
         .freshness-badge.fresh { color: #4ade80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.06); }
         .freshness-badge.stale { color: #fbbf24; border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.06); }
         .freshness-badge.old   { color: #e53e3e; border-color: rgba(229,62,62,0.25);  background: rgba(229,62,62,0.06); }
-        .freshness-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .freshness-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor;
+            animation: freshness-pulse 2s ease-in-out infinite;
+        }
+        @keyframes freshness-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.75); }
+        }
+        .freshness-badge.stale .freshness-dot,
+        .freshness-badge.old .freshness-dot { animation: none; }
 
         /* ===== God mode badge ===== */
         .god-mode-badge {
@@ -954,6 +929,17 @@
 
         /* ===== Brain feed title & text overflow ===== */
         .brain-title, .bf-objective-text { word-break: break-word; overflow-wrap: anywhere; }
+        /* Active brain feed — glow on objective text */
+        .card-brain.brain-active .bf-objective-text {
+            text-shadow: 0 0 20px rgba(229,62,62,0.35), 0 0 40px rgba(229,62,62,0.12);
+            color: rgba(255,255,255,0.92);
+        }
+        /* Smooth fade-in on section updates */
+        @keyframes section-fade-in {
+            from { opacity: 0.3; }
+            to   { opacity: 1; }
+        }
+        .section-updated { animation: section-fade-in 0.4s ease-out; }
 
         /* ===== Model Usage responsive ===== */
         .mu-model-name { max-width: 160px; }
@@ -1042,9 +1028,10 @@
             font-weight: 500;
             flex-shrink: 0;
         }
-        .mu-source-tag.openclaw { background: rgba(229,62,62,0.08); color: rgba(229,62,62,0.75); border: 1px solid rgba(229,62,62,0.15); }
-        .mu-source-tag.codexbar { background: rgba(99,179,237,0.08); color: rgba(99,179,237,0.75); border: 1px solid rgba(99,179,237,0.15); }
-        .mu-source-tag.other    { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.07); }
+        .mu-source-tag.openclaw   { background: rgba(229,62,62,0.08); color: rgba(229,62,62,0.8); border: 1px solid rgba(229,62,62,0.18); }
+        .mu-source-tag.codexbar   { background: rgba(99,179,237,0.08); color: rgba(99,179,237,0.8); border: 1px solid rgba(99,179,237,0.18); }
+        .mu-source-tag.openrouter { background: rgba(34,211,238,0.08); color: #22d3ee; border: 1px solid rgba(34,211,238,0.25); font-weight: 600; }
+        .mu-source-tag.other      { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.07); }
         .mu-model-total {
             font-size: 0.95rem;
             font-weight: 700;
@@ -1054,8 +1041,8 @@
             text-align: right;
         }
         .mu-model-bar-wrap {
-            height: 3px;
-            background: rgba(255,255,255,0.05);
+            height: 4px;
+            background: rgba(255,255,255,0.06);
             border-radius: 99px;
             overflow: hidden;
             margin-bottom: 8px;
@@ -1063,7 +1050,7 @@
         .mu-model-bar-fill {
             height: 100%;
             border-radius: 99px;
-            transition: width 0.6s ease;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .mu-model-breakdown-row {
             display: flex;
@@ -1732,7 +1719,7 @@
                         const pct = Math.max(2, (total / maxCost) * 100).toFixed(1);
                         const color = palette[i % palette.length];
                         const src = (model.source || '').toLowerCase();
-                        const srcClass = src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
+                        const srcClass = src.includes('openrouter') ? 'openrouter' : src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
                         const srcLabel = model.source || 'Unknown';
                         return `<div class="mu-model-item">
                             <div class="mu-model-top">
@@ -1744,7 +1731,7 @@
                                 <span class="mu-model-total">${formatCurrencyAlways(total)}</span>
                             </div>
                             <div class="mu-model-bar-wrap">
-                                <div class="mu-model-bar-fill" style="width:${pct}%;background:${color};opacity:0.6"></div>
+                                <div class="mu-model-bar-fill" style="width:${pct}%;background:${color};opacity:0.85"></div>
                             </div>
                             <div class="mu-model-breakdown-row">
                                 <span class="mu-bd-cell"><span class="mu-bd-label">Session</span><span class="mu-bd-value">${formatCurrencyAlways(model.sessionCost || 0)}</span></span>
@@ -1754,7 +1741,14 @@
                         </div>`;
                     }).join('')}</div>`;
                 }
-                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + `<div class="mu-footer">Totals reflect tracked models only</div>`;
+                const policyNote = `<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.15);border-radius:8px;font-size:0.7rem;">
+                    <span style="color:#22d3ee;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Policy</span>
+                    <span style="color:rgba(255,255,255,0.45);">OpenRouter: Sonnet-only routing (no Opus)</span>
+                </div>`;
+                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + policyNote + `<div class="mu-footer">Totals reflect tracked models only</div>`;
+            modelUsageCard.classList.remove('section-updated');
+            void modelUsageCard.offsetWidth; // trigger reflow
+            modelUsageCard.classList.add('section-updated');
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';
             }
