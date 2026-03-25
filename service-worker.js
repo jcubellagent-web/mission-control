@@ -1,4 +1,4 @@
-const CACHE_NAME = "mission-control-pwa-v5";
+const CACHE_NAME = "mission-control-pwa-v6";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
@@ -37,7 +37,14 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(event.request.url);
-  if (url.pathname.endsWith("/data/dashboard-data.json") || url.pathname.endsWith("/index.html") || url.pathname === "/mission-control/" || url.pathname.endsWith("/mission-control/")) {
+  if (
+    url.pathname.endsWith("/data/dashboard-data.json") ||
+    url.pathname.endsWith("/data/brain-feed.json") ||
+    url.pathname.endsWith("/data/modelUsage.json") ||
+    url.pathname.endsWith("/index.html") ||
+    url.pathname === "/mission-control/" ||
+    url.pathname.endsWith("/mission-control/")
+  ) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

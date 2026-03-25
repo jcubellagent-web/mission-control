@@ -19,6 +19,7 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
     return base.replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 DASHBOARD_PATH = ROOT.parent / "data" / "dashboard-data.json"
+MODEL_USAGE_PATH = ROOT.parent / "data" / "modelUsage.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -63,6 +64,11 @@ def is_valid_iso8601(ts: Any) -> bool:
         return False
 
 
+def should_exclude_model(name: str, source: str = "") -> bool:
+    slug = f"{source} {name}".lower()
+    return "opus" in slug
+
+
 def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
     def normalize(bucket: Dict[str, Any]) -> float:
         return float(bucket.get("totalCost") or 0)
@@ -73,7 +79,7 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
     for bucket_name in ("session", "daily", "weekly"):
         for model in data.get(bucket_name, {}).get("models", []):
             name = model.get("name") or ""
-            if not name:
+            if not name or should_exclude_model(name):
                 continue
             key = (bucket_name, name)
             if key in seen_name_window:
@@ -94,7 +100,8 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
     seen_model_names: dict = {}
     for entry in raw_breakdown:
         mname = entry.get("name") or ""
-        if not mname:
+        source = entry.get("source") or ""
+        if not mname or should_exclude_model(mname, source):
             continue
         existing = seen_model_names.get(mname)
         if existing is None or (entry.get("weeklyCost") or 0) >= (existing.get("weeklyCost") or 0):
@@ -115,6 +122,38 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
         "lastUpdated": last_updated,
     }
 
+
+
+def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dict[str, Any]:
+    if brain_feed:
+        objective = str(brain_feed.get("objective") or "").strip()
+        updated_at = brain_feed.get("updatedAt") if is_valid_iso8601(brain_feed.get("updatedAt")) else now_iso
+        status = str(brain_feed.get("status") or "").strip().lower()
+        if brain_feed.get("active"):
+            return {
+                "status": "Brain Feed live",
+                "context": objective or "Agent task is currently in motion.",
+                "runway": 0.9,
+                "updatedAt": updated_at,
+            }
+        if objective:
+            context = f"Last objective: {objective}"
+            if status == "done":
+                context = f"Last completed objective: {objective}"
+            elif status in {"error", "failed"}:
+                context = f"Last task needs review: {objective}"
+            return {
+                "status": "Brain Feed idle",
+                "context": context,
+                "runway": 0.72,
+                "updatedAt": updated_at,
+            }
+    return {
+        "status": "System nominal",
+        "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
+        "runway": 0.98,
+        "updatedAt": now_iso,
+    }
 
 
 def fetch_model_usage() -> Dict[str, Any] | None:
@@ -379,14 +418,6 @@ def main() -> None:
         "upcomingEvents": [],
     }
 
-    brain = fetch_brain_feed()
-    dashboard["focus"] = brain or {
-        "status": "System nominal",
-        "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
-        "runway": 0.98,
-        "updatedAt": now_iso,
-    }
-
     # Always populate brainFeed — load sidecar, fall back to existing dashboard, then empty default
     brain_feed = load_brain_feed_file()
     if not brain_feed and DASHBOARD_PATH.exists():
@@ -397,9 +428,18 @@ def main() -> None:
             pass
     dashboard["brainFeed"] = brain_feed or dict(DEFAULT_BRAIN_FEED)
 
-    model_usage = fetch_model_usage()
-    if model_usage:
-        dashboard["modelUsage"] = model_usage
+    brain = fetch_brain_feed()
+    dashboard["focus"] = brain or build_focus_fallback(dashboard["brainFeed"], now_iso)
+
+    model_usage = fetch_model_usage() or {
+        "session": 0.0,
+        "daily": 0.0,
+        "weekly": 0.0,
+        "topModels": [],
+        "breakdown": [],
+        "lastUpdated": now_iso,
+    }
+    dashboard["modelUsage"] = model_usage
 
     dashboard["upcomingEvents"] = fetch_upcoming_events()
     dashboard["devices"] = build_devices()
@@ -419,7 +459,9 @@ def main() -> None:
     validate_dashboard(dashboard, now_iso)
 
     DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))
+    MODEL_USAGE_PATH.write_text(json.dumps(model_usage, indent=2))
     print(f"Updated {DASHBOARD_PATH}")
+    print(f"Updated {MODEL_USAGE_PATH}")
 
 
 if __name__ == "__main__":

@@ -45,16 +45,17 @@
             background: var(--bg-primary);
         }
         /* ===== Lobster background pattern ===== */
-        body::before {
-            content: '';
+        .lobster-bg {
             position: fixed;
             inset: 0;
-            z-index: -1;
+            z-index: 0;
             background: url('assets/lobster-bg.jpg') repeat center center;
-            background-size: 120px;
+            background-size: 132px;
             opacity: 0.12;
             pointer-events: none;
             animation: bg-pulse 8s ease-in-out infinite;
+            filter: saturate(0.88) contrast(1.08) brightness(0.9);
+            transform: translateZ(0);
         }
         @keyframes bg-pulse {
             0%, 100% { opacity: 0.10; }
@@ -71,6 +72,7 @@
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
             overscroll-behavior-y: contain;
+            position: relative;
         }
         body::-webkit-scrollbar {
             width: 6px;
@@ -88,6 +90,8 @@
         /* PIN overlay removed — open access */
         
         .container {
+            position: relative;
+            z-index: 1;
             width: min(100%, 1560px);
             margin: 0 auto;
             padding: clamp(18px, 3vw, 36px);
@@ -589,8 +593,9 @@
 
         /* ============ BRAIN FEED — ACTIVE LASER STATE ============ */
         .card-brain.brain-active {
-            border-color: transparent;
+            border-color: rgba(229,62,62,0.28);
             overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(229,62,62,0.12), 0 0 32px rgba(229,62,62,0.14), 0 1px 3px rgba(0,0,0,0.5);
         }
         .card-brain.brain-active::before {
             content: '';
@@ -602,9 +607,9 @@
             background: conic-gradient(from 0deg,
                 transparent 0deg,
                 transparent 330deg,
-                rgba(229,62,62,0.2) 345deg,
-                #e53e3e 352deg,
-                #ff6b6b 356deg,
+                rgba(229,62,62,0.34) 344deg,
+                #e53e3e 351deg,
+                #ff7b7b 355deg,
                 #e53e3e 360deg
             );
             animation: bf-laser-spin 2.8s linear infinite;
@@ -796,9 +801,9 @@
             background: conic-gradient(from 0deg,
                 transparent 0deg,
                 transparent 340deg,
-                rgba(229,62,62,0.15) 348deg,
-                #e53e3e 354deg,
-                #ff6b6b 357deg,
+                rgba(229,62,62,0.26) 347deg,
+                #ff4d4d 353deg,
+                #ff8c8c 356deg,
                 #e53e3e 360deg
             );
             animation: edge-laser-spin 3.2s linear infinite;
@@ -1073,6 +1078,7 @@
     </style>
 </head>
 <body>
+    <div class="lobster-bg" aria-hidden="true"></div>
     <div id="pull-indicator" class="pull-indicator">Pull to refresh</div>
 
     <!-- Main Content (PIN removed — open access) -->
@@ -1184,8 +1190,10 @@
         }
 
         function syncViewportMode() {
+            const phoneMode = isPhoneMode();
             document.body.classList.toggle('kiosk-mode', isKioskMode());
-            document.body.classList.toggle('phone-mode', isPhoneMode());
+            document.body.classList.toggle('phone-mode', phoneMode);
+            document.body.classList.toggle('edge-laser-on', !!(phoneMode && window._mcLastBrainFeed && window._mcLastBrainFeed.active));
         }
 
         function setConnectionStatus(state) {
@@ -1224,7 +1232,7 @@
         }
 
         function handleTouchStart(event) {
-            if (window.scrollY === 0 && sessionStorage.getItem('mc_authenticated') === 'true') {
+            if (window.scrollY === 0) {
                 pullStartY = event.touches[0].clientY;
             } else {
                 pullStartY = null;
@@ -1294,6 +1302,16 @@
             else el.textContent = `${Math.floor(diffSecs / 60)}m ago`;
         }
 
+        function getBrainFeedStateLabel(bf) {
+            if (!bf) return 'Idle';
+            const updatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
+            const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
+            if (bf.active && ageSecs < 60) return 'Live';
+            if (bf.active) return 'Active';
+            if (updatedAt && ageSecs >= 600) return 'Stale';
+            return 'Idle';
+        }
+
         async function fetchData() {
             const t0 = performance.now();
             try {
@@ -1345,12 +1363,16 @@
             const isActive = bf && bf.active;
             const ageSecs = bfLastUpdatedTs ? (Date.now() - bfLastUpdatedTs) / 1000 : 9999;
             const isFresh = ageSecs < 60;
+            const isStale = ageSecs >= 600;
             if (isActive && isFresh) {
                 dot.style.background = '#e53e3e';
                 if (label) label.textContent = 'Live';
             } else if (isActive) {
                 dot.style.background = '#fbbf24';
                 if (label) label.textContent = 'Active';
+            } else if (isStale && bf && bf.updatedAt) {
+                dot.style.background = '#fbbf24';
+                if (label) label.textContent = 'Stale';
             } else {
                 dot.style.background = 'rgba(255,255,255,0.2)';
                 if (label) label.textContent = 'Idle';
@@ -1401,20 +1423,22 @@
         function renderBrainFeed(bf) {
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard) return;
+            window._mcLastBrainFeed = bf || null;
             const brainCard = brainFeedCard.closest('.card-brain');
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
+            const stateLabel = getBrainFeedStateLabel(bf);
 
             // Freshness strip HTML (always present)
             const freshnessStrip = `<div class="bf-freshness-row">
                 <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
-                <span class="bf-freshness-label" id="bf-freshness-label-text">${bf && bf.active ? 'Live' : 'Idle'}</span>
+                <span class="bf-freshness-label" id="bf-freshness-label-text">${stateLabel}</span>
                 <span id="bf-last-updated">${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '–'}</span>
             </div>`;
 
             if (bf && bf.active) {
                 brainCard.classList.add('brain-active');
-                if (phoneMode) document.body.classList.add('edge-laser-on');
+                document.body.classList.toggle('edge-laser-on', phoneMode);
                 const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
                 const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
                 const stepsHtml = (bf.steps || []).map(step => {
@@ -1573,105 +1597,6 @@
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
             `;
 
-            // Brain Feed
-            const brainFeedCard = document.getElementById('brain-feed-card');
-            const brainCard = brainFeedCard.closest('.card-brain');
-            const bf = data.brainFeed;
-            if (bf && bf.active) {
-                brainCard.classList.add('brain-active');
-                // Tool pill class helper
-                function toolPillClass(tool) {
-                    if (!tool) return 'tool-default';
-                    const t = tool.toLowerCase();
-                    if (t === 'read' || t === 'write' || t === 'edit') return 'tool-read';
-                    if (t === 'image' || t === 'image_generate') return 'tool-image';
-                    if (t.includes('claude') || t.includes('sonnet') || t.includes('gpt') || t.includes('gemini')) return 'tool-claude';
-                    if (t === 'git' || t === 'github') return 'tool-git';
-                    if (t === 'exec' || t === 'process') return 'tool-exec';
-                    if (t.includes('web') || t === 'fetch' || t === 'search') return 'tool-web';
-                    return 'tool-default';
-                }
-                const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
-                const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
-                const stepsHtml = (bf.steps || []).map(step => {
-                    const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
-                    const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
-                    const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
-                    const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
-                    return `<div class="bf-step ${stepClass}">
-                        <div class="bf-step-icon ${iconClass}">${iconChar}</div>
-                        <div class="bf-step-body">
-                            <div class="bf-step-label">${escapeHtml(step.label)}</div>
-                            ${toolHtml}
-                        </div>
-                    </div>`;
-                }).join('');
-                brainFeedCard.innerHTML = `
-                    <div class="bf-container">
-                        <div class="bf-msg-banner">
-                            <span class="bf-msg-dot"></span>
-                            <span class="bf-msg-label">Message Received</span>
-                            <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
-                        </div>
-                        <div class="bf-objective">
-                            <div class="bf-objective-kicker">Current Objective</div>
-                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing…')}</div>
-                        </div>
-                        ${bf.currentTool ? `
-                        <div class="bf-current-tool-bar">
-                            <span class="bf-ct-pulse"></span>
-                            <span class="bf-ct-label">Active tool</span>
-                            <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
-                            ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
-                        </div>` : ''}
-                        <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
-                    </div>
-                `;
-            } else {
-                brainCard.classList.remove('brain-active');
-                const percent = Math.max(0, Math.min(100, Math.round(((data.focus && data.focus.runway) || 0) * 100)));
-                const feedItems = (data.recentActivity || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
-                const liveSignals = [
-                    data.modelUsage ? `Session ${formatCurrencyAlways(data.modelUsage.session)}` : null,
-                    data.modelUsage ? `Daily ${formatCurrencyAlways(data.modelUsage.daily)}` : null,
-                    (data.crons || []).length ? `${(data.crons || []).filter(c => c.status === 'ok').length} active crons` : null,
-                    (data.products || []).length ? `${(data.products || []).filter(p => p.status === 'live').length} live products` : null
-                ].filter(Boolean);
-                brainFeedCard.innerHTML = `
-                    <div class="bf-idle-container brain-feed">
-                        <div class="brain-hero">
-                            <div class="brain-kicker">Live Operator State</div>
-                            <div class="brain-title">${escapeHtml((data.focus && data.focus.status) || 'Mission Control Online')}</div>
-                            <p class="focus-context">${escapeHtml((data.focus && data.focus.context) || 'No current context')}</p>
-                            <div class="focus-meter">
-                                <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
-                                <span class="focus-meter-value">${percent}%</span>
-                            </div>
-                            <div class="brain-meta">
-                                <span>${data.focus && data.focus.updatedAt ? `Updated ${formatTime(data.focus.updatedAt)}` : 'Awaiting refresh'}</span>
-                                ${data.modelUsage && data.modelUsage.lastUpdated ? `<span>Telemetry ${formatTime(data.modelUsage.lastUpdated)}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="brain-stream">
-                            <div class="section-label">Recent Feed</div>
-                            <div class="feed-list">
-                                ${feedItems.length ? feedItems.map(item => `
-                                    <div class="feed-item">
-                                        <div class="feed-time">${formatTime(item.time)}</div>
-                                        <div class="feed-text">${escapeHtml(item.event)}</div>
-                                    </div>
-                                `).join('') : '<div class="empty-state">No feed events yet</div>'}
-                            </div>
-                        </div>
-                        <div class="brain-stream">
-                            <div class="section-label">Signal Layer</div>
-                            <div class="signal-strip">
-                                ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
 
             // Model usage snapshot — redesigned (diff-guarded)
             if (sectionChanged('modelUsage', data.modelUsage)) {

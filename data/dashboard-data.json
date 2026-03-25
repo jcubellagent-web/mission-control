@@ -2,12 +2,6 @@
   "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
-  "focus": {
-    "status": "System nominal",
-    "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
-    "runway": 0.98,
-    "updatedAt": "2026-03-25T05:00:01Z"
-  },
   "brainFeed": {
     "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
@@ -43,16 +37,17 @@
     "currentTool": "exec",
     "updatedAt": "2026-03-25T04:58:28Z"
   },
+  "focus": {
+    "status": "Brain Feed idle",
+    "context": "Last completed objective: Boosting lobster background visibility and fixing real-time brain feed pipeline",
+    "runway": 0.72,
+    "updatedAt": "2026-03-25T04:58:28Z"
+  },
   "modelUsage": {
-    "session": 4.0402337,
-    "daily": 2.0788271000000003,
-    "weekly": 4.0821997,
+    "session": 0.7084214,
+    "daily": 2.0822921,
+    "weekly": 4.085664699999999,
     "topModels": [
-      {
-        "name": "claude-sonnet-4-6",
-        "window": "session",
-        "cost": 3.3352772999999996
-      },
       {
         "name": "claude-sonnet-4-6",
         "window": "weekly",
@@ -66,28 +61,33 @@
       {
         "name": "openrouter/openrouter/auto",
         "window": "session",
-        "cost": 0.6500400000000001
+        "cost": 0.653505
       },
       {
         "name": "openrouter/openrouter/auto",
         "window": "daily",
-        "cost": 0.6500400000000001
+        "cost": 0.653505
+      },
+      {
+        "name": "openrouter/openrouter/auto",
+        "window": "weekly",
+        "cost": 0.653505
       }
     ],
     "breakdown": [
       {
         "name": "claude-sonnet-4-6",
         "source": "OpenClaw",
-        "sessionCost": 3.3352772999999996,
+        "sessionCost": 0,
         "dailyCost": 1.3738707,
         "weeklyCost": 3.3352772999999996
       },
       {
         "name": "openrouter/openrouter/auto",
         "source": "OpenRouter",
-        "sessionCost": 0.6500400000000001,
-        "dailyCost": 0.6500400000000001,
-        "weeklyCost": 0.6500400000000001
+        "sessionCost": 0.653505,
+        "dailyCost": 0.653505,
+        "weeklyCost": 0.653505
       },
       {
         "name": "gpt-5.3-codex",
@@ -104,7 +104,7 @@
         "weeklyCost": 0.041966
       }
     ],
-    "lastUpdated": "2026-03-25T05:00:01.337Z"
+    "lastUpdated": "2026-03-25T11:40:01.124Z"
   },
   "devices": [
     {
@@ -118,19 +118,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T05:00:01Z"
+      "lastChecked": "2026-03-25T11:41:12Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T05:00:01Z"
+      "lastChecked": "2026-03-25T11:41:12Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-25T05:00:01Z"
+      "lastChecked": "2026-03-25T11:41:12Z"
     }
   ],
   "crons": [
@@ -151,25 +151,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-25T05:00:01Z",
-      "event": "\ud83e\udde0 System nominal"
+      "time": "2026-03-25T04:58:28Z",
+      "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-25T05:00:01.337Z",
-      "event": "\ud83d\udcb8 Session spend now $4.04"
+      "time": "2026-03-25T11:40:01.124Z",
+      "event": "\ud83d\udcb8 Session spend now $0.71"
     },
     {
-      "time": "2026-03-25T05:00:01Z",
+      "time": "2026-03-25T11:41:12Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-25T05:00:01Z",
+      "time": "2026-03-25T11:41:12Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-25T05:00:01Z",
+      "time": "2026-03-25T11:41:12Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-25T05:00:01Z"
+  "lastUpdated": "2026-03-25T11:41:12Z"
 }
