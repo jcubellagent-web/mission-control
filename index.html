@@ -796,6 +796,77 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ============ MOBILE VIEWPORT LASER BORDER ============ */
+        #edge-laser {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        #edge-laser::before {
+            content: '';
+            position: absolute;
+            width: 300%;
+            height: 300%;
+            top: -100%;
+            left: -100%;
+            background: conic-gradient(from 0deg,
+                transparent 0deg,
+                transparent 340deg,
+                rgba(229,62,62,0.15) 348deg,
+                #e53e3e 354deg,
+                #ff6b6b 357deg,
+                #e53e3e 360deg
+            );
+            animation: edge-laser-spin 3.2s linear infinite;
+        }
+        #edge-laser::after {
+            content: '';
+            position: absolute;
+            inset: 2.5px;
+            background: #0a0a0a;
+            border-radius: 0;
+        }
+        /* Respect notch on iPhones */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            #edge-laser::after {
+                top: max(2.5px, env(safe-area-inset-top, 0px));
+                bottom: max(2.5px, env(safe-area-inset-bottom, 0px));
+                left: max(2.5px, env(safe-area-inset-left, 0px));
+                right: max(2.5px, env(safe-area-inset-right, 0px));
+            }
+        }
+        @keyframes edge-laser-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        /* Only show on phone-mode when brain is active */
+        body.phone-mode.edge-laser-on #edge-laser {
+            display: block;
+        }
+        /* On phone-mode, DISABLE the card-level brain laser so it doesn't double up */
+        body.phone-mode .card-brain.brain-active::before,
+        body.phone-mode .card-brain.brain-active::after {
+            display: none !important;
+        }
+        body.phone-mode .card-brain.brain-active {
+            border-color: rgba(229,62,62,0.25);
+        }
+
+        /* ============ PHONE-MODE: 3-widget stack, hide Upcoming & Devices ============ */
+        body.phone-mode .priority-grid .card-events,
+        body.phone-mode .priority-grid .card-devices {
+            display: none;
+        }
+        body.phone-mode .priority-grid {
+            grid-template-columns: 1fr !important;
+        }
+        body.phone-mode .hero-grid {
+            grid-template-columns: 1fr !important;
+        }
+
         /* ===== Card content overflow fixes ===== */
         #brain-feed-card { overflow-y: auto; max-height: 540px; }
         #today-jobs-card { overflow-y: auto; max-height: 540px; }
@@ -1374,6 +1445,7 @@
 
             if (bf && bf.active) {
                 brainCard.classList.add('brain-active');
+                if (phoneMode) document.body.classList.add('edge-laser-on');
                 const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
                 const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
                 const stepsHtml = (bf.steps || []).map(step => {
@@ -1413,6 +1485,7 @@
                 `;
             } else {
                 brainCard.classList.remove('brain-active');
+                document.body.classList.remove('edge-laser-on');
                 // Use cached focus/activity data if available
                 const focusData = window._mcLastFocus;
                 const activityData = window._mcLastActivity;
@@ -1855,5 +1928,9 @@
             });
         }
     </script>
+
+    <!-- Mobile viewport laser border overlay -->
+    <div id="edge-laser" aria-hidden="true"></div>
+
 </body>
 </html>
