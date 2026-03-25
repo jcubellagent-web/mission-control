@@ -1070,12 +1070,10 @@
     </style>
 </head>
 <body>
-    <!-- PIN protection removed -->
-
     <div id="pull-indicator" class="pull-indicator">Pull to refresh</div>
 
-    <!-- Main Content -->
-    <div class="container" id="main-content" style="display: none;">
+    <!-- Main Content (PIN removed — open access) -->
+    <div class="container" id="main-content">
         <header>
             <div class="logo">
                 <div class="logo-icon"><img src="assets/logo.jpg" alt="Josh logo" /></div>
@@ -1262,24 +1260,7 @@
             window.__mcPullAttached = true;
         }
 
-        function checkPassword() {
-            const input = document.getElementById('pin-input').value;
-            if (input === CONFIG.PIN) {
-                document.getElementById('password-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                sessionStorage.setItem('mc_authenticated', 'true');
-                initDashboard();
-            } else {
-                document.getElementById('password-error').style.display = 'block';
-                document.getElementById('pin-input').value = '';
-                document.getElementById('pin-input').focus();
-            }
-        }
-
-        document.getElementById('pin-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
-
+        // PIN removed — auto-init dashboard on load
         syncViewportMode();
         setConnectionStatus(navigator.onLine ? 'online' : 'offline');
         window.addEventListener('online', () => setConnectionStatus('online'));
@@ -1287,11 +1268,8 @@
         window.addEventListener('resize', syncViewportMode);
         window.addEventListener('orientationchange', syncViewportMode);
 
-        if (sessionStorage.getItem('mc_authenticated') === 'true') {
-            document.getElementById('password-overlay').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            initDashboard();
-        }
+        // Auto-start dashboard (no PIN gate)
+        initDashboard();
 
         function updateLastUpdatedTicker() {
             if (!lastUpdateTime) return;
