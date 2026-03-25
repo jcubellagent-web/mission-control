@@ -16,4 +16,11 @@ fi
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json
 git commit -m "dashboard: auto refresh $ts"
-git push origin main
+
+GH_TOKEN=$(gh auth token 2>/dev/null || true)
+if [[ -n "$GH_TOKEN" ]]; then
+  AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+  git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin main
+else
+  git push origin main
+fi
