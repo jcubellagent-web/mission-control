@@ -6,27 +6,27 @@
     "status": "System nominal",
     "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
     "runway": 0.98,
-    "updatedAt": "2026-03-25T01:20:00Z"
+    "updatedAt": "2026-03-25T01:25:01Z"
   },
   "modelUsage": {
-    "session": 7.631151899999998,
-    "daily": 7.631151899999998,
-    "weekly": 7.6731178999999985,
+    "session": 8.542375499999999,
+    "daily": 8.542375499999999,
+    "weekly": 8.584341499999999,
     "topModels": [
       {
-        "name": "claude-sonnet-4-6",
+        "name": "openrouter/auto",
         "window": "weekly",
-        "cost": 7.618201499999999
+        "cost": 8.5294251
       },
       {
-        "name": "claude-sonnet-4-6",
+        "name": "openrouter/auto",
         "window": "session",
-        "cost": 7.576235499999998
+        "cost": 8.487459099999999
       },
       {
-        "name": "claude-sonnet-4-6",
+        "name": "openrouter/auto",
         "window": "daily",
-        "cost": 7.576235499999998
+        "cost": 8.487459099999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -41,11 +41,11 @@
     ],
     "breakdown": [
       {
-        "name": "claude-sonnet-4-6",
+        "name": "openrouter/auto",
         "source": "OpenClaw",
-        "sessionCost": 7.576235499999998,
-        "dailyCost": 7.576235499999998,
-        "weeklyCost": 7.618201499999999
+        "sessionCost": 8.487459099999999,
+        "dailyCost": 8.487459099999999,
+        "weeklyCost": 8.5294251
       },
       {
         "name": "gpt-5.3-codex",
@@ -55,7 +55,7 @@
         "weeklyCost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-25T01:20:00.472Z"
+    "lastUpdated": "2026-03-25T01:25:00.994Z"
   },
   "devices": [
     {
@@ -69,19 +69,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T01:20:00Z"
+      "lastChecked": "2026-03-25T01:25:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-25T01:20:00Z"
+      "lastChecked": "2026-03-25T01:25:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-25T01:20:00Z"
+      "lastChecked": "2026-03-25T01:25:01Z"
     }
   ],
   "crons": [
@@ -102,25 +102,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-25T01:20:00Z",
+      "time": "2026-03-25T01:25:01Z",
       "event": "\ud83e\udde0 System nominal"
     },
     {
-      "time": "2026-03-25T01:20:00.472Z",
-      "event": "\ud83d\udcb8 Session spend now $7.63"
+      "time": "2026-03-25T01:25:00.994Z",
+      "event": "\ud83d\udcb8 Session spend now $8.54"
     },
     {
-      "time": "2026-03-25T01:20:00Z",
+      "time": "2026-03-25T01:25:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-25T01:20:00Z",
+      "time": "2026-03-25T01:25:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-25T01:20:00Z",
+      "time": "2026-03-25T01:25:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-25T01:20:00Z"
+  "lastUpdated": "2026-03-25T01:25:01Z"
 }
