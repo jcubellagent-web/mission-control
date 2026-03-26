@@ -1,63 +1,20 @@
 {
-  "session": 1.1990135799999997,
-  "daily": 1.2351785799999997,
-  "weekly": 6.184078379999999,
+  "session": 0.0549164,
+  "daily": 0.0549164,
+  "weekly": 0.0549164,
   "topModels": [
     {
-      "name": "claude-sonnet-4-6",
-      "window": "weekly",
-      "cost": 4.479374479999999
-    },
-    {
-      "name": "gpt-5.4",
-      "window": "weekly",
-      "cost": 1.6136225
-    },
-    {
-      "name": "claude-sonnet-4-6",
-      "window": "session",
-      "cost": 1.1440971799999997
-    },
-    {
-      "name": "claude-sonnet-4-6",
-      "window": "daily",
-      "cost": 1.1440971799999997
-    },
-    {
       "name": "gpt-5.3-codex",
-      "window": "session",
+      "window": "daily",
       "cost": 0.0549164
     }
   ],
   "breakdown": [
     {
-      "name": "claude-sonnet-4-6",
-      "source": "OpenClaw",
-      "sessionCost": 1.1440971799999997,
-      "dailyCost": 1.1440971799999997,
-      "weeklyCost": 4.479374479999999
-    },
-    {
-      "name": "gpt-5.4",
-      "source": "OpenClaw",
-      "sessionCost": 0,
-      "dailyCost": 0,
-      "weeklyCost": 1.6136225
-    },
-    {
       "name": "gpt-5.3-codex",
-      "source": "CodexBar",
-      "sessionCost": 0.0549164,
-      "dailyCost": 0.0549164,
-      "weeklyCost": 0.0549164
-    },
-    {
-      "name": "openrouter/openrouter/auto",
-      "source": "OpenRouter",
-      "sessionCost": 0,
-      "dailyCost": 0.036164999999999996,
-      "weeklyCost": 0.036164999999999996
+      "window": "daily",
+      "cost": 0.0549164
     }
   ],
-  "lastUpdated": "2026-03-26T23:36:53.322Z"
+  "lastUpdated": "2026-03-26T23:38:52Z"
 }

@@ -3,98 +3,39 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
+    "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Updating brain feed step order + model usage tracking",
-    "status": "active",
-    "steps": [
-      {
-        "label": "Editing step renderer",
-        "status": "done",
-        "tool": "edit"
-      },
-      {
-        "label": "Checking model usage script",
-        "status": "done",
-        "tool": "read"
-      },
-      {
-        "label": "Deploying",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-03-26T23:36:33Z"
+    "objective": "Idle",
+    "status": "idle",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-03-26T23:37:03Z"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Updating brain feed step order + model usage tracking",
-    "runway": 0.9,
-    "updatedAt": "2026-03-26T23:36:33Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: Idle",
+    "runway": 0.72,
+    "updatedAt": "2026-03-26T23:37:03Z"
   },
   "modelUsage": {
-    "session": 1.1990135799999997,
-    "daily": 1.2351785799999997,
-    "weekly": 6.184078379999999,
+    "session": 0.0549164,
+    "daily": 0.0549164,
+    "weekly": 0.0549164,
     "topModels": [
       {
-        "name": "claude-sonnet-4-6",
-        "window": "weekly",
-        "cost": 4.479374479999999
-      },
-      {
-        "name": "gpt-5.4",
-        "window": "weekly",
-        "cost": 1.6136225
-      },
-      {
-        "name": "claude-sonnet-4-6",
-        "window": "session",
-        "cost": 1.1440971799999997
-      },
-      {
-        "name": "claude-sonnet-4-6",
-        "window": "daily",
-        "cost": 1.1440971799999997
-      },
-      {
         "name": "gpt-5.3-codex",
-        "window": "session",
+        "window": "daily",
         "cost": 0.0549164
       }
     ],
     "breakdown": [
       {
-        "name": "claude-sonnet-4-6",
-        "source": "OpenClaw",
-        "sessionCost": 1.1440971799999997,
-        "dailyCost": 1.1440971799999997,
-        "weeklyCost": 4.479374479999999
-      },
-      {
-        "name": "gpt-5.4",
-        "source": "OpenClaw",
-        "sessionCost": 0,
-        "dailyCost": 0,
-        "weeklyCost": 1.6136225
-      },
-      {
         "name": "gpt-5.3-codex",
-        "source": "CodexBar",
-        "sessionCost": 0.0549164,
-        "dailyCost": 0.0549164,
-        "weeklyCost": 0.0549164
-      },
-      {
-        "name": "openrouter/openrouter/auto",
-        "source": "OpenRouter",
-        "sessionCost": 0,
-        "dailyCost": 0.036164999999999996,
-        "weeklyCost": 0.036164999999999996
+        "window": "daily",
+        "cost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-26T23:36:53.322Z"
+    "lastUpdated": "2026-03-26T23:38:52Z"
   },
   "devices": [
     {
@@ -108,19 +49,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T23:36:53Z"
+      "lastChecked": "2026-03-26T23:38:52Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T23:36:53Z"
+      "lastChecked": "2026-03-26T23:38:52Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T23:36:53Z"
+      "lastChecked": "2026-03-26T23:38:52Z"
     }
   ],
   "crons": [
@@ -141,25 +82,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-26T23:36:33Z",
-      "event": "\ud83e\udde0 Brain Feed live"
+      "time": "2026-03-26T23:37:03Z",
+      "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T23:36:53.322Z",
-      "event": "\ud83d\udcb8 Session spend now $1.20"
+      "time": "2026-03-26T23:38:52Z",
+      "event": "\ud83d\udcb8 Session spend now $0.05"
     },
     {
-      "time": "2026-03-26T23:36:53Z",
+      "time": "2026-03-26T23:38:52Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T23:36:53Z",
+      "time": "2026-03-26T23:38:52Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T23:36:53Z",
+      "time": "2026-03-26T23:38:52Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T23:36:53Z"
+  "lastUpdated": "2026-03-26T23:38:52Z"
 }
