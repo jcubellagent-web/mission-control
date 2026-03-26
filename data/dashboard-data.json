@@ -45,7 +45,7 @@
   },
   "modelUsage": {
     "session": 0.0549164,
-    "daily": 4.5083164,
+    "daily": 0.0549164,
     "weekly": 6.511688999999999,
     "topModels": [
       {
@@ -59,19 +59,19 @@
         "cost": 1.6555885
       },
       {
-        "name": "gpt-5.4",
-        "window": "daily",
-        "cost": 1.6136225
-      },
-      {
-        "name": "openrouter/openrouter/auto",
-        "window": "daily",
-        "cost": 1.4659068
-      },
-      {
         "name": "openrouter/openrouter/auto",
         "window": "weekly",
         "cost": 1.4659068
+      },
+      {
+        "name": "gpt-5.3-codex",
+        "window": "session",
+        "cost": 0.0549164
+      },
+      {
+        "name": "gpt-5.3-codex",
+        "window": "daily",
+        "cost": 0.0549164
       }
     ],
     "breakdown": [
@@ -79,21 +79,21 @@
         "name": "claude-sonnet-4-6",
         "source": "OpenClaw",
         "sessionCost": 0,
-        "dailyCost": 1.3738707,
+        "dailyCost": 0,
         "weeklyCost": 3.3352772999999996
       },
       {
         "name": "gpt-5.4",
         "source": "OpenClaw",
         "sessionCost": 0,
-        "dailyCost": 1.6136225,
+        "dailyCost": 0,
         "weeklyCost": 1.6555885
       },
       {
         "name": "openrouter/openrouter/auto",
         "source": "OpenRouter",
         "sessionCost": 0,
-        "dailyCost": 1.4659068,
+        "dailyCost": 0,
         "weeklyCost": 1.4659068
       },
       {
@@ -104,7 +104,7 @@
         "weeklyCost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-26T03:55:01.239Z"
+    "lastUpdated": "2026-03-26T04:00:00.568Z"
   },
   "devices": [
     {
@@ -118,19 +118,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T03:55:01Z"
+      "lastChecked": "2026-03-26T04:00:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T03:55:01Z"
+      "lastChecked": "2026-03-26T04:00:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T03:55:01Z"
+      "lastChecked": "2026-03-26T04:00:00Z"
     }
   ],
   "crons": [
@@ -155,21 +155,21 @@
       "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T03:55:01.239Z",
+      "time": "2026-03-26T04:00:00.568Z",
       "event": "\ud83d\udcb8 Session spend now $0.05"
     },
     {
-      "time": "2026-03-26T03:55:01Z",
+      "time": "2026-03-26T04:00:00Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T03:55:01Z",
+      "time": "2026-03-26T04:00:00Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T03:55:01Z",
+      "time": "2026-03-26T04:00:00Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T03:55:01Z"
+  "lastUpdated": "2026-03-26T04:00:00Z"
 }
