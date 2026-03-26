@@ -1,20 +1,74 @@
 {
-  "session": 0.0549164,
-  "daily": 0.0549164,
-  "weekly": 0.0549164,
+  "session": 6.79108,
+  "daily": 6.79108,
+  "weekly": 6.79108,
   "topModels": [
     {
+      "name": "anthropic/claude-sonnet-4-6",
+      "window": "session",
+      "cost": 5.122540729999999
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "window": "session",
+      "cost": 1.6136225
+    },
+    {
       "name": "gpt-5.3-codex",
-      "window": "daily",
+      "window": "session",
       "cost": 0.0549164
+    },
+    {
+      "name": "openrouter/auto",
+      "window": "session",
+      "cost": 0.0
     }
   ],
   "breakdown": [
     {
+      "name": "anthropic/claude-sonnet-4-6",
+      "source": "openclaw",
+      "inputTokens": 99,
+      "outputTokens": 76824,
+      "totalTokens": 324782,
+      "sessionCost": 5.122540729999999,
+      "weeklyCost": 5.122540729999999,
+      "sessions": 4,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 84163,
+      "outputTokens": 25281,
+      "totalTokens": 101429,
+      "sessionCost": 1.6136225,
+      "weeklyCost": 1.6136225,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "gpt-5.3-codex",
-      "window": "daily",
-      "cost": 0.0549164
+      "source": "codex",
+      "weeklyCost": 0.0549164,
+      "sessionCost": 0.0549164,
+      "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "openrouter/auto",
+      "source": "openclaw",
+      "inputTokens": 12025,
+      "outputTokens": 6,
+      "totalTokens": 12025,
+      "sessionCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
     }
   ],
-  "lastUpdated": "2026-03-26T23:40:01Z"
+  "lastUpdated": "2026-03-26T23:42:53Z"
 }
