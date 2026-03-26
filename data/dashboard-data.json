@@ -44,7 +44,7 @@
     "updatedAt": "2026-03-25T04:58:28Z"
   },
   "modelUsage": {
-    "session": 0.2357714,
+    "session": 0.1996064,
     "daily": 0.2357714,
     "weekly": 5.1846711999999995,
     "topModels": [
@@ -60,11 +60,6 @@
       },
       {
         "name": "openrouter/openrouter/auto",
-        "window": "session",
-        "cost": 0.180855
-      },
-      {
-        "name": "openrouter/openrouter/auto",
         "window": "daily",
         "cost": 0.180855
       },
@@ -72,6 +67,11 @@
         "name": "openrouter/openrouter/auto",
         "window": "weekly",
         "cost": 0.180855
+      },
+      {
+        "name": "openrouter/openrouter/auto",
+        "window": "session",
+        "cost": 0.14468999999999999
       }
     ],
     "breakdown": [
@@ -92,7 +92,7 @@
       {
         "name": "openrouter/openrouter/auto",
         "source": "OpenRouter",
-        "sessionCost": 0.180855,
+        "sessionCost": 0.14468999999999999,
         "dailyCost": 0.180855,
         "weeklyCost": 0.180855
       },
@@ -104,7 +104,7 @@
         "weeklyCost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-26T19:40:01.165Z"
+    "lastUpdated": "2026-03-26T19:45:01.346Z"
   },
   "devices": [
     {
@@ -118,19 +118,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T19:40:01Z"
+      "lastChecked": "2026-03-26T19:45:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T19:40:01Z"
+      "lastChecked": "2026-03-26T19:45:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T19:40:01Z"
+      "lastChecked": "2026-03-26T19:45:01Z"
     }
   ],
   "crons": [
@@ -155,21 +155,21 @@
       "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T19:40:01.165Z",
-      "event": "\ud83d\udcb8 Session spend now $0.24"
+      "time": "2026-03-26T19:45:01.346Z",
+      "event": "\ud83d\udcb8 Session spend now $0.20"
     },
     {
-      "time": "2026-03-26T19:40:01Z",
+      "time": "2026-03-26T19:45:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T19:40:01Z",
+      "time": "2026-03-26T19:45:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T19:40:01Z",
+      "time": "2026-03-26T19:45:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T19:40:01Z"
+  "lastUpdated": "2026-03-26T19:45:01Z"
 }
