@@ -581,19 +581,86 @@
             gap: 12px;
             min-height: 0;
         }
-        /* Top-right: Upcoming */
-        body.kiosk-mode .card-events {
-            grid-column: 1; grid-row: 1;
+        /* Right col: Newsfeed full height */
+        body.kiosk-mode .card-newsfeed {
+            grid-column: 1; grid-row: 1 / -1;
             min-height: 0; overflow: hidden;
+            display: flex; flex-direction: column;
         }
-        /* Bottom-right: AirPoint clean cutout */
         body.kiosk-mode .card-devices { display: none; }
-        body.kiosk-mode .card-airpoint {
-            grid-column: 1; grid-row: 2;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.05);
-            background: transparent;
-            min-height: 0; overflow: hidden;
+        body.kiosk-mode .card-airpoint { display: none; }
+
+        /* Newsfeed styles */
+        .card-newsfeed { position: relative; }
+        .live-badge {
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #e53e3e;
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes live-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .newsfeed-subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            padding: 0 16px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .newsfeed-skeleton-list {
+            flex: 1;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .ns-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .ns-cat {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .ns-cat-blue   { background: #4299e1; }
+        .ns-cat-green  { background: #48bb78; }
+        .ns-cat-orange { background: #ed8936; }
+        .ns-cat-purple { background: #9f7aea; }
+        .ns-cat-red    { background: #e53e3e; }
+        .ns-lines { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .ns-line {
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.08);
+        }
+        .ns-line-long  { width: 90%; }
+        .ns-line-med   { width: 70%; }
+        .ns-line-short { width: 40%; height: 8px; }
+        @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0.05) 25%,
+                rgba(255,255,255,0.12) 50%,
+                rgba(255,255,255,0.05) 75%
+            );
+            background-size: 400px 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        .newsfeed-placeholder-msg {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
+            padding: 12px 16px 16px;
         }
 
 
@@ -1291,24 +1358,23 @@
                 </div>
             </div>
 
-            <!-- RIGHT COL: Upcoming (top) + AirPoint slot (bottom) -->
+            <!-- RIGHT COL: Live Newsfeed (full height) -->
             <div class="grid priority-grid">
-                <div class="card card-events">
+                <div class="card card-newsfeed">
                     <div class="card-header">
-                        <span class="icon"><img src="assets/icons/calendar.png" alt="" class="section-icon-image"></span>
-                        <h2>Upcoming</h2>
+                        <span class="icon">📰</span>
+                        <h2>Live Newsfeed</h2>
+                        <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
                     </div>
-                    <div id="events-list"></div>
-                </div>
-                <!-- AirPoint clean cutout — bottom-right -->
-                <div class="card-airpoint" id="airpoint-slot" aria-hidden="true"></div>
-                <!-- Devices hidden in kiosk but kept for non-kiosk fallback -->
-                <div class="card card-devices" style="display:none">
-                    <div class="card-header">
-                        <span class="icon"><img src="assets/icons/devices.png" alt="" class="section-icon-image"></span>
-                        <h2>Devices</h2>
+                    <div class="newsfeed-subtitle">Personalized news, market data &amp; intel — coming soon</div>
+                    <div class="newsfeed-skeleton-list">
+                        <div class="ns-item"><span class="ns-cat ns-cat-blue"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                        <div class="ns-item"><span class="ns-cat ns-cat-green"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                        <div class="ns-item"><span class="ns-cat ns-cat-orange"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                        <div class="ns-item"><span class="ns-cat ns-cat-purple"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                        <div class="ns-item"><span class="ns-cat ns-cat-red"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
                     </div>
-                    <div id="device-list"></div>
+                    <div class="newsfeed-placeholder-msg">🔧 Wiring up live data sources…</div>
                 </div>
             </div>
         </div><!-- /kiosk-main -->
@@ -1324,7 +1390,7 @@
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
             BRAIN_FEED_URL: './data/brain-feed.json',  // Fast-polled brain-feed sidecar
             REFRESH_INTERVAL: 10000,   // 10 seconds - full dashboard poll
-            BRAIN_FEED_INTERVAL: 4000, // 4 seconds - brain feed only
+            BRAIN_FEED_INTERVAL: 2000, // 2 seconds - brain feed only
         };
         // ============================================
 
@@ -1613,7 +1679,7 @@
                 document.body.classList.toggle('edge-laser-on', phoneMode);
                 const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
                 const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
-                const stepsHtml = (bf.steps || []).map(step => {
+                const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
                     const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
                     const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
                     const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';

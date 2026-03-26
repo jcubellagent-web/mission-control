@@ -156,10 +156,169 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
     }
 
 
+OPENCLAW_SESSIONS_PATH = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
+
+# Gemini pricing (per 1M tokens) — update as pricing changes
+GEMINI_PRICING: Dict[str, Dict[str, float]] = {
+    "gemini-2.5-flash":       {"input": 0.15,  "output": 0.60},
+    "gemini-2.5-pro":         {"input": 1.25,  "output": 10.00},
+    "gemini-2.0-flash":       {"input": 0.10,  "output": 0.40},
+    "gemini-1.5-flash":       {"input": 0.075, "output": 0.30},
+    "gemini-1.5-pro":         {"input": 1.25,  "output": 5.00},
+}
+
+def estimate_gemini_cost(model: str, input_tokens: int, output_tokens: int) -> float:
+    """Estimate Gemini cost since codexbar skips it."""
+    slug = model.lower().replace("google/", "")
+    pricing = None
+    for key, p in GEMINI_PRICING.items():
+        if key in slug:
+            pricing = p
+            break
+    if not pricing:
+        pricing = {"input": 0.15, "output": 0.60}  # default to flash pricing
+    return (input_tokens / 1_000_000) * pricing["input"] + (output_tokens / 1_000_000) * pricing["output"]
+
+
+def fetch_model_usage_from_sessions() -> List[Dict[str, Any]]:
+    """Pull per-model usage directly from OpenClaw session data. Captures ALL models including Gemini."""
+    if not OPENCLAW_SESSIONS_PATH.exists():
+        return []
+    try:
+        sessions = json.loads(OPENCLAW_SESSIONS_PATH.read_text())
+        by_model: Dict[str, Dict[str, Any]] = {}
+        for sess in sessions.values():
+            raw_model = sess.get("model") or sess.get("modelOverride") or ""
+            provider = sess.get("modelProvider") or ""
+            if not raw_model:
+                continue
+            # Normalize model name
+            full_name = raw_model if "/" in raw_model else f"{provider}/{raw_model}" if provider else raw_model
+            full_name = full_name.lstrip("/")
+            if should_exclude_model(full_name):
+                continue
+            input_t = int(sess.get("inputTokens") or 0)
+            output_t = int(sess.get("outputTokens") or 0)
+            total_t = int(sess.get("totalTokens") or 0)
+            cost = float(sess.get("estimatedCostUsd") or 0)
+            # For Gemini: estimatedCostUsd may be 0 — estimate it
+            if cost == 0 and "gemini" in full_name.lower() and total_t > 0:
+                cost = estimate_gemini_cost(full_name, input_t, output_t)
+            if full_name not in by_model:
+                by_model[full_name] = {
+                    "name": full_name,
+                    "source": "openclaw",
+                    "inputTokens": 0, "outputTokens": 0, "totalTokens": 0,
+                    "sessionCost": 0.0, "weeklyCost": 0.0, "sessions": 0,
+                    "isGemini": "gemini" in full_name.lower(),
+                    "costEstimated": False,
+                }
+            by_model[full_name]["inputTokens"] += input_t
+            by_model[full_name]["outputTokens"] += output_t
+            by_model[full_name]["totalTokens"] += total_t
+            by_model[full_name]["sessionCost"] += cost
+            by_model[full_name]["weeklyCost"] += cost
+            by_model[full_name]["sessions"] += 1
+            if "gemini" in full_name.lower() and cost > 0:
+                by_model[full_name]["costEstimated"] = True
+        return sorted(by_model.values(), key=lambda x: x["weeklyCost"], reverse=True)
+    except Exception as exc:
+        print(f"[warn] session usage fetch failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
+    """Fetch model usage from codexbar CLI (covers Codex/OpenAI with precise cost)."""
+    try:
+        result = subprocess.run(
+            ["/opt/homebrew/bin/codexbar", "cost", "--json"],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return []
+        providers = json.loads(result.stdout)
+        rows: List[Dict[str, Any]] = []
+        for provider in providers:
+            source = provider.get("provider", "codexbar")
+            total_cost = float(provider.get("last30DaysCostUSD") or 0)
+            for day in provider.get("daily", []):
+                for mb in day.get("modelBreakdowns", []):
+                    name = mb.get("modelName", "")
+                    cost = float(mb.get("cost") or 0)
+                    if name and not should_exclude_model(name, source):
+                        rows.append({
+                            "name": name,
+                            "source": source,
+                            "weeklyCost": cost,
+                            "sessionCost": cost,
+                            "totalTokens": 0,
+                            "costEstimated": False,
+                        })
+        return rows
+    except Exception as exc:
+        print(f"[warn] codexbar fetch failed: {exc}", file=sys.stderr)
+        return []
+
+
+def merge_model_rows(session_rows: List[Dict], codexbar_rows: List[Dict]) -> List[Dict]:
+    """Merge session + codexbar rows, preferring session data for Gemini, codexbar for precise OpenAI cost."""
+    merged: Dict[str, Dict] = {}
+    for row in session_rows:
+        merged[row["name"]] = row
+    for row in codexbar_rows:
+        name = row["name"]
+        if name not in merged:
+            merged[name] = row
+        else:
+            # For non-Gemini models, prefer codexbar cost (more precise)
+            if not merged[name].get("isGemini"):
+                merged[name]["weeklyCost"] = max(merged[name]["weeklyCost"], row["weeklyCost"])
+                merged[name]["sessionCost"] = max(merged[name]["sessionCost"], row["sessionCost"])
+    return sorted(merged.values(), key=lambda x: x.get("weeklyCost", 0), reverse=True)
+
+
 def fetch_model_usage() -> Dict[str, Any] | None:
-    data = fetch_next("/api/model-usage")
-    if data:
-        return normalize_model_usage_payload(data)
+    # Primary: merge OpenClaw sessions (all models incl. Gemini) + codexbar (precise Codex costs)
+    session_rows = fetch_model_usage_from_sessions()
+    codexbar_rows = fetch_model_usage_from_codexbar()
+    breakdown = merge_model_rows(session_rows, codexbar_rows)
+
+    if breakdown:
+        total_cost = sum(r.get("weeklyCost", 0) for r in breakdown)
+        # Write a structured tracker file for future API/newsfeed hooks
+        tracker_path = ROOT.parent / "data" / "model-usage-tracker.json"
+        tracker_payload = {
+            "lastUpdated": utc_iso(),
+            "totalCostUsd": round(total_cost, 6),
+            "models": [
+                {
+                    "name": r["name"],
+                    "source": r.get("source", "unknown"),
+                    "totalTokens": r.get("totalTokens", 0),
+                    "inputTokens": r.get("inputTokens", 0),
+                    "outputTokens": r.get("outputTokens", 0),
+                    "costUsd": round(r.get("weeklyCost", 0), 6),
+                    "costEstimated": r.get("costEstimated", False),
+                    "sessions": r.get("sessions", 0),
+                }
+                for r in breakdown
+            ],
+            "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly. Hook this file into the newsfeed/API layer for live model telemetry."
+        }
+        tracker_path.write_text(json.dumps(tracker_payload, indent=2))
+        return {
+            "session": round(total_cost, 6),
+            "daily": round(total_cost, 6),
+            "weekly": round(total_cost, 6),
+            "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
+            "breakdown": breakdown,
+            "lastUpdated": utc_iso(),
+        }
+
+    # Legacy fallback: old Next.js API (likely dead)
+    raw = fetch_next("/api/model-usage")
+    if raw:
+        return normalize_model_usage_payload(raw)
 
     if not KIOSK_MODEL_USAGE_PATH.exists():
         return None

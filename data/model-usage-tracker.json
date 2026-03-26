@@ -1,0 +1,47 @@
+{
+  "lastUpdated": "2026-03-26T23:50:00Z",
+  "totalCostUsd": 7.232257,
+  "models": [
+    {
+      "name": "anthropic/claude-sonnet-4-6",
+      "source": "openclaw",
+      "totalTokens": 334935,
+      "inputTokens": 110,
+      "outputTokens": 82185,
+      "costUsd": 5.563718,
+      "costEstimated": false,
+      "sessions": 4
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "totalTokens": 101429,
+      "inputTokens": 84163,
+      "outputTokens": 25281,
+      "costUsd": 1.613622,
+      "costEstimated": false,
+      "sessions": 1
+    },
+    {
+      "name": "gpt-5.3-codex",
+      "source": "codex",
+      "totalTokens": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0.054916,
+      "costEstimated": false,
+      "sessions": 0
+    },
+    {
+      "name": "openrouter/auto",
+      "source": "openclaw",
+      "totalTokens": 12025,
+      "inputTokens": 12025,
+      "outputTokens": 6,
+      "costUsd": 0.0,
+      "costEstimated": false,
+      "sessions": 1
+    }
+  ],
+  "_note": "costEstimated=true means Gemini cost was calculated from token counts \u00d7 pricing table, not billed directly. Hook this file into the newsfeed/API layer for live model telemetry."
+}
