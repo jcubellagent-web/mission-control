@@ -3,19 +3,35 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "AirPoint notch shipped to Mission Control",
-    "status": "done",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-03-26T22:19:37Z"
+    "objective": "Redesigning layout to integrate AirPoint as native dashboard module",
+    "status": "active",
+    "steps": [
+      {
+        "label": "Taking screenshot",
+        "status": "done",
+        "tool": "airpoint"
+      },
+      {
+        "label": "Analyzing layout",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "Redesigning grid",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-03-26T22:22:31Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last completed objective: AirPoint notch shipped to Mission Control",
-    "runway": 0.72,
-    "updatedAt": "2026-03-26T22:19:37Z"
+    "status": "Brain Feed live",
+    "context": "Redesigning layout to integrate AirPoint as native dashboard module",
+    "runway": 0.9,
+    "updatedAt": "2026-03-26T22:22:31Z"
   },
   "modelUsage": {
     "session": 2.1323630000000002,
@@ -78,7 +94,7 @@
         "weeklyCost": 0.036164999999999996
       }
     ],
-    "lastUpdated": "2026-03-26T22:20:00.870Z"
+    "lastUpdated": "2026-03-26T22:25:01.049Z"
   },
   "devices": [
     {
@@ -92,19 +108,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:20:00Z"
+      "lastChecked": "2026-03-26T22:25:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:20:00Z"
+      "lastChecked": "2026-03-26T22:25:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T22:20:00Z"
+      "lastChecked": "2026-03-26T22:25:01Z"
     }
   ],
   "crons": [
@@ -125,25 +141,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-26T22:19:37Z",
-      "event": "\ud83e\udde0 Brain Feed idle"
+      "time": "2026-03-26T22:22:31Z",
+      "event": "\ud83e\udde0 Brain Feed live"
     },
     {
-      "time": "2026-03-26T22:20:00.870Z",
+      "time": "2026-03-26T22:25:01.049Z",
       "event": "\ud83d\udcb8 Session spend now $2.13"
     },
     {
-      "time": "2026-03-26T22:20:00Z",
+      "time": "2026-03-26T22:25:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T22:20:00Z",
+      "time": "2026-03-26T22:25:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T22:20:00Z",
+      "time": "2026-03-26T22:25:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T22:20:00Z"
+  "lastUpdated": "2026-03-26T22:25:01Z"
 }
