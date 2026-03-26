@@ -1,9 +1,30 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Layout pushed \u2014 brain TL, jobs+model BL, upcoming TR, airpoint BR",
-  "status": "done",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-26T22:51:56Z"
+  "objective": "Redesigning Mission Control dashboard",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Reading layout",
+      "status": "done",
+      "tool": "read"
+    },
+    {
+      "label": "Removing upcoming module",
+      "status": "done",
+      "tool": "edit"
+    },
+    {
+      "label": "Adding newsfeed placeholder",
+      "status": "done",
+      "tool": "edit"
+    },
+    {
+      "label": "Pushing to GitHub",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-26T23:28:51Z"
 }
