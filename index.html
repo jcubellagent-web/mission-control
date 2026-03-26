@@ -543,13 +543,14 @@
             min-height: 0;
             margin-bottom: 0;
         }
-        body.kiosk-mode .card-model   { flex: 1.3;  min-height: 0; overflow: hidden; }
-        body.kiosk-mode .card-events  { flex: 0.75; min-height: 0; overflow: hidden; }
-        body.kiosk-mode .card-devices { flex: 0.65; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-model   { flex: 0 0 200px; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-events  { flex: 0 0 130px; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-devices { flex: 0 0 130px; min-height: 0; overflow: hidden; }
 
-        /* AirPoint slot — transparent reserved space at bottom-right for the copilot panel */
+        /* AirPoint slot — fixed height matching AirPoint panel, transparent */
         body.kiosk-mode .card-airpoint {
-            flex: 0 0 400px;
+            flex: 1 1 auto;
+            min-height: 460px;
             border-radius: 14px;
             border: 1px dashed rgba(255,255,255,0.06);
             background: rgba(255,255,255,0.01);
