@@ -5,68 +5,42 @@
   "brainFeed": {
     "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "",
-    "status": "idle",
-    "steps": [
-      {
-        "label": "Copied lobster background asset to repo",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Added CSS background layer with pulse animation",
-        "status": "done",
-        "tool": "claude-sonnet"
-      },
-      {
-        "label": "Raised opacity to 0.12 subtle/moderate",
-        "status": "done",
-        "tool": "claude-sonnet"
-      },
-      {
-        "label": "Fixing brain-feed auto-push in cron script",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Verifying live site updates in real-time",
-        "status": "done",
-        "tool": "web"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-03-26T22:04:35Z"
+    "objective": "AirPoint notch shipped to Mission Control",
+    "status": "done",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-03-26T22:19:37Z"
   },
   "focus": {
-    "status": "System nominal",
-    "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
-    "runway": 0.98,
-    "updatedAt": "2026-03-26T22:15:01Z"
+    "status": "Brain Feed idle",
+    "context": "Last completed objective: AirPoint notch shipped to Mission Control",
+    "runway": 0.72,
+    "updatedAt": "2026-03-26T22:19:37Z"
   },
   "modelUsage": {
-    "session": 1.14508865,
-    "daily": 1.18125365,
-    "weekly": 6.13015345,
+    "session": 2.1323630000000002,
+    "daily": 2.1685280000000002,
+    "weekly": 7.1174278,
     "topModels": [
       {
         "name": "claude-sonnet-4-6",
         "window": "weekly",
-        "cost": 4.42544955
+        "cost": 5.4127239
+      },
+      {
+        "name": "claude-sonnet-4-6",
+        "window": "session",
+        "cost": 2.0774466
+      },
+      {
+        "name": "claude-sonnet-4-6",
+        "window": "daily",
+        "cost": 2.0774466
       },
       {
         "name": "gpt-5.4",
         "window": "weekly",
         "cost": 1.6136225
-      },
-      {
-        "name": "claude-sonnet-4-6",
-        "window": "session",
-        "cost": 1.09017225
-      },
-      {
-        "name": "claude-sonnet-4-6",
-        "window": "daily",
-        "cost": 1.09017225
       },
       {
         "name": "gpt-5.3-codex",
@@ -78,9 +52,9 @@
       {
         "name": "claude-sonnet-4-6",
         "source": "OpenClaw",
-        "sessionCost": 1.09017225,
-        "dailyCost": 1.09017225,
-        "weeklyCost": 4.42544955
+        "sessionCost": 2.0774466,
+        "dailyCost": 2.0774466,
+        "weeklyCost": 5.4127239
       },
       {
         "name": "gpt-5.4",
@@ -104,7 +78,7 @@
         "weeklyCost": 0.036164999999999996
       }
     ],
-    "lastUpdated": "2026-03-26T22:15:00.958Z"
+    "lastUpdated": "2026-03-26T22:20:00.870Z"
   },
   "devices": [
     {
@@ -118,19 +92,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:15:01Z"
+      "lastChecked": "2026-03-26T22:20:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:15:01Z"
+      "lastChecked": "2026-03-26T22:20:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T22:15:01Z"
+      "lastChecked": "2026-03-26T22:20:00Z"
     }
   ],
   "crons": [
@@ -151,25 +125,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-26T22:15:01Z",
-      "event": "\ud83e\udde0 System nominal"
+      "time": "2026-03-26T22:19:37Z",
+      "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T22:15:00.958Z",
-      "event": "\ud83d\udcb8 Session spend now $1.15"
+      "time": "2026-03-26T22:20:00.870Z",
+      "event": "\ud83d\udcb8 Session spend now $2.13"
     },
     {
-      "time": "2026-03-26T22:15:01Z",
+      "time": "2026-03-26T22:20:00Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T22:15:01Z",
+      "time": "2026-03-26T22:20:00Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T22:15:01Z",
+      "time": "2026-03-26T22:20:00Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T22:15:01Z"
+  "lastUpdated": "2026-03-26T22:20:00Z"
 }
