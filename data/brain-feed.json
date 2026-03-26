@@ -1,9 +1,20 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Mission Control 2-col layout with AirPoint slot live",
-  "status": "done",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-26T22:28:34Z"
+  "objective": "Fixing AirPoint slot height \u2014 cards overlapping",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Measuring from photo",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Adjusting card heights",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-26T22:30:56Z"
 }
