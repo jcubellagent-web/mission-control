@@ -3,50 +3,39 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
+    "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Fixing brain feed \u2014 making it the hero focal point again",
-    "status": "active",
-    "steps": [
-      {
-        "label": "Reviewing layout",
-        "status": "done",
-        "tool": "airpoint"
-      },
-      {
-        "label": "Rewriting CSS",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-03-26T22:44:09Z"
+    "objective": "2x2 grid live \u2014 waiting for your review",
+    "status": "done",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-03-26T22:48:08Z"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Fixing brain feed \u2014 making it the hero focal point again",
-    "runway": 0.9,
-    "updatedAt": "2026-03-26T22:44:09Z"
+    "status": "Brain Feed idle",
+    "context": "Last completed objective: 2x2 grid live \u2014 waiting for your review",
+    "runway": 0.72,
+    "updatedAt": "2026-03-26T22:48:08Z"
   },
   "modelUsage": {
-    "session": 4.4735292499999995,
-    "daily": 4.509694249999999,
-    "weekly": 9.458594049999999,
+    "session": 5.125025449999999,
+    "daily": 5.1611904499999985,
+    "weekly": 10.110090249999999,
     "topModels": [
       {
         "name": "claude-sonnet-4-6",
         "window": "weekly",
-        "cost": 7.75389015
+        "cost": 8.405386349999999
       },
       {
         "name": "claude-sonnet-4-6",
         "window": "session",
-        "cost": 4.41861285
+        "cost": 5.070109049999999
       },
       {
         "name": "claude-sonnet-4-6",
         "window": "daily",
-        "cost": 4.41861285
+        "cost": 5.070109049999999
       },
       {
         "name": "gpt-5.4",
@@ -63,9 +52,9 @@
       {
         "name": "claude-sonnet-4-6",
         "source": "OpenClaw",
-        "sessionCost": 4.41861285,
-        "dailyCost": 4.41861285,
-        "weeklyCost": 7.75389015
+        "sessionCost": 5.070109049999999,
+        "dailyCost": 5.070109049999999,
+        "weeklyCost": 8.405386349999999
       },
       {
         "name": "gpt-5.4",
@@ -89,7 +78,7 @@
         "weeklyCost": 0.036164999999999996
       }
     ],
-    "lastUpdated": "2026-03-26T22:45:00.834Z"
+    "lastUpdated": "2026-03-26T22:50:01.006Z"
   },
   "devices": [
     {
@@ -103,19 +92,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:45:00Z"
+      "lastChecked": "2026-03-26T22:50:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:45:00Z"
+      "lastChecked": "2026-03-26T22:50:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T22:45:00Z"
+      "lastChecked": "2026-03-26T22:50:01Z"
     }
   ],
   "crons": [
@@ -136,25 +125,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-26T22:44:09Z",
-      "event": "\ud83e\udde0 Brain Feed live"
+      "time": "2026-03-26T22:48:08Z",
+      "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T22:45:00.834Z",
-      "event": "\ud83d\udcb8 Session spend now $4.47"
+      "time": "2026-03-26T22:50:01.006Z",
+      "event": "\ud83d\udcb8 Session spend now $5.13"
     },
     {
-      "time": "2026-03-26T22:45:00Z",
+      "time": "2026-03-26T22:50:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T22:45:00Z",
+      "time": "2026-03-26T22:50:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T22:45:00Z",
+      "time": "2026-03-26T22:50:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T22:45:00Z"
+  "lastUpdated": "2026-03-26T22:50:01Z"
 }
