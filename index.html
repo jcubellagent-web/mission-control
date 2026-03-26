@@ -525,6 +525,48 @@
         body.kiosk-mode .priority-grid {
             grid-template-columns: 1.35fr 0.85fr 0.85fr;
         }
+
+        /* ============ AIRPOINT COPILOT NOTCH ============ */
+        /* When AirPoint copilot is active (bottom-right ~360×480px),
+           shrink the container's bottom-right so cards don't go under it.
+           Toggle body.airpoint-active via the AP toggle button. */
+        body.kiosk-mode.airpoint-active .container {
+            padding-right: 380px; /* clear the AirPoint panel width */
+        }
+        body.kiosk-mode.airpoint-active .priority-grid {
+            grid-template-columns: 1.35fr 0.85fr 0.72fr;
+        }
+        body.kiosk-mode.airpoint-active #device-list {
+            max-height: 240px;
+        }
+        /* AirPoint toggle button */
+        #airpoint-toggle {
+            display: none;
+        }
+        body.kiosk-mode #airpoint-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.72rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.03em;
+        }
+        body.kiosk-mode #airpoint-toggle:hover {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.75);
+        }
+        body.kiosk-mode.airpoint-active #airpoint-toggle {
+            border-color: rgba(229,62,62,0.35);
+            background: rgba(229,62,62,0.08);
+            color: rgba(229,62,62,0.8);
+        }
         body.kiosk-mode .card {
             padding: 16px;
             border-radius: 14px;
@@ -1148,6 +1190,7 @@
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">–</span></div>
+                <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
                     <span class="spinner">↻</span>
@@ -1443,7 +1486,20 @@
             setTimeout(() => btn.classList.remove('loading'), 500);
         }
 
+        /* ---- AirPoint copilot notch toggle ---- */
+        function toggleAirpoint() {
+            const isActive = document.body.classList.toggle('airpoint-active');
+            localStorage.setItem('mc_airpoint_active', isActive ? '1' : '0');
+        }
+        function initAirpointState() {
+            // Default ON (AirPoint is always up per user preference)
+            const stored = localStorage.getItem('mc_airpoint_active');
+            const active = stored === null ? true : stored === '1';
+            document.body.classList.toggle('airpoint-active', active);
+        }
+
         function initDashboard() {
+            initAirpointState();
             fetchData();
             fetchBrainFeed();
             updateLastUpdatedTicker();
