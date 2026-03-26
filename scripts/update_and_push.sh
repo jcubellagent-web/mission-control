@@ -1,6 +1,6 @@
 #!/bin/zsh
 set -euo pipefail
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/opt/homebrew/sbin"
 ROOT_DIR=$(cd -- "$(dirname -- "$0")/.." && pwd)
 WORKSPACE_DIR=$(cd -- "$ROOT_DIR/.." && pwd)
 cd "$WORKSPACE_DIR/kiosk-dashboard"
