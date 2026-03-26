@@ -87,8 +87,8 @@
         body::-webkit-scrollbar-thumb:hover {
             background: rgba(255,255,255,0.18);
         }
-        /* PIN overlay removed — open access */
-        
+        /* PIN overlay removed - open access */
+
         .container {
             position: relative;
             z-index: 1;
@@ -170,7 +170,7 @@
         .refresh-btn.loading .spinner { display: inline; }
         .refresh-btn.loading .icon { display: none; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
+
         .alert-banner {
             background: rgba(229,62,62,0.06);
             border: 1px solid rgba(229,62,62,0.18);
@@ -199,7 +199,7 @@
         .alert-item a { color: rgba(255,255,255,0.55); font-size: 0.82rem; text-decoration: none; }
         .alert-item a:hover { color: rgba(255,255,255,0.8); }
         .alert-item a:hover { text-decoration: underline; }
-        
+
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
         .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
         @media (max-width: 900px) {
@@ -224,7 +224,7 @@
             .stats-row { gap: 8px; }
             .card { padding: 18px; }
         }
-        
+
         .card {
             position: relative;
             background: #111111;
@@ -264,7 +264,7 @@
             display: block;
             opacity: 0.8;
         }
-        
+
         .active-task {
             display: flex; align-items: center; gap: 12px;
             padding: 12px 14px;
@@ -291,7 +291,7 @@
             border: 1px solid rgba(255,255,255,0.04);
             border-radius: 8px;
         }
-        
+
         .cron-table { width: 100%; }
         .cron-table.compact .cron-row {
             padding-top: 10px;
@@ -330,7 +330,7 @@
             margin-top: 8px;
         }
         .cron-row.expanded .cron-error-detail { display: block; }
-        
+
         .activity-list { display: flex; flex-direction: column; gap: 2px; }
         .activity-item {
             display: flex; gap: 12px;
@@ -341,7 +341,7 @@
         .activity-item:hover { background: rgba(255,255,255,0.03); }
         .activity-time { font-size: 0.75rem; color: var(--text-muted); min-width: 60px; }
         .activity-event { font-size: 0.875rem; color: var(--text-secondary); }
-        
+
         .stats-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
         .stat-pill {
             display: flex; align-items: center; gap: 8px;
@@ -353,7 +353,7 @@
         }
         .stat-pill .num { font-weight: 600; color: rgba(255,255,255,0.75); }
         .stat-pill .label { color: var(--text-muted); }
-        
+
 
         .focus-status { font-weight: 600; font-size: 1.1rem; }
         .focus-context { color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 16px; }
@@ -506,7 +506,7 @@
             height: 100dvh;
             padding: 12px 20px;
             display: grid;
-            grid-template-rows: auto auto auto minmax(0, 1.04fr) minmax(0, 0.96fr);
+            grid-template-rows: auto auto auto minmax(0, 1fr);
             gap: 14px;
         }
         body.kiosk-mode header,
@@ -526,19 +526,81 @@
             grid-template-columns: 1.35fr 0.85fr 0.85fr;
         }
 
-        /* ============ AIRPOINT COPILOT NOTCH ============ */
-        /* When AirPoint copilot is active (bottom-right ~360×480px),
-           shrink the container's bottom-right so cards don't go under it.
-           Toggle body.airpoint-active via the AP toggle button. */
-        body.kiosk-mode.airpoint-active .container {
-            padding-right: 380px; /* clear the AirPoint panel width */
+        /* ============ KIOSK 2-COLUMN LAYOUT ============ */
+        /* Left col: Brain Feed (tall) + Today's Jobs below
+           Right col: Model Usage + Upcoming + Devices + AirPoint slot stacked */
+        body.kiosk-mode .container {
+            display: grid;
+            grid-template-rows: auto auto auto minmax(0, 1fr);
+            grid-template-columns: 1fr;
         }
-        body.kiosk-mode.airpoint-active .priority-grid {
-            grid-template-columns: 1.35fr 0.85fr 0.72fr;
+        /* Main area wrapper - both grids sit inside a 2-column flex row */
+        body.kiosk-mode .hero-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
-        body.kiosk-mode.airpoint-active #device-list {
-            max-height: 240px;
+        body.kiosk-mode .priority-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
+        /* Override: put hero-grid and priority-grid side by side */
+        body.kiosk-mode .hero-grid,
+        body.kiosk-mode .priority-grid {
+            min-height: 0;
+        }
+        /* Wrap the two grids in a 2-col row using adjacent sibling trick via container */
+        body.kiosk-mode .container > .hero-grid {
+            /* Will be the left column - pushed into a 2-col grid by parent below */
+        }
+        /* Re-declare container as a proper 2-col grid for the last row */
+        body.kiosk-mode .container {
+            grid-template-areas:
+                "header"
+                "alert"
+                "stats"
+                "main";
+        }
+        body.kiosk-mode header { grid-area: header; }
+        body.kiosk-mode .alert-banner { grid-area: alert; }
+        body.kiosk-mode .stats-row    { grid-area: stats; }
+        /* Use a wrapper for the 2-column main section */
+        body.kiosk-mode .kiosk-main {
+            grid-area: main;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 14px;
+            min-height: 0;
+        }
+        body.kiosk-mode .hero-grid  { min-height: 0; overflow: hidden; }
+        body.kiosk-mode .priority-grid { min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-brain  { flex: 1.65; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-jobs   { flex: 1;    min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-model  { flex: 1.3;  min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-events { flex: 0.75; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-devices { flex: 0.65; min-height: 0; overflow: hidden; }
+
+        /* AirPoint slot - transparent reserved space at bottom of right col */
+        body.kiosk-mode .card-airpoint {
+            flex: 0 0 420px;
+            border-radius: 14px;
+            border: 1px dashed rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.01);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        body.kiosk-mode .card-airpoint::after {
+            content: '🖐️  AirPoint';
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+
         /* AirPoint toggle button */
         #airpoint-toggle {
             display: none;
@@ -630,11 +692,11 @@
             overflow: auto;
             padding-right: 4px;
         }
-        
+
         @keyframes flash-update { 0% { background-color: rgba(229,62,62,0.22); } 60% { background-color: rgba(229,62,62,0.08); } 100% { background-color: transparent; } }
         .flash-update { animation: flash-update 1.2s ease-out; }
 
-        /* ============ BRAIN FEED — IDLE BREATHING LASER ============ */
+        /* ============ BRAIN FEED - IDLE BREATHING LASER ============ */
         @keyframes brain-idle-breathe {
             0%, 100% { opacity: 0.55; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.01); }
@@ -689,7 +751,7 @@
             z-index: 2;
         }
 
-        /* ============ BRAIN FEED — ACTIVE LASER STATE ============ */
+        /* ============ BRAIN FEED - ACTIVE LASER STATE ============ */
         .card-brain.brain-active {
             border-color: rgba(229,62,62,0.32);
             overflow: hidden;
@@ -734,7 +796,7 @@
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
         }
-        /* Brain Feed Active — content */
+        /* Brain Feed Active - content */
         .bf-container {
             display: flex;
             flex-direction: column;
@@ -1033,7 +1095,7 @@
 
         /* ===== Brain feed title & text overflow ===== */
         .brain-title, .bf-objective-text { word-break: break-word; overflow-wrap: anywhere; }
-        /* Active brain feed — glow on objective text */
+        /* Active brain feed - glow on objective text */
         .card-brain.brain-active .bf-objective-text {
             text-shadow: 0 0 20px rgba(229,62,62,0.35), 0 0 40px rgba(229,62,62,0.12);
             color: rgba(255,255,255,0.92);
@@ -1054,7 +1116,7 @@
             .mu-summary-cell:last-child { border-bottom: none; }
         }
 
-        /* ============ MODEL USAGE — REDESIGN ============ */
+        /* ============ MODEL USAGE - REDESIGN ============ */
         .mu-header-row {
             display: flex;
             align-items: center;
@@ -1180,7 +1242,7 @@
     <div class="lobster-bg" aria-hidden="true"></div>
     <div id="pull-indicator" class="pull-indicator">Pull to refresh</div>
 
-    <!-- Main Content (PIN removed — open access) -->
+    <!-- Main Content (PIN removed - open access) -->
     <div class="container" id="main-content">
         <header>
             <div class="logo">
@@ -1189,7 +1251,7 @@
             </div>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
-                <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">–</span></div>
+                <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
                 <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
@@ -1213,6 +1275,7 @@
 
         <div class="stats-row" id="stats-row"></div>
 
+        <div class="kiosk-main">
         <div class="hero-grid">
             <div class="card card-brain">
                 <div class="card-header">
@@ -1224,7 +1287,7 @@
             <div class="card card-jobs">
                 <div class="card-header">
                     <span class="icon"><img src="assets/icons/jobs.png" alt="" class="section-icon-image"></span>
-                    <h2>Today’s Jobs</h2>
+                    <h2>Today's Jobs</h2>
                 </div>
                 <div id="today-jobs-card"></div>
             </div>
@@ -1252,20 +1315,23 @@
                 </div>
                 <div id="device-list"></div>
             </div>
+            <!-- AirPoint copilot slot — transparent reserved space, copilot panel floats here -->
+            <div class="card-airpoint" id="airpoint-slot" aria-hidden="true"></div>
         </div>
+        </div><!-- /kiosk-main -->
 
     </div>
 
     <script>
         // ============================================
-        // CONFIGURATION — Edit these values
+        // CONFIGURATION - Edit these values
         // ============================================
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
             BRAIN_FEED_URL: './data/brain-feed.json',  // Fast-polled brain-feed sidecar
-            REFRESH_INTERVAL: 10000,   // 10 seconds — full dashboard poll
-            BRAIN_FEED_INTERVAL: 4000, // 4 seconds — brain feed only
+            REFRESH_INTERVAL: 10000,   // 10 seconds - full dashboard poll
+            BRAIN_FEED_INTERVAL: 4000, // 4 seconds - brain feed only
         };
         // ============================================
 
@@ -1307,7 +1373,7 @@
             }
             const label = statusEl.querySelector('.status-label');
             if (label) {
-                const labels = { offline: '⚡ Offline', degraded: '⚠ Retrying…', online: 'Polling' };
+                const labels = { offline: '⚡ Offline', degraded: '⚠ Retrying...', online: 'Polling' };
                 label.textContent = labels[state] || 'Polling';
             }
         }
@@ -1371,7 +1437,7 @@
             window.__mcPullAttached = true;
         }
 
-        // PIN removed — auto-init dashboard on load
+        // PIN removed - auto-init dashboard on load
         syncViewportMode();
         setConnectionStatus(navigator.onLine ? 'online' : 'offline');
         window.addEventListener('online', () => setConnectionStatus('online'));
@@ -1435,7 +1501,7 @@
             }
         }
 
-        // Fast brain-feed poll — only updates the Brain Feed card
+        // Fast brain-feed poll - only updates the Brain Feed card
         async function fetchBrainFeed() {
             const t0 = performance.now();
             try {
@@ -1452,7 +1518,7 @@
                 renderBrainFeed(bf);
                 updateBfFreshness(bf);
             } catch (err) {
-                // non-fatal — full poll still runs every 10s
+                // non-fatal - full poll still runs every 10s
             }
         }
 
@@ -1546,7 +1612,7 @@
             const freshnessStrip = `<div class="bf-freshness-row">
                 <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
                 <span class="bf-freshness-label" id="bf-freshness-label-text">${stateLabel}</span>
-                <span id="bf-last-updated">${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '–'}</span>
+                <span id="bf-last-updated">${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '-'}</span>
             </div>`;
 
             if (bf && bf.active) {
@@ -1577,7 +1643,7 @@
                         </div>
                         <div class="bf-objective">
                             <div class="bf-objective-kicker">Current Objective</div>
-                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing…')}</div>
+                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
                         </div>
                         ${bf.currentTool ? `
                         <div class="bf-current-tool-bar">
@@ -1667,7 +1733,7 @@
             window._mcLastCrons = data.crons;
             window._mcLastProducts = data.products;
 
-            // Brain Feed — delegate to dedicated renderer (fast-poll may have already done this)
+            // Brain Feed - delegate to dedicated renderer (fast-poll may have already done this)
             if (sectionChanged('brainFeed', data.brainFeed)) {
                 renderBrainFeed(data.brainFeed);
                 if (data.brainFeed) {
@@ -1711,7 +1777,7 @@
             `;
 
 
-            // Model usage snapshot — redesigned (diff-guarded)
+            // Model usage snapshot - redesigned (diff-guarded)
             if (sectionChanged('modelUsage', data.modelUsage)) {
             const modelUsageCard = document.getElementById('model-usage-card');
             if (data.modelUsage) {
