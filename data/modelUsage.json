@@ -1,12 +1,12 @@
 {
-  "session": 0.0721602,
-  "daily": 0.10832519999999998,
-  "weekly": 5.057224999999999,
+  "session": 0.19794373,
+  "daily": 0.23410873000000001,
+  "weekly": 5.1830085299999995,
   "topModels": [
     {
       "name": "claude-sonnet-4-6",
       "window": "weekly",
-      "cost": 3.3352772999999996
+      "cost": 3.47830463
     },
     {
       "name": "gpt-5.4",
@@ -14,18 +14,18 @@
       "cost": 1.6136225
     },
     {
+      "name": "claude-sonnet-4-6",
+      "window": "session",
+      "cost": 0.14302733
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "window": "daily",
+      "cost": 0.14302733
+    },
+    {
       "name": "gpt-5.3-codex",
       "window": "session",
-      "cost": 0.0549164
-    },
-    {
-      "name": "gpt-5.3-codex",
-      "window": "daily",
-      "cost": 0.0549164
-    },
-    {
-      "name": "gpt-5.3-codex",
-      "window": "weekly",
       "cost": 0.0549164
     }
   ],
@@ -33,9 +33,9 @@
     {
       "name": "claude-sonnet-4-6",
       "source": "OpenClaw",
-      "sessionCost": 0,
-      "dailyCost": 0,
-      "weeklyCost": 3.3352772999999996
+      "sessionCost": 0.14302733,
+      "dailyCost": 0.14302733,
+      "weeklyCost": 3.47830463
     },
     {
       "name": "gpt-5.4",
@@ -57,14 +57,7 @@
       "sessionCost": 0,
       "dailyCost": 0.036164999999999996,
       "weeklyCost": 0.036164999999999996
-    },
-    {
-      "name": "gemini-2.5-flash",
-      "source": "OpenClaw",
-      "sessionCost": 0.0172438,
-      "dailyCost": 0.0172438,
-      "weeklyCost": 0.0172438
     }
   ],
-  "lastUpdated": "2026-03-26T23:00:01.349Z"
+  "lastUpdated": "2026-03-26T23:05:00.410Z"
 }
