@@ -1,6 +1,7 @@
 #!/bin/zsh
 set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/opt/homebrew/sbin"
+export HOME="${HOME:-/Users/josh2.0}"  # ensure HOME is set in cron environment
 ROOT_DIR=$(cd -- "$(dirname -- "$0")/.." && pwd)
 WORKSPACE_DIR=$(cd -- "$ROOT_DIR/.." && pwd)
 cd "$WORKSPACE_DIR/kiosk-dashboard"
