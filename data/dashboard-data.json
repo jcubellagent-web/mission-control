@@ -5,8 +5,8 @@
   "brainFeed": {
     "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Boosting lobster background visibility and fixing real-time brain feed pipeline",
-    "status": "done",
+    "objective": "",
+    "status": "idle",
     "steps": [
       {
         "label": "Copied lobster background asset to repo",
@@ -35,23 +35,23 @@
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-25T04:58:28Z"
+    "updatedAt": "2026-03-26T22:04:35Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last completed objective: Boosting lobster background visibility and fixing real-time brain feed pipeline",
-    "runway": 0.72,
-    "updatedAt": "2026-03-25T04:58:28Z"
+    "status": "System nominal",
+    "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
+    "runway": 0.98,
+    "updatedAt": "2026-03-26T22:05:01Z"
   },
   "modelUsage": {
-    "session": 0.15875165,
-    "daily": 0.19491665,
-    "weekly": 5.143816449999999,
+    "session": 0.45618994999999996,
+    "daily": 0.49235494999999996,
+    "weekly": 5.441254749999999,
     "topModels": [
       {
         "name": "claude-sonnet-4-6",
         "window": "weekly",
-        "cost": 3.43911255
+        "cost": 3.73655085
       },
       {
         "name": "gpt-5.4",
@@ -61,12 +61,12 @@
       {
         "name": "claude-sonnet-4-6",
         "window": "session",
-        "cost": 0.10383525
+        "cost": 0.40127355
       },
       {
         "name": "claude-sonnet-4-6",
         "window": "daily",
-        "cost": 0.10383525
+        "cost": 0.40127355
       },
       {
         "name": "gpt-5.3-codex",
@@ -78,9 +78,9 @@
       {
         "name": "claude-sonnet-4-6",
         "source": "OpenClaw",
-        "sessionCost": 0.10383525,
-        "dailyCost": 0.10383525,
-        "weeklyCost": 3.43911255
+        "sessionCost": 0.40127355,
+        "dailyCost": 0.40127355,
+        "weeklyCost": 3.73655085
       },
       {
         "name": "gpt-5.4",
@@ -104,7 +104,7 @@
         "weeklyCost": 0.036164999999999996
       }
     ],
-    "lastUpdated": "2026-03-26T22:00:00.989Z"
+    "lastUpdated": "2026-03-26T22:05:01.423Z"
   },
   "devices": [
     {
@@ -118,19 +118,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:00:01Z"
+      "lastChecked": "2026-03-26T22:05:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:00:01Z"
+      "lastChecked": "2026-03-26T22:05:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T22:00:01Z"
+      "lastChecked": "2026-03-26T22:05:01Z"
     }
   ],
   "crons": [
@@ -151,25 +151,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-25T04:58:28Z",
-      "event": "\ud83e\udde0 Brain Feed idle"
+      "time": "2026-03-26T22:05:01Z",
+      "event": "\ud83e\udde0 System nominal"
     },
     {
-      "time": "2026-03-26T22:00:00.989Z",
-      "event": "\ud83d\udcb8 Session spend now $0.16"
+      "time": "2026-03-26T22:05:01.423Z",
+      "event": "\ud83d\udcb8 Session spend now $0.46"
     },
     {
-      "time": "2026-03-26T22:00:01Z",
+      "time": "2026-03-26T22:05:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T22:00:01Z",
+      "time": "2026-03-26T22:05:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T22:00:01Z",
+      "time": "2026-03-26T22:05:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T22:00:01Z"
+  "lastUpdated": "2026-03-26T22:05:01Z"
 }
