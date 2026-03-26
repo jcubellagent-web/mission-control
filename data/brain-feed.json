@@ -1,9 +1,20 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Brain feed real-time pipeline wired up",
-  "status": "done",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-26T22:15:51Z"
+  "objective": "Adapting Mission Control layout for AirPoint copilot cutout",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Taking screenshot",
+      "status": "done",
+      "tool": "airpoint"
+    },
+    {
+      "label": "Analyzing overlay",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-26T22:18:05Z"
 }
