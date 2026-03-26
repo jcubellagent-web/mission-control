@@ -502,15 +502,14 @@
            Right: Model Usage + Upcoming + Devices + AirPoint slot
            ============================================================ */
         /* ============================================================
-           KIOSK MODE — FINAL LAYOUT (1920×1080)
-           ┌─────────────────────┬──────────┬───────────┐
-           │                     │ Jobs     │ Upcoming  │
-           │   Brain Feed        ├──────────┤ Devices   │
-           │   (HERO, full ht)   │ Model    ├───────────┤
-           │                     │ Usage    │ AirPoint  │
-           └─────────────────────┴──────────┴───────────┘
-           hero-grid col1 = Brain Feed full height
-           priority-grid spans cols 2+3, inner 2-col grid
+           KIOSK MODE — 2×2 GRID (1920×1080)
+           ┌──────────────────┬──────────────────────────┐
+           │  Brain Feed      │  Model Usage + Upcoming  │
+           │  (top-left ¼)    │  (top-right ¼ each)      │
+           ├──────────────────┼──────────────┬───────────┤
+           │  Today's Jobs    │  AirPoint    │           │
+           │  (bot-left ¼)    │  (bot-right) │           │
+           └──────────────────┴──────────────┴───────────┘
            ============================================================ */
         body.kiosk-mode { overflow: hidden; }
 
@@ -527,68 +526,61 @@
         body.kiosk-mode .alert-banner { grid-area: alert; margin-bottom: 0; }
         body.kiosk-mode .stats-row    { grid-area: stats; margin-bottom: 0; }
 
-        /* kiosk-main = 2 direct children: hero-grid (col1) + priority-grid (cols 2+3) */
+        /* kiosk-main: 2-col × 2-row grid */
         body.kiosk-mode .kiosk-main {
             grid-area: main;
             display: grid;
-            grid-template-columns: 1fr 680px;
-            grid-template-rows: 1fr;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
             gap: 12px;
             min-height: 0;
         }
 
-        /* COL 1: hero-grid = Brain Feed full height, Jobs hidden (Jobs lives in priority-grid center) */
+        /* hero-grid spans full left col (top + bottom rows) as a flex column */
         body.kiosk-mode .hero-grid {
-            grid-column: 1; grid-row: 1;
+            grid-column: 1; grid-row: 1 / 3;
             display: flex; flex-direction: column;
-            gap: 0; min-height: 0; margin-bottom: 0;
+            gap: 12px; min-height: 0; margin-bottom: 0;
         }
         body.kiosk-mode .card-brain { flex: 1; min-height: 0; overflow: hidden; }
-        body.kiosk-mode .hero-grid .card-jobs { display: none; }
+        body.kiosk-mode .card-jobs  { flex: 1; min-height: 0; overflow: hidden; }
 
-        /* COLS 2+3: priority-grid = inner 2-col grid (center 280px + right 380px) */
+        /* priority-grid spans full right col, inner 2×2 sub-grid */
         body.kiosk-mode .priority-grid {
-            grid-column: 2; grid-row: 1;
+            grid-column: 2; grid-row: 1 / 3;
             display: grid !important;
-            grid-template-columns: 280px 1fr;
-            grid-template-rows: auto 1fr auto auto 1fr;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
             gap: 12px;
             min-height: 0;
         }
 
-        /* CENTER sub-col: Jobs (top, compact) + Model Usage (fills rest) */
-        body.kiosk-mode .card-jobs  {
+        /* Top-right: Model Usage (left half) + Upcoming (right half) */
+        body.kiosk-mode .card-model  {
             grid-column: 1; grid-row: 1;
-            display: flex !important; flex-direction: column;
-            min-height: 0; max-height: 240px; overflow: hidden;
+            min-height: 0; overflow: hidden;
         }
-        body.kiosk-mode .card-model {
-            grid-column: 1; grid-row: 2 / 6;
+        body.kiosk-mode .card-events {
+            grid-column: 2; grid-row: 1;
             min-height: 0; overflow: hidden;
         }
 
-        /* RIGHT sub-col: Upcoming (compact) + Devices (compact) + AirPoint slot (fills rest) */
-        body.kiosk-mode .card-events {
-            grid-column: 2; grid-row: 1 / 3;
-            min-height: 0; max-height: 160px; overflow: hidden;
-        }
-        body.kiosk-mode .card-devices {
-            grid-column: 2; grid-row: 3;
-            min-height: 0; max-height: 140px; overflow: hidden;
-        }
+        /* Bottom-right: AirPoint slot spans full width */
+        body.kiosk-mode .card-devices { display: none; }
         body.kiosk-mode .card-airpoint {
-            grid-column: 2; grid-row: 4 / 6;
+            grid-column: 1 / 3; grid-row: 2;
             border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.015);
+            border: 1px solid rgba(229,62,62,0.08);
+            background: rgba(229,62,62,0.025);
             display: flex; align-items: center; justify-content: center;
             min-height: 0; overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(229,62,62,0.03);
         }
         body.kiosk-mode .card-airpoint::after {
-            content: '🖐️  AirPoint';
-            font-size: 0.65rem; font-weight: 500;
-            letter-spacing: 0.08em;
-            color: rgba(255,255,255,0.1);
+            content: '🖐️  AirPoint Assistant';
+            font-size: 0.72rem; font-weight: 500;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.12);
             text-transform: uppercase;
         }
 
