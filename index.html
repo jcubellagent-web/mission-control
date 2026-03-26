@@ -500,10 +500,11 @@
             overflow: hidden;
         }
         body.kiosk-mode .container {
-            width: min(100%, 1760px);
+            width: 100%;
+            max-width: 100%;
             height: 100vh;
             height: 100dvh;
-            padding: 12px 18px;
+            padding: 12px 20px;
             display: grid;
             grid-template-rows: auto auto auto minmax(0, 1.04fr) minmax(0, 0.96fr);
             gap: 14px;
@@ -588,14 +589,28 @@
             padding-right: 4px;
         }
         
-        @keyframes flash-update { 0% { background-color: rgba(34,197,94,0.2); } 100% { background-color: transparent; } }
-        .flash-update { animation: flash-update 1s ease-out; }
+        @keyframes flash-update { 0% { background-color: rgba(229,62,62,0.22); } 60% { background-color: rgba(229,62,62,0.08); } 100% { background-color: transparent; } }
+        .flash-update { animation: flash-update 1.2s ease-out; }
 
-        /* ============ BRAIN FEED — ALWAYS-ON IDLE LASER ============ */
+        /* ============ BRAIN FEED — IDLE BREATHING LASER ============ */
+        @keyframes brain-idle-breathe {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.01); }
+        }
+        @keyframes brain-idle-glow {
+            0%, 100% { box-shadow: 0 0 0 1px rgba(229,62,62,0.08), 0 0 14px rgba(229,62,62,0.06), 0 1px 3px rgba(0,0,0,0.5); }
+            50% { box-shadow: 0 0 0 1px rgba(229,62,62,0.18), 0 0 28px rgba(229,62,62,0.13), 0 1px 3px rgba(0,0,0,0.5); }
+        }
+        @keyframes brain-activate {
+            0% { box-shadow: 0 0 0 1px rgba(229,62,62,0.1), 0 0 8px rgba(229,62,62,0.08); }
+            30% { box-shadow: 0 0 0 2px rgba(229,62,62,0.5), 0 0 48px rgba(229,62,62,0.35); }
+            60% { box-shadow: 0 0 0 1px rgba(229,62,62,0.3), 0 0 32px rgba(229,62,62,0.22); }
+            100% { box-shadow: 0 0 0 1px rgba(229,62,62,0.12), 0 0 32px rgba(229,62,62,0.14), 0 1px 3px rgba(0,0,0,0.5); }
+        }
         .card-brain {
             border-color: rgba(229,62,62,0.15);
             overflow: hidden;
-            box-shadow: 0 0 0 1px rgba(229,62,62,0.08), 0 0 18px rgba(229,62,62,0.07), 0 1px 3px rgba(0,0,0,0.5);
+            animation: brain-idle-glow 3.5s ease-in-out infinite;
         }
         .card-brain::before {
             content: '';
@@ -607,12 +622,12 @@
             background: conic-gradient(from 0deg,
                 transparent 0deg,
                 transparent 330deg,
-                rgba(229,62,62,0.12) 344deg,
-                rgba(229,62,62,0.22) 351deg,
-                rgba(255,100,100,0.18) 355deg,
-                rgba(229,62,62,0.12) 360deg
+                rgba(229,62,62,0.10) 344deg,
+                rgba(229,62,62,0.18) 351deg,
+                rgba(255,100,100,0.14) 355deg,
+                rgba(229,62,62,0.10) 360deg
             );
-            animation: bf-laser-spin 4.5s linear infinite;
+            animation: bf-laser-spin 5.5s linear infinite, brain-idle-breathe 3.5s ease-in-out infinite;
             z-index: 0;
             pointer-events: none;
         }
@@ -634,9 +649,9 @@
 
         /* ============ BRAIN FEED — ACTIVE LASER STATE ============ */
         .card-brain.brain-active {
-            border-color: rgba(229,62,62,0.28);
+            border-color: rgba(229,62,62,0.32);
             overflow: hidden;
-            box-shadow: 0 0 0 1px rgba(229,62,62,0.12), 0 0 32px rgba(229,62,62,0.14), 0 1px 3px rgba(0,0,0,0.5);
+            animation: brain-activate 0.8s ease-out forwards, brain-idle-glow 3s ease-in-out infinite 0.8s;
         }
         .card-brain.brain-active::before {
             content: '';
@@ -647,13 +662,14 @@
             left: -50%;
             background: conic-gradient(from 0deg,
                 transparent 0deg,
-                transparent 330deg,
-                rgba(229,62,62,0.34) 344deg,
-                #e53e3e 351deg,
-                #ff7b7b 355deg,
+                transparent 325deg,
+                rgba(229,62,62,0.4) 340deg,
+                #e53e3e 350deg,
+                #ff7b7b 354deg,
+                #ff4444 357deg,
                 #e53e3e 360deg
             );
-            animation: bf-laser-spin 2.8s linear infinite;
+            animation: bf-laser-spin 2.4s linear infinite;
             z-index: 0;
             pointer-events: none;
         }
