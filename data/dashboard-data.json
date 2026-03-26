@@ -3,19 +3,30 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Mission Control 2-col layout with AirPoint slot live",
-    "status": "done",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-03-26T22:28:34Z"
+    "objective": "Fixing AirPoint slot height \u2014 cards overlapping",
+    "status": "active",
+    "steps": [
+      {
+        "label": "Measuring from photo",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "Adjusting card heights",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-03-26T22:30:56Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last completed objective: Mission Control 2-col layout with AirPoint slot live",
-    "runway": 0.72,
-    "updatedAt": "2026-03-26T22:28:34Z"
+    "status": "Brain Feed live",
+    "context": "Fixing AirPoint slot height \u2014 cards overlapping",
+    "runway": 0.9,
+    "updatedAt": "2026-03-26T22:30:56Z"
   },
   "modelUsage": {
     "session": 3.2510726,
@@ -78,7 +89,7 @@
         "weeklyCost": 0.036164999999999996
       }
     ],
-    "lastUpdated": "2026-03-26T22:30:01.341Z"
+    "lastUpdated": "2026-03-26T22:35:00.584Z"
   },
   "devices": [
     {
@@ -92,19 +103,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:30:01Z"
+      "lastChecked": "2026-03-26T22:35:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T22:30:01Z"
+      "lastChecked": "2026-03-26T22:35:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T22:30:01Z"
+      "lastChecked": "2026-03-26T22:35:00Z"
     }
   ],
   "crons": [
@@ -125,25 +136,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-26T22:28:34Z",
-      "event": "\ud83e\udde0 Brain Feed idle"
+      "time": "2026-03-26T22:30:56Z",
+      "event": "\ud83e\udde0 Brain Feed live"
     },
     {
-      "time": "2026-03-26T22:30:01.341Z",
+      "time": "2026-03-26T22:35:00.584Z",
       "event": "\ud83d\udcb8 Session spend now $3.25"
     },
     {
-      "time": "2026-03-26T22:30:01Z",
+      "time": "2026-03-26T22:35:00Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T22:30:01Z",
+      "time": "2026-03-26T22:35:00Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T22:30:01Z",
+      "time": "2026-03-26T22:35:00Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T22:30:01Z"
+  "lastUpdated": "2026-03-26T22:35:00Z"
 }
