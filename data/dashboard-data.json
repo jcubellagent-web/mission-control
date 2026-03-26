@@ -44,9 +44,9 @@
     "updatedAt": "2026-03-25T04:58:28Z"
   },
   "modelUsage": {
-    "session": 0.0549164,
-    "daily": 0.0549164,
-    "weekly": 6.511688999999999,
+    "session": 0.1786604,
+    "daily": 0.1786604,
+    "weekly": 5.1275602,
     "topModels": [
       {
         "name": "claude-sonnet-4-6",
@@ -56,22 +56,22 @@
       {
         "name": "gpt-5.4",
         "window": "weekly",
-        "cost": 1.6555885
+        "cost": 1.6136225
+      },
+      {
+        "name": "openrouter/openrouter/auto",
+        "window": "session",
+        "cost": 0.12374399999999999
+      },
+      {
+        "name": "openrouter/openrouter/auto",
+        "window": "daily",
+        "cost": 0.12374399999999999
       },
       {
         "name": "openrouter/openrouter/auto",
         "window": "weekly",
-        "cost": 1.4659068
-      },
-      {
-        "name": "gpt-5.3-codex",
-        "window": "session",
-        "cost": 0.0549164
-      },
-      {
-        "name": "gpt-5.3-codex",
-        "window": "daily",
-        "cost": 0.0549164
+        "cost": 0.12374399999999999
       }
     ],
     "breakdown": [
@@ -87,14 +87,14 @@
         "source": "OpenClaw",
         "sessionCost": 0,
         "dailyCost": 0,
-        "weeklyCost": 1.6555885
+        "weeklyCost": 1.6136225
       },
       {
         "name": "openrouter/openrouter/auto",
         "source": "OpenRouter",
-        "sessionCost": 0,
-        "dailyCost": 0,
-        "weeklyCost": 1.4659068
+        "sessionCost": 0.12374399999999999,
+        "dailyCost": 0.12374399999999999,
+        "weeklyCost": 0.12374399999999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -104,7 +104,7 @@
         "weeklyCost": 0.0549164
       }
     ],
-    "lastUpdated": "2026-03-26T17:40:01.008Z"
+    "lastUpdated": "2026-03-26T17:45:01.313Z"
   },
   "devices": [
     {
@@ -118,19 +118,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T17:40:01Z"
+      "lastChecked": "2026-03-26T17:45:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-26T17:40:01Z"
+      "lastChecked": "2026-03-26T17:45:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-26T17:40:01Z"
+      "lastChecked": "2026-03-26T17:45:01Z"
     }
   ],
   "crons": [
@@ -155,21 +155,21 @@
       "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-26T17:40:01.008Z",
-      "event": "\ud83d\udcb8 Session spend now $0.05"
+      "time": "2026-03-26T17:45:01.313Z",
+      "event": "\ud83d\udcb8 Session spend now $0.18"
     },
     {
-      "time": "2026-03-26T17:40:01Z",
+      "time": "2026-03-26T17:45:01Z",
       "event": "\u2705 2 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-26T17:40:01Z",
+      "time": "2026-03-26T17:45:01Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-26T17:40:01Z",
+      "time": "2026-03-26T17:45:01Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-26T17:40:01Z"
+  "lastUpdated": "2026-03-26T17:45:01Z"
 }
