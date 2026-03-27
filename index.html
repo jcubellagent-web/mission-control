@@ -619,6 +619,58 @@
 
         /* Newsfeed styles */
         .card-newsfeed { position: relative; }
+
+        /* ── Scrolling ticker bar ── */
+        .intel-ticker-wrap {
+            overflow: hidden;
+            width: 100%;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(0,0,0,0.25);
+            padding: 5px 0;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .intel-ticker-wrap::before,
+        .intel-ticker-wrap::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 28px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .intel-ticker-wrap::before { left: 0;  background: linear-gradient(to right, var(--card-bg, #0d0d0d), transparent); }
+        .intel-ticker-wrap::after  { right: 0; background: linear-gradient(to left,  var(--card-bg, #0d0d0d), transparent); }
+        .intel-ticker-track {
+            display: flex;
+            gap: 0;
+            white-space: nowrap;
+            animation: ticker-scroll 40s linear infinite;
+            width: max-content;
+        }
+        .intel-ticker-track:hover { animation-play-state: paused; }
+        @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .intel-ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 18px;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.55);
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+        .intel-ticker-item.loading { color: rgba(255,255,255,0.25); font-style: italic; }
+        .intel-ticker-item .t-sym  { font-weight: 700; color: rgba(255,255,255,0.85); letter-spacing: 0.04em; }
+        .intel-ticker-item .t-price { color: rgba(255,255,255,0.6); }
+        .intel-ticker-item .t-chg  { font-weight: 600; }
+        .intel-ticker-item .t-chg.up   { color: #4ade80; }
+        .intel-ticker-item .t-chg.down { color: #f87171; }
+        .intel-ticker-item .t-sep  { color: rgba(255,255,255,0.15); margin: 0 2px; }
+        .intel-ticker-item.headline { max-width: 320px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.45); font-style: italic; }
         .live-badge {
             margin-left: auto;
             font-size: 10px;
@@ -1442,6 +1494,12 @@
                         <h2>Live Intelligence Feed</h2>
                         <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
                     </div>
+                    <!-- Scrolling ticker bar -->
+                    <div class="intel-ticker-wrap" id="intel-ticker-wrap">
+                        <div class="intel-ticker-track" id="intel-ticker-track">
+                            <span class="intel-ticker-item loading">Loading ticker…</span>
+                        </div>
+                    </div>
                     <div id="intelligence-feed-card" class="intelligence-feed-body">
                         <!-- populated by fetchIntelligenceFeed() -->
                         <div class="newsfeed-skeleton-list">
@@ -1709,8 +1767,80 @@
                 const hash = JSON.stringify(feed.generatedAt);
                 if (hash === lastIntelHash) return;
                 lastIntelHash = hash;
+                renderTicker(feed);
                 renderIntelligenceFeed(feed);
             } catch(e) {}
+        }
+
+        function renderTicker(f) {
+            const track = document.getElementById('intel-ticker-track');
+            if (!track) return;
+            const items = [];
+
+            // Market summary: SPY, QQQ, BTC
+            const ms = f.market_summary || {};
+            function tickerMkt(sym, d) {
+                if (!d) return null;
+                const up = d.change_pct >= 0;
+                const sign = up ? '+' : '';
+                return `<span class="intel-ticker-item">
+                    <span class="t-sym">${sym}</span>
+                    <span class="t-price">$${typeof d.price === 'number' && d.price > 1000 ? d.price.toLocaleString() : d.price}</span>
+                    <span class="t-chg ${up ? 'up' : 'down'}">${sign}${d.change_pct.toFixed(2)}%</span>
+                </span>`;
+            }
+            if (ms.spy) items.push(tickerMkt('SPY', ms.spy));
+            if (ms.qqq) items.push(tickerMkt('QQQ', ms.qqq));
+            if (ms.btc) items.push(tickerMkt('BTC', ms.btc));
+
+            // Fear & Greed
+            if (f.fear_greed) {
+                const fg = f.fear_greed;
+                const fgColor = fg.value < 30 ? '#f87171' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
+                items.push(`<span class="intel-ticker-item">
+                    <span class="t-sym">F&amp;G</span>
+                    <span class="t-chg" style="color:${fgColor}">${fg.value} ${escapeHtml(fg.label || '')}</span>
+                </span>`);
+            }
+
+            // VIX
+            if (f.macro_context && f.macro_context.vix) {
+                const vix = f.macro_context.vix;
+                const vixColor = vix >= 30 ? '#f87171' : vix >= 20 ? '#fb923c' : 'rgba(255,255,255,0.6)';
+                items.push(`<span class="intel-ticker-item">
+                    <span class="t-sym">VIX</span>
+                    <span class="t-price" style="color:${vixColor}">${vix.toFixed(1)}</span>
+                </span>`);
+            }
+
+            // Top signal headlines (highest scored, max 5)
+            const signals = (f.signal || []).slice(0, 5);
+            signals.forEach(s => {
+                if (!s.title) return;
+                const title = s.title.length > 70 ? s.title.slice(0, 68) + '…' : s.title;
+                items.push(`<span class="intel-ticker-item headline">${escapeHtml(title)}</span>`);
+            });
+
+            // NASDAQ top mover
+            const gainers = (f.nasdaq_movers?.gainers || []).slice(0, 2);
+            const losers  = (f.nasdaq_movers?.losers  || []).slice(0, 2);
+            [...gainers, ...losers].forEach(m => {
+                const up = m.change_pct >= 0;
+                items.push(`<span class="intel-ticker-item">
+                    <span class="t-sym">${m.ticker}</span>
+                    <span class="t-price">$${m.price}</span>
+                    <span class="t-chg ${up ? 'up' : 'down'}">${up ? '+' : ''}${m.change_pct}%</span>
+                </span>`);
+            });
+
+            if (items.length === 0) return;
+            // Double the items so the loop is seamless
+            const html = items.join('') + items.join('');
+            track.innerHTML = html;
+            // Adjust animation speed based on content width
+            const totalW = track.scrollWidth / 2;
+            const speed = Math.max(25, Math.min(80, totalW / 8));
+            track.style.animationDuration = speed + 's';
         }
 
         function renderIntelligenceFeed(f) {
