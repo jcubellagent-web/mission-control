@@ -523,6 +523,7 @@
             background-size: 180px auto;
             background-repeat: repeat;
             background-attachment: fixed;
+            overflow-x: hidden; /* no sideways scroll */
         }
         body.phone-mode::before {
             content: '';
@@ -535,6 +536,7 @@
         body.phone-mode .container {
             position: relative;
             z-index: 1;
+            overflow-x: hidden;
         }
         body.phone-mode .container {
             width: 100%;
@@ -551,13 +553,13 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: max(env(safe-area-inset-top, 0px), 10px) 16px 10px;
-            margin: 0 0 12px 0;
-            min-height: 44px;
-            background: rgba(8, 10, 16, 0.88);
-            backdrop-filter: blur(20px) saturate(1.4);
-            -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: max(env(safe-area-inset-top, 0px), 6px) 16px 6px;
+            margin: 0 0 10px 0;
+            min-height: 38px;
+            background: rgba(8, 10, 16, 0.92);
+            backdrop-filter: blur(24px) saturate(1.5);
+            -webkit-backdrop-filter: blur(24px) saturate(1.5);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
             background-image: none;
         }
         body.phone-mode header::before { display: none; }
@@ -566,36 +568,40 @@
         body.phone-mode .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
         body.phone-mode .logo-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
         }
         body.phone-mode .logo h1 {
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             font-weight: 600;
-            color: rgba(255,255,255,0.7);
-            letter-spacing: 0.03em;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.04em;
         }
 
         /* Model usage pill in header */
         #mobile-cost-pill {
             display: none;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.68rem;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1px;
+            font-size: 0.65rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.45);
+            color: rgba(255,255,255,0.35);
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 999px;
-            padding: 3px 10px;
+            border-radius: 8px;
+            padding: 4px 10px;
             white-space: nowrap;
+            line-height: 1.3;
         }
-        #mobile-cost-pill .mcp-session { color: rgba(255,255,255,0.7); }
-        #mobile-cost-pill .mcp-sep     { color: rgba(255,255,255,0.2); }
+        #mobile-cost-pill .mcp-row        { display: flex; align-items: center; gap: 5px; }
+        #mobile-cost-pill .mcp-label      { color: rgba(255,255,255,0.25); font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        #mobile-cost-pill .mcp-val        { color: rgba(255,255,255,0.75); font-weight: 600; font-variant-numeric: tabular-nums; }
+        #mobile-cost-pill .mcp-sep        { width: 100%; height: 1px; background: rgba(255,255,255,0.06); margin: 2px 0; }
         body.phone-mode #mobile-cost-pill { display: flex; }
 
         /* Hide desktop-only header elements on phone */
@@ -1481,7 +1487,7 @@
             content: '';
             position: absolute;
             inset: 2.5px;
-            background: #0a0a0a;
+            background: transparent;
             border-radius: 0;
         }
         /* Respect notch on iPhones */
@@ -1497,17 +1503,45 @@
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
         }
-        /* Only show on phone-mode when brain is active */
-        body.phone-mode.edge-laser-on #edge-laser {
+        /* Show edge laser always in phone-mode (ambient), brighter when brain active */
+        body.phone-mode #edge-laser {
             display: block;
         }
-        /* On phone-mode, DISABLE the card-level brain laser so it doesn't double up */
+        body.phone-mode #edge-laser::before {
+            background: conic-gradient(from 0deg,
+                transparent 0deg,
+                transparent 340deg,
+                rgba(229,62,62,0.10) 347deg,
+                rgba(229,62,62,0.25) 353deg,
+                rgba(229,62,62,0.15) 356deg,
+                transparent 360deg
+            );
+        }
+        body.phone-mode.edge-laser-on #edge-laser::before {
+            background: conic-gradient(from 0deg,
+                transparent 0deg,
+                transparent 340deg,
+                rgba(229,62,62,0.30) 347deg,
+                #ff4d4d 353deg,
+                #ff8c8c 356deg,
+                #e53e3e 360deg
+            );
+        }
+        /* On phone-mode, DISABLE the card-level brain laser — edge laser handles it */
         body.phone-mode .card-brain.brain-active::before,
         body.phone-mode .card-brain.brain-active::after {
             display: none !important;
         }
         body.phone-mode .card-brain.brain-active {
             border-color: rgba(229,62,62,0.25);
+        }
+
+        /* Ensure desktop brain laser is always on (not phone-mode) */
+        body:not(.phone-mode) .card-brain.brain-active::before {
+            display: block !important;
+        }
+        body:not(.phone-mode) .card-brain.brain-active::after {
+            display: block !important;
         }
 
         /* ============ PHONE-MODE: 3-widget stack, hide Upcoming & Devices ============ */
@@ -1759,9 +1793,9 @@
             </div>
             <!-- Mobile-only cost pill -->
             <div id="mobile-cost-pill">
-                <span class="mcp-session" id="mcp-session">$0.00</span>
-                <span class="mcp-sep">·</span>
-                <span id="mcp-daily">day $0.00</span>
+                <div class="mcp-row"><span class="mcp-label">Session</span><span class="mcp-val" id="mcp-session">$0.00</span></div>
+                <div class="mcp-sep"></div>
+                <div class="mcp-row"><span class="mcp-label">Today</span><span class="mcp-val" id="mcp-daily">$0.00</span></div>
             </div>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
@@ -2307,7 +2341,7 @@
             if (!sessionEl || !dailyEl || !mu) return;
             const fmt = v => '$' + (parseFloat(v) || 0).toFixed(2);
             sessionEl.textContent = fmt(mu.session);
-            dailyEl.textContent   = 'day ' + fmt(mu.daily);
+            dailyEl.textContent   = fmt(mu.daily);
         }
 
         function initDashboard() {
