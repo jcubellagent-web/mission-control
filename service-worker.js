@@ -1,11 +1,10 @@
-const CACHE_NAME = "mission-control-pwa-v6";
+const CACHE_NAME = "mission-control-pwa-v7";
 const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
   "./manifest.webmanifest",
   "./assets/logo.jpg",
   "./assets/logo-192.png",
   "./assets/logo-512.png"
+  // index.html intentionally excluded — always fetched fresh (network-first)
 ];
 
 self.addEventListener("install", (event) => {
@@ -37,14 +36,21 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(event.request.url);
-  if (
+
+  // Always network-first for: index.html, root, and all data JSON files
+  // This ensures the dashboard always loads the latest code and data
+  const alwaysFresh = (
     url.pathname.endsWith("/data/dashboard-data.json") ||
     url.pathname.endsWith("/data/brain-feed.json") ||
     url.pathname.endsWith("/data/modelUsage.json") ||
+    url.pathname.endsWith("/data/newsfeed.json") ||
     url.pathname.endsWith("/index.html") ||
     url.pathname === "/mission-control/" ||
     url.pathname.endsWith("/mission-control/")
-  ) {
+  );
+
+  if (alwaysFresh) {
+    // Network-first: always try network, only fall back to cache if offline
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -56,11 +62,12 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(event.request) || caches.match("./index.html"))
+        .catch(() => caches.match(event.request))
     );
     return;
   }
 
+  // Cache-first for static assets (images, fonts, icons)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -77,7 +84,7 @@ self.addEventListener("fetch", (event) => {
           });
           return response;
         })
-        .catch(() => caches.match("./index.html"));
+        .catch(() => null);
     })
   );
 });
