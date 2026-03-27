@@ -2153,7 +2153,7 @@
             const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
             if (bf.active && ageSecs < 60) return 'Live';
             if (bf.active) return 'Active';
-            if (updatedAt && ageSecs >= 600) return 'Stale';
+            if (updatedAt && ageSecs >= 3600) return 'Stale'; // only stale after 1h of no updates
             return 'Idle';
         }
 
@@ -2236,7 +2236,7 @@
             const isActive = bf && bf.active;
             const ageSecs = bfLastUpdatedTs ? (Date.now() - bfLastUpdatedTs) / 1000 : 9999;
             const isFresh = ageSecs < 60;
-            const isStale = ageSecs >= 600;
+            const isStale = ageSecs >= 3600; // stale only after 1h of silence
             if (isActive && isFresh) {
                 dot.style.background = '#e53e3e';
                 if (label) label.textContent = 'Live';

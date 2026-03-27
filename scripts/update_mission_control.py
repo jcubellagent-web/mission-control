@@ -593,7 +593,7 @@ def load_brain_feed_file() -> Dict[str, Any] | None:
             try:
                 ts = dt.datetime.fromisoformat(updated.replace("Z", "+00:00"))
                 age = dt.datetime.now(dt.timezone.utc) - ts
-                if age.total_seconds() > 600:  # 10 min stale threshold
+                if age.total_seconds() > 3600:  # 1h stale threshold — idle between tasks is normal
                     data["active"] = False
             except (ValueError, TypeError):
                 pass

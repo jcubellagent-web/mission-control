@@ -60,7 +60,13 @@ json.dump(bf, open('$BF_FILE', 'w'), indent=2)
     exit 0
   fi
   git commit -m "brain: $OBJECTIVE [$STATE $(date -u +%H:%M:%SZ)]" -q
-  GH_TOKEN=$(gh auth token 2>/dev/null || true)
+  # Prefer saved token file (works in cron without keyring)
+  GH_TOKEN=""
+  if [[ -f "${HOME}/.secrets/gh_token" ]]; then
+    GH_TOKEN=$(cat "${HOME}/.secrets/gh_token")
+  else
+    GH_TOKEN=$(gh auth token 2>/dev/null || true)
+  fi
   if [[ -n "$GH_TOKEN" ]]; then
     AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
     git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin main -q 2>/dev/null || true
