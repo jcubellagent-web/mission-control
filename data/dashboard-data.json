@@ -3,45 +3,29 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
+    "active": false,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Fixing brain feed staleness + slimming job rows",
-    "status": "active",
-    "steps": [
-      {
-        "label": "Diagnosing brain feed",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Editing UI",
-        "status": "done",
-        "tool": "edit"
-      },
-      {
-        "label": "Deploying",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-03-27T00:17:05Z"
+    "objective": "Idle",
+    "status": "idle",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-03-27T00:17:55Z"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Fixing brain feed staleness + slimming job rows",
-    "runway": 0.9,
-    "updatedAt": "2026-03-27T00:17:05Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: Idle",
+    "runway": 0.72,
+    "updatedAt": "2026-03-27T00:17:55Z"
   },
   "modelUsage": {
-    "session": 10.517214,
-    "daily": 10.517214,
-    "weekly": 10.517214,
+    "session": 10.918326,
+    "daily": 10.918326,
+    "weekly": 10.918326,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 8.840001229999999
+        "cost": 9.24111368
       },
       {
         "name": "openai/gpt-5.4",
@@ -63,11 +47,11 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 103,
-        "outputTokens": 78003,
-        "totalTokens": 377474,
-        "sessionCost": 8.840001229999999,
-        "weeklyCost": 8.840001229999999,
+        "inputTokens": 105,
+        "outputTokens": 79639,
+        "totalTokens": 381021,
+        "sessionCost": 9.24111368,
+        "weeklyCost": 9.24111368,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -105,7 +89,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T00:17:47Z"
+    "lastUpdated": "2026-03-27T00:20:00Z"
   },
   "devices": [
     {
@@ -119,52 +103,52 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:17:47Z"
+      "lastChecked": "2026-03-27T00:20:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:17:47Z"
+      "lastChecked": "2026-03-27T00:20:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T00:17:47Z"
+      "lastChecked": "2026-03-27T00:20:00Z"
     }
   ],
   "crons": [
     {
-      "name": "Chiro invite sync",
+      "name": "Chiro Invite Sync",
       "schedule": "Hourly",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "Mission Control refresh",
-      "schedule": "*/5 * * * *",
+      "name": "Mission Control Refresh",
+      "schedule": "Every 5 min",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "\u26be Lineup Check",
+      "name": "Lineup Check",
       "schedule": "9:15 AM daily",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "\u26be Injury Monitor",
+      "name": "Injury Monitor",
       "schedule": "Every 4h",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "\u26be Waiver Scan",
+      "name": "Waiver Scan",
       "schedule": "Wed + Fri 9am",
       "status": "ok",
       "errors": 0,
@@ -173,25 +157,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T00:17:05Z",
-      "event": "\ud83e\udde0 Brain Feed live"
+      "time": "2026-03-27T00:20:00Z",
+      "event": "Session spend: $10.92"
     },
     {
-      "time": "2026-03-27T00:17:47Z",
-      "event": "\ud83d\udcb8 Session spend now $10.52"
+      "time": "2026-03-27T00:20:00Z",
+      "event": "5 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T00:17:47Z",
-      "event": "\u2705 5 scheduled jobs healthy"
+      "time": "2026-03-27T00:20:00Z",
+      "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T00:17:47Z",
-      "event": "\ud83d\udda5\ufe0f Device layer nominal"
+      "time": "2026-03-27T00:20:00Z",
+      "event": "Mission Control refresh published"
     },
     {
-      "time": "2026-03-27T00:17:47Z",
-      "event": "\ud83d\ude80 Mission Control refresh published"
+      "time": "2026-03-27T00:17:55Z",
+      "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T00:17:47Z"
+  "lastUpdated": "2026-03-27T00:20:00Z"
 }
