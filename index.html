@@ -2231,7 +2231,10 @@
             const newHash = JSON.stringify(bf);
             if (newHash === lastBrainFeedHash) return;
             lastBrainFeedHash = newHash;
-            bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
+            // Determine which timestamp to use for freshness display
+            const lastTouchTs = bf.idleUpdatedAt || bf.checkedAt || bf.updatedAt;
+            bfLastUpdatedTs = lastTouchTs ? new Date(lastTouchTs).getTime() : Date.now();
+
             renderBrainFeed(bf);
             updateBfFreshness(bf);
         }
@@ -2250,7 +2253,7 @@
             } else if (isActive) {
                 dot.style.background = '#fbbf24';
                 if (label) label.textContent = 'Active';
-            } else if (isStale && bf && bf.updatedAt) {
+            } else if (isStale && bfLastUpdatedTs) { // Check bfLastUpdatedTs explicitly here
                 dot.style.background = '#fbbf24';
                 if (label) label.textContent = 'Stale';
             } else {
