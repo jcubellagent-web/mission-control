@@ -30,8 +30,7 @@ CRON_TARGETS = [
     {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball"},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball"},
-    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans for high-signal breaking news, pushes score ≥8.5 to bot", "category": "Intelligence Feed"},
-    {"name": "Trump Monitor", "pattern": "trump_monitor.py", "schedule": "Every 5 min", "description": "Monitors Trump statements via Google News RSS, pushes score ≥7.5", "category": "Intelligence Feed"},
+    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed"},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed",
      "multiRun": {
          "runs": [
