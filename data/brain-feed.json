@@ -1,25 +1,15 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Testing real-time brain feed \u2014 voice message received",
+  "objective": "Message received from Josh",
   "status": "active",
   "steps": [
     {
-      "label": "Parsing message",
-      "status": "done",
-      "tool": "openclaw"
-    },
-    {
-      "label": "Transcribing",
-      "status": "done",
-      "tool": "whisper"
-    },
-    {
-      "label": "Processing response",
+      "label": "Reading message",
       "status": "active",
-      "tool": "gemini"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "gemini",
-  "updatedAt": "2026-03-27T05:16:11Z"
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-27T05:16:37Z"
 }
