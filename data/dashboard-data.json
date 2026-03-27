@@ -89,7 +89,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T02:25:00Z"
+    "lastUpdated": "2026-03-27T02:26:08Z"
   },
   "devices": [
     {
@@ -103,19 +103,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T02:25:00Z"
+      "lastChecked": "2026-03-27T02:26:08Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T02:25:00Z"
+      "lastChecked": "2026-03-27T02:26:08Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T02:25:00Z"
+      "lastChecked": "2026-03-27T02:26:08Z"
     }
   ],
   "crons": [
@@ -168,6 +168,15 @@
       "name": "Breaking News Scanner",
       "schedule": "Every 5 min",
       "description": "Scans for high-signal breaking news, pushes score \u22658.5 to bot",
+      "category": "Intelligence Feed",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Trump Monitor",
+      "schedule": "Every 5 min",
+      "description": "Monitors Trump statements via Google News RSS, pushes score \u22657.5",
       "category": "Intelligence Feed",
       "status": "ok",
       "errors": 0,
@@ -237,19 +246,19 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T02:25:00Z",
+      "time": "2026-03-27T02:26:08Z",
       "event": "Session spend: $33.20"
     },
     {
-      "time": "2026-03-27T02:25:00Z",
-      "event": "7 scheduled jobs healthy"
+      "time": "2026-03-27T02:26:08Z",
+      "event": "8 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T02:25:00Z",
+      "time": "2026-03-27T02:26:08Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T02:25:00Z",
+      "time": "2026-03-27T02:26:08Z",
       "event": "Mission Control refresh published"
     },
     {
@@ -257,5 +266,5 @@
       "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T02:25:00Z"
+  "lastUpdated": "2026-03-27T02:26:08Z"
 }
