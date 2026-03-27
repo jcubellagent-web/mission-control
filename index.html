@@ -518,7 +518,23 @@
            ═══════════════════════════════════════════════ */
 
         body.phone-mode {
-            background: #080a10;
+            background-color: #080a10;
+            background-image: url('assets/logo-pattern.jpg');
+            background-size: 180px auto;
+            background-repeat: repeat;
+            background-attachment: fixed;
+        }
+        body.phone-mode::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 10, 16, 0.87);
+            z-index: 0;
+            pointer-events: none;
+        }
+        body.phone-mode .container {
+            position: relative;
+            z-index: 1;
         }
         body.phone-mode .container {
             width: 100%;
