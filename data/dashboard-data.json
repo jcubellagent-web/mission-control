@@ -89,7 +89,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T00:10:00Z"
+    "lastUpdated": "2026-03-27T00:12:53Z"
   },
   "devices": [
     {
@@ -103,19 +103,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:10:00Z"
+      "lastChecked": "2026-03-27T00:12:53Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:10:00Z"
+      "lastChecked": "2026-03-27T00:12:53Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T00:10:00Z"
+      "lastChecked": "2026-03-27T00:12:53Z"
     }
   ],
   "crons": [
@@ -132,6 +132,27 @@
       "status": "ok",
       "errors": 0,
       "lastError": null
+    },
+    {
+      "name": "\u26be Lineup Check",
+      "schedule": "9:15 AM daily",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "\u26be Injury Monitor",
+      "schedule": "Every 4h",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "\u26be Waiver Scan",
+      "schedule": "Wed + Fri 9am",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
     }
   ],
   "recentActivity": [
@@ -140,21 +161,21 @@
       "event": "\ud83e\udde0 Brain Feed idle"
     },
     {
-      "time": "2026-03-27T00:10:00Z",
+      "time": "2026-03-27T00:12:53Z",
       "event": "\ud83d\udcb8 Session spend now $9.62"
     },
     {
-      "time": "2026-03-27T00:10:00Z",
-      "event": "\u2705 2 scheduled jobs healthy"
+      "time": "2026-03-27T00:12:53Z",
+      "event": "\u2705 5 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T00:10:00Z",
+      "time": "2026-03-27T00:12:53Z",
       "event": "\ud83d\udda5\ufe0f Device layer nominal"
     },
     {
-      "time": "2026-03-27T00:10:00Z",
+      "time": "2026-03-27T00:12:53Z",
       "event": "\ud83d\ude80 Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-27T00:10:00Z"
+  "lastUpdated": "2026-03-27T00:12:53Z"
 }
