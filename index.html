@@ -690,6 +690,55 @@
             padding: 12px 16px 16px;
         }
 
+        /* Intelligence Feed sections */
+        .intelligence-feed-body { flex: 1; overflow-y: auto; padding: 0 4px; }
+        .if-section { margin-bottom: 10px; }
+        .if-section-header {
+            font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: rgba(255,255,255,0.3);
+            padding: 6px 8px 3px; display: flex; align-items: center; gap: 6px;
+        }
+        .if-section-header .if-icon { font-size: 0.65rem; }
+
+        /* Fear & Greed bar */
+        .fg-bar-wrap { padding: 6px 10px 8px; }
+        .fg-bar { font-family: monospace; font-size: 0.75rem; color: #fbbf24; letter-spacing: -1px; }
+        .fg-meta { display: flex; gap: 10px; margin-top: 3px; flex-wrap: wrap; }
+        .fg-pill { font-size: 0.62rem; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
+                   padding: 1px 6px; border-radius: 3px; }
+        .fg-pill.fear { color: #e53e3e; }
+        .fg-pill.greed { color: #4ade80; }
+
+        /* Signal / article items */
+        .if-item { padding: 4px 8px; border-radius: 5px; cursor: default; transition: background 0.15s; }
+        .if-item:hover { background: rgba(255,255,255,0.04); }
+        .if-item-title { font-size: 0.72rem; color: rgba(255,255,255,0.8); line-height: 1.3;
+                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .if-item-meta { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 1px; }
+        .if-score { display: inline-block; font-size: 0.58rem; padding: 0 4px;
+                    border-radius: 3px; background: rgba(99,179,237,0.15); color: #63b3ed; margin-right: 4px; }
+
+        /* Grok text items (macro/reg/hot takes) */
+        .if-grok-item { padding: 4px 8px; }
+        .if-grok-headline { font-size: 0.71rem; color: rgba(255,255,255,0.75); line-height: 1.3; }
+        .if-grok-insight { font-size: 0.63rem; color: rgba(255,255,255,0.35); margin-top: 2px; line-height: 1.3; }
+        .if-mood { display: inline-block; font-size: 0.55rem; font-weight: 700; padding: 0 5px;
+                   border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+        .if-mood.BULL  { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .if-mood.BEAR  { background: rgba(239,68,68,0.15); color: #e53e3e; }
+        .if-mood.FADE  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .if-mood.NEUTRAL { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
+
+        /* Market movers */
+        .if-movers { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px 8px; }
+        .if-mover { display: flex; justify-content: space-between; align-items: center;
+                    background: rgba(255,255,255,0.03); border-radius: 4px; padding: 3px 7px; }
+        .if-mover-name { font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+        .if-mover-chg { font-size: 0.65rem; font-weight: 600; }
+        .if-mover-chg.up { color: #4ade80; }
+        .if-mover-chg.down { color: #e53e3e; }
+        .if-gen-time { font-size: 0.58rem; color: rgba(255,255,255,0.2); padding: 4px 10px 6px; text-align: right; }
+
 
         /* AirPoint toggle button */
         #airpoint-toggle { display: none; }
@@ -1385,23 +1434,22 @@
                 </div>
             </div>
 
-            <!-- RIGHT COL: Live Newsfeed (full height) -->
+            <!-- RIGHT COL: Live Intelligence Feed (full height) -->
             <div class="grid priority-grid">
                 <div class="card card-newsfeed">
                     <div class="card-header">
-                        <span class="icon">📰</span>
-                        <h2>Live Newsfeed</h2>
+                        <span class="icon">⚡</span>
+                        <h2>Live Intelligence Feed</h2>
                         <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
                     </div>
-                    <div class="newsfeed-subtitle">Personalized news, market data &amp; intel — coming soon</div>
-                    <div class="newsfeed-skeleton-list">
-                        <div class="ns-item"><span class="ns-cat ns-cat-blue"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                        <div class="ns-item"><span class="ns-cat ns-cat-green"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                        <div class="ns-item"><span class="ns-cat ns-cat-orange"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                        <div class="ns-item"><span class="ns-cat ns-cat-purple"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                        <div class="ns-item"><span class="ns-cat ns-cat-red"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                    <div id="intelligence-feed-card" class="intelligence-feed-body">
+                        <!-- populated by fetchIntelligenceFeed() -->
+                        <div class="newsfeed-skeleton-list">
+                            <div class="ns-item"><span class="ns-cat ns-cat-blue"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                            <div class="ns-item"><span class="ns-cat ns-cat-green"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                            <div class="ns-item"><span class="ns-cat ns-cat-orange"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                        </div>
                     </div>
-                    <div class="newsfeed-placeholder-msg">🔧 Wiring up live data sources…</div>
                 </div>
             </div>
         </div><!-- /kiosk-main -->
@@ -1650,6 +1698,133 @@
             document.body.classList.toggle('airpoint-active', active);
         }
 
+        // ===== Intelligence Feed =====
+        let lastIntelHash = null;
+
+        async function fetchIntelligenceFeed() {
+            try {
+                const r = await fetch('./data/newsfeed.json?_=' + Date.now());
+                if (!r.ok) return;
+                const feed = await r.json();
+                const hash = JSON.stringify(feed.generatedAt);
+                if (hash === lastIntelHash) return;
+                lastIntelHash = hash;
+                renderIntelligenceFeed(feed);
+            } catch(e) {}
+        }
+
+        function renderIntelligenceFeed(f) {
+            const el = document.getElementById('intelligence-feed-card');
+            if (!el) return;
+            let html = '';
+
+            // Fear & Greed
+            if (f.fear_greed) {
+                const fg = f.fear_greed;
+                const fgClass = fg.value < 40 ? 'fear' : fg.value > 60 ? 'greed' : '';
+                html += `<div class="if-section">
+                    <div class="if-section-header">Fear &amp; Greed</div>
+                    <div class="fg-bar-wrap">
+                        <div class="fg-bar">${escapeHtml(fg.bar || '')} <span style="color:rgba(255,255,255,0.6)">${fg.value} — ${escapeHtml(fg.label || '')}</span></div>
+                        <div class="fg-meta">
+                            ${fg.btc_dominance ? `<span class="fg-pill">BTC Dom ${fg.btc_dominance}%</span>` : ''}
+                            ${fg.market_cap_change_24h != null ? `<span class="fg-pill ${fg.market_cap_change_24h < 0 ? 'fear' : 'greed'}">Mkt 24h ${fg.market_cap_change_24h > 0 ? '+' : ''}${fg.market_cap_change_24h}%</span>` : ''}
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // Signal
+            if (f.signal && f.signal.length) {
+                html += `<div class="if-section"><div class="if-section-header">Signal</div>`;
+                f.signal.slice(0,5).forEach(item => {
+                    html += `<div class="if-item">
+                        <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
+                        <div class="if-item-meta">${escapeHtml(item.source || '')}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // AI Value Chain
+            if (f.ai_value_chain && f.ai_value_chain.length) {
+                html += `<div class="if-section"><div class="if-section-header">AI Value Chain</div>`;
+                f.ai_value_chain.slice(0,4).forEach(item => {
+                    html += `<div class="if-item">
+                        <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Macro & Geo
+            if (f.macro_geo && f.macro_geo.length) {
+                html += `<div class="if-section"><div class="if-section-header">Macro &amp; Geo</div>`;
+                f.macro_geo.forEach(item => {
+                    const mood = item.mood || 'NEUTRAL';
+                    html += `<div class="if-grok-item">
+                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.headline || '')}</div>
+                        ${item.insight ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Regulation
+            if (f.regulation && f.regulation.length) {
+                html += `<div class="if-section"><div class="if-section-header">Regulation</div>`;
+                f.regulation.forEach(item => {
+                    html += `<div class="if-grok-item">
+                        <div class="if-grok-headline">${escapeHtml(item.headline || '')}</div>
+                        ${item.insight ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // NASDAQ Movers
+            const nm = f.nasdaq_movers;
+            if (nm && (nm.gainers?.length || nm.losers?.length)) {
+                html += `<div class="if-section"><div class="if-section-header">NASDAQ Movers</div><div class="if-movers">`;
+                (nm.gainers || []).forEach(m => {
+                    html += `<div class="if-mover"><span class="if-mover-name">${m.ticker}</span><span class="if-mover-chg up">+${m.change_pct}%</span></div>`;
+                });
+                (nm.losers || []).forEach(m => {
+                    html += `<div class="if-mover"><span class="if-mover-name">${m.ticker}</span><span class="if-mover-chg down">${m.change_pct}%</span></div>`;
+                });
+                html += `</div></div>`;
+            }
+
+            // Crypto Movers
+            if (f.crypto_movers && f.crypto_movers.length) {
+                html += `<div class="if-section"><div class="if-section-header">Crypto Movers</div><div class="if-movers">`;
+                f.crypto_movers.slice(0,6).forEach(m => {
+                    const up = m.change_pct >= 0;
+                    html += `<div class="if-mover"><span class="if-mover-name">${m.symbol}</span><span class="if-mover-chg ${up ? 'up' : 'down'}">${up ? '+' : ''}${m.change_pct}%</span></div>`;
+                });
+                html += `</div></div>`;
+            }
+
+            // Hot Takes
+            if (f.hot_takes && f.hot_takes.length) {
+                html += `<div class="if-section"><div class="if-section-header">Hot Takes</div>`;
+                f.hot_takes.forEach(item => {
+                    const mood = item.mood || 'NEUTRAL';
+                    html += `<div class="if-grok-item">
+                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.take || '')}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Generated time
+            if (f.generatedAt) {
+                html += `<div class="if-gen-time">Updated ${formatTime(f.generatedAt)} · ${f.mode || 'full'} run</div>`;
+            }
+
+            el.innerHTML = html;
+        }
+
         function initDashboard() {
             initAirpointState();
             fetchData();
@@ -1658,6 +1833,8 @@
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
             setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
+            fetchIntelligenceFeed();
+            setInterval(fetchIntelligenceFeed, 60000); // refresh every 60s
             attachPullToRefresh();
             // Show god mode badge (visual only)
             const godBadge = document.getElementById('god-mode-badge');
