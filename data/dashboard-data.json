@@ -3,29 +3,40 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Idle",
-    "status": "idle",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-03-27T02:11:46Z"
+    "objective": "Test latency check",
+    "status": "active",
+    "steps": [
+      {
+        "label": "Reading",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "Analyzing",
+        "status": "active",
+        "tool": "gemini"
+      }
+    ],
+    "currentTool": "gemini",
+    "updatedAt": "2026-03-27T05:13:20Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Idle",
-    "runway": 0.72,
-    "updatedAt": "2026-03-27T02:11:46Z"
+    "status": "Brain Feed live",
+    "context": "Test latency check",
+    "runway": 0.9,
+    "updatedAt": "2026-03-27T05:13:20Z"
   },
   "modelUsage": {
-    "session": 24.058107,
-    "daily": 11.181784,
-    "weekly": 24.058107,
+    "session": 29.363124,
+    "daily": 16.486801,
+    "weekly": 29.363124,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 22.048519649999996
+        "cost": 27.353537249999995
       },
       {
         "name": "openai/gpt-5.4",
@@ -47,11 +58,11 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 99,
-        "outputTokens": 76753,
-        "totalTokens": 496183,
-        "sessionCost": 22.048519649999996,
-        "weeklyCost": 22.048519649999996,
+        "inputTokens": 103,
+        "outputTokens": 77941,
+        "totalTokens": 532331,
+        "sessionCost": 27.353537249999995,
+        "weeklyCost": 27.353537249999995,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -89,7 +100,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T05:10:01Z"
+    "lastUpdated": "2026-03-27T05:15:01Z"
   },
   "devices": [
     {
@@ -103,19 +114,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T05:10:00Z"
+      "lastChecked": "2026-03-27T05:15:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T05:10:00Z"
+      "lastChecked": "2026-03-27T05:15:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T05:10:00Z"
+      "lastChecked": "2026-03-27T05:15:01Z"
     }
   ],
   "crons": [
@@ -178,7 +189,7 @@
       "schedule": "Every 5 min",
       "description": "Monitors Trump statements via Google News RSS, pushes score \u22657.5",
       "category": "Intelligence Feed",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -246,25 +257,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T05:10:01Z",
-      "event": "Session spend: $24.06"
+      "time": "2026-03-27T05:15:01Z",
+      "event": "Session spend: $29.36"
     },
     {
-      "time": "2026-03-27T05:10:00Z",
+      "time": "2026-03-27T05:15:01Z",
       "event": "8 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T05:10:00Z",
+      "time": "2026-03-27T05:15:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T05:10:00Z",
+      "time": "2026-03-27T05:15:01Z",
       "event": "Mission Control refresh published"
     },
     {
-      "time": "2026-03-27T02:11:46Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-27T05:13:20Z",
+      "event": "Brain: Brain Feed live"
     }
   ],
-  "lastUpdated": "2026-03-27T05:10:00Z"
+  "lastUpdated": "2026-03-27T05:15:01Z"
 }
