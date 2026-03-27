@@ -1,23 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Building Intelligence Feed \u2014 pipeline + dashboard",
+  "objective": "Building Intelligence Feed pipeline",
   "status": "active",
   "steps": [
     {
-      "label": "Spawning Codex for feed pipeline",
+      "label": "Installing deps",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Updating cron display",
+      "label": "Writing pipeline",
       "status": "done",
       "tool": "edit"
     },
     {
-      "label": "Wiring dashboard",
+      "label": "Testing",
       "status": "done",
-      "tool": "edit"
+      "tool": "exec"
     },
     {
       "label": "Deploying",
@@ -26,5 +26,5 @@
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-27T00:27:46Z"
+  "updatedAt": "2026-03-27T00:50:22Z"
 }
