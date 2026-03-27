@@ -27,7 +27,7 @@ KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsa
 CRON_TARGETS = [
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments"},
     {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance"},
-    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
+    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball"},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball"},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed"},
@@ -85,6 +85,35 @@ def is_valid_iso8601(ts: Any) -> bool:
 def should_exclude_model(name: str, source: str = "") -> bool:
     slug = f"{source} {name}".lower()
     return "opus" in slug
+
+
+# Known model aliases to canonical "provider/model" names (for models that appear without provider prefix)
+MODEL_ALIASES: Dict[str, str] = {
+    "sonnet":                  "anthropic/claude-sonnet-4-6",
+    "claude-sonnet":           "anthropic/claude-sonnet-4-6",
+    "claude-sonnet-4-5":       "anthropic/claude-sonnet-4-5",
+    "claude-sonnet-4-6":       "anthropic/claude-sonnet-4-6",
+    "claude-haiku":            "anthropic/claude-haiku-3-5",
+    "claude-haiku-3-5":        "anthropic/claude-haiku-3-5",
+    "gemini-2.5-flash":        "google/gemini-2.5-flash",
+    "gemini-2.5-pro":          "google/gemini-2.5-pro",
+    "gemini-2.0-flash":        "google/gemini-2.0-flash",
+    "gpt-4o":                  "openai/gpt-4o",
+    "gpt-4o-mini":             "openai/gpt-4o-mini",
+}
+
+def normalize_model_name(raw: str, provider: str = "") -> str:
+    """Normalize a raw model name to canonical 'provider/model' form."""
+    if "/" in raw:
+        return raw.lstrip("/")
+    # Check alias table first
+    lower = raw.lower()
+    if lower in MODEL_ALIASES:
+        return MODEL_ALIASES[lower]
+    # Prefix with provider if available
+    if provider:
+        return f"{provider}/{raw}"
+    return raw
 
 
 def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -196,46 +225,83 @@ def estimate_gemini_cost(model: str, input_tokens: int, output_tokens: int) -> f
 
 
 def fetch_model_usage_from_sessions() -> List[Dict[str, Any]]:
-    """Pull per-model usage directly from OpenClaw session data. Captures ALL models including Gemini."""
+    """Pull per-model usage directly from OpenClaw session data. Captures ALL models including Gemini.
+
+    For each session, cost priority:
+      1. Use estimatedCostUsd if non-zero (OpenClaw already computed it).
+      2. If zero and model is Gemini with token data, estimate from pricing table.
+      3. Otherwise keep 0.
+
+    totalTokens in OpenClaw sessions represents context-window tokens (not input+output sum),
+    so we use inputTokens + outputTokens as the canonical token count for display.
+    """
     if not OPENCLAW_SESSIONS_PATH.exists():
         return []
     try:
         sessions = json.loads(OPENCLAW_SESSIONS_PATH.read_text())
         by_model: Dict[str, Dict[str, Any]] = {}
+
+        # Determine today's date in ET so we can compute a dailyCost field per model
+        now_et = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4)))
+        today_et_str = now_et.strftime("%Y-%m-%d")
+
         for sess in sessions.values():
             raw_model = sess.get("model") or sess.get("modelOverride") or ""
             provider = sess.get("modelProvider") or ""
             if not raw_model:
                 continue
-            # Normalize model name
-            full_name = raw_model if "/" in raw_model else f"{provider}/{raw_model}" if provider else raw_model
-            full_name = full_name.lstrip("/")
+            # Normalize model name to "provider/model" form
+            full_name = normalize_model_name(raw_model, provider)
             if should_exclude_model(full_name):
                 continue
-            input_t = int(sess.get("inputTokens") or 0)
+
+            input_t  = int(sess.get("inputTokens")  or 0)
             output_t = int(sess.get("outputTokens") or 0)
-            total_t = int(sess.get("totalTokens") or 0)
+            # Use inputTokens + outputTokens as canonical token count (totalTokens = context-window size, not sum)
+            token_count = input_t + output_t
+
             cost = float(sess.get("estimatedCostUsd") or 0)
-            # For Gemini: estimatedCostUsd may be 0 — estimate it
-            if cost == 0 and "gemini" in full_name.lower() and total_t > 0:
-                cost = estimate_gemini_cost(full_name, input_t, output_t)
+            estimated = False
+            # For Gemini: use provided cost; only estimate if zero but we have token data
+            if "gemini" in full_name.lower():
+                if cost == 0 and token_count > 0:
+                    cost = estimate_gemini_cost(full_name, input_t, output_t)
+                    estimated = True
+                # If OpenClaw already gave us a real cost, mark as not estimated
+                # (estimatedCostUsd > 0 means the provider billing reported it)
+
+            # Is this session from today (ET)?
+            sess_updated_ms = sess.get("updatedAt")
+            is_today = False
+            if sess_updated_ms:
+                try:
+                    sess_dt = dt.datetime.fromtimestamp(int(sess_updated_ms) / 1000, tz=dt.timezone.utc)
+                    sess_et_str = (sess_dt - dt.timedelta(hours=4)).strftime("%Y-%m-%d")
+                    is_today = (sess_et_str == today_et_str)
+                except (ValueError, TypeError, OSError):
+                    pass
+
             if full_name not in by_model:
                 by_model[full_name] = {
                     "name": full_name,
                     "source": "openclaw",
                     "inputTokens": 0, "outputTokens": 0, "totalTokens": 0,
-                    "sessionCost": 0.0, "weeklyCost": 0.0, "sessions": 0,
+                    "sessionCost": 0.0, "dailyCost": 0.0, "weeklyCost": 0.0,
+                    "sessions": 0,
                     "isGemini": "gemini" in full_name.lower(),
-                    "costEstimated": False,
+                    "costEstimated": estimated,
                 }
             by_model[full_name]["inputTokens"] += input_t
             by_model[full_name]["outputTokens"] += output_t
-            by_model[full_name]["totalTokens"] += total_t
+            by_model[full_name]["totalTokens"] += token_count  # canonical: in + out
             by_model[full_name]["sessionCost"] += cost
             by_model[full_name]["weeklyCost"] += cost
+            if is_today:
+                by_model[full_name]["dailyCost"] += cost
             by_model[full_name]["sessions"] += 1
-            if "gemini" in full_name.lower() and cost > 0:
+            if estimated and cost > 0:
                 by_model[full_name]["costEstimated"] = True
+
         return sorted(by_model.values(), key=lambda x: x["weeklyCost"], reverse=True)
     except Exception as exc:
         print(f"[warn] session usage fetch failed: {exc}", file=sys.stderr)
@@ -243,7 +309,11 @@ def fetch_model_usage_from_sessions() -> List[Dict[str, Any]]:
 
 
 def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
-    """Fetch model usage from codexbar CLI (covers Codex/OpenAI with precise cost)."""
+    """Fetch model usage from codexbar CLI (covers Codex/OpenAI with precise cost).
+
+    The codexbar daily breakdown tells us per-day cost per model.
+    We use that to compute both sessionCost (all days summed) and dailyCost (today only).
+    """
     try:
         result = subprocess.run(
             ["/opt/homebrew/bin/codexbar", "cost", "--json"],
@@ -252,43 +322,66 @@ def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
         if result.returncode != 0 or not result.stdout.strip():
             return []
         providers = json.loads(result.stdout)
-        rows: List[Dict[str, Any]] = []
+        now_et = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4)))
+        today_str = now_et.strftime("%Y-%m-%d")
+
+        by_model: Dict[str, Dict[str, Any]] = {}
         for provider in providers:
             source = provider.get("provider", "codexbar")
-            total_cost = float(provider.get("last30DaysCostUSD") or 0)
-            for day in provider.get("daily", []):
-                for mb in day.get("modelBreakdowns", []):
+            for day_entry in provider.get("daily", []):
+                day_date = day_entry.get("date", "")  # e.g. "2026-03-27"
+                is_today = day_date == today_str
+                for mb in day_entry.get("modelBreakdowns", []):
                     name = mb.get("modelName", "")
                     cost = float(mb.get("cost") or 0)
-                    if name and not should_exclude_model(name, source):
-                        rows.append({
+                    if not name or should_exclude_model(name, source):
+                        continue
+                    if name not in by_model:
+                        by_model[name] = {
                             "name": name,
                             "source": source,
-                            "weeklyCost": cost,
-                            "sessionCost": cost,
+                            "weeklyCost": 0.0,
+                            "dailyCost": 0.0,
+                            "sessionCost": 0.0,
                             "totalTokens": 0,
                             "costEstimated": False,
-                        })
-        return rows
+                        }
+                    by_model[name]["weeklyCost"] += cost
+                    by_model[name]["sessionCost"] += cost
+                    if is_today:
+                        by_model[name]["dailyCost"] += cost
+
+        return list(by_model.values())
     except Exception as exc:
         print(f"[warn] codexbar fetch failed: {exc}", file=sys.stderr)
         return []
 
 
 def merge_model_rows(session_rows: List[Dict], codexbar_rows: List[Dict]) -> List[Dict]:
-    """Merge session + codexbar rows, preferring session data for Gemini, codexbar for precise OpenAI cost."""
+    """Merge session + codexbar rows, preferring session data for Gemini, codexbar for precise OpenAI cost.
+
+    dailyCost is always populated from whichever source has it, or combined if both do.
+    """
     merged: Dict[str, Dict] = {}
     for row in session_rows:
-        merged[row["name"]] = row
+        merged[row["name"]] = dict(row)  # shallow copy to avoid mutating source
     for row in codexbar_rows:
         name = row["name"]
         if name not in merged:
-            merged[name] = row
+            merged[name] = dict(row)
         else:
             # For non-Gemini models, prefer codexbar cost (more precise)
             if not merged[name].get("isGemini"):
-                merged[name]["weeklyCost"] = max(merged[name]["weeklyCost"], row["weeklyCost"])
-                merged[name]["sessionCost"] = max(merged[name]["sessionCost"], row["sessionCost"])
+                merged[name]["weeklyCost"] = max(merged[name].get("weeklyCost", 0), row.get("weeklyCost", 0))
+                merged[name]["sessionCost"] = max(merged[name].get("sessionCost", 0), row.get("sessionCost", 0))
+                # Take max of dailyCost across sources (avoid double-counting)
+                merged[name]["dailyCost"] = max(
+                    merged[name].get("dailyCost", 0),
+                    row.get("dailyCost", 0)
+                )
+    # Ensure every row has a dailyCost field (default 0 if missing)
+    for row in merged.values():
+        row.setdefault("dailyCost", 0.0)
     return sorted(merged.values(), key=lambda x: x.get("weeklyCost", 0), reverse=True)
 
 
