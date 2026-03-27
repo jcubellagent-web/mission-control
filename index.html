@@ -1772,6 +1772,13 @@
             } catch(e) {}
         }
 
+        // Shared English-only guard (>80% ASCII chars)
+        function isEnglish(text) {
+            if (!text) return false;
+            const ascii = [...text].filter(c => c.charCodeAt(0) < 128).length;
+            return ascii / text.length > 0.8;
+        }
+
         function renderTicker(f) {
             const track = document.getElementById('intel-ticker-track');
             if (!track) return;
@@ -1811,13 +1818,6 @@
                     <span class="t-sym">VIX</span>
                     <span class="t-price" style="color:${vixColor}">${vix.toFixed(1)}</span>
                 </span>`);
-            }
-
-            // English-only guard: >80% ASCII chars
-            function isEnglish(text) {
-                if (!text) return false;
-                const ascii = [...text].filter(c => c.charCodeAt(0) < 128).length;
-                return ascii / text.length > 0.8;
             }
 
             // Top signal headlines (highest scored, max 5, English only)
@@ -1873,8 +1873,8 @@
 
             // Signal
             if (f.signal && f.signal.length) {
-                html += `<div class="if-section"><div class="if-section-header">Signal</div>`;
-                f.signal.slice(0,5).forEach(item => {
+                html += `<div class="if-section"><div class="if-section-header">🎯 Top Signal &amp; Breaking Developments</div>`;
+                f.signal.filter(i => isEnglish(i.title)).slice(0,5).forEach(item => {
                     html += `<div class="if-item">
                         <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
                         <div class="if-item-meta">${escapeHtml(item.source || '')}</div>
@@ -1885,8 +1885,8 @@
 
             // AI Value Chain
             if (f.ai_value_chain && f.ai_value_chain.length) {
-                html += `<div class="if-section"><div class="if-section-header">AI Value Chain</div>`;
-                f.ai_value_chain.slice(0,4).forEach(item => {
+                html += `<div class="if-section"><div class="if-section-header">🔗 AI Value Chain</div>`;
+                f.ai_value_chain.filter(i => isEnglish(i.title)).slice(0,4).forEach(item => {
                     html += `<div class="if-item">
                         <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
                     </div>`;
@@ -1896,12 +1896,12 @@
 
             // Macro & Geo
             if (f.macro_geo && f.macro_geo.length) {
-                html += `<div class="if-section"><div class="if-section-header">Macro &amp; Geo</div>`;
-                f.macro_geo.forEach(item => {
+                html += `<div class="if-section"><div class="if-section-header">📈 Macro &amp; Markets</div>`;
+                f.macro_geo.filter(i => isEnglish(i.headline)).forEach(item => {
                     const mood = item.mood || 'NEUTRAL';
                     html += `<div class="if-grok-item">
                         <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.headline || '')}</div>
-                        ${item.insight ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                        ${item.insight && !item.insight.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
                     </div>`;
                 });
                 html += `</div>`;
@@ -1909,11 +1909,11 @@
 
             // Regulation
             if (f.regulation && f.regulation.length) {
-                html += `<div class="if-section"><div class="if-section-header">Regulation</div>`;
-                f.regulation.forEach(item => {
+                html += `<div class="if-section"><div class="if-section-header">⚖️ Regulatory &amp; Policy</div>`;
+                f.regulation.filter(i => isEnglish(i.headline)).forEach(item => {
                     html += `<div class="if-grok-item">
                         <div class="if-grok-headline">${escapeHtml(item.headline || '')}</div>
-                        ${item.insight ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                        ${item.insight && !item.insight.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
                     </div>`;
                 });
                 html += `</div>`;
@@ -1944,8 +1944,8 @@
 
             // Hot Takes
             if (f.hot_takes && f.hot_takes.length) {
-                html += `<div class="if-section"><div class="if-section-header">Hot Takes</div>`;
-                f.hot_takes.forEach(item => {
+                html += `<div class="if-section"><div class="if-section-header">🔥 Hot Takes · Predictions · Big Bets</div>`;
+                f.hot_takes.filter(i => isEnglish(i.take)).forEach(item => {
                     const mood = item.mood || 'NEUTRAL';
                     html += `<div class="if-grok-item">
                         <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.take || '')}</div>
