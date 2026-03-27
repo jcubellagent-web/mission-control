@@ -9,31 +9,31 @@
     "status": "idle",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-03-27T22:20:00Z",
-    "checkedAt": "2026-03-27T22:20:00Z",
-    "idleUpdatedAt": "2026-03-27T22:20:00Z"
+    "updatedAt": "2026-03-27T22:25:00Z",
+    "checkedAt": "2026-03-27T22:25:01Z",
+    "idleUpdatedAt": "2026-03-27T22:25:01Z"
   },
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Idle: Awaiting your next command",
-    "updatedAt": "2026-03-27T22:20:00Z"
+    "updatedAt": "2026-03-27T22:25:00Z"
   },
   "contextWindow": {
-    "usedTokens": 229384,
+    "usedTokens": 134323,
     "limitTokens": 1000000,
-    "pct": 0.2294,
+    "pct": 0.1343,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 9.397132,
+    "session": 10.76574,
     "daily": 23.080097,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 4.069703469999999
+        "cost": 5.438311419999999
       },
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -55,11 +55,11 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 707039,
-        "outputTokens": 4786,
-        "totalTokens": 257515,
-        "sessionCost": 4.069703469999999,
-        "weeklyCost": 4.069703469999999,
+        "inputTokens": 162641,
+        "outputTokens": 150,
+        "totalTokens": 162454,
+        "sessionCost": 5.438311419999999,
+        "weeklyCost": 5.438311419999999,
         "sessions": 2,
         "isGemini": true,
         "costEstimated": true
@@ -97,7 +97,7 @@
         "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-27T22:20:00Z"
+    "lastUpdated": "2026-03-27T22:25:01Z"
   },
   "devices": [
     {
@@ -111,19 +111,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T22:20:00Z"
+      "lastChecked": "2026-03-27T22:25:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T22:20:00Z"
+      "lastChecked": "2026-03-27T22:25:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T22:20:00Z"
+      "lastChecked": "2026-03-27T22:25:01Z"
     }
   ],
   "crons": [
@@ -245,25 +245,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T22:20:00Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-27T22:25:01Z",
+      "event": "Session spend: $10.77"
     },
     {
-      "time": "2026-03-27T22:20:00Z",
-      "event": "Session spend: $9.40"
-    },
-    {
-      "time": "2026-03-27T22:20:00Z",
+      "time": "2026-03-27T22:25:01Z",
       "event": "7 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T22:20:00Z",
+      "time": "2026-03-27T22:25:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T22:20:00Z",
+      "time": "2026-03-27T22:25:01Z",
       "event": "Mission Control refresh published"
+    },
+    {
+      "time": "2026-03-27T22:25:00Z",
+      "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T22:20:00Z"
+  "lastUpdated": "2026-03-27T22:25:01Z"
 }
