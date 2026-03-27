@@ -1,11 +1,22 @@
 {
   "active": false,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-27T22:40:00Z",
+  "objective": "Confirmed weekly lineup lock",
+  "status": "done",
+  "steps": [
+    {
+      "label": "Querying",
+      "status": "done",
+      "tool": "ESPN_API"
+    },
+    {
+      "label": "Analyzing",
+      "status": "active",
+      "tool": "league_settings"
+    }
+  ],
+  "currentTool": "league_settings",
+  "updatedAt": "2026-03-27T22:40:46Z",
   "checkedAt": "2026-03-27T22:40:00Z",
   "idleUpdatedAt": "2026-03-27T22:40:00Z"
 }
