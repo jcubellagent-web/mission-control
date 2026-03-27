@@ -1,9 +1,25 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-26T23:43:01Z"
+  "objective": "Fixing brain feed staleness + slimming job rows",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Diagnosing brain feed",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Editing UI",
+      "status": "done",
+      "tool": "edit"
+    },
+    {
+      "label": "Deploying",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-27T00:17:05Z"
 }
