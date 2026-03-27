@@ -2156,11 +2156,14 @@
 
         function getBrainFeedStateLabel(bf) {
             if (!bf) return 'Idle';
-            const updatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
-            const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
+            const activeUpdatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
+            const idleUpdatedAt = bf.idleUpdatedAt ? new Date(bf.idleUpdatedAt).getTime() : null;
+            const effectiveUpdatedAt = bf.active ? activeUpdatedAt : idleUpdatedAt; // Use idleUpdatedAt for idle state
+            const ageSecs = effectiveUpdatedAt ? (Date.now() - effectiveUpdatedAt) / 1000 : Infinity;
+
             if (bf.active && ageSecs < 60) return 'Live';
             if (bf.active) return 'Active';
-            if (updatedAt && ageSecs >= 3600) return 'Stale'; // only stale after 1h of no updates
+            if (effectiveUpdatedAt && ageSecs >= 3600) return 'Stale'; // Only stale after 1h of no updates
             return 'Idle';
         }
 
