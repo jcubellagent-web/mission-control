@@ -3,25 +3,25 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Building Intelligence Feed \u2014 pipeline + dashboard",
+    "objective": "Building Intelligence Feed pipeline",
     "status": "active",
     "steps": [
       {
-        "label": "Spawning Codex for feed pipeline",
+        "label": "Installing deps",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Updating cron display",
+        "label": "Writing pipeline",
         "status": "done",
         "tool": "edit"
       },
       {
-        "label": "Wiring dashboard",
+        "label": "Testing",
         "status": "done",
-        "tool": "edit"
+        "tool": "exec"
       },
       {
         "label": "Deploying",
@@ -30,13 +30,13 @@
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-27T00:27:46Z"
+    "updatedAt": "2026-03-27T00:50:22Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Building Intelligence Feed \u2014 pipeline + dashboard",
-    "runway": 0.72,
-    "updatedAt": "2026-03-27T00:27:46Z"
+    "status": "Brain Feed live",
+    "context": "Building Intelligence Feed pipeline",
+    "runway": 0.9,
+    "updatedAt": "2026-03-27T00:50:22Z"
   },
   "modelUsage": {
     "session": 16.064332,
@@ -110,7 +110,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T00:50:01Z"
+    "lastUpdated": "2026-03-27T00:54:57Z"
   },
   "devices": [
     {
@@ -124,19 +124,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:50:01Z"
+      "lastChecked": "2026-03-27T00:54:57Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:50:01Z"
+      "lastChecked": "2026-03-27T00:54:57Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T00:50:01Z"
+      "lastChecked": "2026-03-27T00:54:57Z"
     }
   ],
   "crons": [
@@ -190,7 +190,7 @@
       "schedule": "8x daily",
       "description": "AI/macro/crypto/market intelligence briefing",
       "category": "Intelligence Feed",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null,
       "multiRun": {
@@ -249,25 +249,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T00:50:01Z",
+      "time": "2026-03-27T00:54:57Z",
       "event": "Session spend: $16.06"
     },
     {
-      "time": "2026-03-27T00:50:01Z",
+      "time": "2026-03-27T00:54:57Z",
       "event": "6 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T00:50:01Z",
+      "time": "2026-03-27T00:54:57Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T00:50:01Z",
+      "time": "2026-03-27T00:54:57Z",
       "event": "Mission Control refresh published"
     },
     {
-      "time": "2026-03-27T00:27:46Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-27T00:50:22Z",
+      "event": "Brain: Brain Feed live"
     }
   ],
-  "lastUpdated": "2026-03-27T00:50:01Z"
+  "lastUpdated": "2026-03-27T00:54:57Z"
 }
