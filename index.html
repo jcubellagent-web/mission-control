@@ -3073,10 +3073,20 @@
         }
 
         function escapeHtml(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+            if (typeof str !== 'string') return '';
+            const replacements = {
+                '&amp;': /&/g,
+                '&lt;': /</g,
+                '&gt;': />/g,
+                '&quot;': /"/g,
+                '&#x27;': /'/g,
+                '&#x60;': /`/g,
+            };
+            let escaped = str;
+            for (const char in replacements) {
+                escaped = escaped.replace(replacements[char], char);
+            }
+            return escaped;
         }
         // === AUTO-INIT (after all functions defined) ===
         initDashboard();
