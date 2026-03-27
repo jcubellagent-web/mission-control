@@ -89,7 +89,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T00:20:00Z"
+    "lastUpdated": "2026-03-27T00:20:29Z"
   },
   "devices": [
     {
@@ -103,25 +103,27 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:20:00Z"
+      "lastChecked": "2026-03-27T00:20:29Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:20:00Z"
+      "lastChecked": "2026-03-27T00:20:29Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T00:20:00Z"
+      "lastChecked": "2026-03-27T00:20:29Z"
     }
   ],
   "crons": [
     {
       "name": "Chiro Invite Sync",
       "schedule": "Hourly",
+      "description": "Syncs chiropractic client invites to calendar",
+      "category": "Appointments",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -129,6 +131,8 @@
     {
       "name": "Mission Control Refresh",
       "schedule": "Every 5 min",
+      "description": "Pushes live dashboard data to GitHub Pages",
+      "category": "Maintenance",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -136,6 +140,8 @@
     {
       "name": "Lineup Check",
       "schedule": "9:15 AM daily",
+      "description": "Reviews starting lineup, flags IL players in active slots",
+      "category": "Fantasy Baseball",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -143,6 +149,8 @@
     {
       "name": "Injury Monitor",
       "schedule": "Every 4h",
+      "description": "Watches for status changes and alerts if a starter goes down",
+      "category": "Fantasy Baseball",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -150,6 +158,8 @@
     {
       "name": "Waiver Scan",
       "schedule": "Wed + Fri 9am",
+      "description": "Scans top free agents and recommends add/drop moves",
+      "category": "Fantasy Baseball",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -157,19 +167,19 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T00:20:00Z",
+      "time": "2026-03-27T00:20:29Z",
       "event": "Session spend: $10.92"
     },
     {
-      "time": "2026-03-27T00:20:00Z",
+      "time": "2026-03-27T00:20:29Z",
       "event": "5 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T00:20:00Z",
+      "time": "2026-03-27T00:20:29Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T00:20:00Z",
+      "time": "2026-03-27T00:20:29Z",
       "event": "Mission Control refresh published"
     },
     {
@@ -177,5 +187,5 @@
       "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T00:20:00Z"
+  "lastUpdated": "2026-03-27T00:20:29Z"
 }
