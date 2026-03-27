@@ -1,11 +1,22 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-27T22:38:00Z",
+  "objective": "Checking fantasy league lineup lock time",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Analyzing",
+      "status": "done",
+      "tool": "espn_config.json"
+    },
+    {
+      "label": "Checking",
+      "status": "active",
+      "tool": "fantasy_scripts"
+    }
+  ],
+  "currentTool": "fantasy_scripts",
+  "updatedAt": "2026-03-27T22:38:39Z",
   "checkedAt": "2026-03-27T22:35:01Z",
   "idleUpdatedAt": "2026-03-27T22:35:01Z"
 }
