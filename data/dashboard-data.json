@@ -3,29 +3,50 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-03-25T04:27:00Z",
-    "objective": "Idle",
-    "status": "idle",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-03-27T00:20:38Z"
+    "objective": "Building Intelligence Feed \u2014 pipeline + dashboard",
+    "status": "active",
+    "steps": [
+      {
+        "label": "Spawning Codex for feed pipeline",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "Updating cron display",
+        "status": "done",
+        "tool": "edit"
+      },
+      {
+        "label": "Wiring dashboard",
+        "status": "done",
+        "tool": "edit"
+      },
+      {
+        "label": "Deploying",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-03-27T00:27:46Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Idle",
-    "runway": 0.72,
-    "updatedAt": "2026-03-27T00:20:38Z"
+    "status": "Brain Feed live",
+    "context": "Building Intelligence Feed \u2014 pipeline + dashboard",
+    "runway": 0.9,
+    "updatedAt": "2026-03-27T00:27:46Z"
   },
   "modelUsage": {
-    "session": 11.671762,
-    "daily": 11.671762,
-    "weekly": 11.671762,
+    "session": 12.107353,
+    "daily": 12.107353,
+    "weekly": 12.107353,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 9.994549129999998
+        "cost": 10.410105379999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -35,7 +56,7 @@
       {
         "name": "gpt-5.3-codex",
         "window": "session",
-        "cost": 0.0549164
+        "cost": 0.0749518
       },
       {
         "name": "google/gemini-2.5-flash",
@@ -47,11 +68,11 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 97,
-        "outputTokens": 77083,
-        "totalTokens": 390793,
-        "sessionCost": 9.994549129999998,
-        "weeklyCost": 9.994549129999998,
+        "inputTokens": 105,
+        "outputTokens": 77936,
+        "totalTokens": 395256,
+        "sessionCost": 10.410105379999997,
+        "weeklyCost": 10.410105379999997,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -71,8 +92,8 @@
       {
         "name": "gpt-5.3-codex",
         "source": "codex",
-        "weeklyCost": 0.0549164,
-        "sessionCost": 0.0549164,
+        "weeklyCost": 0.0749518,
+        "sessionCost": 0.0749518,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -89,7 +110,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T00:25:00Z"
+    "lastUpdated": "2026-03-27T00:29:22Z"
   },
   "devices": [
     {
@@ -103,19 +124,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:25:00Z"
+      "lastChecked": "2026-03-27T00:29:22Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T00:25:00Z"
+      "lastChecked": "2026-03-27T00:29:22Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T00:25:00Z"
+      "lastChecked": "2026-03-27T00:29:22Z"
     }
   ],
   "crons": [
@@ -163,29 +184,90 @@
       "status": "ok",
       "errors": 0,
       "lastError": null
+    },
+    {
+      "name": "Intelligence Feed",
+      "schedule": "8x daily",
+      "description": "AI/macro/crypto/market intelligence briefing",
+      "category": "Intelligence Feed",
+      "status": "paused",
+      "errors": 0,
+      "lastError": null,
+      "multiRun": {
+        "runs": [
+          {
+            "time": "7:15 AM",
+            "mode": "Full",
+            "label": "Market open",
+            "done": true
+          },
+          {
+            "time": "10:00 AM",
+            "mode": "Full",
+            "label": "Mid-morning",
+            "done": true
+          },
+          {
+            "time": "12:00 PM",
+            "mode": "Full",
+            "label": "Midday",
+            "done": true
+          },
+          {
+            "time": "2:00 PM",
+            "mode": "Lite",
+            "label": "Pulse",
+            "done": true
+          },
+          {
+            "time": "4:15 PM",
+            "mode": "Full",
+            "label": "Close",
+            "done": true
+          },
+          {
+            "time": "6:00 PM",
+            "mode": "Lite",
+            "label": "Evening",
+            "done": true
+          },
+          {
+            "time": "9:00 PM",
+            "mode": "Full",
+            "label": "Late",
+            "done": false
+          },
+          {
+            "time": "11:00 PM",
+            "mode": "Lite",
+            "label": "Wrap",
+            "done": false
+          }
+        ]
+      }
     }
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T00:25:00Z",
-      "event": "Session spend: $11.67"
+      "time": "2026-03-27T00:29:22Z",
+      "event": "Session spend: $12.11"
     },
     {
-      "time": "2026-03-27T00:25:00Z",
-      "event": "5 scheduled jobs healthy"
+      "time": "2026-03-27T00:29:22Z",
+      "event": "6 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T00:25:00Z",
+      "time": "2026-03-27T00:29:22Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T00:25:00Z",
+      "time": "2026-03-27T00:29:22Z",
       "event": "Mission Control refresh published"
     },
     {
-      "time": "2026-03-27T00:20:38Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-27T00:27:46Z",
+      "event": "Brain: Brain Feed live"
     }
   ],
-  "lastUpdated": "2026-03-27T00:25:00Z"
+  "lastUpdated": "2026-03-27T00:29:22Z"
 }
