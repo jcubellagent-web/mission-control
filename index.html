@@ -953,6 +953,107 @@
             font-style: italic;
         }
 
+        /* ── Night Mode Overlay ──────────────────────────── */
+        #night-mode-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        #night-clock {
+            font-size: clamp(64px, 18vw, 160px);
+            font-weight: 200;
+            color: #cc0000;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 40px rgba(204,0,0,0.5), 0 0 80px rgba(204,0,0,0.2);
+            line-height: 1;
+            font-family: "Courier New", monospace;
+        }
+        #night-date {
+            font-size: clamp(16px, 4vw, 32px);
+            color: rgba(180,0,0,0.7);
+            font-family: "Courier New", monospace;
+            letter-spacing: 0.15em;
+            margin-top: 16px;
+            text-transform: uppercase;
+        }
+        #night-hint {
+            position: absolute;
+            bottom: max(32px, env(safe-area-inset-bottom, 32px));
+            font-size: 11px;
+            color: rgba(120,0,0,0.4);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-family: "Courier New", monospace;
+        }
+
+        /* ── Phone Mode — Remote Control Card ───────────── */
+        body.phone-mode .card-remote {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .remote-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            width: 100%;
+            letter-spacing: 0.02em;
+        }
+        .remote-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
+        .remote-btn.btn-refresh { border-color: rgba(99,179,237,0.3); color: #60a5fa; }
+        .remote-btn.btn-refresh:active { background: rgba(99,179,237,0.1); }
+        .remote-btn.btn-night { border-color: rgba(204,0,0,0.4); color: #cc3333; }
+        .remote-btn.btn-night:active { background: rgba(204,0,0,0.1); }
+        .remote-btn .btn-icon { font-size: 1.1rem; }
+        #remote-status {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+            min-height: 16px;
+            transition: color 0.3s;
+        }
+        #remote-status.ok  { color: #4ade80; }
+        #remote-status.err { color: #f87171; }
+
+        /* Hide remote card on desktop */
+        body:not(.phone-mode) .card-remote { display: none !important; }
+
+        /* Night Mode button on desktop header */
+        #night-mode-btn {
+            background: none;
+            border: 1px solid rgba(180,0,0,0.3);
+            color: rgba(180,0,0,0.7);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.05em;
+            transition: background 0.15s;
+        }
+        #night-mode-btn:hover { background: rgba(180,0,0,0.1); }
+        body.phone-mode #night-mode-btn { display: none; }
+
         .intel-ticker-wrap {
             overflow: hidden;
             width: 100%;
@@ -1791,6 +1892,8 @@
                 <div class="logo-icon"><img src="assets/logo.jpg" alt="Josh logo" /></div>
                 <h1>Mission Control</h1>
             </div>
+            <!-- Desktop Night Mode button -->
+            <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙 Night</button>
             <!-- Mobile-only cost pill -->
             <div id="mobile-cost-pill">
                 <div class="mcp-row"><span class="mcp-label">Session</span><span class="mcp-val" id="mcp-session">$0.00</span></div>
@@ -1849,6 +1952,21 @@
                         </div>
                         <div id="model-usage-card"></div>
                     </div>
+
+                    <!-- Remote Control card — phone-mode only -->
+                    <div class="card card-remote">
+                        <div class="card-header">
+                            <span class="icon">🎮</span>
+                            <h2>Desktop Control</h2>
+                        </div>
+                        <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
+                            <span class="btn-icon">↻</span> Refresh Mission Control
+                        </button>
+                        <button class="remote-btn btn-night" onclick="remoteNightMode()">
+                            <span class="btn-icon">🌙</span> Night Mode
+                        </button>
+                        <div id="remote-status"></div>
+                    </div>
                 </div>
             </div>
 
@@ -1878,6 +1996,13 @@
             </div>
         </div><!-- /kiosk-main -->
 
+    </div>
+
+    <!-- ── Night Mode Overlay ─────────────────────────────────────────── -->
+    <div id="night-mode-overlay" style="display:none">
+        <div id="night-clock"></div>
+        <div id="night-date"></div>
+        <div id="night-hint">click anywhere to exit</div>
     </div>
 
     <script>
@@ -2362,6 +2487,81 @@
             }
 
             el.innerHTML = html;
+        }
+
+        // ── Night Mode ────────────────────────────────────────────────────
+        let _nightClockTimer = null;
+
+        function enterNightMode() {
+            const overlay = document.getElementById('night-mode-overlay');
+            overlay.style.display = 'flex';
+            updateNightClock();
+            _nightClockTimer = setInterval(updateNightClock, 1000);
+            overlay.addEventListener('click', exitNightMode, { once: true });
+            // Notify local server so phone knows we're in night mode
+            fetch('http://localhost:8765/nightmode/on', { method: 'POST' }).catch(() => {});
+        }
+
+        function exitNightMode() {
+            const overlay = document.getElementById('night-mode-overlay');
+            overlay.style.display = 'none';
+            clearInterval(_nightClockTimer);
+            fetch('http://localhost:8765/nightmode/off', { method: 'POST' }).catch(() => {});
+        }
+
+        function updateNightClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+            const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            const clock = document.getElementById('night-clock');
+            const date  = document.getElementById('night-date');
+            if (clock) clock.textContent = `${h}:${m}:${s}`;
+            if (date)  date.textContent  = `${days[now.getDay()]}  ${months[now.getMonth()]} ${now.getDate()}  ${now.getFullYear()}`;
+        }
+
+        // Poll for night mode activation from phone
+        setInterval(async () => {
+            try {
+                const r = await fetch('http://localhost:8765/nightmode/state?_=' + Date.now(), { signal: AbortSignal.timeout(500) });
+                if (!r.ok) return;
+                const s = await r.json();
+                const overlay = document.getElementById('night-mode-overlay');
+                const isShowing = overlay && overlay.style.display !== 'none';
+                if (s.nightMode && !isShowing) enterNightMode();
+                if (!s.nightMode && isShowing) exitNightMode();
+            } catch {}
+        }, 1500);
+
+        // ── Remote Control (from phone PWA) ──────────────────────────────
+        const REMOTE_BASE = 'http://localhost:8765';
+
+        async function remoteRefresh() {
+            const status = document.getElementById('remote-status');
+            if (status) { status.textContent = 'Refreshing…'; status.className = ''; }
+            try {
+                const r = await fetch(`${REMOTE_BASE}/refresh`, { method: 'POST', signal: AbortSignal.timeout(3000) });
+                const d = await r.json();
+                if (status) { status.textContent = d.ok ? '✓ Refreshed' : '✗ Failed'; status.className = d.ok ? 'ok' : 'err'; }
+            } catch {
+                if (status) { status.textContent = '✗ Mac offline'; status.className = 'err'; }
+            }
+            setTimeout(() => { if (status) { status.textContent = ''; status.className = ''; } }, 3000);
+        }
+
+        async function remoteNightMode() {
+            const status = document.getElementById('remote-status');
+            if (status) { status.textContent = 'Activating night mode…'; status.className = ''; }
+            try {
+                const r = await fetch(`${REMOTE_BASE}/nightmode/on`, { method: 'POST', signal: AbortSignal.timeout(3000) });
+                const d = await r.json();
+                if (status) { status.textContent = d.ok ? '🌙 Night mode on' : '✗ Failed'; status.className = d.ok ? 'ok' : 'err'; }
+            } catch {
+                if (status) { status.textContent = '✗ Mac offline'; status.className = 'err'; }
+            }
+            setTimeout(() => { if (status) { status.textContent = ''; status.className = ''; } }, 3000);
         }
 
         function updateMobileCostPill(mu) {
