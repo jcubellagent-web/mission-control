@@ -300,27 +300,27 @@
         .cron-row {
             display: grid;
             grid-template-columns: auto 1fr auto;
-            gap: 8px;
-            padding: 6px 8px;
-            border-radius: 6px;
+            gap: 6px;
+            padding: 4px 6px;
+            border-radius: 5px;
             align-items: center;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.15s;
         }
         .cron-row:hover { background: rgba(255,255,255,0.03); }
-        .cron-row.has-error { background: rgba(239,68,68,0.08); }
+        .cron-row.has-error { background: rgba(239,68,68,0.06); }
         .cron-dot {
-            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-            background: rgba(255,255,255,0.2);
+            width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,255,255,0.15);
         }
         .cron-dot.healthy { background: #4ade80; }
         .cron-dot.error   { background: #e53e3e; }
         .cron-dot.paused  { background: #fbbf24; }
-        .cron-name-group { min-width: 0; }
-        .cron-name { font-weight: 500; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cron-desc { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
-        .cron-schedule { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-        .cron-status { font-size: 0.68rem; }
+        .cron-name-group { min-width: 0; line-height: 1.2; }
+        .cron-name { font-weight: 500; font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cron-desc { font-size: 0.63rem; color: rgba(255,255,255,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cron-schedule { font-size: 0.63rem; color: rgba(255,255,255,0.3); white-space: nowrap; flex-shrink: 0; }
+        .cron-status { font-size: 0.63rem; }
         .cron-errors {
             font-size: 0.75rem;
             padding: 2px 8px;
@@ -1967,7 +1967,7 @@
             // Today's Jobs (diff-guarded)
             if (sectionChanged('crons', data.crons)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
-            const cronRows = (data.crons || []).slice(0, kioskMode ? 8 : phoneMode ? 4 : 8).map(cron => {
+            const cronRows = (data.crons || []).slice(0, kioskMode ? 12 : phoneMode ? 5 : 12).map(cron => {
                 const dotClass = cron.status === 'ok' ? 'healthy' : cron.status === 'paused' ? 'paused' : cron.errors > 0 ? 'error' : 'healthy';
                 const schedule = cron.schedule || '';
                 const errorNote = cron.errors > 0 ? ` · ${cron.errors} err` : '';
