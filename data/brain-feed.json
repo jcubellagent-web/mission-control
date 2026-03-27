@@ -1,9 +1,20 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-27T02:11:46Z"
+  "objective": "Test latency check",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Reading",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Analyzing",
+      "status": "active",
+      "tool": "gemini"
+    }
+  ],
+  "currentTool": "gemini",
+  "updatedAt": "2026-03-27T05:13:20Z"
 }
