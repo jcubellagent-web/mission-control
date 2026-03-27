@@ -294,24 +294,31 @@
 
         .cron-table { width: 100%; }
         .cron-table.compact .cron-row {
-            padding-top: 10px;
-            padding-bottom: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
         }
         .cron-row {
             display: grid;
-            grid-template-columns: 1fr auto auto auto;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 8px;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 6px;
             align-items: center;
             cursor: pointer;
             transition: background 0.2s;
         }
         .cron-row:hover { background: rgba(255,255,255,0.03); }
         .cron-row.has-error { background: rgba(239,68,68,0.08); }
-        .cron-name { font-weight: 500; font-size: 0.875rem; }
-        .cron-schedule { font-size: 0.75rem; color: var(--text-muted); }
-        .cron-status { font-size: 0.75rem; }
+        .cron-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+            background: rgba(255,255,255,0.2);
+        }
+        .cron-dot.healthy { background: #4ade80; }
+        .cron-dot.error   { background: #e53e3e; }
+        .cron-dot.paused  { background: #fbbf24; }
+        .cron-name { font-weight: 500; font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cron-schedule { font-size: 0.68rem; color: var(--text-muted); }
+        .cron-status { font-size: 0.68rem; }
         .cron-errors {
             font-size: 0.75rem;
             padding: 2px 8px;
@@ -1958,16 +1965,15 @@
             // Today's Jobs (diff-guarded)
             if (sectionChanged('crons', data.crons)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
-            const cronRows = (data.crons || []).slice(0, kioskMode ? 3 : phoneMode ? 3 : 5).map(cron => {
-                const chipClass = cron.status === 'ok' ? 'ok' : cron.status === 'paused' ? 'paused' : 'error';
-                const cronMeta = [cron.schedule || 'No schedule', cron.errors > 0 ? `${cron.errors} error${cron.errors === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ');
+            const cronRows = (data.crons || []).slice(0, kioskMode ? 8 : phoneMode ? 4 : 8).map(cron => {
+                const dotClass = cron.status === 'ok' ? 'healthy' : cron.status === 'paused' ? 'paused' : cron.errors > 0 ? 'error' : 'healthy';
+                const schedule = cron.schedule || '';
+                const errorNote = cron.errors > 0 ? ` · ${cron.errors} err` : '';
                 return `
-                    <div class="job-row">
-                        <div>
-                            <div class="job-name">${escapeHtml(cron.name)}</div>
-                            <div class="job-detail">${escapeHtml(cronMeta)}</div>
-                        </div>
-                        <div class="job-chip ${chipClass}">${escapeHtml(cron.status || 'unknown')}</div>
+                    <div class="cron-row${cron.errors > 0 ? ' has-error' : ''}">
+                        <div class="cron-dot ${dotClass}"></div>
+                        <div class="cron-name">${escapeHtml(cron.name)}</div>
+                        <div class="cron-schedule">${escapeHtml(schedule + errorNote)}</div>
                     </div>
                 `;
             }).join('');

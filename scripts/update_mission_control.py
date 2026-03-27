@@ -26,7 +26,10 @@ KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsa
 
 CRON_TARGETS = [
     {"name": "Chiro invite sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly"},
-    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/5 * * * *"}
+    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/5 * * * *"},
+    {"name": "⚾ Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily"},
+    {"name": "⚾ Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h"},
+    {"name": "⚾ Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am"},
 ]
 
 
