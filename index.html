@@ -1813,8 +1813,15 @@
                 </span>`);
             }
 
-            // Top signal headlines (highest scored, max 5)
-            const signals = (f.signal || []).slice(0, 5);
+            // English-only guard: >80% ASCII chars
+            function isEnglish(text) {
+                if (!text) return false;
+                const ascii = [...text].filter(c => c.charCodeAt(0) < 128).length;
+                return ascii / text.length > 0.8;
+            }
+
+            // Top signal headlines (highest scored, max 5, English only)
+            const signals = (f.signal || []).filter(s => isEnglish(s.title)).slice(0, 5);
             signals.forEach(s => {
                 if (!s.title) return;
                 const title = s.title.length > 70 ? s.title.slice(0, 68) + '…' : s.title;
