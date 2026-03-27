@@ -517,259 +517,198 @@
            PHONE MODE — Full re-polish
            ═══════════════════════════════════════════════ */
 
+        /* ══════════════════════════════════════════════════════════════
+           PHONE MODE — CINEMATIC REDESIGN
+           ══════════════════════════════════════════════════════════════ */
         body.phone-mode {
-            background-color: #080a10;
-            background-image: url('assets/logo-pattern.jpg');
-            background-size: 180px auto;
-            background-repeat: repeat;
-            background-attachment: fixed;
-            overflow-x: hidden; /* no sideways scroll */
+            background: #05070d;
+            overflow-x: hidden;
         }
+
+        /* Subtle dark vignette — no more massive overlay gap */
         body.phone-mode::before {
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(8, 10, 16, 0.87);
+            background:
+                radial-gradient(ellipse 100% 40% at 50% 0%, rgba(15,20,40,0.95) 0%, transparent 100%),
+                radial-gradient(ellipse 80% 50% at 50% 100%, rgba(5,7,13,0.8) 0%, transparent 100%);
             z-index: 0;
             pointer-events: none;
         }
+
         body.phone-mode .container {
             position: relative;
             z-index: 1;
-            overflow-x: hidden;
-        }
-        body.phone-mode .container {
             width: 100%;
             max-width: 430px;
-            padding: 0 0 max(24px, env(safe-area-inset-bottom, 24px)) 0;
-            gap: 0;
+            padding: 0 0 max(32px, env(safe-area-inset-bottom, 32px)) 0;
+            overflow-x: hidden;
         }
 
-        /* ── Slim header ─────────────────────────────── */
+        /* ── Header — cinematic centered identity ────── */
         body.phone-mode header {
             position: sticky;
             top: 0;
             z-index: 50;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: max(env(safe-area-inset-top, 0px), 6px) 16px 6px;
-            margin: 0 0 10px 0;
-            min-height: 38px;
-            background: rgba(8, 10, 16, 0.92);
-            backdrop-filter: blur(24px) saturate(1.5);
-            -webkit-backdrop-filter: blur(24px) saturate(1.5);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            justify-content: center;
+            padding: max(env(safe-area-inset-top, 14px), 14px) 16px 12px;
+            margin: 0 0 16px 0;
+            background: rgba(5, 7, 13, 0.9);
+            backdrop-filter: blur(32px) saturate(1.8);
+            -webkit-backdrop-filter: blur(32px) saturate(1.8);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             background-image: none;
+            gap: 6px;
         }
         body.phone-mode header::before { display: none; }
         body.phone-mode header > * { position: relative; z-index: 1; }
 
+        /* Logo row — centered */
         body.phone-mode .logo {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
         }
         body.phone-mode .logo-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 5px;
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(99,179,237,0.2);
         }
         body.phone-mode .logo h1 {
-            font-size: 0.76rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-            letter-spacing: 0.04em;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
-        /* Model usage pill in header */
+        /* Cost pill — centered below logo */
         #mobile-cost-pill {
             display: none;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 1px;
-            font-size: 0.65rem;
-            font-weight: 500;
-            color: rgba(255,255,255,0.35);
+            flex-direction: row;
+            align-items: center;
+            gap: 0;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 4px 10px;
+            border-radius: 20px;
+            overflow: hidden;
             white-space: nowrap;
-            line-height: 1.3;
         }
-        #mobile-cost-pill .mcp-row        { display: flex; align-items: center; gap: 5px; }
-        #mobile-cost-pill .mcp-label      { color: rgba(255,255,255,0.25); font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase; }
-        #mobile-cost-pill .mcp-val        { color: rgba(255,255,255,0.75); font-weight: 600; font-variant-numeric: tabular-nums; }
-        #mobile-cost-pill .mcp-sep        { width: 100%; height: 1px; background: rgba(255,255,255,0.06); margin: 2px 0; }
+        #mobile-cost-pill .mcp-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+        }
+        #mobile-cost-pill .mcp-row + .mcp-row {
+            border-left: 1px solid rgba(255,255,255,0.08);
+        }
+        #mobile-cost-pill .mcp-label {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        #mobile-cost-pill .mcp-val {
+            color: rgba(255,255,255,0.8);
+            font-weight: 700;
+            font-size: 0.78rem;
+            font-variant-numeric: tabular-nums;
+        }
+        #mobile-cost-pill .mcp-sep { display: none; }
         body.phone-mode #mobile-cost-pill { display: flex; }
 
-        /* Hide desktop-only header elements on phone */
+        /* Hide desktop-only header elements */
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
         body.phone-mode #refresh-btn,
         body.phone-mode #airpoint-toggle,
         body.phone-mode .connection-status,
-        body.phone-mode .header-status { display: none !important; }
+        body.phone-mode .header-status,
+        body.phone-mode #night-mode-btn { display: none !important; }
 
         /* ── Card base ───────────────────────────────── */
-        body.phone-mode .card {
-            background: #0f1117;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 16px;
-            padding: 16px;
-            margin: 0 12px 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
-            animation: pm-fadein 0.35s ease both;
-        }
         @keyframes pm-fadein {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        body.phone-mode .card:nth-child(1) { animation-delay: 0.05s; }
-        body.phone-mode .card:nth-child(2) { animation-delay: 0.12s; }
-        body.phone-mode .card:nth-child(3) { animation-delay: 0.19s; }
+        body.phone-mode .card {
+            background: rgba(14, 16, 24, 0.95);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 18px;
+            margin: 0 14px 14px;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.04) inset,
+                0 4px 24px rgba(0,0,0,0.5);
+            animation: pm-fadein 0.4s cubic-bezier(0.16,1,0.3,1) both;
+            backdrop-filter: blur(20px);
+        }
+        body.phone-mode .card:nth-child(1) { animation-delay: 0.04s; }
+        body.phone-mode .card:nth-child(2) { animation-delay: 0.10s; }
+        body.phone-mode .card:nth-child(3) { animation-delay: 0.16s; }
+        body.phone-mode .card:nth-child(4) { animation-delay: 0.22s; }
 
         body.phone-mode .card-header {
-            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
         }
         body.phone-mode .card-header h2 {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.35);
         }
 
         /* ── Brain Feed card ─────────────────────────── */
         body.phone-mode .card-brain {
-            border-color: rgba(99,179,237,0.12);
+            border-color: rgba(99,179,237,0.1);
+            background: rgba(10, 14, 26, 0.97);
         }
         body.phone-mode .card-brain.brain-active {
-            border-color: rgba(99,179,237,0.28);
-            box-shadow: 0 0 20px rgba(99,179,237,0.08), 0 2px 12px rgba(0,0,0,0.4);
-            animation: pm-fadein 0.35s ease both, pm-brain-pulse 3s ease-in-out infinite;
+            border-color: rgba(99,179,237,0.25);
+            box-shadow:
+                0 1px 0 rgba(99,179,237,0.08) inset,
+                0 0 28px rgba(99,179,237,0.07),
+                0 4px 24px rgba(0,0,0,0.5);
+            animation: pm-fadein 0.4s cubic-bezier(0.16,1,0.3,1) both, pm-brain-pulse 4s ease-in-out infinite;
         }
         @keyframes pm-brain-pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(99,179,237,0.08), 0 2px 12px rgba(0,0,0,0.4); }
-            50%       { box-shadow: 0 0 32px rgba(99,179,237,0.18), 0 2px 12px rgba(0,0,0,0.4); }
+            0%,100% { box-shadow: 0 1px 0 rgba(99,179,237,0.08) inset, 0 0 28px rgba(99,179,237,0.07), 0 4px 24px rgba(0,0,0,0.5); }
+            50%      { box-shadow: 0 1px 0 rgba(99,179,237,0.12) inset, 0 0 48px rgba(99,179,237,0.14), 0 4px 24px rgba(0,0,0,0.5); }
         }
 
-        /* Brain feed objective */
         body.phone-mode .bf-objective-text {
-            font-size: 0.88rem;
+            font-size: 0.92rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.85);
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
-        body.phone-mode .bf-step-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 7px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        body.phone-mode .bf-step-row:last-child { border-bottom: none; }
-        body.phone-mode .bf-step-icon { font-size: 0.9rem; flex-shrink: 0; }
-        body.phone-mode .bf-step-body { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
-
-        /* Idle state */
-        body.phone-mode .bf-idle-msg {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.25);
-            font-style: italic;
-            text-align: center;
-            padding: 16px 0;
+            color: rgba(255,255,255,0.88);
+            line-height: 1.45;
+            margin-bottom: 14px;
         }
 
         /* ── Today's Jobs card ───────────────────────── */
-        body.phone-mode .card-jobs .job-category-label {
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.25);
-            margin: 10px 0 6px;
-        }
-        body.phone-mode .card-jobs .job-category-label:first-child { margin-top: 0; }
+        body.phone-mode .card-jobs { background: rgba(11, 13, 22, 0.96); }
 
-        body.phone-mode .job-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 7px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        body.phone-mode .job-row:last-child { border-bottom: none; }
-
-        body.phone-mode .job-dot {
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        body.phone-mode .job-dot.cat-fantasy     { background: #a78bfa; }
-        body.phone-mode .job-dot.cat-intelligence { background: #60a5fa; }
-        body.phone-mode .job-dot.cat-maintenance  { background: rgba(255,255,255,0.2); }
-        body.phone-mode .job-dot.cat-default      { background: rgba(255,255,255,0.15); }
-
-        body.phone-mode .job-name {
-            flex: 1;
-            font-size: 0.80rem;
-            font-weight: 500;
-            color: rgba(255,255,255,0.75);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        body.phone-mode .job-time {
-            font-size: 0.68rem;
-            color: rgba(255,255,255,0.28);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        body.phone-mode .job-status-dot {
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        body.phone-mode .job-status-dot.ok      { background: #4ade80; }
-        body.phone-mode .job-status-dot.warn    { background: #fbbf24; }
-        body.phone-mode .job-status-dot.err     { background: #f87171; }
-        body.phone-mode .job-status-dot.pending { background: rgba(255,255,255,0.15); }
-
-        /* ── Hide full model usage card on mobile ────── */
-        body.phone-mode .card-model { display: none !important; }
-
-        /* Hide other desktop cards not needed on mobile */
-        body.phone-mode .card-events,
-        body.phone-mode .card-devices,
-        body.phone-mode .card-airpoint,
-        body.phone-mode .card-activity,
-        body.phone-mode .card-newsfeed,
-        body.phone-mode .stats-row,
-        body.phone-mode .alert-banner { display: none !important; }
-
-        body.phone-mode .brain-stream,
-        body.phone-mode .jobs-shell,
-        body.phone-mode .brain-hero {
-            border-radius: 10px;
-        }
-
-        /* ── Phone-mode Jobs: timeline restyle ───────── */
-        body.phone-mode .jobs-shell { padding: 0; background: none; border: none; }
-        body.phone-mode .job-group  { margin-bottom: 14px; }
+        body.phone-mode .job-group { margin-bottom: 16px; }
         body.phone-mode .job-group:last-child { margin-bottom: 0; }
 
         body.phone-mode .job-group-title,
         body.phone-mode .cron-category-header {
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.22);
-            margin-bottom: 6px;
-            padding-bottom: 4px;
+            color: rgba(255,255,255,0.18);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -777,8 +716,8 @@
         body.phone-mode .job-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 7px 0;
+            gap: 11px;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.04);
         }
         body.phone-mode .cron-row:last-child,
@@ -789,18 +728,17 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
-        body.phone-mode .cron-dot.healthy { background: #4ade80; }
-        body.phone-mode .cron-dot.error   { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.4); }
-        body.phone-mode .cron-dot.paused  { background: rgba(255,255,255,0.2); }
-
-        body.phone-mode .cron-category { margin-bottom: 10px; }
-
+        body.phone-mode .cron-dot.healthy { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
+        body.phone-mode .cron-dot.error   { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+        body.phone-mode .cron-dot.paused  { background: rgba(255,255,255,0.18); }
+        body.phone-mode .cron-category { margin-bottom: 12px; }
         body.phone-mode .cron-name-group { flex: 1; min-width: 0; }
+
         body.phone-mode .cron-name,
         body.phone-mode .job-name {
-            font-size: 0.79rem;
+            font-size: 0.81rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.72);
+            color: rgba(255,255,255,0.75);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -808,35 +746,53 @@
         body.phone-mode .cron-desc,
         body.phone-mode .job-detail {
             font-size: 0.68rem;
-            color: rgba(255,255,255,0.28);
+            color: rgba(255,255,255,0.25);
             margin-top: 1px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         body.phone-mode .cron-schedule,
-        body.phone-mode .job-chip {
-            font-size: 0.68rem;
-            color: rgba(255,255,255,0.28);
+        body.phone-mode .job-chip,
+        body.phone-mode .job-time {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.22);
             white-space: nowrap;
             flex-shrink: 0;
         }
         body.phone-mode .job-chip.error { color: #f87171; }
-
         body.phone-mode .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
         body.phone-mode .run-badge {
-            font-size: 0.6rem;
-            padding: 1px 5px;
-            border-radius: 4px;
-            background: rgba(255,255,255,0.06);
-            color: rgba(255,255,255,0.3);
+            font-size: 0.58rem; padding: 1px 5px; border-radius: 4px;
+            background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.28);
             border: 1px solid rgba(255,255,255,0.06);
         }
         body.phone-mode .run-badge.done {
-            background: rgba(74,222,128,0.08);
-            color: rgba(74,222,128,0.6);
-            border-color: rgba(74,222,128,0.15);
+            background: rgba(52,211,153,0.07); color: rgba(52,211,153,0.6);
+            border-color: rgba(52,211,153,0.15);
         }
+        body.phone-mode .jobs-shell { padding: 0; background: none; border: none; }
+        body.phone-mode .brain-stream, body.phone-mode .jobs-shell, body.phone-mode .brain-hero { border-radius: 12px; }
+
+        /* ── Hide unused cards ───────────────────────── */
+        body.phone-mode .card-model,
+        body.phone-mode .card-events,
+        body.phone-mode .card-devices,
+        body.phone-mode .card-airpoint,
+        body.phone-mode .card-activity,
+        body.phone-mode .card-newsfeed,
+        body.phone-mode .stats-row,
+        body.phone-mode .alert-banner { display: none !important; }
+
+        /* ── Edge laser behind cards ─────────────────── */
+        body.phone-mode #edge-laser { z-index: 0; }
+
+        /* ── Job dot colors ──────────────────────────── */
+        body.phone-mode .job-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        body.phone-mode .job-dot.cat-fantasy      { background: #a78bfa; }
+        body.phone-mode .job-dot.cat-intelligence { background: #60a5fa; }
+        body.phone-mode .job-dot.cat-maintenance  { background: rgba(255,255,255,0.2); }
+        body.phone-mode .job-dot.cat-default      { background: rgba(255,255,255,0.15); }
 
         /* Category dot colors by name */
         body.phone-mode .cron-category:has(.cron-category-header:-webkit-contains("Fantasy")) .cron-dot.healthy { background: #a78bfa; }
@@ -994,45 +950,80 @@
             font-family: "Courier New", monospace;
         }
 
-        /* ── Phone Mode — Remote Control Card ───────────── */
+        /* ── Remote Control Card — Cinematic ────────────── */
         body.phone-mode .card-remote {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 11px;
+            background: rgba(10, 11, 20, 0.97);
+            border-color: rgba(255,255,255,0.07);
         }
+
+        .remote-btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px;
+        }
+
         .remote-btn {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 14px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.8);
-            font-size: 0.85rem;
-            font-weight: 600;
+            gap: 8px;
+            padding: 20px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.7);
+            font-size: 0.72rem;
+            font-weight: 700;
             font-family: inherit;
             cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
             width: 100%;
-            letter-spacing: 0.02em;
         }
-        .remote-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
-        .remote-btn.btn-refresh { border-color: rgba(99,179,237,0.3); color: #60a5fa; }
-        .remote-btn.btn-refresh:active { background: rgba(99,179,237,0.1); }
-        .remote-btn.btn-night { border-color: rgba(204,0,0,0.4); color: #cc3333; }
-        .remote-btn.btn-night:active { background: rgba(204,0,0,0.1); }
-        .remote-btn .btn-icon { font-size: 1.1rem; }
+        .remote-btn:active {
+            transform: scale(0.95);
+            filter: brightness(1.2);
+        }
+        .remote-btn .btn-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+
+        .remote-btn.btn-refresh {
+            background: linear-gradient(135deg, rgba(30,58,100,0.6) 0%, rgba(15,30,60,0.8) 100%);
+            border-color: rgba(96,165,250,0.2);
+            color: #93c5fd;
+            box-shadow: 0 0 24px rgba(96,165,250,0.05) inset, 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .remote-btn.btn-refresh:active {
+            background: linear-gradient(135deg, rgba(40,80,140,0.8) 0%, rgba(20,50,100,0.9) 100%);
+        }
+
+        .remote-btn.btn-night {
+            background: linear-gradient(135deg, rgba(80,10,10,0.5) 0%, rgba(40,5,5,0.8) 100%);
+            border-color: rgba(220,38,38,0.2);
+            color: #fca5a5;
+            box-shadow: 0 0 24px rgba(220,38,38,0.05) inset, 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .remote-btn.btn-night:active {
+            background: linear-gradient(135deg, rgba(120,20,20,0.8) 0%, rgba(80,10,10,0.9) 100%);
+        }
+
         #remote-status {
-            font-size: 0.68rem;
-            color: rgba(255,255,255,0.25);
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.2);
             text-align: center;
-            min-height: 16px;
+            min-height: 14px;
+            letter-spacing: 0.05em;
             transition: color 0.3s;
         }
-        #remote-status.ok  { color: #4ade80; }
+        #remote-status.ok  { color: #34d399; }
         #remote-status.err { color: #f87171; }
 
         /* Hide remote card on desktop */
@@ -1956,15 +1947,19 @@
                     <!-- Remote Control card — phone-mode only -->
                     <div class="card card-remote">
                         <div class="card-header">
-                            <span class="icon">🎮</span>
+                            <span class="icon">🖥</span>
                             <h2>Desktop Control</h2>
                         </div>
-                        <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
-                            <span class="btn-icon">↻</span> Refresh Mission Control
-                        </button>
-                        <button class="remote-btn btn-night" onclick="remoteNightMode()">
-                            <span class="btn-icon">🌙</span> Night Mode
-                        </button>
+                        <div class="remote-btn-row">
+                            <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
+                                <span class="btn-icon">↻</span>
+                                Refresh
+                            </button>
+                            <button class="remote-btn btn-night" onclick="remoteNightMode()">
+                                <span class="btn-icon">🌙</span>
+                                Night Mode
+                            </button>
+                        </div>
                         <div id="remote-status"></div>
                     </div>
                 </div>
