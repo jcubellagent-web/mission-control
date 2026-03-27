@@ -513,37 +513,312 @@
             .event-time { min-width: 0; }
             .model-breakdown { grid-template-columns: 1fr; }
         }
-        body.phone-mode .container {
-            width: min(100%, 430px);
-            padding: max(12px, env(safe-area-inset-top, 0px)) 14px max(18px, env(safe-area-inset-bottom, 0px)) 14px;
+        /* ═══════════════════════════════════════════════
+           PHONE MODE — Full re-polish
+           ═══════════════════════════════════════════════ */
+
+        body.phone-mode {
+            background: #080a10;
         }
+        body.phone-mode .container {
+            width: 100%;
+            max-width: 430px;
+            padding: 0 0 max(24px, env(safe-area-inset-bottom, 24px)) 0;
+            gap: 0;
+        }
+
+        /* ── Slim header ─────────────────────────────── */
         body.phone-mode header {
             position: sticky;
             top: 0;
-            z-index: 20;
-            padding: 10px 0 2px;
-            margin-bottom: 16px;
-            background: #0a0a0a;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: max(env(safe-area-inset-top, 0px), 10px) 16px 10px;
+            margin: 0 0 12px 0;
+            min-height: 44px;
+            background: rgba(8, 10, 16, 0.88);
+            backdrop-filter: blur(20px) saturate(1.4);
+            -webkit-backdrop-filter: blur(20px) saturate(1.4);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background-image: none;
+        }
+        body.phone-mode header::before { display: none; }
+        body.phone-mode header > * { position: relative; z-index: 1; }
+
+        body.phone-mode .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         body.phone-mode .logo-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
         }
         body.phone-mode .logo h1 {
-            font-size: 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 0.03em;
         }
+
+        /* Model usage pill in header */
+        #mobile-cost-pill {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 999px;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+        #mobile-cost-pill .mcp-session { color: rgba(255,255,255,0.7); }
+        #mobile-cost-pill .mcp-sep     { color: rgba(255,255,255,0.2); }
+        body.phone-mode #mobile-cost-pill { display: flex; }
+
+        /* Hide desktop-only header elements on phone */
+        body.phone-mode .god-mode-badge,
+        body.phone-mode .freshness-badge,
+        body.phone-mode #refresh-btn,
+        body.phone-mode #airpoint-toggle,
+        body.phone-mode .connection-status,
+        body.phone-mode .header-status { display: none !important; }
+
+        /* ── Card base ───────────────────────────────── */
         body.phone-mode .card {
-            border-radius: 14px;
-            padding: 18px;
+            background: #0f1117;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 0 12px 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            animation: pm-fadein 0.35s ease both;
         }
+        @keyframes pm-fadein {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        body.phone-mode .card:nth-child(1) { animation-delay: 0.05s; }
+        body.phone-mode .card:nth-child(2) { animation-delay: 0.12s; }
+        body.phone-mode .card:nth-child(3) { animation-delay: 0.19s; }
+
+        body.phone-mode .card-header {
+            margin-bottom: 14px;
+        }
+        body.phone-mode .card-header h2 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ── Brain Feed card ─────────────────────────── */
+        body.phone-mode .card-brain {
+            border-color: rgba(99,179,237,0.12);
+        }
+        body.phone-mode .card-brain.brain-active {
+            border-color: rgba(99,179,237,0.28);
+            box-shadow: 0 0 20px rgba(99,179,237,0.08), 0 2px 12px rgba(0,0,0,0.4);
+            animation: pm-fadein 0.35s ease both, pm-brain-pulse 3s ease-in-out infinite;
+        }
+        @keyframes pm-brain-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(99,179,237,0.08), 0 2px 12px rgba(0,0,0,0.4); }
+            50%       { box-shadow: 0 0 32px rgba(99,179,237,0.18), 0 2px 12px rgba(0,0,0,0.4); }
+        }
+
+        /* Brain feed objective */
+        body.phone-mode .bf-objective-text {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        body.phone-mode .bf-step-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        body.phone-mode .bf-step-row:last-child { border-bottom: none; }
+        body.phone-mode .bf-step-icon { font-size: 0.9rem; flex-shrink: 0; }
+        body.phone-mode .bf-step-body { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
+
+        /* Idle state */
+        body.phone-mode .bf-idle-msg {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.25);
+            font-style: italic;
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        /* ── Today's Jobs card ───────────────────────── */
+        body.phone-mode .card-jobs .job-category-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            margin: 10px 0 6px;
+        }
+        body.phone-mode .card-jobs .job-category-label:first-child { margin-top: 0; }
+
+        body.phone-mode .job-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        body.phone-mode .job-row:last-child { border-bottom: none; }
+
+        body.phone-mode .job-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        body.phone-mode .job-dot.cat-fantasy     { background: #a78bfa; }
+        body.phone-mode .job-dot.cat-intelligence { background: #60a5fa; }
+        body.phone-mode .job-dot.cat-maintenance  { background: rgba(255,255,255,0.2); }
+        body.phone-mode .job-dot.cat-default      { background: rgba(255,255,255,0.15); }
+
+        body.phone-mode .job-name {
+            flex: 1;
+            font-size: 0.80rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.75);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        body.phone-mode .job-time {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.28);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        body.phone-mode .job-status-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        body.phone-mode .job-status-dot.ok      { background: #4ade80; }
+        body.phone-mode .job-status-dot.warn    { background: #fbbf24; }
+        body.phone-mode .job-status-dot.err     { background: #f87171; }
+        body.phone-mode .job-status-dot.pending { background: rgba(255,255,255,0.15); }
+
+        /* ── Hide full model usage card on mobile ────── */
+        body.phone-mode .card-model { display: none !important; }
+
+        /* Hide other desktop cards not needed on mobile */
+        body.phone-mode .card-events,
+        body.phone-mode .card-devices,
+        body.phone-mode .card-airpoint,
+        body.phone-mode .card-activity,
+        body.phone-mode .card-newsfeed,
+        body.phone-mode .stats-row,
+        body.phone-mode .alert-banner { display: none !important; }
+
         body.phone-mode .brain-stream,
         body.phone-mode .jobs-shell,
         body.phone-mode .brain-hero {
             border-radius: 10px;
         }
+
+        /* ── Phone-mode Jobs: timeline restyle ───────── */
+        body.phone-mode .jobs-shell { padding: 0; background: none; border: none; }
+        body.phone-mode .job-group  { margin-bottom: 14px; }
+        body.phone-mode .job-group:last-child { margin-bottom: 0; }
+
+        body.phone-mode .job-group-title,
+        body.phone-mode .cron-category-header {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.22);
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        body.phone-mode .cron-row,
+        body.phone-mode .job-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        body.phone-mode .cron-row:last-child,
+        body.phone-mode .job-row:last-child { border-bottom: none; }
+
+        body.phone-mode .cron-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        body.phone-mode .cron-dot.healthy { background: #4ade80; }
+        body.phone-mode .cron-dot.error   { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.4); }
+        body.phone-mode .cron-dot.paused  { background: rgba(255,255,255,0.2); }
+
+        body.phone-mode .cron-category { margin-bottom: 10px; }
+
+        body.phone-mode .cron-name-group { flex: 1; min-width: 0; }
+        body.phone-mode .cron-name,
+        body.phone-mode .job-name {
+            font-size: 0.79rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.72);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        body.phone-mode .cron-desc,
+        body.phone-mode .job-detail {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.28);
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        body.phone-mode .cron-schedule,
+        body.phone-mode .job-chip {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.28);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        body.phone-mode .job-chip.error { color: #f87171; }
+
+        body.phone-mode .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+        body.phone-mode .run-badge {
+            font-size: 0.6rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        body.phone-mode .run-badge.done {
+            background: rgba(74,222,128,0.08);
+            color: rgba(74,222,128,0.6);
+            border-color: rgba(74,222,128,0.15);
+        }
+
+        /* Category dot colors by name */
+        body.phone-mode .cron-category:has(.cron-category-header:-webkit-contains("Fantasy")) .cron-dot.healthy { background: #a78bfa; }
+        body.phone-mode .cron-category:has(.cron-category-header:-webkit-contains("Intelligence")) .cron-dot.healthy { background: #60a5fa; }
         /* ============================================================
            KIOSK MODE — 2-COLUMN LAYOUT
            Left:  Brain Feed (tall) + Today's Jobs below
@@ -1466,6 +1741,12 @@
                 <div class="logo-icon"><img src="assets/logo.jpg" alt="Josh logo" /></div>
                 <h1>Mission Control</h1>
             </div>
+            <!-- Mobile-only cost pill -->
+            <div id="mobile-cost-pill">
+                <span class="mcp-session" id="mcp-session">$0.00</span>
+                <span class="mcp-sep">·</span>
+                <span id="mcp-daily">day $0.00</span>
+            </div>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -2004,6 +2285,15 @@
             el.innerHTML = html;
         }
 
+        function updateMobileCostPill(mu) {
+            const sessionEl = document.getElementById('mcp-session');
+            const dailyEl   = document.getElementById('mcp-daily');
+            if (!sessionEl || !dailyEl || !mu) return;
+            const fmt = v => '$' + (parseFloat(v) || 0).toFixed(2);
+            sessionEl.textContent = fmt(mu.session);
+            dailyEl.textContent   = 'day ' + fmt(mu.daily);
+        }
+
         function initDashboard() {
             initAirpointState();
             fetchData();
@@ -2172,6 +2462,7 @@
             window._mcLastFocus = data.focus;
             window._mcLastActivity = data.recentActivity;
             window._mcLastModelUsage = data.modelUsage;
+            updateMobileCostPill(data.modelUsage);
             window._mcLastCrons = data.crons;
             window._mcLastProducts = data.products;
 
