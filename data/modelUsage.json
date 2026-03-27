@@ -1,12 +1,12 @@
 {
-  "session": 11.282776,
+  "session": 11.685115,
   "daily": 23.080097,
   "weekly": 35.95642,
   "topModels": [
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 5.955347099999999
+      "cost": 6.293534699999999
     },
     {
       "name": "anthropic/claude-sonnet-4-6",
@@ -21,34 +21,36 @@
     {
       "name": "gpt-5.3-codex",
       "window": "session",
-      "cost": 0.37852919999999995
+      "cost": 0.43344559999999993
     },
     {
-      "name": "sonnet",
+      "name": "claude-sonnet-4-6",
       "window": "session",
-      "cost": 0.0
+      "cost": 0.00923505
     }
   ],
   "breakdown": [
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 177039,
-      "outputTokens": 346,
-      "totalTokens": 322058,
-      "sessionCost": 5.955347099999999,
-      "weeklyCost": 5.955347099999999,
-      "sessions": 2,
+      "inputTokens": 306798,
+      "outputTokens": 408,
+      "totalTokens": 307206,
+      "sessionCost": 6.293534699999999,
+      "dailyCost": 6.293534699999999,
+      "weeklyCost": 6.293534699999999,
+      "sessions": 1,
       "isGemini": true,
-      "costEstimated": true
+      "costEstimated": false
     },
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
       "inputTokens": 94,
       "outputTokens": 76021,
-      "totalTokens": 255516,
+      "totalTokens": 76115,
       "sessionCost": 3.3352772999999996,
+      "dailyCost": 0.0,
       "weeklyCost": 3.3352772999999996,
       "sessions": 3,
       "isGemini": false,
@@ -59,8 +61,9 @@
       "source": "openclaw",
       "inputTokens": 84163,
       "outputTokens": 25281,
-      "totalTokens": 101429,
+      "totalTokens": 109444,
       "sessionCost": 1.6136225,
+      "dailyCost": 0.0,
       "weeklyCost": 1.6136225,
       "sessions": 1,
       "isGemini": false,
@@ -69,9 +72,23 @@
     {
       "name": "gpt-5.3-codex",
       "source": "codex",
-      "weeklyCost": 0.37852919999999995,
-      "sessionCost": 0.37852919999999995,
+      "weeklyCost": 0.43344559999999993,
+      "dailyCost": 0.0,
+      "sessionCost": 0.43344559999999993,
       "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "claude-sonnet-4-6",
+      "source": "openclaw",
+      "inputTokens": 28318,
+      "outputTokens": 129,
+      "totalTokens": 28447,
+      "sessionCost": 0.00923505,
+      "dailyCost": 0.00923505,
+      "weeklyCost": 0.00923505,
+      "sessions": 1,
+      "isGemini": false,
       "costEstimated": false
     },
     {
@@ -81,11 +98,12 @@
       "outputTokens": 0,
       "totalTokens": 0,
       "sessionCost": 0.0,
+      "dailyCost": 0.0,
       "weeklyCost": 0.0,
       "sessions": 1,
       "isGemini": false,
       "costEstimated": false
     }
   ],
-  "lastUpdated": "2026-03-27T22:35:01Z"
+  "lastUpdated": "2026-03-27T22:40:01Z"
 }
