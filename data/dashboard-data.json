@@ -10,8 +10,8 @@
     "steps": [],
     "currentTool": "",
     "updatedAt": "2026-03-27T18:25:35Z",
-    "checkedAt": "2026-03-27T21:30:00Z",
-    "idleUpdatedAt": "2026-03-27T21:30:00Z"
+    "checkedAt": "2026-03-27T21:35:01Z",
+    "idleUpdatedAt": "2026-03-27T21:35:01Z"
   },
   "focus": {
     "status": "Brain Feed idle",
@@ -19,26 +19,26 @@
     "updatedAt": "2026-03-27T18:25:35Z"
   },
   "contextWindow": {
-    "usedTokens": 171611,
+    "usedTokens": 206654,
     "limitTokens": 1000000,
-    "pct": 0.1716,
+    "pct": 0.2067,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 8.621522,
+    "session": 8.926182,
     "daily": 23.080097,
     "weekly": 35.95642,
     "topModels": [
       {
+        "name": "google/gemini-2.5-flash",
+        "window": "session",
+        "cost": 3.5987531999999995
+      },
+      {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
         "cost": 3.3352772999999996
-      },
-      {
-        "name": "google/gemini-2.5-flash",
-        "window": "session",
-        "cost": 3.2940932899999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -53,6 +53,18 @@
     ],
     "breakdown": [
       {
+        "name": "google/gemini-2.5-flash",
+        "source": "openclaw",
+        "inputTokens": 981269,
+        "outputTokens": 3109,
+        "totalTokens": 234785,
+        "sessionCost": 3.5987531999999995,
+        "weeklyCost": 3.5987531999999995,
+        "sessions": 2,
+        "isGemini": true,
+        "costEstimated": true
+      },
+      {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
         "inputTokens": 94,
@@ -63,18 +75,6 @@
         "sessions": 3,
         "isGemini": false,
         "costEstimated": false
-      },
-      {
-        "name": "google/gemini-2.5-flash",
-        "source": "openclaw",
-        "inputTokens": 114536,
-        "outputTokens": 304,
-        "totalTokens": 199742,
-        "sessionCost": 3.2940932899999997,
-        "weeklyCost": 3.2940932899999997,
-        "sessions": 2,
-        "isGemini": true,
-        "costEstimated": true
       },
       {
         "name": "openai/gpt-5.4",
@@ -97,7 +97,7 @@
         "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-27T21:30:01Z"
+    "lastUpdated": "2026-03-27T21:35:01Z"
   },
   "devices": [
     {
@@ -111,19 +111,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T21:30:00Z"
+      "lastChecked": "2026-03-27T21:35:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T21:30:00Z"
+      "lastChecked": "2026-03-27T21:35:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T21:30:00Z"
+      "lastChecked": "2026-03-27T21:35:01Z"
     }
   ],
   "crons": [
@@ -245,19 +245,19 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T21:30:01Z",
-      "event": "Session spend: $8.62"
+      "time": "2026-03-27T21:35:01Z",
+      "event": "Session spend: $8.93"
     },
     {
-      "time": "2026-03-27T21:30:00Z",
+      "time": "2026-03-27T21:35:01Z",
       "event": "7 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T21:30:00Z",
+      "time": "2026-03-27T21:35:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T21:30:00Z",
+      "time": "2026-03-27T21:35:01Z",
       "event": "Mission Control refresh published"
     },
     {
@@ -265,5 +265,5 @@
       "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T21:30:00Z"
+  "lastUpdated": "2026-03-27T21:35:01Z"
 }
