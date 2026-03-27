@@ -152,7 +152,6 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
             return {
                 "status": "Brain Feed live",
                 "context": objective or "Agent task is currently in motion.",
-                "runway": 0.9,
                 "updatedAt": updated_at,
             }
         if objective:
@@ -164,13 +163,11 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
             return {
                 "status": "Brain Feed idle",
                 "context": context,
-                "runway": 0.72,
                 "updatedAt": updated_at,
             }
     return {
         "status": "System nominal",
         "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
-        "runway": 0.98,
         "updatedAt": now_iso,
     }
 
@@ -580,27 +577,103 @@ BRAIN_FEED_PATH = ROOT.parent / "data" / "brain-feed.json"
 
 
 def load_brain_feed_file() -> Dict[str, Any] | None:
-    """Load brainFeed state from the sidecar file written by the agent."""
+    """Load brainFeed state from the sidecar file written by the agent.
+
+    Also writes a heartbeat 'checkedAt' every run so GH Pages always has a
+    fresh file — preventing the 'Stale' badge from appearing when agent is
+    simply idle between tasks.
+    """
+    now_iso = utc_iso()
     if not BRAIN_FEED_PATH.exists():
         return None
     try:
         data = json.loads(BRAIN_FEED_PATH.read_text())
         if not isinstance(data, dict):
             return None
-        # Auto-expire: if updatedAt is older than 10 minutes, mark inactive
+        # Auto-expire active flag if agent hasn't updated in 1h
         updated = data.get("updatedAt")
         if updated:
             try:
                 ts = dt.datetime.fromisoformat(updated.replace("Z", "+00:00"))
                 age = dt.datetime.now(dt.timezone.utc) - ts
-                if age.total_seconds() > 3600:  # 1h stale threshold — idle between tasks is normal
+                if age.total_seconds() > 3600:
                     data["active"] = False
             except (ValueError, TypeError):
                 pass
+
+        # ── Heartbeat: always write a fresh checkedAt + refresh idleUpdatedAt when inactive ──
+        # This ensures GH Pages always receives a fresh file every 5-min cron run,
+        # so the browser never shows "Stale" just because the agent is between tasks.
+        data["checkedAt"] = now_iso
+        if not data.get("active"):
+            data["idleUpdatedAt"] = now_iso  # tracks when cron last confirmed idle state
+        BRAIN_FEED_PATH.write_text(json.dumps(data, indent=2))
         return data
     except (json.JSONDecodeError, OSError) as exc:
         print(f"[warn] failed to read {BRAIN_FEED_PATH}: {exc}", file=sys.stderr)
         return None
+
+
+# Context window limits per model (tokens)
+CONTEXT_LIMITS: Dict[str, int] = {
+    "claude-sonnet-4-6":     200_000,
+    "claude-sonnet-4-5":     200_000,
+    "claude-opus-4":         200_000,
+    "claude-haiku-3-5":      200_000,
+    "gpt-5.4":               128_000,
+    "gpt-5.1-codex":         128_000,
+    "gpt-4o":                128_000,
+    "gemini-2.5-flash":    1_000_000,
+    "gemini-2.5-pro":      1_000_000,
+    "gemini-2.0-flash":    1_000_000,
+    "grok-3":                131_072,
+    "grok-3-mini":           131_072,
+}
+
+def fetch_context_window() -> Dict[str, Any]:
+    """Read contextTokens + model from the most recent OpenClaw session."""
+    result = {"usedTokens": 0, "limitTokens": 0, "pct": 0.0, "model": "", "status": "green"}
+    try:
+        sessions = json.loads(OPENCLAW_SESSIONS_PATH.read_text())
+        # Pick the most-recently-updated session
+        best = max(sessions.values(), key=lambda s: s.get("updatedAt", ""), default=None)
+        if not best:
+            return result
+        model = (best.get("modelOverride") or best.get("model") or "").lower().replace("anthropic/", "").replace("google/", "").replace("openai/", "")
+        ctx_tokens = int(best.get("contextTokens") or 0)
+        total_tokens = int(best.get("totalTokens") or 0)
+        used = total_tokens  # totalTokens = cumulative context used in session
+
+        # Find limit
+        limit = 0
+        for key, lim in CONTEXT_LIMITS.items():
+            if key in model:
+                limit = lim
+                break
+        if limit == 0:
+            limit = ctx_tokens if ctx_tokens > 0 else 200_000  # fallback
+
+        pct = round(used / limit, 4) if limit > 0 else 0.0
+        pct = min(pct, 1.0)
+
+        # RAG status
+        if pct >= 0.85:
+            status = "red"    # new session strongly recommended
+        elif pct >= 0.60:
+            status = "amber"  # getting full, consider /new soon
+        else:
+            status = "green"  # plenty of room
+
+        result = {
+            "usedTokens": used,
+            "limitTokens": limit,
+            "pct": pct,
+            "model": model,
+            "status": status,
+        }
+    except Exception as exc:
+        print(f"[warn] fetch_context_window failed: {exc}", file=sys.stderr)
+    return result
 
 
 DEFAULT_BRAIN_FEED: Dict[str, Any] = {
@@ -615,7 +688,7 @@ DEFAULT_BRAIN_FEED: Dict[str, Any] = {
 
 REQUIRED_DASHBOARD_FIELDS = [
     "actionRequired", "activeNow", "upcomingEvents", "focus",
-    "brainFeed", "devices", "products", "crons", "recentActivity", "lastUpdated",
+    "brainFeed", "contextWindow", "devices", "products", "crons", "recentActivity", "lastUpdated",
 ]
 
 
@@ -672,6 +745,7 @@ def main() -> None:
 
     brain = fetch_brain_feed()
     dashboard["focus"] = brain or build_focus_fallback(dashboard["brainFeed"], now_iso)
+    dashboard["contextWindow"] = fetch_context_window()
 
     model_usage = fetch_model_usage() or {
         "session": 0.0,

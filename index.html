@@ -409,6 +409,13 @@
         .focus-meter-bar { flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 999px; overflow: hidden; }
         .focus-meter-bar span { display: block; height: 100%; background: var(--accent-focus); border-radius: 999px; }
         .focus-meter-value { font-weight: 600; color: var(--accent-focus); }
+        /* Context window meter */
+        .ctx-meter-wrap { margin: 12px 0 4px; }
+        .ctx-meter-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+        .ctx-meter-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .ctx-meter-pct { font-size: 0.88rem; font-weight: 700; }
+        .ctx-meter-hint { font-size: 0.75rem; margin-left: auto; }
+        .ctx-meter-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 16px; }
         .brain-hero {
@@ -2670,7 +2677,7 @@
                 const modelUsageData = window._mcLastModelUsage;
                 const cronsData = window._mcLastCrons;
                 const productsData = window._mcLastProducts;
-                const percent = Math.max(0, Math.min(100, Math.round(((focusData && focusData.runway) || 0) * 100)));
+                const ctxWin = window._mcLastContextWindow || null;
                 const feedItems = (activityData || []).slice(0, kioskMode ? 4 : phoneMode ? 4 : 6);
                 const liveSignals = [
                     modelUsageData ? `Session ${formatCurrencyAlways(modelUsageData.session)}` : null,
@@ -2678,6 +2685,31 @@
                     (cronsData || []).length ? `${(cronsData || []).filter(c => c.status === 'ok').length} active crons` : null,
                     (productsData || []).length ? `${(productsData || []).filter(p => p.status === 'live').length} live products` : null
                 ].filter(Boolean);
+
+                // Context window meter
+                let ctxMeterHtml = '';
+                if (ctxWin && ctxWin.limitTokens > 0) {
+                    const pct = Math.round((ctxWin.pct || 0) * 100);
+                    const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
+                    const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
+                    const ragStatus = ctxWin.status || 'green';
+                    const barColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
+                    const statusLabel = ragStatus === 'red' ? '⚠ New session recommended' : ragStatus === 'amber' ? '· Consider /new soon' : '· Plenty of room';
+                    const statusColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : 'var(--text-muted)';
+                    ctxMeterHtml = `
+                        <div class="ctx-meter-wrap">
+                            <div class="ctx-meter-header">
+                                <span class="ctx-meter-label">Context Window</span>
+                                <span class="ctx-meter-pct" style="color:${barColor}">${pct}%</span>
+                                <span class="ctx-meter-hint" style="color:${statusColor}">${statusLabel}</span>
+                            </div>
+                            <div class="focus-meter">
+                                <div class="focus-meter-bar"><span style="width:${pct}%;background:${barColor};transition:width 0.6s ease,background 0.4s"></span></div>
+                            </div>
+                            <div class="ctx-meter-sub">${usedK}K / ${limK}K tokens · ${escapeHtml(ctxWin.model || 'unknown model')}</div>
+                        </div>`;
+                }
+
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
@@ -2685,10 +2717,7 @@
                             <div class="brain-kicker">Live Operator State</div>
                             <div class="brain-title">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
                             <p class="focus-context">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
-                            <div class="focus-meter">
-                                <div class="focus-meter-bar"><span style="width:${percent}%"></span></div>
-                                <span class="focus-meter-value">${percent}%</span>
-                            </div>
+                            ${ctxMeterHtml}
                             <div class="brain-meta">
                                 <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
                                 ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
@@ -2739,6 +2768,7 @@
             updateMobileCostPill(data.modelUsage);
             window._mcLastCrons = data.crons;
             window._mcLastProducts = data.products;
+            window._mcLastContextWindow = data.contextWindow || null;
 
             // Brain Feed - delegate to dedicated renderer (fast-poll may have already done this)
             if (sectionChanged('brainFeed', data.brainFeed)) {

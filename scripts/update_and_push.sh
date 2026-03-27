@@ -8,14 +8,14 @@ cd "$WORKSPACE_DIR/kiosk-dashboard"
 npm run model:sync
 cd "$ROOT_DIR"
 python3 scripts/update_mission_control.py
-# Always publish brain-feed.json and modelUsage.json changes too.
-# This ensures fast-poll brain feed + standalone model usage make it to GitHub Pages.
-if git diff --quiet data/dashboard-data.json data/brain-feed.json data/modelUsage.json; then
+# Always commit all data files — brain-feed.json gets a heartbeat idleUpdatedAt
+# every run so GH Pages always receives a fresh file (prevents false "Stale" display).
+ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json
+if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0
 fi
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json
 git commit -m "dashboard: auto refresh $ts"
 
 # Prefer saved token file (works in cron without keyring), fall back to gh CLI
