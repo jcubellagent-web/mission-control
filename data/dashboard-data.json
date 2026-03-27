@@ -9,13 +9,21 @@
     "status": "done",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-03-27T16:23:30Z"
+    "updatedAt": "2026-03-27T16:23:30Z",
+    "checkedAt": "2026-03-27T18:25:01Z",
+    "idleUpdatedAt": "2026-03-27T18:25:01Z"
   },
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last completed objective: Brain feed audit complete \u2014 all fixes deployed",
-    "runway": 0.72,
     "updatedAt": "2026-03-27T16:23:30Z"
+  },
+  "contextWindow": {
+    "usedTokens": 40026,
+    "limitTokens": 200000,
+    "pct": 0.2001,
+    "model": "claude-sonnet-4-6",
+    "status": "green"
   },
   "modelUsage": {
     "session": 6.135572,
@@ -89,7 +97,7 @@
         "costEstimated": true
       }
     ],
-    "lastUpdated": "2026-03-27T18:20:01Z"
+    "lastUpdated": "2026-03-27T18:25:01Z"
   },
   "devices": [
     {
@@ -103,19 +111,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T18:20:01Z"
+      "lastChecked": "2026-03-27T18:25:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T18:20:01Z"
+      "lastChecked": "2026-03-27T18:25:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T18:20:01Z"
+      "lastChecked": "2026-03-27T18:25:01Z"
     }
   ],
   "crons": [
@@ -246,19 +254,19 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T18:20:01Z",
+      "time": "2026-03-27T18:25:01Z",
       "event": "Session spend: $6.14"
     },
     {
-      "time": "2026-03-27T18:20:01Z",
+      "time": "2026-03-27T18:25:01Z",
       "event": "8 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T18:20:01Z",
+      "time": "2026-03-27T18:25:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T18:20:01Z",
+      "time": "2026-03-27T18:25:01Z",
       "event": "Mission Control refresh published"
     },
     {
@@ -266,5 +274,5 @@
       "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T18:20:01Z"
+  "lastUpdated": "2026-03-27T18:25:01Z"
 }
