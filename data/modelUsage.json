@@ -1,12 +1,12 @@
 {
-  "session": 10.76574,
+  "session": 11.233261,
   "daily": 23.080097,
   "weekly": 35.95642,
   "topModels": [
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 5.438311419999999
+      "cost": 5.9058321199999995
     },
     {
       "name": "anthropic/claude-sonnet-4-6",
@@ -22,17 +22,22 @@
       "name": "gpt-5.3-codex",
       "window": "session",
       "cost": 0.37852919999999995
+    },
+    {
+      "name": "sonnet",
+      "window": "session",
+      "cost": 0.0
     }
   ],
   "breakdown": [
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 162641,
-      "outputTokens": 150,
-      "totalTokens": 162454,
-      "sessionCost": 5.438311419999999,
-      "weeklyCost": 5.438311419999999,
+      "inputTokens": 473014,
+      "outputTokens": 1226,
+      "totalTokens": 322200,
+      "sessionCost": 5.9058321199999995,
+      "weeklyCost": 5.9058321199999995,
       "sessions": 2,
       "isGemini": true,
       "costEstimated": true
@@ -68,7 +73,19 @@
       "sessionCost": 0.37852919999999995,
       "totalTokens": 0,
       "costEstimated": false
+    },
+    {
+      "name": "sonnet",
+      "source": "openclaw",
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "sessionCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
     }
   ],
-  "lastUpdated": "2026-03-27T22:25:01Z"
+  "lastUpdated": "2026-03-27T22:30:01Z"
 }

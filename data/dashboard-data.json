@@ -9,31 +9,31 @@
     "status": "idle",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-03-27T22:25:00Z",
-    "checkedAt": "2026-03-27T22:25:01Z",
-    "idleUpdatedAt": "2026-03-27T22:25:01Z"
+    "updatedAt": "2026-03-27T22:30:00Z",
+    "checkedAt": "2026-03-27T22:30:00Z",
+    "idleUpdatedAt": "2026-03-27T22:30:00Z"
   },
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Idle: Awaiting your next command",
-    "updatedAt": "2026-03-27T22:25:00Z"
+    "updatedAt": "2026-03-27T22:30:00Z"
   },
   "contextWindow": {
-    "usedTokens": 134323,
+    "usedTokens": 294069,
     "limitTokens": 1000000,
-    "pct": 0.1343,
+    "pct": 0.2941,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 10.76574,
+    "session": 11.233261,
     "daily": 23.080097,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 5.438311419999999
+        "cost": 5.9058321199999995
       },
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -49,17 +49,22 @@
         "name": "gpt-5.3-codex",
         "window": "session",
         "cost": 0.37852919999999995
+      },
+      {
+        "name": "sonnet",
+        "window": "session",
+        "cost": 0.0
       }
     ],
     "breakdown": [
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 162641,
-        "outputTokens": 150,
-        "totalTokens": 162454,
-        "sessionCost": 5.438311419999999,
-        "weeklyCost": 5.438311419999999,
+        "inputTokens": 473014,
+        "outputTokens": 1226,
+        "totalTokens": 322200,
+        "sessionCost": 5.9058321199999995,
+        "weeklyCost": 5.9058321199999995,
         "sessions": 2,
         "isGemini": true,
         "costEstimated": true
@@ -95,9 +100,21 @@
         "sessionCost": 0.37852919999999995,
         "totalTokens": 0,
         "costEstimated": false
+      },
+      {
+        "name": "sonnet",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-27T22:25:01Z"
+    "lastUpdated": "2026-03-27T22:30:01Z"
   },
   "devices": [
     {
@@ -111,19 +128,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T22:25:01Z"
+      "lastChecked": "2026-03-27T22:30:00Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-27T22:25:01Z"
+      "lastChecked": "2026-03-27T22:30:00Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-27T22:25:01Z"
+      "lastChecked": "2026-03-27T22:30:00Z"
     }
   ],
   "crons": [
@@ -245,25 +262,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-27T22:25:01Z",
-      "event": "Session spend: $10.77"
+      "time": "2026-03-27T22:30:01Z",
+      "event": "Session spend: $11.23"
     },
     {
-      "time": "2026-03-27T22:25:01Z",
+      "time": "2026-03-27T22:30:00Z",
+      "event": "Brain: Brain Feed idle"
+    },
+    {
+      "time": "2026-03-27T22:30:00Z",
       "event": "7 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-27T22:25:01Z",
+      "time": "2026-03-27T22:30:00Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-27T22:25:01Z",
+      "time": "2026-03-27T22:30:00Z",
       "event": "Mission Control refresh published"
-    },
-    {
-      "time": "2026-03-27T22:25:00Z",
-      "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-27T22:25:01Z"
+  "lastUpdated": "2026-03-27T22:30:00Z"
 }
