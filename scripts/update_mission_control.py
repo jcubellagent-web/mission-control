@@ -30,6 +30,20 @@ CRON_TARGETS = [
     {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball"},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball"},
+    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed",
+     "multiRun": {
+         "runs": [
+             {"time": "7:15 AM",  "mode": "Full",  "label": "Market open"},
+             {"time": "10:00 AM", "mode": "Full",  "label": "Mid-morning"},
+             {"time": "12:00 PM", "mode": "Full",  "label": "Midday"},
+             {"time": "2:00 PM",  "mode": "Lite",  "label": "Pulse"},
+             {"time": "4:15 PM",  "mode": "Full",  "label": "Close"},
+             {"time": "6:00 PM",  "mode": "Lite",  "label": "Evening"},
+             {"time": "9:00 PM",  "mode": "Full",  "label": "Late"},
+             {"time": "11:00 PM", "mode": "Lite",  "label": "Wrap"},
+         ]
+     }
+    },
 ]
 
 
@@ -397,15 +411,32 @@ def fetch_crons() -> List[Dict[str, Any]]:
     rows = []
     for target in CRON_TARGETS:
         present = target['pattern'] in listing
-        rows.append({
+        row = {
             'name': target['name'],
             'schedule': target['schedule'],
             'description': target.get('description', ''),
             'category': target.get('category', 'Other'),
             'status': 'ok' if present else 'paused',
             'errors': 0,
-            'lastError': None
-        })
+            'lastError': None,
+        }
+        if target.get('multiRun'):
+            # Compute which runs have passed today (ET)
+            import datetime as _dt
+            now_et = _dt.datetime.now(_dt.timezone.utc).astimezone(_dt.timezone(_dt.timedelta(hours=-4)))
+            runs = target['multiRun']['runs']
+            for run in runs:
+                t_str = run['time']
+                try:
+                    t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                        year=now_et.year, month=now_et.month, day=now_et.day,
+                        tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                    )
+                    run['done'] = now_et >= t
+                except Exception:
+                    run['done'] = False
+            row['multiRun'] = {'runs': runs}
+        rows.append(row)
     return rows
 
 def build_devices() -> List[Dict[str, str]]:

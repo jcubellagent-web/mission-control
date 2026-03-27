@@ -316,6 +316,14 @@
         .cron-dot.healthy { background: #4ade80; }
         .cron-dot.error   { background: #e53e3e; }
         .cron-dot.paused  { background: #fbbf24; }
+        .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+        .run-badge {
+            font-size: 0.58rem; padding: 1px 5px; border-radius: 3px;
+            background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
+        }
+        .run-badge.done { background: rgba(74,222,128,0.12); color: #4ade80; border-color: rgba(74,222,128,0.25); }
+        .run-badge.lite { opacity: 0.7; }
         .cron-category { margin-bottom: 8px; }
         .cron-category:last-child { margin-bottom: 0; }
         .cron-category-header {
@@ -1980,7 +1988,7 @@
 
             // Group crons by category
             const BASEBALL_ICON = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9c3.2 2.4 5.3 5.9 5.3 7.1s-2.1 4.7-5.3 7.1M19.1 4.9c-3.2 2.4-5.3 5.9-5.3 7.1s2.1 4.7 5.3 7.1"/></svg>`;
-            const categoryOrder = ['Fantasy Baseball', 'Maintenance', 'Appointments'];
+            const categoryOrder = ['Intelligence Feed', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
             const categoryIcons = { 'Fantasy Baseball': BASEBALL_ICON };
             const grouped = {};
             (data.crons || []).forEach(cron => {
@@ -1992,8 +2000,26 @@
                 const icon = categoryIcons[cat] || '';
                 const rows = grouped[cat].map(cron => {
                     const dotClass = cron.status === 'ok' ? 'healthy' : cron.status === 'paused' ? 'paused' : cron.errors > 0 ? 'error' : 'healthy';
-                    const schedule = cron.schedule || '';
                     const errorNote = cron.errors > 0 ? ` · ${cron.errors} err` : '';
+
+                    if (cron.multiRun && cron.multiRun.runs) {
+                        const timeBadges = cron.multiRun.runs.map(r => {
+                            const cls = r.done ? 'run-badge done' : 'run-badge';
+                            const modeClass = r.mode === 'Lite' ? ' lite' : '';
+                            return `<span class="${cls}${modeClass}" title="${r.label} — ${r.mode}">${r.time.replace(' AM','a').replace(' PM','p')}</span>`;
+                        }).join('');
+                        return `
+                            <div class="cron-row${cron.errors > 0 ? ' has-error' : ''} cron-multirun">
+                                <div class="cron-dot ${dotClass}"></div>
+                                <div class="cron-name-group">
+                                    <div class="cron-name">${escapeHtml(cron.name)}</div>
+                                    ${cron.description ? `<div class="cron-desc">${escapeHtml(cron.description)}</div>` : ''}
+                                    <div class="cron-run-badges">${timeBadges}</div>
+                                </div>
+                            </div>`;
+                    }
+
+                    const schedule = cron.schedule || '';
                     return `
                         <div class="cron-row${cron.errors > 0 ? ' has-error' : ''}">
                             <div class="cron-dot ${dotClass}"></div>
