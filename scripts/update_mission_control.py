@@ -25,11 +25,11 @@ WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
 
 CRON_TARGETS = [
-    {"name": "Chiro invite sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar"},
-    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/5 * * * *", "description": "Pushes live dashboard data to GitHub Pages"},
-    {"name": "⚾ Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots"},
-    {"name": "⚾ Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down"},
-    {"name": "⚾ Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves"},
+    {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments"},
+    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance"},
+    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
+    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball"},
+    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball"},
 ]
 
 
@@ -400,6 +400,8 @@ def fetch_crons() -> List[Dict[str, Any]]:
         rows.append({
             'name': target['name'],
             'schedule': target['schedule'],
+            'description': target.get('description', ''),
+            'category': target.get('category', 'Other'),
             'status': 'ok' if present else 'paused',
             'errors': 0,
             'lastError': None
@@ -450,33 +452,33 @@ def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focu
     if focus and focus.get("status"):
         items.append({
             "time": focus.get("updatedAt") or now_iso,
-            "event": f"🧠 {focus.get('status')}",
+            "event": f"Brain: {focus.get('status')}",
         })
 
     if events:
         next_event = events[0]
         items.append({
             "time": next_event.get("time") or now_iso,
-            "event": f"📅 Upcoming: {next_event.get('title') or 'Calendar event'}",
+            "event": f"Upcoming: {next_event.get('title') or 'Calendar event'}",
         })
 
     if model_usage:
         session_cost = model_usage.get("session") or 0
         items.append({
             "time": model_usage.get("lastUpdated") or now_iso,
-            "event": f"💸 Session spend now ${session_cost:.2f}",
+            "event": f"Session spend: ${session_cost:.2f}",
         })
 
     error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:
         items.append({
             "time": now_iso,
-            "event": f"⚠️ {len(error_crons)} cron job{'s' if len(error_crons) != 1 else ''} need attention",
+            "event": f"{len(error_crons)} cron job{'s' if len(error_crons) != 1 else ''} need attention",
         })
     else:
         items.append({
             "time": now_iso,
-            "event": f"✅ {len(crons)} scheduled job{'s' if len(crons) != 1 else ''} healthy",
+            "event": f"{len(crons)} scheduled jobs healthy",
         })
 
     if devices:
@@ -484,15 +486,17 @@ def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focu
         if attention:
             items.append({
                 "time": now_iso,
-                "event": f"🖥️ {len(attention)} device alert{'s' if len(attention) != 1 else ''}",
+                "event": f"{len(attention)} device alert{'s' if len(attention) != 1 else ''}",
             })
         else:
             items.append({
                 "time": now_iso,
-                "event": "🖥️ Device layer nominal",
+                "event": "Device layer nominal",
             })
 
-    items.append({"time": now_iso, "event": "🚀 Mission Control refresh published"})
+    items.append({"time": now_iso, "event": "Mission Control refresh published"})
+    # Sort most recent first
+    items.sort(key=lambda x: x.get("time", ""), reverse=True)
     return items[:6]
 
 
