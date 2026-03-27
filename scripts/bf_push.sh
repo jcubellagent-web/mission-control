@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# bf_push.sh — update brain-feed.json in real-time during active tasks
-# Usage: bf_push.sh "objective text" [step1|step2|...] [active|done|idle]
-# Designed to be called async (fire-and-forget) during task execution
+# bf_push.sh — update brain-feed.json with zero blocking latency
+# Usage: bf_push.sh "objective" "step1:tool|step2:tool" "active|done|idle"
+# Writes JSON instantly, pushes to GitHub in background (non-blocking)
 set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
@@ -10,12 +10,10 @@ BF_FILE="$ROOT_DIR/data/brain-feed.json"
 
 OBJECTIVE="${1:-Working…}"
 STEPS_RAW="${2:-}"
-STATE="${3:-active}"   # active | done | idle
-
+STATE="${3:-active}"
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-MSG_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# Build steps JSON array
+# Build steps JSON
 if [[ -n "$STEPS_RAW" ]]; then
   STEPS_JSON=$(python3 -c "
 import json, sys
@@ -36,6 +34,7 @@ fi
 IS_ACTIVE="true"
 [[ "$STATE" == "done" || "$STATE" == "idle" ]] && IS_ACTIVE="false"
 
+# ── Write JSON instantly (synchronous, fast) ──────────────────────────────────
 python3 -c "
 import json
 bf = {}
@@ -43,29 +42,32 @@ try:
   bf = json.load(open('$BF_FILE'))
 except:
   pass
-bf['active'] = True if '$IS_ACTIVE' == 'true' else False
-bf['objective'] = '''$OBJECTIVE'''
-bf['status'] = '$STATE'
-bf['updatedAt'] = '$NOW'
-bf['messageReceived'] = bf.get('messageReceived', '$MSG_TIME')
-bf['steps'] = $STEPS_JSON
-if bf['steps']:
-  bf['currentTool'] = bf['steps'][-1].get('tool', 'exec')
-else:
-  bf['currentTool'] = ''
+bf['active']          = True if '$IS_ACTIVE' == 'true' else False
+bf['objective']       = '$OBJECTIVE'
+bf['status']          = '$STATE'
+bf['updatedAt']       = '$NOW'
+bf['messageReceived'] = bf.get('messageReceived', '$NOW')
+bf['steps']           = $STEPS_JSON
+bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''
 json.dump(bf, open('$BF_FILE', 'w'), indent=2)
 "
 
-cd "$ROOT_DIR"
-git add data/brain-feed.json
-if git diff --cached --quiet; then
-  exit 0  # no change
-fi
-git commit -m "brain: $OBJECTIVE [$(date -u +%H:%M:%SZ)]"
-GH_TOKEN=$(gh auth token 2>/dev/null || true)
-if [[ -n "$GH_TOKEN" ]]; then
-  AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
-  git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin main -q
-else
-  git push origin main -q
-fi
+# ── Push to GitHub in background (non-blocking) ───────────────────────────────
+(
+  cd "$ROOT_DIR"
+  git add data/brain-feed.json
+  if git diff --cached --quiet; then
+    exit 0
+  fi
+  git commit -m "brain: $OBJECTIVE [$STATE $(date -u +%H:%M:%SZ)]" -q
+  GH_TOKEN=$(gh auth token 2>/dev/null || true)
+  if [[ -n "$GH_TOKEN" ]]; then
+    AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+    git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin main -q 2>/dev/null || true
+  else
+    git push origin main -q 2>/dev/null || true
+  fi
+) &
+
+# Return immediately — caller is not blocked
+exit 0

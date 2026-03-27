@@ -1887,9 +1887,10 @@
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
-            BRAIN_FEED_URL: './data/brain-feed.json',  // Fast-polled brain-feed sidecar
+            BRAIN_FEED_URL: './data/brain-feed.json',         // GitHub Pages fallback
+            BRAIN_FEED_LOCAL: 'http://localhost:8765/brain-feed.json', // Local server (sub-100ms)
             REFRESH_INTERVAL: 10000,   // 10 seconds - full dashboard poll
-            BRAIN_FEED_INTERVAL: 2000, // 2 seconds - brain feed only
+            BRAIN_FEED_INTERVAL: 1500, // 1.5 seconds - brain feed fast poll
         };
         // ============================================
 
@@ -2059,25 +2060,53 @@
             }
         }
 
-        // Fast brain-feed poll - only updates the Brain Feed card
+        // Try to fetch from local server first (sub-100ms), fall back to GitHub Pages
+        let _localServerOk = true; // optimistic — flip to false on first failure
+        async function fetchBrainFeedFromUrl(url, timeoutMs) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const r = await fetch(url + `?_=${Date.now()}`, { signal: controller.signal });
+                clearTimeout(timer);
+                if (!r.ok) return null;
+                return await r.json();
+            } catch {
+                clearTimeout(timer);
+                return null;
+            }
+        }
+
+        // Fast brain-feed poll — local server first, GH Pages fallback
         async function fetchBrainFeed() {
             const t0 = performance.now();
-            try {
-                const cacheBuster = `?_=${Date.now()}`;
-                const response = await fetch(CONFIG.BRAIN_FEED_URL + cacheBuster);
-                if (!response.ok) return;
-                const bf = await response.json();
-                const latency = Math.round(performance.now() - t0);
-                console.debug(`[MC] brain-feed.json fetched in ${latency}ms`);
-                const newHash = JSON.stringify(bf);
-                if (newHash === lastBrainFeedHash) return; // no change
-                lastBrainFeedHash = newHash;
-                bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
-                renderBrainFeed(bf);
-                updateBfFreshness(bf);
-            } catch (err) {
-                // non-fatal - full poll still runs every 10s
+            let bf = null;
+
+            // Try local server first (300ms timeout)
+            if (_localServerOk) {
+                bf = await fetchBrainFeedFromUrl(CONFIG.BRAIN_FEED_LOCAL, 300);
+                if (!bf) _localServerOk = false; // mark local as down
             }
+
+            // Fall back to GitHub Pages
+            if (!bf) {
+                bf = await fetchBrainFeedFromUrl(CONFIG.BRAIN_FEED_URL, 5000);
+                if (bf) _localServerOk = false; // keep using remote
+            } else {
+                _localServerOk = true; // local is back up
+            }
+
+            if (!bf) return;
+
+            const latency = Math.round(performance.now() - t0);
+            const src = _localServerOk ? '⚡local' : '☁️remote';
+            console.debug(`[MC] brain-feed fetched in ${latency}ms (${src})`);
+
+            const newHash = JSON.stringify(bf);
+            if (newHash === lastBrainFeedHash) return;
+            lastBrainFeedHash = newHash;
+            bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
+            renderBrainFeed(bf);
+            updateBfFreshness(bf);
         }
 
         function updateBfFreshness(bf) {
