@@ -25,11 +25,11 @@ WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
 
 CRON_TARGETS = [
-    {"name": "Chiro invite sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly"},
-    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/5 * * * *"},
-    {"name": "⚾ Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily"},
-    {"name": "⚾ Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h"},
-    {"name": "⚾ Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am"},
+    {"name": "Chiro invite sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar"},
+    {"name": "Mission Control refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "*/5 * * * *", "description": "Pushes live dashboard data to GitHub Pages"},
+    {"name": "⚾ Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "9:15 AM daily", "description": "Reviews starting lineup, flags IL players in active slots"},
+    {"name": "⚾ Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down"},
+    {"name": "⚾ Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves"},
 ]
 
 
