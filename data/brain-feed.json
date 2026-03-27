@@ -1,22 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Confirmed weekly lineup lock",
-  "status": "done",
+  "objective": "Updated fantasy lineup check cron to weekly",
+  "status": "active",
   "steps": [
     {
-      "label": "Querying",
-      "status": "done",
-      "tool": "ESPN_API"
-    },
-    {
-      "label": "Analyzing",
+      "label": "Modifying",
       "status": "active",
-      "tool": "league_settings"
+      "tool": "crontab"
     }
   ],
-  "currentTool": "league_settings",
-  "updatedAt": "2026-03-27T22:40:46Z",
+  "currentTool": "crontab",
+  "updatedAt": "2026-03-27T22:40:51Z",
   "checkedAt": "2026-03-27T22:40:00Z",
   "idleUpdatedAt": "2026-03-27T22:40:00Z"
 }
