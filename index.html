@@ -621,6 +621,20 @@
         .card-newsfeed { position: relative; }
 
         /* ── Scrolling ticker bar ── */
+        .if-tldr-block {
+            margin-top: 8px;
+            padding: 7px 10px;
+            background: rgba(255,255,255,0.04);
+            border-left: 2px solid rgba(99,179,237,0.4);
+            border-radius: 4px;
+        }
+        .if-tldr-bullet {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
         .intel-ticker-wrap {
             overflow: hidden;
             width: 100%;
@@ -1873,13 +1887,20 @@
 
             // Signal
             if (f.signal && f.signal.length) {
-                html += `<div class="if-section"><div class="if-section-header">🎯 Top Signal &amp; Breaking Developments</div>`;
+                html += `<div class="if-section"><div class="if-section-header">🎯 Top Signal, Developments &amp; TLDR</div>`;
                 f.signal.filter(i => isEnglish(i.title)).slice(0,5).forEach(item => {
                     html += `<div class="if-item">
                         <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
                         <div class="if-item-meta">${escapeHtml(item.source || '')}</div>
                     </div>`;
                 });
+                if (f.tldr && f.tldr.length) {
+                    html += `<div class="if-tldr-block">`;
+                    f.tldr.forEach(b => {
+                        html += `<div class="if-tldr-bullet">› ${escapeHtml(b)}</div>`;
+                    });
+                    html += `</div>`;
+                }
                 html += `</div>`;
             }
 

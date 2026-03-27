@@ -296,6 +296,34 @@ def merge_model_rows(session_rows: List[Dict], codexbar_rows: List[Dict]) -> Lis
     return sorted(merged.values(), key=lambda x: x.get("weeklyCost", 0), reverse=True)
 
 
+ACCUM_PATH = ROOT.parent / "data" / "model-usage-accum.json"
+
+def load_accum() -> Dict[str, Any]:
+    """Load persistent daily/weekly accumulator. Resets daily at midnight ET, weekly on Monday."""
+    now_et = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4)))  # ET (close enough)
+    today  = now_et.strftime("%Y-%m-%d")
+    # ISO week starts Monday
+    week   = now_et.strftime("%Y-W%W-%w")[:-2]  # e.g. "2026-W12"
+    empty  = {"daily": 0.0, "weekly": 0.0, "dailyDate": today, "weekKey": week, "peak": 0.0}
+    if not ACCUM_PATH.exists():
+        return empty
+    try:
+        a = json.loads(ACCUM_PATH.read_text())
+        # Reset daily if new day
+        if a.get("dailyDate") != today:
+            a["daily"] = 0.0
+            a["dailyDate"] = today
+        # Reset weekly if new week
+        if a.get("weekKey") != week:
+            a["weekly"] = 0.0
+            a["weekKey"] = week
+        return a
+    except Exception:
+        return empty
+
+def save_accum(a: Dict[str, Any]) -> None:
+    ACCUM_PATH.write_text(json.dumps(a, indent=2))
+
 def fetch_model_usage() -> Dict[str, Any] | None:
     # Primary: merge OpenClaw sessions (all models incl. Gemini) + codexbar (precise Codex costs)
     session_rows = fetch_model_usage_from_sessions()
@@ -303,12 +331,27 @@ def fetch_model_usage() -> Dict[str, Any] | None:
     breakdown = merge_model_rows(session_rows, codexbar_rows)
 
     if breakdown:
-        total_cost = sum(r.get("weeklyCost", 0) for r in breakdown)
+        session_cost = sum(r.get("weeklyCost", 0) for r in breakdown)
+
+        # ── Persistent daily/weekly accumulator ──────────────────────────────
+        accum = load_accum()
+        # Only update if session cost grew (new activity), never shrink
+        prev_peak = accum.get("peak", 0.0)
+        if session_cost > prev_peak:
+            delta = session_cost - prev_peak
+            accum["daily"]  = round(accum.get("daily",  0.0) + delta, 6)
+            accum["weekly"] = round(accum.get("weekly", 0.0) + delta, 6)
+            accum["peak"]   = round(session_cost, 6)
+            save_accum(accum)
+
+        daily_cost  = accum.get("daily",  session_cost)
+        weekly_cost = accum.get("weekly", session_cost)
+
         # Write a structured tracker file for future API/newsfeed hooks
         tracker_path = ROOT.parent / "data" / "model-usage-tracker.json"
         tracker_payload = {
             "lastUpdated": utc_iso(),
-            "totalCostUsd": round(total_cost, 6),
+            "totalCostUsd": round(session_cost, 6),
             "models": [
                 {
                     "name": r["name"],
@@ -322,13 +365,13 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 }
                 for r in breakdown
             ],
-            "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly. Hook this file into the newsfeed/API layer for live model telemetry."
+            "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly."
         }
         tracker_path.write_text(json.dumps(tracker_payload, indent=2))
         return {
-            "session": round(total_cost, 6),
-            "daily": round(total_cost, 6),
-            "weekly": round(total_cost, 6),
+            "session": round(session_cost, 6),
+            "daily":   round(daily_cost,   6),
+            "weekly":  round(weekly_cost,  6),
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),

@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-03-27T03:05:00Z",
-  "totalCostUsd": 9.913078,
+  "lastUpdated": "2026-03-27T03:10:00Z",
+  "totalCostUsd": 10.31007,
   "models": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "totalTokens": 332560,
-      "inputTokens": 118,
-      "outputTokens": 83117,
-      "costUsd": 7.903491,
+      "totalTokens": 338799,
+      "inputTokens": 106,
+      "outputTokens": 79260,
+      "costUsd": 8.300483,
       "costEstimated": false,
       "sessions": 4
     },
@@ -43,5 +43,5 @@
       "sessions": 1
     }
   ],
-  "_note": "costEstimated=true means Gemini cost was calculated from token counts \u00d7 pricing table, not billed directly. Hook this file into the newsfeed/API layer for live model telemetry."
+  "_note": "costEstimated=true means Gemini cost was calculated from token counts \u00d7 pricing table, not billed directly."
 }
