@@ -3430,12 +3430,18 @@
 
             // ── Crypto Movers ──────────────────────────────────────────────
             if (f.crypto_movers && f.crypto_movers.length) {
-                html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div><div class="if-movers">`;
-                f.crypto_movers.slice(0, 6).forEach(m => {
+                html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
+                f.crypto_movers.forEach(m => {
                     const up = m.change_pct >= 0;
-                    html += `<div class="if-mover"><span class="if-mover-name">${m.symbol}</span><span class="if-mover-chg ${up ? 'up' : 'down'}">${up ? '+' : ''}${m.change_pct}%</span></div>`;
+                    const insightHtml = m.insight ? `<div class="if-grok-insight">${escapeHtml(m.insight)}</div>` : '';
+                    html += `<div class="if-item">
+                        <span class="if-mover-name" style="font-size:0.75rem;font-weight:700;color:${up ? '#4ade80' : '#f87171'};min-width:52px;">${escapeHtml(m.symbol)}</span>
+                        <span style="font-size:0.68rem;color:${up ? '#4ade80' : '#f87171'};font-weight:600;margin-right:6px;">${up ? '+' : ''}${m.change_pct}%</span>
+                        <span style="font-size:0.65rem;color:#fff;flex:1;">${escapeHtml(m.name)}</span>
+                        ${insightHtml}
+                    </div>`;
                 });
-                html += `</div></div>`;
+                html += `</div>`;
             }
 
             // ── Timestamp ──────────────────────────────────────────────────
