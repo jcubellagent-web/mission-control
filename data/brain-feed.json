@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:29:25Z",
-  "objective": "Diagnosing brain feed pipeline",
+  "messageReceived": "2026-03-28T19:31:06Z",
+  "objective": "Fix deployed \u00b7 Testing pipeline",
   "status": "active",
   "steps": [
     {
-      "label": "Checking",
+      "label": "Fix",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Testing",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T19:29:25Z",
-  "checkedAt": "2026-03-28T19:29:25Z",
+  "updatedAt": "2026-03-28T19:31:06Z",
+  "checkedAt": "2026-03-28T19:31:06Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
