@@ -21,12 +21,13 @@ raw = sys.argv[1]
 parts = [p.strip() for p in raw.split('|') if p.strip()]
 out = []
 for i, p in enumerate(parts):
-  status = 'active' if i == len(parts)-1 else 'done'
+  final_state = sys.argv[2] if len(sys.argv) > 2 else 'active'
+  status = ('done' if final_state in ('done', 'idle') else 'active') if i == len(parts)-1 else 'done'
   tool = p.split(':')[1].strip() if ':' in p else 'exec'
   label = p.split(':')[0].strip() if ':' in p else p
   out.append({'label': label, 'status': status, 'tool': tool})
 print(json.dumps(out))
-" "$STEPS_RAW")
+" "$STEPS_RAW" "$STATE")
 else
   STEPS_JSON="[]"
 fi
