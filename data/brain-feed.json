@@ -1,17 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Responding to Josh on Telegram",
+  "objective": "Transcribing voice message",
   "status": "active",
   "steps": [
     {
-      "label": "Composing response",
+      "label": "Received audio",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Transcribing",
       "status": "active",
-      "tool": "telegram"
+      "tool": "whisper"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T05:35:11Z",
-  "checkedAt": "2026-03-28T05:35:11Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-28T05:35:12Z",
+  "checkedAt": "2026-03-28T05:35:12Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
