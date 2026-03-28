@@ -356,10 +356,19 @@
         /* ── Today's Jobs reskin ─────────────────────────────────────── */
         .tjob-category { margin-bottom: 10px; }
         .tjob-category:last-child { margin-bottom: 0; }
-        .tjob-cat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; padding: 0 2px; }
+        .tjob-category.collapsed .tjob-rows { display: none; }
+        .tjob-category.collapsed .tjob-collapsed-preview { display: flex; }
+        .tjob-collapsed-preview { display: none; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+        .tjob-collapsed-preview .preview-next-label { color: rgba(255,255,255,0.25); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .tjob-collapsed-preview .preview-next-name { color: rgba(255,255,255,0.6); font-weight: 500; }
+        .tjob-collapsed-preview .preview-next-time { color: rgba(255,255,255,0.35); margin-left: auto; font-size: 0.68rem; }
+        .tjob-cat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; padding: 3px 4px; border-radius: 6px; cursor: pointer; user-select: none; transition: background 0.15s; }
+        .tjob-cat-header:hover { background: rgba(255,255,255,0.04); }
         .tjob-cat-emoji { font-size: 0.75rem; opacity: 0.8; }
         .tjob-cat-name { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; }
         .tjob-cat-count { font-size: 0.58rem; color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); border-radius: 8px; padding: 0 5px; margin-left: auto; }
+        .tjob-cat-chevron { font-size: 0.6rem; color: rgba(255,255,255,0.2); margin-left: 4px; transition: transform 0.2s; }
+        .tjob-category.collapsed .tjob-cat-chevron { transform: rotate(-90deg); }
         .tjob-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); margin-bottom: 4px; transition: background 0.15s; }
         .tjob-row:last-child { margin-bottom: 0; }
         .tjob-row:hover { background: rgba(255,255,255,0.04); }
@@ -4359,13 +4368,56 @@
                     </div>`;
                 }).join('');
 
-                return `<div class="tjob-category">
-                    <div class="tjob-cat-header">
+                // Build collapsed preview: find the next job to run
+                const nextJob = grouped[cat].find(c => {
+                    if (c.multiRun && c.multiRun.runs) {
+                        const etHour = getETHour();
+                        return c.multiRun.runs.some(r => {
+                            if (!r.time) return false;
+                            const tp = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+                            if (!tp) return false;
+                            let rh = parseInt(tp[1], 10);
+                            const ap = (tp[3] || '').toUpperCase();
+                            if (ap === 'PM' && rh !== 12) rh += 12;
+                            if (ap === 'AM' && rh === 12) rh = 0;
+                            return rh >= etHour;
+                        });
+                    }
+                    return c.status !== 'paused';
+                }) || grouped[cat][0];
+                const previewName = nextJob ? escapeHtml(nextJob.name) : '—';
+                let previewTime = '';
+                if (nextJob && nextJob.multiRun && nextJob.multiRun.runs) {
+                    const etHour = getETHour();
+                    const nextRun = nextJob.multiRun.runs.find(r => {
+                        if (!r.time) return false;
+                        const tp = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+                        if (!tp) return false;
+                        let rh = parseInt(tp[1], 10);
+                        const ap = (tp[3] || '').toUpperCase();
+                        if (ap === 'PM' && rh !== 12) rh += 12;
+                        if (ap === 'AM' && rh === 12) rh = 0;
+                        return rh >= etHour;
+                    });
+                    previewTime = nextRun ? nextRun.time : (nextJob.multiRun.runs[nextJob.multiRun.runs.length - 1]?.time || '');
+                } else if (nextJob) {
+                    previewTime = nextJob.schedule || '';
+                }
+                const catId = 'tjob-cat-' + cat.replace(/\s+/g,'-').toLowerCase();
+                const isCollapsed = window._tjobCollapsed && window._tjobCollapsed[cat];
+                return `<div class="tjob-category${isCollapsed ? ' collapsed' : ''}" id="${catId}" data-cat="${escapeHtml(cat)}">
+                    <div class="tjob-cat-header" onclick="window.toggleJobCategory('${escapeHtml(cat)}')">
                         <span class="tjob-cat-emoji">${cfg.emoji}</span>
                         <span class="tjob-cat-name" style="color:${cfg.color}">${escapeHtml(cat)}</span>
                         <span class="tjob-cat-count">${grouped[cat].length}</span>
+                        <span class="tjob-cat-chevron">▾</span>
                     </div>
-                    ${rows}
+                    <div class="tjob-collapsed-preview">
+                        <span class="preview-next-label">Next:</span>
+                        <span class="preview-next-name">${previewName}</span>
+                        <span class="preview-next-time">${escapeHtml(previewTime)}</span>
+                    </div>
+                    <div class="tjob-rows">${rows}</div>
                 </div>`;
             }).join('');
 
@@ -4431,6 +4483,15 @@
         function getETHour() {
             return new Date().toLocaleString('en-US', {timeZone: 'America/New_York', hour: 'numeric', hour12: false}) * 1;
         }
+
+        // ── Collapsible job categories ─────────────────────────────────────
+        window._tjobCollapsed = window._tjobCollapsed || {};
+        window.toggleJobCategory = function(cat) {
+            window._tjobCollapsed[cat] = !window._tjobCollapsed[cat];
+            const catId = 'tjob-cat-' + cat.replace(/\s+/g,'-').toLowerCase();
+            const el = document.getElementById(catId);
+            if (el) el.classList.toggle('collapsed', !!window._tjobCollapsed[cat]);
+        };
 
         function formatRelTime(iso) {
             if (!iso) return '';
@@ -4752,14 +4813,16 @@
         // === HEADER LIVE CLOCK ===
         function updateMcClock() {
             const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
+            let h = now.getHours();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
             const m = String(now.getMinutes()).padStart(2, '0');
             const s = String(now.getSeconds()).padStart(2, '0');
             const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
             const day = now.getDate();
             const clockEl = document.getElementById('mc-clock-time');
             const dateEl  = document.getElementById('mc-clock-date');
-            if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
+            if (clockEl) clockEl.textContent = `${h}:${m}:${s} ${ampm}`;
             if (dateEl)  dateEl.textContent  = `${days[now.getDay()]} · ${day}`;
         }
         updateMcClock();
