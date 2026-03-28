@@ -1,11 +1,27 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T02:26:00Z",
+  "objective": "Migrating crons to J.A.I.N",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Copying scripts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Copying secrets",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Setting up crontab",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T02:26:30Z",
   "checkedAt": "2026-03-28T02:25:02Z",
   "idleUpdatedAt": "2026-03-28T02:25:02Z"
 }
