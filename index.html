@@ -620,6 +620,18 @@
         .mu-el-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
         .mu-el-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-el-bar-fill { height: 100%; border-radius: 3px; }
+        /* Machine Health */
+        .mu-health-section { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mu-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .mu-health-machine { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 7px 9px; }
+        .mu-health-machine-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .mu-health-online-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .mu-health-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .mu-health-key { font-size: 0.58rem; color: rgba(255,255,255,0.3); }
+        .mu-health-val { font-size: 0.62rem; color: rgba(255,255,255,0.65); font-variant-numeric: tabular-nums; }
+        .mu-health-bar-wrap { width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 1px; margin-bottom: 4px; }
+        .mu-health-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+        .mu-health-offline { font-size: 0.62rem; color: rgba(255,68,68,0.6); padding: 6px 0; text-align: center; }
         .model-pill { background: #0d0d0d; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; }
         .model-pill h3 { font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 0.14em; margin-bottom: 4px; }
         .model-pill .value { font-size: 1.05rem; font-weight: 600; color: rgba(255,255,255,0.75); }
@@ -2589,7 +2601,7 @@
                     <div class="card card-model">
                         <div class="card-header">
                             <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
-                            <h2>Model Usage</h2>
+                            <h2>Model Usage &amp; Performance</h2>
                         </div>
                         <div id="model-usage-card"></div>
                     </div>
@@ -4133,7 +4145,7 @@
 
 
             // Model usage snapshot — compact, multi-source (diff-guarded)
-            if (sectionChanged('modelUsage', data.modelUsage)) {
+            if (sectionChanged('modelUsage', data.modelUsage) | sectionChanged('machineHealth', data.machineHealth)) {
             const modelUsageCard = document.getElementById('model-usage-card');
             if (data.modelUsage) {
                 const mu = data.modelUsage;
@@ -4247,7 +4259,37 @@
                         <span style="font-size:0.62rem;color:rgba(255,255,255,0.4)">${(elData.chars_used||0).toLocaleString()} / ${(elData.chars_limit||0).toLocaleString()} chars</span>
                     </div>` : '';
 
-                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + elHtml;
+                // ── Machine Health ──
+                function renderMachineHealth(mh, label, color) {
+                    if (!mh || !mh.available) return `<div class="mu-health-machine">
+                        <div class="mu-health-machine-label"><span class="mu-health-online-dot" style="background:#e53e3e"></span><span style="color:${color}">${label}</span></div>
+                        <div class="mu-health-offline">Offline</div></div>`;
+                    const cpuPct = mh.cpu_pct ?? 0;
+                    const ramPct = mh.ram_total_gb ? Math.round((mh.ram_used_gb / mh.ram_total_gb) * 100) : 0;
+                    const cpuColor = cpuPct > 80 ? '#e53e3e' : cpuPct > 50 ? '#f97316' : '#4ade80';
+                    const ramColor = ramPct > 85 ? '#e53e3e' : ramPct > 65 ? '#fbbf24' : '#60a5fa';
+                    const diskColor = (mh.disk_pct||0) > 85 ? '#e53e3e' : (mh.disk_pct||0) > 65 ? '#fbbf24' : '#4ade80';
+                    const uptime = mh.uptime ? `<div class="mu-health-row"><span class="mu-health-key">Uptime</span><span class="mu-health-val">${escapeHtml(mh.uptime)}</span></div>` : '';
+                    return `<div class="mu-health-machine">
+                        <div class="mu-health-machine-label"><span class="mu-health-online-dot" style="background:#4ade80;box-shadow:0 0 5px #4ade8080"></span><span style="color:${color}">${label}</span></div>
+                        <div class="mu-health-row"><span class="mu-health-key">CPU</span><span class="mu-health-val" style="color:${cpuColor}">${cpuPct}%</span></div>
+                        <div class="mu-health-bar-wrap"><div class="mu-health-bar-fill" style="width:${cpuPct}%;background:${cpuColor}60"></div></div>
+                        <div class="mu-health-row"><span class="mu-health-key">RAM</span><span class="mu-health-val" style="color:${ramColor}">${mh.ram_used_gb}/${mh.ram_total_gb} GB</span></div>
+                        <div class="mu-health-bar-wrap"><div class="mu-health-bar-fill" style="width:${ramPct}%;background:${ramColor}60"></div></div>
+                        <div class="mu-health-row"><span class="mu-health-key">Disk</span><span class="mu-health-val" style="color:${diskColor}">${mh.disk_used} used · ${mh.disk_pct}%</span></div>
+                        <div class="mu-health-row"><span class="mu-health-key">Load</span><span class="mu-health-val">${mh.load1 ?? '—'} / ${mh.load5 ?? '—'}</span></div>
+                        ${uptime}
+                    </div>`;
+                }
+                const mhData = data.machineHealth || {};
+                const healthHtml = `<div class="mu-health-section">
+                    <div class="mu-health-grid">
+                        ${renderMachineHealth(mhData.josh, 'JOSH 2.0', '#4ade80')}
+                        ${renderMachineHealth(mhData.jain, 'J.A.I.N', '#60a5fa')}
+                    </div>
+                </div>`;
+
+                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + elHtml + healthHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');

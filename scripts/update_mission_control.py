@@ -519,6 +519,86 @@ def fetch_elevenlabs_usage() -> Dict[str, Any]:
     return {"chars_used": total_chars, "chars_limit": total_limit, "available": total_chars > 0 or total_limit > 0}
 
 
+def fetch_machine_health() -> Dict[str, Any]:
+    """Collect key health metrics for JOSH 2.0 (local) and J.A.I.N (SSH)."""
+    import re as _re
+
+    def parse_top(stdout: str) -> Dict[str, Any]:
+        cpu_idle, cpu_user, cpu_sys = None, None, None
+        ram_used, ram_total = None, None
+        load1, load5, load15 = None, None, None
+        uptime_str = ""
+        for line in stdout.splitlines():
+            m = _re.search(r'CPU usage:\s*([\d.]+)%\s*user,\s*([\d.]+)%\s*sys,\s*([\d.]+)%\s*idle', line)
+            if m:
+                cpu_user, cpu_sys, cpu_idle = float(m.group(1)), float(m.group(2)), float(m.group(3))
+            m = _re.search(r'Load Avg:\s*([\d.]+),\s*([\d.]+),\s*([\d.]+)', line)
+            if m:
+                load1, load5, load15 = float(m.group(1)), float(m.group(2)), float(m.group(3))
+            m = _re.search(r'PhysMem:\s*([\d.]+)([GMK])\s*used.*?,\s*([\d.]+)([GMK])\s*unused', line)
+            if m:
+                def to_gb(val, unit):
+                    v = float(val)
+                    return v / 1024 if unit == 'M' else v / 1024 / 1024 if unit == 'K' else v
+                ram_used = round(to_gb(m.group(1), m.group(2)), 1)
+                unused = to_gb(m.group(3), m.group(4))
+                ram_total = round(ram_used + unused, 1)
+            m = _re.search(r'up\s+(.+?),\s*\d+\s+user', line)
+            if m:
+                uptime_str = m.group(1).strip()
+        cpu_pct = None if cpu_idle is None else round(100 - cpu_idle, 1)
+        return {
+            "cpu_pct": cpu_pct,
+            "cpu_user": cpu_user,
+            "cpu_sys": cpu_sys,
+            "load1": load1, "load5": load5, "load15": load15,
+            "ram_used_gb": ram_used, "ram_total_gb": ram_total,
+            "uptime": uptime_str,
+        }
+
+    def parse_df(stdout: str) -> Dict[str, Any]:
+        for line in stdout.splitlines()[1:]:
+            parts = line.split()
+            if len(parts) >= 5 and parts[-1] == '/':
+                try:
+                    return {"disk_used": parts[2], "disk_avail": parts[3], "disk_pct": int(parts[4].rstrip('%'))}
+                except Exception:
+                    pass
+        return {}
+
+    result: Dict[str, Any] = {}
+
+    # ── JOSH 2.0 (local) ──────────────────────────────────────────────────
+    try:
+        top_r = subprocess.run(['top', '-l', '1', '-n', '0', '-s', '0'], capture_output=True, text=True, timeout=8)
+        df_r  = subprocess.run(['df', '-h', '/'], capture_output=True, text=True, timeout=5)
+        josh_metrics = parse_top(top_r.stdout)
+        josh_metrics.update(parse_df(df_r.stdout))
+        josh_metrics["available"] = True
+        result["josh"] = josh_metrics
+    except Exception as e:
+        result["josh"] = {"available": False, "error": str(e)}
+
+    # ── J.A.I.N (SSH) ─────────────────────────────────────────────────────
+    try:
+        jain_cmd = "top -l 1 -n 0 -s 0 2>/dev/null; echo '---DF---'; df -h /"
+        r = subprocess.run(
+            ['ssh', '-o', 'ConnectTimeout=6', '-o', 'StrictHostKeyChecking=no',
+             'jc_agent@100.121.89.84', jain_cmd],
+            capture_output=True, text=True, timeout=12
+        )
+        parts = r.stdout.split('---DF---')
+        jain_metrics = parse_top(parts[0])
+        if len(parts) > 1:
+            jain_metrics.update(parse_df(parts[1]))
+        jain_metrics["available"] = r.returncode == 0
+        result["jain"] = jain_metrics
+    except Exception as e:
+        result["jain"] = {"available": False, "error": str(e)}
+
+    return result
+
+
 def fetch_jain_model_usage() -> Dict[str, Any]:
     """SSH to J.A.I.N and retrieve codexbar cost JSON."""
     empty = {"daily": 0, "session": 0, "total": 0, "available": False}
@@ -1183,6 +1263,9 @@ def main() -> None:
         "lastUpdated": now_iso,
     }
     dashboard["modelUsage"] = model_usage
+
+    # Machine health metrics (CPU, RAM, disk, uptime)
+    dashboard["machineHealth"] = fetch_machine_health()
 
     dashboard["upcomingEvents"] = fetch_upcoming_events()
     dashboard["devices"] = build_devices()
