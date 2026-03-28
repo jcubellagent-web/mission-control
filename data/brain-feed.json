@@ -1,22 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Fetching GitHub PR status",
+  "objective": "Generating intelligence feed brief",
   "status": "active",
   "steps": [
     {
-      "label": "Web search",
+      "label": "PRs checked",
       "status": "done",
-      "tool": "web_search"
+      "tool": "github"
     },
     {
-      "label": "Checking PRs",
+      "label": "Generating brief",
       "status": "active",
-      "tool": "github"
+      "tool": "gemini"
     }
   ],
-  "currentTool": "github",
-  "updatedAt": "2026-03-28T05:32:03Z",
-  "checkedAt": "2026-03-28T05:32:03Z",
+  "currentTool": "gemini",
+  "updatedAt": "2026-03-28T05:32:05Z",
+  "checkedAt": "2026-03-28T05:32:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
