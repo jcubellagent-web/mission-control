@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:37:25Z",
+  "messageReceived": "2026-03-28T21:37:39Z",
   "objective": "Delete X-watchlist monitor from JOSH 2.0",
   "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "Found files",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Finding cron jobs",
+      "label": "Deleting",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:37:25Z",
-  "checkedAt": "2026-03-28T21:37:25Z",
+  "updatedAt": "2026-03-28T21:37:39Z",
+  "checkedAt": "2026-03-28T21:37:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
