@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:23:46Z",
+  "messageReceived": "2026-03-28T21:24:22Z",
   "objective": "Fetching league lineup lock rules",
   "status": "active",
   "steps": [
     {
-      "label": "Querying ESPN API",
+      "label": "Got rules",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Updating fantasy scripts",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:23:46Z",
-  "checkedAt": "2026-03-28T21:23:46Z",
+  "updatedAt": "2026-03-28T21:24:22Z",
+  "checkedAt": "2026-03-28T21:24:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
