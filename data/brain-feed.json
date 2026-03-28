@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:10:45Z",
+  "messageReceived": "2026-03-28T21:11:11Z",
   "objective": "Installing ClawHub skills",
   "status": "active",
   "steps": [
     {
-      "label": "Checking elite-longterm-memory",
+      "label": "Skipped elite-memory (conflicts)",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Installing browser + calendar",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:10:45Z",
-  "checkedAt": "2026-03-28T21:10:45Z",
+  "updatedAt": "2026-03-28T21:11:11Z",
+  "checkedAt": "2026-03-28T21:11:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
