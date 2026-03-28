@@ -9,31 +9,31 @@
     "status": "idle",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-03-28T01:10:00Z",
-    "checkedAt": "2026-03-28T01:10:01Z",
-    "idleUpdatedAt": "2026-03-28T01:10:01Z"
+    "updatedAt": "2026-03-28T01:15:00Z",
+    "checkedAt": "2026-03-28T01:15:01Z",
+    "idleUpdatedAt": "2026-03-28T01:15:01Z"
   },
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Idle: Awaiting your next command",
-    "updatedAt": "2026-03-28T01:10:00Z"
+    "updatedAt": "2026-03-28T01:15:00Z"
   },
   "contextWindow": {
-    "usedTokens": 153877,
+    "usedTokens": 15776,
     "limitTokens": 200000,
-    "pct": 0.7694,
+    "pct": 0.0789,
     "model": "claude-sonnet-4-6",
-    "status": "amber"
+    "status": "green"
   },
   "modelUsage": {
-    "session": 16.511316,
+    "session": 18.212401,
     "daily": 23.080097,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 14.464248000000001
+        "cost": 16.139763000000002
       },
       {
         "name": "openai/gpt-5.4",
@@ -44,18 +44,23 @@
         "name": "gpt-5.3-codex",
         "window": "session",
         "cost": 0.43344559999999993
+      },
+      {
+        "name": "google/gemini-2.5-flash",
+        "window": "session",
+        "cost": 0.0255695
       }
     ],
     "breakdown": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 28468,
-        "outputTokens": 124115,
-        "totalTokens": 152583,
-        "sessionCost": 14.464248000000001,
-        "dailyCost": 11.128970700000002,
-        "weeklyCost": 14.464248000000001,
+        "inputTokens": 28466,
+        "outputTokens": 123993,
+        "totalTokens": 152459,
+        "sessionCost": 16.139763000000002,
+        "dailyCost": 12.804485700000003,
+        "weeklyCost": 16.139763000000002,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -81,9 +86,22 @@
         "sessionCost": 0.43344559999999993,
         "totalTokens": 0,
         "costEstimated": false
+      },
+      {
+        "name": "google/gemini-2.5-flash",
+        "source": "openclaw",
+        "inputTokens": 80540,
+        "outputTokens": 563,
+        "totalTokens": 81103,
+        "sessionCost": 0.0255695,
+        "dailyCost": 0.0255695,
+        "weeklyCost": 0.0255695,
+        "sessions": 1,
+        "isGemini": true,
+        "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-28T01:10:01Z"
+    "lastUpdated": "2026-03-28T01:15:01Z"
   },
   "devices": [
     {
@@ -97,19 +115,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T01:10:01Z"
+      "lastChecked": "2026-03-28T01:15:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T01:10:01Z"
+      "lastChecked": "2026-03-28T01:15:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T01:10:01Z"
+      "lastChecked": "2026-03-28T01:15:01Z"
     }
   ],
   "crons": [
@@ -136,7 +154,7 @@
       "schedule": "Mon 9:15 AM ET",
       "description": "Reviews starting lineup, flags IL players in active slots",
       "category": "Fantasy Baseball",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -145,7 +163,7 @@
       "schedule": "Every 4h",
       "description": "Watches for status changes and alerts if a starter goes down",
       "category": "Fantasy Baseball",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -154,7 +172,7 @@
       "schedule": "Wed + Fri 9am",
       "description": "Scans top free agents and recommends add/drop moves",
       "category": "Fantasy Baseball",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -163,7 +181,7 @@
       "schedule": "Every 5 min",
       "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score \u22658.5 to @Jain_win_news_bot",
       "category": "Intelligence Feed",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -172,7 +190,7 @@
       "schedule": "8x daily",
       "description": "Full AI/macro/crypto/market intelligence briefing",
       "category": "Intelligence Feed",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "multiRun": {
@@ -231,25 +249,25 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-03-28T01:10:01Z",
-      "event": "Session spend: $16.51"
+      "time": "2026-03-28T01:15:01Z",
+      "event": "Session spend: $18.21"
     },
     {
-      "time": "2026-03-28T01:10:01Z",
+      "time": "2026-03-28T01:15:01Z",
       "event": "7 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T01:10:01Z",
+      "time": "2026-03-28T01:15:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T01:10:01Z",
+      "time": "2026-03-28T01:15:01Z",
       "event": "Mission Control refresh published"
     },
     {
-      "time": "2026-03-28T01:10:00Z",
+      "time": "2026-03-28T01:15:00Z",
       "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-03-28T01:10:01Z"
+  "lastUpdated": "2026-03-28T01:15:01Z"
 }
