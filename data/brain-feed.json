@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:56:00Z",
+  "objective": "Received: Limit recent activity to last 2 actions",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Parsing message",
+      "status": "active",
+      "tool": "telegram"
+    }
+  ],
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T03:56:19Z",
   "checkedAt": "2026-03-28T03:55:01Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
