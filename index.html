@@ -598,20 +598,20 @@
         /* Compact model usage */
         .mu-totals-section { margin-bottom: 8px; }
         .mu-totals-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
-        .mu-total-cell { display: flex; align-items: center; gap: 5px; padding: 5px 10px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); }
+        .mu-total-cell { display: flex; align-items: center; gap: 4px; padding: 4px 6px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); min-width: 0; }
         .mu-total-cell:last-child { border-right: none; }
-        .mu-total-val { font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
-        .mu-total-label { font-size: 0.55rem; color: rgba(255,255,255,0.28); text-transform: uppercase; letter-spacing: 0.06em; }
+        .mu-total-val { font-size: 0.65rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: #4ade80; white-space: nowrap; }
+        .mu-total-label { font-size: 0.52rem; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; opacity: 0.7; }
         .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
         .mu-compact-row { display: grid; grid-template-columns: 6px 1fr auto 55px auto; align-items: center; gap: 5px; padding: 2px 0; }
         .mu-compact-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .mu-compact-name { font-size: 0.66rem; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-compact-name { font-size: 0.64rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mu-compact-bar-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
-        .mu-compact-cost { font-size: 0.62rem; color: rgba(255,255,255,0.5); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+        .mu-compact-cost { font-size: 0.6rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
         .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: right; }
         .mu-el-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
         .mu-el-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
@@ -4186,20 +4186,20 @@
                 <div class="mu-totals-section">
                     <div class="mu-totals-row">
                         <div class="mu-total-cell">
-                            <span class="mu-total-label">Session</span>
-                            <span class="mu-total-val" style="color:${costColor(totalSession)}">${fmtCost(totalSession)}</span>
+                            <span class="mu-total-label">Sess</span>
+                            <span class="mu-total-val">${fmtCost(totalSession)}</span>
                         </div>
                         <div class="mu-total-cell">
-                            <span class="mu-total-label">Daily</span>
-                            <span class="mu-total-val" style="color:${costColor(totalDaily)}">${fmtCost(totalDaily)}</span>
+                            <span class="mu-total-label">Day</span>
+                            <span class="mu-total-val">${fmtCost(totalDaily)}</span>
                         </div>
                         <div class="mu-total-cell">
-                            <span class="mu-total-label">Weekly</span>
-                            <span class="mu-total-val" style="color:${costColor(totalWeekly)}">${fmtCost(totalWeekly)}</span>
+                            <span class="mu-total-label">Week</span>
+                            <span class="mu-total-val">${fmtCost(totalWeekly)}</span>
                         </div>
                         <div class="mu-total-cell">
-                            <span class="mu-total-label">Monthly</span>
-                            <span class="mu-total-val" style="color:${costColor(totalMonthly)}">${fmtCost(totalMonthly)}</span>
+                            <span class="mu-total-label">Month</span>
+                            <span class="mu-total-val">${fmtCost(totalMonthly)}</span>
                         </div>
                     </div>
                 </div>`;
@@ -4223,8 +4223,8 @@
                         const estimated = model.costEstimated ? ' ~' : '';
                         const sizeLabel = isLocal && model.sizeGb ? ` · ${model.sizeGb}GB` : '';
                         const costDisplay = isLocal
-                            ? `<span style="color:#4ade80;font-size:0.62rem;font-weight:600;">free${sizeLabel}</span>`
-                            : `<span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:rgba(255,255,255,0.25);margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>`;
+                            ? `<span style="color:#4ade80;font-size:0.6rem;font-weight:600;">free${sizeLabel}</span>`
+                            : `<span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:#fff;opacity:0.4;margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>`;
                         const localDot = isLocal && model.loaded ? `<span title="loaded in memory" style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#4ade80;margin-left:2px;vertical-align:middle;"></span>` : '';
                         return `<div class="mu-compact-row">
                             <span class="mu-compact-dot" style="background:${color}"></span>
@@ -4236,7 +4236,7 @@
                             ${costDisplay}
                         </div>`;
                     }).join('')}</div>
-                    <div class="mu-compact-legend" style="font-size:0.55rem;color:rgba(255,255,255,0.25);margin-top:4px;text-align:right;">today / weekly · ~ = estimated</div>`;
+                    `;
                 }
 
                 // ── ElevenLabs usage chip ──
