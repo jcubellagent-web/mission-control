@@ -2422,14 +2422,11 @@
 
         function getBrainFeedStateLabel(bf) {
             if (!bf) return 'Idle';
-            const activeUpdatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
-            const idleUpdatedAt = bf.idleUpdatedAt ? new Date(bf.idleUpdatedAt).getTime() : null;
-            const effectiveUpdatedAt = bf.active ? activeUpdatedAt : idleUpdatedAt; // Use idleUpdatedAt for idle state
-            const ageSecs = effectiveUpdatedAt ? (Date.now() - effectiveUpdatedAt) / 1000 : Infinity;
-
-            if (bf.active && ageSecs < 60) return 'Live';
-            if (bf.active) return 'Active';
-            if (effectiveUpdatedAt && ageSecs >= 3600) return 'Stale'; // Only stale after 1h of no updates
+            // State is authoritative — never infer from timestamp
+            if (bf.active === true) return 'Live';
+            const updatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
+            const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
+            if (ageSecs >= 3600) return 'Stale';
             return 'Idle';
         }
 
@@ -2636,17 +2633,17 @@
             const dot = document.querySelector('.bf-fresh-dot');
             const label = document.getElementById('bf-freshness-label-text');
             if (!dot) return;
-            const isActive = bf && bf.active;
-            const ageSecs = bfLastUpdatedTs ? (Date.now() - bfLastUpdatedTs) / 1000 : 9999;
-            const isFresh = ageSecs < 60;
-            const isStale = ageSecs >= 3600; // stale only after 1h of silence
-            if (isActive && isFresh) {
+            // Always use the canonical state — never infer active from timestamp alone
+            const canonical = window._mcLastBrainFeed || bf;
+            const isActive = canonical && canonical.active === true;
+            const updatedAt = canonical && (canonical.updatedAt);
+            const ageSecs = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) / 1000 : 9999;
+            const isStale = !isActive && ageSecs >= 3600;
+
+            if (isActive) {
                 dot.style.background = '#e53e3e';
                 if (label) label.textContent = 'Live';
-            } else if (isActive) {
-                dot.style.background = '#fbbf24';
-                if (label) label.textContent = 'Active';
-            } else if (isStale && bfLastUpdatedTs) { // Check bfLastUpdatedTs explicitly here
+            } else if (isStale) {
                 dot.style.background = '#fbbf24';
                 if (label) label.textContent = 'Stale';
             } else {
