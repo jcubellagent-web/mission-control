@@ -3224,11 +3224,17 @@
 
             _sbWs.onopen = () => {
                 console.debug('[MC] Supabase Realtime connected');
-                // Join channel for brain_feed table
+                // Subscribe to brain_feed table changes (Realtime v2)
                 _sbWs.send(JSON.stringify({
                     topic: 'realtime:public:brain_feed',
                     event: 'phx_join',
-                    payload: { config: { broadcast: { self: true }, presence: { key: '' } } },
+                    payload: {
+                        config: {
+                            postgres_changes: [{ event: '*', schema: 'public', table: 'brain_feed' }],
+                            broadcast: { self: false },
+                            presence: { key: '' }
+                        }
+                    },
                     ref: '1'
                 }));
                 // Heartbeat every 25s
@@ -3242,14 +3248,18 @@
             _sbWs.onmessage = (evt) => {
                 try {
                     const msg = JSON.parse(evt.data);
-                    if (msg.event === 'postgres_changes' || (msg.event === 'INSERT' || msg.event === 'UPDATE')) {
-                        const record = msg.payload?.data?.record || msg.payload?.record;
-                        if (record?.data) {
-                            console.debug('[MC] Supabase RT brain feed update');
-                            applyBrainFeed(record.data, 'supabase');
-                        }
+                    // Log all non-heartbeat messages for debugging
+                    if (msg.event !== 'phx_reply' && msg.topic !== 'phoenix') {
+                        console.debug('[MC] Supabase RT msg:', msg.event, msg.topic, msg.payload);
                     }
-                } catch(e) {}
+                    // Supabase Realtime v2 format
+                    const payload = msg.payload || {};
+                    const record = payload?.data?.record || payload?.record || payload?.new;
+                    if (record?.data) {
+                        console.debug('[MC] Supabase RT brain feed update received');
+                        applyBrainFeed(record.data, 'supabase');
+                    }
+                } catch(e) { console.warn('[MC] RT parse error', e); }
             };
 
             _sbWs.onerror = () => { console.debug('[MC] Supabase RT error'); };
@@ -3277,22 +3287,24 @@
         function initDashboard() {
             initAirpointState();
             fetchData();
-            fetchBrainFeed();
-            fetchBrainFeedSupabase(); // immediate Supabase fetch
-            initSupabaseRealtime();   // WebSocket subscription
+            // ── Brain feed: SUPABASE IS THE SINGLE SOURCE OF TRUTH ──
+            // One initial REST fetch to populate immediately, then WebSocket takes over.
+            // Local file polling is intentionally disabled — it has different timestamps
+            // from Supabase and causes constant hash-mismatch flicker.
+            fetchBrainFeedSupabase();
+            initSupabaseRealtime();
+            // Fallback REST poll every 30s only (WebSocket is primary; this is a safety net)
+            setInterval(fetchBrainFeedSupabase, 30000);
             updateLastUpdatedTicker();
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
-            setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
-            setInterval(fetchBrainFeedSupabase, CONFIG.BRAIN_FEED_INTERVAL); // Supabase REST fallback
             fetchJainBrainFeed();
             setInterval(fetchJainBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             fetchAgentComms();
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
-            setInterval(fetchIntelligenceFeed, 60000); // refresh every 60s
+            setInterval(fetchIntelligenceFeed, 60000);
             attachPullToRefresh();
-            // Show god mode badge (visual only)
             const godBadge = document.getElementById('god-mode-badge');
             if (godBadge) godBadge.style.display = 'inline-flex';
             // Desktop: poll for remote commands from phone (every 2s)
@@ -3705,12 +3717,9 @@
                 renderActiveAgents(data.activeAgents || []);
             }
 
-            // Brain Feed — Supabase is the ONLY source of truth for active state.
-            // dashboard-data.json brain feed — lowest priority source, route through applyBrainFeed
-            const dashBf = data.brainFeed;
-            if (dashBf && sectionChanged('brainFeed', dashBf)) {
-                applyBrainFeed(dashBf, 'local');
-            }
+            // Brain Feed — Supabase is the ONLY source of truth. 
+            // Never apply brainFeed from dashboard-data.json — it's stale by up to 5 min
+            // and has different timestamps that cause flicker. Supabase WS + REST handles it.
 
             // Action Required (diff-guarded)
             if (!sectionChanged('actionRequired', data.actionRequired)) { /* skip */ } else
