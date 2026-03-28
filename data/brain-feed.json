@@ -1,17 +1,32 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:00:37Z",
-  "objective": "Fixing brain feed done-state steps persistence",
-  "status": "active",
+  "messageReceived": "2026-03-28T20:01:36Z",
+  "objective": "Brain feed steps persistence fix",
+  "status": "done",
   "steps": [
     {
-      "label": "Updating bf_push.sh + active state renderer",
+      "label": "Reading bf_push.sh",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Fixing step preservation",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Fixing idle renderer",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Pushing to GitHub",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:00:37Z",
-  "checkedAt": "2026-03-28T20:00:37Z",
+  "updatedAt": "2026-03-28T20:01:36Z",
+  "checkedAt": "2026-03-28T20:01:36Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
