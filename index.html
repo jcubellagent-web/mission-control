@@ -1558,34 +1558,37 @@
         .bf-current-tool-bar {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            background: rgba(229,62,62,0.08);
-            border: 1px solid rgba(229,62,62,0.25);
-            border-radius: 10px;
-            box-shadow: 0 0 18px rgba(229,62,62,0.08);
+            gap: 14px;
+            padding: 16px 18px;
+            background: rgba(229,62,62,0.1);
+            border: 1.5px solid rgba(229,62,62,0.4);
+            border-radius: 12px;
+            box-shadow: 0 0 24px rgba(229,62,62,0.12), inset 0 0 12px rgba(229,62,62,0.04);
+            margin: 4px 0;
         }
         .bf-ct-pulse {
-            width: 10px; height: 10px;
+            width: 12px; height: 12px;
             border-radius: 50%;
             background: #e53e3e;
             animation: pulse 1s infinite;
             flex-shrink: 0;
-            box-shadow: 0 0 6px rgba(229,62,62,0.5);
+            box-shadow: 0 0 8px rgba(229,62,62,0.8);
         }
         .bf-ct-label {
-            font-size: 0.7rem;
-            color: rgba(229,62,62,0.6);
+            font-size: 0.68rem;
+            color: rgba(229,62,62,0.55);
             text-transform: uppercase;
-            letter-spacing: 0.12em;
-            font-weight: 600;
+            letter-spacing: 0.14em;
+            font-weight: 700;
+            white-space: nowrap;
         }
         .bf-ct-tool {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1.1rem;
+            font-weight: 800;
             color: #ff6b6b;
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
+            text-shadow: 0 0 12px rgba(229,62,62,0.4);
         }
         .bf-timeline {
             display: flex;
@@ -3411,15 +3414,20 @@
                         </div>`;
                 }
 
+                // Color title + context to match the ctx bar color
+                const idleBarColor = (ctxWin && ctxWin.status)
+                    ? (ctxWin.status === 'red' ? '#e53e3e' : ctxWin.status === 'amber' ? '#fbbf24' : '#4ade80')
+                    : '#4ade80';
+
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
                         <div class="brain-hero">
                             <div class="brain-kicker">Live Operator State</div>
-                            <div class="brain-title">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
-                            <p class="focus-context">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
+                            <div class="brain-title" style="color:${idleBarColor}">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
+                            <p class="focus-context" style="color:${idleBarColor};opacity:0.75">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
                             ${ctxMeterHtml}
-                            <div class="brain-meta">
+                            <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
                                 <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
                                 ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
                             </div>
