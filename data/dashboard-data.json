@@ -3,20 +3,31 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-28T17:06:02Z",
-    "objective": "Response sent \u00b7 Awaiting instruction",
-    "status": "idle",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-03-28T17:07:51Z",
-    "checkedAt": "2026-03-28T17:06:02Z",
+    "active": true,
+    "messageReceived": "2026-03-28T17:17:52Z",
+    "objective": "Diagnosing dashboard: brain feed, jobs load, intel feed",
+    "status": "active",
+    "steps": [
+      {
+        "label": "Analyzing",
+        "status": "done",
+        "tool": "openclaw"
+      },
+      {
+        "label": "Spawning J.A.I.N",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-03-28T17:17:52Z",
+    "checkedAt": "2026-03-28T17:17:52Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Response sent \u00b7 Awaiting instruction",
-    "updatedAt": "2026-03-28T17:15:02Z"
+    "status": "Brain Feed live",
+    "context": "Diagnosing dashboard: brain feed, jobs load, intel feed",
+    "updatedAt": "2026-03-28T17:20:02Z"
   },
   "contextWindow": {
     "usedTokens": 16502,
@@ -101,7 +112,7 @@
         "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-28T17:15:02Z",
+    "lastUpdated": "2026-03-28T17:20:02Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -125,19 +136,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T17:15:02Z"
+      "lastChecked": "2026-03-28T17:20:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T17:15:02Z"
+      "lastChecked": "2026-03-28T17:20:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T17:15:02Z"
+      "lastChecked": "2026-03-28T17:20:02Z"
     }
   ],
   "crons": [
@@ -267,25 +278,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T17:15:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-28T17:20:02Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T17:15:02Z",
+      "time": "2026-03-28T17:20:02Z",
       "event": "Session spend: $7.86"
     },
     {
-      "time": "2026-03-28T17:15:02Z",
+      "time": "2026-03-28T17:20:02Z",
       "event": "7 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T17:15:02Z",
+      "time": "2026-03-28T17:20:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T17:15:02Z",
+      "time": "2026-03-28T17:20:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T17:15:02Z"
+  "lastUpdated": "2026-03-28T17:20:02Z"
 }
