@@ -1349,8 +1349,9 @@
         /* Signal table */
         .if-signal-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         .if-signal-table thead th { font-size: 0.55rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
-        .ift-src { width: 90px; white-space: nowrap; }
-        .ift-cat { width: 100px; }
+        .ift-ss { width: 30px; text-align: center; }
+        .ift-src { width: 85px; white-space: nowrap; }
+        .ift-cat { width: 95px; }
         .ift-headline { min-width: 0; }
         .ift-row td { padding: 5px 6px; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .ift-row:last-child td { border-bottom: none; }
@@ -1359,6 +1360,11 @@
         .ift-cat-badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: #fff; white-space: nowrap; display: inline-block; }
         .ift-title { font-size: 0.72rem; color: #fff; line-height: 1.35; }
         .ift-reason { font-size: 0.62rem; color: #fff; opacity: 0.75; margin-top: 2px; line-height: 1.3; }
+        /* Signal Strength bar */
+        .ift-ss-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .ift-ss-bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+        .ift-ss-bar { width: 3px; border-radius: 1px; }
+        .ift-ss-num { font-size: 0.45rem; color: rgba(255,255,255,0.35); letter-spacing: 0; }
         /* Signal table */
         .if-item { padding: 4px 8px 4px 6px; border-radius: 5px; transition: background 0.15s; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
         .if-item:hover { background: rgba(255,255,255,0.04); }
@@ -3446,33 +3452,15 @@
                     <div class="if-section-header">🎯 Top Signals, Developments &amp; TLDR
                         ${chips ? `<div class="if-cat-chips">${chips}</div>` : ''}
                     </div>
-                    <table class="if-signal-table">
-                        <thead>
-                            <tr>
-                                <th class="ift-src">Source</th>
-                                <th class="ift-cat">Category</th>
-                                <th class="ift-headline">Headline</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-                signalItems.slice(0, 6).forEach(item => {
-                    const url = item.url || '';
-                    const titleEl = url
-                        ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(item.title || item.headline || '')}</a>`
-                        : escapeHtml(item.title || item.headline || '');
-                    const cat = resolveCategory(item);
-                    const src = resolveSource(item);
-                    const reason = item.reason && !item.reason.startsWith('http') ? item.reason : '';
-                    html += `<tr class="ift-row">
-                        <td class="ift-src">${escapeHtml(src)}</td>
-                        <td class="ift-cat"><span class="ift-cat-badge">${escapeHtml(cat)}</span></td>
-                        <td class="ift-headline">
-                            <div class="ift-title">${titleEl}</div>
-                            ${reason ? `<div class="ift-reason">${escapeHtml(reason)}</div>` : ''}
-                        </td>
-                    </tr>`;
-                });
-                html += `</tbody></table>`;
+                `;
+                html += makeTable(signalItems.slice(0, 6).map(item => ({
+                    src: resolveSource(item),
+                    cat: resolveCategory(item),
+                    title: item.title || item.headline || '',
+                    url: item.url || '',
+                    blurb: item.reason && !item.reason.startsWith('http') ? item.reason : '',
+                    score: item.score
+                })));
                 if (tldrItems.length) {
                     html += `<div class="if-tldr-block">`;
                     tldrItems.forEach(b => { html += `<div class="if-tldr-bullet">› ${escapeHtml(b)}</div>`; });
@@ -3482,10 +3470,29 @@
             }
 
             // ── Shared table builder ───────────────────────────────────────
+            function ssBar(score) {
+                // score: 0-10 → 5-segment bar, rising heights, colored by strength
+                const pct = Math.min(10, Math.max(0, score || 0)) / 10;
+                const filled = Math.round(pct * 5);
+                const color = pct >= 0.85 ? '#f87171' : pct >= 0.65 ? '#fbbf24' : pct >= 0.45 ? '#4ade80' : 'rgba(255,255,255,0.25)';
+                const heights = [4, 6, 9, 11, 14]; // px heights for each segment
+                let bars = '';
+                for (let i = 0; i < 5; i++) {
+                    const on = i < filled;
+                    bars += `<div class="ift-ss-bar" style="height:${heights[i]}px;background:${on ? color : 'rgba(255,255,255,0.1)'}"></div>`;
+                }
+                const numLabel = score != null ? score.toFixed(0) : '—';
+                return `<div class="ift-ss-wrap" title="Signal strength: ${numLabel}/10">
+                    <div class="ift-ss-bars">${bars}</div>
+                    <div class="ift-ss-num">${numLabel}</div>
+                </div>`;
+            }
+
             function makeTable(rows) {
-                // rows: [{src, cat, title, url, blurb}]
+                // rows: [{src, cat, catColor?, title, url, blurb, score?}]
                 if (!rows.length) return '';
                 let t = `<table class="if-signal-table"><thead><tr>
+                    <th class="ift-ss">SS</th>
                     <th class="ift-src">Source</th>
                     <th class="ift-cat">Category</th>
                     <th class="ift-headline">Headline</th>
@@ -3496,6 +3503,7 @@
                         : escapeHtml(r.title);
                     const catStyle = r.catColor ? ` style="color:${escapeHtml(r.catColor)};border-color:${escapeHtml(r.catColor)}40"` : '';
                     t += `<tr class="ift-row">
+                        <td class="ift-ss">${ssBar(r.score)}</td>
                         <td class="ift-src">${escapeHtml(r.src || '—')}</td>
                         <td class="ift-cat"><span class="ift-cat-badge"${catStyle}>${escapeHtml(r.cat || '—')}</span></td>
                         <td class="ift-headline">
@@ -3513,7 +3521,7 @@
                 html += `<div class="if-section" id="ifs-ai"><div class="if-section-header">🔗 AI Value Chain</div>`;
                 html += makeTable(items.map(i => ({
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'AI Value Chain'}),
-                    title: i.title || '', url: i.url || '',
+                    title: i.title || '', url: i.url || '', score: i.score,
                     blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
                 })));
                 html += `</div>`;
@@ -3525,7 +3533,7 @@
                 html += `<div class="if-section" id="ifs-enterprise"><div class="if-section-header">🏢 Enterprise AI</div>`;
                 html += makeTable(items.map(i => ({
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'Enterprise AI'}),
-                    title: i.title || i.headline || '', url: i.url || '',
+                    title: i.title || i.headline || '', url: i.url || '', score: i.score,
                     blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
                 })));
                 html += `</div>`;
@@ -3540,7 +3548,7 @@
                     const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
                     const moodTag = i.mood && i.mood !== 'NEUTRAL' ? `[${i.mood}] ` : '';
                     return { src: resolveSource({...i, source: i.source || 'Macro'}), cat: 'Macro',
-                             title: (moodTag + (i.headline || '')).trim(), url, blurb };
+                             title: (moodTag + (i.headline || '')).trim(), url, blurb, score: i.score };
                 }));
                 html += `</div>`;
             }
@@ -3553,7 +3561,7 @@
                     const url = i.url || (i.insight && i.insight.startsWith('http') ? i.insight : '');
                     const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
                     return { src: resolveSource({...i, source: i.source || 'Policy'}), cat: 'Policy',
-                             title: i.headline || '', url, blurb };
+                             title: i.headline || '', url, blurb, score: i.score };
                 }));
                 html += `</div>`;
             }
@@ -3566,7 +3574,7 @@
                     src: resolveSource({...i, source: i.source || 'Prediction'}),
                     cat: i.mood || 'Hot Take',
                     title: i.take || i.headline || '', url: i.url || '',
-                    blurb: ''
+                    blurb: '', score: i.score
                 })));
                 html += `</div>`;
             }
@@ -3578,11 +3586,11 @@
                 const nasdaqRows = [];
                 (nm.gainers || []).forEach(m => nasdaqRows.push({
                     src: 'NASDAQ', cat: `+${m.change_pct}%`, catColor: '#4ade80',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: ''
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '', score: null
                 }));
                 (nm.losers || []).forEach(m => nasdaqRows.push({
                     src: 'NASDAQ', cat: `${m.change_pct}%`, catColor: '#f87171',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: ''
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '', score: null
                 }));
                 html += makeTable(nasdaqRows);
                 html += `</div>`;
@@ -3593,12 +3601,14 @@
                 html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
                 html += makeTable(f.crypto_movers.map(m => {
                     const up = m.change_pct >= 0;
-                    const chgStr = `${up ? '+' : ''}${m.change_pct}%`;
+                    const absPct = Math.abs(m.change_pct);
+                    // Treat crypto % move as signal strength: ≥10% = max, scale down
+                    const cryptoScore = Math.min(10, absPct);
                     return {
-                        src: 'CoinGecko', cat: chgStr,
+                        src: 'CoinGecko', cat: `${up ? '+' : ''}${m.change_pct}%`,
                         catColor: up ? '#4ade80' : '#f87171',
                         title: `${m.symbol} — ${m.name}`, url: '',
-                        blurb: m.insight || ''
+                        blurb: m.insight || '', score: cryptoScore
                     };
                 }));
                 html += `</div>`;
