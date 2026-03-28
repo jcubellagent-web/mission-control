@@ -1297,6 +1297,7 @@
             padding: 10px;
         }
         body.kiosk-mode #brain-feed-card,
+        body.kiosk-mode #jain-brain-feed-card,
         body.kiosk-mode #today-jobs-card,
         body.kiosk-mode #model-usage-card,
         body.kiosk-mode #events-list,
@@ -1359,7 +1360,10 @@
             pointer-events: none;
         }
         .card-brain .card-header,
-        .card-brain #brain-feed-card {
+        .card-brain #brain-feed-card,
+        .card-brain #jain-brain-feed-card,
+        .card-brain .dual-brain-feed,
+        .card-brain .agent-comms-section {
             position: relative;
             z-index: 2;
         }
@@ -1401,7 +1405,10 @@
             pointer-events: none;
         }
         .card-brain.brain-active .card-header,
-        .card-brain.brain-active #brain-feed-card {
+        .card-brain.brain-active #brain-feed-card,
+        .card-brain.brain-active #jain-brain-feed-card,
+        .card-brain.brain-active .dual-brain-feed,
+        .card-brain.brain-active .agent-comms-section {
             position: relative;
             z-index: 2;
         }
@@ -1657,10 +1664,110 @@
 
         /* ===== Card content overflow fixes ===== */
         #brain-feed-card { overflow-y: auto; max-height: 540px; }
+        #jain-brain-feed-card { overflow-y: auto; max-height: 540px; }
         #today-jobs-card { overflow-y: auto; max-height: 540px; }
         #model-usage-card { overflow-y: auto; max-height: 440px; }
         #events-list { overflow-y: auto; max-height: 320px; }
         #device-list { overflow-y: auto; max-height: 320px; }
+
+        /* ===== Dual-agent brain feed layout ===== */
+        .dual-brain-feed {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            flex: 1;
+            min-height: 0;
+        }
+        .brain-agent-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 6px 8px 4px;
+        }
+        .brain-agent-divider {
+            width: 1px;
+            background: #1e1e2e;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px 2px 6px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid currentColor;
+            margin-bottom: 4px;
+            width: fit-content;
+        }
+        .agent-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .josh-badge { color: #00d4ff; border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.07); }
+        .jain-badge { color: #00ff88; border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.07); }
+
+        /* ===== Agent Comms ===== */
+        .agent-comms-section {
+            border-top: 1px solid #1e1e2e;
+            padding: 10px 12px 8px;
+            margin-top: 2px;
+        }
+        .agent-comms-header {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 6px;
+        }
+        .agent-comms-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.7rem;
+        }
+        .agent-comms-item:last-child { border-bottom: none; }
+        .comms-dir {
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 1px 5px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .comms-dir.outbound { background: rgba(0,212,255,0.12); color: #00d4ff; }
+        .comms-dir.inbound  { background: rgba(0,255,136,0.12); color: #00ff88; }
+        .comms-msg { flex: 1; color: rgba(255,255,255,0.75); line-height: 1.4; }
+        .comms-ts  { color: rgba(255,255,255,0.28); font-size: 0.6rem; flex-shrink: 0; margin-top: 1px; }
+        .comms-status { font-size: 0.6rem; color: rgba(255,255,255,0.3); flex-shrink: 0; margin-top: 1px; }
+
+        /* ===== Cron agent pill ===== */
+        .cron-agent-pill {
+            display: inline-block;
+            font-size: 0.52rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            padding: 1px 5px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+            border: 1px solid currentColor;
+        }
+        .cron-agent-pill.josh { color: #00d4ff; border-color: rgba(0,212,255,0.4); background: rgba(0,212,255,0.08); }
+        .cron-agent-pill.jain { color: #00ff88; border-color: rgba(0,255,136,0.4); background: rgba(0,255,136,0.08); }
         .priority-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         @media (min-width: 700px) and (max-width: 1099px) { .priority-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 699px) { .priority-grid { grid-template-columns: 1fr; } }
@@ -1932,7 +2039,21 @@
                         <span class="icon"><img src="assets/icons/brain.png" alt="" class="section-icon-image"></span>
                         <h2>Brain Feed</h2>
                     </div>
-                    <div id="brain-feed-card"></div>
+                    <div class="dual-brain-feed">
+                        <div class="brain-agent-col">
+                            <div class="agent-badge josh-badge">JOSH 2.0</div>
+                            <div id="brain-feed-card"></div>
+                        </div>
+                        <div class="brain-agent-divider"></div>
+                        <div class="brain-agent-col">
+                            <div class="agent-badge jain-badge">J.A.I.N</div>
+                            <div id="jain-brain-feed-card"></div>
+                        </div>
+                    </div>
+                    <div class="agent-comms-section">
+                        <div class="agent-comms-header">Agent Comms</div>
+                        <div id="agent-comms-list"></div>
+                    </div>
                 </div>
                 <!-- Bottom-left: Jobs + Model side by side -->
                 <div class="kiosk-bottom-left">
@@ -2240,6 +2361,131 @@
 
             renderBrainFeed(bf);
             updateBfFreshness(bf);
+        }
+
+        // ===== J.A.I.N Brain Feed =====
+        let _jainLocalOk = true;
+        let lastJainBrainFeedHash = null;
+
+        async function fetchJainBrainFeed() {
+            let bf = null;
+            if (_jainLocalOk) {
+                bf = await fetchBrainFeedFromUrl('http://localhost:8765/jain-brain-feed.json', 300);
+                if (!bf) _jainLocalOk = false;
+            }
+            if (!bf) {
+                bf = await fetchBrainFeedFromUrl('./data/jain-brain-feed.json', 5000);
+                if (bf) _jainLocalOk = false;
+                else _jainLocalOk = true;
+            }
+            if (!bf) return;
+            const h = JSON.stringify(bf);
+            if (h === lastJainBrainFeedHash) return;
+            lastJainBrainFeedHash = h;
+            renderJainBrainFeed(bf);
+        }
+
+        function renderJainBrainFeed(bf) {
+            const card = document.getElementById('jain-brain-feed-card');
+            if (!card) return;
+            const stateLabel = getBrainFeedStateLabel(bf);
+            const freshnessStrip = `<div class="bf-freshness-row">
+                <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
+                <span class="bf-freshness-label">${stateLabel}</span>
+                <span>${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '-'}</span>
+            </div>`;
+
+            if (bf && bf.active) {
+                const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
+                const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
+                const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
+                    const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
+                    const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
+                    const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
+                    const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                    return `<div class="bf-step ${stepClass}">
+                        <div class="bf-step-icon ${iconClass}">${iconChar}</div>
+                        <div class="bf-step-body">
+                            <div class="bf-step-label">${escapeHtml(step.label)}</div>
+                            ${toolHtml}
+                        </div>
+                    </div>`;
+                }).join('');
+                card.innerHTML = `
+                    ${freshnessStrip}
+                    <div class="bf-container">
+                        <div class="bf-msg-banner">
+                            <span class="bf-msg-dot" style="background:#00ff88"></span>
+                            <span class="bf-msg-label">Message Received</span>
+                            <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
+                        </div>
+                        <div class="bf-objective">
+                            <div class="bf-objective-kicker">Current Objective</div>
+                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
+                        </div>
+                        ${bf.currentTool ? `
+                        <div class="bf-current-tool-bar">
+                            <span class="bf-ct-pulse" style="background:#00ff88"></span>
+                            <span class="bf-ct-label">Active tool</span>
+                            <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
+                            ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
+                        </div>` : ''}
+                        <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    ${freshnessStrip}
+                    <div class="bf-idle-container brain-feed">
+                        <div class="brain-hero">
+                            <div class="brain-kicker">J.A.I.N State</div>
+                            <div class="brain-title">${escapeHtml(bf && bf.objective ? bf.objective : 'Idle')}</div>
+                            <div class="brain-meta">
+                                <span>${bf && bf.updatedAt ? `Updated ${formatTime(bf.updatedAt)}` : 'No data yet'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            // Freshness dot
+            const dot = card.querySelector('.bf-fresh-dot');
+            if (dot) {
+                const ageSecs = bf && bf.updatedAt ? (Date.now() - new Date(bf.updatedAt).getTime()) / 1000 : 9999;
+                if (bf && bf.active && ageSecs < 60) dot.style.background = '#00ff88';
+                else if (bf && bf.active) dot.style.background = '#fbbf24';
+                else if (ageSecs >= 3600) dot.style.background = '#fbbf24';
+                else dot.style.background = 'rgba(255,255,255,0.2)';
+            }
+        }
+
+        // ===== Agent Comms =====
+        let lastAgentCommsHash = null;
+
+        async function fetchAgentComms() {
+            try {
+                const r = await fetch('./data/agent-comms.json?_=' + Date.now());
+                if (!r.ok) return;
+                const entries = await r.json();
+                const h = JSON.stringify(entries);
+                if (h === lastAgentCommsHash) return;
+                lastAgentCommsHash = h;
+                const el = document.getElementById('agent-comms-list');
+                if (!el) return;
+                if (!Array.isArray(entries) || entries.length === 0) {
+                    el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.25);font-size:0.68rem;padding:4px 0">No agent comms yet.</div>';
+                    return;
+                }
+                el.innerHTML = entries.map(e => {
+                    const dir = (e.direction || 'outbound').toLowerCase();
+                    const dirLabel = dir === 'inbound' ? 'IN' : 'OUT';
+                    return `<div class="agent-comms-item">
+                        <span class="comms-dir ${escapeHtml(dir)}">${dirLabel}</span>
+                        <span class="comms-msg">${escapeHtml(e.message || '')}</span>
+                        <span class="comms-status">${escapeHtml(e.status || '')}</span>
+                        <span class="comms-ts">${e.timestamp ? formatTime(e.timestamp) : ''}</span>
+                    </div>`;
+                }).join('');
+            } catch(e) {}
         }
 
         function updateBfFreshness(bf) {
@@ -2589,6 +2835,10 @@
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
             setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
+            fetchJainBrainFeed();
+            setInterval(fetchJainBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
+            fetchAgentComms();
+            setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
             setInterval(fetchIntelligenceFeed, 60000); // refresh every 60s
             attachPullToRefresh();
@@ -2958,6 +3208,9 @@
                 const rows = grouped[cat].map(cron => {
                     const dotClass = cron.status === 'ok' ? 'healthy' : cron.status === 'paused' ? 'paused' : cron.errors > 0 ? 'error' : 'healthy';
                     const errorNote = cron.errors > 0 ? ` · ${cron.errors} err` : '';
+                    const agentName = cron.agent || 'JOSH 2.0';
+                    const agentClass = agentName === 'J.A.I.N' ? 'jain' : 'josh';
+                    const agentPill = `<span class="cron-agent-pill ${agentClass}">${escapeHtml(agentName)}</span>`;
 
                     if (cron.multiRun && cron.multiRun.runs) {
                         const timeBadges = cron.multiRun.runs.map(r => {
@@ -2969,7 +3222,7 @@
                             <div class="cron-row${cron.errors > 0 ? ' has-error' : ''} cron-multirun">
                                 <div class="cron-dot ${dotClass}"></div>
                                 <div class="cron-name-group">
-                                    <div class="cron-name">${escapeHtml(cron.name)}</div>
+                                    <div class="cron-name">${escapeHtml(cron.name)}${agentPill}</div>
                                     ${cron.description ? `<div class="cron-desc">${escapeHtml(cron.description)}</div>` : ''}
                                     <div class="cron-run-badges">${timeBadges}</div>
                                 </div>
@@ -2981,7 +3234,7 @@
                         <div class="cron-row${cron.errors > 0 ? ' has-error' : ''}">
                             <div class="cron-dot ${dotClass}"></div>
                             <div class="cron-name-group">
-                                <div class="cron-name">${escapeHtml(cron.name)}</div>
+                                <div class="cron-name">${escapeHtml(cron.name)}${agentPill}</div>
                                 ${cron.description ? `<div class="cron-desc">${escapeHtml(cron.description)}</div>` : ''}
                             </div>
                             <div class="cron-schedule">${escapeHtml(schedule + errorNote)}</div>

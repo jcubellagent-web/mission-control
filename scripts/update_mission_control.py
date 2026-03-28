@@ -25,13 +25,13 @@ WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
 
 CRON_TARGETS = [
-    {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments"},
-    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance"},
-    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball"},
-    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball"},
-    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball"},
-    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed"},
-    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed",
+    {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments", "agent": "JOSH 2.0"},
+    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
+    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
+    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
+    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "JOSH 2.0"},
+    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed", "agent": "JOSH 2.0",
      "multiRun": {
          "runs": [
              {"time": "7:15 AM",  "mode": "Full",  "label": "Market open"},
@@ -413,6 +413,99 @@ def load_accum() -> Dict[str, Any]:
 def save_accum(a: Dict[str, Any]) -> None:
     ACCUM_PATH.write_text(json.dumps(a, indent=2))
 
+def fetch_jain_model_usage() -> Dict[str, Any]:
+    """SSH to J.A.I.N and retrieve codexbar cost JSON."""
+    empty = {"daily": 0, "session": 0, "total": 0, "available": False}
+    try:
+        result = subprocess.run(
+            [
+                "ssh",
+                "-o", "ConnectTimeout=5",
+                "-o", "BatchMode=yes",
+                "-o", "StrictHostKeyChecking=no",
+                "jc_agent@100.121.89.84",
+                "/opt/homebrew/bin/codexbar cost --json 2>/dev/null || echo '{}'",
+            ],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return empty
+        data = json.loads(result.stdout)
+        if not isinstance(data, (list, dict)):
+            return empty
+        # Sum daily cost across all providers if list
+        daily = 0.0
+        session = 0.0
+        if isinstance(data, list):
+            now_et = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4)))
+            today_str = now_et.strftime("%Y-%m-%d")
+            for provider in data:
+                for day_entry in provider.get("daily", []):
+                    day_total = sum(
+                        float(mb.get("cost") or 0)
+                        for mb in day_entry.get("modelBreakdowns", [])
+                    )
+                    session += day_total
+                    if day_entry.get("date") == today_str:
+                        daily += day_total
+        return {"daily": round(daily, 6), "session": round(session, 6), "total": round(session, 6), "available": True}
+    except Exception as exc:
+        print(f"[warn] fetch_jain_model_usage failed: {exc}", file=sys.stderr)
+        return empty
+
+
+JAIN_NEWSFEED_PATH = ROOT.parent / "data" / "jain-newsfeed.json"
+NEWSFEED_PATH = ROOT.parent / "data" / "newsfeed.json"
+
+
+def merge_jain_newsfeed() -> None:
+    """Merge J.A.I.N newsfeed into local newsfeed.json (deduped by URL, top 50)."""
+    if not JAIN_NEWSFEED_PATH.exists():
+        return
+    try:
+        jain_feed = json.loads(JAIN_NEWSFEED_PATH.read_text())
+    except Exception:
+        return
+    try:
+        local_feed = json.loads(NEWSFEED_PATH.read_text()) if NEWSFEED_PATH.exists() else {}
+    except Exception:
+        local_feed = {}
+
+    def get_items(feed: Any) -> List[Dict]:
+        if isinstance(feed, list):
+            return feed
+        if isinstance(feed, dict):
+            return feed.get("items") or []
+        return []
+
+    def get_url(item: Dict) -> str:
+        return item.get("url") or item.get("link") or ""
+
+    def get_ts(item: Dict) -> str:
+        return item.get("timestamp") or item.get("publishedAt") or item.get("date") or ""
+
+    jain_items = get_items(jain_feed)
+    local_items = get_items(local_feed)
+
+    # Merge, dedup by URL (prefer newest timestamp)
+    by_url: Dict[str, Dict] = {}
+    for item in local_items + jain_items:
+        url = get_url(item)
+        if not url:
+            continue
+        existing = by_url.get(url)
+        if existing is None or get_ts(item) > get_ts(existing):
+            by_url[url] = item
+
+    merged = sorted(by_url.values(), key=get_ts, reverse=True)[:50]
+
+    if isinstance(local_feed, dict):
+        local_feed["items"] = merged
+        NEWSFEED_PATH.write_text(json.dumps(local_feed, indent=2))
+    else:
+        NEWSFEED_PATH.write_text(json.dumps(merged, indent=2))
+
+
 def fetch_model_usage() -> Dict[str, Any] | None:
     # Primary: merge OpenClaw sessions (all models incl. Gemini) + codexbar (precise Codex costs)
     session_rows = fetch_model_usage_from_sessions()
@@ -457,14 +550,21 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly."
         }
         tracker_path.write_text(json.dumps(tracker_payload, indent=2))
-        return {
+        jain = fetch_jain_model_usage()
+        payload = {
             "session": round(session_cost, 6),
             "daily":   round(daily_cost,   6),
             "weekly":  round(weekly_cost,  6),
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),
+            "jain": jain,
+            "aggregate": {
+                "daily": round(daily_cost + jain.get("daily", 0), 6),
+                "total": round(session_cost + jain.get("total", 0), 6),
+            },
         }
+        return payload
 
     # Legacy fallback: old Next.js API (likely dead)
     raw = fetch_next("/api/model-usage")
@@ -550,6 +650,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
             'schedule': target['schedule'],
             'description': target.get('description', ''),
             'category': target.get('category', 'Other'),
+            'agent': target.get('agent', 'JOSH 2.0'),
             'status': 'ok' if present else 'paused',
             'errors': 0,
             'lastError': None,
@@ -818,6 +919,7 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
 
 def main() -> None:
     DASHBOARD_PATH.parent.mkdir(parents=True, exist_ok=True)
+    merge_jain_newsfeed()
     now_iso = utc_iso()
     dashboard: Dict[str, Any] = {
         "actionRequired": [],

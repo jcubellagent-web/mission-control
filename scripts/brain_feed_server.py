@@ -54,8 +54,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?")[0]
 
-        if path == "/brain-feed.json":
-            bf_path = DATA_DIR / "brain-feed.json"
+        if path in ("/brain-feed.json", "/jain-brain-feed.json"):
+            fname = "brain-feed.json" if path == "/brain-feed.json" else "jain-brain-feed.json"
+            bf_path = DATA_DIR / fname
             try:
                 data = bf_path.read_bytes()
                 self.send_response(200)

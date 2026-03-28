@@ -7,11 +7,14 @@ WORKSPACE_DIR=$(cd -- "$ROOT_DIR/.." && pwd)
 cd "$WORKSPACE_DIR/kiosk-dashboard"
 npm run model:sync
 cd "$ROOT_DIR"
+# Pull J.A.I.N brain feed and newsfeed from remote (non-blocking on failure)
+bash scripts/jain_bf_pull.sh || true
+bash scripts/jain_newsfeed_sync.sh || true
 python3 scripts/update_mission_control.py
 # Always commit all data files — brain-feed.json gets a heartbeat idleUpdatedAt
 # every run so GH Pages always receives a fresh file (prevents false "Stale" display).
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json
+git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0
