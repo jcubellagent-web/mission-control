@@ -431,6 +431,29 @@
         .ctx-meter-pct { font-size: 0.88rem; font-weight: 700; }
         .ctx-meter-hint { font-size: 0.75rem; margin-left: auto; }
         .ctx-meter-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+        /* Inline context bar in brain feed header */
+        .ctx-inline-bar { display: flex; align-items: center; gap: 6px; }
+        .ctx-inline-label { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+        .ctx-inline-pct { font-size: 0.72rem; font-weight: 700; }
+        .ctx-inline-track { width: 80px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+        .ctx-inline-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease, background 0.4s; }
+        /* Unified activity log */
+        .ua-log { display: flex; flex-direction: column; gap: 3px; }
+        .ua-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ua-item:last-child { border-bottom: none; }
+        .ua-agent-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; padding: 1px 5px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+        .ua-agent-tag.josh { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+        .ua-agent-tag.jain { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .ua-agent-tag.agent { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .ua-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+        .ua-dot.active { background: #e53e3e; box-shadow: 0 0 4px #e53e3e; animation: pulse-dot 1.5s infinite; }
+        .ua-dot.done { background: #4ade80; }
+        .ua-dot.idle { background: rgba(255,255,255,0.2); }
+        .ua-msg { font-size: 0.7rem; color: var(--text-secondary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ua-tool-pill { font-size: 0.58rem; color: var(--text-muted); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; padding: 0px 4px; white-space: nowrap; flex-shrink: 0; }
+        .ua-model-pill { font-size: 0.58rem; color: rgba(96,165,250,0.7); background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.15); border-radius: 3px; padding: 0px 4px; white-space: nowrap; flex-shrink: 0; }
+        .ua-ts { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+        .ua-empty { font-size: 0.68rem; color: rgba(255,255,255,0.18); padding: 4px 0; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 8px; }
         .brain-hero {
@@ -2386,17 +2409,19 @@
             <!-- LEFT COL: hero-grid (2-row grid: Brain Feed top, Jobs+Model bottom) -->
             <div class="hero-grid">
                 <div class="card card-brain">
-                    <div class="card-header">
-                        <span class="icon"><img src="assets/icons/brain.png" alt="" class="section-icon-image"></span>
-                        <h2>Brain Feed</h2>
+                    <div class="card-header" style="justify-content:space-between">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="icon"><img src="assets/icons/brain.png" alt="" class="section-icon-image"></span>
+                            <h2>Brain Feed</h2>
+                        </div>
+                        <div id="ctx-header-inline" style="display:flex;align-items:center;gap:8px;min-width:0"></div>
                     </div>
                     <!-- JOSH 2.0 — hero brain feed -->
                     <div id="brain-feed-card"></div>
-                    <!-- Activity & Agents -->
+                    <!-- Activity & Agents — unified log -->
                     <div class="agent-comms-section">
                         <div class="agent-comms-header">Activity &amp; Agents</div>
-                        <div id="active-agents-list"></div>
-                        <div id="agent-comms-list"></div>
+                        <div id="unified-activity-log"></div>
                     </div>
                 </div>
                 <!-- Bottom-left: Jobs + Model side by side -->
@@ -2732,8 +2757,10 @@
             _bfSource = source;
             window._mcLastBrainFeed = bf;
             bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
+            _uaJoshBf = bf;
             renderBrainFeed(bf);
             updateBfFreshness(bf);
+            renderUnifiedActivity();
         }
 
         async function fetchBrainFeed() {
@@ -2784,7 +2811,9 @@
 
         function renderJainBrainFeed(bf) {
             _jainBrainFeed = bf || null;
+            _uaJainBf = bf || null;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed);
+            renderUnifiedActivity();
         }
 
         // ===== Agent Comms =====
@@ -2808,66 +2837,136 @@
             return `${Math.floor(secs/3600)}h ${Math.round((secs%3600)/60)}m`;
         }
 
-        function renderActiveAgents(agents) {
-            const el = document.getElementById('active-agents-list');
+        // ── Inline context window bar in brain feed header ────────────────────
+        function renderCtxHeaderInline(ctxWin) {
+            const el = document.getElementById('ctx-header-inline');
             if (!el) return;
-            const running = (agents || []).filter(a => a.status === 'running');
-            const recent  = (agents || []).filter(a => a.status === 'done');
-            if (!running.length && !recent.length) { el.innerHTML = ''; return; }
+            if (!ctxWin || !ctxWin.limitTokens) { el.innerHTML = ''; return; }
+            const rawPct = Math.round((ctxWin.pct || 0) * 100);
+            const pct = isNaN(rawPct) ? 0 : Math.min(rawPct, 100);
+            const ragStatus = ctxWin.status || 'green';
+            const barColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
+            const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
+            const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
+            el.innerHTML = `<div class="ctx-inline-bar" title="${usedK}K / ${limK}K tokens">
+                <span class="ctx-inline-label">ctx</span>
+                <div class="ctx-inline-track"><div class="ctx-inline-fill" style="width:${pct}%;background:${barColor}"></div></div>
+                <span class="ctx-inline-pct" style="color:${barColor}">${pct}%</span>
+            </div>`;
+        }
 
-            let html = '';
-            if (running.length) {
-                html += `<div class="aa-divider">⚙ Active Agents</div>`;
-                html += running.map(a => `
-                    <div class="active-agent-row">
-                        <div class="aa-dot running"></div>
-                        <div class="aa-label running">${escapeHtml(a.label)}</div>
-                        <div class="aa-elapsed">${formatElapsed(a.elapsedSecs)}</div>
-                    </div>`).join('');
+        // ── Unified Activity & Agents log ─────────────────────────────────────
+        let _uaAgents = [];
+        let _uaComms = [];
+        let _uaJoshBf = null;
+        let _uaJainBf = null;
+
+        function renderUnifiedActivity() {
+            const el = document.getElementById('unified-activity-log');
+            if (!el) return;
+            const items = [];
+
+            // 1. Active subagents first
+            const running = _uaAgents.filter(a => a.status === 'running');
+            const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
+            for (const a of running) {
+                items.push({
+                    agentClass: 'agent',
+                    agentLabel: 'AGENT',
+                    dot: 'active',
+                    msg: a.label || 'Running…',
+                    model: a.model || '',
+                    tool: a.tool || '',
+                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'running',
+                });
             }
-            if (recent.length) {
-                html += `<div class="aa-divider">✓ Completed</div>`;
-                html += recent.slice(0,3).map(a => `
-                    <div class="active-agent-row">
-                        <div class="aa-dot done"></div>
-                        <div class="aa-label">${escapeHtml(a.label)}</div>
-                        <div class="aa-status-done">done · ${formatElapsed(a.elapsedSecs)}</div>
-                    </div>`).join('');
+            for (const a of recentAgents) {
+                items.push({
+                    agentClass: 'agent',
+                    agentLabel: 'AGENT',
+                    dot: 'done',
+                    msg: a.label || 'Done',
+                    model: a.model || '',
+                    tool: '',
+                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
+                });
             }
-            el.innerHTML = html;
+
+            // 2. JOSH 2.0 brain feed state
+            if (_uaJoshBf) {
+                const bf = _uaJoshBf;
+                const isActive = bf.active === true;
+                items.push({
+                    agentClass: 'josh',
+                    agentLabel: 'JOSH 2.0',
+                    dot: isActive ? 'active' : 'idle',
+                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
+                    model: '',
+                    tool: bf.currentTool || '',
+                    ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
+                });
+            }
+
+            // 3. J.A.I.N brain feed state
+            if (_uaJainBf) {
+                const bf = _uaJainBf;
+                const isActive = bf.active === true;
+                items.push({
+                    agentClass: 'jain',
+                    agentLabel: 'J.A.I.N',
+                    dot: isActive ? 'active' : 'idle',
+                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
+                    model: '',
+                    tool: bf.currentTool || '',
+                    ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
+                });
+            }
+
+            // 4. Recent agent comms (filtered, max 3)
+            const filteredComms = (_uaComms || []).filter(e => {
+                const msg = (e.message || '').toLowerCase();
+                return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
+            }).slice(0, 3);
+            for (const e of filteredComms) {
+                const dir = (e.direction || '').toLowerCase();
+                const agent = (e.agent || (dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
+                items.push({
+                    agentClass: agent === 'jain' ? 'jain' : 'josh',
+                    agentLabel: agent === 'jain' ? 'J.A.I.N' : 'JOSH 2.0',
+                    dot: e.status === 'active' ? 'active' : 'done',
+                    msg: e.message || '',
+                    model: e.model || '',
+                    tool: e.tool || '',
+                    ts: e.timestamp ? formatRelTime(e.timestamp) : '',
+                });
+            }
+
+            if (!items.length) {
+                el.innerHTML = '<div class="ua-empty">No recent activity.</div>';
+                return;
+            }
+
+            el.innerHTML = `<div class="ua-log">${items.slice(0, 6).map(item => `
+                <div class="ua-item">
+                    <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
+                    <span class="ua-dot ${escapeHtml(item.dot)}"></span>
+                    <span class="ua-msg">${escapeHtml(item.msg)}</span>
+                    ${item.tool ? `<span class="ua-tool-pill">${escapeHtml(item.tool)}</span>` : ''}
+                    ${item.model ? `<span class="ua-model-pill">${escapeHtml(item.model)}</span>` : ''}
+                    <span class="ua-ts">${escapeHtml(item.ts)}</span>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        function renderActiveAgents(agents) {
+            _uaAgents = agents || [];
+            renderUnifiedActivity();
         }
 
         function renderAgentCommsList(entries) {
-            const el = document.getElementById('agent-comms-list');
-            if (!el) return;
-            if (!Array.isArray(entries) || entries.length === 0) {
-                el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
-                return;
-            }
-            // Filter out system noise (cmd:refresh, cmd:nightmode, etc.)
-            const filtered = entries.filter(e => {
-                const msg = (e.message || '').toLowerCase();
-                return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
-            });
-            if (filtered.length === 0) {
-                el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
-                return;
-            }
-            el.innerHTML = filtered.slice(0, 2).map(e => {
-                // Determine agent tag from direction field: "josh→jain", "jain→josh", or agent field
-                const dir = (e.direction || '').toLowerCase();
-                const agent = (e.agent || (dir.startsWith('josh') ? 'josh' : dir.startsWith('jain') ? 'jain' : 'system')).toLowerCase();
-                const agentLabel = agent === 'josh' ? 'JOSH 2.0' : agent === 'jain' ? 'J.A.I.N' : 'SYS';
-                const toolHtml = e.tool ? `<span class="comms-tool-pill">${escapeHtml(e.tool)}</span>` : '';
-                const statusDot = e.status === 'done' ? '✓' : e.status === 'active' ? '●' : '';
-                return `<div class="agent-comms-item">
-                    <span class="comms-agent-tag ${escapeHtml(agent)}">${escapeHtml(agentLabel)}</span>
-                    <span class="comms-body">
-                        <span class="comms-msg">${escapeHtml(e.message || '')}${toolHtml}</span>
-                    </span>
-                    <span class="comms-ts">${statusDot ? statusDot + ' ' : ''}${e.timestamp ? formatTime(e.timestamp) : ''}</span>
-                </div>`;
-            }).join('');
+            // Feed into unified activity log instead of old element
+            _uaComms = entries || [];
+            renderUnifiedActivity();
         }
 
         async function fetchAgentComms() {
@@ -3718,7 +3817,6 @@
                             <div class="brain-kicker">JOSH 2.0 · Standby</div>
                             <div class="brain-title">${escapeHtml(idleTitle)}</div>
                             ${idleContext ? `<p class="focus-context">${escapeHtml(idleContext)}</p>` : ''}
-                            ${ctxMeterHtml}
                             <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
                                 <span>${bf && bf.updatedAt ? `Updated ${formatRelTime(bf.updatedAt)}` : (focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh')}</span>
                                 ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
@@ -3757,6 +3855,7 @@
             window._mcLastCrons = data.crons;
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
+            renderCtxHeaderInline(data.contextWindow || null);
             if (sectionChanged('activeAgents', data.activeAgents)) {
                 renderActiveAgents(data.activeAgents || []);
             }
