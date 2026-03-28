@@ -3,41 +3,36 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-28T20:01:56Z",
-    "objective": "Response sent \u00b7 Awaiting instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-28T20:16:43Z",
+    "objective": "Cron audit - jobs and agent assignment",
+    "status": "active",
     "steps": [
       {
-        "label": "Reading bf_push.sh",
+        "label": "Reading cron config",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Fixing step preservation",
+        "label": "Checking JAIN crontab",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Fixing idle renderer",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Pushing to GitHub",
-        "status": "done",
+        "label": "Auditing issues",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T20:02:02Z",
-    "checkedAt": "2026-03-28T20:01:56Z",
+    "updatedAt": "2026-03-28T20:16:43Z",
+    "checkedAt": "2026-03-28T20:16:43Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Response sent \u00b7 Awaiting instruction",
-    "updatedAt": "2026-03-28T20:15:01Z"
+    "status": "Brain Feed live",
+    "context": "Cron audit - jobs and agent assignment",
+    "updatedAt": "2026-03-28T20:17:55Z"
   },
   "contextWindow": {
     "usedTokens": 97641,
@@ -137,7 +132,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T20:15:05Z",
+    "lastUpdated": "2026-03-28T20:17:59Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -175,32 +170,22 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:15:01Z"
+      "lastChecked": "2026-03-28T20:17:55Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:15:01Z"
+      "lastChecked": "2026-03-28T20:17:55Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T20:15:01Z"
+      "lastChecked": "2026-03-28T20:17:55Z"
     }
   ],
   "crons": [
-    {
-      "name": "Chiro Invite Sync",
-      "schedule": "Hourly",
-      "description": "Syncs chiropractic client invites to calendar",
-      "category": "Appointments",
-      "agent": "JOSH 2.0",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
     {
       "name": "Mission Control Refresh",
       "schedule": "Every 5 min",
@@ -212,12 +197,32 @@
       "lastError": null
     },
     {
+      "name": "Chiro Invite Sync",
+      "schedule": "Hourly",
+      "description": "Syncs chiropractic client invites to calendar",
+      "category": "Appointments",
+      "agent": "JOSH 2.0",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Watchlist Monitor",
+      "schedule": "Every 5 min",
+      "description": "Monitors X/Twitter watchlist for high-signal posts (score \u22658), pushes to @JAIN_BREAKING_BOT",
+      "category": "Intelligence Feed",
+      "agent": "JOSH 2.0",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
       "name": "Lineup Check",
       "schedule": "Mon 9:15 AM ET",
       "description": "Reviews starting lineup, flags IL players in active slots",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -227,7 +232,7 @@
       "description": "Checks for injuries before Monday lineup lock \u2014 runs 15 min before lineup check",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -237,7 +242,7 @@
       "description": "Scans top free agents and recommends add/drop moves",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -246,7 +251,7 @@
       "schedule": "Daily 10:00 AM ET",
       "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start",
       "category": "Sorare MLB",
-      "agent": "JOSH 2.0",
+      "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -254,10 +259,20 @@
     {
       "name": "Breaking News Scanner",
       "schedule": "Every 5 min",
-      "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score \u22658.5 to @Jain_win_news_bot",
+      "description": "Scans high-signal breaking news + Trump statements. Pushes score \u22658.5 to @JAIN_BREAKING_BOT",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "paused",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Watchlist (JAIN)",
+      "schedule": "Every 10 min",
+      "description": "Secondary X watchlist monitor on J.A.I.N",
+      "category": "Intelligence Feed",
+      "agent": "J.A.I.N",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -266,7 +281,7 @@
       "schedule": "8x weekday / 2x weekend",
       "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot",
       "category": "Intelligence Feed",
-      "agent": "JOSH 2.0",
+      "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
@@ -327,25 +342,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T20:15:05Z",
+      "time": "2026-03-28T20:17:59Z",
       "event": "Session spend: $10.52"
     },
     {
-      "time": "2026-03-28T20:15:01Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-28T20:17:55Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T20:15:01Z",
-      "event": "8 scheduled jobs healthy"
+      "time": "2026-03-28T20:17:55Z",
+      "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T20:15:01Z",
+      "time": "2026-03-28T20:17:55Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T20:15:01Z",
+      "time": "2026-03-28T20:17:55Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T20:15:01Z"
+  "lastUpdated": "2026-03-28T20:17:55Z"
 }
