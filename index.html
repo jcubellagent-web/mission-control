@@ -3846,38 +3846,40 @@
                         ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs)+' ago' : 'done' });
                 }
 
-                // JOSH 2.0 brain feed steps (all available, most recent first)
-                if (_uaJoshBf) {
-                    const jbf = _uaJoshBf;
-                    const steps = jbf.steps || [];
-                    // Add each step as a separate row (up to 8)
-                    const stepsToShow = [...steps].reverse().slice(0, 8);
-                    for (const step of stepsToShow) {
-                        idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot: step.done ? 'done' : 'idle',
-                            msg: step.description || step.step || step,
-                            tool: step.tool || '', model: '',
-                            ts: step.ts ? formatRelTime(step.ts) : '' });
+                // JOSH 2.0 brain feed steps — read directly from bf (the live brain-feed.json)
+                // bf.steps are: { label, status ('done'|'active'|'pending'), tool }
+                const joshSteps = (bf && bf.steps && bf.steps.length) ? bf.steps
+                    : (_uaJoshBf && _uaJoshBf.steps && _uaJoshBf.steps.length) ? _uaJoshBf.steps : [];
+                const joshObjective = (bf && bf.objective) || (_uaJoshBf && _uaJoshBf.objective) || null;
+                const joshUpdatedAt = (bf && bf.updatedAt) || (_uaJoshBf && _uaJoshBf.updatedAt) || null;
+
+                if (joshSteps.length) {
+                    // Show steps newest-first (reversed), all marked done in idle
+                    for (const step of [...joshSteps].reverse().slice(0, 10)) {
+                        const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
+                        idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot:'done',
+                            msg: stepLabel, tool: step.tool || '', model: '',
+                            ts: joshUpdatedAt ? formatRelTime(joshUpdatedAt) : '' });
                     }
-                    // Fallback: just objective if no steps
-                    if (!steps.length) {
-                        idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot:'idle',
-                            msg: jbf.objective || 'Standby', tool: jbf.currentTool||'', model:'',
-                            ts: jbf.updatedAt ? formatRelTime(jbf.updatedAt) : '' });
-                    }
+                } else if (joshObjective) {
+                    // Fallback: just the objective line
+                    idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot:'idle',
+                        msg: joshObjective, tool: '', model: '',
+                        ts: joshUpdatedAt ? formatRelTime(joshUpdatedAt) : '' });
                 }
 
                 // J.A.I.N brain feed steps
                 if (_uaJainBf) {
                     const jf = _uaJainBf;
                     const jsteps = jf.steps || [];
-                    const jstepsToShow = [...jsteps].reverse().slice(0, 4);
-                    for (const step of jstepsToShow) {
-                        idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot: step.done ? 'done' : 'idle',
-                            msg: step.description || step.step || step,
-                            tool: step.tool || '', model: '',
-                            ts: step.ts ? formatRelTime(step.ts) : '' });
-                    }
-                    if (!jsteps.length) {
+                    if (jsteps.length) {
+                        for (const step of [...jsteps].reverse().slice(0, 5)) {
+                            const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
+                            idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'done',
+                                msg: stepLabel, tool: step.tool || '', model: '',
+                                ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
+                        }
+                    } else {
                         idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
                             msg: jf.objective || 'Standby', tool: jf.currentTool||'', model:'',
                             ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });

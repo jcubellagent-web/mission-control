@@ -55,7 +55,18 @@ if '$IS_ACTIVE' == 'true':
     bf['messageReceived'] = '$NOW'
 else:
     bf['messageReceived'] = bf.get('messageReceived', '$NOW')
-bf['steps']           = $STEPS_JSON
+# Only overwrite steps if new steps were provided — preserve on done/idle
+new_steps = $STEPS_JSON
+if new_steps:
+    bf['steps'] = new_steps
+elif '$STATE' in ('done', 'idle'):
+    # Mark all existing steps as done on completion so UI shows them correctly
+    existing = bf.get('steps', [])
+    for s in existing:
+        s['status'] = 'done'
+    bf['steps'] = existing
+else:
+    bf['steps'] = new_steps
 bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''
 json.dump(bf, open('$BF_FILE', 'w'), indent=2)
 "
