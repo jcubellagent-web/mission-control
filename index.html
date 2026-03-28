@@ -1838,31 +1838,57 @@
 
         /* ===== Agent Comms ===== */
         .agent-comms-section {
-            border-top: 1px solid #1e1e2e;
-            padding: 8px 4px 6px;
-            margin-top: 4px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 4px 6px;
+            margin-top: 8px;
         }
         .agent-comms-header {
             font-size: 0.6rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255,255,255,0.3);
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .agent-comms-header::before {
+            content: "";
+            display: inline-block;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
         }
         #agent-comms-list {
-            max-height: 110px;
+            max-height: 160px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
         .agent-comms-item {
-            display: flex;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: start;
             gap: 8px;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding: 6px 8px;
+            border-radius: 7px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
             font-size: 0.7rem;
+            transition: background 0.2s;
         }
         .agent-comms-item:last-child { border-bottom: none; }
+        .comms-agent-tag {
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
         .comms-dir {
             font-size: 0.58rem;
             font-weight: 700;
@@ -1874,8 +1900,25 @@
         }
         .comms-dir.outbound { background: rgba(0,212,255,0.12); color: #00d4ff; }
         .comms-dir.inbound  { background: rgba(0,255,136,0.12); color: #00ff88; }
-        .comms-msg { flex: 1; color: rgba(255,255,255,0.75); line-height: 1.4; }
-        .comms-ts  { color: rgba(255,255,255,0.28); font-size: 0.6rem; flex-shrink: 0; margin-top: 1px; }
+        .comms-agent-tag.josh { background: rgba(0,212,255,0.1); color: #00d4ff; border: 1px solid rgba(0,212,255,0.25); }
+        .comms-agent-tag.jain { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
+        .comms-agent-tag.system { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+        .comms-body { min-width: 0; }
+        .comms-msg { display: block; color: rgba(255,255,255,0.78); line-height: 1.4; word-break: break-word; }
+        .comms-tool-pill {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+            font-family: 'SF Mono', monospace;
+            background: rgba(229,62,62,0.1);
+            color: #e53e3e;
+            border: 1px solid rgba(229,62,62,0.2);
+        }
+        .comms-ts  { color: rgba(255,255,255,0.25); font-size: 0.6rem; flex-shrink: 0; padding-top: 2px; white-space: nowrap; }
         .comms-status { font-size: 0.6rem; color: rgba(255,255,255,0.3); flex-shrink: 0; margin-top: 1px; }
 
         /* ===== Cron agent pill ===== */
@@ -2165,9 +2208,9 @@
                     </div>
                     <!-- JOSH 2.0 — hero brain feed -->
                     <div id="brain-feed-card"></div>
-                    <!-- Agent Comms -->
+                    <!-- Agent Comms & Activity -->
                     <div class="agent-comms-section">
-                        <div class="agent-comms-header">Agent Comms</div>
+                        <div class="agent-comms-header">Recent Activity</div>
                         <div id="agent-comms-list"></div>
                     </div>
                 </div>
@@ -2515,30 +2558,61 @@
         // ===== Agent Comms =====
         let lastAgentCommsHash = null;
 
+        // Also poll from Supabase for agent-comms
+        async function fetchAgentCommsSupabase() {
+            try {
+                const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?order=timestamp.desc&limit=12&select=*', {
+                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY }
+                });
+                if (!r.ok) return null;
+                return await r.json();
+            } catch(e) { return null; }
+        }
+
+        function renderAgentCommsList(entries) {
+            const el = document.getElementById('agent-comms-list');
+            if (!el) return;
+            if (!Array.isArray(entries) || entries.length === 0) {
+                el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
+                return;
+            }
+            el.innerHTML = entries.slice(0, 10).map(e => {
+                // Determine agent tag from direction field: "josh→jain", "jain→josh", or agent field
+                const dir = (e.direction || '').toLowerCase();
+                const agent = (e.agent || (dir.startsWith('josh') ? 'josh' : dir.startsWith('jain') ? 'jain' : 'system')).toLowerCase();
+                const agentLabel = agent === 'josh' ? 'JOSH 2.0' : agent === 'jain' ? 'J.A.I.N' : 'SYS';
+                const toolHtml = e.tool ? `<span class="comms-tool-pill">${escapeHtml(e.tool)}</span>` : '';
+                const statusDot = e.status === 'done' ? '✓' : e.status === 'active' ? '●' : '';
+                return `<div class="agent-comms-item">
+                    <span class="comms-agent-tag ${escapeHtml(agent)}">${escapeHtml(agentLabel)}</span>
+                    <span class="comms-body">
+                        <span class="comms-msg">${escapeHtml(e.message || '')}${toolHtml}</span>
+                    </span>
+                    <span class="comms-ts">${statusDot ? statusDot + ' ' : ''}${e.timestamp ? formatTime(e.timestamp) : ''}</span>
+                </div>`;
+            }).join('');
+        }
+
         async function fetchAgentComms() {
             try {
+                // Try Supabase first for real-time data
+                const sbEntries = await fetchAgentCommsSupabase();
+                if (sbEntries && sbEntries.length > 0) {
+                    const h = JSON.stringify(sbEntries);
+                    if (h !== lastAgentCommsHash) {
+                        lastAgentCommsHash = h;
+                        renderAgentCommsList(sbEntries);
+                    }
+                    return;
+                }
+                // Fallback to static JSON
                 const r = await fetch('./data/agent-comms.json?_=' + Date.now());
                 if (!r.ok) return;
                 const entries = await r.json();
                 const h = JSON.stringify(entries);
                 if (h === lastAgentCommsHash) return;
                 lastAgentCommsHash = h;
-                const el = document.getElementById('agent-comms-list');
-                if (!el) return;
-                if (!Array.isArray(entries) || entries.length === 0) {
-                    el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.25);font-size:0.68rem;padding:4px 0">No agent comms yet.</div>';
-                    return;
-                }
-                el.innerHTML = entries.map(e => {
-                    const dir = (e.direction || 'outbound').toLowerCase();
-                    const dirLabel = dir === 'inbound' ? 'IN' : 'OUT';
-                    return `<div class="agent-comms-item">
-                        <span class="comms-dir ${escapeHtml(dir)}">${dirLabel}</span>
-                        <span class="comms-msg">${escapeHtml(e.message || '')}</span>
-                        <span class="comms-status">${escapeHtml(e.status || '')}</span>
-                        <span class="comms-ts">${e.timestamp ? formatTime(e.timestamp) : ''}</span>
-                    </div>`;
-                }).join('');
+                renderAgentCommsList(entries);
             } catch(e) {}
         }
 
