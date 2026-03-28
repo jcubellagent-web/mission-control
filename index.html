@@ -3074,9 +3074,12 @@
                 html += `<div class="if-section"><div class="if-section-header">📈 Macro &amp; Markets</div>`;
                 f.macro_geo.filter(i => isEnglish(i.headline)).forEach(item => {
                     const mood = item.mood || 'NEUTRAL';
+                    const sourceUrl = item.url || (item.insight && item.insight.startsWith('http') ? item.insight : '');
+                    const insight = item.insight && !item.insight.startsWith('http') ? item.insight : '';
+                    const linkHtml = sourceUrl ? ` <a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:rgba(255,255,255,0.25);font-size:0.6rem;text-decoration:none;">↗</a>` : '';
                     html += `<div class="if-grok-item">
-                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.headline || '')}</div>
-                        ${item.insight && !item.insight.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.headline || '')}${linkHtml}</div>
+                        ${insight ? `<div class="if-grok-insight">${escapeHtml(insight)}</div>` : ''}
                     </div>`;
                 });
                 html += `</div>`;
@@ -3086,9 +3089,12 @@
             if (f.regulation && f.regulation.length) {
                 html += `<div class="if-section"><div class="if-section-header">⚖️ Regulatory &amp; Policy</div>`;
                 f.regulation.filter(i => isEnglish(i.headline)).forEach(item => {
+                    const sourceUrl = item.url || (item.insight && item.insight.startsWith('http') ? item.insight : '');
+                    const insight = item.insight && !item.insight.startsWith('http') ? item.insight : '';
+                    const linkHtml = sourceUrl ? ` <a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:rgba(255,255,255,0.25);font-size:0.6rem;text-decoration:none;">↗</a>` : '';
                     html += `<div class="if-grok-item">
-                        <div class="if-grok-headline">${escapeHtml(item.headline || '')}</div>
-                        ${item.insight && !item.insight.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.insight)}</div>` : ''}
+                        <div class="if-grok-headline">${escapeHtml(item.headline || '')}${linkHtml}</div>
+                        ${insight ? `<div class="if-grok-insight">${escapeHtml(insight)}</div>` : ''}
                     </div>`;
                 });
                 html += `</div>`;
