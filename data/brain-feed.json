@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:21:00Z",
+  "objective": "Received: Fix fake X signal breaking news",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Locating X signal script",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:21:20Z",
   "checkedAt": "2026-03-28T03:20:01Z",
   "idleUpdatedAt": "2026-03-28T03:20:01Z"
 }
