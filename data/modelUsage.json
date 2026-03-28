@@ -1,12 +1,12 @@
 {
-  "session": 7.922992,
-  "daily": 0.272347,
+  "session": 9.093407,
+  "daily": 1.442762,
   "weekly": 35.95642,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 5.850354299999999
+      "cost": 7.020769049999998
     },
     {
       "name": "openai/gpt-5.4",
@@ -22,23 +22,18 @@
       "name": "google/gemini-2.5-flash",
       "window": "session",
       "cost": 0.0255695
-    },
-    {
-      "name": "openrouter/auto (BYOK)",
-      "window": "session",
-      "cost": 9.920956
     }
   ],
   "breakdown": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 153,
-      "outputTokens": 123789,
-      "totalTokens": 123942,
-      "sessionCost": 5.850354299999999,
-      "dailyCost": 0.2723472,
-      "weeklyCost": 5.850354299999999,
+      "inputTokens": 203,
+      "outputTokens": 142664,
+      "totalTokens": 142867,
+      "sessionCost": 7.020769049999998,
+      "dailyCost": 1.44276195,
+      "weeklyCost": 7.020769049999998,
       "sessions": 6,
       "isGemini": false,
       "costEstimated": false
@@ -77,19 +72,9 @@
       "sessions": 1,
       "isGemini": true,
       "costEstimated": false
-    },
-    {
-      "name": "openrouter/auto (BYOK)",
-      "source": "OpenRouter API",
-      "weeklyCost": 9.920956,
-      "dailyCost": 0.072973,
-      "sessionCost": 9.920956,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-03-28T19:53:20Z",
+  "lastUpdated": "2026-03-28T19:55:05Z",
   "jain": {
     "daily": 0.704034,
     "session": 0.92661,
@@ -98,11 +83,11 @@
   },
   "openrouter": {
     "daily": 0.0,
-    "weekly": 80.681975,
-    "monthly": 80.681975,
-    "byok_daily": 0.07297275,
-    "byok_weekly": 9.92095632,
-    "available": true
+    "weekly": 0.0,
+    "monthly": 0.0,
+    "byok_daily": 0.0,
+    "byok_weekly": 0.0,
+    "available": false
   },
   "elevenlabs": {
     "chars_used": 8470,
@@ -110,7 +95,7 @@
     "available": true
   },
   "aggregate": {
-    "daily": 1.049354,
-    "total": 18.770558
+    "daily": 2.146796,
+    "total": 10.020017
   }
 }
