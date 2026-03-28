@@ -11,10 +11,11 @@ cd "$ROOT_DIR"
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
 python3 scripts/update_mission_control.py
-# Always commit all data files — brain-feed.json gets a heartbeat idleUpdatedAt
-# every run so GH Pages always receives a fresh file (prevents false "Stale" display).
+# Commit dashboard data — brain-feed.json is intentionally excluded.
+# Brain feed active state is managed by Supabase Realtime (bf_push.sh).
+# Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/brain-feed.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json
+git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0

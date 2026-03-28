@@ -2536,6 +2536,13 @@
 
             if (!bf) return;
 
+            // If Supabase already has active state, don't let local file override it
+            const sbBfCurrent = window._mcLastBrainFeed;
+            if (sbBfCurrent && sbBfCurrent.active && !bf.active) {
+                console.debug('[MC] brain-feed local/remote skipped — Supabase has active state');
+                return;
+            }
+
             const latency = Math.round(performance.now() - t0);
             const src = _localServerOk ? '⚡local' : '☁️remote';
             console.debug(`[MC] brain-feed fetched in ${latency}ms (${src})`);
@@ -3492,17 +3499,13 @@
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
 
-            // Brain Feed - Supabase is the source of truth for live state.
-            // Only render from dashboard-data.json if Supabase has NOT given us fresher data.
-            const sbBf = window._mcLastBrainFeed; // set by fetchBrainFeedSupabase
+            // Brain Feed — Supabase is the ONLY source of truth for active state.
+            // Never let dashboard-data.json overwrite an active Supabase brain feed.
+            const sbBf = window._mcLastBrainFeed; // set by fetchBrainFeedSupabase / Supabase RT
             const dashBf = data.brainFeed;
-            // Use Supabase data if it's newer OR if agent is active
-            const shouldUseDash = !sbBf || (
-                dashBf &&
-                !sbBf.active &&
-                new Date(dashBf.updatedAt || 0) > new Date(sbBf.updatedAt || 0)
-            );
-            if (shouldUseDash && sectionChanged('brainFeed', dashBf)) {
+            // Block dashboard-data.json from rendering IF Supabase feed is active
+            const sbIsActive = sbBf && sbBf.active;
+            if (!sbIsActive && sectionChanged('brainFeed', dashBf)) {
                 renderBrainFeed(dashBf);
                 if (dashBf) {
                     bfLastUpdatedTs = dashBf.updatedAt ? new Date(dashBf.updatedAt).getTime() : null;
