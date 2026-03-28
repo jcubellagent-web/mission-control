@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-28T20:52:13Z",
-  "objective": "Testing Ollama local inference",
-  "status": "active",
+  "objective": "Response sent \u00b7 Awaiting instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "llama3.2 \u2713",
@@ -21,12 +21,12 @@
     },
     {
       "label": "Responding to Josh",
-      "status": "active",
+      "status": "done",
       "tool": "telegram"
     }
   ],
   "currentTool": "telegram",
-  "updatedAt": "2026-03-28T20:52:13Z",
+  "updatedAt": "2026-03-28T20:52:35Z",
   "checkedAt": "2026-03-28T20:52:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
