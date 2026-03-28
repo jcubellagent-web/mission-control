@@ -2459,13 +2459,13 @@
                 `;
             }
             // Freshness dot
-            const dot = card.querySelector('.bf-fresh-dot');
-            if (dot) {
+            const freshDot = card.querySelector('.bf-fresh-dot');
+            if (freshDot) {
                 const ageSecs = bf && bf.updatedAt ? (Date.now() - new Date(bf.updatedAt).getTime()) / 1000 : 9999;
-                if (bf && bf.active && ageSecs < 60) dot.style.background = '#00ff88';
-                else if (bf && bf.active) dot.style.background = '#fbbf24';
-                else if (ageSecs >= 3600) dot.style.background = '#fbbf24';
-                else dot.style.background = 'rgba(255,255,255,0.2)';
+                if (bf && bf.active && ageSecs < 60) freshDot.style.background = '#00ff88';
+                else if (bf && bf.active) freshDot.style.background = '#fbbf24';
+                else if (ageSecs >= 3600) freshDot.style.background = '#fbbf24';
+                else freshDot.style.background = 'rgba(255,255,255,0.2)';
             }
         }
 
