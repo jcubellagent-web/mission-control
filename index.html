@@ -2656,7 +2656,9 @@
                     if (!response.ok) throw new Error('Failed to fetch');
                     data = await response.json();
                     src = '☁️remote';
-                    _dashLocalOk = true; // retry local next time
+                    // NOTE: do NOT reset _dashLocalOk = true here — that causes a 400ms
+                    // timeout penalty on every subsequent cycle when viewed remotely.
+                    // Only set true in the local-server success path above.
                 } catch (err) {
                     console.error('Failed to fetch dashboard data:', err);
                     setConnectionStatus(navigator.onLine ? 'degraded' : 'offline');
@@ -3041,6 +3043,7 @@
                 f.signal.filter(i => isEnglish(i.title)).slice(0,5).forEach(item => {
                     html += `<div class="if-item">
                         <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
+                        ${item.reason && !item.reason.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.reason)}</div>` : ''}
                         <div class="if-item-meta">${escapeHtml(item.source || '')}</div>
                     </div>`;
                 });
@@ -3060,6 +3063,7 @@
                 f.ai_value_chain.filter(i => isEnglish(i.title)).slice(0,4).forEach(item => {
                     html += `<div class="if-item">
                         <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
+                        ${item.reason && !item.reason.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.reason)}</div>` : ''}
                     </div>`;
                 });
                 html += `</div>`;
@@ -3244,7 +3248,8 @@
                             postgres_changes: [{ event: '*', schema: 'public', table: 'brain_feed' }],
                             broadcast: { self: false },
                             presence: { key: '' }
-                        }
+                        },
+                        access_token: CONFIG.SUPABASE_KEY
                     },
                     ref: '1'
                 }));
@@ -3300,12 +3305,15 @@
             fetchData();
             // ── Brain feed: SUPABASE IS THE SINGLE SOURCE OF TRUTH ──
             // One initial REST fetch to populate immediately, then WebSocket takes over.
-            // Local file polling is intentionally disabled — it has different timestamps
-            // from Supabase and causes constant hash-mismatch flicker.
+            // Local fast-poll is re-enabled as belt-and-suspenders — applyBrainFeed()
+            // has priority logic so local cannot overwrite an active Supabase state.
             fetchBrainFeedSupabase();
             initSupabaseRealtime();
             // Fallback REST poll every 30s only (WebSocket is primary; this is a safety net)
             setInterval(fetchBrainFeedSupabase, 30000);
+            // Fast local poll — catches updates when WS is lagging or recovering
+            fetchBrainFeed();
+            setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             updateLastUpdatedTicker();
             updateTickerInterval = setInterval(updateLastUpdatedTicker, 1000);
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
