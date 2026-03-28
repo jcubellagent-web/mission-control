@@ -1,17 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Received: Build live operator state + agent comms feed",
+  "objective": "Diagnosing brain feed + designing agent comms",
   "status": "active",
   "steps": [
     {
-      "label": "Parsing message",
+      "label": "Reading dashboard code",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking data pipeline",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T03:30:41Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:30:44Z",
   "checkedAt": "2026-03-28T03:30:02Z",
   "idleUpdatedAt": "2026-03-28T03:30:02Z"
 }
