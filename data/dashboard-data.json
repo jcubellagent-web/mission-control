@@ -4,52 +4,47 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T20:48:46Z",
-    "objective": "Installing Ollama + starter models",
+    "messageReceived": "2026-03-28T20:54:01Z",
+    "objective": "Adding Ollama models to model usage widget",
     "status": "active",
     "steps": [
       {
-        "label": "Installed",
+        "label": "Read dashboard",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Service running",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Pulling models",
+        "label": "Updating Python script",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T20:48:46Z",
-    "checkedAt": "2026-03-28T20:48:46Z",
+    "updatedAt": "2026-03-28T20:54:01Z",
+    "checkedAt": "2026-03-28T20:54:01Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Installing Ollama + starter models",
-    "updatedAt": "2026-03-28T20:50:02Z"
+    "context": "Adding Ollama models to model usage widget",
+    "updatedAt": "2026-03-28T20:54:55Z"
   },
   "contextWindow": {
-    "usedTokens": 21711,
+    "usedTokens": 34533,
     "limitTokens": 200000,
-    "pct": 0.1086,
+    "pct": 0.1727,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 7.964318,
-    "daily": 0.313673,
+    "session": 8.218012,
+    "daily": 0.567367,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 5.89168005
+        "cost": 6.145374449999999
       },
       {
         "name": "openai/gpt-5.4",
@@ -67,21 +62,21 @@
         "cost": 0.0255695
       },
       {
-        "name": "openrouter/auto (BYOK)",
+        "name": "local/qwen2.5-coder:7b",
         "window": "session",
-        "cost": 0.04671
+        "cost": 0.0
       }
     ],
     "breakdown": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 153,
-        "outputTokens": 124067,
-        "totalTokens": 124220,
-        "sessionCost": 5.89168005,
-        "dailyCost": 0.31367294999999995,
-        "weeklyCost": 5.89168005,
+        "inputTokens": 160,
+        "outputTokens": 125004,
+        "totalTokens": 125164,
+        "sessionCost": 6.145374449999999,
+        "dailyCost": 0.5673673499999999,
+        "weeklyCost": 6.145374449999999,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -122,6 +117,45 @@
         "costEstimated": false
       },
       {
+        "name": "local/qwen2.5-coder:7b",
+        "source": "ollama",
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "isLocal": true,
+        "sizeGb": 4.68,
+        "loaded": true,
+        "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
+      },
+      {
+        "name": "local/llama3.2:3b",
+        "source": "ollama",
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "isLocal": true,
+        "sizeGb": 2.02,
+        "loaded": true,
+        "_note": "Local Ollama model (2.0GB). Free \u2014 runs on-device."
+      },
+      {
+        "name": "local/nomic-embed-text:latest",
+        "source": "ollama",
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "isLocal": true,
+        "sizeGb": 0.27,
+        "loaded": false,
+        "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
+      },
+      {
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.04671,
@@ -132,7 +166,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T20:50:07Z",
+    "lastUpdated": "2026-03-28T20:54:59Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -154,8 +188,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.017707,
-      "total": 8.937638
+      "daily": 1.271401,
+      "total": 9.191332
     }
   },
   "devices": [
@@ -170,19 +204,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:50:02Z"
+      "lastChecked": "2026-03-28T20:54:55Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:50:02Z"
+      "lastChecked": "2026-03-28T20:54:55Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T20:50:02Z"
+      "lastChecked": "2026-03-28T20:54:55Z"
     }
   ],
   "crons": [
@@ -348,25 +382,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T20:50:07Z",
-      "event": "Session spend: $7.96"
+      "time": "2026-03-28T20:54:59Z",
+      "event": "Session spend: $8.22"
     },
     {
-      "time": "2026-03-28T20:50:02Z",
+      "time": "2026-03-28T20:54:55Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T20:50:02Z",
+      "time": "2026-03-28T20:54:55Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T20:50:02Z",
+      "time": "2026-03-28T20:54:55Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T20:50:02Z",
+      "time": "2026-03-28T20:54:55Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T20:50:02Z"
+  "lastUpdated": "2026-03-28T20:54:55Z"
 }
