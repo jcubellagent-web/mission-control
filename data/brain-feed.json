@@ -1,22 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:09:30Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:10:45Z",
+  "objective": "Installing ClawHub skills",
+  "status": "active",
   "steps": [
     {
-      "label": "Search complete",
-      "status": "done",
+      "label": "Checking elite-longterm-memory",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T21:09:46Z",
-  "checkedAt": "2026-03-28T21:09:30Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T21:10:45Z",
+  "checkedAt": "2026-03-28T21:10:45Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
