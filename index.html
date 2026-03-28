@@ -504,6 +504,7 @@
         .bf-stat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; min-width: 60px; flex: 1; }
         .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
         .bf-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+        .bf-model-badge { font-size: 0.58rem; font-weight: 600; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 1px 6px; margin-left: 6px; letter-spacing: 0.02em; white-space: nowrap; }
         .bf-models-row { display: flex; gap: 5px; flex-wrap: wrap; }
         .bf-model-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 8px; }
         .bf-model-name { font-size: 0.65rem; color: var(--text-secondary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -3905,9 +3906,12 @@
             const isActiveBf = bf && bf.active;
             const statusLabel = isActiveBf ? 'ACTIVE · MSG RECEIVED' : stateLabel;
             const statusDotColor = isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)';
+            const modelLabel = (bf && bf.model) ? bf.model : '';
+            const modelBadge = modelLabel ? `<span class="bf-model-badge" title="Active model">${escapeHtml(modelLabel)}</span>` : '';
             const freshnessStrip = `<div class="bf-freshness-row bf-status-bar" id="bf-status-bar">
                 <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
                 <span class="bf-freshness-label" id="bf-freshness-label-text">${isActiveBf ? 'LIVE' : stateLabel}</span>
+                ${modelBadge}
                 <span id="bf-last-updated" style="margin-left:auto">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
             </div>`;
 
