@@ -2974,6 +2974,18 @@
             applyBrainFeed(bf, _localServerOk ? 'local' : 'remote');
         }
 
+        // ===== J.A.I.N Task Queue =====
+        async function fetchJainTasks() {
+            try {
+                const r = await fetch('http://localhost:8765/jain-tasks.json?_=' + Date.now(), { signal: AbortSignal.timeout(500) });
+                if (r.ok) { window._jainTasks = await r.json(); renderUnifiedActivity(); return; }
+            } catch(e) {}
+            try {
+                const r = await fetch('./data/jain-tasks.json?_=' + Date.now(), { signal: AbortSignal.timeout(3000) });
+                if (r.ok) { window._jainTasks = await r.json(); renderUnifiedActivity(); }
+            } catch(e) {}
+        }
+
         // ===== J.A.I.N Brain Feed =====
         let _jainLocalOk = true;
         let lastJainBrainFeedHash = null;
@@ -3820,6 +3832,8 @@
             setInterval(fetchData, CONFIG.REFRESH_INTERVAL);
             fetchJainBrainFeed();
             setInterval(fetchJainBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
+            fetchJainTasks();
+            setInterval(fetchJainTasks, 15000);
             fetchAgentComms();
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
@@ -4226,17 +4240,35 @@
                 if (_uaJainBf) {
                     const jf = _uaJainBf;
                     const jsteps = jf.steps || [];
-                    if (jsteps.length) {
-                        for (const step of [...jsteps].reverse().slice(0, 5)) {
+                    // Active delegated tasks take priority
+                    const jt = window._jainTasks || null;
+                    const activeTasks = jt && jt.active && jt.active.length ? jt.active : null;
+                    if (activeTasks) {
+                        for (const task of activeTasks.slice(0, 3)) {
+                            idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'running',
+                                msg: task.label, tool: task.context || '',  model: '',
+                                ts: task.delegatedAt ? formatRelTime(task.delegatedAt) : '' });
+                        }
+                    } else if (jsteps.length) {
+                        for (const step of [...jsteps].reverse().slice(0, 3)) {
                             const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
                             idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'done',
                                 msg: stepLabel, tool: step.tool || '', model: '',
                                 ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
                         }
                     } else {
-                        idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
-                            msg: jf.objective || 'Standby', tool: jf.currentTool||'', model:'',
-                            ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
+                        // Show idle capabilities from jain-tasks.json
+                        const caps = jt && jt.idle_capabilities ? jt.idle_capabilities : [];
+                        if (caps.length) {
+                            idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
+                                msg: 'Standby · Handles: ' + caps.slice(0, 3).join(', '),
+                                tool: '', model: '',
+                                ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
+                        } else {
+                            idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
+                                msg: jf.objective || 'Standby', tool: jf.currentTool||'', model:'',
+                                ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
+                        }
                     }
                 }
 

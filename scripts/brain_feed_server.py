@@ -110,6 +110,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             "/jain-brain-feed.json":  DATA_DIR / "jain-brain-feed.json",
             "/dashboard-data.json":   DATA_DIR / "dashboard-data.json",
             "/agent-comms.json":      DATA_DIR / "agent-comms.json",
+            "/jain-tasks.json":       DATA_DIR / "jain-tasks.json",
         }
         if path in LEGACY_JSON:
             return self._serve_file(LEGACY_JSON[path], no_cache=True)
@@ -176,7 +177,32 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass  # suppress access logs
 
+def _poll_jain_brain_feed():
+    """Background thread: pull J.A.I.N brain feed via SSH every 30s, completely independent of cron."""
+    import time
+    dest = DATA_DIR / "jain-brain-feed.json"
+    while True:
+        try:
+            result = subprocess.run(
+                ["ssh", "-o", "ConnectTimeout=3", "-o", "BatchMode=yes",
+                 "-o", "StrictHostKeyChecking=no",
+                 "jc_agent@100.121.89.84",
+                 "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json"],
+                capture_output=True, timeout=5
+            )
+            if result.returncode == 0 and result.stdout:
+                dest.write_bytes(result.stdout)
+        except Exception:
+            pass
+        time.sleep(30)
+
+
 if __name__ == "__main__":
+    # Start JAIN brain feed poller in background (real-time, independent of dashboard cron)
+    t = threading.Thread(target=_poll_jain_brain_feed, daemon=True)
+    t.start()
+    print("J.A.I.N brain feed poller started (30s interval)", flush=True)
+
     server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Brain Feed + Dashboard server on http://localhost:{PORT}", flush=True)
     server.serve_forever()
