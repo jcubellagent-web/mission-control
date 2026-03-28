@@ -1558,30 +1558,34 @@
         .bf-current-tool-bar {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            background: rgba(229,62,62,0.05);
-            border: 1px solid rgba(229,62,62,0.12);
-            border-radius: 8px;
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(229,62,62,0.08);
+            border: 1px solid rgba(229,62,62,0.25);
+            border-radius: 10px;
+            box-shadow: 0 0 18px rgba(229,62,62,0.08);
         }
         .bf-ct-pulse {
-            width: 8px; height: 8px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             background: #e53e3e;
             animation: pulse 1s infinite;
             flex-shrink: 0;
+            box-shadow: 0 0 6px rgba(229,62,62,0.5);
         }
         .bf-ct-label {
-            font-size: 0.72rem;
-            color: var(--text-muted);
+            font-size: 0.7rem;
+            color: rgba(229,62,62,0.6);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
+            font-weight: 600;
         }
         .bf-ct-tool {
-            font-size: 0.84rem;
-            font-weight: 600;
-            color: #e53e3e;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ff6b6b;
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            letter-spacing: 0.02em;
         }
         .bf-timeline {
             display: flex;
@@ -3418,23 +3422,6 @@
                             <div class="brain-meta">
                                 <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
                                 ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="brain-stream">
-                            <div class="section-label">Recent Feed</div>
-                            <div class="feed-list">
-                                ${feedItems.length ? feedItems.map(item => `
-                                    <div class="feed-item">
-                                        <div class="feed-time">${formatTime(item.time)}</div>
-                                        <div class="feed-text">${escapeHtml(item.event)}</div>
-                                    </div>
-                                `).join('') : '<div class="empty-state">No feed events yet</div>'}
-                            </div>
-                        </div>
-                        <div class="brain-stream">
-                            <div class="section-label">Signal Layer</div>
-                            <div class="signal-strip">
-                                ${liveSignals.length ? liveSignals.map(item => `<div class="signal-pill">${escapeHtml(item)}</div>`).join('') : '<div class="empty-state">No live signals yet</div>'}
                             </div>
                         </div>
                     </div>
