@@ -3614,12 +3614,14 @@
                 html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
                 const nasdaqRows = [];
                 (nm.gainers || []).forEach(m => nasdaqRows.push({
-                    src: 'NASDAQ', cat: `+${m.change_pct}%`, catColor: '#4ade80',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '', score: null
+                    src: 'Yahoo Finance', cat: `+${m.change_pct}%`, catColor: '#4ade80',
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '',
+                    score: m.score || null, published: m.published || ''
                 }));
                 (nm.losers || []).forEach(m => nasdaqRows.push({
-                    src: 'NASDAQ', cat: `${m.change_pct}%`, catColor: '#f87171',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '', score: null
+                    src: 'Yahoo Finance', cat: `${m.change_pct}%`, catColor: '#f87171',
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '',
+                    score: m.score || null, published: m.published || ''
                 }));
                 html += makeTable(nasdaqRows);
                 html += `</div>`;
@@ -3630,14 +3632,13 @@
                 html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
                 html += makeTable(f.crypto_movers.map(m => {
                     const up = m.change_pct >= 0;
-                    const absPct = Math.abs(m.change_pct);
-                    // Treat crypto % move as signal strength: ≥10% = max, scale down
-                    const cryptoScore = Math.min(10, absPct);
                     return {
                         src: 'CoinGecko', cat: `${up ? '+' : ''}${m.change_pct}%`,
                         catColor: up ? '#4ade80' : '#f87171',
                         title: `${m.symbol} — ${m.name}`, url: '',
-                        blurb: m.insight || '', score: cryptoScore
+                        blurb: m.insight || '',
+                        score: m.score || null,
+                        published: m.published || ''
                     };
                 }));
                 html += `</div>`;
