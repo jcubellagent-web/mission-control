@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T05:32:16Z",
-  "checkedAt": "2026-03-28T05:32:16Z",
+  "objective": "Responding to Josh on Telegram",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Composing response",
+      "status": "active",
+      "tool": "telegram"
+    }
+  ],
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T05:33:26Z",
+  "checkedAt": "2026-03-28T05:33:26Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
