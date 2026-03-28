@@ -48,7 +48,9 @@ bf['active']          = True if '$IS_ACTIVE' == 'true' else False
 bf['objective']       = '$OBJECTIVE'
 bf['status']          = '$STATE'
 bf['updatedAt']       = '$NOW'
-bf['checkedAt']       = '$NOW'
+# checkedAt only set on active pushes — never on idle — so hash stays stable when nothing changes
+if '$IS_ACTIVE' == 'true':
+    bf['checkedAt'] = '$NOW'
 bf['messageReceived'] = bf.get('messageReceived', '$NOW')
 bf['steps']           = $STEPS_JSON
 bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''

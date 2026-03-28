@@ -2700,6 +2700,18 @@
         // _bfSource: 'supabase' | 'local' — tracks who last wrote the active state
         let _bfSource = null;
 
+        function bfContentHash(bf) {
+            // Only hash meaningful fields — ignore timestamps that change on every push
+            if (!bf) return '';
+            return JSON.stringify({
+                active: bf.active,
+                status: bf.status,
+                objective: bf.objective,
+                currentTool: bf.currentTool,
+                steps: bf.steps,
+            });
+        }
+
         function applyBrainFeed(bf, source) {
             if (!bf) return;
             const current = window._mcLastBrainFeed;
@@ -2708,7 +2720,7 @@
                 console.debug('[MC] brain-feed local update blocked — Supabase active state is authoritative');
                 return;
             }
-            const newHash = JSON.stringify(bf);
+            const newHash = bfContentHash(bf);
             if (newHash === lastBrainFeedHash) return;
             lastBrainFeedHash = newHash;
             _bfSource = source;
