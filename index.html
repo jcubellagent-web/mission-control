@@ -2079,7 +2079,13 @@
             border: 1px solid rgba(255,255,255,0.04);
             border-radius: 8px;
             font-size: 0.72rem;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .card-brain.brain-active .bf-freshness-row {
+            background: rgba(229,62,62,0.06);
+            border-color: rgba(229,62,62,0.2);
         }
         .bf-fresh-dot {
             width: 7px; height: 7px; border-radius: 50%;
@@ -3597,11 +3603,15 @@
             const phoneMode = isPhoneMode();
             const stateLabel = getBrainFeedStateLabel(bf);
 
-            // Freshness strip HTML (always present)
-            const freshnessStrip = `<div class="bf-freshness-row">
-                <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
-                <span class="bf-freshness-label" id="bf-freshness-label-text">${stateLabel}</span>
-                <span id="bf-last-updated">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
+            // Unified status bar — shows LIVE or MSG RECEIVED (replaces both freshness strip + msg banner)
+            const msgTime = bf && bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
+            const isActiveBf = bf && bf.active;
+            const statusLabel = isActiveBf ? 'ACTIVE · MSG RECEIVED' : stateLabel;
+            const statusDotColor = isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)';
+            const freshnessStrip = `<div class="bf-freshness-row bf-status-bar" id="bf-status-bar">
+                <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
+                <span class="bf-freshness-label" id="bf-freshness-label-text">${isActiveBf ? 'LIVE' : stateLabel}</span>
+                <span id="bf-last-updated" style="margin-left:auto">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
             </div>`;
 
             if (bf && bf.active) {
@@ -3631,11 +3641,6 @@
                     brainFeedCard.innerHTML = `
                         ${freshnessStrip}
                         <div class="bf-container">
-                            <div class="bf-msg-banner">
-                                <span class="bf-msg-dot"></span>
-                                <span class="bf-msg-label">Message Received</span>
-                                <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
-                            </div>
                             <div class="bf-objective">
                                 <div class="bf-objective-kicker">Current Objective</div>
                                 <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
@@ -3659,12 +3664,12 @@
                     }
                 } else {
                     // ── Smooth in-place diff updates ────────────────────────────
-                    // 1. Update freshness strip
+                    // 1. Update unified status bar (don't override if currently showing MSG RECEIVED)
                     const fr = brainFeedCard.querySelector('.bf-freshness-row');
                     if (fr) {
                         const lbl = fr.querySelector('#bf-freshness-label-text');
                         const ts = fr.querySelector('#bf-last-updated');
-                        if (lbl) lbl.textContent = stateLabel;
+                        if (lbl && lbl.textContent !== 'MSG RECEIVED') lbl.textContent = 'LIVE';
                         if (ts) ts.textContent = bf.updatedAt ? formatRelTime(bf.updatedAt) : '-';
                     }
 
@@ -3778,15 +3783,27 @@
 
                 // Message received banner flash + scan line
                 if (isReceivingMsg || isWakingUp) {
-                    const banner = brainFeedCard.querySelector('.bf-msg-banner');
-                    if (banner) {
-                        banner.classList.remove('bf-banner-flash');
-                        void banner.offsetWidth;
-                        banner.classList.add('bf-banner-flash');
-                        let scanEl = banner.querySelector('.bf-scan-line');
-                        if (!scanEl) { scanEl = document.createElement('div'); scanEl.className = 'bf-scan-line'; banner.appendChild(scanEl); }
-                        const dot = banner.querySelector('.bf-msg-dot');
-                        if (dot) { dot.classList.add('bf-dot-recv'); setTimeout(() => dot.classList.remove('bf-dot-recv'), 2000); }
+                    // Flash the unified status bar and show MSG RECEIVED
+                    const statusBar = brainFeedCard.querySelector('#bf-status-bar');
+                    const statusLabel = brainFeedCard.querySelector('#bf-freshness-label-text');
+                    const statusDot = brainFeedCard.querySelector('#bf-status-dot');
+                    if (statusBar) {
+                        statusBar.classList.remove('bf-banner-flash');
+                        void statusBar.offsetWidth;
+                        statusBar.classList.add('bf-banner-flash');
+                    }
+                    if (statusLabel) {
+                        statusLabel.textContent = 'MSG RECEIVED';
+                        statusLabel.style.color = '#e53e3e';
+                        // Fade back to LIVE after 3s
+                        setTimeout(() => {
+                            statusLabel.textContent = 'LIVE';
+                            statusLabel.style.color = '';
+                        }, 3000);
+                    }
+                    if (statusDot) {
+                        statusDot.classList.add('bf-dot-recv');
+                        setTimeout(() => statusDot.classList.remove('bf-dot-recv'), 2000);
                     }
                 }
                 // Objective text reveal (first render only, updates handled by diff above)
