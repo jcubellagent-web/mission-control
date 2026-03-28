@@ -326,6 +326,34 @@
             padding: 16px 0;
         }
 
+        /* ── Today's Jobs reskin ─────────────────────────────────────── */
+        .tjob-category { margin-bottom: 10px; }
+        .tjob-category:last-child { margin-bottom: 0; }
+        .tjob-cat-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; padding: 0 2px; }
+        .tjob-cat-emoji { font-size: 0.75rem; opacity: 0.8; }
+        .tjob-cat-name { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; }
+        .tjob-cat-count { font-size: 0.58rem; color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); border-radius: 8px; padding: 0 5px; margin-left: auto; }
+        .tjob-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); margin-bottom: 4px; transition: background 0.15s; }
+        .tjob-row:last-child { margin-bottom: 0; }
+        .tjob-row:hover { background: rgba(255,255,255,0.04); }
+        .tjob-row.tjob-error { border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04); }
+        .tjob-status-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; transition: box-shadow 0.3s; }
+        .tjob-body { flex: 1; min-width: 0; }
+        .tjob-header-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
+        .tjob-name { font-size: 0.78rem; font-weight: 500; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        .tjob-agent { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; }
+        .tjob-meta-row { display: flex; align-items: center; gap: 6px; }
+        .tjob-schedule { font-size: 0.65rem; color: rgba(255,255,255,0.35); }
+        .tjob-status-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; margin-left: auto; }
+        .tjob-err-badge { font-size: 0.58rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 4px; padding: 0 4px; }
+        .tjob-multirun .tjob-body { display: flex; flex-direction: column; gap: 3px; }
+        .tjob-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+        .tjob-badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+        .tjob-badge.done   { background: rgba(74,222,128,0.08); color: #4ade80; border-color: rgba(74,222,128,0.2); }
+        .tjob-badge.next   { background: rgba(229,62,62,0.15); color: #fca5a5; border-color: rgba(229,62,62,0.3); font-weight: 600; }
+        .tjob-badge.future { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.07); }
+        .tjob-badge.lite   { opacity: 0.65; }
+        /* ── Legacy cron styles (kept for compatibility) ──────────────── */
         .cron-table { width: 100%; }
         .cron-table.compact .cron-row {
             padding-top: 5px;
@@ -4155,117 +4183,107 @@
             }
             } // end devices diff guard
 
-            // Today's Jobs (diff-guarded)
-            // Always render today's jobs — crons rarely change but must show on first load
+            // Today's Jobs (diff-guarded) — reskinned
             {
             const todayJobsCard = document.getElementById('today-jobs-card');
 
-            // Group crons by category
-            const BASEBALL_ICON = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9c3.2 2.4 5.3 5.9 5.3 7.1s-2.1 4.7-5.3 7.1M19.1 4.9c-3.2 2.4-5.3 5.9-5.3 7.1s2.1 4.7 5.3 7.1"/></svg>`;
+            // Category config: accent color + emoji
+            const CAT_CONFIG = {
+                'Intelligence Feed': { color: '#60a5fa', emoji: '⚡' },
+                'Sorare MLB':        { color: '#a78bfa', emoji: '⚾' },
+                'Fantasy Baseball':  { color: '#c084fc', emoji: '🏆' },
+                'Maintenance':       { color: '#4ade80', emoji: '⚙' },
+                'Appointments':      { color: '#fbbf24', emoji: '📅' },
+                'Other':             { color: 'rgba(255,255,255,0.3)', emoji: '·' },
+            };
             const categoryOrder = ['Intelligence Feed', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
-            const SORARE_ICON = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;vertical-align:middle;margin-right:3px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-            const categoryIcons = { 'Fantasy Baseball': BASEBALL_ICON, 'Sorare MLB': SORARE_ICON };
+
             const grouped = {};
             (data.crons || []).forEach(cron => {
                 const cat = cron.category || 'Other';
                 if (!grouped[cat]) grouped[cat] = [];
                 grouped[cat].push(cron);
             });
-            const cronRows = categoryOrder.filter(cat => grouped[cat]).map(cat => {
-                const icon = categoryIcons[cat] || '';
-                const rows = grouped[cat].map(cron => {
-                    const dotClass = cron.status === 'ok' ? 'healthy' : cron.status === 'paused' ? 'paused' : cron.errors > 0 ? 'error' : 'healthy';
-                    const errorNote = cron.errors > 0 ? ` · ${cron.errors} err` : '';
-                    const agentName = cron.agent || 'JOSH 2.0';
-                    const agentClass = agentName === 'J.A.I.N' ? 'jain' : 'josh';
-                    const agentPill = `<span class="cron-agent-pill ${agentClass}">${escapeHtml(agentName)}</span>`;
 
+            const cronHtml = categoryOrder.filter(cat => grouped[cat]).map(cat => {
+                const cfg = CAT_CONFIG[cat] || CAT_CONFIG['Other'];
+                const rows = grouped[cat].map(cron => {
+                    const isOk     = cron.status === 'ok';
+                    const isPaused = cron.status === 'paused';
+                    const hasErr   = cron.errors > 0;
+                    const statusColor = hasErr ? '#e53e3e' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const statusLabel = hasErr ? 'ERROR' : isPaused ? 'PAUSED' : 'ACTIVE';
+                    const agentName   = cron.agent || 'JOSH 2.0';
+                    const agentIsJain = agentName === 'J.A.I.N';
+                    const agentColor  = agentIsJain ? '#60a5fa' : '#4ade80';
+
+                    // Multi-run (Intelligence Feed style)
                     if (cron.multiRun && cron.multiRun.runs) {
                         const etHour = getETHour();
                         let foundNext = false;
                         const timeBadges = cron.multiRun.runs.map(r => {
-                            const modeClass = r.mode === 'Lite' ? ' lite' : '';
-                            // Parse run hour from r.time (e.g. "6:00 AM" → 6, "2:00 PM" → 14)
                             let runHour = null;
                             if (r.time) {
-                                const tParts = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
-                                if (tParts) {
-                                    runHour = parseInt(tParts[1], 10);
-                                    const ampm = (tParts[3] || '').toUpperCase();
-                                    if (ampm === 'PM' && runHour !== 12) runHour += 12;
-                                    if (ampm === 'AM' && runHour === 12) runHour = 0;
+                                const tp = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+                                if (tp) {
+                                    runHour = parseInt(tp[1], 10);
+                                    const ap = (tp[3] || '').toUpperCase();
+                                    if (ap === 'PM' && runHour !== 12) runHour += 12;
+                                    if (ap === 'AM' && runHour === 12) runHour = 0;
                                 }
                             }
                             let cls, label;
+                            const shortTime = r.time.replace(' AM','a').replace(' PM','p');
                             if (r.done || (runHour !== null && runHour < etHour)) {
-                                cls = 'run-badge done';
-                                label = '✓ ' + r.time.replace(' AM','a').replace(' PM','p');
+                                cls = 'tjob-badge done'; label = '✓ ' + shortTime;
                             } else if (!foundNext) {
                                 foundNext = true;
-                                cls = 'run-badge next';
-                                label = r.time.replace(' AM','a').replace(' PM','p');
+                                cls = 'tjob-badge next'; label = '▶ ' + shortTime;
                             } else {
-                                cls = 'run-badge future';
-                                label = r.time.replace(' AM','a').replace(' PM','p');
+                                cls = 'tjob-badge future'; label = shortTime;
                             }
-                            return `<span class="${cls}${modeClass}" title="${r.label} — ${r.mode}">${label}</span>`;
+                            return `<span class="${cls}${r.mode === 'Lite' ? ' lite' : ''}" title="${escapeHtml(r.label)} — ${r.mode}">${label}</span>`;
                         }).join('');
-                        return `
-                            <div class="cron-row${cron.errors > 0 ? ' has-error' : ''} cron-multirun">
-                                <div class="cron-dot ${dotClass}"></div>
-                                <div class="cron-name-group">
-                                    <div class="cron-name">${escapeHtml(cron.name)}${agentPill}</div>
-                                    ${cron.description ? `<div class="cron-desc">${escapeHtml(cron.description)}</div>` : ''}
-                                    <div class="cron-run-badges">${timeBadges}</div>
+                        return `<div class="tjob-row tjob-multirun">
+                            <div class="tjob-status-dot" style="background:${statusColor}"></div>
+                            <div class="tjob-body">
+                                <div class="tjob-header-row">
+                                    <span class="tjob-name">${escapeHtml(cron.name)}</span>
+                                    <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
                                 </div>
-                            </div>`;
+                                <div class="tjob-schedule">${escapeHtml(cron.schedule || '')}</div>
+                                <div class="tjob-badges">${timeBadges}</div>
+                            </div>
+                        </div>`;
                     }
 
-                    const schedule = cron.schedule || '';
-                    return `
-                        <div class="cron-row${cron.errors > 0 ? ' has-error' : ''}">
-                            <div class="cron-dot ${dotClass}"></div>
-                            <div class="cron-name-group">
-                                <div class="cron-name">${escapeHtml(cron.name)}${agentPill}</div>
-                                ${cron.description ? `<div class="cron-desc">${escapeHtml(cron.description)}</div>` : ''}
+                    return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}">
+                        <div class="tjob-status-dot" style="background:${statusColor}${isOk && !hasErr ? ';box-shadow:0 0 5px '+statusColor+'60' : ''}"></div>
+                        <div class="tjob-body">
+                            <div class="tjob-header-row">
+                                <span class="tjob-name">${escapeHtml(cron.name)}</span>
+                                <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
                             </div>
-                            <div class="cron-schedule">${escapeHtml(schedule + errorNote)}</div>
-                        </div>`;
+                            <div class="tjob-meta-row">
+                                <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
+                                ${hasErr ? `<span class="tjob-err-badge">${cron.errors} err</span>` : ''}
+                                <span class="tjob-status-label" style="color:${statusColor}">${statusLabel}</span>
+                            </div>
+                        </div>
+                    </div>`;
                 }).join('');
-                return `<div class="cron-category">
-                    <div class="cron-category-header">${icon}${escapeHtml(cat)}</div>
+
+                return `<div class="tjob-category">
+                    <div class="tjob-cat-header">
+                        <span class="tjob-cat-emoji">${cfg.emoji}</span>
+                        <span class="tjob-cat-name" style="color:${cfg.color}">${escapeHtml(cat)}</span>
+                        <span class="tjob-cat-count">${grouped[cat].length}</span>
+                    </div>
                     ${rows}
                 </div>`;
             }).join('');
-            const eventRows = (data.upcomingEvents || []).slice(0, compactMode ? 3 : 4).map(event => `
-                <div class="job-row">
-                    <div>
-                        <div class="job-name">${escapeHtml(event.title || 'Untitled event')}</div>
-                        <div class="job-detail">${escapeHtml(event.source || '')}</div>
-                    </div>
-                    <div class="job-chip">${escapeHtml(formatEventTime(event.time))}</div>
-                </div>
-            `).join('');
-            const actionRows = (data.actionRequired || []).slice(0, compactMode ? 3 : 4).map(item => `
-                <div class="job-row">
-                    <div>
-                        <div class="job-name">${escapeHtml(item.title || 'Action')}</div>
-                        <div class="job-detail">${escapeHtml(item.priority || 'queued')}</div>
-                    </div>
-                    <div class="job-chip error">${escapeHtml(item.priority || 'alert')}</div>
-                </div>
-            `).join('');
-            // Only show non-empty sections to avoid blank padding eating the card space
-            const jobSections = [
-                cronRows   ? `<div class="job-group"><div class="job-group-title">Automation Queue</div>${cronRows}</div>` : '',
-                eventRows  ? `<div class="job-group"><div class="job-group-title">Calendar / Triggers</div>${eventRows}</div>` : '',
-                actionRows ? `<div class="job-group"><div class="job-group-title">Action Required</div>${actionRows}</div>` : '',
-            ].filter(Boolean).join('');
-            todayJobsCard.innerHTML = `
-                <div class="jobs-shell">
-                    ${jobSections || '<div class="empty-state">No scheduled jobs</div>'}
-                </div>
-            `;
+
+            todayJobsCard.innerHTML = cronHtml || '<div class="empty-state">No scheduled jobs</div>';
             } // end crons diff guard
 
         }
