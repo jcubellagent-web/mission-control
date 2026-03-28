@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:42:52Z",
+  "messageReceived": "2026-03-28T21:42:58Z",
   "objective": "Update Mission Control: 12hr clock + collapsible job categories",
   "status": "active",
   "steps": [
     {
-      "label": "Received audio",
+      "label": "Parsed",
       "status": "done",
       "tool": "openclaw"
     },
     {
-      "label": "Transcribing",
+      "label": "Reading dashboard code",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-28T21:42:52Z",
-  "checkedAt": "2026-03-28T21:42:52Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T21:42:58Z",
+  "checkedAt": "2026-03-28T21:42:58Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
