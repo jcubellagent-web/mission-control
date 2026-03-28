@@ -1,6 +1,6 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:48:46Z",
+  "messageReceived": "2026-03-28T20:50:37Z",
   "objective": "Installing Ollama + starter models",
   "status": "active",
   "steps": [
@@ -10,18 +10,23 @@
       "tool": "exec"
     },
     {
-      "label": "Service running",
+      "label": "Running",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Pulling models",
-      "status": "active",
+      "label": "Models pulled",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Responding to Josh",
+      "status": "active",
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:48:46Z",
-  "checkedAt": "2026-03-28T20:48:46Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T20:50:37Z",
+  "checkedAt": "2026-03-28T20:50:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
