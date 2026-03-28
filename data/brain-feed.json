@@ -1,8 +1,8 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:36:11Z",
+  "messageReceived": "2026-03-28T20:38:54Z",
   "objective": "Wire new breaking news sources",
-  "status": "active",
+  "status": "done",
   "steps": [
     {
       "label": "Testing APIs",
@@ -10,13 +10,33 @@
       "tool": "exec"
     },
     {
-      "label": "Writing new fetch functions",
-      "status": "active",
+      "label": "Reuters/AP via Google News RSS",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "SEC EDGAR 8-K feed",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Fed Reserve RSS",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Kalshi macro movers",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Syncing to JAIN",
+      "status": "done",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:36:11Z",
-  "checkedAt": "2026-03-28T20:36:11Z",
+  "updatedAt": "2026-03-28T20:38:54Z",
+  "checkedAt": "2026-03-28T20:38:54Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
