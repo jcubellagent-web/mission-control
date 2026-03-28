@@ -1842,7 +1842,7 @@
         #brain-feed-card { overflow-y: auto; max-height: 420px; }
         #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
         #today-jobs-card { overflow-y: auto; max-height: 380px; }
-        #model-usage-card { overflow-y: auto; max-height: 320px; }
+        #model-usage-card { overflow-y: auto; flex: 1; min-height: 0; }
         #events-list { overflow-y: auto; max-height: 240px; }
         #device-list { overflow-y: auto; max-height: 240px; }
 
@@ -4097,10 +4097,11 @@
                 const orDaily  = orData?.available ? (orData.byok_daily  || 0) : 0;
                 const orWeekly = orData?.available ? (orData.byok_weekly || 0) : 0;
                 const orMonthly = orData?.available ? (orData.byok_monthly || orData.monthly || 0) : 0;
+                const monthlyV  = mu.monthly || mu.aggregate?.monthly || 0;
                 // Aggregate totals across all sources
                 const totalDaily   = (dailyV  || 0) + jainDaily  + orDaily;
                 const totalWeekly  = (weeklyV || 0) + jainWeekly + orWeekly;
-                const totalMonthly = orMonthly; // only OpenRouter has monthly data currently
+                const totalMonthly = (monthlyV || 0) + orMonthly;
 
                 const summaryHtml = `
                 <div class="mu-totals-section">
