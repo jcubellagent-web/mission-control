@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:44:23Z",
-  "objective": "Update Mission Control: 12hr clock + collapsible job categories \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:45:07Z",
+  "objective": "Add output/upload tokens to Model Usage",
+  "status": "active",
   "steps": [
     {
-      "label": "Implemented",
+      "label": "Received audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Pushing to GitHub",
-      "status": "done",
-      "tool": "github"
+      "label": "Checking model usage data",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "github",
-  "updatedAt": "2026-03-28T21:44:34Z",
-  "checkedAt": "2026-03-28T21:44:23Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T21:45:07Z",
+  "checkedAt": "2026-03-28T21:45:07Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
