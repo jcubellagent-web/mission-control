@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:19:21Z",
-  "objective": "Redesign Top Signals as table view \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:21:04Z",
+  "objective": "Fix signal table source and category fields",
+  "status": "active",
   "steps": [
     {
-      "label": "Pushed",
+      "label": "Received audio",
       "status": "done",
-      "tool": "github"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Inspecting feed data",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T22:19:33Z",
-  "checkedAt": "2026-03-28T22:19:21Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T22:21:04Z",
+  "checkedAt": "2026-03-28T22:21:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
