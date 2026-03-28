@@ -30,6 +30,7 @@ CRON_TARGETS = [
     {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 9:00 AM", "description": "Checks for injuries before Monday lineup lock — runs 15 min before lineup check", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
+    {"name": "Sorare Daily Missions", "pattern": "scripts/sorare_missions.py", "schedule": "Daily 10:00 AM ET", "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start", "category": "Sorare MLB", "agent": "JOSH 2.0"},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N"},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "JOSH 2.0",
      "multiRun": {
