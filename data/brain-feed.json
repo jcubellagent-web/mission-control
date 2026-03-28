@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T05:22:00Z",
-  "checkedAt": "2026-03-28T05:22:00Z",
+  "objective": "Received: run brain feed demo",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Parsing message",
+      "status": "active",
+      "tool": "openclaw"
+    }
+  ],
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-28T05:30:24Z",
+  "checkedAt": "2026-03-28T05:30:24Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
