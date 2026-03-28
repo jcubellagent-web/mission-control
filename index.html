@@ -1350,6 +1350,8 @@
         .if-signal-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         .if-signal-table thead th { font-size: 0.55rem; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.15); text-align: left; }
         .ift-ss { width: 26px; text-align: center; }
+        .ift-age { width: 32px; text-align: center; white-space: nowrap; }
+        .ift-age-val { font-size: 0.58rem; color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
         .ift-src { width: 85px; white-space: nowrap; }
         .ift-cat { width: 95px; }
         .ift-headline { min-width: 0; }
@@ -3457,7 +3459,8 @@
                     title: item.title || item.headline || '',
                     url: item.url || '',
                     blurb: item.reason && !item.reason.startsWith('http') ? item.reason : '',
-                    score: item.score
+                    score: item.score,
+                    published: item.published || item.published_at || item.timestamp || ''
                 })));
                 if (tldrItems.length) {
                     html += `<div class="if-tldr-block">`;
@@ -3478,11 +3481,23 @@
                 </div>`;
             }
 
+            function itemAge(published) {
+                // Returns age string like "0.25h", "2.5h", "14h" or "" if unknown
+                if (!published) return '';
+                const ms = Date.now() - new Date(published).getTime();
+                if (isNaN(ms) || ms < 0) return '';
+                const hrs = ms / 3600000;
+                if (hrs < 1) return (Math.round(hrs * 4) / 4).toFixed(2).replace(/\.?0+$/, '') + 'h';
+                if (hrs < 24) return (Math.round(hrs * 2) / 2).toFixed(1).replace(/\.0$/, '') + 'h';
+                return Math.round(hrs) + 'h';
+            }
+
             function makeTable(rows) {
-                // rows: [{src, cat, catColor?, title, url, blurb, score?}]
+                // rows: [{src, cat, catColor?, title, url, blurb, score?, published?}]
                 if (!rows.length) return '';
                 let t = `<table class="if-signal-table"><thead><tr>
                     <th class="ift-ss">SS</th>
+                    <th class="ift-age">Age</th>
                     <th class="ift-src">Source</th>
                     <th class="ift-cat">Category</th>
                     <th class="ift-headline">Headline</th>
@@ -3493,8 +3508,10 @@
                         ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(displayTitle)}</a>`
                         : escapeHtml(displayTitle);
                     const catStyle = r.catColor ? ` style="color:${escapeHtml(r.catColor)};border-color:${escapeHtml(r.catColor)}40"` : '';
+                    const age = itemAge(r.published);
                     t += `<tr class="ift-row">
                         <td class="ift-ss">${ssBar(r.score)}</td>
+                        <td class="ift-age">${age ? `<span class="ift-age-val">${escapeHtml(age)}</span>` : '—'}</td>
                         <td class="ift-src">${escapeHtml(r.src || '—')}</td>
                         <td class="ift-cat"><span class="ift-cat-badge"${catStyle}>${escapeHtml(r.cat || '—')}</span></td>
                         <td class="ift-headline">
@@ -3514,7 +3531,8 @@
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'AI Value Chain'}),
                     title: i.title || '', url: i.url || '', score: i.score,
                     blurb: i.reason && !i.reason.startsWith('http') ? i.reason : '',
-                    developing: !!i.developing
+                    developing: !!i.developing,
+                    published: i.published || i.published_at || i.timestamp || ''
                 })));
                 html += `</div>`;
             }
@@ -3527,7 +3545,8 @@
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'Enterprise AI'}),
                     title: i.title || i.headline || '', url: i.url || '', score: i.score,
                     blurb: i.reason && !i.reason.startsWith('http') ? i.reason : '',
-                    developing: !!i.developing
+                    developing: !!i.developing,
+                    published: i.published || i.published_at || i.timestamp || ''
                 })));
                 html += `</div>`;
             }
@@ -3541,7 +3560,8 @@
                     const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
                     const moodTag = i.mood && i.mood !== 'NEUTRAL' ? `[${i.mood}] ` : '';
                     return { src: resolveSource({...i, source: i.source || 'Macro'}), cat: 'Macro',
-                             title: (moodTag + (i.headline || '')).trim(), url, blurb, score: i.score };
+                             title: (moodTag + (i.headline || '')).trim(), url, blurb, score: i.score,
+                             published: i.published || i.published_at || i.timestamp || '' };
                 }));
                 html += `</div>`;
             }
@@ -3554,7 +3574,8 @@
                     const url = i.url || (i.insight && i.insight.startsWith('http') ? i.insight : '');
                     const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
                     return { src: resolveSource({...i, source: i.source || 'Policy'}), cat: 'Policy',
-                             title: i.headline || '', url, blurb, score: i.score };
+                             title: i.headline || '', url, blurb, score: i.score,
+                             published: i.published || i.published_at || i.timestamp || '' };
                 }));
                 html += `</div>`;
             }
@@ -3567,7 +3588,8 @@
                     src: resolveSource({...i, source: i.source || 'Prediction'}),
                     cat: i.mood || 'Hot Take',
                     title: i.take || i.headline || '', url: i.url || '',
-                    blurb: '', score: i.score
+                    blurb: '', score: i.score,
+                    published: i.published || i.published_at || i.timestamp || ''
                 })));
                 html += `</div>`;
             }
