@@ -52,6 +52,21 @@ bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''
 json.dump(bf, open('$BF_FILE', 'w'), indent=2)
 "
 
+# ── Push to Supabase Realtime in background (non-blocking, fast) ──────────────
+SUPABASE_URL="https://cdzaeptrggczynijegls.supabase.co"
+SUPABASE_KEY="sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
+
+(
+  BF_JSON=$(cat "$BF_FILE")
+  curl -s -o /dev/null -X PATCH \
+    "$SUPABASE_URL/rest/v1/brain_feed?id=eq.main" \
+    -H "apikey: $SUPABASE_KEY" \
+    -H "Authorization: Bearer $SUPABASE_KEY" \
+    -H "Content-Type: application/json" \
+    -H "Prefer: return=minimal" \
+    -d "{\"data\": $BF_JSON, \"updated_at\": \"$NOW\"}" 2>/dev/null || true
+) &
+
 # ── Push to GitHub in background (non-blocking) ───────────────────────────────
 (
   cd "$ROOT_DIR"
