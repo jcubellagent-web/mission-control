@@ -1,32 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T20:52:13Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T20:53:00Z",
+  "objective": "Adding Ollama models to model usage widget",
+  "status": "active",
   "steps": [
     {
-      "label": "llama3.2 \u2713",
-      "status": "done",
+      "label": "Reading dashboard code",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "qwen-coder \u2713",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "REST API \u2713",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T20:52:35Z",
-  "checkedAt": "2026-03-28T20:52:13Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T20:53:00Z",
+  "checkedAt": "2026-03-28T20:53:00Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
