@@ -431,6 +431,17 @@
         .ctx-meter-pct { font-size: 0.88rem; font-weight: 700; }
         .ctx-meter-hint { font-size: 0.75rem; margin-left: auto; }
         .ctx-meter-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+        /* Idle brain feed insights */
+        .bf-idle-insights { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .bf-stats-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        .bf-stat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; min-width: 60px; flex: 1; }
+        .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+        .bf-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+        .bf-models-row { display: flex; gap: 5px; flex-wrap: wrap; }
+        .bf-model-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 8px; }
+        .bf-model-name { font-size: 0.65rem; color: var(--text-secondary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .bf-model-cost { font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
+        .bf-idle-warning { font-size: 0.68rem; border: 1px solid; border-radius: 6px; padding: 5px 10px; margin-top: 8px; }
         /* Inline context bar in brain feed header */
         .ctx-inline-bar { display: flex; align-items: center; gap: 6px; }
         .ctx-inline-label { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
@@ -1371,6 +1382,23 @@
             border-color: rgba(229,62,62,0.15);
             overflow: hidden;
             animation: brain-idle-glow 3.5s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+        }
+        #brain-feed-card {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .bf-idle-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .agent-comms-section {
+            margin-top: auto !important;
         }
         .card-brain::before {
             content: '';
@@ -1835,7 +1863,7 @@
         .agent-comms-section {
             border-top: 1px solid rgba(255,255,255,0.04);
             padding: 6px 0 2px;
-            margin-top: 6px;
+            margin-top: auto;
         }
         .agent-comms-header {
             font-size: 0.52rem;
@@ -3770,6 +3798,53 @@
                 const strippedContext = rawContext.replace(/^Last (completed )?objective:\s*/i, '').trim();
                 const idleContext = (strippedContext && strippedContext !== idleTitle) ? strippedContext : '';
 
+                // ── Build idle stats ──────────────────────────────────────
+                const sessionCost = modelUsageData?.session ?? null;
+                const dailyCost   = modelUsageData?.daily ?? null;
+                const jainCost    = modelUsageData?.jain?.session ?? null;
+                const topModels   = (modelUsageData?.topModels || []).slice(0, 3);
+                const activeCrons = (cronsData || []).filter(c => c.status === 'ok').length;
+                const totalCrons  = (cronsData || []).length;
+
+                // Context window inline (already in header, show amber/red warning here if needed)
+                const ctxPct = ctxWin ? Math.round((ctxWin.pct || 0) * 100) : null;
+                const ctxStatus = ctxWin?.status || 'green';
+                const ctxColor  = ctxStatus === 'red' ? '#e53e3e' : ctxStatus === 'amber' ? '#fbbf24' : '#4ade80';
+                const ctxWarning = ctxStatus !== 'green' && ctxPct !== null
+                    ? `<div class="bf-idle-warning" style="color:${ctxColor};border-color:${ctxColor}30;background:${ctxColor}08">
+                         ${ctxStatus === 'red' ? '⚠' : '·'} Context at ${ctxPct}% — ${ctxStatus === 'red' ? 'new session recommended' : 'consider /new soon'}
+                       </div>` : '';
+
+                // Stats row
+                const statItems = [
+                    sessionCost !== null ? { label: 'Session', value: formatCurrencyAlways(sessionCost), color: sessionCost > 10 ? '#fbbf24' : 'inherit' } : null,
+                    dailyCost   !== null ? { label: 'Daily',   value: formatCurrencyAlways(dailyCost) } : null,
+                    jainCost    !== null ? { label: 'J.A.I.N', value: formatCurrencyAlways(jainCost), color: '#60a5fa' } : null,
+                    totalCrons  > 0      ? { label: 'Crons',   value: `${activeCrons}/${totalCrons}` } : null,
+                ].filter(Boolean);
+
+                const statsHtml = statItems.length ? `
+                    <div class="bf-stats-row">
+                        ${statItems.map(s => `<div class="bf-stat">
+                            <span class="bf-stat-val" style="${s.color ? `color:${s.color}` : ''}">${escapeHtml(s.value)}</span>
+                            <span class="bf-stat-label">${escapeHtml(s.label)}</span>
+                        </div>`).join('')}
+                    </div>` : '';
+
+                // Top models
+                const modelsHtml = topModels.length ? `
+                    <div class="bf-models-row">
+                        ${topModels.map(m => {
+                            const shortName = (m.name || '').replace(/^(anthropic|openai|google|openrouter)\//, '');
+                            return `<div class="bf-model-chip">
+                                <span class="bf-model-name">${escapeHtml(shortName)}</span>
+                                <span class="bf-model-cost">${formatCurrencyAlways(m.cost || 0)}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>` : '';
+
+                const lastUpdatedStr = bf?.updatedAt ? formatRelTime(bf.updatedAt) : '';
+
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
@@ -3777,9 +3852,14 @@
                             <div class="brain-kicker">JOSH 2.0 · Standby</div>
                             <div class="brain-title">${escapeHtml(idleTitle)}</div>
                             ${idleContext ? `<p class="focus-context">${escapeHtml(idleContext)}</p>` : ''}
-                            <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
-                                <span>${bf && bf.updatedAt ? `Updated ${formatRelTime(bf.updatedAt)}` : (focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh')}</span>
-                                ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
+                            ${ctxWarning}
+                        </div>
+                        <div class="bf-idle-insights">
+                            ${statsHtml}
+                            ${modelsHtml}
+                            <div class="brain-meta" style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px">
+                                <span>${lastUpdatedStr ? `Updated ${lastUpdatedStr}` : 'Awaiting refresh'}</span>
+                                ${modelUsageData?.lastUpdated ? `<span>Telemetry ${formatRelTime(modelUsageData.lastUpdated)}</span>` : ''}
                             </div>
                         </div>
                     </div>
