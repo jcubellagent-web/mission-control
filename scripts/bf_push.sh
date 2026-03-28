@@ -14,28 +14,28 @@ STATE="${3:-active}"
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Resolve current active model from OpenClaw sessions
-CURRENT_MODEL=$(python3 -c "
-import json, pathlib
+CURRENT_MODEL=$(python3 - << 'PYEOF' 2>/dev/null
+import json, pathlib, sys
 sessions_file = pathlib.Path.home() / '.openclaw/agents/main/sessions/sessions.json'
+result = 'Unknown'
 try:
     d = json.loads(sessions_file.read_text())
-    # Primary: running telegram direct session
     for key in ['agent:main:telegram:direct:6218150306', 'agent:main:main']:
         s = d.get(key, {})
         m = s.get('model')
         if m:
-            # Shorten to readable label
-            m = m.replace('claude-sonnet-4-6','Sonnet 4.5').replace('claude-opus-4','Opus 4') \
-                 .replace('claude-haiku-4','Haiku 4').replace('gemini-2.5-flash','Gemini 2.5 Flash') \
-                 .replace('gemini-2.5-pro','Gemini 2.5 Pro').replace('gpt-4o','GPT-4o') \
-                 .replace('gpt-4.1','GPT-4.1').replace('gpt-5','GPT-5') \
+            m = m.replace('claude-sonnet-4-6','Sonnet 4.6').replace('claude-sonnet-4','Sonnet 4') \
+                 .replace('claude-opus-4','Opus 4').replace('claude-haiku-4','Haiku 4') \
+                 .replace('gemini-2.5-flash','Gemini 2.5 Flash').replace('gemini-2.5-pro','Gemini 2.5 Pro') \
+                 .replace('gpt-4o','GPT-4o').replace('gpt-4.1','GPT-4.1').replace('gpt-5','GPT-5') \
                  .replace('anthropic/','').replace('google/','').replace('openai/','').replace('openrouter/','')
-            print(m)
-            exit()
-    print('Unknown')
+            result = m
+            break
 except:
-    print('Unknown')
-" 2>/dev/null || echo "Unknown")
+    pass
+print(result)
+PYEOF
+)
 
 # Build steps JSON
 if [[ -n "$STEPS_RAW" ]]; then
