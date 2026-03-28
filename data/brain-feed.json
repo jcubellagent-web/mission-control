@@ -1,11 +1,22 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:15:00Z",
+  "objective": "Supabase Realtime is live!",
+  "status": "active",
+  "steps": [
+    {
+      "label": "WebSocket connected",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Brain feed active",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:15:44Z",
   "checkedAt": "2026-03-28T03:15:01Z",
   "idleUpdatedAt": "2026-03-28T03:15:01Z"
 }
