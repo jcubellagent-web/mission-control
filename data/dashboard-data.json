@@ -4,45 +4,35 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T20:18:21Z",
-    "objective": "Cron audit complete",
+    "messageReceived": "2026-03-28T20:24:58Z",
+    "objective": "Reskin Todays Jobs module",
     "status": "done",
     "steps": [
       {
-        "label": "Reading cron config",
+        "label": "Reading current renderer",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Checking JAIN crontab",
+        "label": "Building new tjob component",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Moving Sorare to JAIN",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Fixing cron targets + agent check",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Pushing changes",
+        "label": "Pushing to GitHub",
         "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T20:18:21Z",
-    "checkedAt": "2026-03-28T20:18:21Z",
+    "updatedAt": "2026-03-28T20:24:58Z",
+    "checkedAt": "2026-03-28T20:24:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Cron audit complete",
-    "updatedAt": "2026-03-28T20:20:01Z"
+    "context": "Reskin Todays Jobs module",
+    "updatedAt": "2026-03-28T20:25:01Z"
   },
   "contextWindow": {
     "usedTokens": 111014,
@@ -142,7 +132,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T20:20:05Z",
+    "lastUpdated": "2026-03-28T20:25:05Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -180,19 +170,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:20:01Z"
+      "lastChecked": "2026-03-28T20:25:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:20:01Z"
+      "lastChecked": "2026-03-28T20:25:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T20:20:01Z"
+      "lastChecked": "2026-03-28T20:25:01Z"
     }
   ],
   "crons": [
@@ -352,25 +342,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T20:20:05Z",
+      "time": "2026-03-28T20:25:05Z",
       "event": "Session spend: $11.79"
     },
     {
-      "time": "2026-03-28T20:20:01Z",
+      "time": "2026-03-28T20:25:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T20:20:01Z",
+      "time": "2026-03-28T20:25:01Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T20:20:01Z",
+      "time": "2026-03-28T20:25:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T20:20:01Z",
+      "time": "2026-03-28T20:25:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T20:20:01Z"
+  "lastUpdated": "2026-03-28T20:25:01Z"
 }
