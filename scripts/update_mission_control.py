@@ -585,29 +585,28 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
 
 def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
-    time_min = utc_iso()
-    time_max = utc_iso(dt.timedelta(days=2))
-    params = json.dumps({
-        "calendarId": "primary",
-        "singleEvents": True,
-        "orderBy": "startTime",
-        "timeMin": time_min,
-        "timeMax": time_max,
-        "maxResults": 10,
-    })
     try:
         result = subprocess.run(
-            ["gws", "calendar", "events", "list", "--params", params],
+            [
+                "gog", "calendar", "events", "list",
+                "--account", "jcubellagent@gmail.com",
+                "--from", "today",
+                "--days", "3",
+                "--max", "10",
+                "-j", "--results-only",
+            ],
             capture_output=True,
             text=True,
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        print(f"[warn] gws calendar list failed: {exc.stderr}", file=sys.stderr)
+        print(f"[warn] gog calendar list failed: {exc.stderr}", file=sys.stderr)
         return []
-    payload = json.loads(result.stdout or "{}")
+    raw = json.loads(result.stdout or "[]")
+    # gog --results-only returns array directly; fallback to items envelope
+    items_list = raw if isinstance(raw, list) else raw.get("items", [])
     events = []
-    for item in payload.get("items", []):
+    for item in items_list:
         start = item.get("start", {})
         start_time = start.get("dateTime") or start.get("date")
         if not start_time:
