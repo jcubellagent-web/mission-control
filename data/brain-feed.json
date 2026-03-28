@@ -1,7 +1,7 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:02:43Z",
-  "objective": "Full capability upgrade \u2014 all items",
+  "messageReceived": "2026-03-28T21:03:30Z",
+  "objective": "Capability upgrade in progress",
   "status": "active",
   "steps": [
     {
@@ -10,13 +10,18 @@
       "tool": "exec"
     },
     {
-      "label": "Spawning build agent",
+      "label": "Build agent running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Claude Code needs manual auth",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:02:43Z",
-  "checkedAt": "2026-03-28T21:02:43Z",
+  "updatedAt": "2026-03-28T21:03:30Z",
+  "checkedAt": "2026-03-28T21:03:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
