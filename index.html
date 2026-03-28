@@ -605,19 +605,13 @@
         .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
-        .mu-compact-list { display: flex; flex-direction: column; gap: 5px; }
-        .mu-compact-row { display: grid; grid-template-columns: 8px 1fr auto 70px auto; align-items: center; gap: 6px; padding: 3px 0; }
-        .mu-compact-name-wrap { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-        .mu-tok-line { display: flex; align-items: center; gap: 4px; margin-top: 1px; }
-        .mu-tok-in, .mu-tok-out { font-size: 0.55rem; color: rgba(255,255,255,0.28); font-variant-numeric: tabular-nums; }
-        .mu-tok-in { color: rgba(96,165,250,0.5); }
-        .mu-tok-out { color: rgba(167,139,250,0.5); }
-        .mu-tok-sep { font-size: 0.5rem; color: rgba(255,255,255,0.15); }
+        .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
+        .mu-compact-row { display: grid; grid-template-columns: 6px 1fr auto 55px auto; align-items: center; gap: 5px; padding: 2px 0; }
         .mu-compact-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .mu-compact-name { font-size: 0.73rem; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-compact-name { font-size: 0.66rem; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mu-compact-bar-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
-        .mu-compact-cost { font-size: 0.68rem; color: rgba(255,255,255,0.55); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+        .mu-compact-cost { font-size: 0.62rem; color: rgba(255,255,255,0.5); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
         .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: right; }
         .mu-el-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
         .mu-el-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
@@ -4182,11 +4176,11 @@
                 const rawWeekly  = (weeklyV || 0) + jainWeekly + orWeekly;
                 const rawMonthly = (monthlyV || 0) + orMonthly;
                 const rawSession = mu.session || 0;
-                // Clamp: monthly ≥ weekly ≥ daily (with grace for midnight rollovers)
-                const totalDaily   = rawDaily;
-                const totalWeekly  = Math.max(rawWeekly, rawDaily);
-                const totalMonthly = Math.max(rawMonthly, totalWeekly);
+                // Clamp: daily ≥ session, weekly ≥ daily, monthly ≥ weekly
                 const totalSession = rawSession;
+                const totalDaily   = Math.max(rawDaily, rawSession);
+                const totalWeekly  = Math.max(rawWeekly, totalDaily);
+                const totalMonthly = Math.max(rawMonthly, totalWeekly);
 
                 const summaryHtml = `
                 <div class="mu-totals-section">
@@ -4231,22 +4225,11 @@
                         const costDisplay = isLocal
                             ? `<span style="color:#4ade80;font-size:0.62rem;font-weight:600;">free${sizeLabel}</span>`
                             : `<span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:rgba(255,255,255,0.25);margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>`;
-                        const localDot = isLocal && model.loaded ? `<span title="loaded in memory" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#4ade80;margin-left:2px;vertical-align:middle;"></span>` : '';
-                        const fmtTok = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : (n||0).toString();
-                        const inTok  = model.inputTokens  || 0;
-                        const outTok = model.outputTokens || 0;
-                        const tokLine = (inTok || outTok) ? `<div class="mu-tok-line">
-                            <span class="mu-tok-in" title="Input tokens">↑ ${fmtTok(inTok)}</span>
-                            <span class="mu-tok-sep">·</span>
-                            <span class="mu-tok-out" title="Output tokens">↓ ${fmtTok(outTok)}</span>
-                        </div>` : '';
+                        const localDot = isLocal && model.loaded ? `<span title="loaded in memory" style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#4ade80;margin-left:2px;vertical-align:middle;"></span>` : '';
                         return `<div class="mu-compact-row">
                             <span class="mu-compact-dot" style="background:${color}"></span>
-                            <div class="mu-compact-name-wrap">
-                                <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}${localDot}</span>
-                                ${tokLine}
-                            </div>
-                            <span class="mu-source-tag ${srcClass}" style="font-size:0.52rem;padding:0 3px;">${srcTag}</span>
+                            <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}${localDot}</span>
+                            <span class="mu-source-tag ${srcClass}" style="font-size:0.5rem;padding:0 3px;">${srcTag}</span>
                             <div class="mu-compact-bar-wrap">
                                 <div class="mu-compact-bar-fill" style="width:${pct}%;background:${isLocal ? '#4ade8060' : color+'80'}"></div>
                             </div>
