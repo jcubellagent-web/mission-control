@@ -1,11 +1,27 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T17:45:33Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T17:45:40Z",
-  "checkedAt": "2026-03-28T17:45:33Z",
+  "active": true,
+  "messageReceived": "2026-03-28T17:47:31Z",
+  "objective": "Compacted brain feed UI \u2014 checking how it looks",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Testing",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Reviewing",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Looks good",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T17:47:31Z",
+  "checkedAt": "2026-03-28T17:47:31Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
