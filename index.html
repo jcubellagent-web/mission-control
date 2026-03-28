@@ -2166,8 +2166,6 @@
                 <div class="logo-icon"><img src="assets/logo.jpg" alt="Josh logo" /></div>
                 <h1>Mission Control</h1>
             </div>
-            <!-- Desktop Night Mode button -->
-            <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙 Night</button>
             <!-- Mobile-only cost pill -->
             <div id="mobile-cost-pill">
                 <div class="mcp-row"><span class="mcp-label">Session</span><span class="mcp-val" id="mcp-session">$0.00</span></div>
@@ -2178,6 +2176,7 @@
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
                 <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
+                <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙 Night</button>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
                     <span class="spinner">↻</span>
@@ -2455,27 +2454,49 @@
             return 'Idle';
         }
 
+        let _dashLocalOk = true;
         async function fetchData() {
             const t0 = performance.now();
-            try {
-                const cacheBuster = `?_=${Date.now()}`;
-                const response = await fetch(CONFIG.DATA_URL + cacheBuster);
-                if (!response.ok) throw new Error('Failed to fetch');
-                const data = await response.json();
-                const latency = Math.round(performance.now() - t0);
-                console.debug(`[MC] dashboard-data.json fetched in ${latency}ms`);
-                lastUpdateTime = new Date(data.lastUpdated || Date.now());
-                renderDashboard(data);
-                updateFreshnessBadge();
-                setConnectionStatus('online');
-                document.getElementById('main-content').classList.add('flash-update');
-                setTimeout(() => document.getElementById('main-content').classList.remove('flash-update'), 1000);
-                return true;
-            } catch (err) {
-                console.error('Failed to fetch dashboard data:', err);
-                setConnectionStatus(navigator.onLine ? 'degraded' : 'offline');
-                return false;
+            const cacheBuster = `?_=${Date.now()}`;
+            let data = null;
+            let src = 'remote';
+
+            // Try local server first (fast, no CDN cache)
+            if (_dashLocalOk) {
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 400);
+                    const r = await fetch('http://localhost:8765/dashboard-data.json' + cacheBuster, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (r.ok) { data = await r.json(); src = '⚡local'; }
+                    else _dashLocalOk = false;
+                } catch { _dashLocalOk = false; }
             }
+
+            // Fallback to GitHub Pages
+            if (!data) {
+                try {
+                    const response = await fetch(CONFIG.DATA_URL + cacheBuster);
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    data = await response.json();
+                    src = '☁️remote';
+                    _dashLocalOk = true; // retry local next time
+                } catch (err) {
+                    console.error('Failed to fetch dashboard data:', err);
+                    setConnectionStatus(navigator.onLine ? 'degraded' : 'offline');
+                    return false;
+                }
+            }
+
+            const latency = Math.round(performance.now() - t0);
+            console.debug(`[MC] dashboard-data.json fetched in ${latency}ms (${src})`);
+            lastUpdateTime = new Date(data.lastUpdated || Date.now());
+            renderDashboard(data);
+            updateFreshnessBadge();
+            setConnectionStatus('online');
+            document.getElementById('main-content').classList.add('flash-update');
+            setTimeout(() => document.getElementById('main-content').classList.remove('flash-update'), 1000);
+            return true;
         }
 
         // Try to fetch from local server first (sub-100ms), fall back to GitHub Pages
