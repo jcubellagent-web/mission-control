@@ -1346,8 +1346,14 @@
         .fg-pill.greed { color: #4ade80; }
 
         /* Signal / article items */
-        .if-item { padding: 4px 8px; border-radius: 5px; cursor: default; transition: background 0.15s; }
+        .if-item { padding: 4px 8px 4px 6px; border-radius: 5px; transition: background 0.15s; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
         .if-item:hover { background: rgba(255,255,255,0.04); }
+        .if-item-link { color: #fff; text-decoration: none; font-size: 0.72rem; line-height: 1.3; flex: 1; min-width: 0; }
+        .if-item-link:hover { color: #93c5fd; text-decoration: underline; }
+        .if-item-source { font-size: 0.58rem; color: rgba(255,255,255,0.5); white-space: nowrap; flex-shrink: 0; }
+        .if-cat-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+        .if-cat-chip { font-size: 0.58rem; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+        .if-cat-chip:hover { background: rgba(255,255,255,0.14); }
         .if-item-title { font-size: 0.72rem; color: #fff; line-height: 1.3;
                          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .if-item-meta { font-size: 0.6rem; color: rgba(255,255,255,0.65); margin-top: 1px; }
@@ -3283,94 +3289,136 @@
             track.style.animationDuration = speed + 's';
         }
 
+        // ── Intelligence Feed helpers ──────────────────────────────────────
+        function ifScrollTo(sectionId) {
+            const target = document.getElementById(sectionId);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function ifItemHtml(item, catKey) {
+            // Title: clickable link to article if URL exists
+            const url = item.url || item.source_url || '';
+            const titleEl = url
+                ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(item.title || item.headline || '')}</a>`
+                : `<span>${escapeHtml(item.title || item.headline || '')}</span>`;
+            const score = (item.score != null) ? `<span class="if-score">${item.score.toFixed(0)}</span>` : '';
+            const source = item.source ? `<span class="if-item-source">${escapeHtml(item.source)}</span>` : '';
+            const reason = item.reason && !item.reason.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.reason)}</div>` : '';
+            return `<div class="if-item">${score}${titleEl}${source}${reason}</div>`;
+        }
+        function grokItemHtml(item) {
+            const mood = item.mood || 'NEUTRAL';
+            const text = item.headline || item.take || '';
+            const url = item.url || (item.insight && item.insight.startsWith('http') ? item.insight : '');
+            const insight = item.insight && !item.insight.startsWith('http') ? item.insight : '';
+            const titleEl = url
+                ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(text)}</a>`
+                : escapeHtml(text);
+            return `<div class="if-grok-item">
+                <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${titleEl}</div>
+                ${insight ? `<div class="if-grok-insight">${escapeHtml(insight)}</div>` : ''}
+            </div>`;
+        }
+
         function renderIntelligenceFeed(f) {
             const el = document.getElementById('intelligence-feed-card');
             if (!el) return;
+
+            // ── Section catalog (for top-signal cross-links) ──────────────
+            const SECTIONS = [
+                { key: 'signal',        label: '🎯 Top Signals',       id: 'ifs-signal'    },
+                { key: 'ai_value_chain',label: '🔗 AI',                id: 'ifs-ai'        },
+                { key: 'enterprise_ai', label: '🏢 Enterprise AI',     id: 'ifs-enterprise'},
+                { key: 'macro_geo',     label: '📈 Macro',             id: 'ifs-macro'     },
+                { key: 'regulation',    label: '⚖️ Policy',            id: 'ifs-reg'       },
+                { key: 'hot_takes',     label: '🔥 Hot Takes',         id: 'ifs-hot'       },
+                { key: 'nasdaq_movers', label: '📊 NASDAQ',            id: 'ifs-nasdaq'    },
+                { key: 'crypto_movers', label: '₿ Crypto',             id: 'ifs-crypto'    },
+            ];
+
             let html = '';
 
-            // Fear & Greed
+            // ── Fear & Greed ──────────────────────────────────────────────
             if (f.fear_greed) {
                 const fg = f.fear_greed;
-                const fgClass = fg.value < 40 ? 'fear' : fg.value > 60 ? 'greed' : '';
-                html += `<div class="if-section">
+                const fgColor = fg.value < 30 ? '#f87171' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
+                html += `<div class="if-section" id="ifs-fg">
                     <div class="if-section-header">Fear &amp; Greed</div>
                     <div class="fg-bar-wrap">
-                        <div class="fg-bar">${escapeHtml(fg.bar || '')} <span style="color:rgba(255,255,255,0.6)">${fg.value} — ${escapeHtml(fg.label || '')}</span></div>
+                        <div class="fg-bar" style="font-size:0.9rem;">${escapeHtml(fg.bar || '')} <span style="color:${fgColor};font-weight:700;">${fg.value} — ${escapeHtml(fg.label || '')}</span></div>
                         <div class="fg-meta">
                             ${fg.btc_dominance ? `<span class="fg-pill">BTC Dom ${fg.btc_dominance}%</span>` : ''}
-                            ${fg.market_cap_change_24h != null ? `<span class="fg-pill ${fg.market_cap_change_24h < 0 ? 'fear' : 'greed'}">Mkt 24h ${fg.market_cap_change_24h > 0 ? '+' : ''}${fg.market_cap_change_24h}%</span>` : ''}
+                            ${fg.market_cap_change_24h != null && fg.market_cap_change_24h !== 0 ? `<span class="fg-pill ${fg.market_cap_change_24h < 0 ? 'fear' : 'greed'}">Mkt 24h ${fg.market_cap_change_24h > 0 ? '+' : ''}${fg.market_cap_change_24h}%</span>` : ''}
                         </div>
                     </div>
                 </div>`;
             }
 
-            // Signal
-            if (f.signal && f.signal.length) {
-                html += `<div class="if-section"><div class="if-section-header">🎯 Top Signal, Developments &amp; TLDR</div>`;
-                f.signal.filter(i => isEnglish(i.title)).slice(0,5).forEach(item => {
-                    html += `<div class="if-item">
-                        <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
-                        ${item.reason && !item.reason.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.reason)}</div>` : ''}
-                        <div class="if-item-meta">${escapeHtml(item.source || '')}</div>
+            // ── Top Signals + TLDR (with category jump chips) ─────────────
+            const signalItems = (f.signal || []).filter(i => isEnglish(i.title || i.headline));
+            const tldrItems   = f.tldr || [];
+            if (signalItems.length || tldrItems.length) {
+                // Category chips — only show sections that have data
+                const chips = SECTIONS.filter(s => {
+                    const d = f[s.key];
+                    return d && (Array.isArray(d) ? d.length > 0 : (d.gainers?.length || d.losers?.length));
+                }).map(s =>
+                    `<span class="if-cat-chip" onclick="ifScrollTo('${s.id}')">${s.label}</span>`
+                ).join('');
+
+                html += `<div class="if-section" id="ifs-signal">
+                    <div class="if-section-header">🎯 Top Signals, Developments &amp; TLDR
+                        ${chips ? `<div class="if-cat-chips">${chips}</div>` : ''}
                     </div>`;
-                });
-                if (f.tldr && f.tldr.length) {
+                signalItems.slice(0, 6).forEach(item => { html += ifItemHtml(item, 'signal'); });
+                if (tldrItems.length) {
                     html += `<div class="if-tldr-block">`;
-                    f.tldr.forEach(b => {
-                        html += `<div class="if-tldr-bullet">› ${escapeHtml(b)}</div>`;
-                    });
+                    tldrItems.forEach(b => { html += `<div class="if-tldr-bullet">› ${escapeHtml(b)}</div>`; });
                     html += `</div>`;
                 }
                 html += `</div>`;
             }
 
-            // AI Value Chain
+            // ── AI Value Chain ─────────────────────────────────────────────
             if (f.ai_value_chain && f.ai_value_chain.length) {
-                html += `<div class="if-section"><div class="if-section-header">🔗 AI Value Chain</div>`;
-                f.ai_value_chain.filter(i => isEnglish(i.title)).slice(0,4).forEach(item => {
-                    html += `<div class="if-item">
-                        <div class="if-item-title"><span class="if-score">${item.score?.toFixed(0) || ''}</span>${escapeHtml(item.title || '')}</div>
-                        ${item.reason && !item.reason.startsWith('http') ? `<div class="if-grok-insight">${escapeHtml(item.reason)}</div>` : ''}
-                    </div>`;
-                });
+                const items = f.ai_value_chain.filter(i => isEnglish(i.title)).slice(0, 5);
+                html += `<div class="if-section" id="ifs-ai"><div class="if-section-header">🔗 AI Value Chain</div>`;
+                items.forEach(item => { html += ifItemHtml(item, 'ai'); });
                 html += `</div>`;
             }
 
-            // Macro & Geo
+            // ── Enterprise AI ──────────────────────────────────────────────
+            if (f.enterprise_ai && f.enterprise_ai.length) {
+                const items = f.enterprise_ai.filter(i => isEnglish(i.title || i.headline)).slice(0, 4);
+                html += `<div class="if-section" id="ifs-enterprise"><div class="if-section-header">🏢 Enterprise AI</div>`;
+                items.forEach(item => { html += ifItemHtml(item, 'enterprise'); });
+                html += `</div>`;
+            }
+
+            // ── Macro & Geo ────────────────────────────────────────────────
             if (f.macro_geo && f.macro_geo.length) {
-                html += `<div class="if-section"><div class="if-section-header">📈 Macro &amp; Markets</div>`;
-                f.macro_geo.filter(i => isEnglish(i.headline)).forEach(item => {
-                    const mood = item.mood || 'NEUTRAL';
-                    const sourceUrl = item.url || (item.insight && item.insight.startsWith('http') ? item.insight : '');
-                    const insight = item.insight && !item.insight.startsWith('http') ? item.insight : '';
-                    const linkHtml = sourceUrl ? ` <a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:rgba(255,255,255,0.25);font-size:0.6rem;text-decoration:none;">↗</a>` : '';
-                    html += `<div class="if-grok-item">
-                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.headline || '')}${linkHtml}</div>
-                        ${insight ? `<div class="if-grok-insight">${escapeHtml(insight)}</div>` : ''}
-                    </div>`;
-                });
+                html += `<div class="if-section" id="ifs-macro"><div class="if-section-header">📈 Macro &amp; Markets</div>`;
+                f.macro_geo.filter(i => isEnglish(i.headline)).forEach(item => { html += grokItemHtml(item); });
                 html += `</div>`;
             }
 
-            // Regulation
+            // ── Regulation ─────────────────────────────────────────────────
             if (f.regulation && f.regulation.length) {
-                html += `<div class="if-section"><div class="if-section-header">⚖️ Regulatory &amp; Policy</div>`;
-                f.regulation.filter(i => isEnglish(i.headline)).forEach(item => {
-                    const sourceUrl = item.url || (item.insight && item.insight.startsWith('http') ? item.insight : '');
-                    const insight = item.insight && !item.insight.startsWith('http') ? item.insight : '';
-                    const linkHtml = sourceUrl ? ` <a href="${escapeHtml(sourceUrl)}" target="_blank" style="color:rgba(255,255,255,0.25);font-size:0.6rem;text-decoration:none;">↗</a>` : '';
-                    html += `<div class="if-grok-item">
-                        <div class="if-grok-headline">${escapeHtml(item.headline || '')}${linkHtml}</div>
-                        ${insight ? `<div class="if-grok-insight">${escapeHtml(insight)}</div>` : ''}
-                    </div>`;
-                });
+                html += `<div class="if-section" id="ifs-reg"><div class="if-section-header">⚖️ Regulatory &amp; Policy</div>`;
+                f.regulation.filter(i => isEnglish(i.headline)).forEach(item => { html += grokItemHtml(item); });
                 html += `</div>`;
             }
 
-            // NASDAQ Movers
+            // ── Hot Takes ──────────────────────────────────────────────────
+            if (f.hot_takes && f.hot_takes.length) {
+                html += `<div class="if-section" id="ifs-hot"><div class="if-section-header">🔥 Hot Takes &amp; Big Bets</div>`;
+                f.hot_takes.filter(i => isEnglish(i.take || i.headline)).forEach(item => { html += grokItemHtml(item); });
+                html += `</div>`;
+            }
+
+            // ── NASDAQ Movers ──────────────────────────────────────────────
             const nm = f.nasdaq_movers;
             if (nm && (nm.gainers?.length || nm.losers?.length)) {
-                html += `<div class="if-section"><div class="if-section-header">NASDAQ Movers</div><div class="if-movers">`;
+                html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div><div class="if-movers">`;
                 (nm.gainers || []).forEach(m => {
                     html += `<div class="if-mover"><span class="if-mover-name">${m.ticker}</span><span class="if-mover-chg up">+${m.change_pct}%</span></div>`;
                 });
@@ -3380,31 +3428,19 @@
                 html += `</div></div>`;
             }
 
-            // Crypto Movers
+            // ── Crypto Movers ──────────────────────────────────────────────
             if (f.crypto_movers && f.crypto_movers.length) {
-                html += `<div class="if-section"><div class="if-section-header">Crypto Movers</div><div class="if-movers">`;
-                f.crypto_movers.slice(0,6).forEach(m => {
+                html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div><div class="if-movers">`;
+                f.crypto_movers.slice(0, 6).forEach(m => {
                     const up = m.change_pct >= 0;
                     html += `<div class="if-mover"><span class="if-mover-name">${m.symbol}</span><span class="if-mover-chg ${up ? 'up' : 'down'}">${up ? '+' : ''}${m.change_pct}%</span></div>`;
                 });
                 html += `</div></div>`;
             }
 
-            // Hot Takes
-            if (f.hot_takes && f.hot_takes.length) {
-                html += `<div class="if-section"><div class="if-section-header">🔥 Hot Takes · Predictions · Big Bets</div>`;
-                f.hot_takes.filter(i => isEnglish(i.take)).forEach(item => {
-                    const mood = item.mood || 'NEUTRAL';
-                    html += `<div class="if-grok-item">
-                        <div class="if-grok-headline"><span class="if-mood ${mood}">${mood}</span>${escapeHtml(item.take || '')}</div>
-                    </div>`;
-                });
-                html += `</div>`;
-            }
-
-            // Generated time
+            // ── Timestamp ──────────────────────────────────────────────────
             if (f.generatedAt) {
-                html += `<div class="if-gen-time">Updated ${formatTime(f.generatedAt)} · ${f.mode || 'full'} run</div>`;
+                html += `<div class="if-gen-time">Updated ${formatTime(f.generatedAt)} · ${(f.mode || 'full').toUpperCase()}</div>`;
             }
 
             el.innerHTML = html;
