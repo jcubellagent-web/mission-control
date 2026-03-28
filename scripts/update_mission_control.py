@@ -31,7 +31,7 @@ CRON_TARGETS = [
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N"},
-    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed", "agent": "J.A.I.N",
+    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "JOSH 2.0",
      "multiRun": {
          "runs": [
              {"time": "7:15 AM",  "mode": "Full",  "label": "Market open"},
@@ -39,9 +39,9 @@ CRON_TARGETS = [
              {"time": "12:00 PM", "mode": "Full",  "label": "Midday"},
              {"time": "2:00 PM",  "mode": "Lite",  "label": "Pulse"},
              {"time": "4:15 PM",  "mode": "Full",  "label": "Close"},
-             {"time": "6:00 PM",  "mode": "Lite",  "label": "Evening"},
+             {"time": "6:00 PM",  "mode": "Full",  "label": "Evening"},
              {"time": "9:00 PM",  "mode": "Full",  "label": "Late"},
-             {"time": "11:00 PM", "mode": "Lite",  "label": "Wrap"},
+             {"time": "11:00 PM", "mode": "Full",  "label": "Wrap"},
          ]
      }
     },
