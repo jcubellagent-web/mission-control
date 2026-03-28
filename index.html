@@ -336,7 +336,7 @@
         }
         .cron-dot.healthy { background: #4ade80; }
         .cron-dot.error   { background: #e53e3e; }
-        .cron-dot.paused  { background: #fbbf24; }
+        .cron-dot.paused  { background: #3a3a4a; }
         .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
         .run-badge {
             font-size: 0.58rem; padding: 1px 5px; border-radius: 3px;
@@ -1671,27 +1671,35 @@
         #device-list { overflow-y: auto; max-height: 320px; }
 
         /* ===== Dual-agent brain feed layout ===== */
-        .dual-brain-feed {
+        /* J.A.I.N compact companion feed */
+        .jain-feed-compact {
+            border-top: 1px solid #1e1e2e;
+            margin-top: 8px;
+            padding: 8px 0 4px;
+        }
+        .jain-feed-header {
             display: flex;
-            flex-direction: row;
-            gap: 0;
-            flex: 1;
-            min-height: 0;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            padding: 0 4px;
         }
-        .brain-agent-col {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 6px 8px 4px;
+        .jain-feed-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3a3a4a;
+            margin-left: auto;
         }
-        .brain-agent-divider {
-            width: 1px;
-            background: #1e1e2e;
-            flex-shrink: 0;
-            align-self: stretch;
+        .jain-feed-status.active { background: #00ff88; box-shadow: 0 0 6px rgba(0,255,136,0.5); }
+        #jain-brain-feed-card {
+            font-size: 0.78rem;
+            opacity: 0.85;
         }
+        #jain-brain-feed-card .bf-objective { font-size: 0.78rem; }
+        #jain-brain-feed-card .bf-step { padding: 2px 0; font-size: 0.72rem; }
+        #jain-brain-feed-card .bf-idle-label { font-size: 0.8rem; }
+        #jain-brain-feed-card .bf-idle-sub { font-size: 0.7rem; }
         .agent-badge {
             display: inline-flex;
             align-items: center;
@@ -2039,17 +2047,17 @@
                         <span class="icon"><img src="assets/icons/brain.png" alt="" class="section-icon-image"></span>
                         <h2>Brain Feed</h2>
                     </div>
-                    <div class="dual-brain-feed">
-                        <div class="brain-agent-col">
-                            <div class="agent-badge josh-badge">JOSH 2.0</div>
-                            <div id="brain-feed-card"></div>
+                    <!-- JOSH 2.0 — hero brain feed -->
+                    <div id="brain-feed-card"></div>
+                    <!-- J.A.I.N — compact companion feed -->
+                    <div class="jain-feed-compact">
+                        <div class="jain-feed-header">
+                            <span class="agent-badge jain-badge">🤖 J.A.I.N</span>
+                            <span class="jain-feed-status" id="jain-feed-status-dot"></span>
                         </div>
-                        <div class="brain-agent-divider"></div>
-                        <div class="brain-agent-col">
-                            <div class="agent-badge jain-badge">J.A.I.N</div>
-                            <div id="jain-brain-feed-card"></div>
-                        </div>
+                        <div id="jain-brain-feed-card"></div>
                     </div>
+                    <!-- Agent Comms -->
                     <div class="agent-comms-section">
                         <div class="agent-comms-header">Agent Comms</div>
                         <div id="agent-comms-list"></div>
@@ -2388,6 +2396,9 @@
         function renderJainBrainFeed(bf) {
             const card = document.getElementById('jain-brain-feed-card');
             if (!card) return;
+            // Update status dot
+            const dot = document.getElementById('jain-feed-status-dot');
+            if (dot) dot.classList.toggle('active', !!(bf && bf.active));
             const stateLabel = getBrainFeedStateLabel(bf);
             const freshnessStrip = `<div class="bf-freshness-row">
                 <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>

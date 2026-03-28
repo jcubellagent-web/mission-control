@@ -1,31 +1,21 @@
 {
-  "lastUpdated": "2026-03-27T21:30:01Z",
-  "totalCostUsd": 8.621522,
+  "lastUpdated": "2026-03-28T01:30:01Z",
+  "totalCostUsd": 18.952547,
   "models": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "totalTokens": 255516,
-      "inputTokens": 94,
-      "outputTokens": 76021,
-      "costUsd": 3.335277,
+      "totalTokens": 123699,
+      "inputTokens": 151,
+      "outputTokens": 123548,
+      "costUsd": 16.879909,
       "costEstimated": false,
-      "sessions": 3
-    },
-    {
-      "name": "google/gemini-2.5-flash",
-      "source": "openclaw",
-      "totalTokens": 199742,
-      "inputTokens": 114536,
-      "outputTokens": 304,
-      "costUsd": 3.294093,
-      "costEstimated": true,
-      "sessions": 2
+      "sessions": 6
     },
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "totalTokens": 101429,
+      "totalTokens": 109444,
       "inputTokens": 84163,
       "outputTokens": 25281,
       "costUsd": 1.613622,
@@ -38,9 +28,19 @@
       "totalTokens": 0,
       "inputTokens": 0,
       "outputTokens": 0,
-      "costUsd": 0.378529,
+      "costUsd": 0.433446,
       "costEstimated": false,
       "sessions": 0
+    },
+    {
+      "name": "google/gemini-2.5-flash",
+      "source": "openclaw",
+      "totalTokens": 81103,
+      "inputTokens": 80540,
+      "outputTokens": 563,
+      "costUsd": 0.025569,
+      "costEstimated": false,
+      "sessions": 1
     }
   ],
   "_note": "costEstimated=true means Gemini cost was calculated from token counts \u00d7 pricing table, not billed directly."
