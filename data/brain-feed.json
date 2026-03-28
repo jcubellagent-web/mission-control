@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:07:44Z",
-  "objective": "Upgrade Live Intelligence Feed display \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:09:30Z",
+  "objective": "Summarize intel feed categories",
+  "status": "active",
   "steps": [
     {
-      "label": "Full feed ready",
+      "label": "Received audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Pushing to dashboard",
-      "status": "done",
-      "tool": "github"
+      "label": "Reading feed scripts",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "github",
-  "updatedAt": "2026-03-28T22:08:06Z",
-  "checkedAt": "2026-03-28T22:07:44Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T22:09:30Z",
+  "checkedAt": "2026-03-28T22:09:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
