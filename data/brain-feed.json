@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:39:59Z",
+  "messageReceived": "2026-03-28T21:41:13Z",
   "objective": "Fix Mission Control load time + stale job data",
   "status": "active",
   "steps": [
     {
-      "label": "Data fixed",
+      "label": "Timeouts fixed",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Investigating load time",
+      "label": "Pushing to GitHub",
       "status": "active",
-      "tool": "exec"
+      "tool": "github"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:39:59Z",
-  "checkedAt": "2026-03-28T21:39:59Z",
+  "currentTool": "github",
+  "updatedAt": "2026-03-28T21:41:13Z",
+  "checkedAt": "2026-03-28T21:41:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
