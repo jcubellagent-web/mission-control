@@ -2715,10 +2715,16 @@
         function applyBrainFeed(bf, source) {
             if (!bf) return;
             const current = window._mcLastBrainFeed;
-            // Block: local/file cannot overwrite an active Supabase state
-            if (source === 'local' && current && current.active && _bfSource === 'supabase') {
-                console.debug('[MC] brain-feed local update blocked — Supabase active state is authoritative');
-                return;
+            // Priority: local server (⚡ sub-100ms, always fresh) > supabase > github pages
+            // Never block local updates — local IS the source of truth when available
+            // Only block github pages (remote) from overwriting a fresher local/supabase state
+            if (source === 'remote' && current) {
+                const currentTs = current.updatedAt ? new Date(current.updatedAt).getTime() : 0;
+                const newTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : 0;
+                if (newTs <= currentTs) {
+                    console.debug('[MC] brain-feed remote update skipped — not fresher than current');
+                    return;
+                }
             }
             const newHash = bfContentHash(bf);
             if (newHash === lastBrainFeedHash) return;
@@ -2751,7 +2757,7 @@
             if (!bf) return;
             const src = _localServerOk ? '⚡local' : '☁️remote';
             console.debug(`[MC] brain-feed (${src}) fetched in ${Math.round(performance.now()-t0)}ms`);
-            applyBrainFeed(bf, 'local');
+            applyBrainFeed(bf, _localServerOk ? 'local' : 'remote');
         }
 
         // ===== J.A.I.N Brain Feed =====
