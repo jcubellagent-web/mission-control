@@ -1,37 +1,17 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:18:21Z",
-  "objective": "Cron audit complete",
-  "status": "done",
+  "messageReceived": "2026-03-28T20:23:37Z",
+  "objective": "Reskin Todays Jobs module",
+  "status": "active",
   "steps": [
     {
-      "label": "Reading cron config",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Checking JAIN crontab",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Moving Sorare to JAIN",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Fixing cron targets + agent check",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Pushing changes",
-      "status": "done",
+      "label": "Reading current renderer",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:18:21Z",
-  "checkedAt": "2026-03-28T20:18:21Z",
+  "updatedAt": "2026-03-28T20:23:37Z",
+  "checkedAt": "2026-03-28T20:23:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
