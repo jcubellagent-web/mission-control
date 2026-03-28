@@ -122,6 +122,33 @@
         }
         header > * { position: relative; z-index: 1; }
         .logo { display: flex; align-items: center; gap: 12px; }
+        .mc-clock-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
+            margin-left: 10px;
+            padding-left: 12px;
+            border-left: 1px solid rgba(229,62,62,0.2);
+        }
+        .mc-clock-time {
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e53e3e;
+            letter-spacing: 0.08em;
+            text-shadow: 0 0 12px rgba(229,62,62,0.5);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .mc-clock-date {
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(229,62,62,0.55);
+            line-height: 1;
+        }
         .logo-icon {
             width: 36px; height: 36px;
             border-radius: 10px;
@@ -2467,6 +2494,10 @@
             <div class="logo">
                 <div class="logo-icon"><img src="assets/logo.jpg" alt="Josh logo" /></div>
                 <h1>Mission Control</h1>
+                <div class="mc-clock-wrap">
+                    <span class="mc-clock-time" id="mc-clock-time">00:00:00</span>
+                    <span class="mc-clock-date" id="mc-clock-date">SATURDAY · 28</span>
+                </div>
             </div>
             <!-- Mobile-only cost pill -->
             <div id="mobile-cost-pill">
@@ -4715,6 +4746,22 @@
                 }
             } catch(e) { console.warn('[MC] pollRemoteCommands error', e); }
         }
+
+        // === HEADER LIVE CLOCK ===
+        function updateMcClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+            const day = now.getDate();
+            const clockEl = document.getElementById('mc-clock-time');
+            const dateEl  = document.getElementById('mc-clock-date');
+            if (clockEl) clockEl.textContent = `${h}:${m}:${s}`;
+            if (dateEl)  dateEl.textContent  = `${days[now.getDay()]} · ${day}`;
+        }
+        updateMcClock();
+        setInterval(updateMcClock, 1000);
 
         // === AUTO-INIT (after all functions defined) ===
         initDashboard();
