@@ -4,30 +4,30 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T21:39:36Z",
+    "messageReceived": "2026-03-28T21:39:59Z",
     "objective": "Fix Mission Control load time + stale job data",
     "status": "active",
     "steps": [
       {
-        "label": "Parsed",
+        "label": "Data fixed",
         "status": "done",
-        "tool": "openclaw"
+        "tool": "exec"
       },
       {
-        "label": "Checking dashboard data",
+        "label": "Investigating load time",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T21:39:36Z",
-    "checkedAt": "2026-03-28T21:39:36Z",
+    "updatedAt": "2026-03-28T21:39:59Z",
+    "checkedAt": "2026-03-28T21:39:59Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
     "context": "Fix Mission Control load time + stale job data",
-    "updatedAt": "2026-03-28T21:39:47Z"
+    "updatedAt": "2026-03-28T21:40:01Z"
   },
   "contextWindow": {
     "usedTokens": 23924,
@@ -167,7 +167,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T21:39:51Z",
+    "lastUpdated": "2026-03-28T21:40:05Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -206,19 +206,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:39:47Z"
+      "lastChecked": "2026-03-28T21:40:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:39:47Z"
+      "lastChecked": "2026-03-28T21:40:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T21:39:47Z"
+      "lastChecked": "2026-03-28T21:40:01Z"
     }
   ],
   "crons": [
@@ -374,25 +374,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T21:39:51Z",
+      "time": "2026-03-28T21:40:05Z",
       "event": "Session spend: $8.41"
     },
     {
-      "time": "2026-03-28T21:39:47Z",
+      "time": "2026-03-28T21:40:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T21:39:47Z",
+      "time": "2026-03-28T21:40:01Z",
       "event": "9 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T21:39:47Z",
+      "time": "2026-03-28T21:40:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T21:39:47Z",
+      "time": "2026-03-28T21:40:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T21:39:47Z"
+  "lastUpdated": "2026-03-28T21:40:01Z"
 }
