@@ -1,22 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:11:11Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:14:33Z",
+  "objective": "Testing browser on ESPN Fantasy Baseball",
+  "status": "active",
   "steps": [
     {
-      "label": "Skipped elite-memory (conflicts)",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Installing browser + calendar",
-      "status": "done",
-      "tool": "exec"
+      "label": "Opening ESPN",
+      "status": "active",
+      "tool": "agent-browser"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:11:53Z",
-  "checkedAt": "2026-03-28T21:11:11Z",
+  "currentTool": "agent-browser",
+  "updatedAt": "2026-03-28T21:14:33Z",
+  "checkedAt": "2026-03-28T21:14:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
