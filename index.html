@@ -596,12 +596,13 @@
 
         .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 12px; }
         /* Compact model usage */
-        .mu-totals-section { margin-bottom: 10px; }
-        .mu-totals-row { display: flex; gap: 8px; margin-bottom: 6px; }
-        .mu-total-cell { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 12px; flex: 1; }
-        .mu-total-val { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
-        .mu-total-label { font-size: 0.6rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
-        .mu-src-breakdown { display: flex; flex-wrap: wrap; gap: 5px; }
+        .mu-totals-section { margin-bottom: 8px; }
+        .mu-totals-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
+        .mu-total-cell { display: flex; align-items: center; gap: 5px; padding: 5px 10px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); }
+        .mu-total-cell:last-child { border-right: none; }
+        .mu-total-val { font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+        .mu-total-label { font-size: 0.55rem; color: rgba(255,255,255,0.28); text-transform: uppercase; letter-spacing: 0.06em; }
+        .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
         .mu-compact-list { display: flex; flex-direction: column; gap: 5px; }
@@ -4177,30 +4178,35 @@
                 const orMonthly = orData?.available ? (orData.byok_monthly || orData.monthly || 0) : 0;
                 const monthlyV  = mu.monthly || mu.aggregate?.monthly || 0;
                 // Aggregate totals across all sources
-                const totalDaily   = (dailyV  || 0) + jainDaily  + orDaily;
-                const totalWeekly  = (weeklyV || 0) + jainWeekly + orWeekly;
-                const totalMonthly = (monthlyV || 0) + orMonthly;
+                const rawDaily   = (dailyV  || 0) + jainDaily  + orDaily;
+                const rawWeekly  = (weeklyV || 0) + jainWeekly + orWeekly;
+                const rawMonthly = (monthlyV || 0) + orMonthly;
+                const rawSession = mu.session || 0;
+                // Clamp: monthly ≥ weekly ≥ daily (with grace for midnight rollovers)
+                const totalDaily   = rawDaily;
+                const totalWeekly  = Math.max(rawWeekly, rawDaily);
+                const totalMonthly = Math.max(rawMonthly, totalWeekly);
+                const totalSession = rawSession;
 
                 const summaryHtml = `
                 <div class="mu-totals-section">
                     <div class="mu-totals-row">
                         <div class="mu-total-cell">
-                            <span class="mu-total-val" style="color:${costColor(totalDaily)}">${fmtCost(totalDaily)}</span>
-                            <span class="mu-total-label">Total Daily</span>
+                            <span class="mu-total-label">Session</span>
+                            <span class="mu-total-val" style="color:${costColor(totalSession)}">${fmtCost(totalSession)}</span>
                         </div>
                         <div class="mu-total-cell">
-                            <span class="mu-total-val" style="color:${costColor(totalWeekly)}">${fmtCost(totalWeekly)}</span>
-                            <span class="mu-total-label">Total Weekly</span>
+                            <span class="mu-total-label">Daily</span>
+                            <span class="mu-total-val" style="color:${costColor(totalDaily)}">${fmtCost(totalDaily)}</span>
                         </div>
-                        ${totalMonthly > 0 ? `<div class="mu-total-cell">
+                        <div class="mu-total-cell">
+                            <span class="mu-total-label">Weekly</span>
+                            <span class="mu-total-val" style="color:${costColor(totalWeekly)}">${fmtCost(totalWeekly)}</span>
+                        </div>
+                        <div class="mu-total-cell">
+                            <span class="mu-total-label">Monthly</span>
                             <span class="mu-total-val" style="color:${costColor(totalMonthly)}">${fmtCost(totalMonthly)}</span>
-                            <span class="mu-total-label">Total Monthly</span>
-                        </div>` : ''}
-                    </div>
-                    <div class="mu-src-breakdown">
-                        <span class="mu-src-chip"><span style="color:#4ade80">JOSH</span> ${fmtCost(dailyV)}/d</span>
-                        ${jainDaily > 0 ? `<span class="mu-src-chip"><span style="color:#60a5fa">JAIN</span> ${fmtCost(jainDaily)}/d</span>` : ''}
-                        ${orDaily > 0 || orWeekly > 0 ? `<span class="mu-src-chip"><span style="color:#a78bfa">OR</span> ${fmtCost(orDaily)}/d · ${fmtCost(orWeekly)}/wk</span>` : ''}
+                        </div>
                     </div>
                 </div>`;
 
