@@ -1,22 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T20:46:55Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T20:48:14Z",
+  "objective": "Installing Ollama + starter models",
+  "status": "active",
   "steps": [
     {
-      "label": "Parsed intent",
-      "status": "done",
-      "tool": "openclaw"
-    },
-    {
-      "label": "Researching",
-      "status": "done",
+      "label": "Installing Ollama",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:47:12Z",
-  "checkedAt": "2026-03-28T20:46:55Z",
+  "updatedAt": "2026-03-28T20:48:14Z",
+  "checkedAt": "2026-03-28T20:48:14Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
