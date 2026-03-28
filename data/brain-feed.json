@@ -1,6 +1,6 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T23:49:48Z",
+  "messageReceived": "2026-03-28T23:50:46Z",
   "objective": "Running live intelligence feed \u2014 full data sweep",
   "status": "active",
   "steps": [
@@ -16,13 +16,18 @@
     },
     {
       "label": "Scoring signals",
-      "status": "active",
+      "status": "done",
       "tool": "gemini"
+    },
+    {
+      "label": "Pushing to Jain Intelligence",
+      "status": "active",
+      "tool": "telegram"
     }
   ],
-  "currentTool": "gemini",
-  "updatedAt": "2026-03-28T23:49:48Z",
-  "checkedAt": "2026-03-28T23:49:48Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T23:50:46Z",
+  "checkedAt": "2026-03-28T23:50:46Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
