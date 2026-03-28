@@ -3,48 +3,43 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-28T21:09:30Z",
-    "objective": "Response sent \u00b7 Awaiting instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-28T21:14:33Z",
+    "objective": "Testing browser on ESPN Fantasy Baseball",
+    "status": "active",
     "steps": [
       {
-        "label": "Search complete",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Responding to Josh",
-        "status": "done",
-        "tool": "telegram"
+        "label": "Opening ESPN",
+        "status": "active",
+        "tool": "agent-browser"
       }
     ],
-    "currentTool": "telegram",
-    "updatedAt": "2026-03-28T21:09:46Z",
-    "checkedAt": "2026-03-28T21:09:30Z",
+    "currentTool": "agent-browser",
+    "updatedAt": "2026-03-28T21:14:33Z",
+    "checkedAt": "2026-03-28T21:14:33Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Response sent \u00b7 Awaiting instruction",
-    "updatedAt": "2026-03-28T21:10:02Z"
+    "status": "Brain Feed live",
+    "context": "Testing browser on ESPN Fantasy Baseball",
+    "updatedAt": "2026-03-28T21:15:01Z"
   },
   "contextWindow": {
-    "usedTokens": 79134,
+    "usedTokens": 83296,
     "limitTokens": 200000,
-    "pct": 0.3957,
+    "pct": 0.4165,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 11.505992,
-    "daily": 3.855347,
+    "session": 11.916308,
+    "daily": 4.265663,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 8.940721949999999
+        "cost": 9.351037649999999
       },
       {
         "name": "openai/gpt-5.4",
@@ -71,12 +66,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 158,
-        "outputTokens": 124561,
-        "totalTokens": 124719,
-        "sessionCost": 8.940721949999999,
-        "dailyCost": 3.36271485,
-        "weeklyCost": 8.940721949999999,
+        "inputTokens": 165,
+        "outputTokens": 125335,
+        "totalTokens": 125500,
+        "sessionCost": 9.351037649999999,
+        "dailyCost": 3.77303055,
+        "weeklyCost": 9.351037649999999,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -152,7 +147,7 @@
         "costEstimated": false,
         "isLocal": true,
         "sizeGb": 0.27,
-        "loaded": true,
+        "loaded": false,
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       },
       {
@@ -166,7 +161,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T21:10:06Z",
+    "lastUpdated": "2026-03-28T21:15:05Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -188,8 +183,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.559381,
-      "total": 12.479312
+      "daily": 4.969697,
+      "total": 12.889628
     }
   },
   "devices": [
@@ -204,19 +199,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:10:02Z"
+      "lastChecked": "2026-03-28T21:15:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:10:02Z"
+      "lastChecked": "2026-03-28T21:15:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T21:10:02Z"
+      "lastChecked": "2026-03-28T21:15:01Z"
     }
   ],
   "crons": [
@@ -385,31 +380,31 @@
       "label": "bd5723ae-3894-46fd-b8a9-5cf493",
       "status": "done",
       "startedAt": "2026-03-28T21:03:26.532000+00:00",
-      "elapsedSecs": 400,
+      "elapsedSecs": 699,
       "updatedAt": "2026-03-28T21:06:13.339000+00:00"
     }
   ],
   "recentActivity": [
     {
-      "time": "2026-03-28T21:10:06Z",
-      "event": "Session spend: $11.51"
+      "time": "2026-03-28T21:15:05Z",
+      "event": "Session spend: $11.92"
     },
     {
-      "time": "2026-03-28T21:10:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-28T21:15:01Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T21:10:02Z",
+      "time": "2026-03-28T21:15:01Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T21:10:02Z",
+      "time": "2026-03-28T21:15:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T21:10:02Z",
+      "time": "2026-03-28T21:15:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T21:10:02Z"
+  "lastUpdated": "2026-03-28T21:15:01Z"
 }
