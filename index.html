@@ -1671,6 +1671,32 @@
         #device-list { overflow-y: auto; max-height: 320px; }
 
         /* ===== Dual-agent brain feed layout ===== */
+        /* ── J.A.I.N Status Bar (compact row below JOSH hero) ── */
+        .jain-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 0;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+        .jsb-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .jsb-label {
+            font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; flex-shrink: 0;
+            transition: color 0.3s;
+        }
+        .jsb-obj { flex: 1; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .jsb-step { color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .jsb-tool { font-size: 0.6rem; padding: 0 4px; border: 1px solid rgba(0,255,136,0.25); border-radius: 3px; }
+        .jsb-ts { color: rgba(255,255,255,0.2); font-size: 0.6rem; flex-shrink: 0; }
+
         /* ── Combined Brain Feed ── */
         .cbf-container {
             display: flex;
@@ -2811,99 +2837,65 @@
         }
 
         function renderCombinedBrainFeed(joshBf, jainBf) {
+            // JOSH 2.0 is the hero — renderBrainFeed handles him fully.
+            // This function just injects/updates the J.A.I.N status bar below.
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
 
+            // Also update brainCard active state considering J.A.I.N
             const brainCard = card.closest('.card-brain');
-            const joshActive = !!(joshBf && joshBf.active);
             const jainActive = !!(jainBf && jainBf.active);
-            const anyActive = joshActive || jainActive;
-
-            if (brainCard) brainCard.classList.toggle('brain-active', anyActive);
-
-            // Update freshness tracking
-            if (joshBf && joshBf.updatedAt) {
-                bfLastUpdatedTs = new Date(joshBf.updatedAt).getTime();
-                updateBfFreshness(joshBf);
+            const joshActive = !!(joshBf && joshBf.active);
+            if (brainCard && jainActive && !joshActive) {
+                brainCard.classList.add('brain-active');
             }
 
-            function agentSection(bf, agentName, isJosh) {
-                const color = isJosh ? '#00d4ff' : '#00ff88';
-                const colorBg = isJosh ? 'rgba(0,212,255,0.08)' : 'rgba(0,255,136,0.08)';
-                const colorBorder = isJosh ? 'rgba(0,212,255,0.25)' : 'rgba(0,255,136,0.25)';
-                const icon = isJosh ? '⚡️' : '🤖';
-                const isActive = !!(bf && bf.active);
-
-                const headerHtml = `<div class="cbf-agent-header" style="border-color:${colorBorder};background:${colorBg}">
-                    <span class="cbf-agent-icon">${icon}</span>
-                    <span class="cbf-agent-name" style="color:${color}">${agentName}</span>
-                    <span class="cbf-agent-status-dot" style="background:${isActive ? color : '#3a3a4a'};${isActive ? `box-shadow:0 0 5px ${color}` : ''}"></span>
-                </div>`;
-
-                if (!bf) {
-                    return `<div class="cbf-agent-block">${headerHtml}<div class="cbf-agent-body cbf-idle"><span style="color:rgba(255,255,255,0.3);font-size:0.65rem;">No data</span></div></div>`;
-                }
-
-                if (!isActive) {
-                    const obj = escapeHtml(bf.objective || 'Idle');
-                    const ts = bf.updatedAt ? formatTime(bf.updatedAt) : '';
-                    return `<div class="cbf-agent-block">${headerHtml}<div class="cbf-agent-body cbf-idle">
-                        <span class="cbf-idle-obj">${obj}</span>
-                        ${ts ? `<span class="cbf-idle-ts">${ts}</span>` : ''}
-                    </div></div>`;
-                }
-
-                // Active — show objective + steps
-                const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
-                    const isDone = step.status === 'done';
-                    const dotColor = isDone ? 'rgba(255,255,255,0.25)' : color;
-                    const toolHtml = step.tool ? `<span class="cbf-tool-chip" style="color:${color};border-color:${colorBorder}">${escapeHtml(step.tool)}</span>` : '';
-                    return `<div class="cbf-step ${isDone ? 'cbf-step-done' : 'cbf-step-active'}">
-                        <span class="cbf-step-dot" style="background:${dotColor}"></span>
-                        <span class="cbf-step-label">${escapeHtml(step.label)}</span>
-                        ${toolHtml}
-                    </div>`;
-                }).join('');
-
-                return `<div class="cbf-agent-block">${headerHtml}<div class="cbf-agent-body">
-                    <div class="cbf-objective" style="color:${color}">${escapeHtml(bf.objective || '')}</div>
-                    ${stepsHtml ? `<div class="cbf-steps">${stepsHtml}</div>` : ''}
-                </div></div>`;
+            // Inject or update J.A.I.N status bar
+            let jainBar = document.getElementById('jain-status-bar');
+            if (!jainBar) {
+                jainBar = document.createElement('div');
+                jainBar.id = 'jain-status-bar';
+                jainBar.className = 'jain-status-bar';
+                card.appendChild(jainBar);
             }
 
-            // Build freshness strip for JOSH (primary)
-            const stateLabel = getBrainFeedStateLabel(joshBf);
-            const freshnessStrip = `<div class="bf-freshness-row">
-                <span class="bf-fresh-dot" id="bf-fresh-dot-main" style="background:rgba(255,255,255,0.2)"></span>
-                <span class="bf-freshness-label" id="bf-freshness-label-text">${stateLabel}</span>
-                <span id="bf-last-updated">${joshBf && joshBf.updatedAt ? formatTime(joshBf.updatedAt) : '-'}</span>
-            </div>`;
+            const isActive = jainActive;
+            const color = '#00ff88';
+            const bg = isActive ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.02)';
+            const borderColor = isActive ? 'rgba(0,255,136,0.25)' : 'rgba(255,255,255,0.06)';
+            const dotColor = isActive ? color : '#3a3a4a';
+            const dotGlow = isActive ? `box-shadow:0 0 5px ${color};` : '';
 
-            card.innerHTML = `
-                ${freshnessStrip}
-                <div class="cbf-container">
-                    ${agentSection(joshBf, 'JOSH 2.0', true)}
-                    ${agentSection(jainBf, 'J.A.I.N', false)}
-                </div>
+            let bodyHtml = '';
+            if (!jainBf) {
+                bodyHtml = `<span class="jsb-obj" style="color:rgba(255,255,255,0.25)">No data</span>`;
+            } else if (!isActive) {
+                bodyHtml = `<span class="jsb-obj">${escapeHtml(jainBf.objective || 'Idle')}</span>`;
+                if (jainBf.updatedAt) bodyHtml += `<span class="jsb-ts">${formatTime(jainBf.updatedAt)}</span>`;
+            } else {
+                // Show active objective + current step
+                const curStep = [...(jainBf.steps||[])].reverse().find(s => s.status === 'active');
+                bodyHtml = `<span class="jsb-obj" style="color:${color}">${escapeHtml(jainBf.objective || '')}</span>`;
+                if (curStep) {
+                    bodyHtml += `<span class="jsb-step">→ ${escapeHtml(curStep.label)}`;
+                    if (curStep.tool) bodyHtml += ` <span class="jsb-tool" style="color:${color}">${escapeHtml(curStep.tool)}</span>`;
+                    bodyHtml += `</span>`;
+                }
+                if (jainBf.updatedAt) bodyHtml += `<span class="jsb-ts">${formatTime(jainBf.updatedAt)}</span>`;
+            }
+
+            jainBar.style.cssText = `background:${bg};border-color:${borderColor};`;
+            jainBar.innerHTML = `
+                <span class="jsb-dot" style="background:${dotColor};${dotGlow}"></span>
+                <span class="jsb-label" style="color:${isActive ? color : 'rgba(255,255,255,0.35)'}">J.A.I.N</span>
+                ${bodyHtml}
             `;
-
-            // Update freshness dot color
-            const freshDot = card.querySelector('#bf-fresh-dot-main');
-            if (freshDot && joshBf) {
-                const ageSecs = joshBf.updatedAt ? (Date.now() - new Date(joshBf.updatedAt).getTime()) / 1000 : 9999;
-                if (joshActive && ageSecs < 60) freshDot.style.background = '#00d4ff';
-                else if (joshActive) freshDot.style.background = '#fbbf24';
-                else if (ageSecs >= 3600) freshDot.style.background = '#fbbf24';
-                else freshDot.style.background = 'rgba(255,255,255,0.2)';
-            }
         }
 
         function renderBrainFeed(bf) {
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard) return;
             window._mcLastBrainFeed = bf || null;
-            renderCombinedBrainFeed(bf, _jainBrainFeed);
-            return;
             const brainCard = brainFeedCard.closest('.card-brain');
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
@@ -3033,6 +3025,8 @@
             }
             // After DOM update, reapply freshness dot state
             if (bfLastUpdatedTs) updateBfFreshness(bf);
+            // Always update J.A.I.N status bar after JOSH renders
+            renderCombinedBrainFeed(bf, _jainBrainFeed);
         }
 
         // ===== Section-level diff helpers =====
