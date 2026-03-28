@@ -1,32 +1,17 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:29:46Z",
-  "objective": "Add freshness filter to breaking news",
-  "status": "done",
+  "messageReceived": "2026-03-28T20:33:04Z",
+  "objective": "Update weekend intel feed schedule",
+  "status": "active",
   "steps": [
     {
-      "label": "Reading breaking_news_scanner.py",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Adding 90min freshness gate",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Filtering all sources",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Syncing to JAIN",
-      "status": "done",
+      "label": "Editing crontabs",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:29:46Z",
-  "checkedAt": "2026-03-28T20:29:46Z",
+  "updatedAt": "2026-03-28T20:33:04Z",
+  "checkedAt": "2026-03-28T20:33:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
