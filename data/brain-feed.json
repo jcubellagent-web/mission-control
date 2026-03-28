@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:13:14Z",
-  "objective": "Update Signal Update Tracker sheet \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:14:41Z",
+  "objective": "Upgrade crypto section with top 300 + AI insights",
+  "status": "active",
   "steps": [
     {
-      "label": "Sheet updated",
+      "label": "Received audio",
       "status": "done",
-      "tool": "gog"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Reading feed script",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T22:13:26Z",
-  "checkedAt": "2026-03-28T22:13:14Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T22:14:41Z",
+  "checkedAt": "2026-03-28T22:14:41Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
