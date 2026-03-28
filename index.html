@@ -432,7 +432,9 @@
         .ctx-meter-hint { font-size: 0.75rem; margin-left: auto; }
         .ctx-meter-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
         /* Idle brain feed insights */
-        .bf-idle-insights { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .bf-idle-insights { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .bf-idle-activity-log { display: flex; flex-direction: column; gap: 4px; }
+        .bf-idle-activity-header { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
         .bf-stats-row { display: flex; gap: 6px; flex-wrap: wrap; }
         .bf-stat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; min-width: 60px; flex: 1; }
         .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
@@ -528,6 +530,22 @@
         .job-chip.error { color: #e53e3e; border-color: rgba(229,62,62,0.18); background: rgba(229,62,62,0.08); }
 
         .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        /* Compact model usage */
+        .mu-compact-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .mu-cs-cell { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 8px; flex: 1; min-width: 60px; }
+        .mu-cs-val { font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .mu-cs-label { font-size: 0.55rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+        .mu-compact-list { display: flex; flex-direction: column; gap: 3px; }
+        .mu-compact-row { display: grid; grid-template-columns: 6px 1fr auto 60px auto; align-items: center; gap: 5px; padding: 2px 0; }
+        .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .mu-compact-name { font-size: 0.66rem; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-compact-bar-wrap { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+        .mu-compact-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+        .mu-compact-cost { font-size: 0.62rem; color: rgba(255,255,255,0.5); white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+        .mu-compact-legend { font-size: 0.55rem; color: rgba(255,255,255,0.25); margin-top: 4px; text-align: right; }
+        .mu-el-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mu-el-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+        .mu-el-bar-fill { height: 100%; border-radius: 2px; }
         .model-pill { background: #0d0d0d; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; }
         .model-pill h3 { font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 0.14em; margin-bottom: 4px; }
         .model-pill .value { font-size: 1.05rem; font-weight: 600; color: rgba(255,255,255,0.75); }
@@ -930,7 +948,7 @@
             display: flex; flex-direction: row;
             gap: 12px; min-height: 0;
         }
-        body.kiosk-mode .card-jobs  { flex: 1; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-jobs  { flex: 2; min-height: 0; overflow: hidden; }
         body.kiosk-mode .card-model { flex: 1; min-height: 0; overflow: hidden; }
 
         /* RIGHT col: priority-grid spans both rows, inner 2×1 grid */
@@ -3798,15 +3816,8 @@
                 const strippedContext = rawContext.replace(/^Last (completed )?objective:\s*/i, '').trim();
                 const idleContext = (strippedContext && strippedContext !== idleTitle) ? strippedContext : '';
 
-                // ── Build idle stats ──────────────────────────────────────
-                const sessionCost = modelUsageData?.session ?? null;
-                const dailyCost   = modelUsageData?.daily ?? null;
-                const jainCost    = modelUsageData?.jain?.session ?? null;
-                const topModels   = (modelUsageData?.topModels || []).slice(0, 3);
-                const activeCrons = (cronsData || []).filter(c => c.status === 'ok').length;
-                const totalCrons  = (cronsData || []).length;
-
-                // Context window inline (already in header, show amber/red warning here if needed)
+                // ── Build idle activity log ──────────────────────────────────────
+                // Context window warning (only show if amber/red — stays lean)
                 const ctxPct = ctxWin ? Math.round((ctxWin.pct || 0) * 100) : null;
                 const ctxStatus = ctxWin?.status || 'green';
                 const ctxColor  = ctxStatus === 'red' ? '#e53e3e' : ctxStatus === 'amber' ? '#fbbf24' : '#4ade80';
@@ -3815,33 +3826,90 @@
                          ${ctxStatus === 'red' ? '⚠' : '·'} Context at ${ctxPct}% — ${ctxStatus === 'red' ? 'new session recommended' : 'consider /new soon'}
                        </div>` : '';
 
-                // Stats row
-                const statItems = [
-                    sessionCost !== null ? { label: 'Session', value: formatCurrencyAlways(sessionCost), color: sessionCost > 10 ? '#fbbf24' : 'inherit' } : null,
-                    dailyCost   !== null ? { label: 'Daily',   value: formatCurrencyAlways(dailyCost) } : null,
-                    jainCost    !== null ? { label: 'J.A.I.N', value: formatCurrencyAlways(jainCost), color: '#60a5fa' } : null,
-                    totalCrons  > 0      ? { label: 'Crons',   value: `${activeCrons}/${totalCrons}` } : null,
-                ].filter(Boolean);
+                // Build rich activity log from all known sources
+                const idleItems = [];
 
-                const statsHtml = statItems.length ? `
-                    <div class="bf-stats-row">
-                        ${statItems.map(s => `<div class="bf-stat">
-                            <span class="bf-stat-val" style="${s.color ? `color:${s.color}` : ''}">${escapeHtml(s.value)}</span>
-                            <span class="bf-stat-label">${escapeHtml(s.label)}</span>
-                        </div>`).join('')}
-                    </div>` : '';
+                // Active/recent subagents
+                const runningAgents = (_uaAgents || []).filter(a => a.status === 'running');
+                const recentAgentsForIdle = (_uaAgents || []).filter(a => a.status === 'done').slice(0, 4);
+                for (const a of runningAgents) {
+                    idleItems.push({ agentClass:'agent', agentLabel:'AGENT', dot:'active',
+                        msg: a.label || 'Running…', tool: a.tool||'', model: a.model||'',
+                        ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs)+' ago' : 'running' });
+                }
+                for (const a of recentAgentsForIdle) {
+                    idleItems.push({ agentClass:'agent', agentLabel:'AGENT', dot:'done',
+                        msg: a.label || 'Done', tool:'', model: a.model||'',
+                        ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs)+' ago' : 'done' });
+                }
 
-                // Top models
-                const modelsHtml = topModels.length ? `
-                    <div class="bf-models-row">
-                        ${topModels.map(m => {
-                            const shortName = (m.name || '').replace(/^(anthropic|openai|google|openrouter)\//, '');
-                            return `<div class="bf-model-chip">
-                                <span class="bf-model-name">${escapeHtml(shortName)}</span>
-                                <span class="bf-model-cost">${formatCurrencyAlways(m.cost || 0)}</span>
-                            </div>`;
-                        }).join('')}
-                    </div>` : '';
+                // JOSH 2.0 brain feed steps (all available, most recent first)
+                if (_uaJoshBf) {
+                    const jbf = _uaJoshBf;
+                    const steps = jbf.steps || [];
+                    // Add each step as a separate row (up to 8)
+                    const stepsToShow = [...steps].reverse().slice(0, 8);
+                    for (const step of stepsToShow) {
+                        idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot: step.done ? 'done' : 'idle',
+                            msg: step.description || step.step || step,
+                            tool: step.tool || '', model: '',
+                            ts: step.ts ? formatRelTime(step.ts) : '' });
+                    }
+                    // Fallback: just objective if no steps
+                    if (!steps.length) {
+                        idleItems.push({ agentClass:'josh', agentLabel:'JOSH 2.0', dot:'idle',
+                            msg: jbf.objective || 'Standby', tool: jbf.currentTool||'', model:'',
+                            ts: jbf.updatedAt ? formatRelTime(jbf.updatedAt) : '' });
+                    }
+                }
+
+                // J.A.I.N brain feed steps
+                if (_uaJainBf) {
+                    const jf = _uaJainBf;
+                    const jsteps = jf.steps || [];
+                    const jstepsToShow = [...jsteps].reverse().slice(0, 4);
+                    for (const step of jstepsToShow) {
+                        idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot: step.done ? 'done' : 'idle',
+                            msg: step.description || step.step || step,
+                            tool: step.tool || '', model: '',
+                            ts: step.ts ? formatRelTime(step.ts) : '' });
+                    }
+                    if (!jsteps.length) {
+                        idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
+                            msg: jf.objective || 'Standby', tool: jf.currentTool||'', model:'',
+                            ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
+                    }
+                }
+
+                // Recent agent comms (filtered)
+                const filteredCommsIdle = (_uaComms || []).filter(e => {
+                    const msg = (e.message || '').toLowerCase();
+                    return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
+                }).slice(0, 5);
+                for (const e of filteredCommsIdle) {
+                    const dir = (e.direction || '').toLowerCase();
+                    const agent = (e.agent || (dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
+                    idleItems.push({ agentClass: agent==='jain'?'jain':'josh',
+                        agentLabel: agent==='jain'?'J.A.I.N':'JOSH 2.0',
+                        dot: 'done', msg: e.message||'', model: e.model||'', tool: e.tool||'',
+                        ts: e.timestamp ? formatRelTime(e.timestamp) : '' });
+                }
+
+                const idleActivityHtml = idleItems.length ? `
+                    <div class="bf-idle-activity-log">
+                        <div class="bf-idle-activity-header">Activity &amp; Agents</div>
+                        <div class="ua-log" style="max-height:280px;overflow-y:auto;">
+                            ${idleItems.slice(0, 20).map(item => `
+                            <div class="ua-item">
+                                <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
+                                <span class="ua-dot ${escapeHtml(item.dot)}"></span>
+                                <span class="ua-msg">${escapeHtml(item.msg)}</span>
+                                ${item.tool ? `<span class="ua-tool-pill">${escapeHtml(item.tool)}</span>` : ''}
+                                ${item.model ? `<span class="ua-model-pill">${escapeHtml(item.model)}</span>` : ''}
+                                <span class="ua-ts">${escapeHtml(item.ts)}</span>
+                            </div>`).join('')}
+                        </div>
+                    </div>` : `<div class="ua-empty">No recent activity.</div>`;
 
                 const lastUpdatedStr = bf?.updatedAt ? formatRelTime(bf.updatedAt) : '';
 
@@ -3855,11 +3923,9 @@
                             ${ctxWarning}
                         </div>
                         <div class="bf-idle-insights">
-                            ${statsHtml}
-                            ${modelsHtml}
-                            <div class="brain-meta" style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px">
+                            ${idleActivityHtml}
+                            <div class="brain-meta" style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
                                 <span>${lastUpdatedStr ? `Updated ${lastUpdatedStr}` : 'Awaiting refresh'}</span>
-                                ${modelUsageData?.lastUpdated ? `<span>Telemetry ${formatRelTime(modelUsageData.lastUpdated)}</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -3939,84 +4005,82 @@
             `;
 
 
-            // Model usage snapshot - redesigned (diff-guarded)
+            // Model usage snapshot — compact, multi-source (diff-guarded)
             if (sectionChanged('modelUsage', data.modelUsage)) {
             const modelUsageCard = document.getElementById('model-usage-card');
             if (data.modelUsage) {
                 const mu = data.modelUsage;
                 const updatedStr = mu.lastUpdated ? formatTime(mu.lastUpdated) : null;
-                // Update card header to show timestamp on right
                 const muHeader = modelUsageCard.closest('.card')?.querySelector('.card-header h2');
                 if (muHeader && updatedStr) {
                     if (!muHeader.parentElement.querySelector('.mu-header-ts')) {
                         const ts = document.createElement('span');
                         ts.className = 'mu-updated mu-header-ts';
-                        ts.style.marginLeft = 'auto';
+                        ts.style.cssText = 'margin-left:auto;font-size:0.6rem;color:rgba(255,255,255,0.25);';
                         muHeader.parentElement.appendChild(ts);
                     }
                     const tsEl = muHeader.parentElement.querySelector('.mu-header-ts');
                     if (tsEl) tsEl.textContent = updatedStr;
                 }
-                const sessionV = (mu.session == null || isNaN(mu.session)) ? null : mu.session;
+
+                // ── Compact summary row ──
                 const dailyV   = (mu.daily   == null || isNaN(mu.daily))   ? null : mu.daily;
                 const weeklyV  = (mu.weekly  == null || isNaN(mu.weekly))  ? null : mu.weekly;
-                const summaryHtml = `
-                    <div class="mu-summary-row">
-                        <div class="mu-summary-cell">
-                            <div class="mu-summary-label">Session</div>
-                            <div class="mu-summary-value" style="color:${costColor(sessionV)}">${fmtCost(sessionV)}</div>
-                        </div>
-                        <div class="mu-summary-cell">
-                            <div class="mu-summary-label">Daily</div>
-                            <div class="mu-summary-value" style="color:${costColor(dailyV)}">${fmtCost(dailyV)}</div>
-                        </div>
-                        <div class="mu-summary-cell">
-                            <div class="mu-summary-label">Weekly</div>
-                            <div class="mu-summary-value" style="color:${costColor(weeklyV)}">${fmtCost(weeklyV)}</div>
-                        </div>
-                    </div>
-                `;
-                let breakdownHtml = '<div class="empty-state">No model calls yet</div>';
+                const aggDaily = mu.aggregate?.daily ?? dailyV;
+                const aggTotal = mu.aggregate?.total ?? weeklyV;
+                const jainCost = mu.jain?.available ? mu.jain.daily : null;
+                const orData   = mu.openrouter;
+                const elData   = mu.elevenlabs;
+
+                const summaryHtml = `<div class="mu-compact-summary">
+                    <div class="mu-cs-cell"><span class="mu-cs-val" style="color:${costColor(dailyV)}">${fmtCost(dailyV)}</span><span class="mu-cs-label">Today (JOSH)</span></div>
+                    ${jainCost !== null ? `<div class="mu-cs-cell"><span class="mu-cs-val" style="color:#60a5fa">${fmtCost(jainCost)}</span><span class="mu-cs-label">Today (JAIN)</span></div>` : ''}
+                    ${orData?.available && orData.byok_daily > 0 ? `<div class="mu-cs-cell"><span class="mu-cs-val" style="color:#a78bfa">${fmtCost(orData.byok_daily)}</span><span class="mu-cs-label">OpenRouter</span></div>` : ''}
+                    <div class="mu-cs-cell"><span class="mu-cs-val" style="color:${costColor(aggTotal)}">${fmtCost(aggTotal)}</span><span class="mu-cs-label">Weekly All</span></div>
+                </div>`;
+
+                // ── Per-model bar breakdown (compact) ──
+                let breakdownHtml = '<div class="empty-state" style="font-size:0.68rem;padding:6px 0;">No model calls yet</div>';
                 if (mu.breakdown && mu.breakdown.length) {
-                    // Sort by weekly cost desc (best proxy for total)
                     const sorted = [...mu.breakdown].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
                     const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
-                    // Generate a color per model
-                    const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24'];
-                    breakdownHtml = `<div class="mu-model-list">${sorted.map((model, i) => {
+                    const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24','#22d3ee','#fb7185'];
+                    breakdownHtml = `<div class="mu-compact-list">${sorted.map((model, i) => {
                         const total = model.weeklyCost || 0;
+                        const daily = model.dailyCost || 0;
                         const pct = Math.max(2, (total / maxCost) * 100).toFixed(1);
                         const color = palette[i % palette.length];
                         const src = (model.source || '').toLowerCase();
+                        const srcTag = src.includes('openrouter') ? 'OR' : src.includes('codexbar') ? 'CB' : src.includes('openclaw') ? 'OC' : src.includes('xai') ? 'xAI' : '?';
                         const srcClass = src.includes('openrouter') ? 'openrouter' : src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
-                        const srcLabel = model.source || 'Unknown';
-                        return `<div class="mu-model-item">
-                            <div class="mu-model-top">
-                                <div class="mu-model-name-group">
-                                    <span class="mu-model-dot" style="background:${color}"></span>
-                                    <span class="mu-model-name" title="${escapeHtml(model.name)}">${escapeHtml(model.name)}</span>
-                                    <span class="mu-source-tag ${srcClass}">${escapeHtml(srcLabel)}</span>
-                                </div>
-                                <span class="mu-model-total">${formatCurrencyAlways(total)}</span>
+                        const shortName = (model.name || '').replace(/^(anthropic|openai|google|openrouter|x-ai)\//, '').replace(/\s*\(BYOK\)/, '');
+                        const estimated = model.costEstimated ? ' ~' : '';
+                        return `<div class="mu-compact-row">
+                            <span class="mu-compact-dot" style="background:${color}"></span>
+                            <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}</span>
+                            <span class="mu-source-tag ${srcClass}" style="font-size:0.52rem;padding:0 3px;">${srcTag}</span>
+                            <div class="mu-compact-bar-wrap">
+                                <div class="mu-compact-bar-fill" style="width:${pct}%;background:${color}80"></div>
                             </div>
-                            <div class="mu-model-bar-wrap">
-                                <div class="mu-model-bar-fill" style="width:${pct}%;background:${color};opacity:0.85"></div>
-                            </div>
-                            <div class="mu-model-breakdown-row">
-                                <span class="mu-bd-cell"><span class="mu-bd-label">Session</span><span class="mu-bd-value">${formatCurrencyAlways(model.sessionCost || 0)}</span></span>
-                                <span class="mu-bd-cell"><span class="mu-bd-label">Daily</span><span class="mu-bd-value">${formatCurrencyAlways(model.dailyCost || 0)}</span></span>
-                                <span class="mu-bd-cell"><span class="mu-bd-label">Weekly</span><span class="mu-bd-value">${formatCurrencyAlways(model.weeklyCost || 0)}</span></span>
-                            </div>
+                            <span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:rgba(255,255,255,0.25);margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>
                         </div>`;
-                    }).join('')}</div>`;
+                    }).join('')}</div>
+                    <div class="mu-compact-legend" style="font-size:0.55rem;color:rgba(255,255,255,0.25);margin-top:4px;text-align:right;">today / weekly · ~ = estimated</div>`;
                 }
-                const policyNote = `<div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.15);border-radius:8px;font-size:0.7rem;">
-                    <span style="color:#22d3ee;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Policy</span>
-                    <span style="color:rgba(255,255,255,0.45);">OpenRouter: Sonnet-only routing (no Opus)</span>
-                </div>`;
-                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + policyNote + `<div class="mu-footer">Totals reflect tracked models only</div>`;
+
+                // ── ElevenLabs usage chip ──
+                const elHtml = (elData?.available && elData.chars_limit > 0) ? `
+                    <div class="mu-el-row">
+                        <span style="color:rgba(255,255,255,0.35);font-size:0.62rem;">ElevenLabs</span>
+                        <div class="mu-el-bar-wrap">
+                            <div class="mu-el-bar-fill" style="width:${Math.min(100, (elData.chars_used / elData.chars_limit) * 100).toFixed(1)}%;background:#fbbf2480"></div>
+                        </div>
+                        <span style="font-size:0.62rem;color:rgba(255,255,255,0.4)">${(elData.chars_used||0).toLocaleString()} / ${(elData.chars_limit||0).toLocaleString()} chars</span>
+                    </div>` : '';
+
+                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + elHtml;
             modelUsageCard.classList.remove('section-updated');
-            void modelUsageCard.offsetWidth; // trigger reflow
+            void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
             } else {
                 modelUsageCard.innerHTML = '<div class="empty-state">No telemetry yet</div>';

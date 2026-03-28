@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import subprocess
 import sys
 import urllib.error
@@ -414,6 +415,60 @@ def load_accum() -> Dict[str, Any]:
 def save_accum(a: Dict[str, Any]) -> None:
     ACCUM_PATH.write_text(json.dumps(a, indent=2))
 
+def fetch_openrouter_usage() -> Dict[str, Any]:
+    """Fetch OpenRouter key usage stats (covers BYOK Grok/Claude calls routed via openrouter.ai)."""
+    empty = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0, "byok_daily": 0.0, "byok_weekly": 0.0, "available": False}
+    try:
+        or_key = "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"
+        req = urllib.request.Request(
+            "https://openrouter.ai/api/v1/auth/key",
+            headers={"Authorization": f"Bearer {or_key}", "User-Agent": "mission-control/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+        d = data.get("data", {})
+        # OpenRouter usage fields are total lifetime; byok_usage is BYOK-only
+        return {
+            "daily":      float(d.get("usage_daily", 0) or 0),
+            "weekly":     float(d.get("usage_weekly", 0) or 0),
+            "monthly":    float(d.get("usage_monthly", 0) or 0),
+            "byok_daily": float(d.get("byok_usage_daily", 0) or 0),
+            "byok_weekly": float(d.get("byok_usage_weekly", 0) or 0),
+            "available": True,
+        }
+    except Exception as exc:
+        print(f"[warn] fetch_openrouter_usage failed: {exc}", file=sys.stderr)
+        return empty
+
+
+def fetch_elevenlabs_usage() -> Dict[str, Any]:
+    """Fetch ElevenLabs character usage (both machines' keys)."""
+    empty = {"chars_used": 0, "chars_limit": 0, "available": False}
+    keys = [
+        "sk_083befcb684c905b14e3bdb63a44ab993f14d89f6c396ee1",  # JOSH 2.0
+    ]
+    # Try JAIN key from file
+    jain_key_path = Path(os.path.expanduser("~/.secrets/elevenlabs_api_key_jain.txt"))
+    if jain_key_path.exists():
+        keys.append(jain_key_path.read_text().strip())
+
+    total_chars = 0
+    total_limit = 0
+    for key in keys:
+        try:
+            req = urllib.request.Request(
+                "https://api.elevenlabs.io/v1/user/subscription",
+                headers={"xi-api-key": key, "User-Agent": "mission-control/1.0"},
+            )
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                d = json.loads(resp.read().decode())
+            total_chars += int(d.get("character_count", 0) or 0)
+            total_limit += int(d.get("character_limit", 0) or 0)
+        except Exception:
+            pass
+    return {"chars_used": total_chars, "chars_limit": total_limit, "available": total_chars > 0 or total_limit > 0}
+
+
 def fetch_jain_model_usage() -> Dict[str, Any]:
     """SSH to J.A.I.N and retrieve codexbar cost JSON."""
     empty = {"daily": 0, "session": 0, "total": 0, "available": False}
@@ -554,6 +609,28 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         }
         tracker_path.write_text(json.dumps(tracker_payload, indent=2))
         jain = fetch_jain_model_usage()
+        openrouter = fetch_openrouter_usage()
+        elevenlabs = fetch_elevenlabs_usage()
+
+        # Inject OpenRouter as a synthetic breakdown row if it has daily/weekly spend
+        or_weekly = openrouter.get("byok_weekly", 0) or openrouter.get("weekly", 0)
+        or_daily  = openrouter.get("byok_daily",  0) or openrouter.get("daily",  0)
+        if openrouter.get("available") and or_weekly > 0:
+            or_row = {
+                "name": "openrouter/auto (BYOK)",
+                "source": "OpenRouter API",
+                "weeklyCost": round(or_weekly, 6),
+                "dailyCost":  round(or_daily, 6),
+                "sessionCost": round(or_weekly, 6),
+                "totalTokens": 0,
+                "costEstimated": False,
+                "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d.",
+            }
+            # Avoid double-counting if OpenRouter models already in breakdown via session tracking
+            breakdown_names_lower = [r["name"].lower() for r in breakdown]
+            if "openrouter/auto (byok)" not in breakdown_names_lower:
+                breakdown.append(or_row)
+
         payload = {
             "session": round(session_cost, 6),
             "daily":   round(daily_cost,   6),
@@ -562,9 +639,11 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),
             "jain": jain,
+            "openrouter": openrouter,
+            "elevenlabs": elevenlabs,
             "aggregate": {
-                "daily": round(daily_cost + jain.get("daily", 0), 6),
-                "total": round(session_cost + jain.get("total", 0), 6),
+                "daily": round(daily_cost + jain.get("daily", 0) + or_daily, 6),
+                "total": round(session_cost + jain.get("total", 0) + or_weekly, 6),
             },
         }
         return payload

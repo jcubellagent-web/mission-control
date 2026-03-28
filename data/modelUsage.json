@@ -22,6 +22,11 @@
       "name": "google/gemini-2.5-flash",
       "window": "session",
       "cost": 0.0255695
+    },
+    {
+      "name": "openrouter/auto (BYOK)",
+      "window": "session",
+      "cost": 9.920956
     }
   ],
   "breakdown": [
@@ -72,17 +77,40 @@
       "sessions": 1,
       "isGemini": true,
       "costEstimated": false
+    },
+    {
+      "name": "openrouter/auto (BYOK)",
+      "source": "OpenRouter API",
+      "weeklyCost": 9.920956,
+      "dailyCost": 0.072973,
+      "sessionCost": 9.920956,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-03-28T19:50:01Z",
+  "lastUpdated": "2026-03-28T19:53:20Z",
   "jain": {
     "daily": 0.704034,
     "session": 0.92661,
     "total": 0.92661,
     "available": true
   },
+  "openrouter": {
+    "daily": 0.0,
+    "weekly": 80.681975,
+    "monthly": 80.681975,
+    "byok_daily": 0.07297275,
+    "byok_weekly": 9.92095632,
+    "available": true
+  },
+  "elevenlabs": {
+    "chars_used": 8470,
+    "chars_limit": 246062,
+    "available": true
+  },
   "aggregate": {
-    "daily": 0.976381,
-    "total": 8.849602
+    "daily": 1.049354,
+    "total": 18.770558
   }
 }
