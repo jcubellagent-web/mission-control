@@ -4,47 +4,42 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T21:24:22Z",
-    "objective": "Fetching league lineup lock rules",
+    "messageReceived": "2026-03-28T21:29:33Z",
+    "objective": "Fixing brain feed bubble layout",
     "status": "active",
     "steps": [
       {
-        "label": "Got rules",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Updating fantasy scripts",
+        "label": "Reading dashboard layout",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T21:24:22Z",
-    "checkedAt": "2026-03-28T21:24:22Z",
+    "updatedAt": "2026-03-28T21:29:33Z",
+    "checkedAt": "2026-03-28T21:29:33Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fetching league lineup lock rules",
-    "updatedAt": "2026-03-28T21:25:01Z"
+    "context": "Fixing brain feed bubble layout",
+    "updatedAt": "2026-03-28T21:30:01Z"
   },
   "contextWindow": {
-    "usedTokens": 115143,
+    "usedTokens": 131502,
     "limitTokens": 200000,
-    "pct": 0.5757,
+    "pct": 0.6575,
     "model": "claude-sonnet-4-6",
-    "status": "green"
+    "status": "amber"
   },
   "modelUsage": {
-    "session": 13.469054,
-    "daily": 5.818409,
+    "session": 14.748954,
+    "daily": 7.09831,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 10.887489449999999
+        "cost": 12.167389799999999
       },
       {
         "name": "openai/gpt-5.4",
@@ -71,12 +66,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 163,
-        "outputTokens": 126366,
-        "totalTokens": 126529,
-        "sessionCost": 10.887489449999999,
-        "dailyCost": 5.30948235,
-        "weeklyCost": 10.887489449999999,
+        "inputTokens": 153,
+        "outputTokens": 124636,
+        "totalTokens": 124789,
+        "sessionCost": 12.167389799999999,
+        "dailyCost": 6.5893827,
+        "weeklyCost": 12.167389799999999,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -166,7 +161,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T21:25:05Z",
+    "lastUpdated": "2026-03-28T21:30:06Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -188,8 +183,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.522443,
-      "total": 14.442374
+      "daily": 7.802344,
+      "total": 15.722274
     }
   },
   "devices": [
@@ -204,19 +199,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:25:01Z"
+      "lastChecked": "2026-03-28T21:30:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:25:01Z"
+      "lastChecked": "2026-03-28T21:30:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T21:25:01Z"
+      "lastChecked": "2026-03-28T21:30:01Z"
     }
   ],
   "crons": [
@@ -246,7 +241,7 @@
       "description": "Monitors X/Twitter watchlist for high-signal posts (score \u22658), pushes to @JAIN_BREAKING_BOT",
       "category": "Intelligence Feed",
       "agent": "JOSH 2.0",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -382,25 +377,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T21:25:05Z",
-      "event": "Session spend: $13.47"
+      "time": "2026-03-28T21:30:06Z",
+      "event": "Session spend: $14.75"
     },
     {
-      "time": "2026-03-28T21:25:01Z",
+      "time": "2026-03-28T21:30:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T21:25:01Z",
+      "time": "2026-03-28T21:30:01Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T21:25:01Z",
+      "time": "2026-03-28T21:30:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T21:25:01Z",
+      "time": "2026-03-28T21:30:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T21:25:01Z"
+  "lastUpdated": "2026-03-28T21:30:01Z"
 }
