@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:42:09Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-28T19:42:15Z",
+  "objective": "Objective confirmed: Remove duplicate JAIN status bar",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Finding element",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-28T19:42:09Z",
-  "checkedAt": "2026-03-28T19:42:09Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T19:42:15Z",
+  "checkedAt": "2026-03-28T19:42:15Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
