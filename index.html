@@ -3295,10 +3295,10 @@
             // Show god mode badge (visual only)
             const godBadge = document.getElementById('god-mode-badge');
             if (godBadge) godBadge.style.display = 'inline-flex';
-            // Desktop: poll for remote commands from phone (every 3s)
+            // Desktop: poll for remote commands from phone (every 2s)
             if (!isPhoneMode()) {
                 pollRemoteCommands();
-                setInterval(pollRemoteCommands, 3000);
+                setInterval(pollRemoteCommands, 2000);
             }
         }
 
@@ -4316,18 +4316,22 @@
             if (isPhoneMode()) return;
             try {
                 const r = await fetch(
-                    CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?agent=eq.phone&order=id.desc&limit=10&select=id,tool,status',
+                    CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?agent=eq.phone&order=id.desc&limit=10&select=id,tool,status,timestamp',
                     { headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY } }
                 );
                 if (!r.ok) return;
                 const rows = await r.json();
                 if (!rows || !rows.length) { _cmdPollerReady = true; return; }
 
-                // On first poll: seed seen IDs without acting (ignore old commands)
+                // On first poll: seed only rows older than 60s (ignore stale backlog, act on fresh ones)
                 if (!_cmdPollerReady) {
-                    rows.forEach(row => _seenCmdIds.add(row.id));
+                    const cutoff = Date.now() - 60000;
+                    rows.forEach(row => {
+                        const rowTs = row.timestamp ? new Date(row.timestamp).getTime() : 0;
+                        if (rowTs < cutoff || row.status === 'done') _seenCmdIds.add(row.id);
+                    });
                     _cmdPollerReady = true;
-                    return;
+                    // Don't return — fall through so fresh rows get acted on immediately
                 }
 
                 for (const row of rows) {
