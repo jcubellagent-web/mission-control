@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:15:58Z",
+  "messageReceived": "2026-03-28T20:16:17Z",
   "objective": "Cron audit - jobs and agent assignment",
   "status": "active",
   "steps": [
     {
       "label": "Reading cron config",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking JAIN crontab",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:15:58Z",
-  "checkedAt": "2026-03-28T20:15:58Z",
+  "updatedAt": "2026-03-28T20:16:17Z",
+  "checkedAt": "2026-03-28T20:16:17Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
