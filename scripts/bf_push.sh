@@ -58,13 +58,13 @@ SUPABASE_KEY="sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
 
 (
   BF_JSON=$(cat "$BF_FILE")
-  curl -s -o /dev/null -X PATCH \
-    "$SUPABASE_URL/rest/v1/brain_feed?id=eq.main" \
+  curl -s -o /dev/null -X POST \
+    "$SUPABASE_URL/rest/v1/brain_feed" \
     -H "apikey: $SUPABASE_KEY" \
     -H "Authorization: Bearer $SUPABASE_KEY" \
     -H "Content-Type: application/json" \
-    -H "Prefer: return=minimal" \
-    -d "{\"data\": $BF_JSON, \"updated_at\": \"$NOW\"}" 2>/dev/null || true
+    -H "Prefer: resolution=merge-duplicates,return=minimal" \
+    -d "{\"id\": \"main\", \"data\": $BF_JSON, \"updated_at\": \"$NOW\"}" 2>/dev/null || true
 ) &
 
 # ── Push to GitHub in background (non-blocking) ───────────────────────────────
