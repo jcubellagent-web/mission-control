@@ -1,11 +1,27 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T05:35:18Z",
-  "checkedAt": "2026-03-28T05:35:18Z",
+  "objective": "Thinking through response",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Transcribed",
+      "status": "done",
+      "tool": "whisper"
+    },
+    {
+      "label": "Parsed",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Reasoning",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T05:35:19Z",
+  "checkedAt": "2026-03-28T05:35:19Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
