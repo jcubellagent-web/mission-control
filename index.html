@@ -3481,69 +3481,126 @@
                 html += `</div>`;
             }
 
+            // ── Shared table builder ───────────────────────────────────────
+            function makeTable(rows) {
+                // rows: [{src, cat, title, url, blurb}]
+                if (!rows.length) return '';
+                let t = `<table class="if-signal-table"><thead><tr>
+                    <th class="ift-src">Source</th>
+                    <th class="ift-cat">Category</th>
+                    <th class="ift-headline">Headline</th>
+                </tr></thead><tbody>`;
+                rows.forEach(r => {
+                    const titleEl = r.url
+                        ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(r.title)}</a>`
+                        : escapeHtml(r.title);
+                    const catStyle = r.catColor ? ` style="color:${escapeHtml(r.catColor)};border-color:${escapeHtml(r.catColor)}40"` : '';
+                    t += `<tr class="ift-row">
+                        <td class="ift-src">${escapeHtml(r.src || '—')}</td>
+                        <td class="ift-cat"><span class="ift-cat-badge"${catStyle}>${escapeHtml(r.cat || '—')}</span></td>
+                        <td class="ift-headline">
+                            <div class="ift-title">${titleEl}</div>
+                            ${r.blurb ? `<div class="ift-reason">${escapeHtml(r.blurb)}</div>` : ''}
+                        </td>
+                    </tr>`;
+                });
+                return t + '</tbody></table>';
+            }
+
             // ── AI Value Chain ─────────────────────────────────────────────
             if (f.ai_value_chain && f.ai_value_chain.length) {
                 const items = f.ai_value_chain.filter(i => isEnglish(i.title)).slice(0, 5);
                 html += `<div class="if-section" id="ifs-ai"><div class="if-section-header">🔗 AI Value Chain</div>`;
-                items.forEach(item => { html += ifItemHtml(item, 'ai'); });
+                html += makeTable(items.map(i => ({
+                    src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'AI Value Chain'}),
+                    title: i.title || '', url: i.url || '',
+                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
+                })));
                 html += `</div>`;
             }
 
             // ── Enterprise AI ──────────────────────────────────────────────
             if (f.enterprise_ai && f.enterprise_ai.length) {
-                const items = f.enterprise_ai.filter(i => isEnglish(i.title || i.headline)).slice(0, 4);
+                const items = f.enterprise_ai.filter(i => isEnglish(i.title || i.headline)).slice(0, 5);
                 html += `<div class="if-section" id="ifs-enterprise"><div class="if-section-header">🏢 Enterprise AI</div>`;
-                items.forEach(item => { html += ifItemHtml(item, 'enterprise'); });
+                html += makeTable(items.map(i => ({
+                    src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'Enterprise AI'}),
+                    title: i.title || i.headline || '', url: i.url || '',
+                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
+                })));
                 html += `</div>`;
             }
 
             // ── Macro & Geo ────────────────────────────────────────────────
             if (f.macro_geo && f.macro_geo.length) {
+                const items = f.macro_geo.filter(i => isEnglish(i.headline)).slice(0, 5);
                 html += `<div class="if-section" id="ifs-macro"><div class="if-section-header">📈 Macro &amp; Markets</div>`;
-                f.macro_geo.filter(i => isEnglish(i.headline)).forEach(item => { html += grokItemHtml(item); });
+                html += makeTable(items.map(i => {
+                    const url = i.url || (i.insight && i.insight.startsWith('http') ? i.insight : '');
+                    const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
+                    const moodTag = i.mood && i.mood !== 'NEUTRAL' ? `[${i.mood}] ` : '';
+                    return { src: resolveSource({...i, source: i.source || 'Macro'}), cat: 'Macro',
+                             title: (moodTag + (i.headline || '')).trim(), url, blurb };
+                }));
                 html += `</div>`;
             }
 
             // ── Regulation ─────────────────────────────────────────────────
             if (f.regulation && f.regulation.length) {
+                const items = f.regulation.filter(i => isEnglish(i.headline)).slice(0, 5);
                 html += `<div class="if-section" id="ifs-reg"><div class="if-section-header">⚖️ Regulatory &amp; Policy</div>`;
-                f.regulation.filter(i => isEnglish(i.headline)).forEach(item => { html += grokItemHtml(item); });
+                html += makeTable(items.map(i => {
+                    const url = i.url || (i.insight && i.insight.startsWith('http') ? i.insight : '');
+                    const blurb = i.insight && !i.insight.startsWith('http') ? i.insight : '';
+                    return { src: resolveSource({...i, source: i.source || 'Policy'}), cat: 'Policy',
+                             title: i.headline || '', url, blurb };
+                }));
                 html += `</div>`;
             }
 
             // ── Hot Takes ──────────────────────────────────────────────────
             if (f.hot_takes && f.hot_takes.length) {
+                const items = f.hot_takes.filter(i => isEnglish(i.take || i.headline)).slice(0, 5);
                 html += `<div class="if-section" id="ifs-hot"><div class="if-section-header">🔥 Hot Takes &amp; Big Bets</div>`;
-                f.hot_takes.filter(i => isEnglish(i.take || i.headline)).forEach(item => { html += grokItemHtml(item); });
+                html += makeTable(items.map(i => ({
+                    src: resolveSource({...i, source: i.source || 'Prediction'}),
+                    cat: i.mood || 'Hot Take',
+                    title: i.take || i.headline || '', url: i.url || '',
+                    blurb: ''
+                })));
                 html += `</div>`;
             }
 
             // ── NASDAQ Movers ──────────────────────────────────────────────
             const nm = f.nasdaq_movers;
             if (nm && (nm.gainers?.length || nm.losers?.length)) {
-                html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div><div class="if-movers">`;
-                (nm.gainers || []).forEach(m => {
-                    html += `<div class="if-mover"><span class="if-mover-name">${m.ticker}</span><span class="if-mover-chg up">+${m.change_pct}%</span></div>`;
-                });
-                (nm.losers || []).forEach(m => {
-                    html += `<div class="if-mover"><span class="if-mover-name">${m.ticker}</span><span class="if-mover-chg down">${m.change_pct}%</span></div>`;
-                });
-                html += `</div></div>`;
+                html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
+                const nasdaqRows = [];
+                (nm.gainers || []).forEach(m => nasdaqRows.push({
+                    src: 'NASDAQ', cat: `+${m.change_pct}%`, catColor: '#4ade80',
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: ''
+                }));
+                (nm.losers || []).forEach(m => nasdaqRows.push({
+                    src: 'NASDAQ', cat: `${m.change_pct}%`, catColor: '#f87171',
+                    title: `${m.ticker}  $${m.price}`, url: '', blurb: ''
+                }));
+                html += makeTable(nasdaqRows);
+                html += `</div>`;
             }
 
             // ── Crypto Movers ──────────────────────────────────────────────
             if (f.crypto_movers && f.crypto_movers.length) {
                 html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
-                f.crypto_movers.forEach(m => {
+                html += makeTable(f.crypto_movers.map(m => {
                     const up = m.change_pct >= 0;
-                    const insightHtml = m.insight ? `<div class="if-grok-insight">${escapeHtml(m.insight)}</div>` : '';
-                    html += `<div class="if-item">
-                        <span class="if-mover-name" style="font-size:0.75rem;font-weight:700;color:${up ? '#4ade80' : '#f87171'};min-width:52px;">${escapeHtml(m.symbol)}</span>
-                        <span style="font-size:0.68rem;color:${up ? '#4ade80' : '#f87171'};font-weight:600;margin-right:6px;">${up ? '+' : ''}${m.change_pct}%</span>
-                        <span style="font-size:0.65rem;color:#fff;flex:1;">${escapeHtml(m.name)}</span>
-                        ${insightHtml}
-                    </div>`;
-                });
+                    const chgStr = `${up ? '+' : ''}${m.change_pct}%`;
+                    return {
+                        src: 'CoinGecko', cat: chgStr,
+                        catColor: up ? '#4ade80' : '#f87171',
+                        title: `${m.symbol} — ${m.name}`, url: '',
+                        blurb: m.insight || ''
+                    };
+                }));
                 html += `</div>`;
             }
 
