@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:14:33Z",
+  "messageReceived": "2026-03-28T21:15:24Z",
   "objective": "Testing browser on ESPN Fantasy Baseball",
   "status": "active",
   "steps": [
     {
-      "label": "Opening ESPN",
+      "label": "Loaded ESPN",
+      "status": "done",
+      "tool": "agent-browser"
+    },
+    {
+      "label": "Logging in",
       "status": "active",
       "tool": "agent-browser"
     }
   ],
   "currentTool": "agent-browser",
-  "updatedAt": "2026-03-28T21:14:33Z",
-  "checkedAt": "2026-03-28T21:14:33Z",
+  "updatedAt": "2026-03-28T21:15:24Z",
+  "checkedAt": "2026-03-28T21:15:24Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
