@@ -2623,13 +2623,14 @@
         }
 
         function getBrainFeedStateLabel(bf) {
-            if (!bf) return 'Idle';
-            // State is authoritative — never infer from timestamp
+            if (!bf) return 'Standby';
             if (bf.active === true) return 'Live';
             const updatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
             const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
-            if (ageSecs >= 3600) return 'Stale';
-            return 'Idle';
+            if (ageSecs >= 3600) return 'Offline';
+            const obj = (bf.objective || '').toLowerCase();
+            if (obj.includes('response sent')) return 'Response Sent';
+            return 'Standby';
         }
 
         let _dashLocalOk = true;
@@ -2898,7 +2899,7 @@
                 if (label) label.textContent = 'Stale';
             } else {
                 dot.style.background = 'rgba(255,255,255,0.2)';
-                if (label) label.textContent = 'Idle';
+                if (label) label.textContent = 'Standby';
             }
         }
 
@@ -3678,14 +3679,23 @@
                         </div>`;
                 }
 
-                // Color title + context to match the ctx bar color
+                // Idle title: use brain feed objective if available, else focus status
+                const idleTitle = (bf && bf.objective && !bf.active)
+                    ? bf.objective
+                    : ((focusData && focusData.status && !focusData.status.toLowerCase().includes('idle'))
+                        ? focusData.status
+                        : 'JOSH 2.0 · Mission Control');
+                const idleContext = (bf && bf.objective && !bf.active && focusData && focusData.context)
+                    ? focusData.context
+                    : (focusData && focusData.context) || 'Standing by';
+
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
                         <div class="brain-hero">
-                            <div class="brain-kicker">Live Operator State</div>
-                            <div class="brain-title">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
-                            <p class="focus-context">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
+                            <div class="brain-kicker">JOSH 2.0 · Live Status</div>
+                            <div class="brain-title">${escapeHtml(idleTitle)}</div>
+                            <p class="focus-context">${escapeHtml(idleContext)}</p>
                             ${ctxMeterHtml}
                             <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
                                 <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
