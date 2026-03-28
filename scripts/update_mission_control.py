@@ -172,9 +172,9 @@ def normalize_model_usage_payload(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dict[str, Any]:
+    updated_at = now_iso  # Always use current time for focus.updatedAt — it represents when we last computed it
     if brain_feed:
         objective = str(brain_feed.get("objective") or "").strip()
-        updated_at = brain_feed.get("updatedAt") if is_valid_iso8601(brain_feed.get("updatedAt")) else now_iso
         status = str(brain_feed.get("status") or "").strip().lower()
         if brain_feed.get("active"):
             return {
@@ -196,7 +196,7 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
     return {
         "status": "System nominal",
         "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
-        "updatedAt": now_iso,
+        "updatedAt": updated_at,
     }
 
 

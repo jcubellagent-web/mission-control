@@ -2625,9 +2625,6 @@
         function getBrainFeedStateLabel(bf) {
             if (!bf) return 'Standby';
             if (bf.active === true) return 'Live';
-            const updatedAt = bf.updatedAt ? new Date(bf.updatedAt).getTime() : null;
-            const ageSecs = updatedAt ? (Date.now() - updatedAt) / 1000 : Infinity;
-            if (ageSecs >= 3600) return 'Offline';
             const obj = (bf.objective || '').toLowerCase();
             if (obj.includes('response sent')) return 'Response Sent';
             return 'Standby';
@@ -2726,8 +2723,7 @@
             lastBrainFeedHash = newHash;
             _bfSource = source;
             window._mcLastBrainFeed = bf;
-            const lastTouchTs = bf.checkedAt || bf.updatedAt;
-            bfLastUpdatedTs = lastTouchTs ? new Date(lastTouchTs).getTime() : Date.now();
+            bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
             renderBrainFeed(bf);
             updateBfFreshness(bf);
         }
@@ -2887,16 +2883,9 @@
             // Always use the canonical state — never infer active from timestamp alone
             const canonical = window._mcLastBrainFeed || bf;
             const isActive = canonical && canonical.active === true;
-            const updatedAt = canonical && (canonical.updatedAt);
-            const ageSecs = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) / 1000 : 9999;
-            const isStale = !isActive && ageSecs >= 3600;
-
             if (isActive) {
                 dot.style.background = '#e53e3e';
                 if (label) label.textContent = 'Live';
-            } else if (isStale) {
-                dot.style.background = '#fbbf24';
-                if (label) label.textContent = 'Stale';
             } else {
                 dot.style.background = 'rgba(255,255,255,0.2)';
                 if (label) label.textContent = 'Standby';
@@ -3698,7 +3687,7 @@
                             <p class="focus-context">${escapeHtml(idleContext)}</p>
                             ${ctxMeterHtml}
                             <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
-                                <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
+                                <span>${bf && bf.updatedAt ? `Updated ${formatRelTime(bf.updatedAt)}` : (focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh')}</span>
                                 ${modelUsageData && modelUsageData.lastUpdated ? `<span>Telemetry ${formatTime(modelUsageData.lastUpdated)}</span>` : ''}
                             </div>
                         </div>
