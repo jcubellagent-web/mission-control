@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:15:24Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:19:08Z",
+  "objective": "Processing request \u00b7 Determining objective",
+  "status": "active",
   "steps": [
     {
-      "label": "Loaded ESPN",
+      "label": "Parsed",
       "status": "done",
-      "tool": "agent-browser"
+      "tool": "openclaw"
     },
     {
-      "label": "Logging in",
-      "status": "done",
-      "tool": "agent-browser"
+      "label": "Confirming objective",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "agent-browser",
-  "updatedAt": "2026-03-28T21:18:56Z",
-  "checkedAt": "2026-03-28T21:15:24Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-28T21:19:08Z",
+  "checkedAt": "2026-03-28T21:19:08Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
