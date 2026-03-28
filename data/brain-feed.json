@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:44:22Z",
-  "objective": "Objective confirmed: Brain feed idle UI redesign",
+  "messageReceived": "2026-03-28T19:45:31Z",
+  "objective": "Brain feed idle UI redesign",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Edits complete",
       "status": "done",
-      "tool": "whisper"
+      "tool": "exec"
     },
     {
-      "label": "Reading layout",
+      "label": "Pushing",
       "status": "active",
-      "tool": "exec"
+      "tool": "github"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T19:44:22Z",
-  "checkedAt": "2026-03-28T19:44:22Z",
+  "currentTool": "github",
+  "updatedAt": "2026-03-28T19:45:31Z",
+  "checkedAt": "2026-03-28T19:45:31Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
