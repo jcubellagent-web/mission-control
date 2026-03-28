@@ -1,27 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:38:10Z",
-  "objective": "Delete X-watchlist monitor from JOSH 2.0 \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:39:29Z",
+  "objective": "Fix Mission Control load time + stale job data",
+  "status": "active",
   "steps": [
     {
-      "label": "Deleted files",
+      "label": "Receiving audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Updated dashboard",
-      "status": "done",
-      "tool": "github"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T21:38:18Z",
-  "checkedAt": "2026-03-28T21:38:10Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-28T21:39:29Z",
+  "checkedAt": "2026-03-28T21:39:29Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
