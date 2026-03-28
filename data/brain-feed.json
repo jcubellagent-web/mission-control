@@ -1,32 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T20:50:37Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T20:51:14Z",
+  "objective": "Testing Ollama local inference",
+  "status": "active",
   "steps": [
     {
-      "label": "Installed",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Models pulled",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Calling llama3.2",
+      "status": "active",
+      "tool": "3b"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T20:50:51Z",
-  "checkedAt": "2026-03-28T20:50:37Z",
+  "currentTool": "3b",
+  "updatedAt": "2026-03-28T20:51:14Z",
+  "checkedAt": "2026-03-28T20:51:14Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
