@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:44:16Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-28T19:44:22Z",
+  "objective": "Objective confirmed: Brain feed idle UI redesign",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Reading layout",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-28T19:44:16Z",
-  "checkedAt": "2026-03-28T19:44:16Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T19:44:22Z",
+  "checkedAt": "2026-03-28T19:44:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
