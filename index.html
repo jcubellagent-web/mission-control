@@ -3308,6 +3308,69 @@
             const target = document.getElementById(sectionId);
             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        // Map domain → outlet name. Falls back to domain if not found.
+        const OUTLET_MAP = {
+            'ft.com': 'Financial Times', 'nytimes.com': 'NY Times', 'wsj.com': 'WSJ',
+            'bloomberg.com': 'Bloomberg', 'reuters.com': 'Reuters', 'techcrunch.com': 'TechCrunch',
+            'theinformation.com': 'The Information', 'axios.com': 'Axios', 'wired.com': 'Wired',
+            'venturebeat.com': 'VentureBeat', 'arstechnica.com': 'Ars Technica',
+            'theverge.com': 'The Verge', 'cnbc.com': 'CNBC', 'cnn.com': 'CNN',
+            'washingtonpost.com': 'Washington Post', 'politico.com': 'Politico',
+            'nature.com': 'Nature', 'arxiv.org': 'arXiv', 'huggingface.co': 'HuggingFace',
+            'github.com': 'GitHub', 'news.ycombinator.com': 'Hacker News',
+            'substack.com': 'Substack', 'importai.substack.com': 'Import AI',
+            'coindesk.com': 'CoinDesk', 'cointelegraph.com': 'CoinTelegraph',
+            'decrypt.co': 'Decrypt', 'polymarket.com': 'Polymarket',
+            'metaculus.com': 'Metaculus', 'manifold.markets': 'Manifold',
+            'sec.gov': 'SEC', 'federalreserve.gov': 'Fed Reserve',
+            'fortune.com': 'Fortune', 'businessinsider.com': 'Business Insider',
+            'economist.com': 'The Economist', 'hbr.org': 'HBR',
+            'openai.com': 'OpenAI', 'anthropic.com': 'Anthropic', 'google.com': 'Google',
+            'microsoft.com': 'Microsoft', 'nvidia.com': 'NVIDIA',
+        };
+        // Generic category words that aren't real outlet names
+        const GENERIC_SOURCES = new Set(['technology','business','science','politics','world',
+            'finance','markets','ai','news','tech','economy','health','sports','entertainment']);
+
+        function resolveSource(item) {
+            const url = item.url || '';
+            const rawSource = item.source || '';
+            // If source looks like a generic category, try to get outlet from URL
+            if (!rawSource || GENERIC_SOURCES.has(rawSource.toLowerCase())) {
+                if (url) {
+                    try {
+                        const host = new URL(url).hostname.replace(/^www\./, '');
+                        // Check full domain then parent domain
+                        if (OUTLET_MAP[host]) return OUTLET_MAP[host];
+                        const parts = host.split('.');
+                        if (parts.length >= 2) {
+                            const parent = parts.slice(-2).join('.');
+                            if (OUTLET_MAP[parent]) return OUTLET_MAP[parent];
+                        }
+                        return host; // fallback to domain
+                    } catch(e) {}
+                }
+                return rawSource || '—';
+            }
+            // Check if it maps to a better name
+            return OUTLET_MAP[rawSource.toLowerCase()] || rawSource;
+        }
+
+        function resolveCategory(item) {
+            const cat = item.category || item.section || '';
+            if (cat) return cat;
+            // Infer from title keywords
+            const t = (item.title || '').toLowerCase();
+            if (t.includes('btc') || t.includes('crypto') || t.includes('bitcoin') || t.includes('ethereum')) return 'Crypto';
+            if (t.includes('vix') || t.includes('fed') || t.includes('macro') || t.includes('rate')) return 'Macro';
+            if (t.includes('nvidia') || t.includes('gpu') || t.includes('chip') || t.includes('semiconductor')) return 'AI Infra';
+            if (t.includes('openai') || t.includes('anthropic') || t.includes('gemini') || t.includes('claude') || t.includes('gpt') || t.includes('llm') || t.includes('model')) return 'AI Models';
+            if (t.includes('regulation') || t.includes('policy') || t.includes('congress') || t.includes('eu ai') || t.includes('executive order')) return 'Policy';
+            if (t.includes('startup') || t.includes('funding') || t.includes('raises') || t.includes('series')) return 'Funding';
+            if (t.includes('engineer') || t.includes('software') || t.includes('developer') || t.includes('agentic')) return 'AI Value Chain';
+            return 'Signal';
+        }
         function ifItemHtml(item, catKey) {
             // Title: clickable link to article if URL exists
             const url = item.url || item.source_url || '';
@@ -3397,8 +3460,8 @@
                     const titleEl = url
                         ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(item.title || item.headline || '')}</a>`
                         : escapeHtml(item.title || item.headline || '');
-                    const cat = item.category || item.section || '—';
-                    const src = item.source || '—';
+                    const cat = resolveCategory(item);
+                    const src = resolveSource(item);
                     const reason = item.reason && !item.reason.startsWith('http') ? item.reason : '';
                     html += `<tr class="ift-row">
                         <td class="ift-src">${escapeHtml(src)}</td>
