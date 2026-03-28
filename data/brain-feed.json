@@ -1,17 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Received: 4 tasks \u2014 jobs speed, model audit, intel feed, night mode button",
+  "objective": "Auditing jobs speed + model usage + intel feed + night mode",
   "status": "active",
   "steps": [
     {
-      "label": "Parsing message",
+      "label": "Reading dashboard code",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking data",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T03:49:41Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:49:45Z",
   "checkedAt": "2026-03-28T03:45:02Z",
   "idleUpdatedAt": "2026-03-28T03:45:02Z"
 }
