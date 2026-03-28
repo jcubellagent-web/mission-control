@@ -1,22 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Web search: latest Anthropic pricing",
+  "objective": "Fetching GitHub PR status",
   "status": "active",
   "steps": [
     {
-      "label": "Agents running",
+      "label": "Web search",
       "status": "done",
-      "tool": "exec"
+      "tool": "web_search"
     },
     {
-      "label": "Web search",
+      "label": "Checking PRs",
       "status": "active",
-      "tool": "web_search"
+      "tool": "github"
     }
   ],
-  "currentTool": "web_search",
-  "updatedAt": "2026-03-28T05:32:01Z",
-  "checkedAt": "2026-03-28T05:32:01Z",
+  "currentTool": "github",
+  "updatedAt": "2026-03-28T05:32:03Z",
+  "checkedAt": "2026-03-28T05:32:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
