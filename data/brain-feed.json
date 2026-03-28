@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T22:09:30Z",
+  "messageReceived": "2026-03-28T22:09:59Z",
   "objective": "Summarize intel feed categories",
   "status": "active",
   "steps": [
     {
-      "label": "Received audio",
+      "label": "Read",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Reading feed scripts",
+      "label": "Responding to Josh",
       "status": "active",
-      "tool": "exec"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T22:09:30Z",
-  "checkedAt": "2026-03-28T22:09:30Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T22:09:59Z",
+  "checkedAt": "2026-03-28T22:09:59Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
