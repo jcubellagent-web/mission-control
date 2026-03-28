@@ -1,17 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:36:34Z",
-  "objective": "Session startup \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:37:20Z",
+  "objective": "Delete X-watchlist monitor from JOSH 2.0",
+  "status": "active",
   "steps": [
     {
-      "label": "Initializing",
+      "label": "Receiving audio",
       "status": "done",
       "tool": "openclaw"
+    },
+    {
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T21:36:38Z",
-  "checkedAt": "2026-03-28T21:36:34Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-28T21:37:20Z",
+  "checkedAt": "2026-03-28T21:37:20Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
