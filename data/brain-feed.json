@@ -1,27 +1,27 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Querying model usage from sessions",
+  "objective": "Pushing updated dashboard to GitHub",
   "status": "active",
   "steps": [
     {
-      "label": "Read repo",
+      "label": "Analyzed",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Analyzing",
+      "label": "Fetched usage",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Fetching usage",
+      "label": "Pushing to GitHub",
       "status": "active",
-      "tool": "exec"
+      "tool": "github"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T05:30:34Z",
-  "checkedAt": "2026-03-28T05:30:34Z",
+  "currentTool": "github",
+  "updatedAt": "2026-03-28T05:30:37Z",
+  "checkedAt": "2026-03-28T05:30:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
