@@ -2495,6 +2495,31 @@
         }
 
         // Fast brain-feed poll — local server first, GH Pages fallback
+        // ── Single source-of-truth brain feed update ─────────────────────
+        // Priority: Supabase (real-time) > local file. Never let a lower-priority
+        // source overwrite a higher-priority active state.
+        // _bfSource: 'supabase' | 'local' — tracks who last wrote the active state
+        let _bfSource = null;
+
+        function applyBrainFeed(bf, source) {
+            if (!bf) return;
+            const current = window._mcLastBrainFeed;
+            // Block: local/file cannot overwrite an active Supabase state
+            if (source === 'local' && current && current.active && _bfSource === 'supabase') {
+                console.debug('[MC] brain-feed local update blocked — Supabase active state is authoritative');
+                return;
+            }
+            const newHash = JSON.stringify(bf);
+            if (newHash === lastBrainFeedHash) return;
+            lastBrainFeedHash = newHash;
+            _bfSource = source;
+            window._mcLastBrainFeed = bf;
+            const lastTouchTs = bf.checkedAt || bf.updatedAt;
+            bfLastUpdatedTs = lastTouchTs ? new Date(lastTouchTs).getTime() : Date.now();
+            renderBrainFeed(bf);
+            updateBfFreshness(bf);
+        }
+
         async function fetchBrainFeed() {
             const t0 = performance.now();
             let bf = null;
@@ -2502,39 +2527,21 @@
             // Try local server first (300ms timeout)
             if (_localServerOk) {
                 bf = await fetchBrainFeedFromUrl(CONFIG.BRAIN_FEED_LOCAL, 300);
-                if (!bf) _localServerOk = false; // mark local as down
+                if (!bf) _localServerOk = false;
             }
 
             // Fall back to GitHub Pages
             if (!bf) {
                 bf = await fetchBrainFeedFromUrl(CONFIG.BRAIN_FEED_URL, 5000);
-                if (bf) _localServerOk = false; // keep using remote
+                if (bf) _localServerOk = false;
             } else {
-                _localServerOk = true; // local is back up
+                _localServerOk = true;
             }
 
             if (!bf) return;
-
-            // If Supabase already has active state, don't let local file override it
-            const sbBfCurrent = window._mcLastBrainFeed;
-            if (sbBfCurrent && sbBfCurrent.active && !bf.active) {
-                console.debug('[MC] brain-feed local/remote skipped — Supabase has active state');
-                return;
-            }
-
-            const latency = Math.round(performance.now() - t0);
             const src = _localServerOk ? '⚡local' : '☁️remote';
-            console.debug(`[MC] brain-feed fetched in ${latency}ms (${src})`);
-
-            const newHash = JSON.stringify(bf);
-            if (newHash === lastBrainFeedHash) return;
-            lastBrainFeedHash = newHash;
-            // Determine which timestamp to use for freshness display
-            const lastTouchTs = bf.idleUpdatedAt || bf.checkedAt || bf.updatedAt;
-            bfLastUpdatedTs = lastTouchTs ? new Date(lastTouchTs).getTime() : Date.now();
-
-            renderBrainFeed(bf);
-            updateBfFreshness(bf);
+            console.debug(`[MC] brain-feed (${src}) fetched in ${Math.round(performance.now()-t0)}ms`);
+            applyBrainFeed(bf, 'local');
         }
 
         // ===== J.A.I.N Brain Feed =====
@@ -3000,13 +3007,7 @@
                         const record = msg.payload?.data?.record || msg.payload?.record;
                         if (record?.data) {
                             console.debug('[MC] Supabase RT brain feed update');
-                            const bf = record.data;
-                            const newHash = JSON.stringify(bf);
-                            if (newHash === lastBrainFeedHash) return;
-                            lastBrainFeedHash = newHash;
-                            bfLastUpdatedTs = Date.now();
-                            renderBrainFeed(bf);
-                            updateBfFreshness(bf);
+                            applyBrainFeed(record.data, 'supabase');
                         }
                     }
                 } catch(e) {}
@@ -3030,13 +3031,7 @@
                 if (!r.ok) return;
                 const rows = await r.json();
                 if (!rows || !rows[0]?.data) return;
-                const bf = rows[0].data;
-                const newHash = JSON.stringify(bf);
-                if (newHash === lastBrainFeedHash) return;
-                lastBrainFeedHash = newHash;
-                bfLastUpdatedTs = Date.now();
-                renderBrainFeed(bf);
-                updateBfFreshness(bf);
+                applyBrainFeed(rows[0].data, 'supabase');
             } catch(e) {}
         }
 
@@ -3467,17 +3462,10 @@
             window._mcLastContextWindow = data.contextWindow || null;
 
             // Brain Feed — Supabase is the ONLY source of truth for active state.
-            // Never let dashboard-data.json overwrite an active Supabase brain feed.
-            const sbBf = window._mcLastBrainFeed; // set by fetchBrainFeedSupabase / Supabase RT
+            // dashboard-data.json brain feed — lowest priority source, route through applyBrainFeed
             const dashBf = data.brainFeed;
-            // Block dashboard-data.json from rendering IF Supabase feed is active
-            const sbIsActive = sbBf && sbBf.active;
-            if (!sbIsActive && sectionChanged('brainFeed', dashBf)) {
-                renderBrainFeed(dashBf);
-                if (dashBf) {
-                    bfLastUpdatedTs = dashBf.updatedAt ? new Date(dashBf.updatedAt).getTime() : null;
-                    updateBfFreshness(dashBf);
-                }
+            if (dashBf && sectionChanged('brainFeed', dashBf)) {
+                applyBrainFeed(dashBf, 'local');
             }
 
             // Action Required (diff-guarded)
