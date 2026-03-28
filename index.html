@@ -23,9 +23,9 @@
             --bg-hover: rgba(255,255,255,0.04);
             --border: rgba(255, 255, 255, 0.07);
             --border-inner: rgba(255, 255, 255, 0.05);
-            --text-primary: rgba(255,255,255,0.75);
-            --text-secondary: rgba(255,255,255,0.65);
-            --text-muted: rgba(255,255,255,0.4);
+            --text-primary: rgba(255,255,255,0.82);
+            --text-secondary: rgba(255,255,255,0.55);
+            --text-muted: rgba(255,255,255,0.35);
             --text-label: rgba(255,255,255,0.4);
             --accent: #e53e3e;
             --accent-focus: #e53e3e;
@@ -221,8 +221,8 @@
         .alert-item a:hover { color: rgba(255,255,255,0.8); }
         .alert-item a:hover { text-decoration: underline; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px; }
-        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 24px; margin-bottom: 24px; align-items: stretch; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 16px; margin-bottom: 24px; align-items: stretch; }
         @media (max-width: 900px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; }
             .header-status {
@@ -256,7 +256,7 @@
             flex-direction: column;
             height: 100%;
             min-height: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            box-shadow: none;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             transition: border-color 0.25s ease, box-shadow 0.25s ease;
@@ -274,9 +274,22 @@
         .card-devices,
         .card-active,
         .card-activity,
-        .card-cron { border-color: rgba(255,255,255,0.07); box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
-        .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-        .card-header h2 { font-size: 0.9rem; font-weight: 600; color: rgba(255,255,255,0.75); }
+        .card-cron { border-color: rgba(255,255,255,0.07); box-shadow: none; }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header h2 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
         .card-header .icon { display: inline-flex; }
         .section-icon-image {
             width: 14px;
@@ -306,11 +319,11 @@
         .active-task-name { font-weight: 500; margin-bottom: 2px; }
         .active-task-meta { font-size: 0.75rem; color: var(--text-muted); }
         .empty-state {
-            color: var(--text-muted); font-size: 0.78rem;
-            padding: 16px; text-align: center;
-            background: #0d0d0d;
-            border: 1px solid rgba(255,255,255,0.04);
-            border-radius: 8px;
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            text-align: center;
+            padding: 16px 0;
         }
 
         .cron-table { width: 100%; }
@@ -331,7 +344,7 @@
         .cron-row:hover { background: rgba(255,255,255,0.03); }
         .cron-row.has-error { background: rgba(239,68,68,0.06); }
         .cron-dot {
-            width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
             background: rgba(255,255,255,0.15);
         }
         .cron-dot.healthy { background: #4ade80; }
@@ -339,11 +352,13 @@
         .cron-dot.paused  { background: #3a3a4a; }
         .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
         .run-badge {
-            font-size: 0.58rem; padding: 1px 5px; border-radius: 3px;
+            font-size: 0.65rem; padding: 2px 7px; border-radius: 999px;
             background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35);
             border: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
         }
         .run-badge.done { background: rgba(74,222,128,0.12); color: #4ade80; border-color: rgba(74,222,128,0.25); }
+        .run-badge.next { background: #e53e3e; color: white; border-color: #e53e3e; }
+        .run-badge.future { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.08); }
         .run-badge.lite { opacity: 0.7; }
         .cron-category { margin-bottom: 8px; }
         .cron-category:last-child { margin-bottom: 0; }
@@ -502,8 +517,11 @@
         .device-name { font-weight: 600; }
         .device-detail { font-size: 0.85rem; color: var(--text-muted); }
         .device-status { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; }
+        .device-status.live { color: #4ade80; }
         .device-status.ok { color: #4ade80; }
-        .device-status.attention { color: rgba(255,255,255,0.5); }
+        .device-status.attention { color: #fbbf24; }
+        .device-status.warning { color: #fbbf24; }
+        .device-status.down { color: #e53e3e; }
         .device-status.error { color: #e53e3e; }
         @media (max-width: 600px) {
             .container { padding: 16px; }
@@ -2132,6 +2150,29 @@
             margin-top: 12px;
             text-align: right;
         }
+
+        /* Activity row alternating + min-height */
+        .activity-item:nth-child(odd) { background: rgba(255,255,255,0.02); }
+        .activity-item { min-height: 32px; }
+
+        /* Context window bar height */
+        .focus-meter-bar { height: 6px; }
+
+        /* Systems divider */
+        .systems-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 0;
+        }
+
+        /* Model usage session cost value */
+        .mu-summary-cell:first-child .mu-summary-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        /* Card brain padding */
+        .card-brain { padding: 24px; }
     </style>
 </head>
 <body>
@@ -2414,10 +2455,7 @@
         function updateBfCounter() {
             const el = document.getElementById('bf-last-updated');
             if (!el || !bfLastUpdatedTs) return;
-            const diffSecs = Math.floor((Date.now() - bfLastUpdatedTs) / 1000);
-            if (diffSecs < 5) el.textContent = 'just now';
-            else if (diffSecs < 60) el.textContent = `${diffSecs}s ago`;
-            else el.textContent = `${Math.floor(diffSecs / 60)}m ago`;
+            el.textContent = formatRelTime(new Date(bfLastUpdatedTs).toISOString());
         }
 
         function getBrainFeedStateLabel(bf) {
@@ -2963,9 +3001,12 @@
             const sessionEl = document.getElementById('mcp-session');
             const dailyEl   = document.getElementById('mcp-daily');
             if (!sessionEl || !dailyEl || !mu) return;
-            const fmt = v => '$' + (parseFloat(v) || 0).toFixed(2);
-            sessionEl.textContent = fmt(mu.session);
-            dailyEl.textContent   = fmt(mu.daily);
+            const sv = (mu.session == null || isNaN(mu.session)) ? null : parseFloat(mu.session);
+            const dv = (mu.daily   == null || isNaN(mu.daily))   ? null : parseFloat(mu.daily);
+            sessionEl.textContent = fmtCost(sv);
+            sessionEl.style.color = costColor(sv);
+            dailyEl.textContent   = fmtCost(dv);
+            dailyEl.style.color   = costColor(dv);
         }
 
         // ── Supabase Realtime brain feed subscription ──────────────────────────
@@ -3151,7 +3192,7 @@
             const freshnessStrip = `<div class="bf-freshness-row">
                 <span class="bf-fresh-dot" style="background:rgba(255,255,255,0.2)"></span>
                 <span class="bf-freshness-label" id="bf-freshness-label-text">${stateLabel}</span>
-                <span id="bf-last-updated">${bf && bf.updatedAt ? formatTime(bf.updatedAt) : '-'}</span>
+                <span id="bf-last-updated">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
             </div>`;
 
             if (bf && bf.active) {
@@ -3215,7 +3256,7 @@
                         const lbl = fr.querySelector('#bf-freshness-label-text');
                         const ts = fr.querySelector('#bf-last-updated');
                         if (lbl) lbl.textContent = stateLabel;
-                        if (ts) ts.textContent = bf.updatedAt ? formatTime(bf.updatedAt) : '-';
+                        if (ts) ts.textContent = bf.updatedAt ? formatRelTime(bf.updatedAt) : '-';
                     }
 
                     // 2. Crossfade objective text if changed
@@ -3385,7 +3426,8 @@
                 // Context window meter
                 let ctxMeterHtml = '';
                 if (ctxWin && ctxWin.limitTokens > 0) {
-                    const pct = Math.round((ctxWin.pct || 0) * 100);
+                    const rawPct = Math.round((ctxWin.pct || 0) * 100);
+                    const pct = (isNaN(rawPct) || rawPct == null) ? 0 : rawPct;
                     const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
                     const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
                     const ragStatus = ctxWin.status || 'green';
@@ -3518,19 +3560,22 @@
                     const tsEl = muHeader.parentElement.querySelector('.mu-header-ts');
                     if (tsEl) tsEl.textContent = updatedStr;
                 }
+                const sessionV = (mu.session == null || isNaN(mu.session)) ? null : mu.session;
+                const dailyV   = (mu.daily   == null || isNaN(mu.daily))   ? null : mu.daily;
+                const weeklyV  = (mu.weekly  == null || isNaN(mu.weekly))  ? null : mu.weekly;
                 const summaryHtml = `
                     <div class="mu-summary-row">
                         <div class="mu-summary-cell">
                             <div class="mu-summary-label">Session</div>
-                            <div class="mu-summary-value">${formatCurrencyAlways(mu.session)}</div>
+                            <div class="mu-summary-value" style="color:${costColor(sessionV)}">${fmtCost(sessionV)}</div>
                         </div>
                         <div class="mu-summary-cell">
                             <div class="mu-summary-label">Daily</div>
-                            <div class="mu-summary-value">${formatCurrencyAlways(mu.daily)}</div>
+                            <div class="mu-summary-value" style="color:${costColor(dailyV)}">${fmtCost(dailyV)}</div>
                         </div>
                         <div class="mu-summary-cell">
                             <div class="mu-summary-label">Weekly</div>
-                            <div class="mu-summary-value">${formatCurrencyAlways(mu.weekly)}</div>
+                            <div class="mu-summary-value" style="color:${costColor(weeklyV)}">${fmtCost(weeklyV)}</div>
                         </div>
                     </div>
                 `;
@@ -3604,7 +3649,8 @@
             const deviceList = document.getElementById('device-list');
             if (data.devices && data.devices.length > 0) {
                 deviceList.innerHTML = data.devices.map(device => {
-                    const statusClass = device.status === 'ok' ? 'ok' : device.status === 'error' ? 'error' : 'attention';
+                    const s = (device.status || '').toLowerCase();
+                    const statusClass = (s === 'live' || s === 'ok') ? 'ok' : (s === 'attention' || s === 'warning') ? 'attention' : (s === 'down' || s === 'error') ? 'error' : 'attention';
                     const statusLabel = device.status ? device.status.toUpperCase() : 'UNKNOWN';
                     return `
                         <div class="device-item">
@@ -3643,10 +3689,34 @@
                     const agentPill = `<span class="cron-agent-pill ${agentClass}">${escapeHtml(agentName)}</span>`;
 
                     if (cron.multiRun && cron.multiRun.runs) {
+                        const etHour = getETHour();
+                        let foundNext = false;
                         const timeBadges = cron.multiRun.runs.map(r => {
-                            const cls = r.done ? 'run-badge done' : 'run-badge';
                             const modeClass = r.mode === 'Lite' ? ' lite' : '';
-                            return `<span class="${cls}${modeClass}" title="${r.label} — ${r.mode}">${r.time.replace(' AM','a').replace(' PM','p')}</span>`;
+                            // Parse run hour from r.time (e.g. "6:00 AM" → 6, "2:00 PM" → 14)
+                            let runHour = null;
+                            if (r.time) {
+                                const tParts = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+                                if (tParts) {
+                                    runHour = parseInt(tParts[1], 10);
+                                    const ampm = (tParts[3] || '').toUpperCase();
+                                    if (ampm === 'PM' && runHour !== 12) runHour += 12;
+                                    if (ampm === 'AM' && runHour === 12) runHour = 0;
+                                }
+                            }
+                            let cls, label;
+                            if (r.done || (runHour !== null && runHour < etHour)) {
+                                cls = 'run-badge done';
+                                label = '✓ ' + r.time.replace(' AM','a').replace(' PM','p');
+                            } else if (!foundNext) {
+                                foundNext = true;
+                                cls = 'run-badge next';
+                                label = r.time.replace(' AM','a').replace(' PM','p');
+                            } else {
+                                cls = 'run-badge future';
+                                label = r.time.replace(' AM','a').replace(' PM','p');
+                            }
+                            return `<span class="${cls}${modeClass}" title="${r.label} — ${r.mode}">${label}</span>`;
                         }).join('');
                         return `
                             <div class="cron-row${cron.errors > 0 ? ' has-error' : ''} cron-multirun">
@@ -3753,6 +3823,31 @@
             const day = date.toLocaleDateString(undefined, { weekday: 'short' });
             const time = date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
             return `${day} ${time}`;
+        }
+
+        function costColor(v) {
+            if (v == null || isNaN(v)) return 'var(--text-muted)';
+            if (v < 1) return '#4ade80';
+            if (v <= 5) return '#fbbf24';
+            return '#e53e3e';
+        }
+
+        function fmtCost(v) {
+            if (v == null || isNaN(v) || v === undefined) return '—';
+            return '$' + v.toFixed(2);
+        }
+
+        function getETHour() {
+            return new Date().toLocaleString('en-US', {timeZone: 'America/New_York', hour: 'numeric', hour12: false}) * 1;
+        }
+
+        function formatRelTime(iso) {
+            if (!iso) return '';
+            const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
         }
 
         function escapeHtml(str) {
