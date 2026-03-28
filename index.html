@@ -2961,7 +2961,8 @@
         async function fetchAgentCommsSupabase() {
             try {
                 const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?order=timestamp.desc&limit=12&select=*', {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY }
+                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY },
+                    signal: AbortSignal.timeout(3000)
                 });
                 if (!r.ok) return null;
                 return await r.json();
@@ -3540,7 +3541,8 @@
         async function fetchBrainFeedSupabase() {
             try {
                 const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/brain_feed?id=eq.main&select=data,updated_at', {
-                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY }
+                    headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY },
+                    signal: AbortSignal.timeout(3000)
                 });
                 if (!r.ok) return;
                 const rows = await r.json();
