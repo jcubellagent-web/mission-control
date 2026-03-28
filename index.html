@@ -65,10 +65,10 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #0a0a0a;
             color: var(--text-secondary);
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             min-height: 100vh;
             min-height: 100dvh;
-            line-height: 1.5;
+            line-height: 1.45;
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
             overscroll-behavior-y: contain;
@@ -94,14 +94,14 @@
             z-index: 1;
             width: min(100%, 1560px);
             margin: 0 auto;
-            padding: clamp(18px, 3vw, 36px);
+            padding: clamp(14px, 2vw, 24px);
         }
         header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+            margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
             position: relative;
-            padding: 16px 20px;
-            margin: -20px -20px 32px -20px;
+            padding: 10px 14px;
+            margin: -14px -14px 16px -14px;
             border-radius: 12px 12px 0 0;
             background-image: url('assets/logo-pattern.jpg');
             background-size: 220px auto;
@@ -195,9 +195,9 @@
         .alert-banner {
             background: rgba(229,62,62,0.06);
             border: 1px solid rgba(229,62,62,0.18);
-            border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
         }
         .alert-banner.empty { display: none; }
         .alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
@@ -221,8 +221,8 @@
         .alert-item a:hover { color: rgba(255,255,255,0.8); }
         .alert-item a:hover { text-decoration: underline; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 16px; margin-bottom: 24px; align-items: stretch; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 10px; margin-bottom: 16px; align-items: stretch; }
         @media (max-width: 900px) {
             header { flex-direction: column; align-items: flex-start; gap: 12px; }
             .header-status {
@@ -251,7 +251,7 @@
             background: #111111;
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 14px;
-            padding: 22px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -278,13 +278,13 @@
         .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border);
         }
         .card-header h2 {
-            font-size: 0.8rem;
+            font-size: 0.68rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
@@ -405,14 +405,14 @@
         .activity-time { font-size: 0.75rem; color: var(--text-muted); min-width: 60px; }
         .activity-event { font-size: 0.875rem; color: var(--text-secondary); }
 
-        .stats-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .stats-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
         .stat-pill {
-            display: flex; align-items: center; gap: 8px;
-            padding: 6px 14px;
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 10px;
             background: #111;
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 999px;
-            font-size: 0.78rem;
+            font-size: 0.7rem;
         }
         .stat-pill .num { font-weight: 600; color: rgba(255,255,255,0.75); }
         .stat-pill .label { color: var(--text-muted); }
@@ -437,7 +437,7 @@
             background: #0d0d0d;
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 10px;
-            padding: 18px 18px 16px;
+            padding: 12px 14px 10px;
         }
         .brain-kicker {
             display: inline-flex; align-items: center; gap: 8px;
@@ -448,8 +448,8 @@
             margin-bottom: 14px;
         }
         .brain-title {
-            font-size: clamp(1.5rem, 3vw, 2.25rem);
-            line-height: 1.05; font-weight: 600; color: rgba(255,255,255,0.75); margin-bottom: 10px;
+            font-size: clamp(1.1rem, 2vw, 1.6rem);
+            line-height: 1.05; font-weight: 600; color: rgba(255,255,255,0.75); margin-bottom: 8px;
         }
         .brain-meta { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-muted); font-size: 0.78rem; }
         .brain-stream, .jobs-shell {
@@ -1771,12 +1771,12 @@
         }
 
         /* ===== Card content overflow fixes ===== */
-        #brain-feed-card { overflow-y: auto; max-height: 540px; }
-        #jain-brain-feed-card { overflow-y: auto; max-height: 540px; }
-        #today-jobs-card { overflow-y: auto; max-height: 540px; }
-        #model-usage-card { overflow-y: auto; max-height: 440px; }
-        #events-list { overflow-y: auto; max-height: 320px; }
-        #device-list { overflow-y: auto; max-height: 320px; }
+        #brain-feed-card { overflow-y: auto; max-height: 420px; }
+        #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
+        #today-jobs-card { overflow-y: auto; max-height: 380px; }
+        #model-usage-card { overflow-y: auto; max-height: 320px; }
+        #events-list { overflow-y: auto; max-height: 240px; }
+        #device-list { overflow-y: auto; max-height: 240px; }
 
         /* ===== Dual-agent brain feed layout ===== */
         /* ── J.A.I.N Status Bar (compact row below JOSH hero) ── */
@@ -2080,25 +2080,25 @@
         }
         .mu-summary-cell {
             flex: 1;
-            padding: 14px 12px;
+            padding: 10px 10px;
             text-align: center;
             border-right: 1px solid rgba(255,255,255,0.05);
         }
         .mu-summary-cell:last-child { border-right: none; }
         .mu-summary-label {
-            font-size: 0.72rem;
+            font-size: 0.62rem;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .mu-summary-value {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: rgba(255,255,255,0.82);
             font-variant-numeric: tabular-nums;
         }
         .mu-model-list { display: flex; flex-direction: column; }
         .mu-model-item {
-            padding: 12px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .mu-model-item:last-child { border-bottom: none; }
@@ -2122,7 +2122,7 @@
             flex-shrink: 0;
         }
         .mu-model-name {
-            font-size: 0.85rem;
+            font-size: 0.74rem;
             font-weight: 500;
             color: rgba(255,255,255,0.75);
             white-space: nowrap;
@@ -2141,7 +2141,7 @@
         .mu-source-tag.openrouter { background: rgba(34,211,238,0.08); color: #22d3ee; border: 1px solid rgba(34,211,238,0.25); font-weight: 600; }
         .mu-source-tag.other      { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.07); }
         .mu-model-total {
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: rgba(255,255,255,0.8);
             font-variant-numeric: tabular-nums;
@@ -2195,12 +2195,12 @@
 
         /* Model usage session cost value */
         .mu-summary-cell:first-child .mu-summary-value {
-            font-size: 1.6rem;
+            font-size: 1.1rem;
             font-weight: 800;
         }
 
         /* Card brain padding */
-        .card-brain { padding: 24px; }
+        .card-brain { padding: 14px; }
     </style>
 </head>
 <body>

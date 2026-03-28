@@ -526,7 +526,9 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             accum["peak"]   = round(session_cost, 6)
             save_accum(accum)
 
-        daily_cost  = accum.get("daily",  session_cost)
+        # Compute daily directly from per-model dailyCost (today's sessions only)
+        # Avoids accumulator bug where peak from yesterday prevents daily from updating
+        daily_cost = round(sum(r.get("dailyCost", 0) for r in breakdown), 6)
         weekly_cost = accum.get("weekly", session_cost)
 
         # Write a structured tracker file for future API/newsfeed hooks
