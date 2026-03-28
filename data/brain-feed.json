@@ -1,27 +1,27 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "All agents done \u2014 compiling report",
-  "status": "active",
+  "objective": "Stress test complete \u2713",
+  "status": "done",
   "steps": [
     {
-      "label": "Agents done",
+      "label": "All steps",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Telegram sent",
+      "label": "Compiled",
       "status": "done",
-      "tool": "telegram"
+      "tool": "exec"
     },
     {
-      "label": "Compiling",
+      "label": "Done",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T05:32:09Z",
-  "checkedAt": "2026-03-28T05:32:09Z",
+  "updatedAt": "2026-03-28T05:32:11Z",
+  "checkedAt": "2026-03-28T05:32:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
