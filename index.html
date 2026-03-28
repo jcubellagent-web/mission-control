@@ -567,7 +567,7 @@
             z-index: 1;
             width: 100%;
             max-width: 430px;
-            padding: 0 0 max(32px, env(safe-area-inset-bottom, 32px)) 0;
+            padding: 0 0 max(20px, env(safe-area-inset-bottom, 20px)) 0;
             overflow-x: hidden;
         }
 
@@ -577,36 +577,36 @@
             top: 0;
             z-index: 50;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            padding: max(env(safe-area-inset-top, 14px), 14px) 16px 12px;
-            margin: 0 0 16px 0;
-            background: rgba(5, 7, 13, 0.9);
+            justify-content: space-between;
+            /* iPhone 17 Pro Dynamic Island: safe-area-inset-top ≈ 59px */
+            padding: max(env(safe-area-inset-top, 10px), 10px) 14px 8px;
+            margin: 0 0 8px 0;
+            background: rgba(5, 7, 13, 0.92);
             backdrop-filter: blur(32px) saturate(1.8);
             -webkit-backdrop-filter: blur(32px) saturate(1.8);
             border-bottom: 1px solid rgba(255,255,255,0.06);
             background-image: none;
-            gap: 6px;
+            gap: 0;
         }
         body.phone-mode header::before { display: none; }
         body.phone-mode header > * { position: relative; z-index: 1; }
 
-        /* Logo row — centered */
+        /* Logo row */
         body.phone-mode .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
         }
         body.phone-mode .logo-icon {
-            width: 28px; height: 28px;
-            border-radius: 8px;
-            box-shadow: 0 0 12px rgba(99,179,237,0.2);
+            width: 22px; height: 22px;
+            border-radius: 6px;
         }
         body.phone-mode .logo h1 {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255,255,255,0.8);
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
@@ -655,6 +655,7 @@
         body.phone-mode #airpoint-toggle,
         body.phone-mode .connection-status,
         body.phone-mode .header-status,
+        body.phone-mode .last-updated,
         body.phone-mode #night-mode-btn { display: none !important; }
 
         /* ── Card base ───────────────────────────────── */
@@ -1671,76 +1672,19 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============ MOBILE VIEWPORT LASER BORDER ============ */
+        /* ============ MOBILE VIEWPORT LASER BORDER — canvas comet ============ */
         #edge-laser {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 9999;
             pointer-events: none;
-            overflow: hidden;
+            width: 100%;
+            height: 100%;
         }
-        #edge-laser::before {
-            content: '';
-            position: absolute;
-            width: 300%;
-            height: 300%;
-            top: -100%;
-            left: -100%;
-            background: conic-gradient(from 0deg,
-                transparent 0deg,
-                transparent 340deg,
-                rgba(229,62,62,0.26) 347deg,
-                #ff4d4d 353deg,
-                #ff8c8c 356deg,
-                #e53e3e 360deg
-            );
-            animation: edge-laser-spin 3.2s linear infinite;
-        }
-        #edge-laser::after {
-            content: '';
-            position: absolute;
-            inset: 2.5px;
-            background: transparent;
-            border-radius: 0;
-        }
-        /* Respect notch on iPhones */
-        @supports (padding-top: env(safe-area-inset-top)) {
-            #edge-laser::after {
-                top: max(2.5px, env(safe-area-inset-top, 0px));
-                bottom: max(2.5px, env(safe-area-inset-bottom, 0px));
-                left: max(2.5px, env(safe-area-inset-left, 0px));
-                right: max(2.5px, env(safe-area-inset-right, 0px));
-            }
-        }
-        @keyframes edge-laser-spin {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
-        /* Show edge laser always in phone-mode (ambient), brighter when brain active */
-        body.phone-mode #edge-laser {
-            display: block;
-        }
-        body.phone-mode #edge-laser::before {
-            background: conic-gradient(from 0deg,
-                transparent 0deg,
-                transparent 340deg,
-                rgba(229,62,62,0.10) 347deg,
-                rgba(229,62,62,0.25) 353deg,
-                rgba(229,62,62,0.15) 356deg,
-                transparent 360deg
-            );
-        }
-        body.phone-mode.edge-laser-on #edge-laser::before {
-            background: conic-gradient(from 0deg,
-                transparent 0deg,
-                transparent 340deg,
-                rgba(229,62,62,0.30) 347deg,
-                #ff4d4d 353deg,
-                #ff8c8c 356deg,
-                #e53e3e 360deg
-            );
-        }
+        /* Show only in phone-mode */
+        body.phone-mode #edge-laser { display: block; }
+
         /* On phone-mode, DISABLE the card-level brain laser — edge laser handles it */
         body.phone-mode .card-brain.brain-active::before,
         body.phone-mode .card-brain.brain-active::after {
@@ -2090,8 +2034,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 14px 8px;
-            font-size: 0.62rem;
+            padding: 2px 14px 6px;
+            font-size: 0.6rem;
             color: rgba(255,255,255,0.3);
         }
         #phone-status-dot {
@@ -2110,14 +2054,14 @@
         body.phone-mode .kiosk-bottom-left {
             display: flex !important;
             flex-direction: column !important;
-            gap: 10px !important;
+            gap: 8px !important;
         }
         body.phone-mode .card-brain,
         body.phone-mode .card-jobs,
         body.phone-mode .card-model {
             display: flex !important;
             flex-direction: column;
-            margin: 0 10px;
+            margin: 0 8px;
         }
         /* Hide everything else */
         body.phone-mode .priority-grid,
@@ -4127,6 +4071,98 @@
             }
             return escaped;
         }
+        // ── Edge laser — canvas comet tracing the screen border ────────────
+        (function initEdgeLaser() {
+            const canvas = document.getElementById('edge-laser');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let W, H, perimeter, raf;
+            let pos = 0; // 0..1 around the perimeter
+            let lastTs = 0;
+
+            function resize() {
+                const dpr = window.devicePixelRatio || 1;
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width  = W * dpr;
+                canvas.height = H * dpr;
+                canvas.style.width  = W + 'px';
+                canvas.style.height = H + 'px';
+                ctx.scale(dpr, dpr);
+                perimeter = 2 * (W + H);
+            }
+
+            // Convert 0..1 position along perimeter (clockwise from top-left) to {x,y}
+            function perimPt(t) {
+                t = ((t % 1) + 1) % 1;
+                const d = t * perimeter;
+                if (d < W)           return { x: d,          y: 0 };
+                if (d < W + H)       return { x: W,           y: d - W };
+                if (d < 2 * W + H)   return { x: W - (d - W - H), y: H };
+                return                      { x: 0,           y: H - (d - 2 * W - H) };
+            }
+
+            function draw(ts) {
+                if (!document.body.classList.contains('phone-mode')) { raf = requestAnimationFrame(draw); return; }
+                const dt = Math.min((ts - lastTs) / 1000, 0.05);
+                lastTs = ts;
+                const active = document.body.classList.contains('edge-laser-on');
+                const speed  = active ? 0.38 : 0.22; // revolutions/sec
+                pos = ((pos + speed * dt) % 1 + 1) % 1;
+
+                ctx.clearRect(0, 0, W, H);
+
+                // ── Ambient border dim line ──
+                ctx.beginPath();
+                ctx.rect(0, 0, W, H);
+                ctx.strokeStyle = active ? 'rgba(229,62,62,0.22)' : 'rgba(229,62,62,0.10)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // ── Comet: a series of line segments with fading opacity ──
+                const cometLen = active ? 0.22 : 0.14; // fraction of perimeter
+                const steps    = 48;
+                for (let i = 0; i < steps; i++) {
+                    const t0 = pos - cometLen * (i / steps);
+                    const t1 = pos - cometLen * ((i + 1) / steps);
+                    const p0 = perimPt(t0);
+                    const p1 = perimPt(t1);
+                    const alpha = active
+                        ? (1 - i / steps) * 0.85
+                        : (1 - i / steps) * 0.45;
+                    const width = active
+                        ? 3.5 * (1 - i / steps * 0.7)
+                        : 2.0 * (1 - i / steps * 0.7);
+                    ctx.beginPath();
+                    ctx.moveTo(p0.x, p0.y);
+                    ctx.lineTo(p1.x, p1.y);
+                    ctx.strokeStyle = active
+                        ? `rgba(255,80,80,${alpha})`
+                        : `rgba(229,62,62,${alpha})`;
+                    ctx.lineWidth = width;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+                }
+
+                // ── Bright tip glow ──
+                const tip = perimPt(pos);
+                const grd = ctx.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, active ? 18 : 10);
+                grd.addColorStop(0, active ? 'rgba(255,120,120,0.9)' : 'rgba(229,62,62,0.55)');
+                grd.addColorStop(0.4, active ? 'rgba(229,62,62,0.4)' : 'rgba(229,62,62,0.18)');
+                grd.addColorStop(1, 'transparent');
+                ctx.beginPath();
+                ctx.arc(tip.x, tip.y, active ? 18 : 10, 0, Math.PI * 2);
+                ctx.fillStyle = grd;
+                ctx.fill();
+
+                raf = requestAnimationFrame(draw);
+            }
+
+            resize();
+            window.addEventListener('resize', () => { resize(); });
+            raf = requestAnimationFrame(draw);
+        })();
+
         // ── Phone status strip updater ──────────────────────────────────────
         function updatePhoneStrip() {
             if (!isPhoneMode()) return;
@@ -4246,8 +4282,8 @@
         }
     </script>
 
-    <!-- Mobile viewport laser border overlay -->
-    <div id="edge-laser" aria-hidden="true"></div>
+    <!-- Mobile edge laser — traces the screen border as a comet -->
+    <canvas id="edge-laser" aria-hidden="true"></canvas>
 
 </body>
 </html>
