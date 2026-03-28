@@ -3279,12 +3279,21 @@
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
 
-            // Brain Feed - delegate to dedicated renderer (fast-poll may have already done this)
-            if (sectionChanged('brainFeed', data.brainFeed)) {
-                renderBrainFeed(data.brainFeed);
-                if (data.brainFeed) {
-                    bfLastUpdatedTs = data.brainFeed.updatedAt ? new Date(data.brainFeed.updatedAt).getTime() : null;
-                    updateBfFreshness(data.brainFeed);
+            // Brain Feed - Supabase is the source of truth for live state.
+            // Only render from dashboard-data.json if Supabase has NOT given us fresher data.
+            const sbBf = window._mcLastBrainFeed; // set by fetchBrainFeedSupabase
+            const dashBf = data.brainFeed;
+            // Use Supabase data if it's newer OR if agent is active
+            const shouldUseDash = !sbBf || (
+                dashBf &&
+                !sbBf.active &&
+                new Date(dashBf.updatedAt || 0) > new Date(sbBf.updatedAt || 0)
+            );
+            if (shouldUseDash && sectionChanged('brainFeed', dashBf)) {
+                renderBrainFeed(dashBf);
+                if (dashBf) {
+                    bfLastUpdatedTs = dashBf.updatedAt ? new Date(dashBf.updatedAt).getTime() : null;
+                    updateBfFreshness(dashBf);
                 }
             }
 
