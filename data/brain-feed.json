@@ -1,22 +1,11 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Processing request",
-  "status": "active",
-  "steps": [
-    {
-      "label": "Transcribed",
-      "status": "done",
-      "tool": "whisper"
-    },
-    {
-      "label": "Parsing intent",
-      "status": "active",
-      "tool": "openclaw"
-    }
-  ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T05:35:16Z",
-  "checkedAt": "2026-03-28T05:35:16Z",
+  "objective": "Response sent \u00b7 Awaiting instruction",
+  "status": "idle",
+  "steps": [],
+  "currentTool": "",
+  "updatedAt": "2026-03-28T05:35:18Z",
+  "checkedAt": "2026-03-28T05:35:18Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
