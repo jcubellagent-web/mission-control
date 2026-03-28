@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:38:39Z",
-  "objective": "Processing request \u00b7 Determining objective",
+  "messageReceived": "2026-03-28T19:38:45Z",
+  "objective": "Objective confirmed: Redesign brain feed header + activity log",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Parsed",
       "status": "done",
-      "tool": "whisper"
+      "tool": "openclaw"
     },
     {
-      "label": "Parsing intent",
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T19:38:39Z",
-  "checkedAt": "2026-03-28T19:38:39Z",
+  "updatedAt": "2026-03-28T19:38:45Z",
+  "checkedAt": "2026-03-28T19:38:45Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
