@@ -16,24 +16,24 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Response sent \u00b7 Awaiting instruction",
-    "updatedAt": "2026-03-28T19:20:01Z"
+    "updatedAt": "2026-03-28T19:24:31Z"
   },
   "contextWindow": {
-    "usedTokens": 124052,
+    "usedTokens": 137846,
     "limitTokens": 200000,
-    "pct": 0.6203,
+    "pct": 0.6892,
     "model": "claude-sonnet-4-6",
     "status": "amber"
   },
   "modelUsage": {
-    "session": 11.86419,
-    "daily": 4.213545,
+    "session": 13.124501,
+    "daily": 5.473856,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 9.791552549999999
+        "cost": 11.051863349999998
       },
       {
         "name": "openai/gpt-5.4",
@@ -55,12 +55,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 170,
-        "outputTokens": 144264,
-        "totalTokens": 144434,
-        "sessionCost": 9.791552549999999,
-        "dailyCost": 4.21354545,
-        "weeklyCost": 9.791552549999999,
+        "inputTokens": 153,
+        "outputTokens": 123827,
+        "totalTokens": 123980,
+        "sessionCost": 11.051863349999998,
+        "dailyCost": 5.473856249999999,
+        "weeklyCost": 11.051863349999998,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -101,7 +101,7 @@
         "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-28T19:20:01Z",
+    "lastUpdated": "2026-03-28T19:24:32Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -109,8 +109,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.917579,
-      "total": 12.7908
+      "daily": 6.17789,
+      "total": 14.051111
     }
   },
   "devices": [
@@ -125,19 +125,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T19:20:01Z"
+      "lastChecked": "2026-03-28T19:24:31Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T19:20:01Z"
+      "lastChecked": "2026-03-28T19:24:31Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T19:20:01Z"
+      "lastChecked": "2026-03-28T19:24:31Z"
     }
   ],
   "crons": [
@@ -188,6 +188,16 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "paused",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Sorare Daily Missions",
+      "schedule": "Daily 10:00 AM ET",
+      "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start",
+      "category": "Sorare MLB",
+      "agent": "JOSH 2.0",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -267,25 +277,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T19:20:01Z",
+      "time": "2026-03-28T19:24:32Z",
+      "event": "Session spend: $13.12"
+    },
+    {
+      "time": "2026-03-28T19:24:31Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-28T19:20:01Z",
-      "event": "Session spend: $11.86"
+      "time": "2026-03-28T19:24:31Z",
+      "event": "8 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T19:20:01Z",
-      "event": "7 scheduled jobs healthy"
-    },
-    {
-      "time": "2026-03-28T19:20:01Z",
+      "time": "2026-03-28T19:24:31Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T19:20:01Z",
+      "time": "2026-03-28T19:24:31Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T19:20:01Z"
+  "lastUpdated": "2026-03-28T19:24:31Z"
 }
