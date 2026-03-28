@@ -2836,7 +2836,16 @@
                 el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
                 return;
             }
-            el.innerHTML = entries.slice(0, 2).map(e => {
+            // Filter out system noise (cmd:refresh, cmd:nightmode, etc.)
+            const filtered = entries.filter(e => {
+                const msg = (e.message || '').toLowerCase();
+                return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
+            });
+            if (filtered.length === 0) {
+                el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
+                return;
+            }
+            el.innerHTML = filtered.slice(0, 2).map(e => {
                 // Determine agent tag from direction field: "josh→jain", "jain→josh", or agent field
                 const dir = (e.direction || '').toLowerCase();
                 const agent = (e.agent || (dir.startsWith('josh') ? 'josh' : dir.startsWith('jain') ? 'jain' : 'system')).toLowerCase();
@@ -3674,17 +3683,21 @@
                     : ((focusData && focusData.status && !focusData.status.toLowerCase().includes('idle'))
                         ? focusData.status
                         : 'JOSH 2.0 · Mission Control');
-                const idleContext = (bf && bf.objective && !bf.active && focusData && focusData.context)
+                // Only show context if it adds info beyond the title
+                const rawContext = (bf && bf.objective && !bf.active && focusData && focusData.context)
                     ? focusData.context
-                    : (focusData && focusData.context) || 'Standing by';
+                    : (focusData && focusData.context) || '';
+                // Strip "Last objective: X" if X == idleTitle (redundant)
+                const strippedContext = rawContext.replace(/^Last (completed )?objective:\s*/i, '').trim();
+                const idleContext = (strippedContext && strippedContext !== idleTitle) ? strippedContext : '';
 
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
                         <div class="brain-hero">
-                            <div class="brain-kicker">JOSH 2.0 · Live Status</div>
+                            <div class="brain-kicker">JOSH 2.0 · Standby</div>
                             <div class="brain-title">${escapeHtml(idleTitle)}</div>
-                            <p class="focus-context">${escapeHtml(idleContext)}</p>
+                            ${idleContext ? `<p class="focus-context">${escapeHtml(idleContext)}</p>` : ''}
                             ${ctxMeterHtml}
                             <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
                                 <span>${bf && bf.updatedAt ? `Updated ${formatRelTime(bf.updatedAt)}` : (focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh')}</span>
