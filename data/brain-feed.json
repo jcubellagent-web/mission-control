@@ -1,17 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:02:24Z",
+  "messageReceived": "2026-03-28T21:02:43Z",
   "objective": "Full capability upgrade \u2014 all items",
   "status": "active",
   "steps": [
     {
-      "label": "Pre-warming Ollama",
+      "label": "Pre-warm \u2713",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Spawning build agent",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:02:24Z",
-  "checkedAt": "2026-03-28T21:02:24Z",
+  "updatedAt": "2026-03-28T21:02:43Z",
+  "checkedAt": "2026-03-28T21:02:43Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
