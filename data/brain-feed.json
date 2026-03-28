@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T19:38:34Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-28T19:38:39Z",
+  "objective": "Processing request \u00b7 Determining objective",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Parsing intent",
       "status": "active",
-      "tool": "whisper"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-28T19:38:34Z",
-  "checkedAt": "2026-03-28T19:38:34Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-28T19:38:39Z",
+  "checkedAt": "2026-03-28T19:38:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
