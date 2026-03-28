@@ -3126,6 +3126,7 @@
         let _nightClockTimer = null;
 
         function enterNightMode() {
+            if (isPhoneMode()) return; // phone never enters night mode locally
             const overlay = document.getElementById('night-mode-overlay');
             overlay.style.display = 'flex';
             updateNightClock();
@@ -4210,7 +4211,7 @@
                 if (res.ok || res.status === 201) {
                     if (statusEl) { statusEl.textContent = '✓'; statusEl.className = 'pca-status ok'; }
                     setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 2500);
-                    return;
+                    return true;
                 }
             } catch(e) {}
 
@@ -4221,12 +4222,13 @@
                 if (r.ok) {
                     if (statusEl) { statusEl.textContent = '✓'; statusEl.className = 'pca-status ok'; }
                     setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 2500);
-                    return;
+                    return true;
                 }
             } catch(e) {}
 
             if (statusEl) { statusEl.textContent = '✗'; statusEl.className = 'pca-status err'; }
             setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 3000);
+            return false;
         }
 
         function phoneRefresh() {
@@ -4234,10 +4236,20 @@
             if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
             sendRemoteCommand('refresh');
         }
-        function phoneNightMode() {
+
+        // Track assumed desktop night-mode state so button acts as toggle
+        let _desktopNightOn = false;
+        async function phoneNightMode() {
             const btn = document.querySelector('.pca-night');
             if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
-            sendRemoteCommand('nightmode');
+            const ok = await sendRemoteCommand('nightmode');
+            if (ok) {
+                _desktopNightOn = !_desktopNightOn;
+                if (btn) {
+                    btn.title = _desktopNightOn ? 'Exit night mode on desktop' : 'Desktop night mode';
+                    btn.textContent = _desktopNightOn ? '☀️' : '🌙';
+                }
+            }
         }
 
         // ── Desktop: poll agent_comms for phone commands ───────────────────
@@ -4261,10 +4273,17 @@
                         headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
                         body: JSON.stringify({ status: 'done' }),
                     }).catch(() => {});
-                    // Act
+                    // Act on command
                     const cmd = row.tool || '';
-                    if (cmd === 'refresh') { forceUpdate(); }
-                    else if (cmd === 'nightmode') { enterNightMode(); }
+                    if (cmd === 'refresh') {
+                        // Hard refresh the Safari tab
+                        window.location.reload();
+                    } else if (cmd === 'nightmode') {
+                        // Toggle: enter if off, exit if on
+                        const overlay = document.getElementById('night-mode-overlay');
+                        const isOn = overlay && overlay.style.display !== 'none';
+                        if (isOn) exitNightMode(); else enterNightMode();
+                    }
                 }
             } catch(e) {}
         }
