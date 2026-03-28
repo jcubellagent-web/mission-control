@@ -1,17 +1,32 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:51:14Z",
+  "messageReceived": "2026-03-28T20:52:13Z",
   "objective": "Testing Ollama local inference",
   "status": "active",
   "steps": [
     {
-      "label": "Calling llama3.2",
+      "label": "llama3.2 \u2713",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "qwen-coder \u2713",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "REST API \u2713",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Responding to Josh",
       "status": "active",
-      "tool": "3b"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "3b",
-  "updatedAt": "2026-03-28T20:51:14Z",
-  "checkedAt": "2026-03-28T20:51:14Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T20:52:13Z",
+  "checkedAt": "2026-03-28T20:52:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
