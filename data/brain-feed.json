@@ -1,11 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T17:47:31Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T19:28:37Z",
-  "checkedAt": "2026-03-28T17:47:31Z",
+  "active": true,
+  "messageReceived": "2026-03-28T19:29:25Z",
+  "objective": "Diagnosing brain feed pipeline",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Checking",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T19:29:25Z",
+  "checkedAt": "2026-03-28T19:29:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
