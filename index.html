@@ -1672,34 +1672,54 @@
 
         /* ===== Dual-agent brain feed layout ===== */
         /* J.A.I.N compact companion feed */
+        /* ── J.A.I.N compact strip ── */
         .jain-feed-compact {
             border-top: 1px solid #1e1e2e;
-            margin-top: 8px;
-            padding: 8px 0 4px;
+            margin-top: 10px;
+            padding: 6px 0 2px;
         }
         .jain-feed-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-            padding: 0 4px;
+            gap: 6px;
+            margin-bottom: 4px;
+            padding: 0 2px;
         }
         .jain-feed-status {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background: #3a3a4a;
             margin-left: auto;
+            flex-shrink: 0;
         }
-        .jain-feed-status.active { background: #00ff88; box-shadow: 0 0 6px rgba(0,255,136,0.5); }
+        .jain-feed-status.active { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,0.5); }
         #jain-brain-feed-card {
-            font-size: 0.78rem;
-            opacity: 0.85;
+            font-size: 0.72rem;
+            opacity: 0.7;
+            line-height: 1.35;
         }
-        #jain-brain-feed-card .bf-objective { font-size: 0.78rem; }
-        #jain-brain-feed-card .bf-step { padding: 2px 0; font-size: 0.72rem; }
-        #jain-brain-feed-card .bf-idle-label { font-size: 0.8rem; }
-        #jain-brain-feed-card .bf-idle-sub { font-size: 0.7rem; }
+        /* Override all brain-feed child elements to stay tiny */
+        #jain-brain-feed-card .bf-freshness-row,
+        #jain-brain-feed-card .bf-objective-kicker,
+        #jain-brain-feed-card .bf-msg-label,
+        #jain-brain-feed-card .bf-msg-time,
+        #jain-brain-feed-card .bf-ct-label { font-size: 0.62rem; }
+        #jain-brain-feed-card .bf-objective-text { font-size: 0.72rem; font-weight: 500; }
+        #jain-brain-feed-card .bf-step { padding: 1px 0; font-size: 0.65rem; }
+        #jain-brain-feed-card .bf-step-icon { width: 12px; height: 12px; font-size: 0.55rem; }
+        #jain-brain-feed-card .bf-tool-pill { font-size: 0.58rem; padding: 0px 4px; }
+        #jain-brain-feed-card .bf-timeline { gap: 2px; }
+        #jain-brain-feed-card .bf-container { gap: 4px; padding: 4px 0; }
+        #jain-brain-feed-card .bf-msg-banner { padding: 3px 6px; }
+        #jain-brain-feed-card .bf-current-tool-bar { padding: 3px 6px; font-size: 0.65rem; }
+        #jain-brain-feed-card .brain-hero { padding: 4px 2px; }
+        #jain-brain-feed-card .brain-title { font-size: 0.72rem; font-weight: 500; }
+        #jain-brain-feed-card .brain-kicker { font-size: 0.58rem; }
+        #jain-brain-feed-card .brain-meta { font-size: 0.58rem; }
+        #jain-brain-feed-card .bf-idle-container { padding: 4px 0; }
+        #jain-brain-feed-card .bf-idle-label { font-size: 0.7rem; }
+        #jain-brain-feed-card .bf-idle-sub { font-size: 0.62rem; }
         .agent-badge {
             display: inline-flex;
             align-items: center;
@@ -1727,8 +1747,9 @@
         /* ===== Agent Comms ===== */
         .agent-comms-section {
             border-top: 1px solid #1e1e2e;
-            padding: 10px 12px 8px;
-            margin-top: 2px;
+            padding: 12px 4px 10px;
+            margin-top: 6px;
+            min-height: 80px;
         }
         .agent-comms-header {
             font-size: 0.6rem;
@@ -1736,13 +1757,17 @@
             letter-spacing: 0.1em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.35);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        #agent-comms-list {
+            max-height: 160px;
+            overflow-y: auto;
         }
         .agent-comms-item {
             display: flex;
             align-items: flex-start;
             gap: 8px;
-            padding: 5px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.04);
             font-size: 0.7rem;
         }
