@@ -40,14 +40,15 @@ CRON_TARGETS = [
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "runs": [
-             {"time": "7:15 AM",  "mode": "Full",  "label": "Market open"},
+             {"time": "7:15 AM",  "mode": "Full",  "label": "Market open (weekday)"},
              {"time": "10:00 AM", "mode": "Full",  "label": "Mid-morning"},
-             {"time": "12:00 PM", "mode": "Full",  "label": "Midday"},
-             {"time": "2:00 PM",  "mode": "Lite",  "label": "Pulse"},
+             {"time": "12:00 PM", "mode": "Full",  "label": "Midday (weekday)"},
+             {"time": "2:00 PM",  "mode": "Full",  "label": "Pulse (weekday)"},
              {"time": "4:15 PM",  "mode": "Full",  "label": "Close"},
-             {"time": "6:00 PM",  "mode": "Full",  "label": "Evening"},
-             {"time": "9:00 PM",  "mode": "Full",  "label": "Late"},
-             {"time": "11:00 PM", "mode": "Full",  "label": "Wrap"},
+             {"time": "6:00 PM",  "mode": "Full",  "label": "Evening (weekday)"},
+             {"time": "6:15 PM",  "mode": "Full",  "label": "Evening (weekend)"},
+             {"time": "9:00 PM",  "mode": "Full",  "label": "Late (weekday)"},
+             {"time": "11:00 PM", "mode": "Full",  "label": "Wrap (weekday)"},
          ]
      }
     },

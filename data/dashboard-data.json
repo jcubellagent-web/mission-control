@@ -4,57 +4,42 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T20:29:46Z",
-    "objective": "Add freshness filter to breaking news",
-    "status": "done",
+    "messageReceived": "2026-03-28T20:33:04Z",
+    "objective": "Update weekend intel feed schedule",
+    "status": "active",
     "steps": [
       {
-        "label": "Reading breaking_news_scanner.py",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Adding 90min freshness gate",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Filtering all sources",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Syncing to JAIN",
-        "status": "done",
+        "label": "Editing crontabs",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-28T20:29:46Z",
-    "checkedAt": "2026-03-28T20:29:46Z",
+    "updatedAt": "2026-03-28T20:33:04Z",
+    "checkedAt": "2026-03-28T20:33:04Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Add freshness filter to breaking news",
-    "updatedAt": "2026-03-28T20:30:02Z"
+    "context": "Update weekend intel feed schedule",
+    "updatedAt": "2026-03-28T20:33:31Z"
   },
   "contextWindow": {
-    "usedTokens": 135460,
+    "usedTokens": 137944,
     "limitTokens": 200000,
-    "pct": 0.6773,
+    "pct": 0.6897,
     "model": "claude-sonnet-4-6",
     "status": "amber"
   },
   "modelUsage": {
-    "session": 13.810979,
-    "daily": 6.160335,
+    "session": 14.130125,
+    "daily": 6.479481,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 11.738341649999997
+        "cost": 12.057487799999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -81,12 +66,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 164,
-        "outputTokens": 127769,
-        "totalTokens": 127933,
-        "sessionCost": 11.738341649999997,
-        "dailyCost": 6.160334549999999,
-        "weeklyCost": 11.738341649999997,
+        "inputTokens": 151,
+        "outputTokens": 123918,
+        "totalTokens": 124069,
+        "sessionCost": 12.057487799999997,
+        "dailyCost": 6.479480699999999,
+        "weeklyCost": 12.057487799999997,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -137,7 +122,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T20:30:07Z",
+    "lastUpdated": "2026-03-28T20:33:34Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -159,8 +144,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.864369,
-      "total": 14.784299
+      "daily": 7.183515,
+      "total": 15.103445
     }
   },
   "devices": [
@@ -175,19 +160,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:30:02Z"
+      "lastChecked": "2026-03-28T20:33:31Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T20:30:02Z"
+      "lastChecked": "2026-03-28T20:33:31Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T20:30:02Z"
+      "lastChecked": "2026-03-28T20:33:31Z"
     }
   ],
   "crons": [
@@ -295,7 +280,7 @@
           {
             "time": "7:15 AM",
             "mode": "Full",
-            "label": "Market open",
+            "label": "Market open (weekday)",
             "done": true
           },
           {
@@ -307,13 +292,13 @@
           {
             "time": "12:00 PM",
             "mode": "Full",
-            "label": "Midday",
+            "label": "Midday (weekday)",
             "done": true
           },
           {
             "time": "2:00 PM",
-            "mode": "Lite",
-            "label": "Pulse",
+            "mode": "Full",
+            "label": "Pulse (weekday)",
             "done": true
           },
           {
@@ -325,19 +310,25 @@
           {
             "time": "6:00 PM",
             "mode": "Full",
-            "label": "Evening",
+            "label": "Evening (weekday)",
+            "done": false
+          },
+          {
+            "time": "6:15 PM",
+            "mode": "Full",
+            "label": "Evening (weekend)",
             "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Full",
-            "label": "Late",
+            "label": "Late (weekday)",
             "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Full",
-            "label": "Wrap",
+            "label": "Wrap (weekday)",
             "done": false
           }
         ]
@@ -347,25 +338,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T20:30:07Z",
-      "event": "Session spend: $13.81"
+      "time": "2026-03-28T20:33:34Z",
+      "event": "Session spend: $14.13"
     },
     {
-      "time": "2026-03-28T20:30:02Z",
+      "time": "2026-03-28T20:33:31Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T20:30:02Z",
+      "time": "2026-03-28T20:33:31Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T20:30:02Z",
+      "time": "2026-03-28T20:33:31Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T20:30:02Z",
+      "time": "2026-03-28T20:33:31Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T20:30:02Z"
+  "lastUpdated": "2026-03-28T20:33:31Z"
 }
