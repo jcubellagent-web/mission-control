@@ -1,21 +1,51 @@
 #!/usr/bin/env python3
 """
-Brain Feed Local Server — serves brain-feed.json + remote control endpoints.
+Brain Feed Local Server — serves brain-feed.json + full dashboard + remote control.
 Port 8765.
 
 Endpoints:
-  GET  /brain-feed.json     — serve latest brain feed data
+  GET  /                    — serve Mission Control dashboard (index.html)
+  GET  /index.html          — same
+  GET  /data/*.json         — serve data files with no-cache headers
+  GET  /assets/*            — serve static assets (CSS, JS, images)
+  GET  /brain-feed.json     — serve latest brain feed data (legacy compat)
+  GET  /dashboard-data.json — serve dashboard data (legacy compat)
+  GET  /jain-brain-feed.json— serve J.A.I.N brain feed (legacy compat)
+  GET  /agent-comms.json    — serve agent comms (legacy compat)
   POST /refresh             — force refresh Safari (reloads Mission Control)
   POST /nightmode/on        — enable night mode on desktop
   POST /nightmode/off       — disable night mode on desktop
   GET  /nightmode/state     — current night mode state
 """
-import http.server, json, os, subprocess, sys, threading
+import http.server, json, mimetypes, os, subprocess, sys, threading
 from pathlib import Path
 
 PORT = 8765
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+ROOT_DIR = Path(__file__).resolve().parent.parent  # mission-control/
+DATA_DIR = ROOT_DIR / "data"
 STATE_FILE = DATA_DIR / "remote-control-state.json"
+
+# MIME type map
+MIME_TYPES = {
+    ".html": "text/html; charset=utf-8",
+    ".js":   "application/javascript",
+    ".css":  "text/css",
+    ".json": "application/json",
+    ".png":  "image/png",
+    ".jpg":  "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif":  "image/gif",
+    ".svg":  "image/svg+xml",
+    ".ico":  "image/x-icon",
+    ".woff": "font/woff",
+    ".woff2":"font/woff2",
+    ".ttf":  "font/ttf",
+    ".webp": "image/webp",
+}
+
+def get_mime(path):
+    ext = Path(path).suffix.lower()
+    return MIME_TYPES.get(ext, "application/octet-stream")
 
 def get_state():
     try: return json.loads(STATE_FILE.read_text())
@@ -35,7 +65,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -47,47 +76,75 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         self._cors()
         self.end_headers()
         self.wfile.write(body)
 
-    def do_GET(self):
-        path = self.path.split("?")[0]
-
-        SERVED_FILES = {
-            "/brain-feed.json": "brain-feed.json",
-            "/jain-brain-feed.json": "jain-brain-feed.json",
-            "/dashboard-data.json": "dashboard-data.json",
-            "/agent-comms.json": "agent-comms.json",
-        }
-        if path in SERVED_FILES:
-            fname = SERVED_FILES[path]
-            bf_path = DATA_DIR / fname
-            try:
-                data = bf_path.read_bytes()
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(data)))
-                self._cors()
-                self.end_headers()
-                self.wfile.write(data)
-            except Exception as e:
-                self._json({"error": str(e)}, 500)
-
-        elif path == "/nightmode/state":
-            self._json(get_state())
-
-        elif path == "/ping":
-            self._json({"ok": True, "port": PORT})
-
-        else:
+    def _serve_file(self, file_path, no_cache=False):
+        """Serve a static file."""
+        try:
+            data = Path(file_path).read_bytes()
+            mime = get_mime(str(file_path))
+            self.send_response(200)
+            self.send_header("Content-Type", mime)
+            self.send_header("Content-Length", str(len(data)))
+            if no_cache:
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            else:
+                self.send_header("Cache-Control", "public, max-age=60")
+            self._cors()
+            self.end_headers()
+            self.wfile.write(data)
+        except FileNotFoundError:
             self._json({"error": "not found"}, 404)
+        except Exception as e:
+            self._json({"error": str(e)}, 500)
+
+    def do_GET(self):
+        path = self.path.split("?")[0].rstrip("/") or "/"
+
+        # Legacy compat: flat JSON file endpoints
+        LEGACY_JSON = {
+            "/brain-feed.json":       DATA_DIR / "brain-feed.json",
+            "/jain-brain-feed.json":  DATA_DIR / "jain-brain-feed.json",
+            "/dashboard-data.json":   DATA_DIR / "dashboard-data.json",
+            "/agent-comms.json":      DATA_DIR / "agent-comms.json",
+        }
+        if path in LEGACY_JSON:
+            return self._serve_file(LEGACY_JSON[path], no_cache=True)
+
+        # Dashboard root
+        if path in ("/", "/index.html"):
+            return self._serve_file(ROOT_DIR / "index.html", no_cache=False)
+
+        # /data/*.json — serve data files (no-cache)
+        if path.startswith("/data/") and path.endswith(".json"):
+            fname = path[len("/data/"):]
+            if ".." not in fname:
+                return self._serve_file(DATA_DIR / fname, no_cache=True)
+
+        # /assets/* — serve static assets
+        if path.startswith("/assets/"):
+            rel = path[len("/assets/"):]
+            if ".." not in rel:
+                asset_path = ROOT_DIR / "assets" / rel
+                return self._serve_file(asset_path)
+
+        # /nightmode/state
+        if path == "/nightmode/state":
+            return self._json(get_state())
+
+        # /ping
+        if path == "/ping":
+            return self._json({"ok": True, "port": PORT})
+
+        self._json({"error": "not found"}, 404)
 
     def do_POST(self):
         path = self.path.split("?")[0]
 
         if path == "/refresh":
-            # Force reload Safari on the desktop
             run_applescript('''
                 tell application "Safari"
                     activate
@@ -102,7 +159,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             state = get_state()
             state["nightMode"] = True
             set_state(state)
-            # Signal the dashboard via a flag file
             (DATA_DIR / "night-mode.flag").write_text("on")
             self._json({"ok": True, "nightMode": True})
 
@@ -122,5 +178,5 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
-    print(f"Brain Feed + Remote Control server on http://localhost:{PORT}", flush=True)
+    print(f"Brain Feed + Dashboard server on http://localhost:{PORT}", flush=True)
     server.serve_forever()
