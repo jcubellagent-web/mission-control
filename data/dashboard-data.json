@@ -4,42 +4,47 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-28T21:14:33Z",
-    "objective": "Testing browser on ESPN Fantasy Baseball",
+    "messageReceived": "2026-03-28T21:19:12Z",
+    "objective": "Objective confirmed: Address fantasy baseball lineup issue",
     "status": "active",
     "steps": [
       {
-        "label": "Opening ESPN",
+        "label": "Confirmed",
+        "status": "done",
+        "tool": "openclaw"
+      },
+      {
+        "label": "Responding to Josh",
         "status": "active",
-        "tool": "agent-browser"
+        "tool": "telegram"
       }
     ],
-    "currentTool": "agent-browser",
-    "updatedAt": "2026-03-28T21:14:33Z",
-    "checkedAt": "2026-03-28T21:14:33Z",
+    "currentTool": "telegram",
+    "updatedAt": "2026-03-28T21:19:12Z",
+    "checkedAt": "2026-03-28T21:19:12Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Testing browser on ESPN Fantasy Baseball",
-    "updatedAt": "2026-03-28T21:15:01Z"
+    "context": "Objective confirmed: Address fantasy baseball lineup issue",
+    "updatedAt": "2026-03-28T21:20:01Z"
   },
   "contextWindow": {
-    "usedTokens": 83296,
+    "usedTokens": 97264,
     "limitTokens": 200000,
-    "pct": 0.4165,
+    "pct": 0.4863,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 11.916308,
-    "daily": 4.265663,
+    "session": 12.631172,
+    "daily": 4.980527,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 9.351037649999999
+        "cost": 10.049606999999998
       },
       {
         "name": "openai/gpt-5.4",
@@ -49,7 +54,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 0.5182020199999999
+        "cost": 0.5344965199999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -66,13 +71,13 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 165,
-        "outputTokens": 125335,
-        "totalTokens": 125500,
-        "sessionCost": 9.351037649999999,
-        "dailyCost": 3.77303055,
-        "weeklyCost": 9.351037649999999,
-        "sessions": 6,
+        "inputTokens": 148,
+        "outputTokens": 123748,
+        "totalTokens": 123896,
+        "sessionCost": 10.049606999999998,
+        "dailyCost": 4.471599899999999,
+        "weeklyCost": 10.049606999999998,
+        "sessions": 5,
         "isGemini": false,
         "costEstimated": false
       },
@@ -92,13 +97,13 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1494218,
-        "outputTokens": 15533,
-        "totalTokens": 1509751,
-        "sessionCost": 0.5182020199999999,
-        "dailyCost": 0.49263251999999996,
-        "weeklyCost": 0.5182020199999999,
-        "sessions": 2,
+        "inputTokens": 1543058,
+        "outputTokens": 16190,
+        "totalTokens": 1559248,
+        "sessionCost": 0.5344965199999999,
+        "dailyCost": 0.50892702,
+        "weeklyCost": 0.5344965199999999,
+        "sessions": 3,
         "isGemini": true,
         "costEstimated": false
       },
@@ -161,7 +166,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-28T21:15:05Z",
+    "lastUpdated": "2026-03-28T21:20:05Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -183,8 +188,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.969697,
-      "total": 12.889628
+      "daily": 5.684561,
+      "total": 13.604492
     }
   },
   "devices": [
@@ -199,19 +204,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:15:01Z"
+      "lastChecked": "2026-03-28T21:20:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T21:15:01Z"
+      "lastChecked": "2026-03-28T21:20:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T21:15:01Z"
+      "lastChecked": "2026-03-28T21:20:01Z"
     }
   ],
   "crons": [
@@ -374,37 +379,28 @@
       }
     }
   ],
-  "activeAgents": [
-    {
-      "id": "bd5723ae-3894-46fd-b8a9-5cf49324c84f",
-      "label": "bd5723ae-3894-46fd-b8a9-5cf493",
-      "status": "done",
-      "startedAt": "2026-03-28T21:03:26.532000+00:00",
-      "elapsedSecs": 699,
-      "updatedAt": "2026-03-28T21:06:13.339000+00:00"
-    }
-  ],
+  "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T21:15:05Z",
-      "event": "Session spend: $11.92"
+      "time": "2026-03-28T21:20:05Z",
+      "event": "Session spend: $12.63"
     },
     {
-      "time": "2026-03-28T21:15:01Z",
+      "time": "2026-03-28T21:20:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-28T21:15:01Z",
+      "time": "2026-03-28T21:20:01Z",
       "event": "10 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T21:15:01Z",
+      "time": "2026-03-28T21:20:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T21:15:01Z",
+      "time": "2026-03-28T21:20:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T21:15:01Z"
+  "lastUpdated": "2026-03-28T21:20:01Z"
 }
