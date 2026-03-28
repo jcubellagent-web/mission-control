@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:57:13Z",
-  "objective": "Fix model usage display \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:58:29Z",
+  "objective": "Slim spend numbers + fix clipping + no gray text",
+  "status": "active",
   "steps": [
     {
-      "label": "Pushed",
+      "label": "Received audio",
       "status": "done",
-      "tool": "github"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Editing dashboard",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T21:57:22Z",
-  "checkedAt": "2026-03-28T21:57:13Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T21:58:29Z",
+  "checkedAt": "2026-03-28T21:58:29Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
