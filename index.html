@@ -369,17 +369,18 @@
         .tjob-cat-count { font-size: 0.58rem; color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); border-radius: 8px; padding: 0 5px; margin-left: auto; }
         .tjob-cat-chevron { font-size: 0.6rem; color: rgba(255,255,255,0.2); margin-left: 4px; transition: transform 0.2s; }
         .tjob-category.collapsed .tjob-cat-chevron { transform: rotate(-90deg); }
-        .tjob-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); margin-bottom: 4px; transition: background 0.15s; }
+        /* Expanded job rows — sleek single-line style */
+        .tjob-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 5px; margin-bottom: 2px; transition: background 0.12s; }
         .tjob-row:last-child { margin-bottom: 0; }
         .tjob-row:hover { background: rgba(255,255,255,0.04); }
-        .tjob-row.tjob-error { border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04); }
-        .tjob-status-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; transition: box-shadow 0.3s; }
-        .tjob-body { flex: 1; min-width: 0; }
-        .tjob-header-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
-        .tjob-name { font-size: 0.78rem; font-weight: 500; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-        .tjob-agent { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; }
-        .tjob-meta-row { display: flex; align-items: center; gap: 6px; }
-        .tjob-schedule { font-size: 0.65rem; color: rgba(255,255,255,0.35); }
+        .tjob-row.tjob-error { background: rgba(239,68,68,0.04); }
+        .tjob-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+        .tjob-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+        .tjob-header-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .tjob-name { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        .tjob-agent { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; opacity: 0.8; }
+        .tjob-meta-row { display: flex; align-items: center; gap: 5px; }
+        .tjob-schedule { font-size: 0.6rem; color: rgba(255,255,255,0.28); white-space: nowrap; }
         .tjob-status-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; margin-left: auto; }
         .tjob-err-badge { font-size: 0.58rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 4px; padding: 0 4px; }
         .tjob-multirun .tjob-body { display: flex; flex-direction: column; gap: 3px; }
@@ -4338,7 +4339,7 @@
             } // end devices diff guard
 
             // Today's Jobs (diff-guarded) — reskinned
-            {
+            if (sectionChanged('crons', data.crons)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
 
             // Category config: accent color + emoji
@@ -4398,30 +4399,27 @@
                             }
                             return `<span class="${cls}${r.mode === 'Lite' ? ' lite' : ''}" title="${escapeHtml(r.label)} — ${r.mode}">${label}</span>`;
                         }).join('');
-                        return `<div class="tjob-row tjob-multirun">
+                            return `<div class="tjob-row tjob-multirun">
                             <div class="tjob-status-dot" style="background:${statusColor}"></div>
-                            <div class="tjob-body">
+                            <div class="tjob-body" style="flex-direction:column;align-items:flex-start;gap:3px;">
                                 <div class="tjob-header-row">
                                     <span class="tjob-name">${escapeHtml(cron.name)}</span>
                                     <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
+                                    <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
                                 </div>
-                                <div class="tjob-schedule">${escapeHtml(cron.schedule || '')}</div>
                                 <div class="tjob-badges">${timeBadges}</div>
                             </div>
                         </div>`;
                     }
 
                     return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}">
-                        <div class="tjob-status-dot" style="background:${statusColor}${isOk && !hasErr ? ';box-shadow:0 0 5px '+statusColor+'60' : ''}"></div>
+                        <div class="tjob-status-dot" style="background:${statusColor}${isOk && !hasErr ? ';box-shadow:0 0 4px '+statusColor+'70' : ''}"></div>
                         <div class="tjob-body">
                             <div class="tjob-header-row">
                                 <span class="tjob-name">${escapeHtml(cron.name)}</span>
-                                <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
-                            </div>
-                            <div class="tjob-meta-row">
                                 <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
                                 ${hasErr ? `<span class="tjob-err-badge">${cron.errors} err</span>` : ''}
-                                <span class="tjob-status-label" style="color:${statusColor}">${statusLabel}</span>
+                                <span class="tjob-agent" style="color:${agentColor};margin-left:auto;">${escapeHtml(agentName)}</span>
                             </div>
                         </div>
                     </div>`;
@@ -4463,7 +4461,7 @@
                     previewTime = nextJob.schedule || '';
                 }
                 const catId = 'tjob-cat-' + cat.replace(/\s+/g,'-').toLowerCase();
-                const isCollapsed = window._tjobCollapsed && window._tjobCollapsed[cat];
+                const isCollapsed = isCatCollapsed(cat);
                 return `<div class="tjob-category${isCollapsed ? ' collapsed' : ''}" id="${catId}" data-cat="${escapeHtml(cat)}">
                     <div class="tjob-cat-header" onclick="window.toggleJobCategory('${escapeHtml(cat)}')">
                         <span class="tjob-cat-emoji">${cfg.emoji}</span>
@@ -4481,6 +4479,7 @@
             }).join('');
 
             todayJobsCard.innerHTML = cronHtml || '<div class="empty-state">No scheduled jobs</div>';
+            } // end crons sectionChanged guard
             } // end crons diff guard
 
         }
@@ -4544,12 +4543,18 @@
         }
 
         // ── Collapsible job categories ─────────────────────────────────────
+        // Default: all collapsed. Stores explicit user toggles. Undefined = collapsed.
         window._tjobCollapsed = window._tjobCollapsed || {};
+        window._tjobCollapseInited = window._tjobCollapseInited || false;
+        function isCatCollapsed(cat) {
+            // If user hasn't explicitly toggled, default to collapsed
+            return window._tjobCollapsed[cat] !== false;
+        }
         window.toggleJobCategory = function(cat) {
-            window._tjobCollapsed[cat] = !window._tjobCollapsed[cat];
+            window._tjobCollapsed[cat] = isCatCollapsed(cat) ? false : true;
             const catId = 'tjob-cat-' + cat.replace(/\s+/g,'-').toLowerCase();
             const el = document.getElementById(catId);
-            if (el) el.classList.toggle('collapsed', !!window._tjobCollapsed[cat]);
+            if (el) el.classList.toggle('collapsed', isCatCollapsed(cat));
         };
 
         function formatRelTime(iso) {
