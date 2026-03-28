@@ -1,22 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Processing request \u00b7 Determining objective",
+  "objective": "Objective confirmed: improve brain feed detail + fix idle flicker",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Parsed",
       "status": "done",
-      "tool": "whisper"
+      "tool": "openclaw"
     },
     {
-      "label": "Parsing intent",
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T05:38:15Z",
-  "checkedAt": "2026-03-28T05:38:15Z",
+  "updatedAt": "2026-03-28T05:38:18Z",
+  "checkedAt": "2026-03-28T05:38:18Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
