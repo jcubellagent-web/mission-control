@@ -1,32 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T20:55:08Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T20:55:34Z",
+  "objective": "Wiring Ollama into Python scripts",
+  "status": "active",
   "steps": [
     {
-      "label": "Script updated",
-      "status": "done",
+      "label": "Auditing scripts",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "Frontend updated",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Pushed",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T20:55:18Z",
-  "checkedAt": "2026-03-28T20:55:08Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T20:55:34Z",
+  "checkedAt": "2026-03-28T20:55:34Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
