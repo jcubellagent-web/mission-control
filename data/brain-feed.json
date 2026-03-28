@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:45:07Z",
-  "objective": "Add output/upload tokens to Model Usage",
+  "messageReceived": "2026-03-28T21:45:50Z",
+  "objective": "Add input/output tokens to Model Usage",
   "status": "active",
   "steps": [
     {
-      "label": "Received audio",
+      "label": "Pushed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "github"
     },
     {
-      "label": "Checking model usage data",
+      "label": "Responding to Josh",
       "status": "active",
-      "tool": "exec"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:45:07Z",
-  "checkedAt": "2026-03-28T21:45:07Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-28T21:45:50Z",
+  "checkedAt": "2026-03-28T21:45:50Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
