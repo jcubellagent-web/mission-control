@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:47:00Z",
+  "objective": "Received: Checking agent_comms table",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Testing Supabase",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:47:54Z",
   "checkedAt": "2026-03-28T03:45:02Z",
   "idleUpdatedAt": "2026-03-28T03:45:02Z"
 }
