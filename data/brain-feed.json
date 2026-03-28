@@ -1,17 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Received: Josh checking brain feed status",
+  "objective": "Verifying brain feed is live",
   "status": "active",
   "steps": [
     {
-      "label": "Parsing message",
+      "label": "Checking local server",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Pushing update",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T02:51:11Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T02:51:13Z",
   "checkedAt": "2026-03-28T02:50:01Z",
   "idleUpdatedAt": "2026-03-28T02:50:01Z"
 }
