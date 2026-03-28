@@ -1611,9 +1611,11 @@
             flex-shrink: 0;
             margin-top: 1px;
         }
+        .bf-step-icon { transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease; }
         .bf-step-icon.done   { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
         .bf-step-icon.active { background: rgba(229,62,62,0.1);  color: #e53e3e; border: 1px solid rgba(229,62,62,0.3); animation: pulse 1.2s infinite; }
         .bf-step-icon.pending{ background: rgba(255,255,255,0.03); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+        .bf-step { transition: background 0.25s ease; }
         .bf-step-body { flex: 1; min-width: 0; }
         .bf-step-label {
             font-size: 0.82rem;
@@ -3158,48 +3160,171 @@
                 document.body.classList.toggle('edge-laser-on', phoneMode);
                 const msgTime = bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
                 const updatedTime = bf.updatedAt ? formatTime(bf.updatedAt) : '';
-                const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
-                    const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
-                    const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
-                    const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
-                    const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
-                    return `<div class="bf-step ${stepClass}">
-                        <div class="bf-step-icon ${iconClass}">${iconChar}</div>
-                        <div class="bf-step-body">
-                            <div class="bf-step-label">${escapeHtml(step.label)}</div>
-                            ${toolHtml}
+
+                // ── Smart in-place update (no full innerHTML replace on updates) ──
+                let bfCont = brainFeedCard.querySelector('.bf-container');
+
+                if (!bfCont || isWakingUp) {
+                    // Full render only on wake-up or first render
+                    const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
+                        const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
+                        const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
+                        const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
+                        const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                        return `<div class="bf-step ${stepClass}" data-label="${escapeHtml(step.label)}">
+                            <div class="bf-step-icon ${iconClass}">${iconChar}</div>
+                            <div class="bf-step-body">
+                                <div class="bf-step-label">${escapeHtml(step.label)}</div>
+                                ${toolHtml}
+                            </div>
+                        </div>`;
+                    }).join('');
+                    brainFeedCard.innerHTML = `
+                        ${freshnessStrip}
+                        <div class="bf-container">
+                            <div class="bf-msg-banner">
+                                <span class="bf-msg-dot"></span>
+                                <span class="bf-msg-label">Message Received</span>
+                                <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
+                            </div>
+                            <div class="bf-objective">
+                                <div class="bf-objective-kicker">Current Objective</div>
+                                <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
+                            </div>
+                            ${bf.currentTool ? `
+                            <div class="bf-current-tool-bar">
+                                <span class="bf-ct-pulse"></span>
+                                <span class="bf-ct-label">Active tool</span>
+                                <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
+                                ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
+                            </div>` : ''}
+                            <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
                         </div>
-                    </div>`;
-                }).join('');
-                brainFeedCard.innerHTML = `
-                    ${freshnessStrip}
-                    <div class="bf-container">
-                        <div class="bf-msg-banner">
-                            <span class="bf-msg-dot"></span>
-                            <span class="bf-msg-label">Message Received</span>
-                            <span class="bf-msg-time">${escapeHtml(msgTime)}</span>
-                        </div>
-                        <div class="bf-objective">
-                            <div class="bf-objective-kicker">Current Objective</div>
-                            <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
-                        </div>
-                        ${bf.currentTool ? `
-                        <div class="bf-current-tool-bar">
-                            <span class="bf-ct-pulse"></span>
-                            <span class="bf-ct-label">Active tool</span>
-                            <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
-                            ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
-                        </div>` : ''}
-                        <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
-                    </div>
-                `;
-                // ── Post-render animation triggers ────────────────────────────
-                // Wake-up animation
-                const bfCont = brainFeedCard.querySelector('.bf-container');
-                if (bfCont && isWakingUp) {
-                    bfCont.classList.add('bf-waking');
-                    bfCont.addEventListener('animationend', () => bfCont.classList.remove('bf-waking'), { once: true });
+                    `;
+                    bfCont = brainFeedCard.querySelector('.bf-container');
+
+                    // Wake-up animation
+                    if (isWakingUp && bfCont) {
+                        bfCont.classList.add('bf-waking');
+                        bfCont.addEventListener('animationend', () => bfCont.classList.remove('bf-waking'), { once: true });
+                    }
+                } else {
+                    // ── Smooth in-place diff updates ────────────────────────────
+                    // 1. Update freshness strip
+                    const fr = brainFeedCard.querySelector('.bf-freshness-row');
+                    if (fr) {
+                        const lbl = fr.querySelector('#bf-freshness-label-text');
+                        const ts = fr.querySelector('#bf-last-updated');
+                        if (lbl) lbl.textContent = stateLabel;
+                        if (ts) ts.textContent = bf.updatedAt ? formatTime(bf.updatedAt) : '-';
+                    }
+
+                    // 2. Crossfade objective text if changed
+                    if (objectiveChanged) {
+                        const objEl = brainFeedCard.querySelector('.bf-objective-text');
+                        if (objEl) {
+                            objEl.style.transition = 'opacity 0.18s ease, transform 0.22s ease';
+                            objEl.style.opacity = '0';
+                            objEl.style.transform = 'translateY(4px)';
+                            setTimeout(() => {
+                                objEl.textContent = bf.objective || 'Processing...';
+                                objEl.style.opacity = '1';
+                                objEl.style.transform = 'translateY(0)';
+                            }, 200);
+                        }
+                    }
+
+                    // 3. Update tool bar smoothly
+                    let toolBar = brainFeedCard.querySelector('.bf-current-tool-bar');
+                    if (bf.currentTool) {
+                        if (!toolBar) {
+                            // Insert before timeline
+                            const timeline = brainFeedCard.querySelector('.bf-timeline');
+                            toolBar = document.createElement('div');
+                            toolBar.className = 'bf-current-tool-bar';
+                            toolBar.style.opacity = '0';
+                            toolBar.style.transition = 'opacity 0.25s ease';
+                            toolBar.innerHTML = `<span class="bf-ct-pulse"></span><span class="bf-ct-label">Active tool</span><span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>`;
+                            if (timeline) timeline.before(toolBar);
+                            requestAnimationFrame(() => { toolBar.style.opacity = '1'; });
+                        } else {
+                            const ctEl = toolBar.querySelector('.bf-ct-tool');
+                            if (ctEl && ctEl.textContent !== bf.currentTool) {
+                                ctEl.style.transition = 'opacity 0.15s ease';
+                                ctEl.style.opacity = '0';
+                                setTimeout(() => { ctEl.textContent = bf.currentTool; ctEl.style.opacity = '1'; }, 160);
+                            }
+                        }
+                    } else if (toolBar) {
+                        toolBar.style.transition = 'opacity 0.25s ease';
+                        toolBar.style.opacity = '0';
+                        setTimeout(() => toolBar.remove(), 280);
+                    }
+
+                    // 4. Diff-update steps — animate step status changes, slide in new steps
+                    const timeline = brainFeedCard.querySelector('.bf-timeline');
+                    if (timeline) {
+                        const existingSteps = {};
+                        timeline.querySelectorAll('.bf-step[data-label]').forEach(el => {
+                            existingSteps[el.dataset.label] = el;
+                        });
+                        const orderedSteps = [...(bf.steps || [])].reverse();
+                        orderedSteps.forEach((step, i) => {
+                            const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
+                            const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
+                            const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
+                            const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+
+                            if (existingSteps[step.label]) {
+                                // Update existing step status smoothly
+                                const el = existingSteps[step.label];
+                                if (!el.classList.contains(stepClass)) {
+                                    el.style.transition = 'background 0.3s ease, opacity 0.2s ease';
+                                    el.className = `bf-step ${stepClass}`;
+                                    const icon = el.querySelector('.bf-step-icon');
+                                    if (icon) {
+                                        icon.className = `bf-step-icon ${iconClass}`;
+                                        icon.textContent = iconChar;
+                                        if (iconClass === 'done') {
+                                            icon.style.transform = 'scale(1.3)';
+                                            setTimeout(() => { icon.style.transition = 'transform 0.2s ease'; icon.style.transform = 'scale(1)'; }, 50);
+                                        }
+                                        if (iconClass === 'active') icon.classList.add('bf-ring');
+                                        else icon.classList.remove('bf-ring');
+                                    }
+                                }
+                                delete existingSteps[step.label];
+                            } else {
+                                // New step — slide in
+                                const el = document.createElement('div');
+                                el.className = `bf-step ${stepClass}`;
+                                el.dataset.label = step.label;
+                                el.innerHTML = `<div class="bf-step-icon ${iconClass}">${iconChar}</div>
+                                    <div class="bf-step-body"><div class="bf-step-label">${escapeHtml(step.label)}</div>${toolHtml}</div>`;
+                                el.style.opacity = '0';
+                                el.style.transform = 'translateX(-12px)';
+                                el.style.transition = 'opacity 0.3s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)';
+                                // Insert at correct position
+                                const children = Array.from(timeline.querySelectorAll('.bf-step'));
+                                if (i < children.length) timeline.insertBefore(el, children[i]);
+                                else timeline.appendChild(el);
+                                requestAnimationFrame(() => requestAnimationFrame(() => {
+                                    el.style.opacity = '1';
+                                    el.style.transform = 'translateX(0)';
+                                    if (iconClass === 'active') el.querySelector('.bf-step-icon')?.classList.add('bf-ring');
+                                }));
+                            }
+                        });
+                        // Remove orphaned steps with fade-out
+                        Object.values(existingSteps).forEach(el => {
+                            el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                            el.style.opacity = '0';
+                            el.style.transform = 'translateX(8px)';
+                            setTimeout(() => el.remove(), 220);
+                        });
+                    }
                 }
+
                 // Message received banner flash + scan line
                 if (isReceivingMsg || isWakingUp) {
                     const banner = brainFeedCard.querySelector('.bf-msg-banner');
@@ -3213,8 +3338,8 @@
                         if (dot) { dot.classList.add('bf-dot-recv'); setTimeout(() => dot.classList.remove('bf-dot-recv'), 2000); }
                     }
                 }
-                // Objective text reveal
-                if (objectiveChanged) {
+                // Objective text reveal (first render only, updates handled by diff above)
+                if (objectiveChanged && isWakingUp) {
                     const objText = brainFeedCard.querySelector('.bf-objective-text');
                     if (objText) {
                         objText.classList.remove('bf-obj-revealing');
@@ -3223,16 +3348,9 @@
                         objText.addEventListener('animationend', () => objText.classList.remove('bf-obj-revealing'), { once: true });
                     }
                     _lastBfObjective = bf.objective;
+                } else if (objectiveChanged) {
+                    _lastBfObjective = bf.objective;
                 }
-                // Step animations — spinning ring on active step
-                brainFeedCard.querySelectorAll('.bf-step').forEach((stepEl, i) => {
-                    if (stepEl.classList.contains('active-step')) {
-                        const icon = stepEl.querySelector('.bf-step-icon');
-                        if (icon) icon.classList.add('bf-ring');
-                        stepEl.classList.add('bf-step-animate');
-                        stepEl.style.animationDelay = (i * 0.06) + 's';
-                    }
-                });
             } else {
                 // Done flash when transitioning active -> done/idle
                 if (isCompleting) {
