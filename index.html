@@ -4296,15 +4296,21 @@
                 badge.style.opacity = '1';
                 badge.style.transform = 'translateY(0) scale(1)';
             });
-            // Fetch fresh data, then fade out
+            // Fetch fresh data, then fade out — always clears regardless of outcome
+            const fadeOut = () => {
+                flash.style.background = 'rgba(229,62,62,0)';
+                badge.style.opacity = '0';
+                badge.style.transform = 'translateY(-10px) scale(0.94)';
+                setTimeout(() => { if (flash.parentNode) flash.remove(); }, 400);
+            };
+            // Hard cap: always gone within 3.5s no matter what
+            const hardTimeout = setTimeout(fadeOut, 3500);
             setTimeout(() => {
-                forceUpdate().then(() => {
-                    flash.style.background = 'rgba(229,62,62,0)';
-                    badge.style.opacity = '0';
-                    badge.style.transform = 'translateY(-10px) scale(0.94)';
-                    setTimeout(() => flash.remove(), 400);
+                forceUpdate().finally(() => {
+                    clearTimeout(hardTimeout);
+                    fadeOut();
                 });
-            }, 800);
+            }, 700);
         }
 
         // ── Desktop: poll agent_comms for phone commands ───────────────────
