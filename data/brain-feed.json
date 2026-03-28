@@ -1,22 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T21:24:22Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T21:26:22Z",
+  "objective": "Consolidating X watchlist monitors",
+  "status": "active",
   "steps": [
     {
-      "label": "Got rules",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Updating fantasy scripts",
-      "status": "done",
+      "label": "Checking cron jobs",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T21:25:08Z",
-  "checkedAt": "2026-03-28T21:24:22Z",
+  "updatedAt": "2026-03-28T21:26:22Z",
+  "checkedAt": "2026-03-28T21:26:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
