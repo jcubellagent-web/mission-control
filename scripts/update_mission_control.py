@@ -552,6 +552,48 @@ def fetch_jain_model_usage() -> Dict[str, Any]:
         return empty
 
 
+def fetch_ollama_usage() -> List[Dict[str, Any]]:
+    """Fetch Ollama local model list and inject as $0 breakdown rows."""
+    rows = []
+    try:
+        import urllib.request
+        req = urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3)
+        data = json.loads(req.read())
+        models = data.get("models", [])
+
+        # Also check /api/ps for currently loaded models (shows what's hot)
+        loaded_names = set()
+        try:
+            ps_req = urllib.request.urlopen("http://localhost:11434/api/ps", timeout=2)
+            ps_data = json.loads(ps_req.read())
+            for m in ps_data.get("models", []):
+                loaded_names.add(m.get("name", ""))
+        except Exception:
+            pass
+
+        for m in models:
+            name = m.get("name", "")
+            size_bytes = m.get("size", 0)
+            size_gb = size_bytes / 1e9
+            loaded = name in loaded_names
+            rows.append({
+                "name": f"local/{name}",
+                "source": "ollama",
+                "weeklyCost": 0.0,
+                "dailyCost": 0.0,
+                "sessionCost": 0.0,
+                "totalTokens": 0,
+                "costEstimated": False,
+                "isLocal": True,
+                "sizeGb": round(size_gb, 2),
+                "loaded": loaded,
+                "_note": f"Local Ollama model ({size_gb:.1f}GB). Free — runs on-device.",
+            })
+    except Exception as exc:
+        print(f"[warn] fetch_ollama_usage failed: {exc}", file=sys.stderr)
+    return rows
+
+
 JAIN_NEWSFEED_PATH = ROOT.parent / "data" / "jain-newsfeed.json"
 NEWSFEED_PATH = ROOT.parent / "data" / "newsfeed.json"
 
@@ -653,6 +695,13 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         jain = fetch_jain_model_usage()
         openrouter = fetch_openrouter_usage()
         elevenlabs = fetch_elevenlabs_usage()
+        ollama_rows = fetch_ollama_usage()
+
+        # Inject Ollama local models into breakdown
+        existing_names_lower = {r["name"].lower() for r in breakdown}
+        for ol_row in ollama_rows:
+            if ol_row["name"].lower() not in existing_names_lower:
+                breakdown.append(ol_row)
 
         # Inject OpenRouter as a synthetic breakdown row if it has daily/weekly spend
         or_weekly = openrouter.get("byok_weekly", 0) or openrouter.get("weekly", 0)

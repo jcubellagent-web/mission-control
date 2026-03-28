@@ -565,6 +565,7 @@
         .mu-total-val { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
         .mu-total-label { font-size: 0.6rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
         .mu-src-breakdown { display: flex; flex-wrap: wrap; gap: 5px; }
+        .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
         .mu-compact-list { display: flex; flex-direction: column; gap: 5px; }
         .mu-compact-row { display: grid; grid-template-columns: 8px 1fr auto 70px auto; align-items: center; gap: 6px; padding: 3px 0; }
@@ -4108,18 +4109,24 @@
                         const pct = Math.max(2, (total / maxCost) * 100).toFixed(1);
                         const color = palette[i % palette.length];
                         const src = (model.source || '').toLowerCase();
-                        const srcTag = src.includes('openrouter') ? 'OR' : src.includes('codexbar') ? 'CB' : src.includes('openclaw') ? 'OC' : src.includes('xai') ? 'xAI' : '?';
-                        const srcClass = src.includes('openrouter') ? 'openrouter' : src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
-                        const shortName = (model.name || '').replace(/^(anthropic|openai|google|openrouter|x-ai)\//, '').replace(/\s*\(BYOK\)/, '');
+                        const isLocal = model.isLocal === true || src === 'ollama';
+                        const srcTag = isLocal ? '⚡' : src.includes('openrouter') ? 'OR' : src.includes('codexbar') ? 'CB' : src.includes('openclaw') ? 'OC' : src.includes('xai') ? 'xAI' : '?';
+                        const srcClass = isLocal ? 'local' : src.includes('openrouter') ? 'openrouter' : src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
+                        const shortName = (model.name || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local)\//, '').replace(/\s*\(BYOK\)/, '');
                         const estimated = model.costEstimated ? ' ~' : '';
+                        const sizeLabel = isLocal && model.sizeGb ? ` · ${model.sizeGb}GB` : '';
+                        const costDisplay = isLocal
+                            ? `<span style="color:#4ade80;font-size:0.62rem;font-weight:600;">free${sizeLabel}</span>`
+                            : `<span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:rgba(255,255,255,0.25);margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>`;
+                        const localDot = isLocal && model.loaded ? `<span title="loaded in memory" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#4ade80;margin-left:2px;vertical-align:middle;"></span>` : '';
                         return `<div class="mu-compact-row">
                             <span class="mu-compact-dot" style="background:${color}"></span>
-                            <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}</span>
+                            <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}${localDot}</span>
                             <span class="mu-source-tag ${srcClass}" style="font-size:0.52rem;padding:0 3px;">${srcTag}</span>
                             <div class="mu-compact-bar-wrap">
-                                <div class="mu-compact-bar-fill" style="width:${pct}%;background:${color}80"></div>
+                                <div class="mu-compact-bar-fill" style="width:${pct}%;background:${isLocal ? '#4ade8060' : color+'80'}"></div>
                             </div>
-                            <span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:rgba(255,255,255,0.25);margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>
+                            ${costDisplay}
                         </div>`;
                     }).join('')}</div>
                     <div class="mu-compact-legend" style="font-size:0.55rem;color:rgba(255,255,255,0.25);margin-top:4px;text-align:right;">today / weekly · ~ = estimated</div>`;
