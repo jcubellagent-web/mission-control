@@ -1,22 +1,22 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T21:37:20Z",
+  "messageReceived": "2026-03-28T21:37:25Z",
   "objective": "Delete X-watchlist monitor from JOSH 2.0",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Parsed",
       "status": "done",
       "tool": "openclaw"
     },
     {
-      "label": "Transcribing",
+      "label": "Finding cron jobs",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-28T21:37:20Z",
-  "checkedAt": "2026-03-28T21:37:20Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T21:37:25Z",
+  "checkedAt": "2026-03-28T21:37:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
