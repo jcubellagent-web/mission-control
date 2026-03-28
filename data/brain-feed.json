@@ -1,6 +1,6 @@
 {
   "active": true,
-  "messageReceived": "2026-03-28T20:16:43Z",
+  "messageReceived": "2026-03-28T20:18:08Z",
   "objective": "Cron audit - jobs and agent assignment",
   "status": "active",
   "steps": [
@@ -15,13 +15,23 @@
       "tool": "exec"
     },
     {
-      "label": "Auditing issues",
+      "label": "Moving Sorare to JAIN",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Fixing cron targets + agent check",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Pushing changes",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-28T20:16:43Z",
-  "checkedAt": "2026-03-28T20:16:43Z",
+  "updatedAt": "2026-03-28T20:18:08Z",
+  "checkedAt": "2026-03-28T20:18:08Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
