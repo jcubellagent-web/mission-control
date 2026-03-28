@@ -1,17 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:28:46Z",
-  "objective": "Session startup \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:29:35Z",
+  "objective": "Redesign signal strength indicator for live intelligence feed",
+  "status": "active",
   "steps": [
     {
-      "label": "Loading context",
+      "label": "Received audio",
       "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Parsing intent",
+      "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T22:28:53Z",
-  "checkedAt": "2026-03-28T22:28:46Z",
+  "updatedAt": "2026-03-28T22:29:35Z",
+  "checkedAt": "2026-03-28T22:29:35Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
