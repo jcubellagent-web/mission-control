@@ -1346,6 +1346,20 @@
         .fg-pill.greed { color: #4ade80; }
 
         /* Signal / article items */
+        /* Signal table */
+        .if-signal-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+        .if-signal-table thead th { font-size: 0.55rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+        .ift-src { width: 90px; white-space: nowrap; }
+        .ift-cat { width: 100px; }
+        .ift-headline { min-width: 0; }
+        .ift-row td { padding: 5px 6px; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .ift-row:last-child td { border-bottom: none; }
+        .ift-row:hover td { background: rgba(255,255,255,0.03); }
+        .ift-row .ift-src { font-size: 0.6rem; color: rgba(255,255,255,0.6); }
+        .ift-cat-badge { font-size: 0.55rem; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: #fff; white-space: nowrap; display: inline-block; }
+        .ift-title { font-size: 0.72rem; color: #fff; line-height: 1.35; }
+        .ift-reason { font-size: 0.62rem; color: #fff; opacity: 0.75; margin-top: 2px; line-height: 1.3; }
+        /* Signal table */
         .if-item { padding: 4px 8px 4px 6px; border-radius: 5px; transition: background 0.15s; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
         .if-item:hover { background: rgba(255,255,255,0.04); }
         .if-item-link { color: #fff; text-decoration: none; font-size: 0.72rem; line-height: 1.3; flex: 1; min-width: 0; }
@@ -3368,8 +3382,34 @@
                 html += `<div class="if-section" id="ifs-signal">
                     <div class="if-section-header">🎯 Top Signals, Developments &amp; TLDR
                         ${chips ? `<div class="if-cat-chips">${chips}</div>` : ''}
-                    </div>`;
-                signalItems.slice(0, 6).forEach(item => { html += ifItemHtml(item, 'signal'); });
+                    </div>
+                    <table class="if-signal-table">
+                        <thead>
+                            <tr>
+                                <th class="ift-src">Source</th>
+                                <th class="ift-cat">Category</th>
+                                <th class="ift-headline">Headline</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                signalItems.slice(0, 6).forEach(item => {
+                    const url = item.url || '';
+                    const titleEl = url
+                        ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(item.title || item.headline || '')}</a>`
+                        : escapeHtml(item.title || item.headline || '');
+                    const cat = item.category || item.section || '—';
+                    const src = item.source || '—';
+                    const reason = item.reason && !item.reason.startsWith('http') ? item.reason : '';
+                    html += `<tr class="ift-row">
+                        <td class="ift-src">${escapeHtml(src)}</td>
+                        <td class="ift-cat"><span class="ift-cat-badge">${escapeHtml(cat)}</span></td>
+                        <td class="ift-headline">
+                            <div class="ift-title">${titleEl}</div>
+                            ${reason ? `<div class="ift-reason">${escapeHtml(reason)}</div>` : ''}
+                        </td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
                 if (tldrItems.length) {
                     html += `<div class="if-tldr-block">`;
                     tldrItems.forEach(b => { html += `<div class="if-tldr-bullet">› ${escapeHtml(b)}</div>`; });
