@@ -1,11 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T17:17:52Z",
-  "objective": "Response sent \u00b7 Awaiting instruction",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T17:45:23Z",
-  "checkedAt": "2026-03-28T17:17:52Z",
+  "active": true,
+  "messageReceived": "2026-03-28T17:45:33Z",
+  "objective": "Live RT test - checking dashboard updates",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Pushing",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Verifying",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T17:45:33Z",
+  "checkedAt": "2026-03-28T17:45:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
