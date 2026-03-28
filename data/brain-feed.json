@@ -1,22 +1,17 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:27:07Z",
-  "objective": "Push feed + add SS indicator to tables \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:28:46Z",
+  "objective": "Session startup",
+  "status": "active",
   "steps": [
     {
-      "label": "Pushed",
-      "status": "done",
-      "tool": "github"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Loading context",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T22:28:34Z",
-  "checkedAt": "2026-03-28T22:27:07Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-28T22:28:46Z",
+  "checkedAt": "2026-03-28T22:28:46Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
