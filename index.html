@@ -1670,10 +1670,10 @@
             margin-bottom: 4px;
         }
         .bf-objective-text {
-            font-size: clamp(0.88rem, 1.6vw, 1.1rem);
+            font-size: clamp(1.76rem, 3.2vw, 2.2rem);
             font-weight: 600;
             color: rgba(255,255,255,0.85);
-            line-height: 1.3;
+            line-height: 1.2;
         }
         .bf-current-tool-bar {
             display: flex;
@@ -1749,7 +1749,7 @@
             color: var(--text-secondary);
             line-height: 1.3;
         }
-        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.85); font-weight: 500; font-size: 1.5rem; line-height: 1.25; }
+        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.85); font-weight: 500; font-size: 0.75rem; line-height: 1.3; }
         .bf-step.pending-step .bf-step-label { color: var(--text-muted); }
         .bf-tool-pill {
             display: inline-flex;
@@ -3929,21 +3929,24 @@
                         ts: e.timestamp ? formatRelTime(e.timestamp) : '' });
                 }
 
-                const idleActivityHtml = idleItems.length ? `
+                // Show last steps from brain feed in idle (no header — bottom Activity & Agents handles that)
+                const idleStepsHtml = joshSteps.length ? `
                     <div class="bf-idle-activity-log">
-                        <div class="bf-idle-activity-header">Activity &amp; Agents</div>
-                        <div class="ua-log" style="max-height:280px;overflow-y:auto;">
-                            ${idleItems.slice(0, 20).map(item => `
-                            <div class="ua-item">
-                                <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
-                                <span class="ua-dot ${escapeHtml(item.dot)}"></span>
-                                <span class="ua-msg">${escapeHtml(item.msg)}</span>
-                                ${item.tool ? `<span class="ua-tool-pill">${escapeHtml(item.tool)}</span>` : ''}
-                                ${item.model ? `<span class="ua-model-pill">${escapeHtml(item.model)}</span>` : ''}
-                                <span class="ua-ts">${escapeHtml(item.ts)}</span>
-                            </div>`).join('')}
+                        <div class="bf-timeline" style="margin-top:4px;">
+                            ${[...joshSteps].reverse().slice(0, 8).map(step => {
+                                const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
+                                const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                                return `<div class="bf-step done-step">
+                                    <div class="bf-step-icon done">✓</div>
+                                    <div class="bf-step-body">
+                                        <div class="bf-step-label">${escapeHtml(stepLabel)}</div>
+                                        ${toolHtml}
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
-                    </div>` : `<div class="ua-empty">No recent activity.</div>`;
+                    </div>` : '';
+                const idleActivityHtml = idleStepsHtml;
 
                 const lastUpdatedStr = bf?.updatedAt ? formatRelTime(bf.updatedAt) : '';
 
