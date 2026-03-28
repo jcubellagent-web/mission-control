@@ -1417,6 +1417,87 @@
             to   { transform: rotate(360deg); }
         }
         /* Brain Feed Active - content */
+        /* ── Brain Feed Cinematic Animations ───────────────────────────────── */
+        @keyframes bf-wake-flash {
+          0%   { opacity: 0; transform: translateY(12px) scale(0.98); }
+          20%  { opacity: 1; transform: translateY(-3px) scale(1.005); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes bf-scan-line {
+          0%   { transform: translateX(-110%); opacity: 0.7; }
+          100% { transform: translateX(110%); opacity: 0; }
+        }
+        @keyframes bf-step-in {
+          from { opacity: 0; transform: translateX(-14px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes bf-done-glow {
+          0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+          30%  { box-shadow: 0 0 50px 12px rgba(74,222,128,0.4); }
+          100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+        }
+        @keyframes bf-obj-reveal {
+          from { opacity: 0; transform: translateY(7px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bf-ring-spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes bf-banner-flash {
+          0%   { background: rgba(229,62,62,0.28); border-color: rgba(229,62,62,0.8); }
+          60%  { background: rgba(229,62,62,0.06); border-color: rgba(229,62,62,0.15); }
+          100% { background: rgba(229,62,62,0.06); border-color: rgba(229,62,62,0.15); }
+        }
+        @keyframes bf-dot-fast {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.2; transform: scale(0.5); }
+        }
+        @keyframes bf-done-banner-in {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bf-done-banner-out {
+          from { opacity: 1; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(-8px); }
+        }
+        .bf-container.bf-waking { animation: bf-wake-flash 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+        .bf-msg-banner.bf-banner-flash { animation: bf-banner-flash 1.2s ease-out both; }
+        .bf-scan-line {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; overflow: hidden; border-radius: 8px;
+        }
+        .bf-scan-line::after {
+            content: "";
+            position: absolute; top: 0; bottom: 0; width: 40%;
+            background: linear-gradient(90deg, transparent, rgba(229,62,62,0.4), transparent);
+            animation: bf-scan-line 0.9s ease-out both;
+        }
+        .bf-msg-dot.bf-dot-recv { animation: bf-dot-fast 0.45s infinite !important; }
+        .bf-objective-text.bf-obj-revealing { animation: bf-obj-reveal 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        .bf-step.bf-step-animate { animation: bf-step-in 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+        .card-brain.bf-done-flash { animation: bf-done-glow 1.4s ease-out both; }
+        .bf-step-icon.active.bf-ring { position: relative; }
+        .bf-step-icon.active.bf-ring::before {
+            content: "";
+            position: absolute; inset: -3px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #e53e3e;
+            animation: bf-ring-spin 0.85s linear infinite;
+        }
+        .bf-done-success-banner {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px;
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.3);
+            border-radius: 8px;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: #4ade80;
+            animation: bf-done-banner-in 0.3s ease both;
+        }
+        .bf-done-success-banner.fading-out { animation: bf-done-banner-out 0.4s ease both; }
+
         .bf-container {
             display: flex;
             flex-direction: column;
@@ -2187,6 +2268,9 @@
         let lastUpdateTime = null;
         let lastDashboardHash = {};  // section-level cache for diff
         let lastBrainFeedHash = null;
+        let _prevBfState = 'idle';
+        let _lastBfObjective = '';
+        let _bfDoneBannerTimer = null;
         let bfLastUpdatedTs = null;
         let _jainBrainFeed = null;
         let bfCounterInterval = null;
@@ -2977,6 +3061,12 @@
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard) return;
             window._mcLastBrainFeed = bf || null;
+            // State transition detection
+            const newState = (bf && bf.active) ? 'active' : (bf && bf.status === 'done') ? 'done' : 'idle';
+            const isWakingUp = (_prevBfState === 'idle' || _prevBfState === 'done') && newState === 'active';
+            const isCompleting = _prevBfState === 'active' && (newState === 'done' || newState === 'idle');
+            const objectiveChanged = bf && bf.objective && bf.objective !== _lastBfObjective;
+            const isReceivingMsg = bf && bf.objective && bf.objective.toLowerCase().startsWith('received:');
             const brainCard = brainFeedCard.closest('.card-brain');
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
@@ -3029,7 +3119,61 @@
                         <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
                     </div>
                 `;
+                // ── Post-render animation triggers ────────────────────────────
+                // Wake-up animation
+                const bfCont = brainFeedCard.querySelector('.bf-container');
+                if (bfCont && isWakingUp) {
+                    bfCont.classList.add('bf-waking');
+                    bfCont.addEventListener('animationend', () => bfCont.classList.remove('bf-waking'), { once: true });
+                }
+                // Message received banner flash + scan line
+                if (isReceivingMsg || isWakingUp) {
+                    const banner = brainFeedCard.querySelector('.bf-msg-banner');
+                    if (banner) {
+                        banner.classList.remove('bf-banner-flash');
+                        void banner.offsetWidth;
+                        banner.classList.add('bf-banner-flash');
+                        let scanEl = banner.querySelector('.bf-scan-line');
+                        if (!scanEl) { scanEl = document.createElement('div'); scanEl.className = 'bf-scan-line'; banner.appendChild(scanEl); }
+                        const dot = banner.querySelector('.bf-msg-dot');
+                        if (dot) { dot.classList.add('bf-dot-recv'); setTimeout(() => dot.classList.remove('bf-dot-recv'), 2000); }
+                    }
+                }
+                // Objective text reveal
+                if (objectiveChanged) {
+                    const objText = brainFeedCard.querySelector('.bf-objective-text');
+                    if (objText) {
+                        objText.classList.remove('bf-obj-revealing');
+                        void objText.offsetWidth;
+                        objText.classList.add('bf-obj-revealing');
+                        objText.addEventListener('animationend', () => objText.classList.remove('bf-obj-revealing'), { once: true });
+                    }
+                    _lastBfObjective = bf.objective;
+                }
+                // Step animations — spinning ring on active step
+                brainFeedCard.querySelectorAll('.bf-step').forEach((stepEl, i) => {
+                    if (stepEl.classList.contains('active-step')) {
+                        const icon = stepEl.querySelector('.bf-step-icon');
+                        if (icon) icon.classList.add('bf-ring');
+                        stepEl.classList.add('bf-step-animate');
+                        stepEl.style.animationDelay = (i * 0.06) + 's';
+                    }
+                });
             } else {
+                // Done flash when transitioning active -> done/idle
+                if (isCompleting) {
+                    brainCard.classList.add('bf-done-flash');
+                    brainCard.addEventListener('animationend', () => brainCard.classList.remove('bf-done-flash'), { once: true });
+                    if (_bfDoneBannerTimer) clearTimeout(_bfDoneBannerTimer);
+                    const doneBanner = document.createElement('div');
+                    doneBanner.className = 'bf-done-success-banner';
+                    doneBanner.innerHTML = '<span>✓</span><span>Response sent</span>';
+                    brainFeedCard.prepend(doneBanner);
+                    _bfDoneBannerTimer = setTimeout(() => {
+                        doneBanner.classList.add('fading-out');
+                        doneBanner.addEventListener('animationend', () => doneBanner.remove(), { once: true });
+                    }, 2000);
+                }
                 brainCard.classList.remove('brain-active');
                 document.body.classList.remove('edge-laser-on');
                 // Use cached focus/activity data if available
@@ -3108,6 +3252,8 @@
             if (bfLastUpdatedTs) updateBfFreshness(bf);
             // Always update J.A.I.N status bar after JOSH renders
             renderCombinedBrainFeed(bf, _jainBrainFeed);
+            // Track state for next transition
+            _prevBfState = newState;
         }
 
         // ===== Section-level diff helpers =====
