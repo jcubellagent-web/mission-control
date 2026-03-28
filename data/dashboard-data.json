@@ -3,43 +3,37 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
-    "messageReceived": "2026-03-28T19:29:25Z",
-    "objective": "Diagnosing brain feed pipeline",
-    "status": "active",
-    "steps": [
-      {
-        "label": "Checking",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-03-28T19:29:25Z",
-    "checkedAt": "2026-03-28T19:29:25Z",
+    "active": false,
+    "messageReceived": "2026-03-28T19:31:06Z",
+    "objective": "Response sent \u00b7 Awaiting instruction",
+    "status": "idle",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-03-28T19:31:12Z",
+    "checkedAt": "2026-03-28T19:31:06Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Diagnosing brain feed pipeline",
-    "updatedAt": "2026-03-28T19:30:01Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: Response sent \u00b7 Awaiting instruction",
+    "updatedAt": "2026-03-28T19:35:02Z"
   },
   "contextWindow": {
-    "usedTokens": 151660,
+    "usedTokens": 163935,
     "limitTokens": 200000,
-    "pct": 0.7583,
+    "pct": 0.8197,
     "model": "claude-sonnet-4-6",
     "status": "amber"
   },
   "modelUsage": {
-    "session": 14.216965,
-    "daily": 6.56632,
+    "session": 15.339247,
+    "daily": 7.688603,
     "weekly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 12.144327299999997
+        "cost": 13.266609749999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -61,12 +55,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 155,
-        "outputTokens": 124260,
-        "totalTokens": 124415,
-        "sessionCost": 12.144327299999997,
-        "dailyCost": 6.566320199999999,
-        "weeklyCost": 12.144327299999997,
+        "inputTokens": 152,
+        "outputTokens": 124251,
+        "totalTokens": 124403,
+        "sessionCost": 13.266609749999997,
+        "dailyCost": 7.688602649999999,
+        "weeklyCost": 13.266609749999997,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -107,7 +101,7 @@
         "costEstimated": false
       }
     ],
-    "lastUpdated": "2026-03-28T19:30:01Z",
+    "lastUpdated": "2026-03-28T19:35:02Z",
     "jain": {
       "daily": 0.704034,
       "session": 0.92661,
@@ -115,8 +109,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 7.270354,
-      "total": 15.143575
+      "daily": 8.392637,
+      "total": 16.265857
     }
   },
   "devices": [
@@ -131,19 +125,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T19:30:01Z"
+      "lastChecked": "2026-03-28T19:35:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-28T19:30:01Z"
+      "lastChecked": "2026-03-28T19:35:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-28T19:30:01Z"
+      "lastChecked": "2026-03-28T19:35:02Z"
     }
   ],
   "crons": [
@@ -283,25 +277,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-28T19:30:01Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-03-28T19:35:02Z",
+      "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-28T19:30:01Z",
-      "event": "Session spend: $14.22"
+      "time": "2026-03-28T19:35:02Z",
+      "event": "Session spend: $15.34"
     },
     {
-      "time": "2026-03-28T19:30:01Z",
+      "time": "2026-03-28T19:35:02Z",
       "event": "8 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-28T19:30:01Z",
+      "time": "2026-03-28T19:35:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-28T19:30:01Z",
+      "time": "2026-03-28T19:35:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-28T19:30:01Z"
+  "lastUpdated": "2026-03-28T19:35:02Z"
 }
