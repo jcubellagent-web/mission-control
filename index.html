@@ -3466,59 +3466,19 @@
         }
 
         function renderCombinedBrainFeed(joshBf, jainBf) {
-            // JOSH 2.0 is the hero — renderBrainFeed handles him fully.
-            // This function just injects/updates the J.A.I.N status bar below.
+            // J.A.I.N status is now in the unified Activity & Agents log — not here.
+            // Only keep brainCard active-state logic for laser/glow effects.
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
-
-            // Also update brainCard active state considering J.A.I.N
             const brainCard = card.closest('.card-brain');
             const jainActive = !!(jainBf && jainBf.active);
             const joshActive = !!(joshBf && joshBf.active);
             if (brainCard && jainActive && !joshActive) {
                 brainCard.classList.add('brain-active');
             }
-
-            // Inject or update J.A.I.N status bar
-            let jainBar = document.getElementById('jain-status-bar');
-            if (!jainBar) {
-                jainBar = document.createElement('div');
-                jainBar.id = 'jain-status-bar';
-                jainBar.className = 'jain-status-bar';
-                card.appendChild(jainBar);
-            }
-
-            const isActive = jainActive;
-            const color = '#00ff88';
-            const bg = isActive ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.02)';
-            const borderColor = isActive ? 'rgba(0,255,136,0.25)' : 'rgba(255,255,255,0.06)';
-            const dotColor = isActive ? color : '#3a3a4a';
-            const dotGlow = isActive ? `box-shadow:0 0 5px ${color};` : '';
-
-            let bodyHtml = '';
-            if (!jainBf) {
-                bodyHtml = `<span class="jsb-obj" style="color:rgba(255,255,255,0.25)">No data</span>`;
-            } else if (!isActive) {
-                bodyHtml = `<span class="jsb-obj">${escapeHtml(jainBf.objective || 'Idle')}</span>`;
-                if (jainBf.updatedAt) bodyHtml += `<span class="jsb-ts">${formatTime(jainBf.updatedAt)}</span>`;
-            } else {
-                // Show active objective + current step
-                const curStep = [...(jainBf.steps||[])].reverse().find(s => s.status === 'active');
-                bodyHtml = `<span class="jsb-obj" style="color:${color}">${escapeHtml(jainBf.objective || '')}</span>`;
-                if (curStep) {
-                    bodyHtml += `<span class="jsb-step">→ ${escapeHtml(curStep.label)}`;
-                    if (curStep.tool) bodyHtml += ` <span class="jsb-tool" style="color:${color}">${escapeHtml(curStep.tool)}</span>`;
-                    bodyHtml += `</span>`;
-                }
-                if (jainBf.updatedAt) bodyHtml += `<span class="jsb-ts">${formatTime(jainBf.updatedAt)}</span>`;
-            }
-
-            jainBar.style.cssText = `background:${bg};border-color:${borderColor};`;
-            jainBar.innerHTML = `
-                <span class="jsb-dot" style="background:${dotColor};${dotGlow}"></span>
-                <span class="jsb-label" style="color:${isActive ? color : 'rgba(255,255,255,0.35)'}">J.A.I.N</span>
-                ${bodyHtml}
-            `;
+            // Remove old jain-status-bar if it exists
+            const old = document.getElementById('jain-status-bar');
+            if (old) old.remove();
         }
 
         function renderBrainFeed(bf) {
