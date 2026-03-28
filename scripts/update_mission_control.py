@@ -27,11 +27,11 @@ KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsa
 CRON_TARGETS = [
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
-    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
-    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "JOSH 2.0"},
-    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "JOSH 2.0"},
-    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed", "agent": "JOSH 2.0",
+    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
+    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Every 4h", "description": "Watches for status changes and alerts if a starter goes down", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
+    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "J.A.I.N"},
+    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements (folded in). Pushes score ≥8.5 to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N"},
+    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x daily", "description": "Full AI/macro/crypto/market intelligence briefing", "category": "Intelligence Feed", "agent": "J.A.I.N",
      "multiRun": {
          "runs": [
              {"time": "7:15 AM",  "mode": "Full",  "label": "Market open"},
