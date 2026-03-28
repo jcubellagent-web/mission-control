@@ -5,18 +5,18 @@
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Confirmed",
       "status": "done",
-      "tool": "whisper"
+      "tool": "openclaw"
     },
     {
-      "label": "Confirmed objective",
+      "label": "Patching JS renderer",
       "status": "active",
-      "tool": "openclaw"
+      "tool": "exec"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T05:40:27Z",
-  "checkedAt": "2026-03-28T05:40:27Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T05:40:30Z",
+  "checkedAt": "2026-03-28T05:40:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
