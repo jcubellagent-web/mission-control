@@ -34,6 +34,29 @@ fi
 
 IS_ACTIVE="true"
 [[ "$STATE" == "idle" ]] && IS_ACTIVE="false"
+
+# On idle: auto-build objective from previous objective if caller passes empty/generic string
+if [[ "$STATE" == "idle" ]]; then
+  OBJECTIVE=$(python3 -c "
+import json, sys
+bf_file = '$BF_FILE'
+new_obj = sys.argv[1]
+generic = ['Response sent · Awaiting instruction', 'Working…', '', 'Awaiting instruction']
+try:
+    bf = json.load(open(bf_file))
+    prev = bf.get('objective', '')
+    # If caller passed a generic/empty string, build from previous objective
+    if new_obj.strip() in generic or not new_obj.strip():
+        if prev and prev not in generic:
+            print(prev + ' — complete · awaiting next instruction')
+        else:
+            print('Awaiting next instruction')
+    else:
+        print(new_obj)
+except:
+    print(new_obj if new_obj.strip() else 'Awaiting next instruction')
+" "$OBJECTIVE")
+fi
 # "done" keeps active=true for 90s so the dashboard shows the completion flash
 # The idle cron will not overwrite while active=true
 
