@@ -1,11 +1,22 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Responded to Josh \u2014 X signal is hallucinated, needs xAI API",
-  "status": "done",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:24:04Z",
+  "objective": "Wiring up xAI API for live X search",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Saving key",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Testing connection",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:24:44Z",
   "checkedAt": "2026-03-28T03:20:01Z",
   "idleUpdatedAt": "2026-03-28T03:20:01Z"
 }
