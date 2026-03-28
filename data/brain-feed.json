@@ -1,22 +1,22 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-28T22:09:59Z",
-  "objective": "Summarize intel feed categories \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-28T22:11:33Z",
+  "objective": "Update Signal Update Tracker sheet",
+  "status": "active",
   "steps": [
     {
-      "label": "Read",
+      "label": "Received",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Reading skill",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-28T22:10:30Z",
-  "checkedAt": "2026-03-28T22:09:59Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T22:11:33Z",
+  "checkedAt": "2026-03-28T22:11:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
