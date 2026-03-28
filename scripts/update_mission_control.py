@@ -400,7 +400,9 @@ def load_accum() -> Dict[str, Any]:
     today  = now_et.strftime("%Y-%m-%d")
     # ISO week starts Monday
     week   = now_et.strftime("%Y-W%W-%w")[:-2]  # e.g. "2026-W12"
-    empty  = {"daily": 0.0, "weekly": 0.0, "dailyDate": today, "weekKey": week, "peak": 0.0}
+    month  = now_et.strftime("%Y-%m")            # e.g. "2026-03"
+    empty  = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0,
+              "dailyDate": today, "weekKey": week, "monthKey": month, "peak": 0.0}
     if not ACCUM_PATH.exists():
         return empty
     try:
@@ -413,6 +415,13 @@ def load_accum() -> Dict[str, Any]:
         if a.get("weekKey") != week:
             a["weekly"] = 0.0
             a["weekKey"] = week
+        # Reset monthly if new month
+        if a.get("monthKey") != month:
+            a["monthly"] = 0.0
+            a["monthKey"] = month
+        if "monthly" not in a:
+            a["monthly"] = 0.0
+            a["monthKey"] = month
         return a
     except Exception:
         return empty
@@ -661,9 +670,10 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         prev_peak = accum.get("peak", 0.0)
         if session_cost > prev_peak:
             delta = session_cost - prev_peak
-            accum["daily"]  = round(accum.get("daily",  0.0) + delta, 6)
-            accum["weekly"] = round(accum.get("weekly", 0.0) + delta, 6)
-            accum["peak"]   = round(session_cost, 6)
+            accum["daily"]   = round(accum.get("daily",   0.0) + delta, 6)
+            accum["weekly"]  = round(accum.get("weekly",  0.0) + delta, 6)
+            accum["monthly"] = round(accum.get("monthly", 0.0) + delta, 6)
+            accum["peak"]    = round(session_cost, 6)
             save_accum(accum)
 
         # Compute daily directly from per-model dailyCost (today's sessions only)
@@ -722,10 +732,16 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             if "openrouter/auto (byok)" not in breakdown_names_lower:
                 breakdown.append(or_row)
 
+        monthly_cost = accum.get("monthly", 0.0)
+        or_monthly   = openrouter.get("byok_monthly", 0) or openrouter.get("monthly", 0)
+        jain_monthly = jain.get("monthly", jain.get("total", 0))  # approximate from total if no monthly
+        total_monthly = round(monthly_cost + or_monthly, 6)
+
         payload = {
             "session": round(session_cost, 6),
             "daily":   round(daily_cost,   6),
             "weekly":  round(weekly_cost,  6),
+            "monthly": round(monthly_cost, 6),
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),
@@ -733,8 +749,9 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "openrouter": openrouter,
             "elevenlabs": elevenlabs,
             "aggregate": {
-                "daily": round(daily_cost + jain.get("daily", 0) + or_daily, 6),
-                "total": round(session_cost + jain.get("total", 0) + or_weekly, 6),
+                "daily":   round(daily_cost + jain.get("daily", 0) + or_daily, 6),
+                "total":   round(session_cost + jain.get("total", 0) + or_weekly, 6),
+                "monthly": total_monthly,
             },
         }
         return payload
