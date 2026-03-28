@@ -1,17 +1,22 @@
 {
   "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Received: run brain feed demo",
+  "objective": "Scanning mission-control repo for issues",
   "status": "active",
   "steps": [
     {
       "label": "Parsing message",
-      "status": "active",
+      "status": "done",
       "tool": "openclaw"
+    },
+    {
+      "label": "Reading repo",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-28T05:30:24Z",
-  "checkedAt": "2026-03-28T05:30:24Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T05:30:27Z",
+  "checkedAt": "2026-03-28T05:30:27Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
