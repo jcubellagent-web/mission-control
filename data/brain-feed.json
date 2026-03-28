@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-28T22:09:59Z",
-  "objective": "Summarize intel feed categories",
-  "status": "active",
+  "objective": "Summarize intel feed categories \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Read",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Responding to Josh",
-      "status": "active",
+      "status": "done",
       "tool": "telegram"
     }
   ],
   "currentTool": "telegram",
-  "updatedAt": "2026-03-28T22:09:59Z",
+  "updatedAt": "2026-03-28T22:10:30Z",
   "checkedAt": "2026-03-28T22:09:59Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z"
 }
