@@ -32,7 +32,9 @@ else
 fi
 
 IS_ACTIVE="true"
-[[ "$STATE" == "done" || "$STATE" == "idle" ]] && IS_ACTIVE="false"
+[[ "$STATE" == "idle" ]] && IS_ACTIVE="false"
+# "done" keeps active=true for 90s so the dashboard shows the completion flash
+# The idle cron will not overwrite while active=true
 
 # ── Write JSON instantly (synchronous, fast) ──────────────────────────────────
 python3 -c "
@@ -46,6 +48,7 @@ bf['active']          = True if '$IS_ACTIVE' == 'true' else False
 bf['objective']       = '$OBJECTIVE'
 bf['status']          = '$STATE'
 bf['updatedAt']       = '$NOW'
+bf['checkedAt']       = '$NOW'
 bf['messageReceived'] = bf.get('messageReceived', '$NOW')
 bf['steps']           = $STEPS_JSON
 bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''

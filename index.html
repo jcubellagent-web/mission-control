@@ -3514,17 +3514,13 @@
                 }
 
                 // Color title + context to match the ctx bar color
-                const idleBarColor = (ctxWin && ctxWin.status)
-                    ? (ctxWin.status === 'red' ? '#e53e3e' : ctxWin.status === 'amber' ? '#fbbf24' : '#4ade80')
-                    : '#4ade80';
-
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
                     <div class="bf-idle-container brain-feed">
                         <div class="brain-hero">
                             <div class="brain-kicker">Live Operator State</div>
-                            <div class="brain-title" style="color:${idleBarColor}">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
-                            <p class="focus-context" style="color:${idleBarColor};opacity:0.75">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
+                            <div class="brain-title">${escapeHtml((focusData && focusData.status) || 'Mission Control Online')}</div>
+                            <p class="focus-context">${escapeHtml((focusData && focusData.context) || 'No current context')}</p>
                             ${ctxMeterHtml}
                             <div class="brain-meta" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px">
                                 <span>${focusData && focusData.updatedAt ? `Updated ${formatTime(focusData.updatedAt)}` : 'Awaiting refresh'}</span>
