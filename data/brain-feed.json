@@ -1,11 +1,17 @@
 {
-  "active": false,
+  "active": true,
   "messageReceived": "2026-03-25T04:27:00Z",
-  "objective": "Idle: Awaiting your next command",
-  "status": "idle",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-03-28T03:52:00Z",
+  "objective": "Committing intel feed + model audit updates",
+  "status": "active",
+  "steps": [
+    {
+      "label": "Pushing changes",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-03-28T03:52:27Z",
   "checkedAt": "2026-03-28T03:50:01Z",
   "idleUpdatedAt": "2026-03-28T03:50:01Z"
 }
