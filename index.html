@@ -4002,20 +4002,15 @@
                     <div class="job-chip error">${escapeHtml(item.priority || 'alert')}</div>
                 </div>
             `).join('');
+            // Only show non-empty sections to avoid blank padding eating the card space
+            const jobSections = [
+                cronRows   ? `<div class="job-group"><div class="job-group-title">Automation Queue</div>${cronRows}</div>` : '',
+                eventRows  ? `<div class="job-group"><div class="job-group-title">Calendar / Triggers</div>${eventRows}</div>` : '',
+                actionRows ? `<div class="job-group"><div class="job-group-title">Action Required</div>${actionRows}</div>` : '',
+            ].filter(Boolean).join('');
             todayJobsCard.innerHTML = `
                 <div class="jobs-shell">
-                    <div class="job-group">
-                        <div class="job-group-title">Automation Queue</div>
-                        ${cronRows || '<div class="empty-state">No scheduled jobs</div>'}
-                    </div>
-                    <div class="job-group">
-                        <div class="job-group-title">Calendar / Triggers</div>
-                        ${eventRows || '<div class="empty-state">No upcoming events</div>'}
-                    </div>
-                    <div class="job-group">
-                        <div class="job-group-title">Action Required</div>
-                        ${actionRows || '<div class="empty-state">Nothing urgent</div>'}
-                    </div>
+                    ${jobSections || '<div class="empty-state">No scheduled jobs</div>'}
                 </div>
             `;
             } // end crons diff guard
