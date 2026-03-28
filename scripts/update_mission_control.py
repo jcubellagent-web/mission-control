@@ -635,6 +635,47 @@ def airpoint_status() -> Dict[str, str]:
         return {"name": "Airpoint", "status": "attention", "detail": f"Status check failed ({exc.returncode})"}
 
 
+def fetch_active_subagents() -> List[Dict[str, Any]]:
+    """Read active/recent sub-agent sessions from OpenClaw sessions.json."""
+    sessions_path = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
+    if not sessions_path.exists():
+        return []
+    try:
+        data = json.loads(sessions_path.read_text())
+        agents = []
+        now_ms = int(dt.datetime.now(dt.timezone.utc).timestamp() * 1000)
+        for key, val in data.items():
+            if "subagent" not in key:
+                continue
+            status = val.get("status", "unknown")
+            label = val.get("label") or key.split(":")[-1][:30]
+            updated_at_ms = val.get("updatedAt", 0)
+            started_at_ms = val.get("startedAt", 0)
+            age_secs = (now_ms - updated_at_ms) / 1000 if updated_at_ms else 9999
+            # Only include: active ones OR completed within last 10 minutes
+            if status == "running" or (status == "done" and age_secs < 600):
+                started_iso = dt.datetime.fromtimestamp(
+                    started_at_ms / 1000, tz=dt.timezone.utc
+                ).isoformat() if started_at_ms else None
+                elapsed_secs = int((now_ms - started_at_ms) / 1000) if started_at_ms else 0
+                agents.append({
+                    "id": key.split(":")[-1],
+                    "label": label,
+                    "status": status,
+                    "startedAt": started_iso,
+                    "elapsedSecs": elapsed_secs,
+                    "updatedAt": dt.datetime.fromtimestamp(
+                        updated_at_ms / 1000, tz=dt.timezone.utc
+                    ).isoformat() if updated_at_ms else None,
+                })
+        # Active first, then by most recent
+        agents.sort(key=lambda x: (0 if x["status"] == "running" else 1, -x.get("elapsedSecs", 0)))
+        return agents[:5]
+    except Exception as exc:
+        print(f"[warn] fetch_active_subagents failed: {exc}", file=sys.stderr)
+        return []
+
+
 def fetch_crons() -> List[Dict[str, Any]]:
     try:
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True)
@@ -945,6 +986,7 @@ def main() -> None:
     dashboard["devices"] = build_devices()
     dashboard["products"] = build_products(now_iso)
     dashboard["crons"] = fetch_crons()
+    dashboard["activeAgents"] = fetch_active_subagents()
     dashboard["recentActivity"] = build_recent_activity(
         now_iso,
         model_usage,

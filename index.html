@@ -1920,6 +1920,34 @@
         .comms-ts { color: rgba(255,255,255,0.2); font-size: 0.55rem; flex-shrink: 0; white-space: nowrap; }
         .comms-status { display: none; }
 
+        /* ── Active sub-agents ── */
+        #active-agents-list { margin-bottom: 6px; }
+        .active-agent-row {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.65rem; overflow: hidden;
+        }
+        .active-agent-row:last-child { border-bottom: none; }
+        .aa-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+        }
+        .aa-dot.running { background: #e53e3e; animation: pulse 1.2s infinite; }
+        .aa-dot.done    { background: #4ade80; }
+        .aa-label {
+            flex: 1; color: rgba(255,255,255,0.65); overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap; font-size: 0.65rem;
+        }
+        .aa-label.running { color: rgba(255,255,255,0.85); font-weight: 500; }
+        .aa-elapsed {
+            color: rgba(255,255,255,0.25); font-size: 0.58rem; flex-shrink: 0; white-space: nowrap;
+        }
+        .aa-status-done { color: #4ade80; font-size: 0.58rem; flex-shrink: 0; }
+        .aa-divider {
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.2); margin: 4px 0 2px; padding-top: 4px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
         /* ===== Cron agent pill ===== */
         .cron-agent-pill {
             display: inline-block;
@@ -2229,9 +2257,10 @@
                     </div>
                     <!-- JOSH 2.0 — hero brain feed -->
                     <div id="brain-feed-card"></div>
-                    <!-- Agent Comms & Activity -->
+                    <!-- Activity & Agents -->
                     <div class="agent-comms-section">
-                        <div class="agent-comms-header">Recent Activity</div>
+                        <div class="agent-comms-header">Activity &amp; Agents</div>
+                        <div id="active-agents-list"></div>
                         <div id="agent-comms-list"></div>
                     </div>
                 </div>
@@ -2618,6 +2647,42 @@
                 if (!r.ok) return null;
                 return await r.json();
             } catch(e) { return null; }
+        }
+
+        function formatElapsed(secs) {
+            if (!secs || secs < 5) return 'just now';
+            if (secs < 60) return `${secs}s`;
+            if (secs < 3600) return `${Math.round(secs/60)}m`;
+            return `${Math.floor(secs/3600)}h ${Math.round((secs%3600)/60)}m`;
+        }
+
+        function renderActiveAgents(agents) {
+            const el = document.getElementById('active-agents-list');
+            if (!el) return;
+            const running = (agents || []).filter(a => a.status === 'running');
+            const recent  = (agents || []).filter(a => a.status === 'done');
+            if (!running.length && !recent.length) { el.innerHTML = ''; return; }
+
+            let html = '';
+            if (running.length) {
+                html += `<div class="aa-divider">⚙ Active Agents</div>`;
+                html += running.map(a => `
+                    <div class="active-agent-row">
+                        <div class="aa-dot running"></div>
+                        <div class="aa-label running">${escapeHtml(a.label)}</div>
+                        <div class="aa-elapsed">${formatElapsed(a.elapsedSecs)}</div>
+                    </div>`).join('');
+            }
+            if (recent.length) {
+                html += `<div class="aa-divider">✓ Completed</div>`;
+                html += recent.slice(0,3).map(a => `
+                    <div class="active-agent-row">
+                        <div class="aa-dot done"></div>
+                        <div class="aa-label">${escapeHtml(a.label)}</div>
+                        <div class="aa-status-done">done · ${formatElapsed(a.elapsedSecs)}</div>
+                    </div>`).join('');
+            }
+            el.innerHTML = html;
         }
 
         function renderAgentCommsList(entries) {
@@ -3499,6 +3564,9 @@
             window._mcLastCrons = data.crons;
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
+            if (sectionChanged('activeAgents', data.activeAgents)) {
+                renderActiveAgents(data.activeAgents || []);
+            }
 
             // Brain Feed — Supabase is the ONLY source of truth for active state.
             // dashboard-data.json brain feed — lowest priority source, route through applyBrainFeed
