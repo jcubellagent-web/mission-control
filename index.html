@@ -3488,9 +3488,10 @@
                     <th class="ift-headline">Headline</th>
                 </tr></thead><tbody>`;
                 rows.forEach(r => {
+                    const displayTitle = r.developing ? `🔄 Developing: ${r.title}` : r.title;
                     const titleEl = r.url
-                        ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(r.title)}</a>`
-                        : escapeHtml(r.title);
+                        ? `<a href="${escapeHtml(r.url)}" target="_blank" rel="noopener" class="if-item-link">${escapeHtml(displayTitle)}</a>`
+                        : escapeHtml(displayTitle);
                     const catStyle = r.catColor ? ` style="color:${escapeHtml(r.catColor)};border-color:${escapeHtml(r.catColor)}40"` : '';
                     t += `<tr class="ift-row">
                         <td class="ift-ss">${ssBar(r.score)}</td>
@@ -3512,7 +3513,8 @@
                 html += makeTable(items.map(i => ({
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'AI Value Chain'}),
                     title: i.title || '', url: i.url || '', score: i.score,
-                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
+                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : '',
+                    developing: !!i.developing
                 })));
                 html += `</div>`;
             }
@@ -3524,7 +3526,8 @@
                 html += makeTable(items.map(i => ({
                     src: resolveSource(i), cat: resolveCategory({...i, category: i.category || 'Enterprise AI'}),
                     title: i.title || i.headline || '', url: i.url || '', score: i.score,
-                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : ''
+                    blurb: i.reason && !i.reason.startsWith('http') ? i.reason : '',
+                    developing: !!i.developing
                 })));
                 html += `</div>`;
             }
