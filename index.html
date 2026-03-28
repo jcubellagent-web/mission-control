@@ -1863,7 +1863,7 @@
             background: rgba(255,255,255,0.2);
         }
         #agent-comms-list {
-            max-height: 160px;
+            max-height: 90px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -2606,7 +2606,7 @@
                 el.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.2);font-size:0.68rem;padding:6px 0">No comms yet.</div>';
                 return;
             }
-            el.innerHTML = entries.slice(0, 10).map(e => {
+            el.innerHTML = entries.slice(0, 2).map(e => {
                 // Determine agent tag from direction field: "josh→jain", "jain→josh", or agent field
                 const dir = (e.direction || '').toLowerCase();
                 const agent = (e.agent || (dir.startsWith('josh') ? 'josh' : dir.startsWith('jain') ? 'jain' : 'system')).toLowerCase();
