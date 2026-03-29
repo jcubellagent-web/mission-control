@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-29T16:10:02Z",
-  "objective": "Check X progress + trigger Sorare daily mission",
-  "status": "active",
+  "objective": "Check X progress + trigger Sorare daily mission \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Synced x-progress",
@@ -16,12 +16,12 @@
     },
     {
       "label": "Responding to Josh",
-      "status": "active",
+      "status": "done",
       "tool": "telegram"
     }
   ],
   "currentTool": "telegram",
-  "updatedAt": "2026-03-29T16:10:02Z",
+  "updatedAt": "2026-03-29T16:10:13Z",
   "checkedAt": "2026-03-29T16:10:02Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
