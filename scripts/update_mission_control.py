@@ -27,7 +27,8 @@ KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsa
 
 CRON_TARGETS = [
     # ── JOSH 2.0 (this machine) ──────────────────────────────────────────────
-    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 10 min", "description": "Pushes live dashboard data to GitHub Pages", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Real-time brain feed server for live dashboard laser + status updates", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     # ── J.A.I.N (background compute) ────────────────────────────────────────
     {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
@@ -36,6 +37,13 @@ CRON_TARGETS = [
     {"name": "Sorare Daily Missions", "pattern": "sorare_missions.py", "schedule": "Daily 10:00 AM ET", "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements. Pushes score ≥8.5 to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 10 min", "description": "Monitors X/Twitter watchlist for high-signal posts (score ≥8), pushes to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
+    # ── X Account ────────────────────────────────────────────────────────────
+    {"name": "X Morning Brief", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "AI-generated macro/market open take posted to @AgentJc11443", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Mid-Morning Signal", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "Top AI/tech signal of the day posted to X", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Afternoon Mover", "pattern": "x_post_agent.py", "schedule": "Daily 2:00 PM ET", "description": "Nasdaq/crypto mover take posted to X", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "Market wrap + outlook posted to X", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Evening Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "Deep insight / thread starter posted to X", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Feedback Loop", "pattern": "x_post_agent.py", "schedule": "Daily 6:00 AM ET", "description": "Pulls X analytics, scores post performance, updates content strategy. Fires milestone alerts via Telegram.", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "runs": [
@@ -435,11 +443,23 @@ def fetch_openrouter_usage() -> Dict[str, Any]:
     """
     empty = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0, "byok_daily": 0.0, "byok_weekly": 0.0,
              "byok_monthly": 0.0, "available": False}
-    # Keys to try (in order): primary inference key, secrets file key
-    keys_to_try = [
-        "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",
-    ]
-    # Load secondary key from secrets file if available
+    # Keys to try: load from ~/.secrets/openrouter_api_key.txt or auth-profiles.json
+    keys_to_try = []
+    # Primary: ~/.secrets/openrouter_api_key.txt
+    key_file = Path.home() / ".secrets" / "openrouter_api_key.txt"
+    if key_file.exists():
+        k = key_file.read_text().strip()
+        if k: keys_to_try.append(k)
+    # Secondary: openclaw auth-profiles
+    auth_path = Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json"
+    if auth_path.exists():
+        try:
+            import json as _json
+            d = _json.loads(auth_path.read_text())
+            k = d.get("profiles", {}).get("openrouter:default", {}).get("key", "")
+            if k and k not in keys_to_try: keys_to_try.append(k)
+        except: pass
+    # Fallback: secrets env file
     sec_key_path = Path(os.path.expanduser("~/.openclaw/workspace/secrets/openrouter.env"))
     if sec_key_path.exists():
         for line in sec_key_path.read_text().splitlines():
