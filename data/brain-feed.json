@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T17:06:03Z",
+  "messageReceived": "2026-03-29T17:08:39Z",
   "objective": "Review + optimize Sorare lineups",
   "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "Optimal lineups submitted",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Waiting for screenshot + re-auditing",
+      "label": "Responding to Josh",
       "status": "active",
-      "tool": "exec"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-29T17:06:03Z",
-  "checkedAt": "2026-03-29T17:06:03Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-29T17:08:39Z",
+  "checkedAt": "2026-03-29T17:08:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
