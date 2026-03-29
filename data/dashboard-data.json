@@ -3,45 +3,45 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
-    "messageReceived": "2026-03-29T18:29:24Z",
-    "objective": "Setting up Sorare cron on J.A.I.N",
-    "status": "active",
+    "active": false,
+    "messageReceived": "2026-03-29T18:31:28Z",
+    "objective": "Optimize lineups: 6\u00d72026 + 1\u00d72025 strategy \u2014 complete \u00b7 awaiting next instruction",
+    "status": "idle",
     "steps": [
       {
-        "label": "Deploying script to J.A.I.N",
-        "status": "active",
+        "label": "Updating lineup builder",
+        "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-29T18:29:24Z",
-    "checkedAt": "2026-03-29T18:29:24Z",
+    "updatedAt": "2026-03-29T18:33:12Z",
+    "checkedAt": "2026-03-29T18:31:28Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Setting up Sorare cron on J.A.I.N",
-    "updatedAt": "2026-03-29T18:30:02Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: Optimize lineups: 6\u00d72026 + 1\u00d72025 strategy \u2014 complete \u00b7 awaiting next instruction",
+    "updatedAt": "2026-03-29T18:40:01Z"
   },
   "contextWindow": {
-    "usedTokens": 147427,
-    "limitTokens": 200000,
-    "pct": 0.7371,
-    "model": "claude-sonnet-4-6",
-    "status": "amber"
+    "usedTokens": 16466,
+    "limitTokens": 1000000,
+    "pct": 0.0165,
+    "model": "gemini-2.5-flash",
+    "status": "green"
   },
   "modelUsage": {
-    "session": 15.718941,
-    "daily": 7.575664,
+    "session": 17.270757,
+    "daily": 9.12748,
     "weekly": 35.95642,
     "monthly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 13.039781549999997
+        "cost": 14.586642599999998
       },
       {
         "name": "openai/gpt-5.4",
@@ -51,7 +51,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 0.6320915199999999
+        "cost": 0.6370463199999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -68,12 +68,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 154,
-        "outputTokens": 127660,
-        "totalTokens": 127814,
-        "sessionCost": 13.039781549999997,
-        "dailyCost": 7.461774449999999,
-        "weeklyCost": 13.039781549999997,
+        "inputTokens": 158,
+        "outputTokens": 128609,
+        "totalTokens": 128767,
+        "sessionCost": 14.586642599999998,
+        "dailyCost": 9.008635499999999,
+        "weeklyCost": 14.586642599999998,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -94,12 +94,12 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1583605,
+        "inputTokens": 1583648,
         "outputTokens": 32399,
-        "totalTokens": 1616004,
-        "sessionCost": 0.6320915199999999,
-        "dailyCost": 0.11388949999999999,
-        "weeklyCost": 0.6320915199999999,
+        "totalTokens": 1616047,
+        "sessionCost": 0.6370463199999999,
+        "dailyCost": 0.11884429999999999,
+        "weeklyCost": 0.6370463199999999,
         "sessions": 4,
         "isGemini": true,
         "costEstimated": false
@@ -150,7 +150,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T18:30:06Z",
+    "lastUpdated": "2026-03-29T18:40:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -172,19 +172,19 @@
       "available": true
     },
     "aggregate": {
-      "daily": 7.575664,
-      "total": 16.692261,
+      "daily": 9.12748,
+      "total": 18.244077,
       "monthly": 36.00313
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 28.3,
-      "cpu_user": 13.12,
-      "cpu_sys": 15.2,
-      "load1": 2.27,
-      "load5": 2.14,
-      "load15": 2.1,
+      "cpu_pct": 18.2,
+      "cpu_user": 5.94,
+      "cpu_sys": 12.28,
+      "load1": 2.12,
+      "load5": 2.31,
+      "load15": 2.17,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -194,12 +194,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 2.56,
-      "cpu_sys": 9.61,
-      "load1": 1.58,
-      "load5": 1.8,
-      "load15": 1.74,
+      "cpu_pct": 11.2,
+      "cpu_user": 2.9,
+      "cpu_sys": 9.9,
+      "load1": 1.33,
+      "load5": 1.58,
+      "load15": 1.67,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -221,19 +221,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T18:30:02Z"
+      "lastChecked": "2026-03-29T18:40:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T18:30:02Z"
+      "lastChecked": "2026-03-29T18:40:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T18:30:02Z"
+      "lastChecked": "2026-03-29T18:40:01Z"
     }
   ],
   "crons": [
@@ -303,7 +303,7 @@
       "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "runStatus": "missed"
@@ -538,25 +538,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-29T18:30:06Z",
-      "event": "Session spend: $15.72"
+      "time": "2026-03-29T18:40:05Z",
+      "event": "Session spend: $17.27"
     },
     {
-      "time": "2026-03-29T18:30:02Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-03-29T18:40:01Z",
+      "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-29T18:30:02Z",
+      "time": "2026-03-29T18:40:01Z",
       "event": "22 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T18:30:02Z",
+      "time": "2026-03-29T18:40:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T18:30:02Z",
+      "time": "2026-03-29T18:40:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T18:30:02Z"
+  "lastUpdated": "2026-03-29T18:40:01Z"
 }
