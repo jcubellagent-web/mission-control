@@ -5240,13 +5240,21 @@
                     <span id="xd-updated" class="xd-updated">–</span>
                 </div>
 
+                <!-- Post mix today -->
+                <div class="xd-mix-row">
+                    <div class="xd-mix-pill xd-mix-orig"><span id="xd-orig-today">0</span> <span class="xd-mix-label">Originals</span></div>
+                    <div class="xd-mix-pill xd-mix-reply"><span id="xd-reply-today">0</span> <span class="xd-mix-label">Replies</span></div>
+                    <div class="xd-mix-pill xd-mix-qt"><span id="xd-qt-today">0</span> <span class="xd-mix-label">Quote Tweets</span></div>
+                    <div class="xd-mix-pill xd-mix-total"><span id="xd-total-today">0</span> <span class="xd-mix-label">Total Today</span></div>
+                </div>
+
                 <!-- Lead metrics grid -->
                 <div class="xd-section-label">LEAD METRICS</div>
                 <div class="xd-leads">
                     <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-impressions7d">–</div>
-                        <div class="xd-metric-label">Impressions (7d)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-impressions7d"></div></div>
+                        <div class="xd-metric-val" id="xd-followers-total">–</div>
+                        <div class="xd-metric-label">Total Followers</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-followers-total"></div></div>
                     </div>
                     <div class="xd-metric">
                         <div class="xd-metric-val" id="xd-followers-gained">–</div>
@@ -5254,24 +5262,59 @@
                         <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-followers-gained"></div></div>
                     </div>
                     <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-follower-velocity">–</div>
+                        <div class="xd-metric-label">Follower Velocity (30d/day)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-follower-velocity"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-impressions7d">–</div>
+                        <div class="xd-metric-label">Impressions (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-impressions7d"></div></div>
+                    </div>
+                    <div class="xd-metric">
                         <div class="xd-metric-val" id="xd-engagement">–</div>
                         <div class="xd-metric-label">Engagement Rate (7d)</div>
                         <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-engagement"></div></div>
-                    </div>
-                    <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-posts7d">–</div>
-                        <div class="xd-metric-label">Posts This Week</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-posts7d"></div></div>
                     </div>
                     <div class="xd-metric">
                         <div class="xd-metric-val" id="xd-top-post">–</div>
                         <div class="xd-metric-label">Best Post (impr.)</div>
                         <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-top-post"></div></div>
                     </div>
-                    <div class="xd-metric xd-metric-followers">
-                        <div class="xd-metric-val" id="xd-followers-total">–</div>
-                        <div class="xd-metric-label">Total Followers</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-followers-total"></div></div>
+                </div>
+
+                <!-- Reply & QT metrics -->
+                <div class="xd-section-label">REPLY &amp; QUOTE TWEET METRICS</div>
+                <div class="xd-leads">
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-reply-impr">–</div>
+                        <div class="xd-metric-label">Reply Impressions (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-reply-impr"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-reply-conv">–</div>
+                        <div class="xd-metric-label">Reply → Follow Rate (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-reply-conv"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-top-reply">–</div>
+                        <div class="xd-metric-label">Best Reply (impr.)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-top-reply"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-qt-eng">–</div>
+                        <div class="xd-metric-label">QT Engagement Rate (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-qt-eng"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-posts7d">–</div>
+                        <div class="xd-metric-label">Total Posts (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-posts7d"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-avg-reply-impr">–</div>
+                        <div class="xd-metric-label">Avg Reply Impressions</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-avg-reply-impr"></div></div>
                     </div>
                 </div>
 
@@ -5476,6 +5519,22 @@
     }
     .xd-strat-label { color: #1d9bf0; font-weight: 600; margin-right: 6px; }
 
+    /* ── Post mix row ────────────────────────────────────────────── */
+    .xd-mix-row { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+    .xd-mix-pill { flex:1; min-width:70px; border-radius:10px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); text-align:center; }
+    .xd-mix-pill span:first-child { display:block; font-size:1.4rem; font-weight:700; line-height:1.1; }
+    .xd-mix-label { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.5; }
+    .xd-mix-orig  { border-color:rgba(29,155,240,0.3); } .xd-mix-orig  span:first-child { color:#1d9bf0; }
+    .xd-mix-reply { border-color:rgba(167,139,250,0.3);} .xd-mix-reply span:first-child { color:#a78bfa; }
+    .xd-mix-qt    { border-color:rgba(245,158,11,0.3); } .xd-mix-qt    span:first-child { color:#f59e0b; }
+    .xd-mix-total { border-color:rgba(74,222,128,0.3); } .xd-mix-total span:first-child { color:#4ade80; }
+
+    /* ── Post type badge ─────────────────────────────────────────── */
+    .xd-post-type { display:inline-block; font-size:0.58rem; font-weight:700; padding:2px 6px; border-radius:4px; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.06em; }
+    .xd-type-original { background:rgba(29,155,240,0.15); color:#1d9bf0; }
+    .xd-type-reply    { background:rgba(167,139,250,0.15); color:#a78bfa; }
+    .xd-type-qt       { background:rgba(245,158,11,0.15); color:#f59e0b; }
+
     /* ── Stat pill X bubble ──────────────────────────────────────── */
     .stat-pill-x {
         cursor: pointer;
@@ -5525,38 +5584,70 @@
             updEl.textContent = 'No data yet';
         }
 
+        // Post mix today
+        const strat = data.strategy || {};
+        const origToday  = strat.originals_today || 0;
+        const replyToday = strat.replies_today || 0;
+        const qtToday    = strat.qts_today || 0;
+        document.getElementById('xd-orig-today').textContent  = origToday;
+        document.getElementById('xd-reply-today').textContent = replyToday;
+        document.getElementById('xd-qt-today').textContent    = qtToday;
+        document.getElementById('xd-total-today').textContent = origToday + replyToday + qtToday;
+
         // Lead metrics
         const lead = data.lead || {};
-        const imp7  = lead.impressions_7d || 0;
-        const fol7  = lead.followers_gained_7d || 0;
-        const eng   = lead.engagement_rate_7d || 0;
-        const posts = lead.posts_7d || 0;
-        const topP  = lead.top_post_impressions || 0;
-        const folT  = lead.followers_total || 0;
+        const imp7     = lead.impressions_7d || 0;
+        const fol7     = lead.followers_gained_7d || 0;
+        const eng      = lead.engagement_rate_7d || 0;
+        const posts    = lead.posts_7d || 0;
+        const topP     = lead.top_post_impressions || 0;
+        const folT     = lead.followers_total || 0;
+        const folVel   = lead.follower_velocity_30d || 0;
+        const repImpr  = lead.reply_impressions_7d || 0;
+        const repConv  = lead.reply_conversion_rate_7d || 0;
+        const topReply = lead.top_reply_impressions || 0;
+        const qtEng    = lead.qt_engagement_rate_7d || 0;
+        const avgRepI  = lead.avg_reply_impressions || 0;
 
-        document.getElementById('xd-impressions7d').textContent  = fmtNum(imp7);
-        document.getElementById('xd-followers-gained').textContent = fmtNum(fol7);
-        document.getElementById('xd-engagement').textContent     = fmtPct(eng);
-        document.getElementById('xd-posts7d').textContent        = posts + ' / wk';
-        document.getElementById('xd-top-post').textContent       = fmtNum(topP);
-        document.getElementById('xd-followers-total').textContent = fmtNum(folT);
+        document.getElementById('xd-followers-total').textContent   = fmtNum(folT);
+        document.getElementById('xd-followers-gained').textContent  = '+' + fmtNum(fol7);
+        document.getElementById('xd-follower-velocity').textContent = folVel.toFixed(1) + '/day';
+        document.getElementById('xd-impressions7d').textContent     = fmtNum(imp7);
+        document.getElementById('xd-engagement').textContent        = fmtPct(eng);
+        document.getElementById('xd-top-post').textContent          = fmtNum(topP);
+        document.getElementById('xd-reply-impr').textContent        = fmtNum(repImpr);
+        document.getElementById('xd-reply-conv').textContent        = fmtPct(repConv);
+        document.getElementById('xd-top-reply').textContent         = fmtNum(topReply);
+        document.getElementById('xd-qt-eng').textContent            = fmtPct(qtEng);
+        document.getElementById('xd-posts7d').textContent           = fmtNum(posts);
+        document.getElementById('xd-avg-reply-impr').textContent    = fmtNum(avgRepI);
 
         // Bars — animate after a tick
         requestAnimationFrame(() => {
-            document.getElementById('xd-bar-impressions7d').style.width    = barPct(imp7, 100000) + '%';
-            document.getElementById('xd-bar-followers-gained').style.width = barPct(fol7, 100) + '%';
-            document.getElementById('xd-bar-engagement').style.width       = barPct(eng, 0.15) + '%';
-            document.getElementById('xd-bar-posts7d').style.width          = barPct(posts, 84) + '%';
-            document.getElementById('xd-bar-top-post').style.width         = barPct(topP, 50000) + '%';
-            document.getElementById('xd-bar-followers-total').style.width  = barPct(folT, 500) + '%';
+            document.getElementById('xd-bar-followers-total').style.width   = barPct(folT, 500) + '%';
+            document.getElementById('xd-bar-followers-gained').style.width  = barPct(fol7, 50) + '%';
+            document.getElementById('xd-bar-follower-velocity').style.width = barPct(folVel, 20) + '%';
+            document.getElementById('xd-bar-impressions7d').style.width     = barPct(imp7, 100000) + '%';
+            document.getElementById('xd-bar-engagement').style.width        = barPct(eng, 0.10) + '%';
+            document.getElementById('xd-bar-top-post').style.width          = barPct(topP, 50000) + '%';
+            document.getElementById('xd-bar-reply-impr').style.width        = barPct(repImpr, 50000) + '%';
+            document.getElementById('xd-bar-reply-conv').style.width        = barPct(repConv, 0.05) + '%';
+            document.getElementById('xd-bar-top-reply').style.width         = barPct(topReply, 10000) + '%';
+            document.getElementById('xd-bar-qt-eng').style.width            = barPct(qtEng, 0.10) + '%';
+            document.getElementById('xd-bar-posts7d').style.width           = barPct(posts, 126) + '%';
+            document.getElementById('xd-bar-avg-reply-impr').style.width    = barPct(avgRepI, 500) + '%';
         });
 
         // Milestones
         const milestoneEl = document.getElementById('xd-milestones');
         const milestones = data.milestones || [
-            { label: '500 Followers', metric: 'followers', target: 500, current: folT, achieved: folT >= 500 },
-            { label: '5M Impressions (90d)', metric: 'impressions_90d', target: 5000000, current: (data.lag||{}).impressions_90d||0, achieved: false },
-            { label: 'X Monetization', metric: 'monetized', target: 1, current: (data.lag||{}).monetized||0, achieved: (data.lag||{}).monetized >= 1 },
+            { label: '500 Followers',  target: 500,       current: folT, achieved: folT >= 500 },
+            { label: '2,500 Followers',target: 2500,      current: folT, achieved: folT >= 2500 },
+            { label: '10K Followers',  target: 10000,     current: folT, achieved: folT >= 10000 },
+            { label: '1M Impressions (30d)', target: 1000000,  current: (data.lag||{}).impressions_30d||0, achieved: false },
+            { label: '5M Impressions (90d)', target: 5000000,  current: (data.lag||{}).impressions_90d||0, achieved: false },
+            { label: '500 Avg Reply Impr.',  target: 500,      current: avgRepI, achieved: avgRepI >= 500 },
+            { label: 'X Monetization',       target: 1,        current: (data.lag||{}).monetized||0, achieved: (data.lag||{}).monetized >= 1 },
         ];
         milestoneEl.innerHTML = milestones.map(ms => {
             const pct = ms.target === 1 ? (ms.achieved ? 100 : 0) : Math.min(100, Math.round(((ms.current||0) / ms.target) * 100));
@@ -5594,7 +5685,10 @@
                     const diff = Math.floor((Date.now() - new Date(p.posted_at)) / 60000);
                     return diff < 60 ? diff+'m ago' : Math.floor(diff/60)+'h ago';
                 })() : '';
+                const typeClass = p.type === 'reply' ? 'xd-type-reply' : p.type === 'qt' ? 'xd-type-qt' : 'xd-type-original';
+                const typeLabel = p.type === 'reply' ? '↩ Reply' : p.type === 'qt' ? '🔁 QT' : '✦ Original';
                 return `<div class="xd-post">
+                    <div class="xd-post-type ${typeClass}">${typeLabel}</div>
                     <div class="xd-post-text">${p.text || ''}</div>
                     <div class="xd-post-stats">
                         <span class="xd-post-stat">👁 <span class="xd-post-stat-val">${fmtNum(impr)}</span></span>
@@ -5610,10 +5704,14 @@
         // Strategy
         const strat = data.strategy || {};
         const stratParts = [];
-        if (strat.best_hours && strat.best_hours.length) stratParts.push(`Best hours: ${strat.best_hours.join(', ')}`);
+        if (strat.best_hours_by_type) {
+            const bh = strat.best_hours_by_type;
+            if (bh.original && bh.original.length) stratParts.push(`Best original hours: ${bh.original.join(', ')}`);
+            if (bh.reply && bh.reply.length) stratParts.push(`Best reply hours: ${bh.reply.join(', ')}`);
+        } else if (strat.best_hours && strat.best_hours.length) stratParts.push(`Best hours: ${strat.best_hours.join(', ')}`);
+        if (strat.best_reply_targets && strat.best_reply_targets.length) stratParts.push(`Top reply targets: ${strat.best_reply_targets.slice(0,3).join(', ')}`);
         if (strat.best_topics && strat.best_topics.length) stratParts.push(`Top topics: ${strat.best_topics.join(', ')}`);
-        if (strat.avg_engagement) stratParts.push(`Avg engagement: ${fmtPct(strat.avg_engagement)}`);
-        if (strat.posts_today != null) stratParts.push(`Posted today: ${strat.posts_today}`);
+        if (strat.avg_reply_impressions) stratParts.push(`Avg reply impr: ${fmtNum(strat.avg_reply_impressions)}`);
         document.getElementById('xd-strat-text').textContent = stratParts.length
             ? stratParts.join(' · ')
             : 'Awaiting first feedback loop (daily 6am ET)';

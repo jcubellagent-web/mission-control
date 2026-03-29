@@ -5,26 +5,44 @@
     "impressions_7d": 0,
     "followers_gained_7d": 0,
     "engagement_rate_7d": 0,
+    "reply_impressions_7d": 0,
+    "reply_conversion_rate_7d": 0,
+    "qt_engagement_rate_7d": 0,
     "posts_7d": 0,
+    "originals_7d": 0,
+    "replies_7d": 0,
+    "quote_tweets_7d": 0,
     "top_post_impressions": 0,
-    "followers_total": 0
+    "top_reply_impressions": 0,
+    "follower_velocity_30d": 0,
+    "followers_total": 0,
+    "avg_reply_impressions": 0
   },
   "lag": {
     "followers": 0,
+    "impressions_30d": 0,
     "impressions_90d": 0,
-    "monetized": 0
+    "monetized": 0,
+    "avg_reply_impressions": 0
   },
   "milestones": [
     { "label": "500 Followers", "metric": "followers", "target": 500, "current": 0, "achieved": false },
+    { "label": "2,500 Followers", "metric": "followers", "target": 2500, "current": 0, "achieved": false },
+    { "label": "10K Followers", "metric": "followers", "target": 10000, "current": 0, "achieved": false },
+    { "label": "1M Impressions (30d)", "metric": "impressions_30d", "target": 1000000, "current": 0, "achieved": false },
     { "label": "5M Impressions (90d)", "metric": "impressions_90d", "target": 5000000, "current": 0, "achieved": false },
+    { "label": "500 Avg Reply Impr.", "metric": "avg_reply_impressions", "target": 500, "current": 0, "achieved": false },
     { "label": "X Monetization", "metric": "monetized", "target": 1, "current": 0, "achieved": false }
   ],
   "recentPosts": [],
   "strategy": {
-    "best_hours": [],
+    "best_hours_by_type": { "original": [], "reply": [], "qt": [] },
+    "best_reply_targets": [],
     "best_topics": [],
-    "avg_engagement": 0,
-    "posts_today": 0,
+    "avg_reply_impressions": 0,
+    "originals_today": 0,
+    "replies_today": 0,
+    "qts_today": 0,
     "last_post_at": null
   }
 }

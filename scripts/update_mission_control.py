@@ -37,20 +37,22 @@ CRON_TARGETS = [
     {"name": "Sorare Daily Missions", "pattern": "sorare_missions.py", "schedule": "Daily 10:00 AM ET", "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements. Pushes score ≥8.5 to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min", "description": "Monitors X/Twitter watchlist for high-signal posts (score ≥8), pushes to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    # ── X Account (12 posts/day) ──────────────────────────────────────────────
-    {"name": "X Feedback Loop",      "pattern": "x_post_agent.py", "schedule": "Daily 6:00 AM ET",  "description": "Pulls X analytics, scores performance, updates strategy. Fires milestone alerts via Telegram.", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Pre-Market",         "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET",  "description": "Futures + overnight signals before the bell", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Market Open",        "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET",  "description": "Market open take — macro brief + SPY/BTC read", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X AI Signal #1",       "pattern": "x_post_agent.py", "schedule": "Daily 9:00 AM ET",  "description": "First AI/tech signal of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Mover #1",           "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Hot Take",           "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "Bold midday opinion / contrarian take — engineered for replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X AI Signal #2",       "pattern": "x_post_agent.py", "schedule": "Daily 2:00 PM ET",  "description": "Afternoon AI signal or product drop", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Mover #2",           "pattern": "x_post_agent.py", "schedule": "Daily 3:00 PM ET",  "description": "Afternoon volume spike / notable mover", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Market Close",       "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET",  "description": "Close wrap + next-day outlook", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Post-Close Deep",    "pattern": "x_post_agent.py", "schedule": "Daily 6:00 PM ET",  "description": "Post-close deep dive / thread starter", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Evening AI",         "pattern": "x_post_agent.py", "schedule": "Daily 8:00 PM ET",  "description": "Evening AI/tech take — prime time engagement window", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Prime Hot Take",     "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET",  "description": "Peak prime time — max engagement take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Nightcap",           "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "One sharp insight to end the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # ── X Account (18 interactions/day: 7 originals + 7 replies + 4 QTs) ───────
+    {"name": "X Feedback Loop",   "pattern": "x_post_agent.py", "schedule": "Daily 6:00 AM ET",  "description": "Pulls analytics, updates strategy, fires milestone alerts", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # Originals (7/day)
+    {"name": "X Pre-Market",      "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET",  "description": "[Original] Futures + overnight signals", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Market Open",     "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET",  "description": "[Original] Market open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Mover",           "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover / stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Hot Take",        "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Bold contrarian take — max reply bait", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Market Close",    "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET",  "description": "[Original] Close wrap + next-day outlook", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Prime Take",      "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET",  "description": "[Original] Prime time hot take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Nightcap",        "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] One sharp insight to end the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # Strategic Replies (7 slots/day — @elonmusk, @sama, @pmarca, @saylor, etc.)
+    {"name": "X Reply Batch AM",  "pattern": "x_post_agent.py", "schedule": "Daily 9–10 AM ET", "description": "[Reply] Monitor target accounts, reply to viral posts in last 2h (2 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Reply Batch PM",  "pattern": "x_post_agent.py", "schedule": "Daily 12–4 PM ET", "description": "[Reply] Reply slots at 12pm, 2pm, 4pm (3 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Reply Batch Eve", "pattern": "x_post_agent.py", "schedule": "Daily 7–11 PM ET", "description": "[Reply] Evening reply slots at 7pm + 11pm (2 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # Quote Tweets (4 slots/day — breaking news + viral AI/finance posts)
+    {"name": "X Quote Tweets",    "pattern": "x_post_agent.py", "schedule": "Daily 10am/1pm/6pm/8pm ET", "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "runs": [
