@@ -3618,24 +3618,41 @@
                     const col = v >= 0 ? '#4ade80' : '#f87171';
                     return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
                 };
+                // Shared column widths for both tables to stay aligned
+                const _colStyle = {
+                    name:  'width:100px;padding:4px 6px;',
+                    price: 'width:80px;padding:4px 6px;',
+                    pct:   'width:62px;padding:4px 6px;text-align:right;font-variant-numeric:tabular-nums;',
+                    note:  'padding:4px 6px;',
+                };
+                const _thStyle = {
+                    name:  `width:100px;padding:4px 6px;`,
+                    price: `width:80px;padding:4px 6px;`,
+                    pct:   `width:62px;padding:4px 6px;text-align:right;`,
+                    note:  `padding:4px 6px;`,
+                };
+                const _tableStyle = `width:100%;border-collapse:collapse;font-size:0.82rem;table-layout:fixed;`;
+                const _theadStyle = `color:#fff;text-align:left;border-bottom:1px solid #444;`;
+                const _rowStyle   = `border-bottom:1px solid #1e1e1e;`;
+
                 const nasdaqAllRows = [...(nm.gainers||[]), ...(nm.losers||[])];
-                html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead><tr style="color:#fff;text-align:left;border-bottom:1px solid #444;">
-                        <th style="padding:4px 6px;">Ticker</th>
-                        <th style="padding:4px 6px;">Price</th>
-                        <th style="padding:4px 6px;text-align:right;">1D</th>
-                        <th style="padding:4px 6px;text-align:right;">1W</th>
-                        <th style="padding:4px 6px;text-align:right;">1M</th>
-                        <th style="padding:4px 6px;">Note</th>
+                html += `<table style="${_tableStyle}">
+                    <thead><tr style="${_theadStyle}">
+                        <th style="${_thStyle.name}">Ticker</th>
+                        <th style="${_thStyle.price}">Price</th>
+                        <th style="${_thStyle.pct}">1D</th>
+                        <th style="${_thStyle.pct}">1W</th>
+                        <th style="${_thStyle.pct}">1M</th>
+                        <th style="${_thStyle.note}">Note</th>
                     </tr></thead><tbody>`;
                 nasdaqAllRows.forEach(m => {
-                    html += `<tr style="border-bottom:1px solid #1e1e1e;">
-                        <td style="padding:4px 6px;font-weight:700;color:#fff;">${m.ticker}</td>
-                        <td style="padding:4px 6px;color:#fff;">$${m.price}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct)}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1w ?? null)}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1m ?? null)}</td>
-                        <td style="padding:4px 6px;color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
+                    html += `<tr style="${_rowStyle}">
+                        <td style="${_colStyle.name}font-weight:700;color:#fff;">${m.ticker}</td>
+                        <td style="${_colStyle.price}color:#fff;">$${m.price}</td>
+                        <td style="${_colStyle.pct}">${_fmtChg(m.change_pct)}</td>
+                        <td style="${_colStyle.pct}">${_fmtChg(m.change_pct_1w ?? null)}</td>
+                        <td style="${_colStyle.pct}">${_fmtChg(m.change_pct_1m ?? null)}</td>
+                        <td style="${_colStyle.note}color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
                     </tr>`;
                 });
                 html += `</tbody></table>`;
@@ -3651,24 +3668,28 @@
                     const col = v >= 0 ? '#4ade80' : '#f87171';
                     return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
                 };
-                html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead><tr style="color:#fff;text-align:left;border-bottom:1px solid #444;">
-                        <th style="padding:4px 6px;">Coin</th>
-                        <th style="padding:4px 6px;">Price</th>
-                        <th style="padding:4px 6px;text-align:right;">1D</th>
-                        <th style="padding:4px 6px;text-align:right;">1W</th>
-                        <th style="padding:4px 6px;text-align:right;">1M</th>
-                        <th style="padding:4px 6px;">Note</th>
+                // Crypto price: always 2 decimal places, no locale separators (keeps column narrow)
+                const _fmtPrice = (p) => {
+                    if (p == null) return 'N/A';
+                    return `$${Number(p).toFixed(2)}`;
+                };
+                html += `<table style="${_tableStyle}">
+                    <thead><tr style="${_theadStyle}">
+                        <th style="${_thStyle.name}">Coin</th>
+                        <th style="${_thStyle.price}">Price</th>
+                        <th style="${_thStyle.pct}">1D</th>
+                        <th style="${_thStyle.pct}">1W</th>
+                        <th style="${_thStyle.pct}">1M</th>
+                        <th style="${_thStyle.note}">Note</th>
                     </tr></thead><tbody>`;
                 f.crypto_movers.forEach(m => {
-                    const price = m.price >= 1 ? `$${m.price.toLocaleString()}` : `$${m.price}`;
-                    html += `<tr style="border-bottom:1px solid #1e1e1e;">
-                        <td style="padding:4px 6px;font-weight:700;color:#fff;">${m.symbol} <span style="color:#fff;font-weight:400;">${m.name}</span></td>
-                        <td style="padding:4px 6px;color:#fff;">${price}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct)}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1w ?? null)}</td>
-                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1m ?? null)}</td>
-                        <td style="padding:4px 6px;color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
+                    html += `<tr style="${_rowStyle}">
+                        <td style="${_colStyle.name}font-weight:700;color:#fff;">${m.symbol} <span style="color:#fff;font-weight:400;">${m.name}</span></td>
+                        <td style="${_colStyle.price}color:#fff;">${_fmtPrice(m.price)}</td>
+                        <td style="${_colStyle.pct}">${_fmtChgC(m.change_pct)}</td>
+                        <td style="${_colStyle.pct}">${_fmtChgC(m.change_pct_1w ?? null)}</td>
+                        <td style="${_colStyle.pct}">${_fmtChgC(m.change_pct_1m ?? null)}</td>
+                        <td style="${_colStyle.note}color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
                     </tr>`;
                 });
                 html += `</tbody></table>`;
