@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T05:14:19Z",
-  "objective": "Find best 2026 card buys under  \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T05:19:21Z",
+  "objective": "Build + deploy Sorare auto-bid monitor",
+  "status": "active",
   "steps": [
     {
-      "label": "Scanned marketplace",
+      "label": "Received",
       "status": "done",
-      "tool": "sorare_api"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Building script",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T05:14:34Z",
-  "checkedAt": "2026-03-29T05:14:19Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T05:19:21Z",
+  "checkedAt": "2026-03-29T05:19:21Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
