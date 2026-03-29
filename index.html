@@ -4463,8 +4463,12 @@
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
+                <div class="stat-pill stat-pill-x" id="x-progress-bubble" title="X Growth Dashboard">
+                    <span class="num" style="font-family:serif;font-size:1.1em;">𝕏</span>
+                    <span class="label">Progress</span>
+                </div>
             `;
-            // bubble click is handled by document-level delegation below
+            // bubble click handled by DOMContentLoaded listener below
 
 
             // Model usage snapshot — compact, multi-source (diff-guarded)
@@ -5225,12 +5229,6 @@
     <!-- Mobile edge laser — traces the screen border as a comet -->
     <canvas id="edge-laser" aria-hidden="true"></canvas>
 
-    <!-- ── X Progress floating button (fixed, always on top) ── -->
-    <button id="x-fab" title="X Growth Dashboard">
-        <span style="font-family:serif;font-size:1.15em;line-height:1;">𝕏</span>
-        <span style="font-size:0.6rem;letter-spacing:0.06em;opacity:0.8;">PROGRESS</span>
-    </button>
-
     <!-- ═══════════════════════════════════════════════════════════════
          X PROGRESS DASHBOARD MODAL
     ═══════════════════════════════════════════════════════════════ -->
@@ -5741,17 +5739,17 @@
             }).join('');
         }
 
-        // Strategy
-        const strat = data.strategy || {};
+        // Strategy footer
+        const stratInfo = data.strategy || {};
         const stratParts = [];
-        if (strat.best_hours_by_type) {
-            const bh = strat.best_hours_by_type;
+        if (stratInfo.best_hours_by_type) {
+            const bh = stratInfo.best_hours_by_type;
             if (bh.original && bh.original.length) stratParts.push(`Best original hours: ${bh.original.join(', ')}`);
             if (bh.reply && bh.reply.length) stratParts.push(`Best reply hours: ${bh.reply.join(', ')}`);
-        } else if (strat.best_hours && strat.best_hours.length) stratParts.push(`Best hours: ${strat.best_hours.join(', ')}`);
-        if (strat.best_reply_targets && strat.best_reply_targets.length) stratParts.push(`Top reply targets: ${strat.best_reply_targets.slice(0,3).join(', ')}`);
-        if (strat.best_topics && strat.best_topics.length) stratParts.push(`Top topics: ${strat.best_topics.join(', ')}`);
-        if (strat.avg_reply_impressions) stratParts.push(`Avg reply impr: ${fmtNum(strat.avg_reply_impressions)}`);
+        } else if (stratInfo.best_hours && stratInfo.best_hours.length) stratParts.push(`Best hours: ${stratInfo.best_hours.join(', ')}`);
+        if (stratInfo.best_reply_targets && stratInfo.best_reply_targets.length) stratParts.push(`Top reply targets: ${stratInfo.best_reply_targets.slice(0,3).join(', ')}`);
+        if (stratInfo.best_topics && stratInfo.best_topics.length) stratParts.push(`Top topics: ${stratInfo.best_topics.join(', ')}`);
+        if (stratInfo.avg_reply_impressions) stratParts.push(`Avg reply impr: ${fmtNum(stratInfo.avg_reply_impressions)}`);
         document.getElementById('xd-strat-text').textContent = stratParts.length
             ? stratParts.join(' · ')
             : 'Awaiting first feedback loop (daily 6am ET)';
@@ -5782,25 +5780,26 @@
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
 
-    // Wire all X dashboard triggers via direct addEventListener (not delegation)
+    // Wire static elements on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
-        // Floating action button
-        const fab = document.getElementById('x-fab');
-        if (fab) fab.addEventListener('click', function() { window.openXDashboard(); });
-
-        // Mobile remote card button
-        const mobileBtn = document.getElementById('x-progress-btn-mobile');
-        if (mobileBtn) mobileBtn.addEventListener('click', function() { window.openXDashboard(); });
-
-        // Modal close button
+        // Modal close button (static element)
         const closeBtn = document.getElementById('x-modal-close');
         if (closeBtn) closeBtn.addEventListener('click', function() { window.closeXDashboard(); });
 
-        // Click outside modal to close
+        // Click outside modal to close (static element)
         const overlay = document.getElementById('x-modal-overlay');
         if (overlay) overlay.addEventListener('click', function(e) {
             if (e.target === overlay) window.closeXDashboard();
         });
+
+        // Mobile remote card button (static element)
+        const mobileBtn = document.getElementById('x-progress-btn-mobile');
+        if (mobileBtn) mobileBtn.addEventListener('click', function() { window.openXDashboard(); });
+    });
+
+    // Use document-level delegation only for dynamically-injected bubble
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#x-progress-bubble')) window.openXDashboard();
     });
 
     // Close on Escape key
