@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-29T17:14:30Z",
-  "objective": "Fill all empty Sorare lineup slots",
-  "status": "active",
+  "objective": "Fill all empty Sorare lineup slots \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "All 5 slots filled",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Responding to Josh",
-      "status": "active",
+      "status": "done",
       "tool": "telegram"
     }
   ],
   "currentTool": "telegram",
-  "updatedAt": "2026-03-29T17:14:30Z",
+  "updatedAt": "2026-03-29T17:14:39Z",
   "checkedAt": "2026-03-29T17:14:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
