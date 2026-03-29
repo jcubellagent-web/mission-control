@@ -4,49 +4,49 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": false,
-    "messageReceived": "2026-03-29T05:58:12Z",
-    "objective": "X strategy upgraded to 12/day - shipped",
+    "messageReceived": "2026-03-29T06:06:55Z",
+    "objective": "X strategy fully rebuilt and live on dashboard",
     "status": "idle",
     "steps": [
       {
-        "label": "Received",
+        "label": "Script rebuilt",
         "status": "done",
-        "tool": "openclaw"
+        "tool": "exec"
       },
       {
-        "label": "Updating strategy",
+        "label": "Updating dashboard",
         "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-29T06:00:01Z",
-    "checkedAt": "2026-03-29T05:58:12Z",
+    "updatedAt": "2026-03-29T06:09:27Z",
+    "checkedAt": "2026-03-29T06:06:55Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last objective: X strategy upgraded to 12/day - shipped",
-    "updatedAt": "2026-03-29T06:00:01Z"
+    "context": "Last objective: X strategy fully rebuilt and live on dashboard",
+    "updatedAt": "2026-03-29T06:10:01Z"
   },
   "contextWindow": {
-    "usedTokens": 107666,
+    "usedTokens": 143189,
     "limitTokens": 200000,
-    "pct": 0.5383,
+    "pct": 0.7159,
     "model": "claude-sonnet-4-6",
-    "status": "green"
+    "status": "amber"
   },
   "modelUsage": {
-    "session": 12.225085,
-    "daily": 4.065513,
+    "session": 14.987501,
+    "daily": 6.827929,
     "weekly": 35.95642,
     "monthly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 9.643519949999998
+        "cost": 12.341897249999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -56,7 +56,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 0.5344965199999999
+        "cost": 0.5985357199999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -74,11 +74,11 @@
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
         "inputTokens": 168,
-        "outputTokens": 134612,
-        "totalTokens": 134780,
-        "sessionCost": 9.643519949999998,
-        "dailyCost": 4.065512849999999,
-        "weeklyCost": 9.643519949999998,
+        "outputTokens": 136048,
+        "totalTokens": 136216,
+        "sessionCost": 12.341897249999997,
+        "dailyCost": 6.763890149999999,
+        "weeklyCost": 12.341897249999997,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -99,13 +99,13 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1543058,
-        "outputTokens": 16190,
-        "totalTokens": 1559248,
-        "sessionCost": 0.5344965199999999,
-        "dailyCost": 0.0,
-        "weeklyCost": 0.5344965199999999,
-        "sessions": 3,
+        "inputTokens": 1616022,
+        "outputTokens": 33050,
+        "totalTokens": 1649072,
+        "sessionCost": 0.5985357199999999,
+        "dailyCost": 0.06403919999999999,
+        "weeklyCost": 0.5985357199999999,
+        "sessions": 4,
         "isGemini": true,
         "costEstimated": false
       },
@@ -155,7 +155,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T06:00:06Z",
+    "lastUpdated": "2026-03-29T06:10:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -177,19 +177,19 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.065513,
-      "total": 13.198405,
+      "daily": 6.827929,
+      "total": 15.960821,
       "monthly": 36.00313
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 19.3,
-      "cpu_user": 6.32,
-      "cpu_sys": 12.95,
-      "load1": 2.22,
-      "load5": 2.16,
-      "load15": 2.13,
+      "cpu_pct": 27.2,
+      "cpu_user": 13.69,
+      "cpu_sys": 13.49,
+      "load1": 1.76,
+      "load5": 2.06,
+      "load15": 2.07,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -199,10 +199,10 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.3,
-      "cpu_user": 2.12,
-      "cpu_sys": 9.21,
-      "load1": 1.81,
+      "cpu_pct": 10.2,
+      "cpu_user": 1.44,
+      "cpu_sys": 8.69,
+      "load1": 1.72,
       "load5": 1.7,
       "load15": 1.64,
       "ram_used_gb": 10.0,
@@ -226,19 +226,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T06:00:01Z"
+      "lastChecked": "2026-03-29T06:10:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T06:00:01Z"
+      "lastChecked": "2026-03-29T06:10:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T06:00:01Z"
+      "lastChecked": "2026-03-29T06:10:01Z"
     }
   ],
   "crons": [
@@ -335,7 +335,7 @@
     {
       "name": "X Feedback Loop",
       "schedule": "Daily 6:00 AM ET",
-      "description": "Pulls X analytics, scores performance, updates strategy. Fires milestone alerts via Telegram.",
+      "description": "Pulls analytics, updates strategy, fires milestone alerts",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -345,7 +345,7 @@
     {
       "name": "X Pre-Market",
       "schedule": "Daily 7:00 AM ET",
-      "description": "Futures + overnight signals before the bell",
+      "description": "[Original] Futures + overnight signals",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -355,7 +355,7 @@
     {
       "name": "X Market Open",
       "schedule": "Daily 8:00 AM ET",
-      "description": "Market open take \u2014 macro brief + SPY/BTC read",
+      "description": "[Original] Market open macro take",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -363,19 +363,9 @@
       "lastError": null
     },
     {
-      "name": "X AI Signal #1",
-      "schedule": "Daily 9:00 AM ET",
-      "description": "First AI/tech signal of the day",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Mover #1",
+      "name": "X Mover",
       "schedule": "Daily 11:00 AM ET",
-      "description": "Mid-morning mover or stat",
+      "description": "[Original] Mid-morning mover / stat",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -385,27 +375,7 @@
     {
       "name": "X Hot Take",
       "schedule": "Daily 12:00 PM ET",
-      "description": "Bold midday opinion / contrarian take \u2014 engineered for replies",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X AI Signal #2",
-      "schedule": "Daily 2:00 PM ET",
-      "description": "Afternoon AI signal or product drop",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Mover #2",
-      "schedule": "Daily 3:00 PM ET",
-      "description": "Afternoon volume spike / notable mover",
+      "description": "[Original] Bold contrarian take \u2014 max reply bait",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -415,7 +385,7 @@
     {
       "name": "X Market Close",
       "schedule": "Daily 5:00 PM ET",
-      "description": "Close wrap + next-day outlook",
+      "description": "[Original] Close wrap + next-day outlook",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -423,29 +393,9 @@
       "lastError": null
     },
     {
-      "name": "X Post-Close Deep",
-      "schedule": "Daily 6:00 PM ET",
-      "description": "Post-close deep dive / thread starter",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Evening AI",
-      "schedule": "Daily 8:00 PM ET",
-      "description": "Evening AI/tech take \u2014 prime time engagement window",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Prime Hot Take",
+      "name": "X Prime Take",
       "schedule": "Daily 9:00 PM ET",
-      "description": "Peak prime time \u2014 max engagement take",
+      "description": "[Original] Prime time hot take",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -455,7 +405,47 @@
     {
       "name": "X Nightcap",
       "schedule": "Daily 10:00 PM ET",
-      "description": "One sharp insight to end the day",
+      "description": "[Original] One sharp insight to end the day",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Reply Batch AM",
+      "schedule": "Daily 9\u201310 AM ET",
+      "description": "[Reply] Monitor target accounts, reply to viral posts in last 2h (2 slots)",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Reply Batch PM",
+      "schedule": "Daily 12\u20134 PM ET",
+      "description": "[Reply] Reply slots at 12pm, 2pm, 4pm (3 slots)",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Reply Batch Eve",
+      "schedule": "Daily 7\u201311 PM ET",
+      "description": "[Reply] Evening reply slots at 7pm + 11pm (2 slots)",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Quote Tweets",
+      "schedule": "Daily 10am/1pm/6pm/8pm ET",
+      "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -531,28 +521,37 @@
       }
     }
   ],
-  "activeAgents": [],
+  "activeAgents": [
+    {
+      "id": "b326f395-ba3f-4b75-b17c-80f3493ba0ba",
+      "label": "x-strategy-rebuild",
+      "status": "done",
+      "startedAt": "2026-03-29T06:05:36.233000+00:00",
+      "elapsedSecs": 271,
+      "updatedAt": "2026-03-29T06:10:05.322000+00:00"
+    }
+  ],
   "recentActivity": [
     {
-      "time": "2026-03-29T06:00:06Z",
-      "event": "Session spend: $12.23"
+      "time": "2026-03-29T06:10:05Z",
+      "event": "Session spend: $14.99"
     },
     {
-      "time": "2026-03-29T06:00:01Z",
+      "time": "2026-03-29T06:10:01Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-29T06:00:01Z",
-      "event": "23 scheduled jobs healthy"
+      "time": "2026-03-29T06:10:01Z",
+      "event": "22 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T06:00:01Z",
+      "time": "2026-03-29T06:10:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T06:00:01Z",
+      "time": "2026-03-29T06:10:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T06:00:01Z"
+  "lastUpdated": "2026-03-29T06:10:01Z"
 }
