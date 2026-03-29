@@ -1,28 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T16:04:15Z",
-  "objective": "Tighten X metrics feedback loop post-publish \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T16:08:27Z",
+  "objective": "Check X progress + trigger Sorare daily mission",
+  "status": "active",
   "steps": [
     {
-      "label": "Fixed sync",
+      "label": "Receiving audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Pushed to GitHub",
-      "status": "done",
-      "tool": "github"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T16:04:26Z",
-  "checkedAt": "2026-03-29T16:04:15Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-29T16:08:27Z",
+  "checkedAt": "2026-03-29T16:08:27Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
