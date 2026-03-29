@@ -3612,35 +3612,64 @@
             const nm = f.nasdaq_movers;
             if (nm && (nm.gainers?.length || nm.losers?.length)) {
                 html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
-                const nasdaqRows = [];
-                (nm.gainers || []).forEach(m => nasdaqRows.push({
-                    src: 'Yahoo Finance', cat: `+${m.change_pct}%`, catColor: '#4ade80',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '',
-                    score: m.score || null, published: m.published || ''
-                }));
-                (nm.losers || []).forEach(m => nasdaqRows.push({
-                    src: 'Yahoo Finance', cat: `${m.change_pct}%`, catColor: '#f87171',
-                    title: `${m.ticker}  $${m.price}`, url: '', blurb: '',
-                    score: m.score || null, published: m.published || ''
-                }));
-                html += makeTable(nasdaqRows);
+                const _fmtChg = (v, alwaysSign=true) => {
+                    if (v == null) return '<span style="color:#666">—</span>';
+                    const s = alwaysSign && v >= 0 ? '+' : '';
+                    const col = v >= 0 ? '#4ade80' : '#f87171';
+                    return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
+                };
+                const nasdaqAllRows = [...(nm.gainers||[]), ...(nm.losers||[])];
+                html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <thead><tr style="color:#888;text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 6px;">Ticker</th>
+                        <th style="padding:4px 6px;">Price</th>
+                        <th style="padding:4px 6px;text-align:right;">1D</th>
+                        <th style="padding:4px 6px;text-align:right;">1W</th>
+                        <th style="padding:4px 6px;text-align:right;">1M</th>
+                    </tr></thead><tbody>`;
+                nasdaqAllRows.forEach(m => {
+                    html += `<tr style="border-bottom:1px solid #1e1e1e;">
+                        <td style="padding:4px 6px;font-weight:700;">${m.ticker}</td>
+                        <td style="padding:4px 6px;color:#ccc;">$${m.price}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct)}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1w ?? null)}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1m ?? null)}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
                 html += `</div>`;
             }
 
             // ── Crypto Movers ──────────────────────────────────────────────
             if (f.crypto_movers && f.crypto_movers.length) {
                 html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
-                html += makeTable(f.crypto_movers.map(m => {
-                    const up = m.change_pct >= 0;
-                    return {
-                        src: 'CoinGecko', cat: `${up ? '+' : ''}${m.change_pct}%`,
-                        catColor: up ? '#4ade80' : '#f87171',
-                        title: `${m.symbol} — ${m.name}`, url: '',
-                        blurb: m.insight || '',
-                        score: m.score || null,
-                        published: m.published || ''
-                    };
-                }));
+                const _fmtChgC = (v) => {
+                    if (v == null) return '<span style="color:#666">—</span>';
+                    const s = v >= 0 ? '+' : '';
+                    const col = v >= 0 ? '#4ade80' : '#f87171';
+                    return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
+                };
+                html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <thead><tr style="color:#888;text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 6px;">Coin</th>
+                        <th style="padding:4px 6px;">Price</th>
+                        <th style="padding:4px 6px;text-align:right;">1D</th>
+                        <th style="padding:4px 6px;text-align:right;">1W</th>
+                        <th style="padding:4px 6px;text-align:right;">1M</th>
+                        <th style="padding:4px 6px;color:#666;">Note</th>
+                    </tr></thead><tbody>`;
+                f.crypto_movers.forEach(m => {
+                    const price = m.price >= 1 ? `$${m.price.toLocaleString()}` : `$${m.price}`;
+                    html += `<tr style="border-bottom:1px solid #1e1e1e;">
+                        <td style="padding:4px 6px;font-weight:700;">${m.symbol} <span style="color:#666;font-weight:400;">${m.name}</span></td>
+                        <td style="padding:4px 6px;color:#ccc;">${price}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct)}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1w ?? null)}</td>
+                        <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1m ?? null)}</td>
+                        <td style="padding:4px 6px;color:#888;font-size:0.75rem;">${m.insight || ''}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
                 html += `</div>`;
             }
 
