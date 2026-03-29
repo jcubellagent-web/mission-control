@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-29T22:43:48Z",
-  "objective": "Checking Sorare update status",
-  "status": "active",
+  "objective": "Checking Sorare update status \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Receiving audio",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Checking status",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T22:43:48Z",
+  "updatedAt": "2026-03-29T22:44:23Z",
   "checkedAt": "2026-03-29T22:43:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
