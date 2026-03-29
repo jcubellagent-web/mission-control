@@ -1,28 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T15:48:05Z",
-  "objective": "Fix collapsed section next-step labels in dashboard \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T16:01:57Z",
+  "objective": "Tighten X metrics feedback loop post-publish",
+  "status": "active",
   "steps": [
     {
-      "label": "Fixed",
+      "label": "Receiving audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Pushed to GitHub",
-      "status": "done",
-      "tool": "github"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T15:48:14Z",
-  "checkedAt": "2026-03-29T15:48:05Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-29T16:01:57Z",
+  "checkedAt": "2026-03-29T16:01:57Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
