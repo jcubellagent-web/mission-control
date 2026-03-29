@@ -1,24 +1,25 @@
 {
-  "updatedAt": "2026-03-29T16:00:11.786240+00:00",
+  "updatedAt": "2026-03-29T16:25:09.187625+00:00",
   "account": "@AgentJc11443",
   "lead": {
     "impressions_7d": 0,
     "followers_gained_7d": 0,
-    "engagement_rate_7d": 0,
+    "engagement_rate_7d": 0.0,
     "reply_impressions_7d": 0,
-    "reply_conversion_rate_7d": 0,
-    "qt_engagement_rate_7d": 0,
-    "posts_7d": 0,
-    "originals_7d": 0,
+    "reply_conversion_rate_7d": 0.0,
+    "qt_engagement_rate_7d": 0.0,
+    "posts_7d": 5,
+    "originals_7d": 5,
     "replies_7d": 0,
     "quote_tweets_7d": 0,
     "top_post_impressions": 0,
     "top_reply_impressions": 0,
-    "follower_velocity_30d": 0
+    "follower_velocity_30d": 0,
+    "followers_total": 50
   },
   "lag": {
-    "followers": 0,
-    "impressions_90d": 0,
+    "followers": 50,
+    "impressions_90d": 391,
     "monetized": 0,
     "avg_reply_impressions": 0
   },
@@ -27,7 +28,7 @@
       "label": "500 followers",
       "metric": "followers",
       "target": 500,
-      "current": 0,
+      "current": 50,
       "achieved": false,
       "achieved_at": null
     },
@@ -35,7 +36,7 @@
       "label": "2,500 followers",
       "metric": "followers",
       "target": 2500,
-      "current": 0,
+      "current": 50,
       "achieved": false,
       "achieved_at": null
     },
@@ -43,7 +44,7 @@
       "label": "10K followers",
       "metric": "followers",
       "target": 10000,
-      "current": 0,
+      "current": 50,
       "achieved": false,
       "achieved_at": null
     },
@@ -51,7 +52,7 @@
       "label": "1M impressions 30d",
       "metric": "impressions_30d",
       "target": 1000000,
-      "current": 0,
+      "current": 391,
       "achieved": false,
       "achieved_at": null
     },
@@ -59,7 +60,7 @@
       "label": "5M impressions 90d",
       "metric": "impressions_90d",
       "target": 5000000,
-      "current": 0,
+      "current": 391,
       "achieved": false,
       "achieved_at": null
     },
@@ -133,10 +134,15 @@
     }
   ],
   "strategy": {
-    "best_hours_by_type": {},
+    "best_hours_by_type": {
+      "original": [
+        15,
+        16
+      ]
+    },
     "best_reply_targets": [],
-    "avg_engagement": 0,
-    "posts_today": 0,
-    "last_post_at": null
+    "avg_engagement": 0.0,
+    "posts_today": 5,
+    "last_post_at": "2026-03-29T16:00:11.782616+00:00"
   }
 }
