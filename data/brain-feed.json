@@ -1,23 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T02:21:48Z",
+  "messageReceived": "2026-03-29T02:22:49Z",
   "objective": "Wipe X account via browser",
   "status": "active",
   "steps": [
     {
-      "label": "TweetDelete OAuth loaded in Chrome",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Clicking Authorize",
+      "label": "Using Chrome JS injection to delete tweets",
       "status": "active",
-      "tool": "applescript"
+      "tool": "exec"
     }
   ],
-  "currentTool": "applescript",
-  "updatedAt": "2026-03-29T02:21:48Z",
-  "checkedAt": "2026-03-29T02:21:48Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T02:22:49Z",
+  "checkedAt": "2026-03-29T02:22:49Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
