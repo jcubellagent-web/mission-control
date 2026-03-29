@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T18:28:18Z",
-  "objective": "Verifying all Sorare lineups fresh \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T18:29:24Z",
+  "objective": "Setting up Sorare cron on J.A.I.N",
+  "status": "active",
   "steps": [
     {
-      "label": "Cleaned up",
-      "status": "done",
-      "tool": "sorare_api"
-    },
-    {
-      "label": "Resubmitting all lineups",
-      "status": "done",
-      "tool": "sorare_api"
+      "label": "Deploying script to J.A.I.N",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "sorare_api",
-  "updatedAt": "2026-03-29T18:28:43Z",
-  "checkedAt": "2026-03-29T18:28:18Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T18:29:24Z",
+  "checkedAt": "2026-03-29T18:29:24Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
