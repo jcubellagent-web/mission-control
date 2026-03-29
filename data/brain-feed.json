@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-29T18:28:18Z",
-  "objective": "Verifying all Sorare lineups fresh",
-  "status": "active",
+  "objective": "Verifying all Sorare lineups fresh \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Cleaned up",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Resubmitting all lineups",
-      "status": "active",
+      "status": "done",
       "tool": "sorare_api"
     }
   ],
   "currentTool": "sorare_api",
-  "updatedAt": "2026-03-29T18:28:18Z",
+  "updatedAt": "2026-03-29T18:28:43Z",
   "checkedAt": "2026-03-29T18:28:18Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
