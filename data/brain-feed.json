@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T16:58:57Z",
-  "objective": "Scout Sorare market \u2014  budget \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T17:01:27Z",
+  "objective": "Set optimal Champion + Hot Streak lineups",
+  "status": "active",
   "steps": [
     {
-      "label": "Champion PvP submitted",
+      "label": "Parsed",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Auditing inventory + missions",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T16:59:09Z",
-  "checkedAt": "2026-03-29T16:58:57Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T17:01:27Z",
+  "checkedAt": "2026-03-29T17:01:27Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
