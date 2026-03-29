@@ -3,37 +3,37 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-29T15:48:05Z",
-    "objective": "Fix collapsed section next-step labels in dashboard \u2014 complete \u00b7 awaiting next instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-29T16:03:35Z",
+    "objective": "Tighten X metrics feedback loop post-publish",
+    "status": "active",
     "steps": [
       {
-        "label": "Fixed",
+        "label": "Parsed",
+        "status": "done",
+        "tool": "openclaw"
+      },
+      {
+        "label": "Read scripts",
         "status": "done",
         "tool": "exec"
       },
       {
-        "label": "Pushed to GitHub",
-        "status": "done",
-        "tool": "github"
-      },
-      {
-        "label": "Responding to Josh",
-        "status": "done",
-        "tool": "telegram"
+        "label": "Fixing sync + polling",
+        "status": "active",
+        "tool": "exec"
       }
     ],
-    "currentTool": "telegram",
-    "updatedAt": "2026-03-29T15:48:14Z",
-    "checkedAt": "2026-03-29T15:48:05Z",
+    "currentTool": "exec",
+    "updatedAt": "2026-03-29T16:03:35Z",
+    "checkedAt": "2026-03-29T16:03:35Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Fix collapsed section next-step labels in dashboard \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-03-29T16:00:02Z"
+    "status": "Brain Feed live",
+    "context": "Tighten X metrics feedback loop post-publish",
+    "updatedAt": "2026-03-29T16:03:57Z"
   },
   "contextWindow": {
     "usedTokens": 27731,
@@ -160,7 +160,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T16:00:06Z",
+    "lastUpdated": "2026-03-29T16:04:03Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -190,11 +190,11 @@
   "machineHealth": {
     "josh": {
       "cpu_pct": 18.7,
-      "cpu_user": 6.9,
-      "cpu_sys": 12.57,
-      "load1": 1.69,
-      "load5": 1.96,
-      "load15": 1.97,
+      "cpu_user": 6.77,
+      "cpu_sys": 11.91,
+      "load1": 1.41,
+      "load5": 1.67,
+      "load15": 1.84,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -204,14 +204,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.7,
-      "cpu_user": 2.14,
-      "cpu_sys": 8.57,
-      "load1": 1.59,
-      "load5": 1.62,
-      "load15": 1.59,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 11.1,
+      "cpu_user": 2.8,
+      "cpu_sys": 9.2,
+      "load1": 1.92,
+      "load5": 1.77,
+      "load15": 1.67,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -231,19 +231,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T16:00:02Z"
+      "lastChecked": "2026-03-29T16:03:57Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T16:00:02Z"
+      "lastChecked": "2026-03-29T16:03:57Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T16:00:02Z"
+      "lastChecked": "2026-03-29T16:03:57Z"
     }
   ],
   "crons": [
@@ -394,7 +394,8 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-03-29T12:00:00"
     },
     {
       "name": "X Market Close",
@@ -545,25 +546,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-29T16:00:06Z",
+      "time": "2026-03-29T16:04:03Z",
       "event": "Session spend: $8.51"
     },
     {
-      "time": "2026-03-29T16:00:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-29T16:03:57Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-29T16:00:02Z",
+      "time": "2026-03-29T16:03:57Z",
       "event": "22 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T16:00:02Z",
+      "time": "2026-03-29T16:03:57Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T16:00:02Z",
+      "time": "2026-03-29T16:03:57Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T16:00:02Z"
+  "lastUpdated": "2026-03-29T16:03:57Z"
 }
