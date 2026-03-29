@@ -4,8 +4,8 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-29T16:29:34Z",
-    "objective": "Update Sorare missions script to cover all daily missions",
+    "messageReceived": "2026-03-29T16:32:57Z",
+    "objective": "Deep scrub Sorare missions + lineups strategy",
     "status": "active",
     "steps": [
       {
@@ -14,26 +14,21 @@
         "tool": "openclaw"
       },
       {
-        "label": "Spawned Claude Code agent",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Awaiting completion",
+        "label": "Fixing agent command + expanding scope",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-29T16:29:34Z",
-    "checkedAt": "2026-03-29T16:29:34Z",
+    "updatedAt": "2026-03-29T16:32:57Z",
+    "checkedAt": "2026-03-29T16:32:57Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Update Sorare missions script to cover all daily missions",
-    "updatedAt": "2026-03-29T16:30:02Z"
+    "context": "Deep scrub Sorare missions + lineups strategy",
+    "updatedAt": "2026-03-29T16:40:02Z"
   },
   "contextWindow": {
     "usedTokens": 94148,
@@ -160,7 +155,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T16:30:06Z",
+    "lastUpdated": "2026-03-29T16:40:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -189,12 +184,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 21.5,
-      "cpu_user": 8.2,
-      "cpu_sys": 13.28,
-      "load1": 2.38,
-      "load5": 2.12,
-      "load15": 1.98,
+      "cpu_pct": 18.5,
+      "cpu_user": 6.1,
+      "cpu_sys": 12.41,
+      "load1": 2.63,
+      "load5": 2.18,
+      "load15": 2.0,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -204,14 +199,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.8,
-      "cpu_user": 2.81,
-      "cpu_sys": 9.15,
-      "load1": 1.46,
-      "load5": 1.51,
-      "load15": 1.59,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 18.2,
+      "cpu_user": 9.9,
+      "cpu_sys": 9.9,
+      "load1": 2.02,
+      "load5": 1.84,
+      "load15": 1.71,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -231,19 +226,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T16:30:02Z"
+      "lastChecked": "2026-03-29T16:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T16:30:02Z"
+      "lastChecked": "2026-03-29T16:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T16:30:02Z"
+      "lastChecked": "2026-03-29T16:40:02Z"
     }
   ],
   "crons": [
@@ -546,25 +541,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-29T16:30:06Z",
+      "time": "2026-03-29T16:40:06Z",
       "event": "Session spend: $10.83"
     },
     {
-      "time": "2026-03-29T16:30:02Z",
+      "time": "2026-03-29T16:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-29T16:30:02Z",
+      "time": "2026-03-29T16:40:02Z",
       "event": "22 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T16:30:02Z",
+      "time": "2026-03-29T16:40:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T16:30:02Z",
+      "time": "2026-03-29T16:40:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T16:30:02Z"
+  "lastUpdated": "2026-03-29T16:40:02Z"
 }
