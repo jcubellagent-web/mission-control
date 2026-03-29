@@ -1,23 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T02:13:44Z",
-  "objective": "Clean up X account",
+  "messageReceived": "2026-03-29T02:14:43Z",
+  "objective": "Wipe X account via browser",
   "status": "active",
   "steps": [
     {
-      "label": "X API blocked - credits depleted",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
+      "label": "Opening TweetDelete in browser",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T02:13:44Z",
-  "checkedAt": "2026-03-29T02:13:44Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T02:14:43Z",
+  "checkedAt": "2026-03-29T02:14:43Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
