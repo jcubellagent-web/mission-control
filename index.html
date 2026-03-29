@@ -3608,18 +3608,14 @@
                 html += `</div>`;
             }
 
-            // ── NASDAQ Movers ──────────────────────────────────────────────
-            const nm = f.nasdaq_movers;
-            if (nm && (nm.gainers?.length || nm.losers?.length)) {
-                html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
-                const _fmtChg = (v, alwaysSign=true) => {
-                    if (v == null) return '<span style="color:#fff">N/A</span>';
-                    const s = alwaysSign && v >= 0 ? '+' : '';
-                    const col = v >= 0 ? '#4ade80' : '#f87171';
-                    return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
-                };
-                // Shared column widths for both tables to stay aligned
-                const _colStyle = {
+            // ── NASDAQ + Crypto Movers shared styles ───────────────────────
+            const _fmtChg = (v, alwaysSign=true) => {
+                if (v == null) return '<span style="color:#fff">N/A</span>';
+                const s = alwaysSign && v >= 0 ? '+' : '';
+                const col = v >= 0 ? '#4ade80' : '#f87171';
+                return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
+            };
+            const _colStyle = {
                     name:  'width:100px;padding:4px 6px;',
                     price: 'width:80px;padding:4px 6px;',
                     pct:   'width:62px;padding:4px 6px;text-align:right;font-variant-numeric:tabular-nums;',
@@ -3631,10 +3627,14 @@
                     pct:   `width:62px;padding:4px 6px;text-align:right;`,
                     note:  `padding:4px 6px;`,
                 };
-                const _tableStyle = `width:100%;border-collapse:collapse;font-size:0.82rem;table-layout:fixed;`;
-                const _theadStyle = `color:#fff;text-align:left;border-bottom:1px solid #444;`;
-                const _rowStyle   = `border-bottom:1px solid #1e1e1e;`;
+            const _tableStyle = `width:100%;border-collapse:collapse;font-size:0.82rem;table-layout:fixed;`;
+            const _theadStyle = `color:#fff;text-align:left;border-bottom:1px solid #444;`;
+            const _rowStyle   = `border-bottom:1px solid #1e1e1e;`;
 
+            // ── NASDAQ Movers ──────────────────────────────────────────────
+            const nm = f.nasdaq_movers;
+            if (nm && (nm.gainers?.length || nm.losers?.length)) {
+                html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
                 const nasdaqAllRows = [...(nm.gainers||[]), ...(nm.losers||[])];
                 html += `<table style="${_tableStyle}">
                     <thead><tr style="${_theadStyle}">
