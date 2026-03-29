@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T04:23:34Z",
-  "objective": "List duplicate 2025 cards + buy 2026 cards \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T05:09:34Z",
+  "objective": "Find best 2026 card buys under ",
+  "status": "active",
   "steps": [
     {
-      "label": "Researched listing API",
+      "label": "Receiving audio",
       "status": "done",
-      "tool": "web_search"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T04:24:02Z",
-  "checkedAt": "2026-03-29T04:23:34Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-29T05:09:34Z",
+  "checkedAt": "2026-03-29T05:09:34Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
