@@ -5838,8 +5838,8 @@
         overlay.classList.remove('closing');
         overlay.style.display = 'flex';
         await fetchXProgress();
-        // Poll every 30s while open
-        window._xPollInterval = setInterval(fetchXProgress, 30000);
+        // Poll every 10s while open for tight post-publish feedback
+        window._xPollInterval = setInterval(fetchXProgress, 10000);
     };
 
     window.closeXDashboard = function() {
