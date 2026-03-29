@@ -1,18 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T00:26:55Z",
-  "objective": "Session ready \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T00:37:11Z",
+  "objective": "Run live intelligence update \u00b7 all sections always shown",
+  "status": "active",
   "steps": [
     {
-      "label": "Loading context",
+      "label": "Receiving audio",
       "status": "done",
       "tool": "openclaw"
+    },
+    {
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-29T00:26:56Z",
-  "checkedAt": "2026-03-29T00:26:55Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-29T00:37:11Z",
+  "checkedAt": "2026-03-29T00:37:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
