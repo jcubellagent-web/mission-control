@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T01:05:17Z",
+  "messageReceived": "2026-03-29T01:05:41Z",
   "objective": "Deep system audit: JOSH 2.0 + J.A.I.N",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Audit data collected",
       "status": "done",
-      "tool": "whisper"
+      "tool": "exec"
     },
     {
-      "label": "Starting local audit",
+      "label": "Analyzing + Responding to Josh",
       "status": "active",
-      "tool": "exec"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-29T01:05:17Z",
-  "checkedAt": "2026-03-29T01:05:17Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-29T01:05:41Z",
+  "checkedAt": "2026-03-29T01:05:41Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
