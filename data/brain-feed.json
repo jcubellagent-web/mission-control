@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-29T17:48:06Z",
-  "objective": "Fix Hot Streak detection + run live",
-  "status": "active",
+  "objective": "Fix Hot Streak detection + run live \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Dry run passed",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Submitting live",
-      "status": "active",
+      "status": "done",
       "tool": "sorare_api"
     }
   ],
   "currentTool": "sorare_api",
-  "updatedAt": "2026-03-29T17:48:06Z",
+  "updatedAt": "2026-03-29T17:53:17Z",
   "checkedAt": "2026-03-29T17:48:06Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
