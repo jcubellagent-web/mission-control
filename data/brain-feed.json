@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T00:37:16Z",
+  "messageReceived": "2026-03-29T00:37:23Z",
   "objective": "Run live intelligence update \u00b7 all sections always shown",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Scripts found",
       "status": "done",
-      "tool": "whisper"
+      "tool": "exec"
     },
     {
-      "label": "Locating intel scripts",
+      "label": "Reading intelligence_feed.py",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T00:37:16Z",
-  "checkedAt": "2026-03-29T00:37:16Z",
+  "updatedAt": "2026-03-29T00:37:23Z",
+  "checkedAt": "2026-03-29T00:37:23Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
