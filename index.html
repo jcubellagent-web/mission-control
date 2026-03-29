@@ -5537,7 +5537,7 @@
         document.getElementById('xd-impressions7d').textContent  = fmtNum(imp7);
         document.getElementById('xd-followers-gained').textContent = fmtNum(fol7);
         document.getElementById('xd-engagement').textContent     = fmtPct(eng);
-        document.getElementById('xd-posts7d').textContent        = posts + ' / 7';
+        document.getElementById('xd-posts7d').textContent        = posts + ' / wk';
         document.getElementById('xd-top-post').textContent       = fmtNum(topP);
         document.getElementById('xd-followers-total').textContent = fmtNum(folT);
 
@@ -5546,7 +5546,7 @@
             document.getElementById('xd-bar-impressions7d').style.width    = barPct(imp7, 100000) + '%';
             document.getElementById('xd-bar-followers-gained').style.width = barPct(fol7, 100) + '%';
             document.getElementById('xd-bar-engagement').style.width       = barPct(eng, 0.15) + '%';
-            document.getElementById('xd-bar-posts7d').style.width          = barPct(posts, 7) + '%';
+            document.getElementById('xd-bar-posts7d').style.width          = barPct(posts, 84) + '%';
             document.getElementById('xd-bar-top-post').style.width         = barPct(topP, 50000) + '%';
             document.getElementById('xd-bar-followers-total').style.width  = barPct(folT, 500) + '%';
         });
