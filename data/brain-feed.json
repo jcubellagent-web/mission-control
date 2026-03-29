@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T00:38:52Z",
-  "objective": "Run live intelligence update \u00b7 all sections always shown \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T00:43:54Z",
+  "objective": "Add weekly/monthly % to dashboard movers (desktop only)",
+  "status": "active",
   "steps": [
     {
-      "label": "Patched",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "exec"
+      "tool": "whisper"
     },
     {
-      "label": "Running intelligence_feed.py",
-      "status": "done",
+      "label": "Patching fetch_nasdaq_movers + fetch_crypto_movers",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T00:40:06Z",
-  "checkedAt": "2026-03-29T00:38:52Z",
+  "updatedAt": "2026-03-29T00:43:54Z",
+  "checkedAt": "2026-03-29T00:43:54Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
