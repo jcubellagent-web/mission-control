@@ -4464,9 +4464,7 @@
                     <span class="label">Progress</span>
                 </div>
             `;
-            // Re-attach click listener after innerHTML rewrite
-            const xBubble = document.getElementById('x-progress-bubble');
-            if (xBubble) xBubble.addEventListener('click', () => window.openXDashboard());
+            // bubble click is handled by document-level delegation below
 
 
             // Model usage snapshot — compact, multi-source (diff-guarded)
@@ -5745,15 +5743,19 @@
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
 
-    // Wire modal close button + overlay click via JS (not inline onclick — CSP safe)
-    document.addEventListener('DOMContentLoaded', () => {
-        const closeBtn = document.getElementById('x-modal-close');
-        if (closeBtn) closeBtn.addEventListener('click', () => window.closeXDashboard());
+    // Global event delegation — handles bubble click, modal close, overlay dismiss
+    // Works regardless of dynamic DOM injection order
+    document.addEventListener('click', function(e) {
+        const bubble = e.target.closest('#x-progress-bubble');
+        if (bubble) { window.openXDashboard(); return; }
+
+        const closeBtn = e.target.closest('#x-modal-close');
+        if (closeBtn) { window.closeXDashboard(); return; }
 
         const overlay = document.getElementById('x-modal-overlay');
-        if (overlay) overlay.addEventListener('click', e => {
-            if (e.target === overlay) window.closeXDashboard();
-        });
+        if (overlay && overlay.style.display !== 'none' && e.target === overlay) {
+            window.closeXDashboard();
+        }
     });
 
     // Close on Escape key
