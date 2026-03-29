@@ -4771,40 +4771,86 @@
                 }).join('');
 
                 // Build collapsed preview: find the next job to run
-                const nextJob = grouped[cat].find(c => {
+                // Helper: parse a schedule string like "Daily 6:00 AM ET" → hour in 24h, or null
+                function parseScheduleHour(schedStr) {
+                    if (!schedStr) return null;
+                    const tp = schedStr.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+                    if (!tp) return null;
+                    let rh = parseInt(tp[1], 10);
+                    const ap = tp[3].toUpperCase();
+                    if (ap === 'PM' && rh !== 12) rh += 12;
+                    if (ap === 'AM' && rh === 12) rh = 0;
+                    return rh;
+                }
+                const etHourNow = getETHour();
+                const etMinNow = new Date().toLocaleString('en-US', {timeZone: 'America/New_York', minute: 'numeric'}) * 1;
+                const etDecimalNow = etHourNow + etMinNow / 60;
+
+                // For each non-multiRun job, compute its next scheduled hour
+                // Prefer jobs that: (1) haven't run yet today (runStatus !== 'done') OR whose schedule time > now
+                // Sort by scheduled time, pick the earliest upcoming
+                let nextJob = null;
+                let nextJobTime = '';
+                let nextJobScheduledDecimal = Infinity;
+
+                for (const c of grouped[cat]) {
+                    if (c.status === 'paused') continue;
                     if (c.multiRun && c.multiRun.runs) {
-                        const etHour = getETHour();
-                        return c.multiRun.runs.some(r => {
-                            if (!r.time) return false;
+                        // For multiRun: find the earliest upcoming run
+                        let bestRun = null;
+                        let bestDecimal = Infinity;
+                        for (const r of c.multiRun.runs) {
+                            if (!r.time) continue;
                             const tp = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
-                            if (!tp) return false;
+                            if (!tp) continue;
                             let rh = parseInt(tp[1], 10);
+                            const rm = tp[2] ? parseInt(tp[2], 10) : 0;
                             const ap = (tp[3] || '').toUpperCase();
                             if (ap === 'PM' && rh !== 12) rh += 12;
                             if (ap === 'AM' && rh === 12) rh = 0;
-                            return rh >= etHour;
-                        });
+                            const rd = rh + rm / 60;
+                            if (r.done) continue; // already ran
+                            if (rd >= etDecimalNow && rd < bestDecimal) {
+                                bestDecimal = rd;
+                                bestRun = r;
+                            }
+                        }
+                        if (bestRun && bestDecimal < nextJobScheduledDecimal) {
+                            nextJobScheduledDecimal = bestDecimal;
+                            nextJob = c;
+                            nextJobTime = bestRun.time;
+                        }
+                    } else {
+                        // For single-schedule jobs: parse schedule time
+                        const sh = parseScheduleHour(c.schedule);
+                        if (sh === null) {
+                            // No parseable time — include as fallback only if nothing else found
+                            if (!nextJob) { nextJob = c; nextJobTime = c.schedule || ''; }
+                            continue;
+                        }
+                        // Extract minutes too
+                        const tp2 = (c.schedule || '').match(/(\d+):(\d+)/);
+                        const sm = tp2 ? parseInt(tp2[2], 10) : 0;
+                        const sd = sh + sm / 60;
+                        // Skip if already done and time has passed
+                        if (c.runStatus === 'done' && sd < etDecimalNow) continue;
+                        // Skip if time already passed (even if not marked done)
+                        if (sd < etDecimalNow && sd < nextJobScheduledDecimal - 0.001) continue;
+                        if (sd >= etDecimalNow && sd < nextJobScheduledDecimal) {
+                            nextJobScheduledDecimal = sd;
+                            nextJob = c;
+                            nextJobTime = c.schedule || '';
+                        }
                     }
-                    return c.status !== 'paused';
-                }) || grouped[cat][0];
-                const previewName = nextJob ? escapeHtml(nextJob.name) : '—';
-                let previewTime = '';
-                if (nextJob && nextJob.multiRun && nextJob.multiRun.runs) {
-                    const etHour = getETHour();
-                    const nextRun = nextJob.multiRun.runs.find(r => {
-                        if (!r.time) return false;
-                        const tp = r.time.match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
-                        if (!tp) return false;
-                        let rh = parseInt(tp[1], 10);
-                        const ap = (tp[3] || '').toUpperCase();
-                        if (ap === 'PM' && rh !== 12) rh += 12;
-                        if (ap === 'AM' && rh === 12) rh = 0;
-                        return rh >= etHour;
-                    });
-                    previewTime = nextRun ? nextRun.time : (nextJob.multiRun.runs[nextJob.multiRun.runs.length - 1]?.time || '');
-                } else if (nextJob) {
-                    previewTime = nextJob.schedule || '';
                 }
+                // Fallback: if nothing upcoming, show the last job in the list
+                if (!nextJob) {
+                    nextJob = grouped[cat][grouped[cat].length - 1];
+                    nextJobTime = nextJob ? (nextJob.schedule || '') : '';
+                }
+
+                const previewName = nextJob ? escapeHtml(nextJob.name) : '—';
+                let previewTime = nextJobTime;
                 const catId = 'tjob-cat-' + cat.replace(/\s+/g,'-').toLowerCase();
                 const isCollapsed = isCatCollapsed(cat);
                 return `<div class="tjob-category${isCollapsed ? ' collapsed' : ''}" id="${catId}" data-cat="${escapeHtml(cat)}">
