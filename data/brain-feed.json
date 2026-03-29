@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T04:15:15Z",
+  "messageReceived": "2026-03-29T04:17:49Z",
   "objective": "Check Sorare MLB inventory + marketplace strategy",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Fetched inventory",
       "status": "done",
-      "tool": "whisper"
+      "tool": "sorare_api"
     },
     {
-      "label": "Fetching inventory",
+      "label": "Analyzing cards",
       "status": "active",
-      "tool": "sorare_api"
+      "tool": "gemini"
     }
   ],
-  "currentTool": "sorare_api",
-  "updatedAt": "2026-03-29T04:15:15Z",
-  "checkedAt": "2026-03-29T04:15:15Z",
+  "currentTool": "gemini",
+  "updatedAt": "2026-03-29T04:17:49Z",
+  "checkedAt": "2026-03-29T04:17:49Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
