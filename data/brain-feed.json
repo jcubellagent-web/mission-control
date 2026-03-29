@@ -1,18 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T01:23:02Z",
-  "objective": "Update Mission Control jobs module \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T01:28:19Z",
+  "objective": "Build X monetization strategy + cron",
+  "status": "active",
   "steps": [
     {
-      "label": "Reading dashboard scripts",
+      "label": "Transcribed",
       "status": "done",
+      "tool": "whisper"
+    },
+    {
+      "label": "Checking UploadPost + X API",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T01:23:35Z",
-  "checkedAt": "2026-03-29T01:23:02Z",
+  "updatedAt": "2026-03-29T01:28:19Z",
+  "checkedAt": "2026-03-29T01:28:19Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
