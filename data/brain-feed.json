@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T19:31:29Z",
-  "objective": "Set Sorare lineups for GW2 \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T19:41:28Z",
+  "objective": "Sorare deep logic audit + Google Sheet",
+  "status": "active",
   "steps": [
     {
-      "label": "Dry run complete",
-      "status": "done",
+      "label": "Reading full bot script",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "Submitting lineup 3",
-      "status": "done",
-      "tool": "sorare_api"
     }
   ],
-  "currentTool": "sorare_api",
-  "updatedAt": "2026-03-29T19:31:45Z",
-  "checkedAt": "2026-03-29T19:31:29Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T19:41:28Z",
+  "checkedAt": "2026-03-29T19:41:28Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
