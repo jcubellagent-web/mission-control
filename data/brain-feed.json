@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T17:14:30Z",
-  "objective": "Fill all empty Sorare lineup slots \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T17:14:50Z",
+  "objective": "Session startup",
+  "status": "active",
   "steps": [
     {
-      "label": "All 5 slots filled",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Loading context",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T17:14:39Z",
-  "checkedAt": "2026-03-29T17:14:30Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-29T17:14:50Z",
+  "checkedAt": "2026-03-29T17:14:50Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
