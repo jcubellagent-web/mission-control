@@ -1,23 +1,28 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T16:27:55Z",
+  "messageReceived": "2026-03-29T16:28:34Z",
   "objective": "Update Sorare missions script to cover all daily missions",
   "status": "active",
   "steps": [
     {
-      "label": "Read script",
+      "label": "Parsed",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Analyzing gaps",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Analyzing gaps vs screenshot",
+      "label": "Spawning coding agent",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T16:27:55Z",
-  "checkedAt": "2026-03-29T16:27:55Z",
+  "updatedAt": "2026-03-29T16:28:34Z",
+  "checkedAt": "2026-03-29T16:28:34Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
