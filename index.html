@@ -4657,13 +4657,14 @@
             // Category config: accent color + emoji
             const CAT_CONFIG = {
                 'Intelligence Feed': { color: '#60a5fa', emoji: '⚡' },
+                'X Account':         { color: '#1d9bf0', emoji: '𝕏' },
                 'Sorare MLB':        { color: '#a78bfa', emoji: '⚾' },
                 'Fantasy Baseball':  { color: '#c084fc', emoji: '🏆' },
                 'Maintenance':       { color: '#4ade80', emoji: '⚙' },
                 'Appointments':      { color: '#fbbf24', emoji: '📅' },
                 'Other':             { color: 'rgba(255,255,255,0.3)', emoji: '·' },
             };
-            const categoryOrder = ['Intelligence Feed', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
+            const categoryOrder = ['Intelligence Feed', 'X Account', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
 
             const grouped = {};
             (data.crons || []).forEach(cron => {
