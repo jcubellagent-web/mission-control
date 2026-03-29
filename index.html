@@ -1352,7 +1352,7 @@
         .if-signal-table thead th { font-size: 0.55rem; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.15); text-align: left; }
         .ift-ss { width: 26px; text-align: center; }
         .ift-age { width: 32px; text-align: center; white-space: nowrap; }
-        .ift-age-val { font-size: 0.58rem; color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
+        .ift-age-val { font-size: 0.58rem; color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
         .ift-src { width: 85px; white-space: nowrap; }
         .ift-cat { width: 95px; }
         .ift-headline { min-width: 0; }
@@ -1371,13 +1371,13 @@
         .if-item:hover { background: rgba(255,255,255,0.04); }
         .if-item-link { color: #fff; text-decoration: none; font-size: 0.72rem; line-height: 1.3; flex: 1; min-width: 0; }
         .if-item-link:hover { color: #93c5fd; text-decoration: underline; }
-        .if-item-source { font-size: 0.58rem; color: rgba(255,255,255,0.5); white-space: nowrap; flex-shrink: 0; }
+        .if-item-source { font-size: 0.58rem; color: rgba(255,255,255,0.85); white-space: nowrap; flex-shrink: 0; }
         .if-cat-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
         .if-cat-chip { font-size: 0.58rem; padding: 2px 7px; border-radius: 10px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
         .if-cat-chip:hover { background: rgba(255,255,255,0.14); }
         .if-item-title { font-size: 0.72rem; color: #fff; line-height: 1.3;
                          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .if-item-meta { font-size: 0.6rem; color: rgba(255,255,255,0.65); margin-top: 1px; }
+        .if-item-meta { font-size: 0.6rem; color: rgba(255,255,255,0.9); margin-top: 1px; }
         .if-score { display: inline-block; font-size: 0.58rem; padding: 0 4px;
                     border-radius: 3px; background: rgba(99,179,237,0.15); color: #63b3ed; margin-right: 4px; }
 
@@ -1400,7 +1400,7 @@
         .if-mover-chg { font-size: 0.65rem; font-weight: 600; }
         .if-mover-chg.up { color: #4ade80; }
         .if-mover-chg.down { color: #e53e3e; }
-        .if-gen-time { font-size: 0.58rem; color: rgba(255,255,255,0.55); padding: 4px 10px 6px; text-align: right; }
+        .if-gen-time { font-size: 0.58rem; color: rgba(255,255,255,0.85); padding: 4px 10px 6px; text-align: right; }
 
 
         /* AirPoint toggle button */
@@ -3525,9 +3525,9 @@
                     const age = itemAge(r.published);
                     t += `<tr class="ift-row">
                         <td class="ift-ss">${ssBar(r.score)}</td>
-                        <td class="ift-age">${age ? `<span class="ift-age-val">${escapeHtml(age)}</span>` : '—'}</td>
-                        <td class="ift-src">${escapeHtml(r.src || '—')}</td>
-                        <td class="ift-cat"><span class="ift-cat-badge"${catStyle}>${escapeHtml(r.cat || '—')}</span></td>
+                        <td class="ift-age">${age ? `<span class="ift-age-val">${escapeHtml(age)}</span>` : '<span class="ift-age-val">N/A</span>'}</td>
+                        <td class="ift-src">${escapeHtml(r.src || 'N/A')}</td>
+                        <td class="ift-cat"><span class="ift-cat-badge"${catStyle}>${escapeHtml(r.cat || 'N/A')}</span></td>
                         <td class="ift-headline">
                             <div class="ift-title">${titleEl}</div>
                             ${r.blurb ? `<div class="ift-reason">${escapeHtml(r.blurb)}</div>` : ''}
@@ -3613,27 +3613,29 @@
             if (nm && (nm.gainers?.length || nm.losers?.length)) {
                 html += `<div class="if-section" id="ifs-nasdaq"><div class="if-section-header">📊 NASDAQ Movers</div>`;
                 const _fmtChg = (v, alwaysSign=true) => {
-                    if (v == null) return '<span style="color:#666">—</span>';
+                    if (v == null) return '<span style="color:#fff">N/A</span>';
                     const s = alwaysSign && v >= 0 ? '+' : '';
                     const col = v >= 0 ? '#4ade80' : '#f87171';
                     return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
                 };
                 const nasdaqAllRows = [...(nm.gainers||[]), ...(nm.losers||[])];
                 html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead><tr style="color:#888;text-align:left;border-bottom:1px solid #333;">
+                    <thead><tr style="color:#fff;text-align:left;border-bottom:1px solid #444;">
                         <th style="padding:4px 6px;">Ticker</th>
                         <th style="padding:4px 6px;">Price</th>
                         <th style="padding:4px 6px;text-align:right;">1D</th>
                         <th style="padding:4px 6px;text-align:right;">1W</th>
                         <th style="padding:4px 6px;text-align:right;">1M</th>
+                        <th style="padding:4px 6px;">Note</th>
                     </tr></thead><tbody>`;
                 nasdaqAllRows.forEach(m => {
                     html += `<tr style="border-bottom:1px solid #1e1e1e;">
-                        <td style="padding:4px 6px;font-weight:700;">${m.ticker}</td>
-                        <td style="padding:4px 6px;color:#ccc;">$${m.price}</td>
+                        <td style="padding:4px 6px;font-weight:700;color:#fff;">${m.ticker}</td>
+                        <td style="padding:4px 6px;color:#fff;">$${m.price}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct)}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1w ?? null)}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChg(m.change_pct_1m ?? null)}</td>
+                        <td style="padding:4px 6px;color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
                     </tr>`;
                 });
                 html += `</tbody></table>`;
@@ -3644,29 +3646,29 @@
             if (f.crypto_movers && f.crypto_movers.length) {
                 html += `<div class="if-section" id="ifs-crypto"><div class="if-section-header">₿ Crypto Movers</div>`;
                 const _fmtChgC = (v) => {
-                    if (v == null) return '<span style="color:#666">—</span>';
+                    if (v == null) return '<span style="color:#fff">N/A</span>';
                     const s = v >= 0 ? '+' : '';
                     const col = v >= 0 ? '#4ade80' : '#f87171';
                     return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
                 };
                 html += `<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead><tr style="color:#888;text-align:left;border-bottom:1px solid #333;">
+                    <thead><tr style="color:#fff;text-align:left;border-bottom:1px solid #444;">
                         <th style="padding:4px 6px;">Coin</th>
                         <th style="padding:4px 6px;">Price</th>
                         <th style="padding:4px 6px;text-align:right;">1D</th>
                         <th style="padding:4px 6px;text-align:right;">1W</th>
                         <th style="padding:4px 6px;text-align:right;">1M</th>
-                        <th style="padding:4px 6px;color:#666;">Note</th>
+                        <th style="padding:4px 6px;">Note</th>
                     </tr></thead><tbody>`;
                 f.crypto_movers.forEach(m => {
                     const price = m.price >= 1 ? `$${m.price.toLocaleString()}` : `$${m.price}`;
                     html += `<tr style="border-bottom:1px solid #1e1e1e;">
-                        <td style="padding:4px 6px;font-weight:700;">${m.symbol} <span style="color:#666;font-weight:400;">${m.name}</span></td>
-                        <td style="padding:4px 6px;color:#ccc;">${price}</td>
+                        <td style="padding:4px 6px;font-weight:700;color:#fff;">${m.symbol} <span style="color:#fff;font-weight:400;">${m.name}</span></td>
+                        <td style="padding:4px 6px;color:#fff;">${price}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct)}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1w ?? null)}</td>
                         <td style="padding:4px 6px;text-align:right;">${_fmtChgC(m.change_pct_1m ?? null)}</td>
-                        <td style="padding:4px 6px;color:#888;font-size:0.75rem;">${m.insight || ''}</td>
+                        <td style="padding:4px 6px;color:#fff;font-size:0.75rem;">${m.insight || 'N/A'}</td>
                     </tr>`;
                 });
                 html += `</tbody></table>`;
