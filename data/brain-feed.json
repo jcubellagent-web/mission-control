@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T15:37:20Z",
+  "messageReceived": "2026-03-29T15:38:35Z",
   "objective": "Catch up missed X posts",
   "status": "active",
   "steps": [
     {
-      "label": "Reviewing log",
+      "label": "Posted catch-ups",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Updating dashboard",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-03-29T15:37:20Z",
-  "checkedAt": "2026-03-29T15:37:20Z",
+  "updatedAt": "2026-03-29T15:38:35Z",
+  "checkedAt": "2026-03-29T15:38:35Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
