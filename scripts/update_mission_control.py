@@ -991,11 +991,93 @@ def fetch_crons() -> List[Dict[str, Any]]:
         jain_listing = r.stdout if r.returncode == 0 else ""
     except Exception:
         jain_listing = ""
+    import datetime as _dt
+    import re as _re
+
+    now_et = _dt.datetime.now(_dt.timezone.utc).astimezone(_dt.timezone(_dt.timedelta(hours=-4)))
+    today_str = now_et.strftime('%Y-%m-%d')
+
+    # Parse X post log from J.A.I.N for lastRun data
+    x_log_runs: dict[str, str] = {}  # cron name → ISO timestamp of last successful run today
+    try:
+        log_r = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "jc_agent@100.121.89.84",
+             f"grep -E '\\[([0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}})\\] X Post Agent|✅ Posted' /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null || true"],
+            capture_output=True, text=True, timeout=8
+        )
+        if log_r.returncode == 0:
+            log_lines = log_r.stdout.strip().splitlines()
+            # Map run times to job names by hour
+            hour_to_job = {
+                6:  "X Feedback Loop",
+                7:  "X Pre-Market",
+                8:  "X Market Open",
+                11: "X Mover",
+                12: "X Hot Take",
+                17: "X Market Close",
+                21: "X Prime Take",
+                22: "X Nightcap",
+                9:  "X Reply Batch AM",
+                10: "X Reply Batch AM",
+                14: "X Reply Batch PM",
+                16: "X Reply Batch PM",
+                19: "X Reply Batch Eve",
+                23: "X Reply Batch Eve",
+                13: "X Quote Tweets",
+                15: "X Quote Tweets",
+                18: "X Quote Tweets",
+                20: "X Quote Tweets",
+            }
+            for line in log_lines:
+                m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
+                if m:
+                    h = int(m.group(1))
+                    job_name = hour_to_job.get(h)
+                    if job_name:
+                        iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
+                        x_log_runs[job_name] = iso
+    except Exception:
+        pass
+
+    def parse_daily_hour(schedule_str: str):
+        """Extract scheduled ET hour from a 'Daily H:MM AM/PM ET' string. Returns int or None."""
+        m = _re.search(r'(\d{1,2}):(\d{2})\s*(AM|PM)', schedule_str, _re.IGNORECASE)
+        if not m:
+            m = _re.search(r'(\d{1,2}):?(\d{0,2})\s*(AM|PM)', schedule_str, _re.IGNORECASE)
+        if m:
+            h = int(m.group(1))
+            ap = m.group(3).upper()
+            if ap == 'PM' and h != 12:
+                h += 12
+            elif ap == 'AM' and h == 12:
+                h = 0
+            return h
+        return None
+
     rows = []
     for target in CRON_TARGETS:
         is_jain = target.get('jain', False)
         listing = jain_listing if is_jain else josh_listing
         present = target['pattern'] in listing
+
+        # Compute runStatus for daily jobs
+        sched = target.get('schedule', '')
+        run_status = None  # 'done' | 'missed' | 'upcoming' | None
+        last_run = x_log_runs.get(target['name'])
+
+        if sched.startswith('Daily'):
+            sched_hour = parse_daily_hour(sched)
+            if sched_hour is not None:
+                now_hour = now_et.hour
+                now_min = now_et.minute
+                if last_run:
+                    run_status = 'done'
+                elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= 10):
+                    run_status = 'missed'
+                else:
+                    run_status = 'upcoming'
+
         row = {
             'name': target['name'],
             'schedule': target['schedule'],
@@ -1006,10 +1088,12 @@ def fetch_crons() -> List[Dict[str, Any]]:
             'errors': 0,
             'lastError': None,
         }
+        if run_status:
+            row['runStatus'] = run_status
+        if last_run:
+            row['lastRun'] = last_run
+
         if target.get('multiRun'):
-            # Compute which runs have passed today (ET)
-            import datetime as _dt
-            now_et = _dt.datetime.now(_dt.timezone.utc).astimezone(_dt.timezone(_dt.timedelta(hours=-4)))
             runs = target['multiRun']['runs']
             for run in runs:
                 t_str = run['time']

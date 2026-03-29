@@ -3,32 +3,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-29T15:38:35Z",
-    "objective": "X catch-up complete - 4 posts fired",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-29T15:41:10Z",
+    "objective": "Verify X posts + add done/missed/upcoming status to dashboard",
+    "status": "active",
     "steps": [
       {
-        "label": "Posted catch-ups",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "Updating dashboard",
-        "status": "done",
+        "label": "Verifying posts",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-29T15:39:10Z",
-    "checkedAt": "2026-03-29T15:38:35Z",
+    "updatedAt": "2026-03-29T15:41:10Z",
+    "checkedAt": "2026-03-29T15:41:10Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: X catch-up complete - 4 posts fired",
-    "updatedAt": "2026-03-29T15:40:01Z"
+    "status": "Brain Feed live",
+    "context": "Verify X posts + add done/missed/upcoming status to dashboard",
+    "updatedAt": "2026-03-29T15:42:45Z"
   },
   "contextWindow": {
     "usedTokens": 187062,
@@ -155,7 +150,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T15:40:05Z",
+    "lastUpdated": "2026-03-29T15:42:51Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -184,12 +179,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.3,
-      "cpu_user": 6.14,
-      "cpu_sys": 12.18,
-      "load1": 2.07,
-      "load5": 1.85,
-      "load15": 1.97,
+      "cpu_pct": 18.4,
+      "cpu_user": 6.6,
+      "cpu_sys": 11.79,
+      "load1": 1.62,
+      "load5": 1.68,
+      "load15": 1.87,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -199,14 +194,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 2.7,
-      "cpu_sys": 9.45,
-      "load1": 1.75,
-      "load5": 1.74,
+      "cpu_pct": 12.5,
+      "cpu_user": 2.5,
+      "cpu_sys": 10.0,
+      "load1": 1.67,
+      "load5": 1.7,
       "load15": 1.63,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -226,19 +221,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T15:40:01Z"
+      "lastChecked": "2026-03-29T15:42:45Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T15:40:01Z"
+      "lastChecked": "2026-03-29T15:42:45Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T15:40:01Z"
+      "lastChecked": "2026-03-29T15:42:45Z"
     }
   ],
   "crons": [
@@ -310,7 +305,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "missed"
     },
     {
       "name": "Breaking News Scanner",
@@ -340,7 +336,9 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-03-29T06:00:00"
     },
     {
       "name": "X Pre-Market",
@@ -350,7 +348,9 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-03-29T11:38:06"
     },
     {
       "name": "X Market Open",
@@ -360,7 +360,9 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-03-29T08:00:00"
     },
     {
       "name": "X Mover",
@@ -370,7 +372,9 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-03-29T11:00:00"
     },
     {
       "name": "X Hot Take",
@@ -380,7 +384,9 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-03-29T11:38:29"
     },
     {
       "name": "X Market Close",
@@ -390,7 +396,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "X Prime Take",
@@ -400,7 +407,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "X Nightcap",
@@ -410,7 +418,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "X Reply Batch AM",
@@ -420,7 +429,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "missed"
     },
     {
       "name": "X Reply Batch PM",
@@ -430,7 +440,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "X Reply Batch Eve",
@@ -440,7 +451,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "X Quote Tweets",
@@ -450,7 +462,8 @@
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "missed"
     },
     {
       "name": "Intelligence Feed",
@@ -524,25 +537,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-29T15:40:05Z",
+      "time": "2026-03-29T15:42:51Z",
       "event": "Session spend: $23.29"
     },
     {
-      "time": "2026-03-29T15:40:01Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-29T15:42:45Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-29T15:40:01Z",
+      "time": "2026-03-29T15:42:45Z",
       "event": "22 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T15:40:01Z",
+      "time": "2026-03-29T15:42:45Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T15:40:01Z",
+      "time": "2026-03-29T15:42:45Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T15:40:01Z"
+  "lastUpdated": "2026-03-29T15:42:45Z"
 }

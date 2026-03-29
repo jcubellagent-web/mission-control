@@ -373,7 +373,14 @@
         .tjob-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 5px; margin-bottom: 2px; transition: background 0.12s; }
         .tjob-row:last-child { margin-bottom: 0; }
         .tjob-row:hover { background: rgba(255,255,255,0.04); }
-        .tjob-row.tjob-error { background: rgba(239,68,68,0.04); }
+        .tjob-row.tjob-error  { background: rgba(239,68,68,0.04); }
+        .tjob-row.tjob-done   { background: rgba(74,222,128,0.03); }
+        .tjob-row.tjob-missed { background: rgba(245,158,11,0.04); }
+        .tjob-name-done { text-decoration: line-through; opacity: 0.5; }
+        .tjob-run-badge { font-size:0.55rem; font-weight:700; letter-spacing:0.06em; border-radius:4px; padding:1px 5px; white-space:nowrap; flex-shrink:0; }
+        .tjob-run-done     { background:rgba(74,222,128,0.15);  color:#4ade80; border:1px solid rgba(74,222,128,0.25); }
+        .tjob-run-missed   { background:rgba(245,158,11,0.15);  color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
+        .tjob-run-upcoming { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.08); }
         .tjob-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
         .tjob-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
         .tjob-header-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
@@ -4734,12 +4741,28 @@
                         </div>`;
                     }
 
-                    return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}">
-                        <div class="tjob-status-dot" style="background:${statusColor}${isOk && !hasErr ? ';box-shadow:0 0 4px '+statusColor+'70' : ''}"></div>
+                    // done / missed / upcoming state
+                    const rs = cron.runStatus;
+                    const isDone    = rs === 'done';
+                    const isMissed  = rs === 'missed';
+                    const isUpcoming = rs === 'upcoming';
+                    const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
+                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const statusBadge = isDone
+                        ? `<span class="tjob-run-badge tjob-run-done">✓ done</span>`
+                        : isMissed
+                        ? `<span class="tjob-run-badge tjob-run-missed">⚠ missed</span>`
+                        : isUpcoming
+                        ? `<span class="tjob-run-badge tjob-run-upcoming">upcoming</span>`
+                        : '';
+
+                    return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}${rowExtra}">
+                        <div class="tjob-status-dot" style="background:${dotColor}${isDone ? ';box-shadow:0 0 4px #4ade8070' : !hasErr && !isMissed && isOk ? ';box-shadow:0 0 4px '+dotColor+'70' : ''}"></div>
                         <div class="tjob-body">
                             <div class="tjob-header-row">
-                                <span class="tjob-name">${escapeHtml(cron.name)}</span>
+                                <span class="tjob-name${isDone ? ' tjob-name-done' : ''}">${escapeHtml(cron.name)}</span>
                                 <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
+                                ${statusBadge}
                                 ${hasErr ? `<span class="tjob-err-badge">${cron.errors} err</span>` : ''}
                                 <span class="tjob-agent" style="color:${agentColor};margin-left:auto;">${escapeHtml(agentName)}</span>
                             </div>
