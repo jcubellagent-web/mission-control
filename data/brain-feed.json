@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T16:43:22Z",
+  "messageReceived": "2026-03-29T16:43:36Z",
   "objective": "Run Sorare missions live before MLB games",
   "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "Missions complete",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Running missions live on J.A.I.N",
+      "label": "Responding to Josh",
       "status": "active",
-      "tool": "exec"
+      "tool": "telegram"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-29T16:43:22Z",
-  "checkedAt": "2026-03-29T16:43:22Z",
+  "currentTool": "telegram",
+  "updatedAt": "2026-03-29T16:43:36Z",
+  "checkedAt": "2026-03-29T16:43:36Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
