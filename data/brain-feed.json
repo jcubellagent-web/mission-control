@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T04:20:33Z",
+  "messageReceived": "2026-03-29T04:20:38Z",
   "objective": "List duplicate 2025 cards + buy 2026 cards",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Fetching floor prices",
       "status": "active",
-      "tool": "whisper"
+      "tool": "sorare_api"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-29T04:20:33Z",
-  "checkedAt": "2026-03-29T04:20:33Z",
+  "currentTool": "sorare_api",
+  "updatedAt": "2026-03-29T04:20:38Z",
+  "checkedAt": "2026-03-29T04:20:38Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
