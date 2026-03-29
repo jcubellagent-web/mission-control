@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T15:45:58Z",
+  "messageReceived": "2026-03-29T15:46:05Z",
   "objective": "Fix collapsed section next-step labels in dashboard",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Parsed",
       "status": "done",
       "tool": "openclaw"
     },
     {
-      "label": "Transcribing",
+      "label": "Reading dashboard scripts",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-29T15:45:58Z",
-  "checkedAt": "2026-03-29T15:45:58Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T15:46:05Z",
+  "checkedAt": "2026-03-29T15:46:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
