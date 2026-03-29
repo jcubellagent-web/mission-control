@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T16:55:29Z",
-  "objective": "Check Sorare Pro tab leaderboards \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T16:55:55Z",
+  "objective": "Scout Sorare market \u2014  budget",
+  "status": "active",
   "steps": [
     {
-      "label": "Found Pro structure",
+      "label": "Parsed",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Querying market listings",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T16:55:41Z",
-  "checkedAt": "2026-03-29T16:55:29Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T16:55:55Z",
+  "checkedAt": "2026-03-29T16:55:55Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
