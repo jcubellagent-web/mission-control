@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-29T16:55:55Z",
+  "messageReceived": "2026-03-29T16:57:36Z",
   "objective": "Scout Sorare market \u2014  budget",
   "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "API market not accessible",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Querying market listings",
+      "label": "Web scraping Sorare market",
       "status": "active",
-      "tool": "exec"
+      "tool": "web_search"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-29T16:55:55Z",
-  "checkedAt": "2026-03-29T16:55:55Z",
+  "currentTool": "web_search",
+  "updatedAt": "2026-03-29T16:57:36Z",
+  "checkedAt": "2026-03-29T16:57:36Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
