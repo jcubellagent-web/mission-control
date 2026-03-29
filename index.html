@@ -4459,11 +4459,14 @@
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
-                <div class="stat-pill stat-pill-x" id="x-progress-bubble" onclick="window.openXDashboard()" title="X Growth Dashboard">
+                <div class="stat-pill stat-pill-x" id="x-progress-bubble" title="X Growth Dashboard">
                     <span class="num" style="font-family:serif;font-size:1.1em;">𝕏</span>
                     <span class="label">Progress</span>
                 </div>
             `;
+            // Re-attach click listener after innerHTML rewrite
+            const xBubble = document.getElementById('x-progress-bubble');
+            if (xBubble) xBubble.addEventListener('click', () => window.openXDashboard());
 
 
             // Model usage snapshot — compact, multi-source (diff-guarded)
@@ -5227,9 +5230,9 @@
     <!-- ═══════════════════════════════════════════════════════════════
          X PROGRESS DASHBOARD MODAL
     ═══════════════════════════════════════════════════════════════ -->
-    <div id="x-modal-overlay" onclick="if(event.target===this)window.closeXDashboard()" style="display:none;">
+    <div id="x-modal-overlay" style="display:none;">
         <div id="x-modal">
-            <button id="x-modal-close" onclick="window.closeXDashboard()">✕</button>
+            <button id="x-modal-close">✕</button>
             <div id="x-modal-inner">
                 <div class="xd-header">
                     <span class="xd-logo">𝕏</span>
@@ -5741,6 +5744,17 @@
         clearInterval(window._xPollInterval);
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
+
+    // Wire modal close button + overlay click via JS (not inline onclick — CSP safe)
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.getElementById('x-modal-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => window.closeXDashboard());
+
+        const overlay = document.getElementById('x-modal-overlay');
+        if (overlay) overlay.addEventListener('click', e => {
+            if (e.target === overlay) window.closeXDashboard();
+        });
+    });
 
     // Close on Escape key
     document.addEventListener('keydown', e => {
