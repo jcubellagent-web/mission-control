@@ -4459,6 +4459,10 @@
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
+                <div class="stat-pill stat-pill-x" id="x-progress-bubble" onclick="window.openXDashboard()" title="X Growth Dashboard">
+                    <span class="num" style="font-family:serif;font-size:1.1em;">𝕏</span>
+                    <span class="label">Progress</span>
+                </div>
             `;
 
 
@@ -5219,6 +5223,432 @@
 
     <!-- Mobile edge laser — traces the screen border as a comet -->
     <canvas id="edge-laser" aria-hidden="true"></canvas>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         X PROGRESS DASHBOARD MODAL
+    ═══════════════════════════════════════════════════════════════ -->
+    <div id="x-modal-overlay" onclick="if(event.target===this)window.closeXDashboard()" style="display:none;">
+        <div id="x-modal">
+            <button id="x-modal-close" onclick="window.closeXDashboard()">✕</button>
+            <div id="x-modal-inner">
+                <div class="xd-header">
+                    <span class="xd-logo">𝕏</span>
+                    <div class="xd-title-block">
+                        <h2>Growth Dashboard</h2>
+                        <span id="xd-account" class="xd-account">@AgentJc11443</span>
+                    </div>
+                    <span id="xd-updated" class="xd-updated">–</span>
+                </div>
+
+                <!-- Lead metrics grid -->
+                <div class="xd-section-label">LEAD METRICS</div>
+                <div class="xd-leads">
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-impressions7d">–</div>
+                        <div class="xd-metric-label">Impressions (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-impressions7d"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-followers-gained">–</div>
+                        <div class="xd-metric-label">Followers Gained (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-followers-gained"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-engagement">–</div>
+                        <div class="xd-metric-label">Engagement Rate (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-engagement"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-posts7d">–</div>
+                        <div class="xd-metric-label">Posts This Week</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-posts7d"></div></div>
+                    </div>
+                    <div class="xd-metric">
+                        <div class="xd-metric-val" id="xd-top-post">–</div>
+                        <div class="xd-metric-label">Best Post (impr.)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-top-post"></div></div>
+                    </div>
+                    <div class="xd-metric xd-metric-followers">
+                        <div class="xd-metric-val" id="xd-followers-total">–</div>
+                        <div class="xd-metric-label">Total Followers</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-followers-total"></div></div>
+                    </div>
+                </div>
+
+                <!-- Lag / milestone section -->
+                <div class="xd-section-label">MILESTONES</div>
+                <div class="xd-milestones" id="xd-milestones"></div>
+
+                <!-- Recent posts -->
+                <div class="xd-section-label">RECENT POSTS</div>
+                <div class="xd-posts" id="xd-posts">
+                    <div class="xd-no-posts">No posts yet — first run at 8:00 AM ET tomorrow.</div>
+                </div>
+
+                <!-- Strategy footer -->
+                <div class="xd-strategy" id="xd-strategy">
+                    <span class="xd-strat-label">Strategy:</span>
+                    <span id="xd-strat-text">Awaiting first feedback loop (daily 6am ET)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* ── X Modal Overlay ──────────────────────────────────────────── */
+    #x-modal-overlay {
+        position: fixed; inset: 0; z-index: 9000;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(6px);
+        display: flex; align-items: center; justify-content: center;
+        animation: xFadeIn 0.22s ease;
+    }
+    #x-modal-overlay.closing { animation: xFadeOut 0.22s ease forwards; }
+    @keyframes xFadeIn  { from { opacity:0; } to { opacity:1; } }
+    @keyframes xFadeOut { from { opacity:1; } to { opacity:0; } }
+
+    #x-modal {
+        position: relative;
+        width: min(680px, 96vw);
+        max-height: 88vh;
+        background: linear-gradient(145deg, rgba(10,14,28,0.98) 0%, rgba(7,10,22,0.98) 100%);
+        border: 1px solid rgba(29,155,240,0.28);
+        border-radius: 18px;
+        box-shadow: 0 0 60px rgba(29,155,240,0.18), 0 24px 80px rgba(0,0,0,0.7);
+        overflow: hidden;
+        animation: xSlideUp 0.26s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    #x-modal-overlay.closing #x-modal { animation: xSlideDown 0.22s ease forwards; }
+    @keyframes xSlideUp   { from { transform: translateY(30px) scale(0.96); opacity:0; } to { transform: none; opacity:1; } }
+    @keyframes xSlideDown { from { transform: none; opacity:1; } to { transform: translateY(20px) scale(0.97); opacity:0; } }
+
+    #x-modal-inner {
+        overflow-y: auto;
+        max-height: 88vh;
+        padding: 28px 28px 24px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(29,155,240,0.3) transparent;
+    }
+    #x-modal-close {
+        position: absolute; top: 14px; right: 16px; z-index: 2;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.6); border-radius: 50%; width: 28px; height: 28px;
+        cursor: pointer; font-size: 12px; display:flex; align-items:center; justify-content:center;
+        transition: all 0.15s;
+    }
+    #x-modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .xd-header {
+        display: flex; align-items: center; gap: 14px;
+        margin-bottom: 22px; padding-bottom: 18px;
+        border-bottom: 1px solid rgba(29,155,240,0.15);
+    }
+    .xd-logo {
+        font-family: serif; font-size: 2.2rem; color: #1d9bf0;
+        text-shadow: 0 0 20px rgba(29,155,240,0.6);
+        line-height: 1;
+    }
+    .xd-title-block h2 {
+        margin: 0; font-size: 1.1rem; font-weight: 700;
+        color: #fff; letter-spacing: 0.04em;
+    }
+    .xd-account { font-size: 0.75rem; color: rgba(29,155,240,0.8); }
+    .xd-updated { margin-left: auto; font-size: 0.68rem; color: rgba(255,255,255,0.3); white-space:nowrap; }
+
+    /* ── Section labels ──────────────────────────────────────────── */
+    .xd-section-label {
+        font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.25); margin: 20px 0 10px;
+        text-transform: uppercase;
+    }
+
+    /* ── Lead metrics grid ───────────────────────────────────────── */
+    .xd-leads {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    @media (max-width: 520px) { .xd-leads { grid-template-columns: repeat(2, 1fr); } }
+
+    .xd-metric {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 10px;
+        padding: 12px 14px 10px;
+        transition: border-color 0.2s;
+    }
+    .xd-metric:hover { border-color: rgba(29,155,240,0.25); }
+    .xd-metric-val {
+        font-size: 1.5rem; font-weight: 700;
+        color: #1d9bf0; letter-spacing: -0.02em;
+        line-height: 1.1; margin-bottom: 3px;
+    }
+    .xd-metric-label {
+        font-size: 0.65rem; color: rgba(255,255,255,0.4);
+        text-transform: uppercase; letter-spacing: 0.06em;
+        margin-bottom: 8px;
+    }
+    .xd-bar-wrap {
+        height: 3px; background: rgba(255,255,255,0.07);
+        border-radius: 99px; overflow: hidden;
+    }
+    .xd-bar {
+        height: 100%; border-radius: 99px;
+        background: linear-gradient(90deg, #1d9bf0, #60cdff);
+        width: 0%; transition: width 0.8s cubic-bezier(0.34,1.3,0.64,1);
+        box-shadow: 0 0 6px rgba(29,155,240,0.6);
+    }
+    .xd-bar-green  { background: linear-gradient(90deg, #22c55e, #4ade80); box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+    .xd-bar-purple { background: linear-gradient(90deg, #a78bfa, #c4b5fd); box-shadow: 0 0 6px rgba(167,139,250,0.5); }
+    .xd-bar-gold   { background: linear-gradient(90deg, #f59e0b, #fcd34d); box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+    .xd-bar-blue   { background: linear-gradient(90deg, #1d9bf0, #93c5fd); box-shadow: 0 0 6px rgba(29,155,240,0.5); }
+
+    /* ── Milestones ──────────────────────────────────────────────── */
+    .xd-milestones { display: flex; flex-direction: column; gap: 10px; }
+    .xd-milestone {
+        display: flex; align-items: center; gap: 12px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px; padding: 12px 16px;
+        transition: border-color 0.2s;
+    }
+    .xd-milestone.achieved {
+        border-color: rgba(34,197,94,0.35);
+        background: rgba(34,197,94,0.05);
+    }
+    .xd-ms-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .xd-ms-body { flex: 1; min-width: 0; }
+    .xd-ms-label {
+        font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.85);
+        margin-bottom: 4px;
+    }
+    .xd-ms-progress-wrap {
+        height: 5px; background: rgba(255,255,255,0.07);
+        border-radius: 99px; overflow: hidden; margin-bottom: 3px;
+    }
+    .xd-ms-bar {
+        height: 100%; border-radius: 99px;
+        background: linear-gradient(90deg, #1d9bf0, #60cdff);
+        width: 0%; transition: width 1s cubic-bezier(0.34,1.1,0.64,1);
+        box-shadow: 0 0 8px rgba(29,155,240,0.5);
+    }
+    .xd-ms-bar.achieved-bar { background: linear-gradient(90deg, #22c55e, #4ade80); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+    .xd-ms-nums {
+        display: flex; justify-content: space-between;
+        font-size: 0.63rem; color: rgba(255,255,255,0.35);
+    }
+    .xd-ms-pct {
+        font-size: 0.9rem; font-weight: 700; color: #1d9bf0;
+        flex-shrink: 0; min-width: 40px; text-align: right;
+    }
+    .xd-milestone.achieved .xd-ms-pct { color: #4ade80; }
+
+    /* ── Recent Posts ────────────────────────────────────────────── */
+    .xd-posts { display: flex; flex-direction: column; gap: 8px; }
+    .xd-no-posts { font-size: 0.78rem; color: rgba(255,255,255,0.3); padding: 12px 0; }
+    .xd-post {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px; padding: 11px 14px;
+    }
+    .xd-post-text {
+        font-size: 0.8rem; color: rgba(255,255,255,0.75);
+        line-height: 1.45; margin-bottom: 7px;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .xd-post-stats {
+        display: flex; gap: 14px;
+        font-size: 0.65rem; color: rgba(255,255,255,0.35);
+    }
+    .xd-post-stat { display: flex; align-items: center; gap: 3px; }
+    .xd-post-stat-val { color: rgba(255,255,255,0.65); font-weight: 600; }
+
+    /* ── Strategy footer ─────────────────────────────────────────── */
+    .xd-strategy {
+        margin-top: 18px; padding: 10px 14px;
+        background: rgba(29,155,240,0.06);
+        border: 1px solid rgba(29,155,240,0.14);
+        border-radius: 8px;
+        font-size: 0.72rem; color: rgba(255,255,255,0.55);
+        line-height: 1.5;
+    }
+    .xd-strat-label { color: #1d9bf0; font-weight: 600; margin-right: 6px; }
+
+    /* ── Stat pill X bubble ──────────────────────────────────────── */
+    .stat-pill-x {
+        cursor: pointer;
+        border-color: rgba(29,155,240,0.4) !important;
+        transition: all 0.2s;
+    }
+    .stat-pill-x:hover {
+        background: rgba(29,155,240,0.12) !important;
+        border-color: rgba(29,155,240,0.7) !important;
+        box-shadow: 0 0 12px rgba(29,155,240,0.3);
+        transform: translateY(-1px);
+    }
+    .stat-pill-x .num { color: #1d9bf0 !important; }
+    </style>
+
+    <script>
+    // ── X Progress Dashboard Logic ──────────────────────────────────
+    let _xData = null;
+
+    function fmtNum(n) {
+        if (n == null || isNaN(n)) return '–';
+        if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+        if (n >= 1000) return (n/1000).toFixed(1)+'K';
+        return String(n);
+    }
+    function fmtPct(n) {
+        if (n == null || isNaN(n)) return '–';
+        return (n * 100).toFixed(1) + '%';
+    }
+    function barPct(val, max) {
+        if (!max || !val) return 0;
+        return Math.min(100, Math.round((val / max) * 100));
+    }
+
+    function renderXDashboard(data) {
+        if (!data) return;
+        _xData = data;
+
+        // Header
+        document.getElementById('xd-account').textContent = data.account || '@AgentJc11443';
+        const updEl = document.getElementById('xd-updated');
+        if (data.updatedAt) {
+            const d = new Date(data.updatedAt);
+            const diff = Math.floor((Date.now() - d) / 60000);
+            updEl.textContent = diff < 1 ? 'just now' : diff < 60 ? diff+'m ago' : Math.floor(diff/60)+'h ago';
+        } else {
+            updEl.textContent = 'No data yet';
+        }
+
+        // Lead metrics
+        const lead = data.lead || {};
+        const imp7  = lead.impressions_7d || 0;
+        const fol7  = lead.followers_gained_7d || 0;
+        const eng   = lead.engagement_rate_7d || 0;
+        const posts = lead.posts_7d || 0;
+        const topP  = lead.top_post_impressions || 0;
+        const folT  = lead.followers_total || 0;
+
+        document.getElementById('xd-impressions7d').textContent  = fmtNum(imp7);
+        document.getElementById('xd-followers-gained').textContent = fmtNum(fol7);
+        document.getElementById('xd-engagement').textContent     = fmtPct(eng);
+        document.getElementById('xd-posts7d').textContent        = posts + ' / 7';
+        document.getElementById('xd-top-post').textContent       = fmtNum(topP);
+        document.getElementById('xd-followers-total').textContent = fmtNum(folT);
+
+        // Bars — animate after a tick
+        requestAnimationFrame(() => {
+            document.getElementById('xd-bar-impressions7d').style.width    = barPct(imp7, 100000) + '%';
+            document.getElementById('xd-bar-followers-gained').style.width = barPct(fol7, 100) + '%';
+            document.getElementById('xd-bar-engagement').style.width       = barPct(eng, 0.15) + '%';
+            document.getElementById('xd-bar-posts7d').style.width          = barPct(posts, 7) + '%';
+            document.getElementById('xd-bar-top-post').style.width         = barPct(topP, 50000) + '%';
+            document.getElementById('xd-bar-followers-total').style.width  = barPct(folT, 500) + '%';
+        });
+
+        // Milestones
+        const milestoneEl = document.getElementById('xd-milestones');
+        const milestones = data.milestones || [
+            { label: '500 Followers', metric: 'followers', target: 500, current: folT, achieved: folT >= 500 },
+            { label: '5M Impressions (90d)', metric: 'impressions_90d', target: 5000000, current: (data.lag||{}).impressions_90d||0, achieved: false },
+            { label: 'X Monetization', metric: 'monetized', target: 1, current: (data.lag||{}).monetized||0, achieved: (data.lag||{}).monetized >= 1 },
+        ];
+        milestoneEl.innerHTML = milestones.map(ms => {
+            const pct = ms.target === 1 ? (ms.achieved ? 100 : 0) : Math.min(100, Math.round(((ms.current||0) / ms.target) * 100));
+            const icon = ms.achieved ? '✅' : pct >= 80 ? '🔥' : pct >= 40 ? '📈' : '🎯';
+            const currentFmt = ms.target === 1 ? (ms.achieved ? 'Done' : 'Locked') : fmtNum(ms.current||0);
+            const targetFmt  = ms.target === 1 ? '' : ' / ' + fmtNum(ms.target);
+            return `<div class="xd-milestone${ms.achieved ? ' achieved' : ''}">
+                <div class="xd-ms-icon">${icon}</div>
+                <div class="xd-ms-body">
+                    <div class="xd-ms-label">${ms.label}</div>
+                    <div class="xd-ms-progress-wrap">
+                        <div class="xd-ms-bar${ms.achieved ? ' achieved-bar' : ''}" style="width:${pct}%"></div>
+                    </div>
+                    <div class="xd-ms-nums">
+                        <span>${currentFmt}${targetFmt}</span>
+                        <span>${ms.achieved ? 'Achieved 🏆' : ''}</span>
+                    </div>
+                </div>
+                <div class="xd-ms-pct">${pct}%</div>
+            </div>`;
+        }).join('');
+
+        // Recent posts
+        const postsEl = document.getElementById('xd-posts');
+        const recent = data.recentPosts || [];
+        if (recent.length === 0) {
+            postsEl.innerHTML = '<div class="xd-no-posts">No posts yet — first run at 8:00 AM ET tomorrow.</div>';
+        } else {
+            postsEl.innerHTML = recent.slice(0, 5).map(p => {
+                const impr = p.impressions || 0;
+                const likes = p.likes || 0;
+                const rts   = p.retweets || 0;
+                const reps  = p.replies || 0;
+                const ago = p.posted_at ? (() => {
+                    const diff = Math.floor((Date.now() - new Date(p.posted_at)) / 60000);
+                    return diff < 60 ? diff+'m ago' : Math.floor(diff/60)+'h ago';
+                })() : '';
+                return `<div class="xd-post">
+                    <div class="xd-post-text">${p.text || ''}</div>
+                    <div class="xd-post-stats">
+                        <span class="xd-post-stat">👁 <span class="xd-post-stat-val">${fmtNum(impr)}</span></span>
+                        <span class="xd-post-stat">❤️ <span class="xd-post-stat-val">${likes}</span></span>
+                        <span class="xd-post-stat">🔁 <span class="xd-post-stat-val">${rts}</span></span>
+                        <span class="xd-post-stat">💬 <span class="xd-post-stat-val">${reps}</span></span>
+                        ${ago ? `<span class="xd-post-stat" style="margin-left:auto">${ago}</span>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Strategy
+        const strat = data.strategy || {};
+        const stratParts = [];
+        if (strat.best_hours && strat.best_hours.length) stratParts.push(`Best hours: ${strat.best_hours.join(', ')}`);
+        if (strat.best_topics && strat.best_topics.length) stratParts.push(`Top topics: ${strat.best_topics.join(', ')}`);
+        if (strat.avg_engagement) stratParts.push(`Avg engagement: ${fmtPct(strat.avg_engagement)}`);
+        if (strat.posts_today != null) stratParts.push(`Posted today: ${strat.posts_today}`);
+        document.getElementById('xd-strat-text').textContent = stratParts.length
+            ? stratParts.join(' · ')
+            : 'Awaiting first feedback loop (daily 6am ET)';
+    }
+
+    async function fetchXProgress() {
+        try {
+            const r = await fetch('data/x-progress.json?t=' + Date.now());
+            if (!r.ok) return;
+            const data = await r.json();
+            renderXDashboard(data);
+        } catch(e) { /* silent */ }
+    }
+
+    window.openXDashboard = async function() {
+        const overlay = document.getElementById('x-modal-overlay');
+        overlay.classList.remove('closing');
+        overlay.style.display = 'flex';
+        await fetchXProgress();
+        // Poll every 30s while open
+        window._xPollInterval = setInterval(fetchXProgress, 30000);
+    };
+
+    window.closeXDashboard = function() {
+        const overlay = document.getElementById('x-modal-overlay');
+        overlay.classList.add('closing');
+        clearInterval(window._xPollInterval);
+        setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
+    };
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') window.closeXDashboard();
+    });
+    </script>
 
 </body>
 </html>
