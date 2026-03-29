@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T16:42:53Z",
-  "objective": "Explain X reply batch process \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T16:43:22Z",
+  "objective": "Run Sorare missions live before MLB games",
+  "status": "active",
   "steps": [
     {
-      "label": "Read script",
+      "label": "Parsed",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Running missions live on J.A.I.N",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T16:43:07Z",
-  "checkedAt": "2026-03-29T16:42:53Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T16:43:22Z",
+  "checkedAt": "2026-03-29T16:43:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
