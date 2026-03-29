@@ -2636,7 +2636,7 @@
                             <span class="icon">🖥</span>
                             <h2>Desktop Control</h2>
                         </div>
-                        <div class="remote-btn-row">
+                        <div class="remote-btn-row" style="grid-template-columns:1fr 1fr 1fr;">
                             <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
                                 <span class="btn-icon">↻</span>
                                 Refresh
@@ -2644,6 +2644,10 @@
                             <button class="remote-btn btn-night" onclick="remoteNightMode()">
                                 <span class="btn-icon">🌙</span>
                                 Night Mode
+                            </button>
+                            <button class="remote-btn btn-x-dash" id="x-progress-btn-mobile">
+                                <span class="btn-icon" style="font-family:serif;">𝕏</span>
+                                Progress
                             </button>
                         </div>
                         <div id="remote-status"></div>
@@ -5520,6 +5524,11 @@
     }
     .xd-strat-label { color: #1d9bf0; font-weight: 600; margin-right: 6px; }
 
+    /* ── Mobile X progress button ────────────────────────────────── */
+    .btn-x-dash { border-color: rgba(29,155,240,0.4) !important; color: #1d9bf0 !important; }
+    .btn-x-dash .btn-icon { color: #1d9bf0 !important; }
+    .btn-x-dash:hover { background: rgba(29,155,240,0.12) !important; }
+
     /* ── Post mix row ────────────────────────────────────────────── */
     .xd-mix-row { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
     .xd-mix-pill { flex:1; min-width:70px; border-radius:10px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); text-align:center; }
@@ -5742,6 +5751,11 @@
         clearInterval(window._xPollInterval);
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
+
+    // Mobile X button
+    document.addEventListener('click', function _xMobileBtn(e) {
+        if (e.target.closest('#x-progress-btn-mobile')) window.openXDashboard();
+    });
 
     // Global event delegation — handles bubble click, modal close, overlay dismiss
     // Works regardless of dynamic DOM injection order
