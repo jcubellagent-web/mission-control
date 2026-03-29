@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T17:04:25Z",
-  "objective": "Set optimal Champion + Hot Streak lineups \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-29T17:06:03Z",
+  "objective": "Review + optimize Sorare lineups",
+  "status": "active",
   "steps": [
     {
-      "label": "Submitted both lineups",
+      "label": "Parsed",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Waiting for screenshot + re-auditing",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-29T17:04:38Z",
-  "checkedAt": "2026-03-29T17:04:25Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-29T17:06:03Z",
+  "checkedAt": "2026-03-29T17:06:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
