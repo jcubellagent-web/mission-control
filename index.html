@@ -790,6 +790,24 @@
         #mobile-cost-pill .mcp-sep { display: none; }
         body.phone-mode #mobile-cost-pill { display: flex; }
 
+        /* ── X Header Button ─────────────────────────── */
+        #x-header-btn {
+            display: none; /* hidden on desktop */
+            align-items: center;
+            justify-content: center;
+            width: 32px; height: 32px;
+            border-radius: 10px;
+            background: rgba(29,155,240,0.12);
+            border: 1px solid rgba(29,155,240,0.25);
+            color: #7dd3fc;
+            font-family: serif;
+            font-size: 1rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+        }
+        body.phone-mode #x-header-btn { display: flex; }
+
         /* Hide desktop-only header elements */
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
@@ -806,15 +824,14 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         body.phone-mode .card {
-            background: rgba(12, 14, 22, 0.96);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(16, 18, 28, 0.97);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 18px;
             margin: 0 14px 14px;
             box-shadow:
-                0 1px 0 rgba(255,255,255,0.07) inset,
-                0 0 0 0.5px rgba(255,255,255,0.06) inset,
-                0 4px 28px rgba(0,0,0,0.55);
+                0 1px 0 rgba(255,255,255,0.06) inset,
+                0 4px 20px rgba(0,0,0,0.5);
             animation: pm-fadein 0.4s cubic-bezier(0.16,1,0.3,1) both;
             backdrop-filter: blur(20px);
         }
@@ -826,15 +843,15 @@
         body.phone-mode .card-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 16px;
         }
         body.phone-mode .card-header h2 {
-            font-size: 0.65rem;
-            font-weight: 800;
-            letter-spacing: 0.14em;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.38);
+            color: rgba(255,255,255,0.45);
         }
         body.phone-mode .card-header .card-icon {
             filter: drop-shadow(0 0 6px currentColor);
@@ -1242,6 +1259,7 @@
 
         /* ── Mobile X Growth Card ───────────────────── */
         body:not(.phone-mode) .card-x-mobile { display: none !important; }
+        body.phone-mode .card-x-mobile { display: none !important; }
 
         body.phone-mode .card-x-mobile {
             background: linear-gradient(145deg, rgba(10,14,24,0.97) 0%, rgba(6,10,20,0.99) 100%);
@@ -2768,6 +2786,8 @@
                 <div class="mcp-sep"></div>
                 <div class="mcp-row"><span class="mcp-label">Today</span><span class="mcp-val" id="mcp-daily">$0.00</span></div>
             </div>
+            <!-- Mobile X Growth button -->
+            <button id="x-header-btn" onclick="window.openXDashboard()"><span style="font-family:serif">𝕏</span></button>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -2923,13 +2943,6 @@
                                 <span class="remote-btn-label">
                                     <span class="remote-btn-title">Night Mode</span>
                                     <span class="remote-btn-sub">Toggle dim overlay</span>
-                                </span>
-                            </button>
-                            <button class="remote-btn btn-x-dash" id="x-progress-btn-mobile">
-                                <span class="btn-icon" style="font-family:serif;">𝕏</span>
-                                <span class="remote-btn-label">
-                                    <span class="remote-btn-title">X Progress</span>
-                                    <span class="remote-btn-sub">View growth stats</span>
                                 </span>
                             </button>
                         </div>
