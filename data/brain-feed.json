@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T11:02:46Z",
-  "objective": "PWA UI revamp running in background",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T11:13:35Z",
+  "objective": "Voice message received",
+  "status": "active",
   "steps": [
     {
-      "label": "Confirmed",
-      "status": "done",
+      "label": "Receiving audio",
+      "status": "active",
       "tool": "openclaw"
-    },
-    {
-      "label": "Spawning Claude Code",
-      "status": "done",
-      "tool": "exec"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T11:03:23Z",
-  "checkedAt": "2026-03-30T11:02:46Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T11:13:35Z",
+  "checkedAt": "2026-03-30T11:13:35Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
