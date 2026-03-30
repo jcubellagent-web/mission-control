@@ -1066,13 +1066,13 @@ def fetch_crons() -> List[Dict[str, Any]]:
             jain_rs = json.loads(reply_state_r.stdout.strip() or '{}')
             for r in jain_rs.get('replies', []):
                 posted = r.get('posted_at', '')
-                if posted[:10] == today_str:
-                    try:
-                        rh_utc = int(posted[11:13])
-                        rh_et = (rh_utc - 4) % 24
-                        _jain_replies_today.append(rh_et)
-                    except Exception:
-                        pass
+                try:
+                    dt_utc = _dt.datetime.fromisoformat(posted.replace('Z', '+00:00'))
+                    dt_et = dt_utc - _dt.timedelta(hours=4)
+                    if dt_et.strftime('%Y-%m-%d') == today_str:
+                        _jain_replies_today.append(dt_et.hour)
+                except Exception:
+                    pass
             if _jain_replies_today:
                 x_log_runs["X Strategic Replies"] = f"{today_str}T{_jain_replies_today[-1]:02d}:00:00"
     except Exception:
@@ -1140,6 +1140,16 @@ def fetch_crons() -> List[Dict[str, Any]]:
             if target['name'] == 'X Strategic Replies':
                 # Collect reply timestamps from both machines
                 reply_hours_today: list[int] = []
+
+                def _utc_to_et_date_hour(posted_iso: str):
+                    """Convert UTC ISO timestamp to (ET_date_str, ET_hour). Returns (None, None) on error."""
+                    try:
+                        dt_utc = _dt.datetime.fromisoformat(posted_iso.replace('Z', '+00:00'))
+                        dt_et = dt_utc - _dt.timedelta(hours=4)  # EDT = UTC-4
+                        return dt_et.strftime('%Y-%m-%d'), dt_et.hour
+                    except Exception:
+                        return None, None
+
                 for rs_path in [
                     ROOT.parent / 'data' / 'x_reply_state.json',
                 ]:
@@ -1148,20 +1158,14 @@ def fetch_crons() -> List[Dict[str, Any]]:
                             rs_data = json.loads(rs_path.read_text())
                             for r in rs_data.get('replies', []):
                                 posted = r.get('posted_at', '')
-                                if posted[:10] == today_str:
-                                    try:
-                                        rh = int(posted[11:13])  # UTC hour
-                                        # Convert UTC → ET (UTC-4 in EDT)
-                                        rh_et = (rh - 4) % 24
-                                        reply_hours_today.append(rh_et)
-                                    except Exception:
-                                        pass
+                                et_date, et_hour = _utc_to_et_date_hour(posted)
+                                if et_date == today_str and et_hour is not None:
+                                    reply_hours_today.append(et_hour)
                         except Exception:
                             pass
-                # Also try J.A.I.N reply state (already fetched above if available)
-                # We stored it in jain_x_reply_state if present
-                for r in getattr(fetch_crons, '_jain_replies_today', []):
-                    reply_hours_today.append(r)
+                # Also pull J.A.I.N replies (fetched above)
+                for rh in getattr(fetch_crons, '_jain_replies_today', []):
+                    reply_hours_today.append(rh)
 
                 # Slot schedule hours (ET)
                 slot_hours = [9, 11, 13, 15, 17, 19, 21, 23]
