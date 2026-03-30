@@ -28,20 +28,20 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: X Growth card added to mobile PWA - pushed",
-    "updatedAt": "2026-03-30T15:00:01Z"
+    "updatedAt": "2026-03-30T15:10:01Z"
   },
   "contextWindow": {
-    "usedTokens": 45218,
+    "usedTokens": 43810,
     "limitTokens": 1000000,
-    "pct": 0.0452,
+    "pct": 0.0438,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 15.080592,
-    "daily": 6.844718,
-    "weekly": 15.080592,
-    "monthly": 51.037012,
+    "session": 15.110831,
+    "daily": 6.874957,
+    "weekly": 15.110831,
+    "monthly": 51.067251,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -56,7 +56,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 1.25192903
+        "cost": 1.28216809
       },
       {
         "name": "gpt-5.3-codex",
@@ -99,12 +99,12 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1874314,
-        "outputTokens": 34506,
-        "totalTokens": 1908820,
-        "sessionCost": 1.25192903,
-        "dailyCost": 0.64113055,
-        "weeklyCost": 1.25192903,
+        "inputTokens": 1740908,
+        "outputTokens": 34380,
+        "totalTokens": 1775288,
+        "sessionCost": 1.28216809,
+        "dailyCost": 0.67136961,
+        "weeklyCost": 1.28216809,
         "sessions": 6,
         "isGemini": true,
         "costEstimated": false
@@ -145,7 +145,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-30T15:00:06Z",
+    "lastUpdated": "2026-03-30T15:10:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -167,19 +167,19 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.844718,
-      "total": 16.007202,
-      "monthly": 51.083722
+      "daily": 6.874957,
+      "total": 16.037441,
+      "monthly": 51.113961
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 17.7,
-      "cpu_user": 5.95,
-      "cpu_sys": 11.73,
-      "load1": 2.26,
-      "load5": 1.9,
-      "load15": 1.93,
+      "cpu_pct": 17.8,
+      "cpu_user": 5.85,
+      "cpu_sys": 11.89,
+      "load1": 2.1,
+      "load5": 1.94,
+      "load15": 1.92,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -189,14 +189,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.4,
-      "cpu_user": 1.29,
-      "cpu_sys": 9.9,
-      "load1": 2.04,
-      "load5": 1.77,
-      "load15": 1.73,
+      "cpu_pct": 11.3,
+      "cpu_user": 2.83,
+      "cpu_sys": 8.51,
+      "load1": 1.9,
+      "load5": 1.76,
+      "load15": 1.72,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -216,19 +216,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T15:00:01Z"
+      "lastChecked": "2026-03-30T15:10:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T15:00:01Z"
+      "lastChecked": "2026-03-30T15:10:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-30T15:00:01Z"
+      "lastChecked": "2026-03-30T15:10:01Z"
     }
   ],
   "crons": [
@@ -312,7 +312,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "missed"
     },
     {
       "name": "Breaking News Scanner",
@@ -439,7 +439,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-03-30T09:00:00",
+      "lastRun": "2026-03-30T11:00:00",
       "multiRun": {
         "runs": [
           {
@@ -450,7 +450,7 @@
           {
             "time": "11:00 AM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "1:00 PM",
@@ -569,25 +569,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-30T15:00:06Z",
-      "event": "Session spend: $15.08"
+      "time": "2026-03-30T15:10:06Z",
+      "event": "Session spend: $15.11"
     },
     {
-      "time": "2026-03-30T15:00:01Z",
+      "time": "2026-03-30T15:10:01Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-30T15:00:01Z",
+      "time": "2026-03-30T15:10:01Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-30T15:00:01Z",
+      "time": "2026-03-30T15:10:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-30T15:00:01Z",
+      "time": "2026-03-30T15:10:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-30T15:00:01Z"
+  "lastUpdated": "2026-03-30T15:10:01Z"
 }
