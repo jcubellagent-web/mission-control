@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:39:48Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-30T03:39:56Z",
+  "objective": "Processing request \u00b7 Determining objective",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Received",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Parsing intent",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T03:39:48Z",
-  "checkedAt": "2026-03-30T03:39:48Z",
+  "updatedAt": "2026-03-30T03:39:56Z",
+  "checkedAt": "2026-03-30T03:39:56Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
