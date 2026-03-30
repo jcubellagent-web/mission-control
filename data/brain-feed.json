@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:22:17Z",
-  "objective": "Objective confirmed: Confirm capability to scan and add own skills",
+  "messageReceived": "2026-03-30T03:23:05Z",
+  "objective": "Processing request \u00b7 Determining objective",
   "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "Received",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "telegram"
     },
     {
-      "label": "Confirming objective",
+      "label": "Parsing intent",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T03:22:17Z",
-  "checkedAt": "2026-03-30T03:22:17Z",
+  "updatedAt": "2026-03-30T03:23:05Z",
+  "checkedAt": "2026-03-30T03:23:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
