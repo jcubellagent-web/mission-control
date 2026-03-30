@@ -1,17 +1,17 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-30T00:02:47Z",
-  "objective": "Checking X post delivery",
-  "status": "active",
+  "objective": "Checking X post delivery \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Checking docs",
-      "status": "active",
+      "status": "done",
       "tool": "web_fetch"
     }
   ],
   "currentTool": "web_fetch",
-  "updatedAt": "2026-03-30T00:02:47Z",
+  "updatedAt": "2026-03-30T00:03:07Z",
   "checkedAt": "2026-03-30T00:02:47Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
