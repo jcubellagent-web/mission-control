@@ -1,18 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T02:59:13Z",
-  "objective": "Checking OpenClaw changelog \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T03:00:46Z",
+  "objective": "Checking ACP config + Gemini CLI",
+  "status": "active",
   "steps": [
     {
-      "label": "Fetching release notes",
-      "status": "done",
-      "tool": "web_fetch"
+      "label": "Reading config",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "web_fetch",
-  "updatedAt": "2026-03-30T03:00:09Z",
-  "checkedAt": "2026-03-30T02:59:13Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-30T03:00:46Z",
+  "checkedAt": "2026-03-30T03:00:46Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
