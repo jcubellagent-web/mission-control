@@ -1416,6 +1416,84 @@ def main() -> None:
     print(f"Updated {DASHBOARD_PATH}")
     print(f"Updated {MODEL_USAGE_PATH}")
 
+    # ── Sync browser reply state into x-progress.json ──────────────────────
+    try:
+        xp_path = ROOT.parent / "data" / "x-progress.json"
+        reply_state_path = ROOT.parent / "data" / "x_reply_state.json"
+        if xp_path.exists():
+            xp = json.loads(xp_path.read_text())
+            total_browser_replies = 0
+            browser_recent = []
+            if reply_state_path.exists():
+                rs = json.loads(reply_state_path.read_text())
+                total_browser_replies = len(rs.get('replied_tweet_ids', []))
+                for r in rs.get('replies', [])[-10:]:
+                    browser_recent.append({
+                        'id': r.get('tweet_id', ''),
+                        'text': r.get('reply_text', ''),
+                        'type': 'engagement',
+                        'posted_at': r.get('posted_at', ''),
+                        'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
+                        'reply_to': f"@{r.get('tweet_author','')}",
+                    })
+
+            # Also pull reply state from J.A.I.N if available
+            try:
+                import subprocess as _sp
+                r2 = _sp.run(
+                    ['ssh', '-o', 'ConnectTimeout=5', '-o', 'BatchMode=yes',
+                     'jc_agent@100.121.89.84',
+                     'cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo "{}"'],
+                    capture_output=True, text=True, timeout=8
+                )
+                if r2.returncode == 0 and r2.stdout.strip().startswith('{'):
+                    jain_rs = json.loads(r2.stdout)
+                    jain_total = len(jain_rs.get('replied_tweet_ids', []))
+                    total_browser_replies = max(total_browser_replies, jain_total)
+                    # Add J.A.I.N replies to recent list
+                    for r in jain_rs.get('replies', [])[-10:]:
+                        browser_recent.append({
+                            'id': r.get('tweet_id', ''),
+                            'text': r.get('reply_text', ''),
+                            'type': 'engagement',
+                            'posted_at': r.get('posted_at', ''),
+                            'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
+                            'reply_to': f"@{r.get('tweet_author','')}",
+                        })
+            except Exception:
+                pass
+
+            # Merge into recentPosts — deduplicate by id
+            existing_ids = {p.get('id', '') for p in xp.get('recentPosts', [])}
+            new_posts = [p for p in browser_recent if p.get('id') and p['id'] not in existing_ids]
+            merged_posts = new_posts + xp.get('recentPosts', [])
+            # Sort by posted_at desc, keep top 8
+            merged_posts.sort(key=lambda p: p.get('posted_at', ''), reverse=True)
+            xp['recentPosts'] = merged_posts[:8]
+
+            # Update lead metrics
+            lead = xp.setdefault('lead', {})
+            lead['total_replies_all_time'] = total_browser_replies
+
+            # Today's browser reply count
+            today_iso = now_iso[:10]
+            today_replies = [p for p in browser_recent if p.get('posted_at', '')[:10] == today_iso]
+            strategy = xp.setdefault('strategy', {})
+            strategy['replies_today'] = len(today_replies)
+            strategy['engagement_today'] = len(today_replies)
+
+            # Update milestone for total replies
+            for ms in xp.get('milestones', []):
+                if ms.get('metric') == 'total_replies':
+                    ms['current'] = total_browser_replies
+                    ms['achieved'] = total_browser_replies >= ms.get('target', 9999)
+
+            xp['updatedAt'] = now_iso
+            xp_path.write_text(json.dumps(xp, indent=2, default=str))
+            print(f"Updated x-progress.json (replies={total_browser_replies})")
+    except Exception as _xe:
+        print(f"x-progress sync warning: {_xe}")
+
 
 if __name__ == "__main__":
     main()
