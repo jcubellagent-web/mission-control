@@ -1,18 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T03:04:08Z",
-  "objective": "Switching default to Gemini 2.5 Pro \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T03:09:25Z",
+  "objective": "Processing request \u00b7 Determining objective",
+  "status": "active",
   "steps": [
     {
-      "label": "Updating config",
+      "label": "Received",
       "status": "done",
-      "tool": "exec"
+      "tool": "telegram"
+    },
+    {
+      "label": "Parsing intent",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T03:05:49Z",
-  "checkedAt": "2026-03-30T03:04:08Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T03:09:25Z",
+  "checkedAt": "2026-03-30T03:09:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "Sonnet 4.6"
+  "model": "Gemini 2.5 Flash"
 }
