@@ -4,31 +4,31 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-30T11:17:54Z",
-    "objective": "Objective confirmed: Fix mobile PWA - buttons still look cramped/slammed in header",
+    "messageReceived": "2026-03-30T11:23:03Z",
+    "objective": "Debug model usage module - not updating",
     "status": "active",
     "steps": [
       {
-        "label": "Parsed",
+        "label": "Inspected",
         "status": "done",
-        "tool": "openclaw"
+        "tool": "exec"
       },
       {
-        "label": "Confirming objective",
+        "label": "Responding to Josh",
         "status": "active",
-        "tool": "openclaw"
+        "tool": "telegram"
       }
     ],
-    "currentTool": "openclaw",
-    "updatedAt": "2026-03-30T11:17:54Z",
-    "checkedAt": "2026-03-30T11:17:54Z",
+    "currentTool": "telegram",
+    "updatedAt": "2026-03-30T11:23:03Z",
+    "checkedAt": "2026-03-30T11:23:03Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Objective confirmed: Fix mobile PWA - buttons still look cramped/slammed in header",
-    "updatedAt": "2026-03-30T11:20:01Z"
+    "context": "Debug model usage module - not updating",
+    "updatedAt": "2026-03-30T11:23:36Z"
   },
   "contextWindow": {
     "usedTokens": 71134,
@@ -40,8 +40,8 @@
   "modelUsage": {
     "session": 11.723326,
     "daily": 3.487452,
-    "weekly": 0.0,
-    "monthly": 35.95642,
+    "weekly": 11.723326,
+    "monthly": 47.679746,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -145,7 +145,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-30T11:20:05Z",
+    "lastUpdated": "2026-03-30T11:23:40Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -169,19 +169,19 @@
     "aggregate": {
       "daily": 3.487452,
       "total": 12.649936,
-      "monthly": 36.00313
+      "monthly": 47.726456
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.3,
-      "cpu_user": 6.2,
-      "cpu_sys": 12.4,
-      "load1": 2.03,
-      "load5": 2.16,
-      "load15": 2.05,
+      "cpu_pct": 17.1,
+      "cpu_user": 6.22,
+      "cpu_sys": 10.88,
+      "load1": 2.25,
+      "load5": 2.01,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "167Gi",
@@ -189,14 +189,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.0,
-      "cpu_user": 2.75,
-      "cpu_sys": 8.27,
-      "load1": 1.96,
-      "load5": 1.78,
-      "load15": 1.7,
+      "cpu_pct": 10.9,
+      "cpu_user": 2.4,
+      "cpu_sys": 8.84,
+      "load1": 1.47,
+      "load5": 1.6,
+      "load15": 1.64,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -216,19 +216,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T11:20:01Z"
+      "lastChecked": "2026-03-30T11:23:36Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T11:20:01Z"
+      "lastChecked": "2026-03-30T11:23:36Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-30T11:20:01Z"
+      "lastChecked": "2026-03-30T11:23:36Z"
     }
   ],
   "crons": [
@@ -568,25 +568,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-30T11:20:05Z",
+      "time": "2026-03-30T11:23:40Z",
       "event": "Session spend: $11.72"
     },
     {
-      "time": "2026-03-30T11:20:01Z",
+      "time": "2026-03-30T11:23:36Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-30T11:20:01Z",
+      "time": "2026-03-30T11:23:36Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-30T11:20:01Z",
+      "time": "2026-03-30T11:23:36Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-30T11:20:01Z",
+      "time": "2026-03-30T11:23:36Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-30T11:20:01Z"
+  "lastUpdated": "2026-03-30T11:23:36Z"
 }
