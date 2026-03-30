@@ -3,45 +3,45 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-30T00:36:55Z",
-    "objective": "Ready \u00b7 Awaiting instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-30T00:47:39Z",
+    "objective": "Strategic X replies",
+    "status": "active",
     "steps": [
       {
-        "label": "Initializing",
-        "status": "done",
-        "tool": "openclaw"
+        "label": "Posting 3 replies",
+        "status": "active",
+        "tool": "playwright"
       }
     ],
-    "currentTool": "openclaw",
-    "updatedAt": "2026-03-30T00:37:01Z",
-    "checkedAt": "2026-03-30T00:36:55Z",
+    "currentTool": "playwright",
+    "updatedAt": "2026-03-30T00:47:39Z",
+    "checkedAt": "2026-03-30T00:47:39Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Ready \u00b7 Awaiting instruction",
-    "updatedAt": "2026-03-30T00:40:01Z"
+    "status": "Brain Feed live",
+    "context": "Strategic X replies",
+    "updatedAt": "2026-03-30T00:50:02Z"
   },
   "contextWindow": {
-    "usedTokens": 23446,
+    "usedTokens": 29244,
     "limitTokens": 200000,
-    "pct": 0.1172,
+    "pct": 0.1462,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 8.530785,
-    "daily": 0.387508,
+    "session": 8.684353,
+    "daily": 0.541075,
     "weekly": 35.95642,
     "monthly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 5.7715841999999995
+        "cost": 5.9251521
       },
       {
         "name": "openai/gpt-5.4",
@@ -68,12 +68,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 148,
-        "outputTokens": 123484,
-        "totalTokens": 123632,
-        "sessionCost": 5.7715841999999995,
-        "dailyCost": 0.1935771,
-        "weeklyCost": 5.7715841999999995,
+        "inputTokens": 154,
+        "outputTokens": 125400,
+        "totalTokens": 125554,
+        "sessionCost": 5.9251521,
+        "dailyCost": 0.347145,
+        "weeklyCost": 5.9251521,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-30T00:40:06Z",
+    "lastUpdated": "2026-03-30T00:50:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -162,21 +162,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.387508,
-      "total": 9.457395,
+      "daily": 0.541075,
+      "total": 9.610963,
       "monthly": 36.00313
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 11.6,
-      "cpu_user": 2.3,
-      "cpu_sys": 9.3,
-      "load1": 1.52,
-      "load5": 1.34,
-      "load15": 1.51,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 19.6,
+      "cpu_user": 7.1,
+      "cpu_sys": 12.55,
+      "load1": 2.53,
+      "load5": 2.12,
+      "load15": 1.78,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "168Gi",
@@ -185,11 +185,11 @@
     },
     "jain": {
       "cpu_pct": 11.6,
-      "cpu_user": 2.4,
-      "cpu_sys": 9.52,
-      "load1": 1.75,
-      "load5": 1.78,
-      "load15": 1.75,
+      "cpu_user": 2.58,
+      "cpu_sys": 9.3,
+      "load1": 1.5,
+      "load5": 1.67,
+      "load15": 1.7,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -211,19 +211,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T00:40:01Z"
+      "lastChecked": "2026-03-30T00:50:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T00:40:01Z"
+      "lastChecked": "2026-03-30T00:50:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-30T00:40:01Z"
+      "lastChecked": "2026-03-30T00:50:02Z"
     }
   ],
   "crons": [
@@ -541,25 +541,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-30T00:40:06Z",
-      "event": "Session spend: $8.53"
+      "time": "2026-03-30T00:50:06Z",
+      "event": "Session spend: $8.68"
     },
     {
-      "time": "2026-03-30T00:40:01Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-30T00:50:02Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-30T00:40:01Z",
+      "time": "2026-03-30T00:50:02Z",
       "event": "23 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-30T00:40:01Z",
+      "time": "2026-03-30T00:50:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-30T00:40:01Z",
+      "time": "2026-03-30T00:50:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-30T00:40:01Z"
+  "lastUpdated": "2026-03-30T00:50:02Z"
 }
