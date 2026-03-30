@@ -1,18 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T11:13:35Z",
-  "objective": "PWA UI revamp pushed live",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T11:17:48Z",
+  "objective": "Processing request \u00b7 Determining objective",
+  "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Received",
       "status": "done",
+      "tool": "telegram"
+    },
+    {
+      "label": "Parsing intent",
+      "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T11:14:19Z",
-  "checkedAt": "2026-03-30T11:13:35Z",
+  "updatedAt": "2026-03-30T11:17:48Z",
+  "checkedAt": "2026-03-30T11:17:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
