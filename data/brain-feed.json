@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:16:29Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-30T03:16:33Z",
+  "objective": "Transcribing voice message",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
-      "status": "active",
+      "label": "Received",
+      "status": "done",
       "tool": "openclaw"
+    },
+    {
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T03:16:29Z",
-  "checkedAt": "2026-03-30T03:16:29Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-30T03:16:33Z",
+  "checkedAt": "2026-03-30T03:16:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
