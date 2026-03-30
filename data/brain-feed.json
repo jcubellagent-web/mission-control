@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-30T02:39:38Z",
-  "objective": "Deep roster analysis",
-  "status": "active",
+  "objective": "Deep roster analysis \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Fetching ESPN roster",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Pulling stats + schedules",
-      "status": "active",
+      "status": "done",
       "tool": "web_search"
     }
   ],
   "currentTool": "web_search",
-  "updatedAt": "2026-03-30T02:39:38Z",
+  "updatedAt": "2026-03-30T02:40:50Z",
   "checkedAt": "2026-03-30T02:39:38Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
