@@ -1,18 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-29T23:57:08Z",
-  "objective": "Stress testing X replies + QTs \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T00:02:47Z",
+  "objective": "Checking X post delivery",
+  "status": "active",
   "steps": [
     {
-      "label": "Running tests",
-      "status": "done",
-      "tool": "exec"
+      "label": "Checking docs",
+      "status": "active",
+      "tool": "web_fetch"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T00:00:02Z",
-  "checkedAt": "2026-03-29T23:57:08Z",
+  "currentTool": "web_fetch",
+  "updatedAt": "2026-03-30T00:02:47Z",
+  "checkedAt": "2026-03-30T00:02:47Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
