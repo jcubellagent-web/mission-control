@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T02:10:49Z",
+  "messageReceived": "2026-03-30T02:12:08Z",
   "objective": "Updating Champion lineups + cron",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Patching bot code",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "exec"
     },
     {
-      "label": "Fetching current lineups",
+      "label": "Updating Flex strategy",
       "status": "active",
-      "tool": "sorare_api"
+      "tool": "exec"
     }
   ],
-  "currentTool": "sorare_api",
-  "updatedAt": "2026-03-30T02:10:49Z",
-  "checkedAt": "2026-03-30T02:10:49Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-30T02:12:08Z",
+  "checkedAt": "2026-03-30T02:12:08Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
