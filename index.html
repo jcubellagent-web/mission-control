@@ -1240,6 +1240,169 @@
         /* Hide remote card on desktop */
         body:not(.phone-mode) .card-remote { display: none !important; }
 
+        /* ── Mobile X Growth Card ───────────────────── */
+        body:not(.phone-mode) .card-x-mobile { display: none !important; }
+
+        body.phone-mode .card-x-mobile {
+            background: linear-gradient(145deg, rgba(10,14,24,0.97) 0%, rgba(6,10,20,0.99) 100%);
+            border-color: rgba(29,155,240,0.2);
+            box-shadow:
+                0 1px 0 rgba(29,155,240,0.08) inset,
+                0 0 0 0.5px rgba(29,155,240,0.06) inset,
+                0 6px 28px rgba(0,0,0,0.5);
+        }
+        .x-mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .x-mobile-account {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .x-mobile-logo {
+            font-family: serif;
+            font-size: 1.2rem;
+            color: rgba(29,155,240,0.9);
+            line-height: 1;
+        }
+        .x-mobile-handle {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.02em;
+        }
+        .x-mobile-updated {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.28);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: 0.06em;
+        }
+
+        /* Stats row */
+        .x-mobile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .x-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 10px 8px;
+        }
+        .x-stat-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .x-stat-label {
+            font-size: 0.56rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+        .x-stat.x-stat-blue .x-stat-val { color: #7dd3fc; }
+        .x-stat.x-stat-green .x-stat-val { color: #6ee7b7; }
+
+        /* Today's post mix */
+        .x-mobile-mix {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .x-mix-pill {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 7px 4px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .x-mix-pill-val { font-size: 1rem; font-weight: 800; line-height: 1; }
+        .x-mix-orig  { background: rgba(29,155,240,0.1); color: #7dd3fc; border: 1px solid rgba(29,155,240,0.2); }
+        .x-mix-reply { background: rgba(52,211,153,0.08); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.15); }
+        .x-mix-qt    { background: rgba(167,139,250,0.08); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.15); }
+        .x-mix-total { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.08); }
+
+        /* Next milestone progress */
+        .x-milestone-row {
+            margin-bottom: 12px;
+        }
+        .x-milestone-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+        .x-milestone-name {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .x-milestone-pct {
+            font-size: 0.65rem;
+            color: rgba(29,155,240,0.7);
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', monospace;
+        }
+        .x-milestone-bar-bg {
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .x-milestone-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #1d9bf0, #60a5fa);
+            transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        /* Full dashboard button */
+        .x-mobile-open-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(29,155,240,0.1);
+            border: 1px solid rgba(29,155,240,0.25);
+            border-radius: 12px;
+            color: #7dd3fc;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: inherit;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 1px 0 rgba(29,155,240,0.1) inset;
+        }
+        .x-mobile-open-btn:active {
+            transform: scale(0.97);
+            background: rgba(29,155,240,0.18);
+        }
+
         /* Night Mode button on desktop header */
         #night-mode-btn {
             background: none;
@@ -2663,6 +2826,67 @@
                         <div id="unified-activity-log"></div>
                     </div>
                 </div>
+                <!-- Mobile X Growth Card — phone-mode only -->
+                <div class="card card-x-mobile">
+                    <div class="x-mobile-header">
+                        <div class="x-mobile-account">
+                            <span class="x-mobile-logo">𝕏</span>
+                            <span class="x-mobile-handle" id="xm-handle">@AgentJc11443</span>
+                        </div>
+                        <span class="x-mobile-updated" id="xm-updated">–</span>
+                    </div>
+                    <!-- Key stats row -->
+                    <div class="x-mobile-stats">
+                        <div class="x-stat x-stat-blue">
+                            <span class="x-stat-val" id="xm-followers">–</span>
+                            <span class="x-stat-label">Followers</span>
+                        </div>
+                        <div class="x-stat x-stat-blue">
+                            <span class="x-stat-val" id="xm-impr7d">–</span>
+                            <span class="x-stat-label">Impr 7d</span>
+                        </div>
+                        <div class="x-stat x-stat-green">
+                            <span class="x-stat-val" id="xm-posts7d">–</span>
+                            <span class="x-stat-label">Posts 7d</span>
+                        </div>
+                    </div>
+                    <!-- Today's post mix -->
+                    <div class="x-mobile-mix">
+                        <div class="x-mix-pill x-mix-orig">
+                            <span class="x-mix-pill-val" id="xm-orig-today">0</span>
+                            <span>Orig</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-reply">
+                            <span class="x-mix-pill-val" id="xm-eng-today">0</span>
+                            <span>Eng</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-qt">
+                            <span class="x-mix-pill-val" id="xm-qt-today">0</span>
+                            <span>QT</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-total">
+                            <span class="x-mix-pill-val" id="xm-total-today">0</span>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                    <!-- Next milestone progress bar -->
+                    <div class="x-milestone-row">
+                        <div class="x-milestone-label">
+                            <span class="x-milestone-name" id="xm-ms-name">500 Followers</span>
+                            <span class="x-milestone-pct" id="xm-ms-pct">0%</span>
+                        </div>
+                        <div class="x-milestone-bar-bg">
+                            <div class="x-milestone-bar-fill" id="xm-ms-bar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <!-- Open full modal -->
+                    <button class="x-mobile-open-btn" onclick="window.openXDashboard()">
+                        <span style="font-family:serif;font-size:0.9rem;">𝕏</span>
+                        Full Growth Dashboard
+                        <span style="opacity:0.5;font-size:0.85rem;">↗</span>
+                    </button>
+                </div>
+
                 <!-- Bottom-left: Jobs + Model side by side -->
                 <div class="kiosk-bottom-left">
                     <div class="card card-jobs">
@@ -5866,7 +6090,56 @@
             if (!r.ok) return;
             const data = await r.json();
             renderXDashboard(data);
+            renderXMobileCard(data);
         } catch(e) { /* silent */ }
+    }
+
+    function renderXMobileCard(data) {
+        if (!data) return;
+        const lead = data.lead || {};
+        const strat = data.strategy || {};
+
+        // Handle
+        const handleEl = document.getElementById('xm-handle');
+        if (handleEl) handleEl.textContent = data.account || '@AgentJc11443';
+
+        // Updated
+        const updEl = document.getElementById('xm-updated');
+        if (updEl && data.updatedAt) {
+            const diff = Math.floor((Date.now() - new Date(data.updatedAt)) / 60000);
+            updEl.textContent = diff < 1 ? 'just now' : diff < 60 ? diff + 'm ago' : Math.floor(diff/60) + 'h ago';
+        }
+
+        // Stats
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmtNum(val); };
+        setEl('xm-followers', lead.followers_total);
+        setEl('xm-impr7d', lead.impressions_7d);
+        setEl('xm-posts7d', lead.posts_7d);
+
+        // Today mix
+        const orig = strat.originals_today || 0;
+        const eng  = strat.engagement_today || strat.replies_today || 0;
+        const qt   = strat.qts_today || 0;
+        const setN = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setN('xm-orig-today', orig);
+        setN('xm-eng-today', eng);
+        setN('xm-qt-today', qt);
+        setN('xm-total-today', orig + eng + qt);
+
+        // Next unachieved milestone
+        const milestones = (data.milestones || []).filter(m => !m.achieved);
+        if (milestones.length > 0) {
+            const ms = milestones[0];
+            const target = typeof ms.target === 'number' ? ms.target : 1;
+            const current = typeof ms.current === 'number' ? ms.current : 0;
+            const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+            const nameEl = document.getElementById('xm-ms-name');
+            const pctEl  = document.getElementById('xm-ms-pct');
+            const barEl  = document.getElementById('xm-ms-bar');
+            if (nameEl) nameEl.textContent = ms.label || '500 Followers';
+            if (pctEl)  pctEl.textContent  = pct + '%';
+            if (barEl)  setTimeout(() => barEl.style.width = pct + '%', 100);
+        }
     }
 
     window.openXDashboard = async function() {
