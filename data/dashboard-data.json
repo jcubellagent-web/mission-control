@@ -3,45 +3,45 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-29T23:01:33Z",
-    "objective": "Pushing test intelligence brief \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-29T23:57:08Z",
+    "objective": "Stress testing X replies + QTs",
+    "status": "active",
     "steps": [
       {
-        "label": "Running feed",
-        "status": "done",
+        "label": "Running tests",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-29T23:28:15Z",
-    "checkedAt": "2026-03-29T23:01:33Z",
+    "updatedAt": "2026-03-29T23:57:08Z",
+    "checkedAt": "2026-03-29T23:57:08Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Pushing test intelligence brief \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-03-29T23:50:02Z"
+    "status": "Brain Feed live",
+    "context": "Stress testing X replies + QTs",
+    "updatedAt": "2026-03-30T00:00:01Z"
   },
   "contextWindow": {
-    "usedTokens": 126789,
+    "usedTokens": 139217,
     "limitTokens": 200000,
-    "pct": 0.6339,
+    "pct": 0.6961,
     "model": "claude-sonnet-4-6",
     "status": "amber"
   },
   "modelUsage": {
-    "session": 14.605407,
-    "daily": 6.46213,
+    "session": 16.244728,
+    "daily": 8.101451,
     "weekly": 35.95642,
     "monthly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 11.866357499999998
+        "cost": 13.505678699999999
       },
       {
         "name": "openai/gpt-5.4",
@@ -68,12 +68,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 158,
-        "outputTokens": 125458,
-        "totalTokens": 125616,
-        "sessionCost": 11.866357499999998,
-        "dailyCost": 6.2883504,
-        "weeklyCost": 11.866357499999998,
+        "inputTokens": 148,
+        "outputTokens": 124210,
+        "totalTokens": 124358,
+        "sessionCost": 13.505678699999999,
+        "dailyCost": 7.9276716,
+        "weeklyCost": 13.505678699999999,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -138,19 +138,9 @@
         "sizeGb": 0.27,
         "loaded": false,
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "openrouter/auto (BYOK)",
-        "source": "OpenRouter API",
-        "weeklyCost": 0.04671,
-        "dailyCost": 0.0,
-        "sessionCost": 0.04671,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-03-29T23:50:06Z",
+    "lastUpdated": "2026-03-30T00:00:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -159,7 +149,7 @@
     },
     "openrouter": {
       "daily": 0.0,
-      "weekly": 0.04671,
+      "weekly": 0.0,
       "monthly": 0.04671,
       "byok_daily": 0.0,
       "byok_weekly": 0.0,
@@ -172,21 +162,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.46213,
-      "total": 15.578727,
+      "daily": 8.101451,
+      "total": 17.171338,
       "monthly": 36.00313
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.4,
-      "cpu_user": 6.51,
-      "cpu_sys": 11.86,
-      "load1": 1.58,
-      "load5": 1.85,
-      "load15": 1.86,
+      "cpu_pct": 19.2,
+      "cpu_user": 6.58,
+      "cpu_sys": 12.58,
+      "load1": 2.02,
+      "load5": 1.88,
+      "load15": 1.85,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "168Gi",
@@ -194,14 +184,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.1,
-      "cpu_user": 6.4,
-      "cpu_sys": 10.6,
-      "load1": 1.59,
-      "load5": 1.58,
-      "load15": 1.64,
+      "cpu_pct": 12.6,
+      "cpu_user": 3.31,
+      "cpu_sys": 9.27,
+      "load1": 1.92,
+      "load5": 1.78,
+      "load15": 1.69,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -221,19 +211,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T23:50:02Z"
+      "lastChecked": "2026-03-30T00:00:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-29T23:50:02Z"
+      "lastChecked": "2026-03-30T00:00:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-29T23:50:02Z"
+      "lastChecked": "2026-03-30T00:00:01Z"
     }
   ],
   "crons": [
@@ -551,25 +541,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-29T23:50:06Z",
-      "event": "Session spend: $14.61"
+      "time": "2026-03-30T00:00:06Z",
+      "event": "Session spend: $16.24"
     },
     {
-      "time": "2026-03-29T23:50:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-30T00:00:01Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-29T23:50:02Z",
+      "time": "2026-03-30T00:00:01Z",
       "event": "23 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-29T23:50:02Z",
+      "time": "2026-03-30T00:00:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-29T23:50:02Z",
+      "time": "2026-03-30T00:00:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-29T23:50:02Z"
+  "lastUpdated": "2026-03-30T00:00:01Z"
 }

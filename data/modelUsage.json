@@ -1,13 +1,13 @@
 {
-  "session": 14.605407,
-  "daily": 6.46213,
+  "session": 16.244728,
+  "daily": 8.101451,
   "weekly": 35.95642,
   "monthly": 35.95642,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 11.866357499999998
+      "cost": 13.505678699999999
     },
     {
       "name": "openai/gpt-5.4",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 158,
-      "outputTokens": 125458,
-      "totalTokens": 125616,
-      "sessionCost": 11.866357499999998,
-      "dailyCost": 6.2883504,
-      "weeklyCost": 11.866357499999998,
+      "inputTokens": 148,
+      "outputTokens": 124210,
+      "totalTokens": 124358,
+      "sessionCost": 13.505678699999999,
+      "dailyCost": 7.9276716,
+      "weeklyCost": 13.505678699999999,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -104,19 +104,9 @@
       "sizeGb": 0.27,
       "loaded": false,
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "openrouter/auto (BYOK)",
-      "source": "OpenRouter API",
-      "weeklyCost": 0.04671,
-      "dailyCost": 0.0,
-      "sessionCost": 0.04671,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-03-29T23:50:06Z",
+  "lastUpdated": "2026-03-30T00:00:06Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -125,7 +115,7 @@
   },
   "openrouter": {
     "daily": 0.0,
-    "weekly": 0.04671,
+    "weekly": 0.0,
     "monthly": 0.04671,
     "byok_daily": 0.0,
     "byok_weekly": 0.0,
@@ -138,8 +128,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 6.46213,
-    "total": 15.578727,
+    "daily": 8.101451,
+    "total": 17.171338,
     "monthly": 36.00313
   }
 }
