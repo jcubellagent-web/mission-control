@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T02:43:57Z",
-  "objective": "Rotation analysis complete \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T02:46:48Z",
+  "objective": "Session startup",
+  "status": "active",
   "steps": [
     {
-      "label": "Analyzing 2-start pitchers",
-      "status": "done",
+      "label": "Reading context",
+      "status": "active",
       "tool": "openclaw"
-    },
-    {
-      "label": "Building swap plan",
-      "status": "done",
-      "tool": "exec"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T02:45:14Z",
-  "checkedAt": "2026-03-30T02:43:57Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T02:46:48Z",
+  "checkedAt": "2026-03-30T02:46:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
