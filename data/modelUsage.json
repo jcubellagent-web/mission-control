@@ -1,13 +1,13 @@
 {
-  "session": 8.51071,
-  "daily": 0.367433,
+  "session": 8.558634,
+  "daily": 0.415357,
   "weekly": 35.95642,
   "monthly": 35.95642,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 5.578007099999999
+      "cost": 5.753069569999999
     },
     {
       "name": "openai/gpt-5.4",
@@ -17,7 +17,7 @@
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 0.8856345399999999
+      "cost": 0.7584963199999999
     },
     {
       "name": "gpt-5.3-codex",
@@ -34,13 +34,13 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 145,
-      "outputTokens": 123421,
-      "totalTokens": 123566,
-      "sessionCost": 5.578007099999999,
-      "dailyCost": 0.0,
-      "weeklyCost": 5.578007099999999,
-      "sessions": 4,
+      "inputTokens": 35431,
+      "outputTokens": 124187,
+      "totalTokens": 159618,
+      "sessionCost": 5.753069569999999,
+      "dailyCost": 0.17506247,
+      "weeklyCost": 5.753069569999999,
+      "sessions": 5,
       "isGemini": false,
       "costEstimated": false
     },
@@ -60,13 +60,13 @@
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 1737795,
-      "outputTokens": 35414,
-      "totalTokens": 1773209,
-      "sessionCost": 0.8856345399999999,
-      "dailyCost": 0.3674325199999999,
-      "weeklyCost": 0.8856345399999999,
-      "sessions": 7,
+      "inputTokens": 1672300,
+      "outputTokens": 33878,
+      "totalTokens": 1706178,
+      "sessionCost": 0.7584963199999999,
+      "dailyCost": 0.24029429999999996,
+      "weeklyCost": 0.7584963199999999,
+      "sessions": 6,
       "isGemini": true,
       "costEstimated": false
     },
@@ -106,7 +106,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-03-30T03:20:05Z",
+  "lastUpdated": "2026-03-30T03:30:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -128,8 +128,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.367433,
-    "total": 9.43732,
+    "daily": 0.415357,
+    "total": 9.485244,
     "monthly": 36.00313
   }
 }
