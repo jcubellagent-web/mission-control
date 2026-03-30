@@ -34,10 +34,18 @@ CRON_TARGETS = [
     {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 9:00 AM", "description": "Checks for injuries before Monday lineup lock — runs 15 min before lineup check", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Daily Missions", "pattern": "sorare_missions.py", "schedule": "Daily 10:00 AM ET", "description": "Submits optimal picks for Save Picker + SP (Classic) missions, and Champion lineup before games start", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Sorare Daily Missions", "pattern": "sorare_mlb_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "Submits all 5 daily missions (Save Picker, SP Classic, etc.) via sorare_mlb_bot.py --missions-only", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Sorare Competition Lineups", "pattern": "sorare_mlb_bot.py --lineups-only", "schedule": "Daily 11:00 AM ET", "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements. Pushes score ≥8.5 to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min", "description": "Monitors X/Twitter watchlist for high-signal posts (score ≥8), pushes to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    # ── X Account (18 interactions/day: 7 originals + 7 replies + 4 QTs) ───────
+    # ── X Account Growth Strategy ──────────────────────────────────────────────
+    # Originals: 7/day via x_post_agent.py (J.A.I.N)
+    # Strategic Replies: 8/day via x_strategic_reply.py (J.A.I.N) — browser/cookie session
+    #   - xAI live search finds fresh tweets (<4h) from 20+ high-follower target accounts
+    #   - Scores by freshness + engagement signal, skips already-replied tweets
+    #   - Gemini generates sharp value-adding reply (220 char max, no hashtags)
+    #   - Posts via Playwright browser with human-like delays
+    # Quote Tweets: 4/day via x_post_agent.py (J.A.I.N)
     {"name": "X Feedback Loop",   "pattern": "x_post_agent.py", "schedule": "Daily 6:00 AM ET",  "description": "Pulls analytics, updates strategy, fires milestone alerts", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     # Originals (7/day)
     {"name": "X Pre-Market",      "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET",  "description": "[Original] Futures + overnight signals", "category": "X Account", "agent": "J.A.I.N", "jain": True},
@@ -47,10 +55,8 @@ CRON_TARGETS = [
     {"name": "X Market Close",    "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET",  "description": "[Original] Close wrap + next-day outlook", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "X Prime Take",      "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET",  "description": "[Original] Prime time hot take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "X Nightcap",        "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] One sharp insight to end the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    # Strategic Replies (7 slots/day — @elonmusk, @sama, @pmarca, @saylor, etc.)
-    {"name": "X Reply Batch AM",  "pattern": "x_post_agent.py", "schedule": "Daily 9–10 AM ET", "description": "[Reply] Monitor target accounts, reply to viral posts in last 2h (2 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Reply Batch PM",  "pattern": "x_post_agent.py", "schedule": "Daily 12–4 PM ET", "description": "[Reply] Reply slots at 12pm, 2pm, 4pm (3 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Reply Batch Eve", "pattern": "x_post_agent.py", "schedule": "Daily 7–11 PM ET", "description": "[Reply] Evening reply slots at 7pm + 11pm (2 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # Strategic Replies (8 slots/day — browser/cookie, fresh <4h tweets only)
+    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "8x daily (9am–11pm ET)", "description": "[Reply] xAI finds fresh high-visibility tweets from @elonmusk, @sama, @pmarca, @saylor + 20 others → Gemini reply → Playwright browser post. Scores by freshness + likes. Never double-replies.", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     # Quote Tweets (4 slots/day — breaking news + viral AI/finance posts)
     {"name": "X Quote Tweets",    "pattern": "x_post_agent.py", "schedule": "Daily 10am/1pm/6pm/8pm ET", "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
@@ -1018,12 +1024,6 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 17: "X Market Close",
                 21: "X Prime Take",
                 22: "X Nightcap",
-                9:  "X Reply Batch AM",
-                10: "X Reply Batch AM",
-                14: "X Reply Batch PM",
-                16: "X Reply Batch PM",
-                19: "X Reply Batch Eve",
-                23: "X Reply Batch Eve",
                 13: "X Quote Tweets",
                 15: "X Quote Tweets",
                 18: "X Quote Tweets",
@@ -1037,6 +1037,19 @@ def fetch_crons() -> List[Dict[str, Any]]:
                     if job_name:
                         iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
                         x_log_runs[job_name] = iso
+    except Exception:
+        pass
+
+    # Parse strategic reply log from J.A.I.N
+    try:
+        reply_log_r = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "jc_agent@100.121.89.84",
+             f"grep -E '✅ Done — posted [1-9]' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -5 || true"],
+            capture_output=True, text=True, timeout=8
+        )
+        if reply_log_r.returncode == 0 and reply_log_r.stdout.strip():
+            x_log_runs["X Strategic Replies"] = f"{today_str}T{reply_log_r.stdout.strip()[:8]}"
     except Exception:
         pass
 

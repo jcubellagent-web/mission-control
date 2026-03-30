@@ -5317,7 +5317,7 @@
                 <!-- Post mix today -->
                 <div class="xd-mix-row">
                     <div class="xd-mix-pill xd-mix-orig"><span id="xd-orig-today">0</span> <span class="xd-mix-label">Originals</span></div>
-                    <div class="xd-mix-pill xd-mix-reply"><span id="xd-reply-today">0</span> <span class="xd-mix-label">Replies</span></div>
+                    <div class="xd-mix-pill xd-mix-reply"><span id="xd-engagement-today">0</span> <span class="xd-mix-label">Engagement</span></div>
                     <div class="xd-mix-pill xd-mix-qt"><span id="xd-qt-today">0</span> <span class="xd-mix-label">Quote Tweets</span></div>
                     <div class="xd-mix-pill xd-mix-total"><span id="xd-total-today">0</span> <span class="xd-mix-label">Total Today</span></div>
                 </div>
@@ -5346,49 +5346,39 @@
                         <div class="xd-bar-wrap"><div class="xd-bar" id="xd-bar-impressions7d"></div></div>
                     </div>
                     <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-engagement">–</div>
-                        <div class="xd-metric-label">Engagement Rate (7d)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-engagement"></div></div>
+                        <div class="xd-metric-val" id="xd-impressions30d">–</div>
+                        <div class="xd-metric-label">Impressions (30d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-impressions30d"></div></div>
                     </div>
                     <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-top-post">–</div>
-                        <div class="xd-metric-label">Best Post (impr.)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-top-post"></div></div>
+                        <div class="xd-metric-val" id="xd-avg-impr-per-post">–</div>
+                        <div class="xd-metric-label">Avg Impr/Post (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-avg-impr"></div></div>
                     </div>
                 </div>
 
                 <!-- Reply & QT metrics -->
-                <div class="xd-section-label">REPLY &amp; QUOTE TWEET METRICS</div>
+                <div class="xd-section-label">ENGAGEMENT &amp; QT METRICS</div>
                 <div class="xd-leads">
                     <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-reply-impr">–</div>
-                        <div class="xd-metric-label">Reply Impressions (7d)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-reply-impr"></div></div>
+                        <div class="xd-metric-val" id="xd-engagement-7d">–</div>
+                        <div class="xd-metric-label">Engagement Posts (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-engagement-7d"></div></div>
                     </div>
                     <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-reply-conv">–</div>
-                        <div class="xd-metric-label">Reply → Follow Rate (7d)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-reply-conv"></div></div>
-                    </div>
-                    <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-top-reply">–</div>
-                        <div class="xd-metric-label">Best Reply (impr.)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-top-reply"></div></div>
+                        <div class="xd-metric-val" id="xd-qts-7d">–</div>
+                        <div class="xd-metric-label">Quote Tweets (7d)</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-blue" id="xd-bar-qts-7d"></div></div>
                     </div>
                     <div class="xd-metric">
                         <div class="xd-metric-val" id="xd-qt-eng">–</div>
-                        <div class="xd-metric-label">QT Engagement Rate (7d)</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-gold" id="xd-bar-qt-eng"></div></div>
+                        <div class="xd-metric-label">QT Engagement Rate</div>
+                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-green" id="xd-bar-qt-eng"></div></div>
                     </div>
                     <div class="xd-metric">
                         <div class="xd-metric-val" id="xd-posts7d">–</div>
                         <div class="xd-metric-label">Total Posts (7d)</div>
                         <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-posts7d"></div></div>
-                    </div>
-                    <div class="xd-metric">
-                        <div class="xd-metric-val" id="xd-avg-reply-impr">–</div>
-                        <div class="xd-metric-label">Avg Reply Impressions</div>
-                        <div class="xd-bar-wrap"><div class="xd-bar xd-bar-purple" id="xd-bar-avg-reply-impr"></div></div>
                     </div>
                 </div>
 
@@ -5694,55 +5684,49 @@
         // Post mix today
         const strat = data.strategy || {};
         const origToday  = strat.originals_today || 0;
-        const replyToday = strat.replies_today || 0;
+        const engToday   = strat.engagement_today || strat.replies_today || 0;
         const qtToday    = strat.qts_today || 0;
-        document.getElementById('xd-orig-today').textContent  = origToday;
-        document.getElementById('xd-reply-today').textContent = replyToday;
-        document.getElementById('xd-qt-today').textContent    = qtToday;
-        document.getElementById('xd-total-today').textContent = origToday + replyToday + qtToday;
+        document.getElementById('xd-orig-today').textContent        = origToday;
+        document.getElementById('xd-engagement-today').textContent  = engToday;
+        document.getElementById('xd-qt-today').textContent          = qtToday;
+        document.getElementById('xd-total-today').textContent       = origToday + engToday + qtToday;
 
         // Lead metrics
         const lead = data.lead || {};
-        const imp7     = lead.impressions_7d || 0;
-        const fol7     = lead.followers_gained_7d || 0;
-        const eng      = lead.engagement_rate_7d || 0;
-        const posts    = lead.posts_7d || 0;
-        const topP     = lead.top_post_impressions || 0;
-        const folT     = lead.followers_total || 0;
-        const folVel   = lead.follower_velocity_30d || 0;
-        const repImpr  = lead.reply_impressions_7d || 0;
-        const repConv  = lead.reply_conversion_rate_7d || 0;
-        const topReply = lead.top_reply_impressions || 0;
-        const qtEng    = lead.qt_engagement_rate_7d || 0;
-        const avgRepI  = lead.avg_reply_impressions || 0;
+        const imp7            = lead.impressions_7d || 0;
+        const imp30d          = lead.impressions_30d || 0;
+        const fol7            = lead.followers_gained_7d || 0;
+        const posts           = lead.posts_7d || 0;
+        const folT            = lead.followers_total || 0;
+        const folVel          = lead.follower_velocity_30d || 0;
+        const qtEng           = lead.qt_engagement_rate_7d || 0;
+        const avgImprPerPost  = lead.avg_impressions_per_post_7d || 0;
+        const eng7d           = lead.engagement_7d || 0;
+        const qts7d           = lead.qts_7d || 0;
 
         document.getElementById('xd-followers-total').textContent   = fmtNum(folT);
         document.getElementById('xd-followers-gained').textContent  = '+' + fmtNum(fol7);
         document.getElementById('xd-follower-velocity').textContent = folVel.toFixed(1) + '/day';
         document.getElementById('xd-impressions7d').textContent     = fmtNum(imp7);
-        document.getElementById('xd-engagement').textContent        = fmtPct(eng);
-        document.getElementById('xd-top-post').textContent          = fmtNum(topP);
-        document.getElementById('xd-reply-impr').textContent        = fmtNum(repImpr);
-        document.getElementById('xd-reply-conv').textContent        = fmtPct(repConv);
-        document.getElementById('xd-top-reply').textContent         = fmtNum(topReply);
+        document.getElementById('xd-impressions30d').textContent    = fmtNum(imp30d);
+        document.getElementById('xd-avg-impr-per-post').textContent = fmtNum(avgImprPerPost);
         document.getElementById('xd-qt-eng').textContent            = fmtPct(qtEng);
         document.getElementById('xd-posts7d').textContent           = fmtNum(posts);
-        document.getElementById('xd-avg-reply-impr').textContent    = fmtNum(avgRepI);
+        document.getElementById('xd-engagement-7d').textContent     = fmtNum(eng7d);
+        document.getElementById('xd-qts-7d').textContent            = fmtNum(qts7d);
 
         // Bars — animate after a tick
         requestAnimationFrame(() => {
-            document.getElementById('xd-bar-followers-total').style.width   = barPct(folT, 500) + '%';
-            document.getElementById('xd-bar-followers-gained').style.width  = barPct(fol7, 50) + '%';
-            document.getElementById('xd-bar-follower-velocity').style.width = barPct(folVel, 20) + '%';
-            document.getElementById('xd-bar-impressions7d').style.width     = barPct(imp7, 100000) + '%';
-            document.getElementById('xd-bar-engagement').style.width        = barPct(eng, 0.10) + '%';
-            document.getElementById('xd-bar-top-post').style.width          = barPct(topP, 50000) + '%';
-            document.getElementById('xd-bar-reply-impr').style.width        = barPct(repImpr, 50000) + '%';
-            document.getElementById('xd-bar-reply-conv').style.width        = barPct(repConv, 0.05) + '%';
-            document.getElementById('xd-bar-top-reply').style.width         = barPct(topReply, 10000) + '%';
-            document.getElementById('xd-bar-qt-eng').style.width            = barPct(qtEng, 0.10) + '%';
-            document.getElementById('xd-bar-posts7d').style.width           = barPct(posts, 126) + '%';
-            document.getElementById('xd-bar-avg-reply-impr').style.width    = barPct(avgRepI, 500) + '%';
+            document.getElementById('xd-bar-followers-total').style.width    = barPct(folT, 500) + '%';
+            document.getElementById('xd-bar-followers-gained').style.width   = barPct(fol7, 50) + '%';
+            document.getElementById('xd-bar-follower-velocity').style.width  = barPct(folVel, 20) + '%';
+            document.getElementById('xd-bar-impressions7d').style.width      = barPct(imp7, 100000) + '%';
+            document.getElementById('xd-bar-impressions30d').style.width     = barPct(imp30d, 500000) + '%';
+            document.getElementById('xd-bar-avg-impr').style.width           = barPct(avgImprPerPost, 1000) + '%';
+            document.getElementById('xd-bar-qt-eng').style.width             = barPct(qtEng, 0.10) + '%';
+            document.getElementById('xd-bar-posts7d').style.width            = barPct(posts, 126) + '%';
+            document.getElementById('xd-bar-engagement-7d').style.width      = barPct(eng7d, 50) + '%';
+            document.getElementById('xd-bar-qts-7d').style.width             = barPct(qts7d, 30) + '%';
         });
 
         // Milestones
