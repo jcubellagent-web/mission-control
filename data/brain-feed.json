@@ -1,23 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:38:54Z",
-  "objective": "Build custom memory skill, beef up heartbeat/proactive logic",
+  "messageReceived": "2026-03-30T03:39:48Z",
+  "objective": "Voice message received",
   "status": "active",
   "steps": [
     {
-      "label": "Confirmed",
-      "status": "done",
-      "tool": "openclaw"
-    },
-    {
-      "label": "Claude Code running",
+      "label": "Receiving audio",
       "status": "active",
-      "tool": "exec"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T03:38:54Z",
-  "checkedAt": "2026-03-30T03:38:54Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T03:39:48Z",
+  "checkedAt": "2026-03-30T03:39:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
