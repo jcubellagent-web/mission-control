@@ -4,44 +4,44 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-30T00:47:39Z",
-    "objective": "Strategic X replies",
+    "messageReceived": "2026-03-30T00:55:17Z",
+    "objective": "Updating X growth strategy docs",
     "status": "active",
     "steps": [
       {
-        "label": "Posting 3 replies",
+        "label": "Checking cron overlap",
         "status": "active",
-        "tool": "playwright"
+        "tool": "exec"
       }
     ],
-    "currentTool": "playwright",
-    "updatedAt": "2026-03-30T00:47:39Z",
-    "checkedAt": "2026-03-30T00:47:39Z",
+    "currentTool": "exec",
+    "updatedAt": "2026-03-30T00:55:17Z",
+    "checkedAt": "2026-03-30T00:55:17Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Strategic X replies",
-    "updatedAt": "2026-03-30T00:50:02Z"
+    "context": "Updating X growth strategy docs",
+    "updatedAt": "2026-03-30T00:57:39Z"
   },
   "contextWindow": {
-    "usedTokens": 29244,
+    "usedTokens": 54544,
     "limitTokens": 200000,
-    "pct": 0.1462,
+    "pct": 0.2727,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 8.684353,
-    "daily": 0.541075,
+    "session": 9.184856,
+    "daily": 1.041579,
     "weekly": 35.95642,
     "monthly": 35.95642,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 5.9251521
+        "cost": 6.425655899999999
       },
       {
         "name": "openai/gpt-5.4",
@@ -68,12 +68,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 154,
-        "outputTokens": 125400,
-        "totalTokens": 125554,
-        "sessionCost": 5.9251521,
-        "dailyCost": 0.347145,
-        "weeklyCost": 5.9251521,
+        "inputTokens": 167,
+        "outputTokens": 131917,
+        "totalTokens": 132084,
+        "sessionCost": 6.425655899999999,
+        "dailyCost": 0.8476488,
+        "weeklyCost": 6.425655899999999,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-30T00:50:06Z",
+    "lastUpdated": "2026-03-30T00:57:43Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -162,21 +162,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.541075,
-      "total": 9.610963,
+      "daily": 1.041579,
+      "total": 10.111466,
       "monthly": 36.00313
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 19.6,
-      "cpu_user": 7.1,
-      "cpu_sys": 12.55,
-      "load1": 2.53,
-      "load5": 2.12,
-      "load15": 1.78,
+      "cpu_pct": 18.8,
+      "cpu_user": 7.7,
+      "cpu_sys": 11.72,
+      "load1": 1.94,
+      "load5": 2.09,
+      "load15": 1.91,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "168Gi",
@@ -184,12 +184,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.6,
-      "cpu_user": 2.58,
-      "cpu_sys": 9.3,
-      "load1": 1.5,
-      "load5": 1.67,
-      "load15": 1.7,
+      "cpu_pct": 12.3,
+      "cpu_user": 3.42,
+      "cpu_sys": 8.9,
+      "load1": 1.64,
+      "load5": 1.74,
+      "load15": 1.72,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -211,19 +211,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T00:50:02Z"
+      "lastChecked": "2026-03-30T00:57:39Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T00:50:02Z"
+      "lastChecked": "2026-03-30T00:57:39Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-30T00:50:02Z"
+      "lastChecked": "2026-03-30T00:57:39Z"
     }
   ],
   "crons": [
@@ -423,39 +423,14 @@
       "runStatus": "upcoming"
     },
     {
-      "name": "X Reply Batch AM",
-      "schedule": "Daily 9\u201310 AM ET",
-      "description": "[Reply] Monitor target accounts, reply to viral posts in last 2h (2 slots)",
+      "name": "X Strategic Replies",
+      "schedule": "8x daily (9am\u201311pm ET)",
+      "description": "[Reply] xAI finds fresh high-visibility tweets from @elonmusk, @sama, @pmarca, @saylor + 20 others \u2192 Gemini reply \u2192 Playwright browser post. Scores by freshness + likes. Never double-replies.",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
-      "lastError": null,
-      "runStatus": "missed"
-    },
-    {
-      "name": "X Reply Batch PM",
-      "schedule": "Daily 12\u20134 PM ET",
-      "description": "[Reply] Reply slots at 12pm, 2pm, 4pm (3 slots)",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-03-29T16:00:00"
-    },
-    {
-      "name": "X Reply Batch Eve",
-      "schedule": "Daily 7\u201311 PM ET",
-      "description": "[Reply] Evening reply slots at 7pm + 11pm (2 slots)",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-03-29T19:00:00"
+      "lastError": null
     },
     {
       "name": "X Quote Tweets",
@@ -541,25 +516,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-30T00:50:06Z",
-      "event": "Session spend: $8.68"
+      "time": "2026-03-30T00:57:43Z",
+      "event": "Session spend: $9.18"
     },
     {
-      "time": "2026-03-30T00:50:02Z",
+      "time": "2026-03-30T00:57:39Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-30T00:50:02Z",
-      "event": "23 scheduled jobs healthy"
+      "time": "2026-03-30T00:57:39Z",
+      "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-30T00:50:02Z",
+      "time": "2026-03-30T00:57:39Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-30T00:50:02Z",
+      "time": "2026-03-30T00:57:39Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-30T00:50:02Z"
+  "lastUpdated": "2026-03-30T00:57:39Z"
 }
