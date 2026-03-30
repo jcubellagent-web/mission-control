@@ -4,37 +4,42 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-30T02:14:00Z",
-    "objective": "Updating Champion lineups + cron",
+    "messageReceived": "2026-03-30T02:29:05Z",
+    "objective": "Updating GW2 Champion L2 lineup",
     "status": "active",
     "steps": [
       {
-        "label": "Code synced to JAIN",
+        "label": "Received",
         "status": "done",
-        "tool": "exec"
+        "tool": "openclaw"
       },
       {
-        "label": "Responding to Josh",
+        "label": "Transcribed",
+        "status": "done",
+        "tool": "openclaw"
+      },
+      {
+        "label": "Force-updating L2 Flex",
         "status": "active",
-        "tool": "telegram"
+        "tool": "sorare_api"
       }
     ],
-    "currentTool": "telegram",
-    "updatedAt": "2026-03-30T02:14:00Z",
-    "checkedAt": "2026-03-30T02:14:00Z",
+    "currentTool": "sorare_api",
+    "updatedAt": "2026-03-30T02:29:05Z",
+    "checkedAt": "2026-03-30T02:29:05Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Updating Champion lineups + cron",
-    "updatedAt": "2026-03-30T02:20:01Z"
+    "context": "Updating GW2 Champion L2 lineup",
+    "updatedAt": "2026-03-30T02:30:01Z"
   },
   "contextWindow": {
-    "usedTokens": 16856,
-    "limitTokens": 1000000,
-    "pct": 0.0169,
-    "model": "gemini-2.5-flash",
+    "usedTokens": 71288,
+    "limitTokens": 200000,
+    "pct": 0.3564,
+    "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
@@ -145,7 +150,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-30T02:20:06Z",
+    "lastUpdated": "2026-03-30T02:30:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -174,14 +179,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.3,
-      "cpu_user": 6.3,
-      "cpu_sys": 11.96,
-      "load1": 2.14,
-      "load5": 2.37,
-      "load15": 2.19,
+      "cpu_pct": 18.8,
+      "cpu_user": 6.33,
+      "cpu_sys": 12.47,
+      "load1": 2.12,
+      "load5": 2.08,
+      "load15": 2.07,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "168Gi",
@@ -189,14 +194,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.8,
-      "cpu_user": 2.54,
-      "cpu_sys": 8.28,
-      "load1": 1.43,
-      "load5": 1.7,
-      "load15": 1.75,
+      "cpu_pct": 21.4,
+      "cpu_user": 11.72,
+      "cpu_sys": 9.65,
+      "load1": 2.13,
+      "load5": 1.85,
+      "load15": 1.78,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -216,19 +221,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T02:20:01Z"
+      "lastChecked": "2026-03-30T02:30:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-30T02:20:01Z"
+      "lastChecked": "2026-03-30T02:30:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-30T02:20:01Z"
+      "lastChecked": "2026-03-30T02:30:01Z"
     }
   ],
   "crons": [
@@ -568,25 +573,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-30T02:20:06Z",
+      "time": "2026-03-30T02:30:09Z",
       "event": "Session spend: $9.81"
     },
     {
-      "time": "2026-03-30T02:20:01Z",
+      "time": "2026-03-30T02:30:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-30T02:20:01Z",
+      "time": "2026-03-30T02:30:01Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-30T02:20:01Z",
+      "time": "2026-03-30T02:30:01Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-30T02:20:01Z",
+      "time": "2026-03-30T02:30:01Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-30T02:20:01Z"
+  "lastUpdated": "2026-03-30T02:30:01Z"
 }
