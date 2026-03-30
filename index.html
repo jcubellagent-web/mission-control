@@ -722,15 +722,16 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            /* iPhone 17 Pro Dynamic Island: safe-area-inset-top ≈ 59px */
-            padding: max(env(safe-area-inset-top, 10px), 10px) 14px 8px;
+            flex-wrap: nowrap;
+            /* Tighter top padding — no wasted space */
+            padding: max(env(safe-area-inset-top, 6px), 6px) 12px 6px;
             margin: 0 0 8px 0;
             background: rgba(5, 7, 13, 0.92);
             backdrop-filter: blur(32px) saturate(1.8);
             -webkit-backdrop-filter: blur(32px) saturate(1.8);
             border-bottom: 1px solid rgba(229,62,62,0.08);
             background-image: linear-gradient(180deg, rgba(229,62,62,0.06) 0%, transparent 60%);
-            gap: 0;
+            gap: 8px;
         }
         body.phone-mode header::before { display: none; }
         body.phone-mode header > * { position: relative; z-index: 1; }
@@ -739,19 +740,21 @@
         body.phone-mode .logo {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
+            flex-shrink: 0;
         }
         body.phone-mode .logo-icon {
-            width: 22px; height: 22px;
-            border-radius: 6px;
+            width: 20px; height: 20px;
+            border-radius: 5px;
         }
         body.phone-mode .logo h1 {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             color: rgba(255,255,255,0.8);
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
+        body.phone-mode .mc-clock-wrap { display: none !important; }
 
         /* Cost pill — centered below logo */
         #mobile-cost-pill {
@@ -768,8 +771,8 @@
         #mobile-cost-pill .mcp-row {
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
+            gap: 3px;
+            padding: 4px 9px;
         }
         #mobile-cost-pill .mcp-row + .mcp-row {
             border-left: 1px solid rgba(255,255,255,0.08);
@@ -795,13 +798,13 @@
             display: none; /* hidden on desktop */
             align-items: center;
             justify-content: center;
-            width: 32px; height: 32px;
-            border-radius: 10px;
+            width: 30px; height: 30px;
+            border-radius: 9px;
             background: rgba(29,155,240,0.12);
             border: 1px solid rgba(29,155,240,0.25);
             color: #7dd3fc;
             font-family: serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             flex-shrink: 0;
@@ -2427,12 +2430,14 @@
         body.phone-mode .phone-actions {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
+            flex-shrink: 0;
+            margin-left: auto;
         }
         .pca-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px;
-            border-radius: 10px;
+            width: 30px; height: 30px;
+            border-radius: 9px;
             border: 1px solid rgba(255,255,255,0.12);
             background: rgba(255,255,255,0.07);
             font-size: 1.05rem;
