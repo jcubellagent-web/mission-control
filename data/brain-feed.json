@@ -1,18 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T02:48:10Z",
-  "objective": "Health check complete \u00b7 All systems go",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T02:51:15Z",
+  "objective": "Tighten breaking news filter",
+  "status": "active",
   "steps": [
     {
-      "label": "Starting checks",
+      "label": "Receiving audio",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
+    },
+    {
+      "label": "Transcribing",
+      "status": "active",
+      "tool": "whisper"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-30T02:49:09Z",
-  "checkedAt": "2026-03-30T02:48:10Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-30T02:51:15Z",
+  "checkedAt": "2026-03-30T02:51:15Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
