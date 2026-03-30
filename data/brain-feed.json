@@ -1,18 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T02:46:48Z",
-  "objective": "Session ready \u00b7 Awaiting instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-30T02:47:13Z",
+  "objective": "Checking OpenClaw version",
+  "status": "active",
   "steps": [
     {
-      "label": "Reading context",
-      "status": "done",
-      "tool": "openclaw"
+      "label": "Checking version",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T02:46:54Z",
-  "checkedAt": "2026-03-30T02:46:48Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-30T02:47:13Z",
+  "checkedAt": "2026-03-30T02:47:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
