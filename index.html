@@ -1254,8 +1254,8 @@
         #remote-status.ok  { color: #34d399; }
         #remote-status.err { color: #f87171; }
 
-        /* Hide remote card on desktop */
-        body:not(.phone-mode) .card-remote { display: none !important; }
+        /* Hide remote card on both desktop and mobile — controls live in header */
+        .card-remote { display: none !important; }
 
         /* ── Mobile X Growth Card ───────────────────── */
         body:not(.phone-mode) .card-x-mobile { display: none !important; }
@@ -2427,39 +2427,42 @@
         body.phone-mode .phone-actions {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
         }
         .pca-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(255,255,255,0.05);
-            font-size: 1rem;
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.07);
+            font-size: 1.05rem;
             cursor: pointer;
-            color: rgba(255,255,255,0.7);
-            transition: background 0.15s, transform 0.1s;
+            color: rgba(255,255,255,0.75);
+            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
         }
-        .pca-btn:active { transform: scale(0.90); filter: brightness(1.3); }
+        .pca-btn:active { transform: scale(0.88); filter: brightness(1.4); transition-duration: 0.06s; }
         .pca-btn.pca-refresh {
-            background: rgba(96,165,250,0.10);
-            border-color: rgba(96,165,250,0.2);
+            background: rgba(96,165,250,0.14);
+            border-color: rgba(96,165,250,0.28);
             color: #93c5fd;
+            box-shadow: 0 1px 0 rgba(147,197,253,0.1) inset;
         }
         .pca-btn.pca-night {
-            background: rgba(229,62,62,0.08);
-            border-color: rgba(229,62,62,0.2);
+            background: rgba(229,62,62,0.12);
+            border-color: rgba(229,62,62,0.25);
             color: #fca5a5;
+            box-shadow: 0 1px 0 rgba(252,165,165,0.08) inset;
         }
         .pca-btn.pca-sending { opacity: 0.5; pointer-events: none; }
         .pca-btn.pca-ok { filter: brightness(1.8); }
         .pca-status {
-            font-size: 0.58rem;
+            font-size: 0.55rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             color: rgba(255,255,255,0.3);
-            min-width: 24px;
+            min-width: 16px;
             text-align: center;
             transition: color 0.3s;
         }
