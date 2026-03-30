@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:33:04Z",
-  "objective": "Transcribing voice message",
+  "messageReceived": "2026-03-30T03:33:10Z",
+  "objective": "Processing request \u00b7 Determining objective",
   "status": "active",
   "steps": [
     {
-      "label": "Received",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Parsing intent",
       "status": "active",
-      "tool": "whisper"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-30T03:33:04Z",
-  "checkedAt": "2026-03-30T03:33:04Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T03:33:10Z",
+  "checkedAt": "2026-03-30T03:33:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
