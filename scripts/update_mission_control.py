@@ -56,7 +56,20 @@ CRON_TARGETS = [
     {"name": "X Prime Take",      "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET",  "description": "[Original] Prime time hot take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "X Nightcap",        "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] One sharp insight to end the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     # Strategic Replies (8 slots/day — browser/cookie, fresh <4h tweets only)
-    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "8x daily (9am–11pm ET)", "description": "[Reply] xAI finds fresh high-visibility tweets from @elonmusk, @sama, @pmarca, @saylor + 20 others → Gemini reply → Playwright browser post. Scores by freshness + likes. Never double-replies.", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    # multiRun slots are evaluated dynamically in fetch_crons() below
+    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "8x daily (9am–11pm ET)", "description": "[Reply] xAI finds fresh high-visibility tweets from @elonmusk, @sama, @pmarca, @saylor + 20 others → Gemini reply → Playwright browser post. Scores by freshness + likes. Never double-replies.", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+     "multiRun": {
+         "runs": [
+             {"time": "9:00 AM",  "label": "Strategic Reply"},
+             {"time": "11:00 AM", "label": "Strategic Reply"},
+             {"time": "1:00 PM",  "label": "Strategic Reply"},
+             {"time": "3:00 PM",  "label": "Strategic Reply"},
+             {"time": "5:00 PM",  "label": "Strategic Reply"},
+             {"time": "7:00 PM",  "label": "Strategic Reply"},
+             {"time": "9:00 PM",  "label": "Strategic Reply"},
+             {"time": "11:00 PM", "label": "Strategic Reply"},
+         ]
+     }},
     # Quote Tweets (4 slots/day — breaking news + viral AI/finance posts)
     {"name": "X Quote Tweets",    "pattern": "x_post_agent.py", "schedule": "Daily 10am/1pm/6pm/8pm ET", "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "8x weekday / 2x weekend", "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
@@ -1040,18 +1053,32 @@ def fetch_crons() -> List[Dict[str, Any]]:
     except Exception:
         pass
 
-    # Parse strategic reply log from J.A.I.N
+    # Parse strategic reply state from J.A.I.N — collect reply ET hours posted today
+    _jain_replies_today: list[int] = []
     try:
-        reply_log_r = subprocess.run(
+        reply_state_r = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
              "jc_agent@100.121.89.84",
-             f"grep -E '✅ Done — posted [1-9]' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -5 || true"],
+             f"cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{{}}'"],
             capture_output=True, text=True, timeout=8
         )
-        if reply_log_r.returncode == 0 and reply_log_r.stdout.strip():
-            x_log_runs["X Strategic Replies"] = f"{today_str}T{reply_log_r.stdout.strip()[:8]}"
+        if reply_state_r.returncode == 0:
+            jain_rs = json.loads(reply_state_r.stdout.strip() or '{}')
+            for r in jain_rs.get('replies', []):
+                posted = r.get('posted_at', '')
+                if posted[:10] == today_str:
+                    try:
+                        rh_utc = int(posted[11:13])
+                        rh_et = (rh_utc - 4) % 24
+                        _jain_replies_today.append(rh_et)
+                    except Exception:
+                        pass
+            if _jain_replies_today:
+                x_log_runs["X Strategic Replies"] = f"{today_str}T{_jain_replies_today[-1]:02d}:00:00"
     except Exception:
         pass
+    # Store for multiRun slot logic
+    fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
 
     def parse_daily_hour(schedule_str: str):
         """Extract scheduled ET hour from a 'Daily H:MM AM/PM ET' string. Returns int or None."""
@@ -1107,17 +1134,60 @@ def fetch_crons() -> List[Dict[str, Any]]:
             row['lastRun'] = last_run
 
         if target.get('multiRun'):
-            runs = target['multiRun']['runs']
-            for run in runs:
-                t_str = run['time']
-                try:
-                    t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
-                        year=now_et.year, month=now_et.month, day=now_et.day,
-                        tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
-                    )
-                    run['done'] = now_et >= t
-                except Exception:
-                    run['done'] = False
+            runs = list(target['multiRun']['runs'])
+
+            # For X Strategic Replies: mark slots done based on actual replies posted today
+            if target['name'] == 'X Strategic Replies':
+                # Collect reply timestamps from both machines
+                reply_hours_today: list[int] = []
+                for rs_path in [
+                    ROOT.parent / 'data' / 'x_reply_state.json',
+                ]:
+                    if rs_path.exists():
+                        try:
+                            rs_data = json.loads(rs_path.read_text())
+                            for r in rs_data.get('replies', []):
+                                posted = r.get('posted_at', '')
+                                if posted[:10] == today_str:
+                                    try:
+                                        rh = int(posted[11:13])  # UTC hour
+                                        # Convert UTC → ET (UTC-4 in EDT)
+                                        rh_et = (rh - 4) % 24
+                                        reply_hours_today.append(rh_et)
+                                    except Exception:
+                                        pass
+                        except Exception:
+                            pass
+                # Also try J.A.I.N reply state (already fetched above if available)
+                # We stored it in jain_x_reply_state if present
+                for r in getattr(fetch_crons, '_jain_replies_today', []):
+                    reply_hours_today.append(r)
+
+                # Slot schedule hours (ET)
+                slot_hours = [9, 11, 13, 15, 17, 19, 21, 23]
+                replies_done = sorted(reply_hours_today)
+
+                # Greedily assign each reply to the earliest slot it could cover
+                assigned = [False] * len(slot_hours)
+                for rh in replies_done:
+                    for i, sh in enumerate(slot_hours):
+                        if not assigned[i] and rh >= sh:
+                            assigned[i] = True
+                            break
+
+                for i, run in enumerate(runs):
+                    run['done'] = assigned[i] if i < len(assigned) else False
+            else:
+                for run in runs:
+                    t_str = run['time']
+                    try:
+                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                            year=now_et.year, month=now_et.month, day=now_et.day,
+                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                        )
+                        run['done'] = now_et >= t
+                    except Exception:
+                        run['done'] = False
             row['multiRun'] = {'runs': runs}
         rows.append(row)
     return rows
