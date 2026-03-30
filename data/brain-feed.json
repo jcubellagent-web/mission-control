@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T02:51:15Z",
+  "messageReceived": "2026-03-30T02:51:19Z",
   "objective": "Tighten breaking news filter",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Transcribed",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "whisper"
     },
     {
-      "label": "Transcribing",
+      "label": "Reading current scanner",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-03-30T02:51:15Z",
-  "checkedAt": "2026-03-30T02:51:15Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-30T02:51:19Z",
+  "checkedAt": "2026-03-30T02:51:19Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
