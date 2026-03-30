@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:17:23Z",
-  "objective": "Generate image of message routing and agent/model selection workflow",
+  "messageReceived": "2026-03-30T03:22:13Z",
+  "objective": "Processing request \u00b7 Determining objective",
   "status": "active",
   "steps": [
     {
-      "label": "Image generated",
+      "label": "Received",
       "status": "done",
-      "tool": "google/gemini-3.1-flash-image-preview"
+      "tool": "telegram"
     },
     {
-      "label": "Responding to Josh",
+      "label": "Parsing intent",
       "status": "active",
-      "tool": "telegram"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-30T03:17:23Z",
-  "checkedAt": "2026-03-30T03:17:23Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-30T03:22:13Z",
+  "checkedAt": "2026-03-30T03:22:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
