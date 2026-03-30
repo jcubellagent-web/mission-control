@@ -1130,111 +1130,109 @@
         body.phone-mode .card-remote {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            background: rgba(8, 10, 18, 0.98);
-            border-color: rgba(255,255,255,0.09);
+            gap: 10px;
+            background: rgba(16, 18, 28, 0.97);
+            border: 1px solid rgba(255,255,255,0.12);
             box-shadow:
-                0 1px 0 rgba(255,255,255,0.07) inset,
-                0 0 0 0.5px rgba(255,255,255,0.05) inset,
-                0 6px 32px rgba(0,0,0,0.6),
-                0 0 40px rgba(229,62,62,0.03);
+                0 1px 0 rgba(255,255,255,0.08) inset,
+                0 8px 32px rgba(0,0,0,0.5),
+                0 0 0 0.5px rgba(229,62,62,0.08);
         }
 
         .remote-btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 10px;
-            border-top: 1px solid rgba(255,255,255,0.04);
-            padding-top: 12px;
         }
 
         .remote-btn {
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: center;
-            gap: 9px;
-            padding: 24px 16px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.09);
-            background: rgba(255,255,255,0.04);
-            color: rgba(255,255,255,0.7);
-            font-size: 0.68rem;
-            font-weight: 700;
+            justify-content: flex-start;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            font-weight: 600;
             font-family: inherit;
             cursor: pointer;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            text-transform: none;
             transition: all 0.18s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
             width: 100%;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.1) inset,
-                0 2px 10px rgba(0,0,0,0.35);
-        }
-        .remote-btn:hover {
-            transform: scale(1.02);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.07) inset, 0 2px 8px rgba(0,0,0,0.3);
         }
         .remote-btn:active {
-            transform: scale(0.96);
-            filter: brightness(1.25);
+            transform: scale(0.97);
+            filter: brightness(1.2);
             transition-duration: 0.06s;
         }
         .remote-btn .btn-icon {
-            font-size: 2rem;
+            font-size: 1.4rem;
             line-height: 1;
             flex-shrink: 0;
+            width: 28px;
+            text-align: center;
+        }
+        .remote-btn-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
+        }
+        .remote-btn-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+        .remote-btn-sub {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            font-weight: 400;
+            letter-spacing: 0.02em;
         }
 
         .remote-btn.btn-refresh {
-            background: linear-gradient(145deg,
-                rgba(20,50,100,0.7) 0%,
-                rgba(10,25,55,0.9) 100%);
-            border-color: rgba(96,165,250,0.25);
+            background: linear-gradient(135deg, rgba(25,55,110,0.6) 0%, rgba(12,28,65,0.85) 100%);
+            border-color: rgba(96,165,250,0.3);
             color: #bfdbfe;
-            box-shadow:
-                0 1px 0 rgba(147,197,253,0.15) inset,
-                0 0 20px rgba(96,165,250,0.08) inset,
-                0 3px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 1px 0 rgba(147,197,253,0.12) inset, 0 0 18px rgba(96,165,250,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
         }
         .remote-btn.btn-refresh:active {
-            background: linear-gradient(145deg, rgba(35,70,130,0.85) 0%, rgba(18,40,90,0.95) 100%);
-            box-shadow:
-                0 1px 0 rgba(147,197,253,0.2) inset,
-                0 0 28px rgba(96,165,250,0.14) inset,
-                0 1px 6px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, rgba(40,80,150,0.8) 0%, rgba(20,45,100,0.95) 100%);
         }
 
         .remote-btn.btn-night {
-            background: linear-gradient(145deg,
-                rgba(90,15,15,0.6) 0%,
-                rgba(45,8,8,0.9) 100%);
-            border-color: rgba(239,68,68,0.25);
+            background: linear-gradient(135deg, rgba(100,18,18,0.55) 0%, rgba(50,8,8,0.85) 100%);
+            border-color: rgba(239,68,68,0.3);
             color: #fecaca;
-            box-shadow:
-                0 1px 0 rgba(252,165,165,0.15) inset,
-                0 0 20px rgba(220,38,38,0.07) inset,
-                0 3px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 1px 0 rgba(252,165,165,0.12) inset, 0 0 18px rgba(220,38,38,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
         }
         .remote-btn.btn-night:active {
-            background: linear-gradient(145deg, rgba(120,18,18,0.85) 0%, rgba(80,10,10,0.95) 100%);
-            box-shadow:
-                0 1px 0 rgba(252,165,165,0.2) inset,
-                0 0 28px rgba(220,38,38,0.14) inset,
-                0 1px 6px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, rgba(140,22,22,0.8) 0%, rgba(90,12,12,0.95) 100%);
+        }
+
+        .remote-btn.btn-x-dash {
+            background: linear-gradient(135deg, rgba(20,20,20,0.7) 0%, rgba(10,10,10,0.9) 100%);
+            border-color: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.75);
         }
 
         #remote-status {
-            font-size: 0.6rem;
-            color: rgba(255,255,255,0.18);
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.2);
             text-align: center;
-            min-height: 14px;
+            min-height: 12px;
             letter-spacing: 0.1em;
             transition: color 0.3s;
             font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
             text-transform: uppercase;
+            padding-top: 2px;
         }
         #remote-status.ok  { color: #34d399; }
         #remote-status.err { color: #f87171; }
@@ -2688,18 +2686,27 @@
                             <span class="icon">🖥</span>
                             <h2>Desktop Control</h2>
                         </div>
-                        <div class="remote-btn-row" style="grid-template-columns:1fr 1fr 1fr;">
+                        <div class="remote-btn-row">
                             <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
                                 <span class="btn-icon">↻</span>
-                                Refresh
+                                <span class="remote-btn-label">
+                                    <span class="remote-btn-title">Refresh Desktop</span>
+                                    <span class="remote-btn-sub">Reload dashboard data</span>
+                                </span>
                             </button>
                             <button class="remote-btn btn-night" onclick="remoteNightMode()">
                                 <span class="btn-icon">🌙</span>
-                                Night Mode
+                                <span class="remote-btn-label">
+                                    <span class="remote-btn-title">Night Mode</span>
+                                    <span class="remote-btn-sub">Toggle dim overlay</span>
+                                </span>
                             </button>
                             <button class="remote-btn btn-x-dash" id="x-progress-btn-mobile">
                                 <span class="btn-icon" style="font-family:serif;">𝕏</span>
-                                Progress
+                                <span class="remote-btn-label">
+                                    <span class="remote-btn-title">X Progress</span>
+                                    <span class="remote-btn-sub">View growth stats</span>
+                                </span>
                             </button>
                         </div>
                         <div id="remote-status"></div>
