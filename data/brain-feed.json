@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:10:27Z",
-  "objective": "Processing request \u00b7 Determining objective",
+  "messageReceived": "2026-03-30T03:10:32Z",
+  "objective": "Objective confirmed: Provide model information and summarize routing rules",
   "status": "active",
   "steps": [
     {
-      "label": "Received",
+      "label": "Parsed",
       "status": "done",
-      "tool": "telegram"
+      "tool": "openclaw"
     },
     {
-      "label": "Parsing intent",
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T03:10:27Z",
-  "checkedAt": "2026-03-30T03:10:27Z",
+  "updatedAt": "2026-03-30T03:10:32Z",
+  "checkedAt": "2026-03-30T03:10:32Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
