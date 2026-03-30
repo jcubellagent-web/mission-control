@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-30T03:15:36Z",
-  "objective": "Processing request \u00b7 Determining objective",
+  "messageReceived": "2026-03-30T03:15:41Z",
+  "objective": "Objective confirmed: Visualize decision tree for message routing and agent/model selection",
   "status": "active",
   "steps": [
     {
-      "label": "Transcribed",
+      "label": "Parsed",
       "status": "done",
-      "tool": "whisper"
+      "tool": "openclaw"
     },
     {
-      "label": "Parsing intent",
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-30T03:15:36Z",
-  "checkedAt": "2026-03-30T03:15:36Z",
+  "updatedAt": "2026-03-30T03:15:41Z",
+  "checkedAt": "2026-03-30T03:15:41Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
