@@ -5731,102 +5731,69 @@
 
                 <!-- Header -->
                 <div class="es-header">
-                    <span class="es-logo">🛏️</span>
-                    <div class="es-title-block">
-                        <h2>Eight Sleep</h2>
-                        <span class="es-subtitle">Pod Temperature Control</span>
-                    </div>
+                    <span class="es-logo-text">Eight Sleep</span>
                     <span id="es-updated" class="es-updated">–</span>
                 </div>
 
-                <!-- Sleep Stats -->
+                <!-- Main Temp Card -->
+                <div class="es-temp-card">
+                    <!-- Tabs: Now / Night / Dawn -->
+                    <div class="es-tabs">
+                        <button class="es-tab es-tab-active" data-tab="now" onclick="window.esSelectTab('now')">
+                            Now<span class="es-tab-sub" id="es-tab-sub-now">–°F</span>
+                        </button>
+                        <button class="es-tab" data-tab="night" onclick="window.esSelectTab('night')">
+                            Night<span class="es-tab-sub" id="es-tab-sub-night">–°F</span>
+                        </button>
+                        <button class="es-tab" data-tab="dawn" onclick="window.esSelectTab('dawn')">
+                            Dawn<span class="es-tab-sub" id="es-tab-sub-dawn">–°F</span>
+                        </button>
+                    </div>
+
+                    <!-- Big °F display + −/+ buttons -->
+                    <div class="es-temp-display">
+                        <button class="es-pm-btn" onclick="window.esAdjust(-5)">−</button>
+                        <div class="es-temp-big" id="es-temp-big">–°F</div>
+                        <button class="es-pm-btn" onclick="window.esAdjust(+5)">+</button>
+                    </div>
+
+                    <div class="es-card-divider"></div>
+
+                    <!-- Hot Flash Mode row -->
+                    <div class="es-hot-flash-row">
+                        <div class="es-hot-flash-label">HOT FLASH MODE</div>
+                        <div class="es-hot-flash-controls">
+                            <span class="es-hot-flash-duration">15 min</span>
+                            <button class="es-icon-btn">▶</button>
+                            <button class="es-icon-btn">⋮</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alarms -->
+                <div class="es-section-label">ALARMS</div>
+                <div class="es-alarm-card">
+                    <div class="es-alarm-info">
+                        <div class="es-alarm-recur" id="es-alarm-recur">EVERY DAY</div>
+                        <div class="es-alarm-time" id="es-alarm-time">7:00 AM</div>
+                    </div>
+                    <label class="es-toggle">
+                        <input type="checkbox" id="es-alarm-toggle" checked>
+                        <span class="es-toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Sleep Stats pills -->
                 <div class="es-section-label">LAST NIGHT</div>
-                <div class="es-stats-row">
-                    <div class="es-stat">
-                        <div class="es-stat-val" id="es-total-hours">–</div>
-                        <div class="es-stat-label">Hours</div>
-                    </div>
-                    <div class="es-stat">
-                        <div class="es-stat-val" id="es-deep-pct">–</div>
-                        <div class="es-stat-label">Deep %</div>
-                    </div>
-                    <div class="es-stat">
-                        <div class="es-stat-val" id="es-rem-pct">–</div>
-                        <div class="es-stat-label">REM %</div>
-                    </div>
-                    <div class="es-stat">
-                        <div class="es-stat-val" id="es-tnt">–</div>
-                        <div class="es-stat-label">Turns</div>
-                    </div>
-                    <div class="es-stat">
-                        <div class="es-stat-val" id="es-snore">–</div>
-                        <div class="es-stat-label">Snore %</div>
-                    </div>
+                <div class="es-pills-row">
+                    <div class="es-pill"><span class="es-pill-val" id="es-total-hours">–</span><span class="es-pill-lbl">hrs</span></div>
+                    <div class="es-pill"><span class="es-pill-val" id="es-deep-pct">–</span><span class="es-pill-lbl">deep</span></div>
+                    <div class="es-pill"><span class="es-pill-val" id="es-rem-pct">–</span><span class="es-pill-lbl">rem</span></div>
+                    <div class="es-pill"><span class="es-pill-val" id="es-tnt">–</span><span class="es-pill-lbl">turns</span></div>
+                    <div class="es-pill"><span class="es-pill-val" id="es-snore">–</span><span class="es-pill-lbl">snore</span></div>
                 </div>
 
-                <!-- 7-day trend bars -->
-                <div class="es-section-label">7-DAY TREND</div>
-                <div class="es-trend-bars" id="es-trend-bars">
-                    <!-- injected by JS -->
-                </div>
-
-                <!-- Current Status -->
-                <div class="es-section-label">CURRENT STATUS</div>
-                <div class="es-status-row">
-                    <div class="es-side-block">
-                        <div class="es-side-label">Left Side</div>
-                        <div class="es-temp-gauge" id="es-left-gauge">
-                            <div class="es-temp-bar-wrap">
-                                <div class="es-temp-bar" id="es-left-bar"></div>
-                            </div>
-                            <div class="es-temp-val" id="es-left-val">–</div>
-                        </div>
-                        <div class="es-heating-dot" id="es-left-active"></div>
-                    </div>
-                    <div class="es-cool-warm-label">
-                        <span style="color:#38bdf8">❄ Cool</span>
-                        <span style="opacity:0.4">←→</span>
-                        <span style="color:#f97316">Warm 🔥</span>
-                    </div>
-                    <div class="es-side-block">
-                        <div class="es-side-label">Right Side</div>
-                        <div class="es-temp-gauge" id="es-right-gauge">
-                            <div class="es-temp-bar-wrap">
-                                <div class="es-temp-bar" id="es-right-bar"></div>
-                            </div>
-                            <div class="es-temp-val" id="es-right-val">–</div>
-                        </div>
-                        <div class="es-heating-dot" id="es-right-active"></div>
-                    </div>
-                </div>
-
-                <!-- Schedule Info -->
-                <div id="es-schedule-block" class="es-schedule-block" style="display:none;">
-                    <div class="es-section-label">SCHEDULE</div>
-                    <div id="es-schedule-info" class="es-schedule-info"></div>
-                </div>
-
-                <!-- Controls -->
-                <div class="es-section-label">CONTROLS</div>
-                <div class="es-controls">
-                    <div class="es-ctrl-row">
-                        <span class="es-ctrl-label">Left Side</span>
-                        <input type="range" id="es-left-slider" min="-100" max="100" value="0" class="es-slider">
-                        <span class="es-slider-val" id="es-left-slider-val">0</span>
-                        <button class="es-btn es-btn-set" onclick="window.esSetTemp('left')">Set Left</button>
-                    </div>
-                    <div class="es-ctrl-row">
-                        <span class="es-ctrl-label">Right Side</span>
-                        <input type="range" id="es-right-slider" min="-100" max="100" value="0" class="es-slider">
-                        <span class="es-slider-val" id="es-right-slider-val">0</span>
-                        <button class="es-btn es-btn-set" onclick="window.esSetTemp('right')">Set Right</button>
-                    </div>
-                    <div class="es-ctrl-btn-row">
-                        <button class="es-btn es-btn-sync" onclick="window.esSyncBoth()">⇄ Sync Both</button>
-                        <button class="es-btn es-btn-off" onclick="window.esTurnOff()">⬛ Turn Off</button>
-                    </div>
-                    <div id="es-ctrl-status" class="es-ctrl-status"></div>
-                </div>
+                <div id="es-ctrl-status" class="es-ctrl-status"></div>
 
             </div>
         </div>
@@ -5845,12 +5812,11 @@
 
     #es-modal {
         position: relative;
-        width: min(680px, 96vw);
-        max-height: 88vh;
-        background: linear-gradient(145deg, rgba(6,18,28,0.98) 0%, rgba(4,12,22,0.98) 100%);
-        border: 1px solid rgba(0,180,216,0.28);
-        border-radius: 18px;
-        box-shadow: 0 0 60px rgba(0,180,216,0.15), 0 24px 80px rgba(0,0,0,0.7);
+        width: min(390px, 96vw);
+        max-height: 90vh;
+        background: #111;
+        border-radius: 20px;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.85);
         overflow: hidden;
         animation: xSlideUp 0.26s cubic-bezier(0.34,1.56,0.64,1);
     }
@@ -5858,146 +5824,150 @@
 
     #es-modal-inner {
         overflow-y: auto;
-        max-height: 88vh;
-        padding: 28px 28px 24px;
+        max-height: 90vh;
+        padding: 20px 16px 28px;
         scrollbar-width: thin;
-        scrollbar-color: rgba(0,180,216,0.3) transparent;
+        scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
     #es-modal-close {
         position: absolute; top: 14px; right: 16px; z-index: 2;
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-        color: rgba(255,255,255,0.6); border-radius: 50%; width: 28px; height: 28px;
+        background: rgba(255,255,255,0.1); border: none;
+        color: rgba(255,255,255,0.7); border-radius: 50%; width: 28px; height: 28px;
         cursor: pointer; font-size: 12px; display:flex; align-items:center; justify-content:center;
         transition: all 0.15s;
     }
-    #es-modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    #es-modal-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
-    /* ── ES Header ──────────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────────── */
     .es-header {
-        display: flex; align-items: center; gap: 14px;
-        margin-bottom: 22px; padding-bottom: 18px;
-        border-bottom: 1px solid rgba(0,180,216,0.18);
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px; padding-right: 36px;
     }
-    .es-logo { font-size: 2rem; line-height: 1; }
-    .es-title-block h2 { margin: 0; font-size: 1.3rem; font-weight: 700; color: #e2f8ff; }
-    .es-subtitle { font-size: 0.78rem; color: rgba(0,180,216,0.75); }
-    .es-updated { margin-left: auto; font-size: 0.72rem; color: rgba(255,255,255,0.35); white-space: nowrap; }
+    .es-logo-text {
+        font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.9);
+        letter-spacing: -0.02em;
+    }
+    .es-updated { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
 
     /* ── Section label ──────────────────────────────────────────── */
     .es-section-label {
         font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
-        color: rgba(0,180,216,0.6); margin: 18px 0 10px;
+        color: rgba(255,255,255,0.35); margin: 16px 0 8px;
     }
 
-    /* ── Sleep Stats ────────────────────────────────────────────── */
-    .es-stats-row {
-        display: flex; gap: 10px; flex-wrap: wrap;
-    }
-    .es-stat {
-        flex: 1 1 60px;
-        background: rgba(0,180,216,0.06);
-        border: 1px solid rgba(0,180,216,0.15);
-        border-radius: 10px; padding: 10px 8px; text-align: center;
-    }
-    .es-stat-val { font-size: 1.25rem; font-weight: 700; color: #a5f3fc; }
-    .es-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
-
-    /* ── 7-day trend bars ───────────────────────────────────────── */
-    .es-trend-bars {
-        display: flex; gap: 5px; align-items: flex-end; height: 48px;
-    }
-    .es-trend-day {
-        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    }
-    .es-trend-bar-outer {
-        width: 100%; background: rgba(255,255,255,0.06); border-radius: 3px;
-        overflow: hidden; display: flex; align-items: flex-end; height: 36px;
-    }
-    .es-trend-bar-fill {
-        width: 100%; background: linear-gradient(to top, #00b4d8, #90e0ef);
-        border-radius: 3px; transition: height 0.4s ease;
-    }
-    .es-trend-day-label { font-size: 0.58rem; color: rgba(255,255,255,0.3); }
-
-    /* ── Current Status ─────────────────────────────────────────── */
-    .es-status-row {
-        display: flex; align-items: center; gap: 10px;
-    }
-    .es-side-block { flex: 1; }
-    .es-side-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; text-align: center; }
-    .es-temp-gauge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .es-temp-bar-wrap {
-        width: 100%; height: 8px; border-radius: 4px;
-        background: linear-gradient(to right, #0ea5e9, #334155, #f97316);
-        position: relative; overflow: visible;
-    }
-    .es-temp-bar {
-        position: absolute; top: -4px;
-        width: 16px; height: 16px; border-radius: 50%;
-        background: #fff; border: 2px solid #00b4d8;
-        transform: translateX(-50%);
-        transition: left 0.4s ease;
-    }
-    .es-temp-val { font-size: 1rem; font-weight: 700; color: #a5f3fc; }
-    .es-heating-dot {
-        font-size: 0.68rem; text-align: center; margin-top: 4px;
-        color: rgba(255,255,255,0.4);
-    }
-    .es-cool-warm-label {
-        display: flex; flex-direction: column; align-items: center; gap: 3px;
-        font-size: 0.65rem; color: rgba(255,255,255,0.5); white-space: nowrap;
+    /* ── Main Temp Card ──────────────────────────────────────────── */
+    .es-temp-card {
+        background: radial-gradient(ellipse at 50% 120%, rgba(30,80,200,0.6) 0%, rgba(10,20,60,0.8) 50%, #1a1a2e 100%);
+        border-radius: 20px;
+        padding: 20px 20px 16px;
+        margin-bottom: 12px;
     }
 
-    /* ── Schedule ───────────────────────────────────────────────── */
-    .es-schedule-block { margin-top: 4px; }
-    .es-schedule-info {
-        font-size: 0.8rem; color: rgba(255,255,255,0.6);
-        background: rgba(0,180,216,0.06);
-        border: 1px solid rgba(0,180,216,0.15);
-        border-radius: 8px; padding: 8px 12px;
+    /* ── Tabs ────────────────────────────────────────────────────── */
+    .es-tabs {
+        display: flex; gap: 28px; margin-bottom: 20px;
+    }
+    .es-tab {
+        background: none; border: none; border-bottom: 2px solid transparent;
+        color: rgba(255,255,255,0.4); font-size: 0.9rem; font-weight: 500;
+        padding: 2px 0 8px; cursor: pointer; transition: all 0.15s;
+        display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+        line-height: 1.2;
+    }
+    .es-tab.es-tab-active { color: #fff; border-bottom-color: #fff; }
+    .es-tab-sub {
+        display: block; font-size: 0.68rem; color: rgba(255,255,255,0.35);
+        font-weight: 400; letter-spacing: 0;
+    }
+    .es-tab.es-tab-active .es-tab-sub { color: rgba(255,255,255,0.55); }
+
+    /* ── Big Temp Display ────────────────────────────────────────── */
+    .es-temp-display {
+        display: flex; align-items: center; justify-content: center; gap: 16px;
+        margin: 4px 0 24px;
+    }
+    .es-temp-big {
+        font-size: 56px; font-weight: 300; letter-spacing: -2px;
+        color: #fff; min-width: 140px; text-align: center;
+    }
+    .es-pm-btn {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: rgba(255,255,255,0.12); border: none;
+        font-size: 24px; color: #fff; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s; flex-shrink: 0;
+    }
+    .es-pm-btn:hover { background: rgba(255,255,255,0.22); }
+    .es-pm-btn:active { background: rgba(255,255,255,0.07); }
+
+    /* ── Card Divider ────────────────────────────────────────────── */
+    .es-card-divider {
+        height: 1px; background: rgba(255,255,255,0.1); margin: 0 0 14px;
     }
 
-    /* ── Controls ───────────────────────────────────────────────── */
-    .es-controls { display: flex; flex-direction: column; gap: 10px; }
-    .es-ctrl-row {
-        display: flex; align-items: center; gap: 8px;
+    /* ── Hot Flash Mode ──────────────────────────────────────────── */
+    .es-hot-flash-row {
+        display: flex; align-items: center; justify-content: space-between;
     }
-    .es-ctrl-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); width: 64px; flex-shrink: 0; }
-    .es-slider {
-        flex: 1; -webkit-appearance: none; appearance: none;
-        height: 6px; border-radius: 3px; outline: none; cursor: pointer;
-        background: linear-gradient(to right, #0ea5e9, #334155, #f97316);
+    .es-hot-flash-label {
+        font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.45);
     }
-    .es-slider::-webkit-slider-thumb {
-        -webkit-appearance: none; appearance: none;
-        width: 16px; height: 16px; border-radius: 50%;
-        background: #fff; border: 2px solid #00b4d8; cursor: pointer;
+    .es-hot-flash-controls { display: flex; align-items: center; gap: 8px; }
+    .es-hot-flash-duration { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+    .es-icon-btn {
+        background: rgba(255,255,255,0.08); border: none;
+        color: rgba(255,255,255,0.55); width: 30px; height: 30px; border-radius: 50%;
+        cursor: pointer; font-size: 0.75rem;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
     }
-    .es-slider-val {
-        font-size: 0.72rem; color: #a5f3fc; width: 36px; text-align: right; flex-shrink: 0;
+    .es-icon-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── Alarm Card ──────────────────────────────────────────────── */
+    .es-alarm-card {
+        background: #1c1c1e; border-radius: 14px;
+        padding: 14px 16px;
+        display: flex; align-items: center; justify-content: space-between;
     }
-    .es-btn {
-        border: none; border-radius: 7px; padding: 6px 12px;
-        font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    .es-alarm-recur {
+        font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.4); margin-bottom: 4px;
     }
-    .es-btn-set {
-        background: rgba(0,180,216,0.18); border: 1px solid rgba(0,180,216,0.35);
-        color: #a5f3fc;
+    .es-alarm-time {
+        font-size: 2rem; font-weight: 300; color: #fff; letter-spacing: -1px; line-height: 1;
     }
-    .es-btn-set:hover { background: rgba(0,180,216,0.32); }
-    .es-ctrl-btn-row { display: flex; gap: 8px; margin-top: 4px; }
-    .es-btn-sync {
-        flex: 1; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
-        color: #c4b5fd;
+
+    /* ── Toggle switch ───────────────────────────────────────────── */
+    .es-toggle { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
+    .es-toggle input { opacity: 0; width: 0; height: 0; }
+    .es-toggle-track {
+        position: absolute; inset: 0; background: #3a3a3c; border-radius: 14px;
+        cursor: pointer; transition: background 0.2s;
     }
-    .es-btn-sync:hover { background: rgba(99,102,241,0.28); }
-    .es-btn-off {
-        flex: 1; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
-        color: #fca5a5;
+    .es-toggle-track::before {
+        content: ''; position: absolute;
+        width: 24px; height: 24px; border-radius: 50%;
+        background: #fff; top: 2px; left: 2px;
+        transition: transform 0.2s;
     }
-    .es-btn-off:hover { background: rgba(239,68,68,0.24); }
+    .es-toggle input:checked + .es-toggle-track { background: #0a84ff; }
+    .es-toggle input:checked + .es-toggle-track::before { transform: translateX(22px); }
+
+    /* ── Sleep stat pills ────────────────────────────────────────── */
+    .es-pills-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .es-pill {
+        flex: 1 1 52px; background: #1c1c1e; border-radius: 10px;
+        padding: 8px 6px; text-align: center;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .es-pill-val { font-size: 1.1rem; font-weight: 600; color: #fff; }
+    .es-pill-lbl { font-size: 0.6rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ── Control status ──────────────────────────────────────────── */
     .es-ctrl-status {
-        font-size: 0.72rem; color: rgba(0,180,216,0.8); min-height: 18px; text-align: center;
+        font-size: 0.72rem; color: rgba(255,255,255,0.45); min-height: 18px;
+        text-align: center; margin-top: 12px;
     }
     </style>
 
@@ -6523,112 +6493,127 @@
     // EIGHT SLEEP DASHBOARD
     // ═══════════════════════════════════════════════════════════════════
 
-    function _esTempLabel(level) {
-        if (level <= -70) return 'Max Cool';
-        if (level <= -30) return 'Cool';
-        if (level < 0)    return 'Slightly Cool';
-        if (level === 0)  return 'Neutral';
-        if (level < 30)   return 'Slightly Warm';
-        if (level < 70)   return 'Warm';
-        return 'Max Warm';
+    window._esCurrentLevel = 0;       // raw -100..+100, tracks "now" level
+    window._esTargetLevels = [0,0,0]; // [now, night, dawn]
+    window._esActiveTab = 'now';
+
+    function _esLevelToF(level) {
+        return Math.round(55 + ((level + 100) / 200) * 55);
     }
 
-    function _esTempPct(level) {
-        // -100..+100 → 0..100%
-        return Math.round((level + 100) / 200 * 100);
+    function _esRenderTab() {
+        const idx = {now:0, night:1, dawn:2}[window._esActiveTab] || 0;
+        const level = window._esTargetLevels[idx] !== undefined ? window._esTargetLevels[idx] : 0;
+        const tempEl = document.getElementById('es-temp-big');
+        if (tempEl) tempEl.textContent = _esLevelToF(level) + '°F';
     }
 
-    function renderEightSleepDashboard(data) {
-        if (!data) return;
-        const status = data.status || {};
-        const trends = data.trends || {};
+    window.esSelectTab = function(tab) {
+        window._esActiveTab = tab;
+        document.querySelectorAll('.es-tab').forEach(btn => {
+            btn.classList.toggle('es-tab-active', btn.dataset.tab === tab);
+        });
+        _esRenderTab();
+    };
+
+    window.esAdjust = async function(delta) {
+        if (window._esActiveTab !== 'now') return; // only "Now" tab is interactive
+        const newLevel = Math.max(-100, Math.min(100, window._esCurrentLevel + delta));
+        window._esCurrentLevel = newLevel;
+        window._esTargetLevels[0] = newLevel;
+        // Optimistically update display
+        const sub = document.getElementById('es-tab-sub-now');
+        if (sub) sub.textContent = _esLevelToF(newLevel) + '°F';
+        _esRenderTab();
+        const statusEl = document.getElementById('es-ctrl-status');
+        if (statusEl) statusEl.textContent = 'Sending…';
+        try {
+            const r = await fetch('http://localhost:8765/eightsleep/both?level=' + newLevel, {method: 'PUT'});
+            const json = await r.json();
+            if (statusEl) statusEl.textContent = json.ok ? '✓ Done' : ('Error: ' + (json.error || 'unknown'));
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+        } catch(e) {
+            if (statusEl) statusEl.textContent = '⚠ Server offline';
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+        }
+    };
+
+    function renderEightSleepDashboard(data, liveStatus) {
+        const status = (data && data.status) || {};
+        const trends = (data && data.trends) || {};
         const lastNight = trends.lastNight || {};
-        const week = trends.week || [];
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
         // Updated time
         const upd = document.getElementById('es-updated');
-        if (upd && data.updatedAt) {
+        if (upd && data && data.updatedAt) {
             try {
                 const d = new Date(data.updatedAt);
                 upd.textContent = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
             } catch(e) { upd.textContent = data.updatedAt; }
         }
 
-        // Last night stats
-        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-        setEl('es-total-hours', lastNight.totalHours != null ? lastNight.totalHours + 'h' : '–');
-        setEl('es-deep-pct', lastNight.deepPct != null ? lastNight.deepPct + '%' : '–');
-        setEl('es-rem-pct', lastNight.remPct != null ? lastNight.remPct + '%' : '–');
-        setEl('es-tnt', lastNight.tnt != null ? lastNight.tnt : '–');
-        setEl('es-snore', lastNight.snorePercent != null ? lastNight.snorePercent + '%' : '–');
-
-        // 7-day trend bars
-        const barsEl = document.getElementById('es-trend-bars');
-        if (barsEl && week.length) {
-            const maxHours = Math.max(...week.map(d => d.totalHours || 0), 0.1);
-            barsEl.innerHTML = week.map(d => {
-                const pct = maxHours > 0 ? Math.round((d.totalHours || 0) / maxHours * 100) : 0;
-                const label = d.date ? new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'narrow'}) : '';
-                return `<div class="es-trend-day">
-                    <div class="es-trend-bar-outer"><div class="es-trend-bar-fill" style="height:${pct}%"></div></div>
-                    <div class="es-trend-day-label">${label}</div>
-                </div>`;
-            }).join('');
+        // Target levels — prefer live status leftKelvin.targetLevels
+        const ls = liveStatus || {};
+        const kelvin = ls.leftKelvin || ls.result && ls.result.leftKelvin;
+        if (kelvin && Array.isArray(kelvin.targetLevels) && kelvin.targetLevels.length >= 3) {
+            window._esTargetLevels = kelvin.targetLevels.slice(0, 3);
+        } else {
+            const lvl = typeof status.leftHeatingLevel === 'number' ? status.leftHeatingLevel : 0;
+            window._esTargetLevels = [lvl, lvl, lvl];
         }
+        window._esCurrentLevel = window._esTargetLevels[0];
 
-        // Temp gauges
-        const leftLevel = typeof status.leftHeatingLevel === 'number' ? status.leftHeatingLevel : 0;
-        const rightLevel = typeof status.rightHeatingLevel === 'number' ? status.rightHeatingLevel : 0;
-        const leftPct = _esTempPct(leftLevel);
-        const rightPct = _esTempPct(rightLevel);
+        // Update tab sub-labels
+        ['now','night','dawn'].forEach((tab, i) => {
+            const sub = document.getElementById('es-tab-sub-' + tab);
+            if (sub) sub.textContent = _esLevelToF(window._esTargetLevels[i]) + '°F';
+        });
+        _esRenderTab();
 
-        const leftBar = document.getElementById('es-left-bar');
-        if (leftBar) setTimeout(() => leftBar.style.left = leftPct + '%', 100);
-        setEl('es-left-val', leftLevel + ' (' + _esTempLabel(leftLevel) + ')');
+        // Sleep stats pills
+        setEl('es-total-hours', lastNight.totalHours != null ? lastNight.totalHours + 'h' : '–');
+        setEl('es-deep-pct',    lastNight.deepPct      != null ? lastNight.deepPct + '%'  : '–');
+        setEl('es-rem-pct',     lastNight.remPct       != null ? lastNight.remPct + '%'   : '–');
+        setEl('es-tnt',         lastNight.tnt          != null ? lastNight.tnt             : '–');
+        setEl('es-snore',       lastNight.snorePercent != null ? lastNight.snorePercent + '%' : '–');
 
-        const rightBar = document.getElementById('es-right-bar');
-        if (rightBar) setTimeout(() => rightBar.style.left = rightPct + '%', 100);
-        setEl('es-right-val', rightLevel + ' (' + _esTempLabel(rightLevel) + ')');
-
-        // Active dots
-        const leftActive = document.getElementById('es-left-active');
-        if (leftActive) leftActive.textContent = status.leftNowHeating ? '🟢 Active' : '⚫ Standby';
-        const rightActive = document.getElementById('es-right-active');
-        if (rightActive) rightActive.textContent = status.rightNowHeating ? '🟢 Active' : '⚫ Standby';
-
-        // Sliders — sync to current levels
-        const leftSlider = document.getElementById('es-left-slider');
-        const rightSlider = document.getElementById('es-right-slider');
-        if (leftSlider) { leftSlider.value = leftLevel; setEl('es-left-slider-val', leftLevel + ' (' + _esTempLabel(leftLevel) + ')'); }
-        if (rightSlider) { rightSlider.value = rightLevel; setEl('es-right-slider-val', rightLevel + ' (' + _esTempLabel(rightLevel) + ')'); }
-
-        // Schedule
-        const schedBlock = document.getElementById('es-schedule-block');
-        const schedInfo = document.getElementById('es-schedule-info');
+        // Alarm — derive from schedule
         const sched = status.leftSchedule || status.rightSchedule;
-        if (sched && schedBlock && schedInfo) {
-            schedBlock.style.display = 'block';
-            const days = (sched.weekdays || []).join(', ') || 'every day';
-            const autoTag = status.currentActivity === 'schedule' ? ' <span style="color:#00b4d8;font-weight:700">● Auto Active</span>' : '';
-            schedInfo.innerHTML = `⏰ Starts ${sched.startTime || '–'} &nbsp;·&nbsp; ${days}${autoTag}`;
-        } else if (schedBlock) {
-            schedBlock.style.display = 'none';
+        if (sched && sched.startTime) {
+            const parts = sched.startTime.split(':').map(Number);
+            const h = parts[0], m = parts[1] || 0;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            setEl('es-alarm-time', h12 + ':' + String(m).padStart(2,'0') + ' ' + ampm);
+            const days = sched.weekdays && sched.weekdays.length ? sched.weekdays.join(', ').toUpperCase() : 'EVERY DAY';
+            setEl('es-alarm-recur', days);
+            const tog = document.getElementById('es-alarm-toggle');
+            if (tog) tog.checked = !!sched.enabled;
         }
     }
 
     async function fetchEightSleepData() {
+        let data = null, liveStatus = null;
         try {
             const r = await fetch('data/eight-sleep-data.json?t=' + Date.now());
-            if (!r.ok) return;
-            const data = await r.json();
-            renderEightSleepDashboard(data);
-        } catch(e) { /* silent */ }
+            if (r.ok) data = await r.json();
+        } catch(e) {}
+        try {
+            const r2 = await fetch('http://localhost:8765/eightsleep/status');
+            if (r2.ok) liveStatus = await r2.json();
+        } catch(e) {}
+        renderEightSleepDashboard(data, liveStatus);
     }
 
     window.openEightSleepDashboard = async function() {
         const overlay = document.getElementById('es-modal-overlay');
         overlay.classList.remove('closing');
         overlay.style.display = 'flex';
+        window._esActiveTab = 'now';
+        document.querySelectorAll('.es-tab').forEach(btn => {
+            btn.classList.toggle('es-tab-active', btn.dataset.tab === 'now');
+        });
         await fetchEightSleepData();
     };
 
@@ -6638,75 +6623,14 @@
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
 
-    // Slider live labels
     document.addEventListener('DOMContentLoaded', function() {
         const esClose = document.getElementById('es-modal-close');
         if (esClose) esClose.addEventListener('click', window.closeEightSleepDashboard);
-
         const esOverlay = document.getElementById('es-modal-overlay');
         if (esOverlay) esOverlay.addEventListener('click', function(e) {
             if (e.target === esOverlay) window.closeEightSleepDashboard();
         });
-
-        const leftSlider = document.getElementById('es-left-slider');
-        if (leftSlider) leftSlider.addEventListener('input', function() {
-            const v = parseInt(this.value);
-            const el = document.getElementById('es-left-slider-val');
-            if (el) el.textContent = v + ' (' + _esTempLabel(v) + ')';
-        });
-        const rightSlider = document.getElementById('es-right-slider');
-        if (rightSlider) rightSlider.addEventListener('input', function() {
-            const v = parseInt(this.value);
-            const el = document.getElementById('es-right-slider-val');
-            if (el) el.textContent = v + ' (' + _esTempLabel(v) + ')';
-        });
     });
-
-    async function _esApiCall(method, path) {
-        const statusEl = document.getElementById('es-ctrl-status');
-        if (statusEl) statusEl.textContent = 'Sending…';
-        try {
-            const r = await fetch('http://localhost:8765' + path, {method});
-            const json = await r.json();
-            if (statusEl) statusEl.textContent = json.ok ? '✓ Done' : ('Error: ' + (json.error || 'unknown'));
-            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
-            return json;
-        } catch(e) {
-            if (statusEl) statusEl.textContent = '⚠ Server offline (start brain_feed_server.py)';
-            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 5000);
-        }
-    }
-
-    window.esSetTemp = async function(side) {
-        const slider = document.getElementById(`es-${side}-slider`);
-        if (!slider) return;
-        const level = parseInt(slider.value);
-        await _esApiCall('PUT', `/eightsleep/${side}?level=${level}`);
-    };
-
-    window.esSyncBoth = async function() {
-        const leftSlider = document.getElementById('es-left-slider');
-        const level = leftSlider ? parseInt(leftSlider.value) : 0;
-        // Set right slider to match left
-        const rightSlider = document.getElementById('es-right-slider');
-        if (rightSlider) {
-            rightSlider.value = level;
-            const el = document.getElementById('es-right-slider-val');
-            if (el) el.textContent = level + ' (' + _esTempLabel(level) + ')';
-        }
-        await _esApiCall('PUT', `/eightsleep/both?level=${level}`);
-    };
-
-    window.esTurnOff = async function() {
-        await _esApiCall('POST', '/eightsleep/off');
-        // Update sliders to 0
-        ['left','right'].forEach(side => {
-            const s = document.getElementById(`es-${side}-slider`);
-            if (s) s.value = 0;
-            const v = document.getElementById(`es-${side}-slider-val`);
-            if (v) v.textContent = '0 (Neutral)';
-        });
-    };
     </script>
 
 </body>
