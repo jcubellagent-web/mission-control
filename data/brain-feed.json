@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T00:47:28Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-31T00:47:37Z",
+  "objective": "Objective confirmed: Investigate Sorare MLB cron jobs showing as skipped",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Parsed",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-31T00:47:28Z",
-  "checkedAt": "2026-03-31T00:47:28Z",
+  "updatedAt": "2026-03-31T00:47:37Z",
+  "checkedAt": "2026-03-31T00:47:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
