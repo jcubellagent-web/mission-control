@@ -1,6 +1,6 @@
 {
-  "session": 16.569245,
-  "daily": 2.807048,
+  "session": 13.7845,
+  "daily": 0.022303,
   "weekly": 24.051213,
   "monthly": 60.007633,
   "topModels": [
@@ -10,14 +10,14 @@
       "cost": 11.063430149999999
     },
     {
-      "name": "google/gemini-2.5-flash",
-      "window": "session",
-      "cost": 3.4587471199999986
-    },
-    {
       "name": "openai/gpt-5.4",
       "window": "session",
       "cost": 1.6136225
+    },
+    {
+      "name": "google/gemini-2.5-flash",
+      "window": "session",
+      "cost": 0.6740015899999999
     },
     {
       "name": "gpt-5.3-codex",
@@ -45,19 +45,6 @@
       "costEstimated": false
     },
     {
-      "name": "google/gemini-2.5-flash",
-      "source": "openclaw",
-      "inputTokens": 1860954,
-      "outputTokens": 40872,
-      "totalTokens": 1901826,
-      "sessionCost": 3.4587471199999986,
-      "dailyCost": 2.807048369999999,
-      "weeklyCost": 3.4587471199999986,
-      "sessions": 7,
-      "isGemini": true,
-      "costEstimated": false
-    },
-    {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
       "inputTokens": 84163,
@@ -68,6 +55,19 @@
       "weeklyCost": 1.6136225,
       "sessions": 1,
       "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "google/gemini-2.5-flash",
+      "source": "openclaw",
+      "inputTokens": 1793348,
+      "outputTokens": 41030,
+      "totalTokens": 1834378,
+      "sessionCost": 0.6740015899999999,
+      "dailyCost": 0.02230284,
+      "weeklyCost": 0.6740015899999999,
+      "sessions": 7,
+      "isGemini": true,
       "costEstimated": false
     },
     {
@@ -106,7 +106,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-03-31T08:15:06Z",
+  "lastUpdated": "2026-03-31T08:20:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -135,8 +135,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 2.807048,
-    "total": 17.495855,
+    "daily": 0.022303,
+    "total": 14.71111,
     "monthly": 60.054343
   }
 }
