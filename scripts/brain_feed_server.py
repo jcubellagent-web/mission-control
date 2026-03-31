@@ -44,8 +44,11 @@ def _8s_authenticate() -> str:
     if _8s_token_cache.get("token") and _8s_token_cache.get("expires", 0) > now + 60:
         return _8s_token_cache["token"]
     body = json.dumps({
-        "email": _8S_EMAIL, "password": _8S_PASSWORD,
-        "client_id": _8S_CLIENT_ID, "client_secret": _8S_CLIENT_SECRET,
+        "grant_type": "password",
+        "client_id": _8S_CLIENT_ID,
+        "client_secret": _8S_CLIENT_SECRET,
+        "username": _8S_EMAIL,
+        "password": _8S_PASSWORD,
     }).encode()
     req = urllib.request.Request(_8S_AUTH_URL, data=body, method="POST")
     req.add_header("Content-Type", "application/json")

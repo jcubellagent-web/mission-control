@@ -44,10 +44,11 @@ def _get(url: str, token: str) -> dict:
 def authenticate() -> str:
     """Get access token from Eight Sleep auth API."""
     resp = _post(AUTH_URL, {
-        "email": EMAIL,
-        "password": PASSWORD,
+        "grant_type": "password",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET,
+        "username": EMAIL,
+        "password": PASSWORD,
     })
     token = resp.get("session", {}).get("token") or resp.get("access_token") or resp.get("token")
     if not token:
@@ -82,7 +83,7 @@ def fetch_trends(token: str, days: int = 7) -> list:
 
 
 def parse_device(device: dict) -> dict:
-    """Extract left/right heating levels and schedule from device state."""
+    """Extract left/right heating levels, target levels, schedule, and alarms from device state."""
     left_heating = device.get("leftHeatingLevel", 0)
     right_heating = device.get("rightHeatingLevel", 0)
     left_now = device.get("leftNowHeating", False)
@@ -92,6 +93,9 @@ def parse_device(device: dict) -> dict:
     left_kelvin = device.get("leftKelvin", {})
     right_kelvin = device.get("rightKelvin", {})
 
+    # targetLevels: [now, night, dawn] — the three phases of a sleep session
+    target_levels = left_kelvin.get("targetLevels") or [left_heating, left_heating, left_heating]
+
     def extract_schedule(kelvin: dict) -> dict | None:
         profiles = kelvin.get("scheduleProfiles", [])
         if not profiles:
@@ -99,17 +103,49 @@ def parse_device(device: dict) -> dict:
         # Find active profile
         for p in profiles:
             if p.get("enabled"):
+                # weekDays is a dict like {"monday": true, ...}
+                week_days_raw = p.get("weekDays") or p.get("daysOfWeek") or {}
+                if isinstance(week_days_raw, dict):
+                    weekdays = [k for k, v in week_days_raw.items() if v]
+                elif isinstance(week_days_raw, list):
+                    weekdays = week_days_raw
+                else:
+                    weekdays = []
                 return {
                     "startTime": p.get("startLocalTime", ""),
-                    "weekdays": p.get("daysOfWeek", []),
+                    "weekdays": weekdays,
+                    "enabled": True,
+                }
+        return None
+
+    def extract_alarm(kelvin: dict) -> dict | None:
+        """Extract the earliest upcoming alarm from kelvin.alarms."""
+        alarms = kelvin.get("alarms") or []
+        if not alarms:
+            return None
+        # Each alarm: {"alarmId": ..., "time": "07:00:00", "daysOfWeek": {...}, "enabled": true, ...}
+        for a in alarms:
+            if a.get("enabled", True):
+                week_days_raw = a.get("daysOfWeek") or a.get("weekDays") or {}
+                if isinstance(week_days_raw, dict):
+                    weekdays = [k for k, v in week_days_raw.items() if v]
+                elif isinstance(week_days_raw, list):
+                    weekdays = week_days_raw
+                else:
+                    weekdays = []
+                return {
+                    "time": a.get("time") or a.get("alarmTime", ""),
+                    "weekdays": weekdays,
                     "enabled": True,
                 }
         return None
 
     left_schedule = extract_schedule(left_kelvin)
     right_schedule = extract_schedule(right_kelvin)
+    left_alarm = extract_alarm(left_kelvin)
+    right_alarm = extract_alarm(right_kelvin)
 
-    current_activity = device.get("leftKelvin", {}).get("currentActivity") or ""
+    current_activity = left_kelvin.get("currentActivity") or ""
 
     return {
         "leftHeatingLevel": left_heating,
@@ -117,8 +153,11 @@ def parse_device(device: dict) -> dict:
         "leftNowHeating": left_now,
         "rightNowHeating": right_now,
         "currentActivity": current_activity,
+        "targetLevels": target_levels,
         "leftSchedule": left_schedule,
         "rightSchedule": right_schedule,
+        "leftAlarm": left_alarm,
+        "rightAlarm": right_alarm,
     }
 
 

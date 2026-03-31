@@ -10,3 +10,9 @@ ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
     jc_agent@100.121.89.84 \
     "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json" \
     > "$DEST" 2>/dev/null || true
+
+# Also pull JAIN direct API cost tracker
+ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
+    jc_agent@100.121.89.84 \
+    "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/jain-api-costs.json" \
+    > "$(dirname "$0")/../data/jain-api-costs.json" 2>/dev/null || true

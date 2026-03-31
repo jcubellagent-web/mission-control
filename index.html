@@ -6553,10 +6553,13 @@
             } catch(e) { upd.textContent = data.updatedAt; }
         }
 
-        // Target levels — prefer live status leftKelvin.targetLevels
+        // Target levels — prefer status.targetLevels (now/night/dawn), fall back to live device kelvin
         const ls = liveStatus || {};
-        const kelvin = ls.leftKelvin || ls.result && ls.result.leftKelvin;
-        if (kelvin && Array.isArray(kelvin.targetLevels) && kelvin.targetLevels.length >= 3) {
+        const lsDevice = ls.device || ls;
+        const kelvin = lsDevice.leftKelvin || (lsDevice.result && lsDevice.result.leftKelvin);
+        if (status.targetLevels && Array.isArray(status.targetLevels) && status.targetLevels.length >= 3) {
+            window._esTargetLevels = status.targetLevels.slice(0, 3);
+        } else if (kelvin && Array.isArray(kelvin.targetLevels) && kelvin.targetLevels.length >= 3) {
             window._esTargetLevels = kelvin.targetLevels.slice(0, 3);
         } else {
             const lvl = typeof status.leftHeatingLevel === 'number' ? status.leftHeatingLevel : 0;
@@ -6578,18 +6581,24 @@
         setEl('es-tnt',         lastNight.tnt          != null ? lastNight.tnt             : '–');
         setEl('es-snore',       lastNight.snorePercent != null ? lastNight.snorePercent + '%' : '–');
 
-        // Alarm — derive from schedule
-        const sched = status.leftSchedule || status.rightSchedule;
-        if (sched && sched.startTime) {
-            const parts = sched.startTime.split(':').map(Number);
+        // Alarm — use leftAlarm if present (vibration wake alarm), otherwise show no alarm
+        const alarm = status.leftAlarm || status.rightAlarm;
+        if (alarm && alarm.time) {
+            const parts = alarm.time.split(':').map(Number);
             const h = parts[0], m = parts[1] || 0;
             const ampm = h >= 12 ? 'PM' : 'AM';
             const h12 = h % 12 || 12;
             setEl('es-alarm-time', h12 + ':' + String(m).padStart(2,'0') + ' ' + ampm);
-            const days = sched.weekdays && sched.weekdays.length ? sched.weekdays.join(', ').toUpperCase() : 'EVERY DAY';
+            const days = alarm.weekdays && alarm.weekdays.length ? alarm.weekdays.join(', ').toUpperCase() : 'EVERY DAY';
             setEl('es-alarm-recur', days);
             const tog = document.getElementById('es-alarm-toggle');
-            if (tog) tog.checked = !!sched.enabled;
+            if (tog) tog.checked = !!alarm.enabled;
+        } else {
+            // No alarm set in Eight Sleep app
+            setEl('es-alarm-time', 'No alarm');
+            setEl('es-alarm-recur', '');
+            const tog = document.getElementById('es-alarm-toggle');
+            if (tog) tog.checked = false;
         }
     }
 
