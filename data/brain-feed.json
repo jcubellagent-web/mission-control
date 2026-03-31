@@ -1,18 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T03:12:24Z",
-  "objective": "Building image attachment for X replies",
+  "messageReceived": "2026-03-31T03:13:02Z",
+  "objective": "Transcribing voice message",
   "status": "active",
   "steps": [
     {
-      "label": "Subagent deploying chart generator",
+      "label": "Transcribing",
       "status": "active",
-      "tool": "exec"
+      "tool": "whisper"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-31T03:12:24Z",
-  "checkedAt": "2026-03-31T03:12:24Z",
+  "currentTool": "whisper",
+  "updatedAt": "2026-03-31T03:13:02Z",
+  "checkedAt": "2026-03-31T03:13:02Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
