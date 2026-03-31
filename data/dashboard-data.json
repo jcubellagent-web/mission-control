@@ -3,32 +3,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-03-31T02:11:30Z",
-    "objective": "Capability gap scan \u2014 complete \u00b7 awaiting next instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-03-31T02:22:47Z",
+    "objective": "Building Eight Sleep dashboard card",
+    "status": "active",
     "steps": [
       {
-        "label": "Analysis complete",
-        "status": "done",
+        "label": "Reviewing Mission Control layout",
+        "status": "active",
         "tool": "exec"
-      },
-      {
-        "label": "Responding to Josh",
-        "status": "done",
-        "tool": "telegram"
       }
     ],
-    "currentTool": "telegram",
-    "updatedAt": "2026-03-31T02:11:52Z",
-    "checkedAt": "2026-03-31T02:11:30Z",
+    "currentTool": "exec",
+    "updatedAt": "2026-03-31T02:22:47Z",
+    "checkedAt": "2026-03-31T02:22:47Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Capability gap scan \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-03-31T02:20:02Z"
+    "status": "Brain Feed live",
+    "context": "Building Eight Sleep dashboard card",
+    "updatedAt": "2026-03-31T02:25:02Z"
   },
   "contextWindow": {
     "usedTokens": 98958,
@@ -145,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-31T02:20:06Z",
+    "lastUpdated": "2026-03-31T02:25:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -181,14 +176,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.4,
-      "cpu_user": 6.0,
-      "cpu_sys": 12.37,
-      "load1": 1.84,
-      "load5": 1.81,
-      "load15": 1.86,
+      "cpu_pct": 20.4,
+      "cpu_user": 8.2,
+      "cpu_sys": 12.4,
+      "load1": 2.12,
+      "load5": 1.83,
+      "load15": 1.83,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "167Gi",
@@ -196,11 +191,11 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 2.68,
-      "cpu_sys": 10.6,
-      "load1": 1.7,
-      "load5": 1.69,
+      "cpu_pct": 12.2,
+      "cpu_user": 2.2,
+      "cpu_sys": 10.13,
+      "load1": 1.69,
+      "load5": 1.68,
       "load15": 1.66,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.7,
@@ -223,19 +218,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T02:20:02Z"
+      "lastChecked": "2026-03-31T02:25:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T02:20:02Z"
+      "lastChecked": "2026-03-31T02:25:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-31T02:20:02Z"
+      "lastChecked": "2026-03-31T02:25:02Z"
     }
   ],
   "crons": [
@@ -576,25 +571,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-31T02:20:06Z",
+      "time": "2026-03-31T02:25:06Z",
       "event": "Session spend: $13.89"
     },
     {
-      "time": "2026-03-31T02:20:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-03-31T02:25:02Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-31T02:20:02Z",
+      "time": "2026-03-31T02:25:02Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-31T02:20:02Z",
+      "time": "2026-03-31T02:25:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-31T02:20:02Z",
+      "time": "2026-03-31T02:25:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-31T02:20:02Z"
+  "lastUpdated": "2026-03-31T02:25:02Z"
 }
