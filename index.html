@@ -2814,8 +2814,7 @@
             </div>
             <!-- Mobile X Growth button -->
             <button id="x-header-btn" onclick="window.openXDashboard()"><span style="font-family:serif">𝕏</span></button>
-            <!-- Eight Sleep button (always visible) -->
-            <button id="eightsleep-header-btn" onclick="window.openEightSleepDashboard()" title="Eight Sleep">🛏️</button>
+
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -4791,6 +4790,10 @@
                     <span class="num" style="font-family:serif;font-size:1.1em;">𝕏</span>
                     <span class="label">Progress</span>
                 </div>
+                <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleep && window.openEightSleep()" style="cursor:pointer;">
+                    <span class="num">🛏️</span>
+                    <span class="label">Sleep</span>
+                </div>
             `;
             // bubble click handled by DOMContentLoaded listener below
 
@@ -6230,6 +6233,15 @@
     .xd-type-qt       { background:rgba(245,158,11,0.15); color:#f59e0b; }
 
     /* ── Stat pill X bubble ──────────────────────────────────────── */
+    .stat-pill-8s {
+        border-color: rgba(0,180,216,0.5) !important;
+        cursor: pointer;
+    }
+    .stat-pill-8s:hover {
+        background: rgba(0,180,216,0.12) !important;
+        border-color: rgba(0,180,216,0.9) !important;
+    }
+    .stat-pill-8s .num { font-size: 1em !important; }
     .stat-pill-x {
         cursor: pointer;
         border-color: rgba(29,155,240,0.4) !important;
@@ -6499,6 +6511,7 @@
     // Use document-level delegation only for dynamically-injected bubble
     document.addEventListener('click', function(e) {
         if (e.target.closest('#x-progress-bubble')) window.openXDashboard();
+        if (e.target.closest('#eightsleep-bubble')) window.openEightSleepDashboard && window.openEightSleepDashboard();
     });
 
     // Close on Escape key
