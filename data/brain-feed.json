@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-30T19:34:14Z",
-  "objective": "Mobile header compacted, clock hidden, single row buttons",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-31T00:47:28Z",
+  "objective": "Voice message received",
+  "status": "active",
   "steps": [
     {
-      "label": "Verified",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
-      "status": "done",
-      "tool": "telegram"
+      "label": "Receiving audio",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-30T19:44:21Z",
-  "checkedAt": "2026-03-30T19:34:14Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-31T00:47:28Z",
+  "checkedAt": "2026-03-31T00:47:28Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
