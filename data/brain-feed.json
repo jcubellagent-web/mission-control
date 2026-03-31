@@ -1,23 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T01:09:09Z",
-  "objective": "Audit breaking news logic and reduce noise",
+  "messageReceived": "2026-03-31T01:09:58Z",
+  "objective": "Voice message received",
   "status": "active",
   "steps": [
     {
-      "label": "Analyzed",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Responding to Josh",
+      "label": "Receiving audio",
       "status": "active",
-      "tool": "telegram"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-31T01:09:09Z",
-  "checkedAt": "2026-03-31T01:09:09Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-31T01:09:58Z",
+  "checkedAt": "2026-03-31T01:09:58Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
