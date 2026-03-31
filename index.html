@@ -811,6 +811,24 @@
         }
         body.phone-mode #x-header-btn { display: flex; }
 
+        /* ── Eight Sleep Header Button ───────────────────── */
+        #eightsleep-header-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px; height: 30px;
+            border-radius: 9px;
+            background: rgba(0,180,216,0.12);
+            border: 1px solid rgba(0,180,216,0.28);
+            color: #67e8f9;
+            font-size: 0.88rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        #eightsleep-header-btn:hover { background: rgba(0,180,216,0.22); border-color: rgba(0,180,216,0.5); }
+
         /* Hide desktop-only header elements */
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
@@ -2796,6 +2814,8 @@
             </div>
             <!-- Mobile X Growth button -->
             <button id="x-header-btn" onclick="window.openXDashboard()"><span style="font-family:serif">𝕏</span></button>
+            <!-- Eight Sleep button (always visible) -->
+            <button id="eightsleep-header-btn" onclick="window.openEightSleepDashboard()" title="Eight Sleep">🛏️</button>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -5698,6 +5718,286 @@
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════
+         EIGHT SLEEP DASHBOARD MODAL
+    ═══════════════════════════════════════════════════════════════ -->
+    <div id="es-modal-overlay" style="display:none;">
+        <div id="es-modal">
+            <button id="es-modal-close">✕</button>
+            <div id="es-modal-inner">
+
+                <!-- Header -->
+                <div class="es-header">
+                    <span class="es-logo">🛏️</span>
+                    <div class="es-title-block">
+                        <h2>Eight Sleep</h2>
+                        <span class="es-subtitle">Pod Temperature Control</span>
+                    </div>
+                    <span id="es-updated" class="es-updated">–</span>
+                </div>
+
+                <!-- Sleep Stats -->
+                <div class="es-section-label">LAST NIGHT</div>
+                <div class="es-stats-row">
+                    <div class="es-stat">
+                        <div class="es-stat-val" id="es-total-hours">–</div>
+                        <div class="es-stat-label">Hours</div>
+                    </div>
+                    <div class="es-stat">
+                        <div class="es-stat-val" id="es-deep-pct">–</div>
+                        <div class="es-stat-label">Deep %</div>
+                    </div>
+                    <div class="es-stat">
+                        <div class="es-stat-val" id="es-rem-pct">–</div>
+                        <div class="es-stat-label">REM %</div>
+                    </div>
+                    <div class="es-stat">
+                        <div class="es-stat-val" id="es-tnt">–</div>
+                        <div class="es-stat-label">Turns</div>
+                    </div>
+                    <div class="es-stat">
+                        <div class="es-stat-val" id="es-snore">–</div>
+                        <div class="es-stat-label">Snore %</div>
+                    </div>
+                </div>
+
+                <!-- 7-day trend bars -->
+                <div class="es-section-label">7-DAY TREND</div>
+                <div class="es-trend-bars" id="es-trend-bars">
+                    <!-- injected by JS -->
+                </div>
+
+                <!-- Current Status -->
+                <div class="es-section-label">CURRENT STATUS</div>
+                <div class="es-status-row">
+                    <div class="es-side-block">
+                        <div class="es-side-label">Left Side</div>
+                        <div class="es-temp-gauge" id="es-left-gauge">
+                            <div class="es-temp-bar-wrap">
+                                <div class="es-temp-bar" id="es-left-bar"></div>
+                            </div>
+                            <div class="es-temp-val" id="es-left-val">–</div>
+                        </div>
+                        <div class="es-heating-dot" id="es-left-active"></div>
+                    </div>
+                    <div class="es-cool-warm-label">
+                        <span style="color:#38bdf8">❄ Cool</span>
+                        <span style="opacity:0.4">←→</span>
+                        <span style="color:#f97316">Warm 🔥</span>
+                    </div>
+                    <div class="es-side-block">
+                        <div class="es-side-label">Right Side</div>
+                        <div class="es-temp-gauge" id="es-right-gauge">
+                            <div class="es-temp-bar-wrap">
+                                <div class="es-temp-bar" id="es-right-bar"></div>
+                            </div>
+                            <div class="es-temp-val" id="es-right-val">–</div>
+                        </div>
+                        <div class="es-heating-dot" id="es-right-active"></div>
+                    </div>
+                </div>
+
+                <!-- Schedule Info -->
+                <div id="es-schedule-block" class="es-schedule-block" style="display:none;">
+                    <div class="es-section-label">SCHEDULE</div>
+                    <div id="es-schedule-info" class="es-schedule-info"></div>
+                </div>
+
+                <!-- Controls -->
+                <div class="es-section-label">CONTROLS</div>
+                <div class="es-controls">
+                    <div class="es-ctrl-row">
+                        <span class="es-ctrl-label">Left Side</span>
+                        <input type="range" id="es-left-slider" min="-100" max="100" value="0" class="es-slider">
+                        <span class="es-slider-val" id="es-left-slider-val">0</span>
+                        <button class="es-btn es-btn-set" onclick="window.esSetTemp('left')">Set Left</button>
+                    </div>
+                    <div class="es-ctrl-row">
+                        <span class="es-ctrl-label">Right Side</span>
+                        <input type="range" id="es-right-slider" min="-100" max="100" value="0" class="es-slider">
+                        <span class="es-slider-val" id="es-right-slider-val">0</span>
+                        <button class="es-btn es-btn-set" onclick="window.esSetTemp('right')">Set Right</button>
+                    </div>
+                    <div class="es-ctrl-btn-row">
+                        <button class="es-btn es-btn-sync" onclick="window.esSyncBoth()">⇄ Sync Both</button>
+                        <button class="es-btn es-btn-off" onclick="window.esTurnOff()">⬛ Turn Off</button>
+                    </div>
+                    <div id="es-ctrl-status" class="es-ctrl-status"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+    /* ── Eight Sleep Modal Overlay ────────────────────────────────── */
+    #es-modal-overlay {
+        position: fixed; inset: 0; z-index: 9001;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(6px);
+        display: flex; align-items: center; justify-content: center;
+        animation: xFadeIn 0.22s ease;
+    }
+    #es-modal-overlay.closing { animation: xFadeOut 0.22s ease forwards; }
+
+    #es-modal {
+        position: relative;
+        width: min(680px, 96vw);
+        max-height: 88vh;
+        background: linear-gradient(145deg, rgba(6,18,28,0.98) 0%, rgba(4,12,22,0.98) 100%);
+        border: 1px solid rgba(0,180,216,0.28);
+        border-radius: 18px;
+        box-shadow: 0 0 60px rgba(0,180,216,0.15), 0 24px 80px rgba(0,0,0,0.7);
+        overflow: hidden;
+        animation: xSlideUp 0.26s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    #es-modal-overlay.closing #es-modal { animation: xSlideDown 0.22s ease forwards; }
+
+    #es-modal-inner {
+        overflow-y: auto;
+        max-height: 88vh;
+        padding: 28px 28px 24px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,180,216,0.3) transparent;
+    }
+    #es-modal-close {
+        position: absolute; top: 14px; right: 16px; z-index: 2;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.6); border-radius: 50%; width: 28px; height: 28px;
+        cursor: pointer; font-size: 12px; display:flex; align-items:center; justify-content:center;
+        transition: all 0.15s;
+    }
+    #es-modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ── ES Header ──────────────────────────────────────────────── */
+    .es-header {
+        display: flex; align-items: center; gap: 14px;
+        margin-bottom: 22px; padding-bottom: 18px;
+        border-bottom: 1px solid rgba(0,180,216,0.18);
+    }
+    .es-logo { font-size: 2rem; line-height: 1; }
+    .es-title-block h2 { margin: 0; font-size: 1.3rem; font-weight: 700; color: #e2f8ff; }
+    .es-subtitle { font-size: 0.78rem; color: rgba(0,180,216,0.75); }
+    .es-updated { margin-left: auto; font-size: 0.72rem; color: rgba(255,255,255,0.35); white-space: nowrap; }
+
+    /* ── Section label ──────────────────────────────────────────── */
+    .es-section-label {
+        font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+        color: rgba(0,180,216,0.6); margin: 18px 0 10px;
+    }
+
+    /* ── Sleep Stats ────────────────────────────────────────────── */
+    .es-stats-row {
+        display: flex; gap: 10px; flex-wrap: wrap;
+    }
+    .es-stat {
+        flex: 1 1 60px;
+        background: rgba(0,180,216,0.06);
+        border: 1px solid rgba(0,180,216,0.15);
+        border-radius: 10px; padding: 10px 8px; text-align: center;
+    }
+    .es-stat-val { font-size: 1.25rem; font-weight: 700; color: #a5f3fc; }
+    .es-stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    /* ── 7-day trend bars ───────────────────────────────────────── */
+    .es-trend-bars {
+        display: flex; gap: 5px; align-items: flex-end; height: 48px;
+    }
+    .es-trend-day {
+        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .es-trend-bar-outer {
+        width: 100%; background: rgba(255,255,255,0.06); border-radius: 3px;
+        overflow: hidden; display: flex; align-items: flex-end; height: 36px;
+    }
+    .es-trend-bar-fill {
+        width: 100%; background: linear-gradient(to top, #00b4d8, #90e0ef);
+        border-radius: 3px; transition: height 0.4s ease;
+    }
+    .es-trend-day-label { font-size: 0.58rem; color: rgba(255,255,255,0.3); }
+
+    /* ── Current Status ─────────────────────────────────────────── */
+    .es-status-row {
+        display: flex; align-items: center; gap: 10px;
+    }
+    .es-side-block { flex: 1; }
+    .es-side-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; text-align: center; }
+    .es-temp-gauge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .es-temp-bar-wrap {
+        width: 100%; height: 8px; border-radius: 4px;
+        background: linear-gradient(to right, #0ea5e9, #334155, #f97316);
+        position: relative; overflow: visible;
+    }
+    .es-temp-bar {
+        position: absolute; top: -4px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #fff; border: 2px solid #00b4d8;
+        transform: translateX(-50%);
+        transition: left 0.4s ease;
+    }
+    .es-temp-val { font-size: 1rem; font-weight: 700; color: #a5f3fc; }
+    .es-heating-dot {
+        font-size: 0.68rem; text-align: center; margin-top: 4px;
+        color: rgba(255,255,255,0.4);
+    }
+    .es-cool-warm-label {
+        display: flex; flex-direction: column; align-items: center; gap: 3px;
+        font-size: 0.65rem; color: rgba(255,255,255,0.5); white-space: nowrap;
+    }
+
+    /* ── Schedule ───────────────────────────────────────────────── */
+    .es-schedule-block { margin-top: 4px; }
+    .es-schedule-info {
+        font-size: 0.8rem; color: rgba(255,255,255,0.6);
+        background: rgba(0,180,216,0.06);
+        border: 1px solid rgba(0,180,216,0.15);
+        border-radius: 8px; padding: 8px 12px;
+    }
+
+    /* ── Controls ───────────────────────────────────────────────── */
+    .es-controls { display: flex; flex-direction: column; gap: 10px; }
+    .es-ctrl-row {
+        display: flex; align-items: center; gap: 8px;
+    }
+    .es-ctrl-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); width: 64px; flex-shrink: 0; }
+    .es-slider {
+        flex: 1; -webkit-appearance: none; appearance: none;
+        height: 6px; border-radius: 3px; outline: none; cursor: pointer;
+        background: linear-gradient(to right, #0ea5e9, #334155, #f97316);
+    }
+    .es-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #fff; border: 2px solid #00b4d8; cursor: pointer;
+    }
+    .es-slider-val {
+        font-size: 0.72rem; color: #a5f3fc; width: 36px; text-align: right; flex-shrink: 0;
+    }
+    .es-btn {
+        border: none; border-radius: 7px; padding: 6px 12px;
+        font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .es-btn-set {
+        background: rgba(0,180,216,0.18); border: 1px solid rgba(0,180,216,0.35);
+        color: #a5f3fc;
+    }
+    .es-btn-set:hover { background: rgba(0,180,216,0.32); }
+    .es-ctrl-btn-row { display: flex; gap: 8px; margin-top: 4px; }
+    .es-btn-sync {
+        flex: 1; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
+        color: #c4b5fd;
+    }
+    .es-btn-sync:hover { background: rgba(99,102,241,0.28); }
+    .es-btn-off {
+        flex: 1; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+        color: #fca5a5;
+    }
+    .es-btn-off:hover { background: rgba(239,68,68,0.24); }
+    .es-ctrl-status {
+        font-size: 0.72rem; color: rgba(0,180,216,0.8); min-height: 18px; text-align: center;
+    }
+    </style>
+
     <style>
     /* ── X Modal Overlay ──────────────────────────────────────────── */
     #x-modal-overlay {
@@ -6203,8 +6503,197 @@
 
     // Close on Escape key
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') window.closeXDashboard();
+        if (e.key === 'Escape') { window.closeXDashboard(); window.closeEightSleepDashboard(); }
     });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // EIGHT SLEEP DASHBOARD
+    // ═══════════════════════════════════════════════════════════════════
+
+    function _esTempLabel(level) {
+        if (level <= -70) return 'Max Cool';
+        if (level <= -30) return 'Cool';
+        if (level < 0)    return 'Slightly Cool';
+        if (level === 0)  return 'Neutral';
+        if (level < 30)   return 'Slightly Warm';
+        if (level < 70)   return 'Warm';
+        return 'Max Warm';
+    }
+
+    function _esTempPct(level) {
+        // -100..+100 → 0..100%
+        return Math.round((level + 100) / 200 * 100);
+    }
+
+    function renderEightSleepDashboard(data) {
+        if (!data) return;
+        const status = data.status || {};
+        const trends = data.trends || {};
+        const lastNight = trends.lastNight || {};
+        const week = trends.week || [];
+
+        // Updated time
+        const upd = document.getElementById('es-updated');
+        if (upd && data.updatedAt) {
+            try {
+                const d = new Date(data.updatedAt);
+                upd.textContent = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+            } catch(e) { upd.textContent = data.updatedAt; }
+        }
+
+        // Last night stats
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('es-total-hours', lastNight.totalHours != null ? lastNight.totalHours + 'h' : '–');
+        setEl('es-deep-pct', lastNight.deepPct != null ? lastNight.deepPct + '%' : '–');
+        setEl('es-rem-pct', lastNight.remPct != null ? lastNight.remPct + '%' : '–');
+        setEl('es-tnt', lastNight.tnt != null ? lastNight.tnt : '–');
+        setEl('es-snore', lastNight.snorePercent != null ? lastNight.snorePercent + '%' : '–');
+
+        // 7-day trend bars
+        const barsEl = document.getElementById('es-trend-bars');
+        if (barsEl && week.length) {
+            const maxHours = Math.max(...week.map(d => d.totalHours || 0), 0.1);
+            barsEl.innerHTML = week.map(d => {
+                const pct = maxHours > 0 ? Math.round((d.totalHours || 0) / maxHours * 100) : 0;
+                const label = d.date ? new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'narrow'}) : '';
+                return `<div class="es-trend-day">
+                    <div class="es-trend-bar-outer"><div class="es-trend-bar-fill" style="height:${pct}%"></div></div>
+                    <div class="es-trend-day-label">${label}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // Temp gauges
+        const leftLevel = typeof status.leftHeatingLevel === 'number' ? status.leftHeatingLevel : 0;
+        const rightLevel = typeof status.rightHeatingLevel === 'number' ? status.rightHeatingLevel : 0;
+        const leftPct = _esTempPct(leftLevel);
+        const rightPct = _esTempPct(rightLevel);
+
+        const leftBar = document.getElementById('es-left-bar');
+        if (leftBar) setTimeout(() => leftBar.style.left = leftPct + '%', 100);
+        setEl('es-left-val', leftLevel + ' (' + _esTempLabel(leftLevel) + ')');
+
+        const rightBar = document.getElementById('es-right-bar');
+        if (rightBar) setTimeout(() => rightBar.style.left = rightPct + '%', 100);
+        setEl('es-right-val', rightLevel + ' (' + _esTempLabel(rightLevel) + ')');
+
+        // Active dots
+        const leftActive = document.getElementById('es-left-active');
+        if (leftActive) leftActive.textContent = status.leftNowHeating ? '🟢 Active' : '⚫ Standby';
+        const rightActive = document.getElementById('es-right-active');
+        if (rightActive) rightActive.textContent = status.rightNowHeating ? '🟢 Active' : '⚫ Standby';
+
+        // Sliders — sync to current levels
+        const leftSlider = document.getElementById('es-left-slider');
+        const rightSlider = document.getElementById('es-right-slider');
+        if (leftSlider) { leftSlider.value = leftLevel; setEl('es-left-slider-val', leftLevel + ' (' + _esTempLabel(leftLevel) + ')'); }
+        if (rightSlider) { rightSlider.value = rightLevel; setEl('es-right-slider-val', rightLevel + ' (' + _esTempLabel(rightLevel) + ')'); }
+
+        // Schedule
+        const schedBlock = document.getElementById('es-schedule-block');
+        const schedInfo = document.getElementById('es-schedule-info');
+        const sched = status.leftSchedule || status.rightSchedule;
+        if (sched && schedBlock && schedInfo) {
+            schedBlock.style.display = 'block';
+            const days = (sched.weekdays || []).join(', ') || 'every day';
+            const autoTag = status.currentActivity === 'schedule' ? ' <span style="color:#00b4d8;font-weight:700">● Auto Active</span>' : '';
+            schedInfo.innerHTML = `⏰ Starts ${sched.startTime || '–'} &nbsp;·&nbsp; ${days}${autoTag}`;
+        } else if (schedBlock) {
+            schedBlock.style.display = 'none';
+        }
+    }
+
+    async function fetchEightSleepData() {
+        try {
+            const r = await fetch('data/eight-sleep-data.json?t=' + Date.now());
+            if (!r.ok) return;
+            const data = await r.json();
+            renderEightSleepDashboard(data);
+        } catch(e) { /* silent */ }
+    }
+
+    window.openEightSleepDashboard = async function() {
+        const overlay = document.getElementById('es-modal-overlay');
+        overlay.classList.remove('closing');
+        overlay.style.display = 'flex';
+        await fetchEightSleepData();
+    };
+
+    window.closeEightSleepDashboard = function() {
+        const overlay = document.getElementById('es-modal-overlay');
+        overlay.classList.add('closing');
+        setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
+    };
+
+    // Slider live labels
+    document.addEventListener('DOMContentLoaded', function() {
+        const esClose = document.getElementById('es-modal-close');
+        if (esClose) esClose.addEventListener('click', window.closeEightSleepDashboard);
+
+        const esOverlay = document.getElementById('es-modal-overlay');
+        if (esOverlay) esOverlay.addEventListener('click', function(e) {
+            if (e.target === esOverlay) window.closeEightSleepDashboard();
+        });
+
+        const leftSlider = document.getElementById('es-left-slider');
+        if (leftSlider) leftSlider.addEventListener('input', function() {
+            const v = parseInt(this.value);
+            const el = document.getElementById('es-left-slider-val');
+            if (el) el.textContent = v + ' (' + _esTempLabel(v) + ')';
+        });
+        const rightSlider = document.getElementById('es-right-slider');
+        if (rightSlider) rightSlider.addEventListener('input', function() {
+            const v = parseInt(this.value);
+            const el = document.getElementById('es-right-slider-val');
+            if (el) el.textContent = v + ' (' + _esTempLabel(v) + ')';
+        });
+    });
+
+    async function _esApiCall(method, path) {
+        const statusEl = document.getElementById('es-ctrl-status');
+        if (statusEl) statusEl.textContent = 'Sending…';
+        try {
+            const r = await fetch('http://localhost:8765' + path, {method});
+            const json = await r.json();
+            if (statusEl) statusEl.textContent = json.ok ? '✓ Done' : ('Error: ' + (json.error || 'unknown'));
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+            return json;
+        } catch(e) {
+            if (statusEl) statusEl.textContent = '⚠ Server offline (start brain_feed_server.py)';
+            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 5000);
+        }
+    }
+
+    window.esSetTemp = async function(side) {
+        const slider = document.getElementById(`es-${side}-slider`);
+        if (!slider) return;
+        const level = parseInt(slider.value);
+        await _esApiCall('PUT', `/eightsleep/${side}?level=${level}`);
+    };
+
+    window.esSyncBoth = async function() {
+        const leftSlider = document.getElementById('es-left-slider');
+        const level = leftSlider ? parseInt(leftSlider.value) : 0;
+        // Set right slider to match left
+        const rightSlider = document.getElementById('es-right-slider');
+        if (rightSlider) {
+            rightSlider.value = level;
+            const el = document.getElementById('es-right-slider-val');
+            if (el) el.textContent = level + ' (' + _esTempLabel(level) + ')';
+        }
+        await _esApiCall('PUT', `/eightsleep/both?level=${level}`);
+    };
+
+    window.esTurnOff = async function() {
+        await _esApiCall('POST', '/eightsleep/off');
+        // Update sliders to 0
+        ['left','right'].forEach(side => {
+            const s = document.getElementById(`es-${side}-slider`);
+            if (s) s.value = 0;
+            const v = document.getElementById(`es-${side}-slider-val`);
+            if (v) v.textContent = '0 (Neutral)';
+        });
+    };
     </script>
 
 </body>

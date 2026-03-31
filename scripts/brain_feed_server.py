@@ -16,9 +16,73 @@ Endpoints:
   POST /nightmode/on        — enable night mode on desktop
   POST /nightmode/off       — disable night mode on desktop
   GET  /nightmode/state     — current night mode state
+  GET  /eightsleep/status   — fetch live Eight Sleep device state
+  PUT  /eightsleep/left     — set left side temp (?level=-54)
+  PUT  /eightsleep/right    — set right side temp (?level=-54)
+  PUT  /eightsleep/both     — set both sides temp (?level=-54)
+  POST /eightsleep/off      — turn off (set both sides to 0)
 """
-import http.server, json, mimetypes, os, subprocess, sys, threading
+import http.server, json, mimetypes, os, subprocess, sys, threading, urllib.error, urllib.request
 from pathlib import Path
+
+# ── Eight Sleep constants ──────────────────────────────────────────────────────
+_8S_AUTH_URL = "https://auth-api.8slp.net/v1/tokens"
+_8S_CLIENT_API = "https://client-api.8slp.net/v1"
+_8S_EMAIL = "jcubell16@gmail.com"
+_8S_PASSWORD = "Drakemaye123!!!"
+_8S_CLIENT_ID = "0894c7f33bb94800a03f1f4df13a4f38"
+_8S_CLIENT_SECRET = "f0954a3ed5763ba3d06834c73731a32f15f168f47d4f164751275def86db0c76"
+_8S_DEVICE_ID = "46765770c69adc8ab1f0b25401b0684e7b6f41a5"
+_8S_USER_ID = "c162f25b35354979ba76ed46d28f537b"
+_8s_token_cache: dict = {}  # {"token": str, "expires": float}
+
+
+def _8s_authenticate() -> str:
+    """Get (or return cached) Eight Sleep access token."""
+    import time
+    now = time.time()
+    if _8s_token_cache.get("token") and _8s_token_cache.get("expires", 0) > now + 60:
+        return _8s_token_cache["token"]
+    body = json.dumps({
+        "email": _8S_EMAIL, "password": _8S_PASSWORD,
+        "client_id": _8S_CLIENT_ID, "client_secret": _8S_CLIENT_SECRET,
+    }).encode()
+    req = urllib.request.Request(_8S_AUTH_URL, data=body, method="POST")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        resp = json.load(r)
+    token = resp.get("session", {}).get("token") or resp.get("access_token") or resp.get("token")
+    if not token:
+        for v in resp.values():
+            if isinstance(v, dict) and "token" in v:
+                token = v["token"]
+                break
+    if not token:
+        raise ValueError("No token in Eight Sleep auth response")
+    _8s_token_cache["token"] = token
+    _8s_token_cache["expires"] = now + 3600  # assume 1h TTL
+    return token
+
+
+def _8s_get(path: str) -> dict:
+    token = _8s_authenticate()
+    url = f"{_8S_CLIENT_API}{path}"
+    req = urllib.request.Request(url)
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.load(r)
+
+
+def _8s_put(path: str, body: dict) -> dict:
+    token = _8s_authenticate()
+    url = f"{_8S_CLIENT_API}{path}"
+    data = json.dumps(body).encode()
+    req = urllib.request.Request(url, data=data, method="PUT")
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.load(r)
 
 PORT = 8765
 ROOT_DIR = Path(__file__).resolve().parent.parent  # mission-control/
@@ -140,7 +204,41 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path == "/ping":
             return self._json({"ok": True, "port": PORT})
 
+        # /eightsleep/status — proxy live device state
+        if path == "/eightsleep/status":
+            try:
+                device = _8s_get(f"/devices/{_8S_DEVICE_ID}")
+                result = device.get("result", device)
+                return self._json({"ok": True, "device": result})
+            except Exception as e:
+                return self._json({"ok": False, "error": str(e)}, 500)
+
         self._json({"error": "not found"}, 404)
+
+    def do_PUT(self):
+        from urllib.parse import urlparse, parse_qs
+        parsed = urlparse(self.path)
+        path = parsed.path
+        params = parse_qs(parsed.query)
+        try:
+            level = int(params.get("level", [None])[0])
+        except (TypeError, ValueError):
+            return self._json({"ok": False, "error": "?level=<int> required"}, 400)
+        level = max(-100, min(100, level))
+        try:
+            if path == "/eightsleep/left":
+                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": level})
+                return self._json({"ok": True, "side": "left", "level": level})
+            elif path == "/eightsleep/right":
+                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"rightHeatingLevel": level})
+                return self._json({"ok": True, "side": "right", "level": level})
+            elif path == "/eightsleep/both":
+                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": level, "rightHeatingLevel": level})
+                return self._json({"ok": True, "side": "both", "level": level})
+            else:
+                return self._json({"error": "not found"}, 404)
+        except Exception as e:
+            return self._json({"ok": False, "error": str(e)}, 500)
 
     def do_POST(self):
         path = self.path.split("?")[0]
@@ -170,6 +268,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             flag = DATA_DIR / "night-mode.flag"
             if flag.exists(): flag.unlink()
             self._json({"ok": True, "nightMode": False})
+
+        elif path == "/eightsleep/off":
+            try:
+                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": 0, "rightHeatingLevel": 0})
+                self._json({"ok": True, "action": "off"})
+            except Exception as e:
+                self._json({"ok": False, "error": str(e)}, 500)
 
         else:
             self._json({"error": "not found"}, 404)

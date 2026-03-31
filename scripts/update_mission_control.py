@@ -21,6 +21,7 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 
 DASHBOARD_PATH = ROOT.parent / "data" / "dashboard-data.json"
 MODEL_USAGE_PATH = ROOT.parent / "data" / "modelUsage.json"
+EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -446,10 +447,11 @@ def load_accum() -> Dict[str, Any]:
         if a.get("dailyDate") != today:
             a["daily"] = 0.0
             a["dailyDate"] = today
-        # Reset weekly if new week
+        # Reset weekly if new week (also reset peak so new week accumulates fresh)
         if a.get("weekKey") != week:
             a["weekly"] = 0.0
             a["weekKey"] = week
+            a["peak"] = 0.0
         # Reset monthly if new month
         if a.get("monthKey") != month:
             a["monthly"] = 0.0
@@ -473,12 +475,20 @@ def fetch_openrouter_usage() -> Dict[str, Any]:
              "byok_monthly": 0.0, "available": False}
     # Keys to try: load from ~/.secrets/openrouter_api_key.txt or auth-profiles.json
     keys_to_try = []
-    # Primary: ~/.secrets/openrouter_api_key.txt
+    # Priority 1: ~/.secrets/openrouter_api_key.txt (most up-to-date)
     key_file = Path.home() / ".secrets" / "openrouter_api_key.txt"
     if key_file.exists():
         k = key_file.read_text().strip()
         if k: keys_to_try.append(k)
-    # Secondary: openclaw auth-profiles
+    # Priority 2: secrets env file
+    sec_key_path = Path(os.path.expanduser("~/.openclaw/workspace/secrets/openrouter.env"))
+    if sec_key_path.exists():
+        for line in sec_key_path.read_text().splitlines():
+            if line.startswith("OPENROUTER_API_KEY="):
+                sec_key = line.split("=", 1)[1].strip()
+                if sec_key and sec_key not in keys_to_try:
+                    keys_to_try.append(sec_key)
+    # Priority 3: openclaw auth-profiles (may be stale)
     auth_path = Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json"
     if auth_path.exists():
         try:
@@ -487,14 +497,6 @@ def fetch_openrouter_usage() -> Dict[str, Any]:
             k = d.get("profiles", {}).get("openrouter:default", {}).get("key", "")
             if k and k not in keys_to_try: keys_to_try.append(k)
         except: pass
-    # Fallback: secrets env file
-    sec_key_path = Path(os.path.expanduser("~/.openclaw/workspace/secrets/openrouter.env"))
-    if sec_key_path.exists():
-        for line in sec_key_path.read_text().splitlines():
-            if line.startswith("OPENROUTER_API_KEY="):
-                sec_key = line.split("=", 1)[1].strip()
-                if sec_key and sec_key not in keys_to_try:
-                    keys_to_try.append(sec_key)
 
     agg: Dict[str, float] = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0,
                               "byok_daily": 0.0, "byok_weekly": 0.0, "byok_monthly": 0.0}
@@ -688,6 +690,20 @@ def fetch_jain_model_usage() -> Dict[str, Any]:
         return empty
 
 
+def fetch_jain_api_costs() -> Dict[str, Any]:
+    """Pull jain-api-costs.json from J.A.I.N (direct Gemini/xAI API calls from scripts)."""
+    empty = {"daily": 0, "weekly": 0, "monthly": 0, "models": {}, "available": False}
+    jain_cost_file = ROOT.parent / "data" / "jain-api-costs.json"
+    if jain_cost_file.exists():
+        try:
+            data = json.loads(jain_cost_file.read_text())
+            data["available"] = True
+            return data
+        except Exception as exc:
+            print(f"[warn] jain-api-costs.json parse failed: {exc}", file=sys.stderr)
+    return empty
+
+
 def fetch_ollama_usage() -> List[Dict[str, Any]]:
     """Fetch Ollama local model list and inject as $0 breakdown rows."""
     rows = []
@@ -830,6 +846,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         }
         tracker_path.write_text(json.dumps(tracker_payload, indent=2))
         jain = fetch_jain_model_usage()
+        jain_api = fetch_jain_api_costs()
         openrouter = fetch_openrouter_usage()
         elevenlabs = fetch_elevenlabs_usage()
         ollama_rows = fetch_ollama_usage()
@@ -862,7 +879,29 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         monthly_cost = accum.get("monthly", 0.0)
         or_monthly   = openrouter.get("byok_monthly", 0) or openrouter.get("monthly", 0)
         jain_monthly = jain.get("monthly", jain.get("total", 0))  # approximate from total if no monthly
-        total_monthly = round(monthly_cost + or_monthly, 6)
+        jain_api_daily   = jain_api.get("daily", 0.0) if jain_api.get("available") else 0.0
+        jain_api_monthly = jain_api.get("monthly", 0.0) if jain_api.get("available") else 0.0
+
+        # Inject JAIN direct API models into breakdown (Gemini calls from scripts)
+        jain_api_models = jain_api.get("models", {})
+        existing_names_lower2 = {r["name"].lower() for r in breakdown}
+        for model_name, mdata in jain_api_models.items():
+            row_name = f"jain/{model_name}"
+            if row_name.lower() not in existing_names_lower2:
+                breakdown.append({
+                    "name": row_name,
+                    "source": "jain-scripts",
+                    "weeklyCost": round(mdata.get("cost", 0), 6),
+                    "dailyCost": 0.0,
+                    "sessionCost": round(mdata.get("cost", 0), 6),
+                    "totalTokens": mdata.get("input_tokens", 0) + mdata.get("output_tokens", 0),
+                    "inputTokens": mdata.get("input_tokens", 0),
+                    "outputTokens": mdata.get("output_tokens", 0),
+                    "costEstimated": False,
+                    "_note": f"Direct API call from JAIN script ({mdata.get('last_script','?')}). Calls: {mdata.get('calls',0)}",
+                })
+
+        total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
 
         payload = {
             "session": round(session_cost, 6),
@@ -873,11 +912,12 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),
             "jain": jain,
+            "jainApi": jain_api,
             "openrouter": openrouter,
             "elevenlabs": elevenlabs,
             "aggregate": {
-                "daily":   round(daily_cost + jain.get("daily", 0) + or_daily, 6),
-                "total":   round(session_cost + jain.get("total", 0) + or_weekly, 6),
+                "daily":   round(daily_cost + jain.get("daily", 0) + or_daily + jain_api_daily, 6),
+                "total":   round(session_cost + jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0), 6),
                 "monthly": total_monthly,
             },
         }
@@ -1481,6 +1521,17 @@ def main() -> None:
         dashboard["devices"],
     )
     dashboard["lastUpdated"] = now_iso
+
+    # ── Eight Sleep ──────────────────────────────────────────────────────────
+    try:
+        _eight_sleep_result = subprocess.run(
+            [sys.executable, str(ROOT / "fetch_eight_sleep.py")],
+            capture_output=True, text=True, timeout=20
+        )
+        if _eight_sleep_result.returncode != 0:
+            print(f"[warn] fetch_eight_sleep exited {_eight_sleep_result.returncode}: {_eight_sleep_result.stderr.strip()}", file=sys.stderr)
+    except Exception as _e:
+        print(f"[warn] fetch_eight_sleep failed: {_e}", file=sys.stderr)
 
     # Final validation — fills any missing required fields with safe defaults
     validate_dashboard(dashboard, now_iso)
