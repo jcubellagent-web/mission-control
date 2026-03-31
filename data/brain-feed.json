@@ -1,23 +1,23 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-31T01:05:37Z",
-  "objective": "Fantasy lineup check fixed - Telegram notifications + UTIL optimization",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-31T01:08:21Z",
+  "objective": "Processing request \u00b7 Determining objective",
+  "status": "active",
   "steps": [
     {
-      "label": "Parsed",
+      "label": "Received",
       "status": "done",
-      "tool": "openclaw"
+      "tool": "telegram"
     },
     {
-      "label": "Fixing",
-      "status": "done",
-      "tool": "exec"
+      "label": "Parsing intent",
+      "status": "active",
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-31T01:06:35Z",
-  "checkedAt": "2026-03-31T01:05:37Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-31T01:08:21Z",
+  "checkedAt": "2026-03-31T01:08:21Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
