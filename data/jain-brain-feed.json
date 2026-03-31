@@ -1,10 +1,17 @@
 {
-  "active": false,
-  "objective": "Intel FULL brief sent",
-  "status": "idle",
-  "updatedAt": "2026-03-31T03:02:45Z",
+  "active": true,
+  "objective": "Intel Feed: FULL brief",
+  "status": "active",
+  "updatedAt": "2026-03-31T11:15:00Z",
   "model": "GPT-5.1-codex",
-  "messageReceived": "2026-03-31T03:02:45Z",
-  "steps": [],
-  "currentTool": ""
+  "messageReceived": "2026-03-31T11:15:00Z",
+  "steps": [
+    {
+      "label": "Starting",
+      "status": "active",
+      "tool": "intelligence_feed"
+    }
+  ],
+  "currentTool": "intelligence_feed",
+  "checkedAt": "2026-03-31T11:15:00Z"
 }
