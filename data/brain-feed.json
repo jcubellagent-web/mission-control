@@ -1,8 +1,8 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-03-31T02:11:30Z",
-  "objective": "Capability gap scan",
-  "status": "active",
+  "objective": "Capability gap scan \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "Analysis complete",
@@ -11,12 +11,12 @@
     },
     {
       "label": "Responding to Josh",
-      "status": "active",
+      "status": "done",
       "tool": "telegram"
     }
   ],
   "currentTool": "telegram",
-  "updatedAt": "2026-03-31T02:11:30Z",
+  "updatedAt": "2026-03-31T02:11:52Z",
   "checkedAt": "2026-03-31T02:11:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
