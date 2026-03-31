@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T01:01:11Z",
-  "objective": "Voice message received",
+  "messageReceived": "2026-03-31T01:01:17Z",
+  "objective": "Objective confirmed: Check fantasy baseball week 1 and week 2 schedule",
   "status": "active",
   "steps": [
     {
-      "label": "Receiving audio",
+      "label": "Parsed",
+      "status": "done",
+      "tool": "openclaw"
+    },
+    {
+      "label": "Confirming objective",
       "status": "active",
       "tool": "openclaw"
     }
   ],
   "currentTool": "openclaw",
-  "updatedAt": "2026-03-31T01:01:11Z",
-  "checkedAt": "2026-03-31T01:01:11Z",
+  "updatedAt": "2026-03-31T01:01:17Z",
+  "checkedAt": "2026-03-31T01:01:17Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
