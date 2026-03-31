@@ -4,26 +4,26 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-31T02:04:26Z",
+    "messageReceived": "2026-03-31T02:07:49Z",
     "objective": "JAIN brain feed + cost tracking",
     "status": "active",
     "steps": [
       {
-        "label": "Building JAIN cost tracker",
+        "label": "Pushing updates",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-31T02:04:26Z",
-    "checkedAt": "2026-03-31T02:04:26Z",
+    "updatedAt": "2026-03-31T02:07:49Z",
+    "checkedAt": "2026-03-31T02:07:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
     "context": "JAIN brain feed + cost tracking",
-    "updatedAt": "2026-03-31T02:05:01Z"
+    "updatedAt": "2026-03-31T02:07:50Z"
   },
   "contextWindow": {
     "usedTokens": 56269,
@@ -140,12 +140,19 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-31T02:05:05Z",
+    "lastUpdated": "2026-03-31T02:07:54Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
       "total": 0.92661,
       "available": true
+    },
+    "jainApi": {
+      "daily": 0,
+      "weekly": 0,
+      "monthly": 0,
+      "models": {},
+      "available": false
     },
     "openrouter": {
       "daily": 0.0,
@@ -169,12 +176,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.2,
-      "cpu_user": 6.6,
-      "cpu_sys": 12.12,
-      "load1": 2.3,
-      "load5": 1.95,
-      "load15": 1.85,
+      "cpu_pct": 18.1,
+      "cpu_user": 6.25,
+      "cpu_sys": 11.83,
+      "load1": 2.48,
+      "load5": 2.2,
+      "load15": 1.97,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -184,14 +191,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.0,
-      "cpu_user": 2.95,
-      "cpu_sys": 10.5,
-      "load1": 1.67,
-      "load5": 1.69,
-      "load15": 1.64,
+      "cpu_pct": 12.0,
+      "cpu_user": 3.33,
+      "cpu_sys": 8.66,
+      "load1": 1.52,
+      "load5": 1.58,
+      "load15": 1.6,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -211,19 +218,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T02:05:01Z"
+      "lastChecked": "2026-03-31T02:07:50Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T02:05:01Z"
+      "lastChecked": "2026-03-31T02:07:50Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-31T02:05:01Z"
+      "lastChecked": "2026-03-31T02:07:50Z"
     }
   ],
   "crons": [
@@ -564,25 +571,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-31T02:05:05Z",
+      "time": "2026-03-31T02:07:54Z",
       "event": "Session spend: $11.88"
     },
     {
-      "time": "2026-03-31T02:05:01Z",
+      "time": "2026-03-31T02:07:50Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-31T02:05:01Z",
+      "time": "2026-03-31T02:07:50Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-31T02:05:01Z",
+      "time": "2026-03-31T02:07:50Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-31T02:05:01Z",
+      "time": "2026-03-31T02:07:50Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-31T02:05:01Z"
+  "lastUpdated": "2026-03-31T02:07:50Z"
 }
