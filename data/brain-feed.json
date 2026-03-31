@@ -1,23 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T01:03:08Z",
-  "objective": "Check Week 2 fantasy baseball lineup",
+  "messageReceived": "2026-03-31T01:05:37Z",
+  "objective": "Objective confirmed: Fix JAIN lineup check notification + add Marte/Cowser flag",
   "status": "active",
   "steps": [
     {
-      "label": "Checked",
+      "label": "Parsed",
       "status": "done",
-      "tool": "exec"
+      "tool": "openclaw"
     },
     {
-      "label": "Responding to Josh",
+      "label": "Fixing",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-31T01:03:08Z",
-  "checkedAt": "2026-03-31T01:03:08Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-31T01:05:37Z",
+  "checkedAt": "2026-03-31T01:05:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
