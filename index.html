@@ -1282,7 +1282,7 @@
         body:not(.phone-mode) .card-x-mobile { display: none !important; }
         body.phone-mode .card-x-mobile { display: none !important; }
         body:not(.phone-mode) .card-moltworld-mobile { display: none !important; }
-        body.phone-mode .card-moltworld-mobile { display: block; }
+        body.phone-mode .card-moltworld-mobile { display: flex !important; }
 
         body.phone-mode .card-x-mobile {
             background: linear-gradient(145deg, rgba(10,14,24,0.97) 0%, rgba(6,10,20,0.99) 100%);
@@ -6234,7 +6234,7 @@
     .stat-pill-mw .num { color: #10b981 !important; font-size: 1.1em; }
 
     /* ── Mobile MoltWorld Card ──────────────────────────────────── */
-    body.phone-mode .card-mw-mobile {
+    body.phone-mode .card-moltworld-mobile {
         background: linear-gradient(145deg, rgba(10,24,20,0.97) 0%, rgba(6,20,16,0.99) 100%);
         border-color: rgba(16,185,129,0.2);
         box-shadow:
