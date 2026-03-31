@@ -4220,6 +4220,8 @@
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
             setInterval(fetchIntelligenceFeed, 60000);
+            fetchMoltWorldData();
+            setInterval(fetchMoltWorldData, 30000);
             attachPullToRefresh();
             const godBadge = document.getElementById('god-mode-badge');
             if (godBadge) godBadge.style.display = 'inline-flex';
@@ -4793,6 +4795,10 @@
                 <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleep && window.openEightSleep()" style="cursor:pointer;">
                     <span class="num">🛏️</span>
                     <span class="label">Sleep</span>
+                </div>
+                <div class="stat-pill stat-pill-mw" id="moltworld-bubble" title="MoltWorld Agent" onclick="window.openMoltWorldDashboard && window.openMoltWorldDashboard()" style="cursor:pointer;">
+                    <span class="num" id="mw-bubble-sim">⚡</span>
+                    <span class="label">MoltWorld</span>
                 </div>
             `;
             // bubble click handled by DOMContentLoaded listener below
@@ -5799,6 +5805,60 @@
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════
+         MOLTWORLD DASHBOARD MODAL
+    ═══════════════════════════════════════════════════════════════ -->
+    <div id="mw-modal-overlay" style="display:none;">
+        <div id="mw-modal">
+            <button id="mw-modal-close">✕</button>
+            <div id="mw-modal-inner">
+                <div class="mw-header">
+                    <span class="mw-logo-text">🌍 MoltWorld</span>
+                    <span id="mw-updated" class="mw-updated">–</span>
+                </div>
+
+                <!-- Status Row: Online/Offline, Earning Rate -->
+                <div class="mw-status-row">
+                    <span id="mw-online-dot" class="mw-status-dot mw-offline"></span>
+                    <span id="mw-status-text" class="mw-status-text">Offline</span>
+                </div>
+
+                <!-- SIM Balance -->
+                <div class="mw-balance-card">
+                    <span id="mw-sim-balance" class="mw-sim-balance">–</span>
+                    <span class="mw-sim-label">SIM</span>
+                </div>
+
+                <!-- Stats Row: Position, Online Time, Blocks Built, Total Runs -->
+                <div class="mw-section-label">AGENT STATS</div>
+                <div class="mw-stats-row">
+                    <div class="mw-stat-pill"><span class="mw-stat-val" id="mw-position">–</span><span class="mw-stat-lbl">Position (X,Y)</span></div>
+                    <div class="mw-stat-pill"><span class="mw-stat-val" id="mw-online-time">–</span><span class="mw-stat-lbl">Online Time</span></div>
+                    <div class="mw-stat-pill"><span class="mw-stat-val" id="mw-blocks-built">–</span><span class="mw-stat-lbl">Blocks Built</span></div>
+                    <div class="mw-stat-pill"><span class="mw-stat-val" id="mw-total-runs">–</span><span class="mw-stat-lbl">Total Runs</span></div>
+                </div>
+
+                <!-- Projection -->
+                <div class="mw-section-label">PROJECTION</div>
+                <div class="mw-projection-card">
+                    <span id="mw-projection" class="mw-projection">– SIM/day · –/month</span>
+                </div>
+
+                <!-- Nearby Agents -->
+                <div class="mw-section-label">NEARBY AGENTS (TOP 5)</div>
+                <div id="mw-nearby-agents" class="mw-nearby-agents">
+                    <div class="mw-empty-state">No agents nearby</div>
+                </div>
+
+                <!-- Last Thought -->
+                <div class="mw-section-label">LAST THOUGHT</div>
+                <div class="mw-last-thought-card">
+                    <span id="mw-last-thought" class="mw-last-thought">–</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
     /* ── Eight Sleep Modal Overlay ────────────────────────────────── */
     #es-modal-overlay {
@@ -5968,6 +6028,215 @@
     .es-ctrl-status {
         font-size: 0.72rem; color: rgba(255,255,255,0.45); min-height: 18px;
         text-align: center; margin-top: 12px;
+    }
+
+    /* ── MoltWorld Modal Overlay ────────────────────────────────── */
+    #mw-modal-overlay {
+        position: fixed; inset: 0; z-index: 9002;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(6px);
+        display: flex; align-items: center; justify-content: center;
+        animation: xFadeIn 0.22s ease;
+    }
+    #mw-modal-overlay.closing { animation: xFadeOut 0.22s ease forwards; }
+
+    #mw-modal {
+        position: relative;
+        width: min(390px, 96vw);
+        max-height: 90vh;
+        background: #111;
+        border-radius: 20px;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.85);
+        overflow: hidden;
+        animation: xSlideUp 0.26s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    #mw-modal-overlay.closing #mw-modal { animation: xSlideDown 0.22s ease forwards; }
+
+    #mw-modal-inner {
+        overflow-y: auto;
+        max-height: 90vh;
+        padding: 20px 16px 28px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(16,185,129,0.3) transparent; /* MoltWorld green accent */
+    }
+    #mw-modal-close {
+        position: absolute; top: 14px; right: 16px; z-index: 2;
+        background: rgba(255,255,255,0.1); border: none;
+        color: rgba(255,255,255,0.7); border-radius: 50%; width: 28px; height: 28px;
+        cursor: pointer; font-size: 12px; display:flex; align-items:center; justify-content:center;
+        transition: all 0.15s;
+    }
+    #mw-modal-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* ── MoltWorld Header ───────────────────────────────────────── */
+    .mw-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px; padding-right: 36px;
+    }
+    .mw-logo-text {
+        font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.9);
+        letter-spacing: -0.02em;
+    }
+    .mw-updated { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+
+    /* ── MoltWorld Section label ────────────────────────────────── */
+    .mw-section-label {
+        font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.35); margin: 16px 0 8px;
+    }
+
+    /* ── MoltWorld Status Row ───────────────────────────────────── */
+    .mw-status-row {
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.3);
+        border-radius: 14px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+    }
+    .mw-status-dot {
+        width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .mw-status-dot.mw-online {
+        background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.7);
+        animation: pulse 1.5s infinite;
+    }
+    .mw-status-dot.mw-offline { background: rgba(255,255,255,0.2); }
+    .mw-status-text {
+        font-size: 0.8rem; font-weight: 500; color: #fff;
+        flex: 1;
+    }
+    .mw-earning-rate { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+
+    /* ── MoltWorld Balance Card ─────────────────────────────────── */
+    .mw-balance-card {
+        background: #1c1c1e; border-radius: 14px;
+        padding: 14px 16px;
+        display: flex; flex-direction: column; align-items: center;
+        margin-bottom: 12px;
+    }
+    .mw-sim-balance {
+        font-size: 2.8rem; font-weight: 700; color: #10b981; line-height: 1;
+        margin-bottom: 4px; letter-spacing: -1px; font-variant-numeric: tabular-nums;
+    }
+    .mw-sim-label {
+        font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.4);
+        text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    /* ── MoltWorld Stats Row (Pills) ────────────────────────────── */
+    .mw-stats-row {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        margin-bottom: 12px;
+    }
+    .mw-stat-pill {
+        background: #1c1c1e; border-radius: 10px;
+        padding: 10px 8px; text-align: center;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .mw-stat-val {
+        font-size: 1rem; font-weight: 600; color: #fff; line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+    }
+    .mw-stat-lbl {
+        font-size: 0.58rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ── MoltWorld Projection Card ──────────────────────────────── */
+    .mw-projection-card {
+        background: #1c1c1e; border-radius: 14px;
+        padding: 14px 16px;
+        display: flex; flex-direction: column; align-items: center;
+        margin-bottom: 12px;
+    }
+    .mw-projection {
+        font-size: 1.1rem; font-weight: 600; color: #10b981; line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ── MoltWorld Nearby Agents ────────────────────────────────── */
+    .mw-nearby-agents {
+        display: flex; flex-direction: column; gap: 6px;
+        background: #1c1c1e; border-radius: 14px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+    }
+    .mw-agent-row {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .mw-agent-row:last-child { border-bottom: none; }
+    .mw-agent-emoji { font-size: 1.1rem; flex-shrink: 0; }
+    .mw-agent-info { flex: 1; min-width: 0; }
+    .mw-agent-name { font-size: 0.78rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mw-agent-thought { font-size: 0.65rem; color: rgba(255,255,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mw-agent-distance { font-size: 0.65rem; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+    .mw-empty-state { font-size: 0.7rem; color: rgba(255,255,255,0.3); text-align: center; padding: 8px 0; }
+
+    /* ── MoltWorld Last Thought Card ────────────────────────────── */
+    .mw-last-thought-card {
+        background: #1c1c1e; border-radius: 14px;
+        padding: 14px 16px;
+    }
+    .mw-last-thought {
+        font-size: 0.8rem; color: rgba(255,255,255,0.75); line-height: 1.4;
+    }
+
+    /* ── Stat pill for MoltWorld ────────────────────────────────── */
+    .stat-pill-mw {
+        border-color: rgba(16,185,129,0.5) !important; /* MoltWorld green */
+        cursor: pointer;
+    }
+    .stat-pill-mw:hover {
+        background: rgba(16,185,129,0.12) !important;
+        border-color: rgba(16,185,129,0.9) !important;
+    }
+    .stat-pill-mw .num { color: #10b981 !important; font-size: 1.1em; }
+
+    /* ── Mobile MoltWorld Card ──────────────────────────────────── */
+    body.phone-mode .card-mw-mobile {
+        background: linear-gradient(145deg, rgba(10,24,20,0.97) 0%, rgba(6,20,16,0.99) 100%);
+        border-color: rgba(16,185,129,0.2);
+        box-shadow:
+            0 1px 0 rgba(16,185,129,0.08) inset,
+            0 0 0 0.5px rgba(16,185,129,0.06) inset,
+            0 6px 28px rgba(0,0,0,0.5);
+        display: flex !important; /* Override phone-mode display:none !important for other cards */
+        flex-direction: column;
+        margin: 0 8px;
+        padding: 14px;
+        border-radius: 16px;
+    }
+    .mwm-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    .mwm-logo { font-size: 1.1rem; color: #10b981; }
+    .mwm-title { font-size: 0.78rem; font-weight: 700; color: #fff; letter-spacing: 0.02em; margin-left: 8px; }
+    .mwm-updated { font-size: 0.6rem; color: rgba(255,255,255,0.28); font-family: 'SF Mono', monospace; letter-spacing: 0.06em; }
+    .mwm-stats-row {
+        display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .mwm-stat-pill {
+        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px; padding: 8px 6px;
+    }
+    .mwm-stat-val { font-size: 1rem; font-weight: 700; color: #10b981; line-height: 1; font-variant-numeric: tabular-nums; }
+    .mwm-stat-lbl { font-size: 0.56rem; font-weight: 600; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
+    .mwm-online-status {
+        display: flex; align-items: center; gap: 6px; margin-top: 8px; justify-content: center;
+    }
+    .mwm-online-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); }
+    .mwm-online-dot.online { background: #10b981; animation: pulse 1.5s infinite; }
+    .mwm-online-text { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+
+    @media (max-width: 480px) {
+        .mw-stats-row { grid-template-columns: 1fr; }
+        .mw-balance-card { margin-bottom: 8px; }
+        .mw-projection-card { margin-bottom: 8px; }
+        .mw-nearby-agents { margin-bottom: 8px; }
     }
     </style>
 
@@ -6638,6 +6907,113 @@
         const esOverlay = document.getElementById('es-modal-overlay');
         if (esOverlay) esOverlay.addEventListener('click', function(e) {
             if (e.target === esOverlay) window.closeEightSleepDashboard();
+        });
+
+        // MoltWorld Modal close button
+        const mwClose = document.getElementById('mw-modal-close');
+        if (mwClose) mwClose.addEventListener('click', window.closeMoltWorldDashboard);
+
+        // Click outside MoltWorld modal to close
+        const mwOverlay = document.getElementById('mw-modal-overlay');
+        if (mwOverlay) mwOverlay.addEventListener('click', function(e) {
+            if (e.target === mwOverlay) window.closeMoltWorldDashboard();
+        });
+    });
+    </script>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // MOLTWORLD DASHBOARD
+    // ═══════════════════════════════════════════════════════════════════
+    let _moltWorldPollInterval = null;
+
+    async function fetchMoltWorldData() {
+        let data = null;
+        try {
+            const r = await fetch('data/moltworld-data.json?t=' + Date.now());
+            if (r.ok) data = await r.json();
+        } catch(e) { console.error("Error fetching MoltWorld data:", e); }
+        renderMoltWorldDashboard(data);
+    }
+
+    function renderMoltWorldDashboard(data) {
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        const toggleClass = (id, cls, condition) => { const el = document.getElementById(id); if (el) el.classList.toggle(cls, condition); };
+
+        // Header Updated time
+        const upd = document.getElementById('mw-updated');
+        if (upd && data && data.updatedAt) {
+            try {
+                const d = new Date(data.updatedAt);
+                upd.textContent = d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+            } catch(e) { upd.textContent = data.updatedAt; }
+        } else if (upd) {
+            upd.textContent = '–';
+        }
+
+        // Status row
+        const isOnline = data?.is_online === true;
+        toggleClass('mw-online-dot', 'mw-online', isOnline);
+        toggleClass('mw-online-dot', 'mw-offline', !isOnline);
+        setEl('mw-status-text', isOnline ? `Online · earning ${data?.earning_rate || '—'}` : 'Offline');
+
+        // SIM balance
+        setEl('mw-sim-balance', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(3) : '—');
+        setEl('mw-bubble-sim', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(2) : '⚡');
+
+        // Stats Row
+        setEl('mw-position', data?.position_x != null && data?.position_y != null ? `(${data.position_x},${data.position_y})` : '—');
+        setEl('mw-online-time', data?.online_time || '—');
+        setEl('mw-blocks-built', data?.blocks_built != null ? data.blocks_built.toLocaleString() : '—');
+        setEl('mw-total-runs', data?.run_count != null ? data.run_count.toLocaleString() : '—');
+
+        // Projection
+        setEl('mw-projection', data?.projection_per_day != null ? `${data.projection_per_day.toFixed(1)} SIM/day · ${(data.projection_per_day * 30).toFixed(0)}/month` : '—');
+
+        // Nearby Agents
+        const nearbyAgentsEl = document.getElementById('mw-nearby-agents');
+        if (nearbyAgentsEl) {
+            if (data?.nearby_agents && data.nearby_agents.length > 0) {
+                nearbyAgentsEl.innerHTML = data.nearby_agents.slice(0, 5).map(agent => `
+                    <div class="mw-agent-row">
+                        <span class="mw-agent-emoji">${escapeHtml(agent.emoji || '👤')}</span>
+                        <div class="mw-agent-info">
+                            <div class="mw-agent-name">${escapeHtml(agent.name || 'Unknown Agent')}</div>
+                            <div class="mw-agent-thought">${escapeHtml(agent.thinking || '...').substring(0, 60)}</div>
+                        </div>
+                        <span class="mw-agent-distance">${agent.distance != null ? agent.distance.toFixed(1) + 'm' : '—'}</span>
+                    </div>
+                `).join('');
+            } else {
+                nearbyAgentsEl.innerHTML = '<div class="mw-empty-state">No agents nearby</div>';
+            }
+        }
+
+        // Last Thought
+        setEl('mw-last-thought', data?.last_thought || '—');
+    }
+
+    window.openMoltWorldDashboard = async function() {
+        const overlay = document.getElementById('mw-modal-overlay');
+        overlay.classList.remove('closing');
+        overlay.style.display = 'flex';
+        await fetchMoltWorldData();
+        _moltWorldPollInterval = setInterval(fetchMoltWorldData, 30000); // Poll every 30s
+    };
+
+    window.closeMoltWorldDashboard = function() {
+        const overlay = document.getElementById('mw-modal-overlay');
+        overlay.classList.add('closing');
+        clearInterval(_moltWorldPollInterval);
+        setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const mwClose = document.getElementById('mw-modal-close');
+        if (mwClose) mwClose.addEventListener('click', window.closeMoltWorldDashboard);
+        const mwOverlay = document.getElementById('mw-modal-overlay');
+        if (mwOverlay) mwOverlay.addEventListener('click', function(e) {
+            if (e.target === mwOverlay) window.closeMoltWorldDashboard();
         });
     });
     </script>

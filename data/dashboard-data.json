@@ -4,26 +4,26 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-31T15:38:35Z",
+    "messageReceived": "2026-03-31T15:42:09Z",
     "objective": "Building MoltWorld dashboard card",
     "status": "active",
     "steps": [
       {
-        "label": "Coding agent building card",
+        "label": "Subagent failed, building directly",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-31T15:38:35Z",
-    "checkedAt": "2026-03-31T15:38:35Z",
+    "updatedAt": "2026-03-31T15:42:09Z",
+    "checkedAt": "2026-03-31T15:42:09Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
     "context": "Building MoltWorld dashboard card",
-    "updatedAt": "2026-03-31T15:40:02Z"
+    "updatedAt": "2026-03-31T15:44:37Z"
   },
   "contextWindow": {
     "usedTokens": 165002,
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-31T15:40:05Z",
+    "lastUpdated": "2026-03-31T15:44:40Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -175,9 +175,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 0.010278,
-    "total_earned": 0.010278,
-    "online_time": "0h 6m",
+    "sim_balance": 0.017889,
+    "total_earned": 0.017889,
+    "online_time": "0h 10m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -187,18 +187,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-03-31T15:40:06Z"
+    "updatedAt": "2026-03-31T15:44:41Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.5,
-      "cpu_user": 9.85,
-      "cpu_sys": 13.64,
-      "load1": 1.57,
-      "load5": 1.7,
-      "load15": 1.83,
+      "cpu_pct": 24.7,
+      "cpu_user": 10.88,
+      "cpu_sys": 13.77,
+      "load1": 1.78,
+      "load5": 1.63,
+      "load15": 1.75,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "167Gi",
@@ -206,14 +206,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.7,
-      "cpu_user": 2.0,
-      "cpu_sys": 8.66,
-      "load1": 1.63,
-      "load5": 1.69,
-      "load15": 1.66,
+      "cpu_pct": 11.8,
+      "cpu_user": 2.61,
+      "cpu_sys": 9.15,
+      "load1": 2.29,
+      "load5": 1.9,
+      "load15": 1.75,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -233,19 +233,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T15:40:02Z"
+      "lastChecked": "2026-03-31T15:44:37Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T15:40:02Z"
+      "lastChecked": "2026-03-31T15:44:37Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-31T15:40:02Z"
+      "lastChecked": "2026-03-31T15:44:37Z"
     }
   ],
   "crons": [
@@ -583,37 +583,28 @@
       }
     }
   ],
-  "activeAgents": [
-    {
-      "id": "51bfc86b-cf37-4407-8ae3-6489dd65ec82",
-      "label": "51bfc86b-cf37-4407-8ae3-6489dd",
-      "status": "running",
-      "startedAt": "2026-03-31T15:39:13.394000+00:00",
-      "elapsedSecs": 52,
-      "updatedAt": "2026-03-31T15:39:13.401000+00:00"
-    }
-  ],
+  "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-31T15:40:05Z",
+      "time": "2026-03-31T15:44:40Z",
       "event": "Session spend: $16.19"
     },
     {
-      "time": "2026-03-31T15:40:02Z",
+      "time": "2026-03-31T15:44:37Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-31T15:40:02Z",
+      "time": "2026-03-31T15:44:37Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-31T15:40:02Z",
+      "time": "2026-03-31T15:44:37Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-31T15:40:02Z",
+      "time": "2026-03-31T15:44:37Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-31T15:40:02Z"
+  "lastUpdated": "2026-03-31T15:44:37Z"
 }

@@ -1389,6 +1389,54 @@ CONTEXT_LIMITS: Dict[str, int] = {
     "grok-3-mini":           131_072,
 }
 
+MOLTWORLD_AGENT_ID = "agent_9bon7uvreysrf2z6"
+MOLTWORLD_API_BASE = "https://moltworld.io"
+MOLTWORLD_STATE_PATH = ROOT.parent / "data" / "moltworld-state.json"
+
+def fetch_moltworld_data() -> Dict[str, Any]:
+    try:
+        # 1. Fetch balance data
+        balance_url = f"{MOLTWORLD_API_BASE}/api/agents/balance?agentId={MOLTWORLD_AGENT_ID}"
+        with urllib.request.urlopen(balance_url, timeout=5) as resp:
+            balance_data = json.load(resp)
+        balance = balance_data.get("balance", {})
+        tokenomics = balance_data.get("tokenomics", {}).get("projection", {})
+
+        # 2. Read moltworld-state.json
+        state_data = {}
+        if MOLTWORLD_STATE_PATH.exists():
+            try:
+                state_data = json.loads(MOLTWORLD_STATE_PATH.read_text())
+            except json.JSONDecodeError:
+                pass # Will use empty dict
+
+        # 3. Construct the return dict
+        return {
+            "sim_balance":        float(balance.get("sim", 0.0)),
+            "total_earned":       float(balance.get("totalEarned", 0.0)),
+            "online_time":        str(balance.get("totalOnlineTime", "0h 0m")),
+            "is_online":          bool(balance.get("isOnline", False)),
+            "earning_rate":       str(balance.get("earningRate", "0 SIM/hour")),
+            "position_x":         int(state_data.get("x", 0)),
+            "position_y":         int(state_data.get("y", 0)),
+            "run_count":          int(state_data.get("run_count", 0)),
+            "nearby_agents":      list(state_data.get("nearby_agents", [])),
+            "last_thought":       str(state_data.get("last_thought", "...")),
+            "blocks_built":       int(state_data.get("blocks_built", 0)),
+            "projection_per_day": float(tokenomics.get("perDay", 0.0)),
+            "updatedAt":          utc_iso(),
+        }
+    except Exception as exc:
+        print(f"[warn] fetch_moltworld_data failed: {exc}", file=sys.stderr)
+        return { # Safe defaults on failure
+            "sim_balance": 0.0, "total_earned": 0.0, "online_time": "0h 0m",
+            "is_online": False, "earning_rate": "0 SIM/hour",
+            "position_x": 0, "position_y": 0, "run_count": 0,
+            "nearby_agents": [], "last_thought": "Error fetching data",
+            "blocks_built": 0, "projection_per_day": 0.0,
+            "updatedAt": utc_iso(),
+        }
+
 def fetch_context_window() -> Dict[str, Any]:
     """Read contextTokens + model from the most recent OpenClaw session."""
     result = {"usedTokens": 0, "limitTokens": 0, "pct": 0.0, "model": "", "status": "green"}
@@ -1517,6 +1565,9 @@ def main() -> None:
     }
     dashboard["modelUsage"] = model_usage
 
+    moltworld_data = fetch_moltworld_data()
+    dashboard["moltWorld"] = moltworld_data
+
     # Run independent fetches in parallel
     import concurrent.futures as _cf2
     with _cf2.ThreadPoolExecutor(max_workers=6) as _pool2:
@@ -1565,8 +1616,11 @@ def main() -> None:
 
     DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))
     MODEL_USAGE_PATH.write_text(json.dumps(model_usage, indent=2))
+    MOLTWORLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True) # Ensure data dir exists
+    (ROOT.parent / "data" / "moltworld-data.json").write_text(json.dumps(moltworld_data, indent=2))
     print(f"Updated {DASHBOARD_PATH}")
     print(f"Updated {MODEL_USAGE_PATH}")
+    print(f"Updated {ROOT.parent / 'data' / 'moltworld-data.json'}")
 
     # ── Sync browser reply state into x-progress.json ──────────────────────
     try:

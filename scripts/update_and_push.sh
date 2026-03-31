@@ -10,6 +10,11 @@ cd "$ROOT_DIR"
 # Pull J.A.I.N brain feed and newsfeed from remote (non-blocking on failure)
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
+# Pull MoltWorld state from J.A.I.N
+ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
+    jc_agent@100.121.89.84 \
+    "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" \
+    > data/moltworld-state.json 2>/dev/null || true
 # Pull J.A.I.N x-progress metrics (updated after every post)
 ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
     jc_agent@100.121.89.84 \
@@ -20,7 +25,7 @@ python3 scripts/update_mission_control.py
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json
+git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0
