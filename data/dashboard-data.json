@@ -4,26 +4,26 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-03-31T03:34:42Z",
+    "messageReceived": "2026-03-31T03:37:16Z",
     "objective": "Diagnosing jobs card slow load",
     "status": "active",
     "steps": [
       {
-        "label": "Reading dashboard code",
+        "label": "Identified bottleneck, fixing",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-03-31T03:34:42Z",
-    "checkedAt": "2026-03-31T03:34:42Z",
+    "updatedAt": "2026-03-31T03:37:16Z",
+    "checkedAt": "2026-03-31T03:37:16Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
     "context": "Diagnosing jobs card slow load",
-    "updatedAt": "2026-03-31T03:37:03Z"
+    "updatedAt": "2026-03-31T03:39:27Z"
   },
   "contextWindow": {
     "usedTokens": 103647,
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-31T03:37:07Z",
+    "lastUpdated": "2026-03-31T03:39:30Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -176,14 +176,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 17.7,
-      "cpu_user": 6.4,
-      "cpu_sys": 11.25,
-      "load1": 2.07,
-      "load5": 2.2,
-      "load15": 2.19,
+      "cpu_pct": 25.2,
+      "cpu_user": 11.71,
+      "cpu_sys": 13.44,
+      "load1": 1.95,
+      "load5": 2.22,
+      "load15": 2.21,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "167Gi",
@@ -191,12 +191,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 22.8,
-      "cpu_user": 11.72,
-      "cpu_sys": 11.3,
-      "load1": 1.96,
-      "load5": 1.89,
-      "load15": 1.78,
+      "cpu_pct": 12.7,
+      "cpu_user": 4.32,
+      "cpu_sys": 8.64,
+      "load1": 1.49,
+      "load5": 1.74,
+      "load15": 1.73,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -218,19 +218,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T03:37:03Z"
+      "lastChecked": "2026-03-31T03:39:27Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T03:37:03Z"
+      "lastChecked": "2026-03-31T03:39:27Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-31T03:37:03Z"
+      "lastChecked": "2026-03-31T03:39:27Z"
     }
   ],
   "crons": [
@@ -571,25 +571,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-31T03:37:07Z",
+      "time": "2026-03-31T03:39:30Z",
       "event": "Session spend: $13.80"
     },
     {
-      "time": "2026-03-31T03:37:03Z",
+      "time": "2026-03-31T03:39:27Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-03-31T03:37:03Z",
+      "time": "2026-03-31T03:39:27Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-31T03:37:03Z",
+      "time": "2026-03-31T03:39:27Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-31T03:37:03Z",
+      "time": "2026-03-31T03:39:27Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-31T03:37:03Z"
+  "lastUpdated": "2026-03-31T03:39:27Z"
 }

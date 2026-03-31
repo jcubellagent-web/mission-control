@@ -845,11 +845,19 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly."
         }
         tracker_path.write_text(json.dumps(tracker_payload, indent=2))
-        jain = fetch_jain_model_usage()
-        jain_api = fetch_jain_api_costs()
-        openrouter = fetch_openrouter_usage()
-        elevenlabs = fetch_elevenlabs_usage()
-        ollama_rows = fetch_ollama_usage()
+        # Run all external/SSH fetches in parallel to cut pipeline time
+        import concurrent.futures as _cf
+        with _cf.ThreadPoolExecutor(max_workers=5) as _pool:
+            _f_jain      = _pool.submit(fetch_jain_model_usage)
+            _f_jain_api  = _pool.submit(fetch_jain_api_costs)
+            _f_openrouter = _pool.submit(fetch_openrouter_usage)
+            _f_elevenlabs = _pool.submit(fetch_elevenlabs_usage)
+            _f_ollama     = _pool.submit(fetch_ollama_usage)
+        jain        = _f_jain.result()
+        jain_api    = _f_jain_api.result()
+        openrouter  = _f_openrouter.result()
+        elevenlabs  = _f_elevenlabs.result()
+        ollama_rows = _f_ollama.result()
 
         # Inject Ollama local models into breakdown
         existing_names_lower = {r["name"].lower() for r in breakdown}
@@ -1040,72 +1048,76 @@ def fetch_crons() -> List[Dict[str, Any]]:
         josh_listing = result.stdout
     except subprocess.CalledProcessError:
         josh_listing = ""
-    # J.A.I.N crontab via SSH
-    try:
-        r = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jc_agent@100.121.89.84", "crontab -l 2>/dev/null || true"],
-            capture_output=True, text=True, timeout=8
-        )
-        jain_listing = r.stdout if r.returncode == 0 else ""
-    except Exception:
-        jain_listing = ""
+    # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
     import datetime as _dt
     import re as _re
 
     now_et = _dt.datetime.now(_dt.timezone.utc).astimezone(_dt.timezone(_dt.timedelta(hours=-4)))
     today_str = now_et.strftime('%Y-%m-%d')
 
-    # Parse X post log from J.A.I.N for lastRun data
-    x_log_runs: dict[str, str] = {}  # cron name → ISO timestamp of last successful run today
+    jain_listing = ""
+    x_log_lines_raw = ""
+    reply_state_raw = "{}"
     try:
-        log_r = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jc_agent@100.121.89.84",
-             f"grep -E '\\[([0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}})\\] X Post Agent|✅ Posted' /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null || true"],
-            capture_output=True, text=True, timeout=8
+        jain_batch_cmd = (
+            "echo '===CRON==='; crontab -l 2>/dev/null || true; "
+            "echo '===XLOG==='; grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}.*X Post Agent|Posted' "
+            "  /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null | tail -50 || true; "
+            "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'"
         )
-        if log_r.returncode == 0:
-            log_lines = log_r.stdout.strip().splitlines()
-            # Map run times to job names by hour
-            hour_to_job = {
-                6:  "X Feedback Loop",
-                7:  "X Pre-Market",
-                8:  "X Market Open",
-                11: "X Mover",
-                12: "X Hot Take",
-                17: "X Market Close",
-                21: "X Prime Take",
-                22: "X Nightcap",
-                13: "X Quote Tweets",
-                15: "X Quote Tweets",
-                18: "X Quote Tweets",
-                20: "X Quote Tweets",
-            }
-            for line in log_lines:
-                m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
-                if m:
-                    h = int(m.group(1))
-                    job_name = hour_to_job.get(h)
-                    if job_name:
-                        iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
-                        x_log_runs[job_name] = iso
+        r = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "jc_agent@100.121.89.84", jain_batch_cmd],
+            capture_output=True, text=True, timeout=12
+        )
+        if r.returncode == 0:
+            raw = r.stdout
+            parts = raw.split("===XLOG===")
+            jain_listing = parts[0].replace("===CRON===", "").strip() if parts else ""
+            if len(parts) > 1:
+                reply_split = parts[1].split("===REPLY===")
+                x_log_lines_raw = reply_split[0].strip()
+                reply_state_raw = reply_split[1].strip() if len(reply_split) > 1 else "{}"
     except Exception:
         pass
 
-    # Parse strategic reply state from J.A.I.N — collect reply ET hours posted today
+    # Parse X post log for lastRun data
+    x_log_runs: dict[str, str] = {}
+    try:
+        log_lines = x_log_lines_raw.splitlines()
+        hour_to_job = {
+            6:  "X Feedback Loop",
+            7:  "X Pre-Market",
+            8:  "X Market Open",
+            11: "X Mover",
+            12: "X Hot Take",
+            17: "X Market Close",
+            21: "X Prime Take",
+            22: "X Nightcap",
+            13: "X Quote Tweets",
+            15: "X Quote Tweets",
+            18: "X Quote Tweets",
+            20: "X Quote Tweets",
+        }
+        for line in log_lines:
+            m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
+            if m:
+                h = int(m.group(1))
+                job_name = hour_to_job.get(h)
+                if job_name:
+                    iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
+                    x_log_runs[job_name] = iso
+    except Exception:
+        pass
+
+    # Parse strategic reply state
     _jain_replies_today: list[int] = []
     try:
-        reply_state_r = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jc_agent@100.121.89.84",
-             f"cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{{}}'"],
-            capture_output=True, text=True, timeout=8
-        )
-        if reply_state_r.returncode == 0:
-            jain_rs = json.loads(reply_state_r.stdout.strip() or '{}')
-            for r in jain_rs.get('replies', []):
-                posted = r.get('posted_at', '')
+        reply_state_r_stdout = reply_state_raw
+        if True:  # keep indentation compatible with original code below
+            jain_rs = json.loads(reply_state_r_stdout.strip() or '{}')
+            for r_item in jain_rs.get('replies', []):
+                posted = r_item.get('posted_at', '')
                 try:
                     dt_utc = _dt.datetime.fromisoformat(posted.replace('Z', '+00:00'))
                     dt_et = dt_utc - _dt.timedelta(hours=4)
@@ -1117,8 +1129,9 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 x_log_runs["X Strategic Replies"] = f"{today_str}T{_jain_replies_today[-1]:02d}:00:00"
     except Exception:
         pass
-    # Store for multiRun slot logic
     fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
+
+
 
     def parse_daily_hour(schedule_str: str):
         """Extract scheduled ET hour from a 'Daily H:MM AM/PM ET' string. Returns int or None."""
@@ -1504,14 +1517,39 @@ def main() -> None:
     }
     dashboard["modelUsage"] = model_usage
 
-    # Machine health metrics (CPU, RAM, disk, uptime)
-    dashboard["machineHealth"] = fetch_machine_health()
+    # Run independent fetches in parallel
+    import concurrent.futures as _cf2
+    with _cf2.ThreadPoolExecutor(max_workers=6) as _pool2:
+        _f_health   = _pool2.submit(fetch_machine_health)
+        _f_events   = _pool2.submit(fetch_upcoming_events)
+        _f_devices  = _pool2.submit(build_devices)
+        _f_products = _pool2.submit(build_products, now_iso)
+        _f_crons    = _pool2.submit(fetch_crons)
+        _f_agents   = _pool2.submit(fetch_active_subagents)
+        # Eight Sleep — run as subprocess in parallel
+        _eight_proc = subprocess.Popen(
+            [sys.executable, str(ROOT / "fetch_eight_sleep.py")],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
 
-    dashboard["upcomingEvents"] = fetch_upcoming_events()
-    dashboard["devices"] = build_devices()
-    dashboard["products"] = build_products(now_iso)
-    dashboard["crons"] = fetch_crons()
-    dashboard["activeAgents"] = fetch_active_subagents()
+    dashboard["machineHealth"]  = _f_health.result()
+    dashboard["upcomingEvents"] = _f_events.result()
+    dashboard["devices"]        = _f_devices.result()
+    dashboard["products"]       = _f_products.result()
+    dashboard["crons"]          = _f_crons.result()
+    dashboard["activeAgents"]   = _f_agents.result()
+
+    # Wait for Eight Sleep subprocess
+    try:
+        _eight_proc.wait(timeout=20)
+        if _eight_proc.returncode != 0:
+            _err = _eight_proc.stderr.read().decode(errors='replace').strip()
+            print(f"[warn] fetch_eight_sleep exited {_eight_proc.returncode}: {_err}", file=sys.stderr)
+    except Exception as _e:
+        print(f"[warn] fetch_eight_sleep failed: {_e}", file=sys.stderr)
+        try: _eight_proc.kill()
+        except Exception: pass
+
     dashboard["recentActivity"] = build_recent_activity(
         now_iso,
         model_usage,
@@ -1521,17 +1559,6 @@ def main() -> None:
         dashboard["devices"],
     )
     dashboard["lastUpdated"] = now_iso
-
-    # ── Eight Sleep ──────────────────────────────────────────────────────────
-    try:
-        _eight_sleep_result = subprocess.run(
-            [sys.executable, str(ROOT / "fetch_eight_sleep.py")],
-            capture_output=True, text=True, timeout=20
-        )
-        if _eight_sleep_result.returncode != 0:
-            print(f"[warn] fetch_eight_sleep exited {_eight_sleep_result.returncode}: {_eight_sleep_result.stderr.strip()}", file=sys.stderr)
-    except Exception as _e:
-        print(f"[warn] fetch_eight_sleep failed: {_e}", file=sys.stderr)
 
     # Final validation — fills any missing required fields with safe defaults
     validate_dashboard(dashboard, now_iso)
