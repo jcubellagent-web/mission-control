@@ -23,18 +23,18 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Diagnosing jobs card slow load \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-03-31T13:15:02Z"
+    "updatedAt": "2026-03-31T13:20:02Z"
   },
   "contextWindow": {
-    "usedTokens": 20315,
+    "usedTokens": 21319,
     "limitTokens": 1000000,
-    "pct": 0.0203,
+    "pct": 0.0213,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 13.892489,
-    "daily": 0.130292,
+    "session": 13.901851,
+    "daily": 0.139654,
     "weekly": 24.051213,
     "monthly": 60.007633,
     "topModels": [
@@ -51,7 +51,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 0.78199119
+        "cost": 0.7913522699999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -94,12 +94,12 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1750210,
-        "outputTokens": 40525,
-        "totalTokens": 1790735,
-        "sessionCost": 0.78199119,
-        "dailyCost": 0.13029243999999998,
-        "weeklyCost": 0.78199119,
+        "inputTokens": 1751432,
+        "outputTokens": 40580,
+        "totalTokens": 1792012,
+        "sessionCost": 0.7913522699999999,
+        "dailyCost": 0.13965351999999998,
+        "weeklyCost": 0.7913522699999999,
         "sessions": 7,
         "isGemini": true,
         "costEstimated": false
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-03-31T13:15:05Z",
+    "lastUpdated": "2026-03-31T13:20:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -169,19 +169,19 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.130292,
-      "total": 14.819099,
+      "daily": 0.139654,
+      "total": 14.828461,
       "monthly": 60.054343
     }
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.5,
-      "cpu_user": 9.75,
-      "cpu_sys": 13.74,
-      "load1": 2.53,
-      "load5": 2.38,
-      "load15": 2.34,
+      "cpu_pct": 23.2,
+      "cpu_user": 9.35,
+      "cpu_sys": 13.81,
+      "load1": 4.79,
+      "load5": 2.89,
+      "load15": 2.51,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -191,14 +191,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.2,
-      "cpu_user": 2.79,
-      "cpu_sys": 8.39,
-      "load1": 1.88,
-      "load5": 1.99,
-      "load15": 1.9,
+      "cpu_pct": 11.6,
+      "cpu_user": 2.58,
+      "cpu_sys": 9.3,
+      "load1": 1.65,
+      "load5": 1.82,
+      "load15": 1.84,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -218,19 +218,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T13:15:02Z"
+      "lastChecked": "2026-03-31T13:20:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-03-31T13:15:02Z"
+      "lastChecked": "2026-03-31T13:20:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-03-31T13:15:02Z"
+      "lastChecked": "2026-03-31T13:20:02Z"
     }
   ],
   "crons": [
@@ -571,25 +571,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-03-31T13:15:05Z",
-      "event": "Session spend: $13.89"
+      "time": "2026-03-31T13:20:06Z",
+      "event": "Session spend: $13.90"
     },
     {
-      "time": "2026-03-31T13:15:02Z",
+      "time": "2026-03-31T13:20:02Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-03-31T13:15:02Z",
+      "time": "2026-03-31T13:20:02Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-03-31T13:15:02Z",
+      "time": "2026-03-31T13:20:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-03-31T13:15:02Z",
+      "time": "2026-03-31T13:20:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-03-31T13:15:02Z"
+  "lastUpdated": "2026-03-31T13:20:02Z"
 }
