@@ -1,23 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-03-31T01:01:47Z",
-  "objective": "Check fantasy baseball week 1 and week 2 schedule",
+  "messageReceived": "2026-03-31T01:02:50Z",
+  "objective": "Voice message received",
   "status": "active",
   "steps": [
     {
-      "label": "Searched",
-      "status": "done",
-      "tool": "web_search"
-    },
-    {
-      "label": "Responding to Josh",
+      "label": "Receiving audio",
       "status": "active",
-      "tool": "telegram"
+      "tool": "openclaw"
     }
   ],
-  "currentTool": "telegram",
-  "updatedAt": "2026-03-31T01:01:47Z",
-  "checkedAt": "2026-03-31T01:01:47Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-31T01:02:50Z",
+  "checkedAt": "2026-03-31T01:02:50Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
