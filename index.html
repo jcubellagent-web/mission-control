@@ -722,15 +722,16 @@
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
-            /* iPhone 17 Pro Dynamic Island: safe-area-inset-top ≈ 59px */
-            padding: max(env(safe-area-inset-top, 10px), 10px) 14px 8px;
+            flex-wrap: nowrap;
+            /* Tighter top padding — no wasted space */
+            padding: max(env(safe-area-inset-top, 6px), 6px) 12px 6px;
             margin: 0 0 8px 0;
             background: rgba(5, 7, 13, 0.92);
             backdrop-filter: blur(32px) saturate(1.8);
             -webkit-backdrop-filter: blur(32px) saturate(1.8);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            background-image: none;
-            gap: 0;
+            border-bottom: 1px solid rgba(229,62,62,0.08);
+            background-image: linear-gradient(180deg, rgba(229,62,62,0.06) 0%, transparent 60%);
+            gap: 8px;
         }
         body.phone-mode header::before { display: none; }
         body.phone-mode header > * { position: relative; z-index: 1; }
@@ -739,19 +740,21 @@
         body.phone-mode .logo {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
+            flex-shrink: 0;
         }
         body.phone-mode .logo-icon {
-            width: 22px; height: 22px;
-            border-radius: 6px;
+            width: 20px; height: 20px;
+            border-radius: 5px;
         }
         body.phone-mode .logo h1 {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             color: rgba(255,255,255,0.8);
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
+        body.phone-mode .mc-clock-wrap { display: none !important; }
 
         /* Cost pill — centered below logo */
         #mobile-cost-pill {
@@ -768,8 +771,8 @@
         #mobile-cost-pill .mcp-row {
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
+            gap: 3px;
+            padding: 4px 9px;
         }
         #mobile-cost-pill .mcp-row + .mcp-row {
             border-left: 1px solid rgba(255,255,255,0.08);
@@ -790,6 +793,24 @@
         #mobile-cost-pill .mcp-sep { display: none; }
         body.phone-mode #mobile-cost-pill { display: flex; }
 
+        /* ── X Header Button ─────────────────────────── */
+        #x-header-btn {
+            display: none; /* hidden on desktop */
+            align-items: center;
+            justify-content: center;
+            width: 30px; height: 30px;
+            border-radius: 9px;
+            background: rgba(29,155,240,0.12);
+            border: 1px solid rgba(29,155,240,0.25);
+            color: #7dd3fc;
+            font-family: serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+        }
+        body.phone-mode #x-header-btn { display: flex; }
+
         /* Hide desktop-only header elements */
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
@@ -806,14 +827,14 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         body.phone-mode .card {
-            background: rgba(14, 16, 24, 0.95);
-            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(16, 18, 28, 0.97);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 18px;
             margin: 0 14px 14px;
             box-shadow:
-                0 1px 0 rgba(255,255,255,0.04) inset,
-                0 4px 24px rgba(0,0,0,0.5);
+                0 1px 0 rgba(255,255,255,0.06) inset,
+                0 4px 20px rgba(0,0,0,0.5);
             animation: pm-fadein 0.4s cubic-bezier(0.16,1,0.3,1) both;
             backdrop-filter: blur(20px);
         }
@@ -825,21 +846,25 @@
         body.phone-mode .card-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 16px;
         }
         body.phone-mode .card-header h2 {
-            font-size: 0.65rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255,255,255,0.45);
+        }
+        body.phone-mode .card-header .card-icon {
+            filter: drop-shadow(0 0 6px currentColor);
+            opacity: 0.9;
         }
 
         /* ── Brain Feed card ─────────────────────────── */
         body.phone-mode .card-brain {
-            border-color: rgba(99,179,237,0.1);
-            background: rgba(10, 14, 26, 0.97);
+            border-color: rgba(229,62,62,0.12);
+            background: rgba(10, 12, 22, 0.98);
         }
         body.phone-mode .card-brain.brain-active {
             border-color: rgba(99,179,237,0.25);
@@ -863,7 +888,10 @@
         }
 
         /* ── Today's Jobs card ───────────────────────── */
-        body.phone-mode .card-jobs { background: rgba(11, 13, 22, 0.96); }
+        body.phone-mode .card-jobs {
+            background: rgba(10, 12, 21, 0.97);
+            border-color: rgba(96,165,250,0.1);
+        }
 
         body.phone-mode .job-group { margin-bottom: 16px; }
         body.phone-mode .job-group:last-child { margin-bottom: 0; }
@@ -1118,84 +1146,283 @@
             font-family: "Courier New", monospace;
         }
 
-        /* ── Remote Control Card — Cinematic ────────────── */
+        /* ── Remote Control Card — Premium Glass Panel ──── */
         body.phone-mode .card-remote {
             display: flex;
             flex-direction: column;
-            gap: 11px;
-            background: rgba(10, 11, 20, 0.97);
-            border-color: rgba(255,255,255,0.07);
+            gap: 10px;
+            background: rgba(16, 18, 28, 0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.08) inset,
+                0 8px 32px rgba(0,0,0,0.5),
+                0 0 0 0.5px rgba(229,62,62,0.08);
         }
 
         .remote-btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .remote-btn {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 20px 12px;
+            justify-content: flex-start;
+            gap: 14px;
+            padding: 16px 20px;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
-            color: rgba(255,255,255,0.7);
-            font-size: 0.72rem;
-            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            font-weight: 600;
             font-family: inherit;
             cursor: pointer;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
+            letter-spacing: 0.03em;
+            text-transform: none;
+            transition: all 0.18s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
             width: 100%;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.07) inset, 0 2px 8px rgba(0,0,0,0.3);
         }
         .remote-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.97);
             filter: brightness(1.2);
+            transition-duration: 0.06s;
         }
         .remote-btn .btn-icon {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             line-height: 1;
+            flex-shrink: 0;
+            width: 28px;
+            text-align: center;
+        }
+        .remote-btn-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
+        }
+        .remote-btn-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+        .remote-btn-sub {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            font-weight: 400;
+            letter-spacing: 0.02em;
         }
 
         .remote-btn.btn-refresh {
-            background: linear-gradient(135deg, rgba(30,58,100,0.6) 0%, rgba(15,30,60,0.8) 100%);
-            border-color: rgba(96,165,250,0.2);
-            color: #93c5fd;
-            box-shadow: 0 0 24px rgba(96,165,250,0.05) inset, 0 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, rgba(25,55,110,0.6) 0%, rgba(12,28,65,0.85) 100%);
+            border-color: rgba(96,165,250,0.3);
+            color: #bfdbfe;
+            box-shadow: 0 1px 0 rgba(147,197,253,0.12) inset, 0 0 18px rgba(96,165,250,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
         }
         .remote-btn.btn-refresh:active {
-            background: linear-gradient(135deg, rgba(40,80,140,0.8) 0%, rgba(20,50,100,0.9) 100%);
+            background: linear-gradient(135deg, rgba(40,80,150,0.8) 0%, rgba(20,45,100,0.95) 100%);
         }
 
         .remote-btn.btn-night {
-            background: linear-gradient(135deg, rgba(80,10,10,0.5) 0%, rgba(40,5,5,0.8) 100%);
-            border-color: rgba(220,38,38,0.2);
-            color: #fca5a5;
-            box-shadow: 0 0 24px rgba(220,38,38,0.05) inset, 0 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, rgba(100,18,18,0.55) 0%, rgba(50,8,8,0.85) 100%);
+            border-color: rgba(239,68,68,0.3);
+            color: #fecaca;
+            box-shadow: 0 1px 0 rgba(252,165,165,0.12) inset, 0 0 18px rgba(220,38,38,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
         }
         .remote-btn.btn-night:active {
-            background: linear-gradient(135deg, rgba(120,20,20,0.8) 0%, rgba(80,10,10,0.9) 100%);
+            background: linear-gradient(135deg, rgba(140,22,22,0.8) 0%, rgba(90,12,12,0.95) 100%);
+        }
+
+        .remote-btn.btn-x-dash {
+            background: linear-gradient(135deg, rgba(20,20,20,0.7) 0%, rgba(10,10,10,0.9) 100%);
+            border-color: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.75);
         }
 
         #remote-status {
-            font-size: 0.65rem;
+            font-size: 0.58rem;
             color: rgba(255,255,255,0.2);
             text-align: center;
-            min-height: 14px;
-            letter-spacing: 0.05em;
+            min-height: 12px;
+            letter-spacing: 0.1em;
             transition: color 0.3s;
+            font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+            text-transform: uppercase;
+            padding-top: 2px;
         }
         #remote-status.ok  { color: #34d399; }
         #remote-status.err { color: #f87171; }
 
-        /* Hide remote card on desktop */
-        body:not(.phone-mode) .card-remote { display: none !important; }
+        /* Hide remote card on both desktop and mobile — controls live in header */
+        .card-remote { display: none !important; }
+
+        /* ── Mobile X Growth Card ───────────────────── */
+        body:not(.phone-mode) .card-x-mobile { display: none !important; }
+        body.phone-mode .card-x-mobile { display: none !important; }
+
+        body.phone-mode .card-x-mobile {
+            background: linear-gradient(145deg, rgba(10,14,24,0.97) 0%, rgba(6,10,20,0.99) 100%);
+            border-color: rgba(29,155,240,0.2);
+            box-shadow:
+                0 1px 0 rgba(29,155,240,0.08) inset,
+                0 0 0 0.5px rgba(29,155,240,0.06) inset,
+                0 6px 28px rgba(0,0,0,0.5);
+        }
+        .x-mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .x-mobile-account {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .x-mobile-logo {
+            font-family: serif;
+            font-size: 1.2rem;
+            color: rgba(29,155,240,0.9);
+            line-height: 1;
+        }
+        .x-mobile-handle {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.02em;
+        }
+        .x-mobile-updated {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.28);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            letter-spacing: 0.06em;
+        }
+
+        /* Stats row */
+        .x-mobile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .x-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 10px 8px;
+        }
+        .x-stat-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .x-stat-label {
+            font-size: 0.56rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            text-align: center;
+        }
+        .x-stat.x-stat-blue .x-stat-val { color: #7dd3fc; }
+        .x-stat.x-stat-green .x-stat-val { color: #6ee7b7; }
+
+        /* Today's post mix */
+        .x-mobile-mix {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .x-mix-pill {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 7px 4px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .x-mix-pill-val { font-size: 1rem; font-weight: 800; line-height: 1; }
+        .x-mix-orig  { background: rgba(29,155,240,0.1); color: #7dd3fc; border: 1px solid rgba(29,155,240,0.2); }
+        .x-mix-reply { background: rgba(52,211,153,0.08); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.15); }
+        .x-mix-qt    { background: rgba(167,139,250,0.08); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.15); }
+        .x-mix-total { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.08); }
+
+        /* Next milestone progress */
+        .x-milestone-row {
+            margin-bottom: 12px;
+        }
+        .x-milestone-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+        .x-milestone-name {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .x-milestone-pct {
+            font-size: 0.65rem;
+            color: rgba(29,155,240,0.7);
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', monospace;
+        }
+        .x-milestone-bar-bg {
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .x-milestone-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #1d9bf0, #60a5fa);
+            transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        /* Full dashboard button */
+        .x-mobile-open-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(29,155,240,0.1);
+            border: 1px solid rgba(29,155,240,0.25);
+            border-radius: 12px;
+            color: #7dd3fc;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: inherit;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 1px 0 rgba(29,155,240,0.1) inset;
+        }
+        .x-mobile-open-btn:active {
+            transform: scale(0.97);
+            background: rgba(29,155,240,0.18);
+        }
 
         /* Night Mode button on desktop header */
         #night-mode-btn {
@@ -2204,38 +2431,43 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
+            margin-left: auto;
         }
         .pca-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(255,255,255,0.05);
-            font-size: 1rem;
+            width: 30px; height: 30px;
+            border-radius: 9px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.07);
+            font-size: 1.05rem;
             cursor: pointer;
-            color: rgba(255,255,255,0.7);
-            transition: background 0.15s, transform 0.1s;
+            color: rgba(255,255,255,0.75);
+            transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
         }
-        .pca-btn:active { transform: scale(0.90); filter: brightness(1.3); }
+        .pca-btn:active { transform: scale(0.88); filter: brightness(1.4); transition-duration: 0.06s; }
         .pca-btn.pca-refresh {
-            background: rgba(96,165,250,0.10);
-            border-color: rgba(96,165,250,0.2);
+            background: rgba(96,165,250,0.14);
+            border-color: rgba(96,165,250,0.28);
             color: #93c5fd;
+            box-shadow: 0 1px 0 rgba(147,197,253,0.1) inset;
         }
         .pca-btn.pca-night {
-            background: rgba(229,62,62,0.08);
-            border-color: rgba(229,62,62,0.2);
+            background: rgba(229,62,62,0.12);
+            border-color: rgba(229,62,62,0.25);
             color: #fca5a5;
+            box-shadow: 0 1px 0 rgba(252,165,165,0.08) inset;
         }
         .pca-btn.pca-sending { opacity: 0.5; pointer-events: none; }
         .pca-btn.pca-ok { filter: brightness(1.8); }
         .pca-status {
-            font-size: 0.58rem;
+            font-size: 0.55rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             color: rgba(255,255,255,0.3);
-            min-width: 24px;
+            min-width: 16px;
             text-align: center;
             transition: color 0.3s;
         }
@@ -2562,6 +2794,8 @@
                 <div class="mcp-sep"></div>
                 <div class="mcp-row"><span class="mcp-label">Today</span><span class="mcp-val" id="mcp-daily">$0.00</span></div>
             </div>
+            <!-- Mobile X Growth button -->
+            <button id="x-header-btn" onclick="window.openXDashboard()"><span style="font-family:serif">𝕏</span></button>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -2620,6 +2854,67 @@
                         <div id="unified-activity-log"></div>
                     </div>
                 </div>
+                <!-- Mobile X Growth Card — phone-mode only -->
+                <div class="card card-x-mobile">
+                    <div class="x-mobile-header">
+                        <div class="x-mobile-account">
+                            <span class="x-mobile-logo">𝕏</span>
+                            <span class="x-mobile-handle" id="xm-handle">@AgentJc11443</span>
+                        </div>
+                        <span class="x-mobile-updated" id="xm-updated">–</span>
+                    </div>
+                    <!-- Key stats row -->
+                    <div class="x-mobile-stats">
+                        <div class="x-stat x-stat-blue">
+                            <span class="x-stat-val" id="xm-followers">–</span>
+                            <span class="x-stat-label">Followers</span>
+                        </div>
+                        <div class="x-stat x-stat-blue">
+                            <span class="x-stat-val" id="xm-impr7d">–</span>
+                            <span class="x-stat-label">Impr 7d</span>
+                        </div>
+                        <div class="x-stat x-stat-green">
+                            <span class="x-stat-val" id="xm-posts7d">–</span>
+                            <span class="x-stat-label">Posts 7d</span>
+                        </div>
+                    </div>
+                    <!-- Today's post mix -->
+                    <div class="x-mobile-mix">
+                        <div class="x-mix-pill x-mix-orig">
+                            <span class="x-mix-pill-val" id="xm-orig-today">0</span>
+                            <span>Orig</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-reply">
+                            <span class="x-mix-pill-val" id="xm-eng-today">0</span>
+                            <span>Eng</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-qt">
+                            <span class="x-mix-pill-val" id="xm-qt-today">0</span>
+                            <span>QT</span>
+                        </div>
+                        <div class="x-mix-pill x-mix-total">
+                            <span class="x-mix-pill-val" id="xm-total-today">0</span>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                    <!-- Next milestone progress bar -->
+                    <div class="x-milestone-row">
+                        <div class="x-milestone-label">
+                            <span class="x-milestone-name" id="xm-ms-name">500 Followers</span>
+                            <span class="x-milestone-pct" id="xm-ms-pct">0%</span>
+                        </div>
+                        <div class="x-milestone-bar-bg">
+                            <div class="x-milestone-bar-fill" id="xm-ms-bar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <!-- Open full modal -->
+                    <button class="x-mobile-open-btn" onclick="window.openXDashboard()">
+                        <span style="font-family:serif;font-size:0.9rem;">𝕏</span>
+                        Full Growth Dashboard
+                        <span style="opacity:0.5;font-size:0.85rem;">↗</span>
+                    </button>
+                </div>
+
                 <!-- Bottom-left: Jobs + Model side by side -->
                 <div class="kiosk-bottom-left">
                     <div class="card card-jobs">
@@ -2643,18 +2938,20 @@
                             <span class="icon">🖥</span>
                             <h2>Desktop Control</h2>
                         </div>
-                        <div class="remote-btn-row" style="grid-template-columns:1fr 1fr 1fr;">
+                        <div class="remote-btn-row">
                             <button class="remote-btn btn-refresh" onclick="remoteRefresh()">
                                 <span class="btn-icon">↻</span>
-                                Refresh
+                                <span class="remote-btn-label">
+                                    <span class="remote-btn-title">Refresh Desktop</span>
+                                    <span class="remote-btn-sub">Reload dashboard data</span>
+                                </span>
                             </button>
                             <button class="remote-btn btn-night" onclick="remoteNightMode()">
                                 <span class="btn-icon">🌙</span>
-                                Night Mode
-                            </button>
-                            <button class="remote-btn btn-x-dash" id="x-progress-btn-mobile">
-                                <span class="btn-icon" style="font-family:serif;">𝕏</span>
-                                Progress
+                                <span class="remote-btn-label">
+                                    <span class="remote-btn-title">Night Mode</span>
+                                    <span class="remote-btn-sub">Toggle dim overlay</span>
+                                </span>
                             </button>
                         </div>
                         <div id="remote-status"></div>
@@ -5814,7 +6111,56 @@
             if (!r.ok) return;
             const data = await r.json();
             renderXDashboard(data);
+            renderXMobileCard(data);
         } catch(e) { /* silent */ }
+    }
+
+    function renderXMobileCard(data) {
+        if (!data) return;
+        const lead = data.lead || {};
+        const strat = data.strategy || {};
+
+        // Handle
+        const handleEl = document.getElementById('xm-handle');
+        if (handleEl) handleEl.textContent = data.account || '@AgentJc11443';
+
+        // Updated
+        const updEl = document.getElementById('xm-updated');
+        if (updEl && data.updatedAt) {
+            const diff = Math.floor((Date.now() - new Date(data.updatedAt)) / 60000);
+            updEl.textContent = diff < 1 ? 'just now' : diff < 60 ? diff + 'm ago' : Math.floor(diff/60) + 'h ago';
+        }
+
+        // Stats
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmtNum(val); };
+        setEl('xm-followers', lead.followers_total);
+        setEl('xm-impr7d', lead.impressions_7d);
+        setEl('xm-posts7d', lead.posts_7d);
+
+        // Today mix
+        const orig = strat.originals_today || 0;
+        const eng  = strat.engagement_today || strat.replies_today || 0;
+        const qt   = strat.qts_today || 0;
+        const setN = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setN('xm-orig-today', orig);
+        setN('xm-eng-today', eng);
+        setN('xm-qt-today', qt);
+        setN('xm-total-today', orig + eng + qt);
+
+        // Next unachieved milestone
+        const milestones = (data.milestones || []).filter(m => !m.achieved);
+        if (milestones.length > 0) {
+            const ms = milestones[0];
+            const target = typeof ms.target === 'number' ? ms.target : 1;
+            const current = typeof ms.current === 'number' ? ms.current : 0;
+            const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+            const nameEl = document.getElementById('xm-ms-name');
+            const pctEl  = document.getElementById('xm-ms-pct');
+            const barEl  = document.getElementById('xm-ms-bar');
+            if (nameEl) nameEl.textContent = ms.label || '500 Followers';
+            if (pctEl)  pctEl.textContent  = pct + '%';
+            if (barEl)  setTimeout(() => barEl.style.width = pct + '%', 100);
+        }
     }
 
     window.openXDashboard = async function() {
