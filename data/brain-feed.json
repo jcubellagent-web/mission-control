@@ -1,18 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-31T15:24:50Z",
-  "objective": "Researching Moltworld \u2014 complete \u00b7 awaiting next instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-31T15:33:44Z",
+  "objective": "Joining MoltWorld",
+  "status": "active",
   "steps": [
     {
-      "label": "Searching web",
-      "status": "done",
-      "tool": "web_search"
+      "label": "Registering agent",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "web_search",
-  "updatedAt": "2026-03-31T15:25:18Z",
-  "checkedAt": "2026-03-31T15:24:50Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-03-31T15:33:44Z",
+  "checkedAt": "2026-03-31T15:33:44Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
