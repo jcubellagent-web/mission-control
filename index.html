@@ -6533,8 +6533,8 @@
             if (statusEl) statusEl.textContent = json.ok ? '✓ Done' : ('Error: ' + (json.error || 'unknown'));
             setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
         } catch(e) {
-            if (statusEl) statusEl.textContent = '⚠ Server offline';
-            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
+            if (statusEl) { statusEl.textContent = '⚠ Controls unavailable on mobile'; statusEl.style.opacity='0.5'; }
+            setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.style.opacity='1'; } }, 3000);
         }
     };
 
