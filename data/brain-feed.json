@@ -1,23 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-03-31T00:58:47Z",
-  "objective": "JAIN git conflict fixed, intelligence feed push unblocked",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-03-31T01:01:11Z",
+  "objective": "Voice message received",
+  "status": "active",
   "steps": [
     {
-      "label": "Parsed",
-      "status": "done",
+      "label": "Receiving audio",
+      "status": "active",
       "tool": "openclaw"
-    },
-    {
-      "label": "Fixing",
-      "status": "done",
-      "tool": "exec"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-03-31T00:59:43Z",
-  "checkedAt": "2026-03-31T00:58:47Z",
+  "currentTool": "openclaw",
+  "updatedAt": "2026-03-31T01:01:11Z",
+  "checkedAt": "2026-03-31T01:01:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
