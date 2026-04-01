@@ -1282,7 +1282,43 @@
         body:not(.phone-mode) .card-x-mobile { display: none !important; }
         body.phone-mode .card-x-mobile { display: none !important; }
         body:not(.phone-mode) .card-moltworld-mobile { display: none !important; }
-        body.phone-mode .card-moltworld-mobile { display: flex !important; }
+        body.phone-mode .card-moltworld-mobile { display: none !important; }
+
+        /* ── MoltWorld popup button row (phone-mode only) ── */
+        .mw-popup-btn-row { display: none; }
+        body.phone-mode .mw-popup-btn-row {
+            display: flex;
+            padding: 0 8px;
+            margin-bottom: 8px;
+        }
+        .mw-popup-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(10,24,20,0.97) 0%, rgba(6,20,16,0.99) 100%);
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 14px;
+            padding: 10px 16px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            box-shadow: 0 0 0 0.5px rgba(16,185,129,0.08) inset, 0 4px 16px rgba(0,0,0,0.4);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mw-popup-btn:active { border-color: rgba(16,185,129,0.5); box-shadow: 0 0 12px rgba(16,185,129,0.2); }
+        .mw-popup-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+        .mw-popup-dot.online { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.6); }
+        .mw-popup-globe { font-size: 1rem; }
+        .mw-popup-label { flex: 1; text-align: left; color: rgba(255,255,255,0.85); }
+        .mw-popup-sim { color: #10b981; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+        .mw-popup-arrow { color: rgba(255,255,255,0.3); font-size: 0.8rem; margin-left: 4px; }
 
         body.phone-mode .card-x-mobile {
             background: linear-gradient(145deg, rgba(10,14,24,0.97) 0%, rgba(6,10,20,0.99) 100%);
@@ -2855,6 +2891,17 @@
 
         <div class="stats-row" id="stats-row"></div>
 
+        <!-- MoltWorld popup button — phone-mode only (desktop uses stats-row bubble) -->
+        <div class="mw-popup-btn-row" id="mw-popup-btn-row">
+            <button class="mw-popup-btn" onclick="window.openMoltWorldDashboard && window.openMoltWorldDashboard()">
+                <span class="mw-popup-dot" id="mw-popup-dot"></span>
+                <span class="mw-popup-globe">🌍</span>
+                <span class="mw-popup-label">MoltWorld</span>
+                <span class="mw-popup-sim" id="mw-popup-sim">–</span>
+                <span class="mw-popup-arrow">↗</span>
+            </button>
+        </div>
+
         <div class="kiosk-main">
             <!-- LEFT COL: hero-grid (2-row grid: Brain Feed top, Jobs+Model bottom) -->
             <div class="hero-grid">
@@ -2936,42 +2983,7 @@
                     </button>
                 </div>
 
-                <!-- MoltWorld mobile card -->
-                <div class="card card-moltworld-mobile">
-                    <div class="mwm-header">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <span class="mwm-logo">🌍</span>
-                            <span class="mwm-title">MoltWorld</span>
-                            <span class="mwm-online-dot" id="mwm-online-dot"></span>
-                        </div>
-                        <span class="mwm-updated" id="mwm-updated">–</span>
-                    </div>
-                    <div class="mwm-stats-row" style="margin-top:8px;">
-                        <div class="mwm-stat-pill">
-                            <span class="mwm-stat-val" id="mwm-sim">–</span>
-                            <span class="mwm-stat-lbl">SIM</span>
-                        </div>
-                        <div class="mwm-stat-pill">
-                            <span class="mwm-stat-val" id="mwm-pos" style="font-size:0.78rem;">–</span>
-                            <span class="mwm-stat-lbl">Position</span>
-                        </div>
-                        <div class="mwm-stat-pill">
-                            <span class="mwm-stat-val" id="mwm-nearby">–</span>
-                            <span class="mwm-stat-lbl">Nearby</span>
-                        </div>
-                        <div class="mwm-stat-pill">
-                            <span class="mwm-stat-val" id="mwm-blocks">–</span>
-                            <span class="mwm-stat-lbl">Built</span>
-                        </div>
-                    </div>
-                    <div class="mwm-online-status" style="margin-top:6px;">
-                        <span class="mwm-online-text" id="mwm-status-text">–</span>
-                    </div>
-                    <button class="x-mobile-open-btn" style="border-color:rgba(16,185,129,0.3);margin-top:8px;" onclick="window.openMoltWorldDashboard && window.openMoltWorldDashboard()">
-                        🌍 Full MoltWorld Dashboard
-                        <span style="opacity:0.5;font-size:0.85rem;">↗</span>
-                    </button>
-                </div>
+
 
                 <!-- Bottom-left: Jobs + Model side by side -->
                 <div class="kiosk-bottom-left">
@@ -7031,14 +7043,12 @@
         // Last Thought
         setEl('mw-last-thought', data?.last_thought || '—');
 
-        // Mobile card
+        // Mobile popup button
         const mwmDot = document.getElementById('mwm-online-dot');
         if (mwmDot) { mwmDot.classList.toggle('online', isOnline); }
-        setEl('mwm-sim', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(3) : '–');
-        setEl('mwm-pos', data?.position_x != null ? `(${data.position_x},${data.position_y})` : '–');
-        setEl('mwm-nearby', data?.nearby_agents ? data.nearby_agents.length : '–');
-        setEl('mwm-blocks', data?.blocks_built != null ? data.blocks_built : '–');
-        setEl('mwm-status-text', isOnline ? `Online · ${data?.earning_rate || '0.1 SIM/hr'}` : 'Offline');
+        const mwPopupDot = document.getElementById('mw-popup-dot');
+        if (mwPopupDot) { mwPopupDot.classList.toggle('online', isOnline); }
+        setEl('mw-popup-sim', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(3) + ' SIM' : '–');
         if (data?.updatedAt) {
             const mwmUpd = document.getElementById('mwm-updated');
             if (mwmUpd) {

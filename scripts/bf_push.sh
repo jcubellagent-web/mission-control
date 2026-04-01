@@ -24,11 +24,13 @@ try:
         s = d.get(key, {})
         m = s.get('model')
         if m:
+            import re
             m = m.replace('claude-sonnet-4-6','Sonnet 4.6').replace('claude-sonnet-4','Sonnet 4') \
                  .replace('claude-opus-4','Opus 4').replace('claude-haiku-4','Haiku 4') \
                  .replace('gemini-2.5-flash','Gemini 2.5 Flash').replace('gemini-2.5-pro','Gemini 2.5 Pro') \
                  .replace('gpt-4o','GPT-4o').replace('gpt-4.1','GPT-4.1').replace('gpt-5','GPT-5') \
                  .replace('anthropic/','').replace('google/','').replace('openai/','').replace('openrouter/','')
+            m = re.sub(r'-codex\b', '', m, flags=re.IGNORECASE)
             result = m
             break
 except:
