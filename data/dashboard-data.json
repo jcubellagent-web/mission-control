@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Writing MoltWorld X thread \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-04-01T03:55:02Z"
+    "updatedAt": "2026-04-01T04:00:02Z"
   },
   "contextWindow": {
     "usedTokens": 38460,
@@ -34,9 +34,9 @@
   },
   "modelUsage": {
     "session": 11.193221,
-    "daily": 2.916447,
+    "daily": 0.0,
     "weekly": 24.051213,
-    "monthly": 60.007633,
+    "monthly": 0.0,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -72,7 +72,7 @@
         "outputTokens": 123906,
         "totalTokens": 124054,
         "sessionCost": 7.567616249999999,
-        "dailyCost": 1.98960915,
+        "dailyCost": 0.0,
         "weeklyCost": 7.567616249999999,
         "sessions": 5,
         "isGemini": false,
@@ -98,7 +98,7 @@
         "outputTokens": 41230,
         "totalTokens": 1921806,
         "sessionCost": 1.5785362900000004,
-        "dailyCost": 0.9268375400000001,
+        "dailyCost": 0.0,
         "weeklyCost": 1.5785362900000004,
         "sessions": 8,
         "isGemini": true,
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-01T03:55:05Z",
+    "lastUpdated": "2026-04-01T04:00:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -169,15 +169,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.916447,
+      "daily": 0.0,
       "total": 12.119831,
-      "monthly": 60.007633
+      "monthly": 0.0
     }
   },
   "moltWorld": {
-    "sim_balance": 1.234139,
-    "total_earned": 1.234139,
-    "online_time": "12h 20m",
+    "sim_balance": 1.242444,
+    "total_earned": 1.242444,
+    "online_time": "12h 25m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -187,16 +187,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-01T03:55:06Z"
+    "updatedAt": "2026-04-01T04:00:06Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.9,
-      "cpu_user": 9.96,
-      "cpu_sys": 13.89,
-      "load1": 1.04,
-      "load5": 1.65,
-      "load15": 1.8,
+      "cpu_pct": 25.3,
+      "cpu_user": 10.98,
+      "cpu_sys": 14.29,
+      "load1": 1.82,
+      "load5": 1.73,
+      "load15": 1.79,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -206,12 +206,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.7,
-      "cpu_user": 2.73,
-      "cpu_sys": 10.95,
-      "load1": 1.85,
-      "load5": 1.78,
-      "load15": 1.75,
+      "cpu_pct": 12.1,
+      "cpu_user": 2.68,
+      "cpu_sys": 9.39,
+      "load1": 1.62,
+      "load5": 1.62,
+      "load15": 1.67,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -233,19 +233,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-01T03:55:02Z"
+      "lastChecked": "2026-04-01T04:00:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-01T03:55:02Z"
+      "lastChecked": "2026-04-01T04:00:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-01T03:55:02Z"
+      "lastChecked": "2026-04-01T04:00:02Z"
     }
   ],
   "crons": [
@@ -318,7 +318,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Competition Lineups",
@@ -329,7 +329,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Breaking News Scanner",
@@ -360,7 +360,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Pre-Market",
@@ -372,7 +372,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T07:00:00"
+      "lastRun": "2026-04-01T07:00:00"
     },
     {
       "name": "X Market Open",
@@ -384,7 +384,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T08:00:00"
+      "lastRun": "2026-04-01T08:00:00"
     },
     {
       "name": "X Mover",
@@ -396,7 +396,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T11:00:00"
+      "lastRun": "2026-04-01T11:00:00"
     },
     {
       "name": "X Hot Take",
@@ -408,7 +408,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T12:00:00"
+      "lastRun": "2026-04-01T12:00:00"
     },
     {
       "name": "X Market Close",
@@ -420,7 +420,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T17:00:00"
+      "lastRun": "2026-04-01T17:00:00"
     },
     {
       "name": "X Prime Take",
@@ -432,7 +432,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T21:00:00"
+      "lastRun": "2026-04-01T21:00:00"
     },
     {
       "name": "X Nightcap",
@@ -444,7 +444,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T22:00:00"
+      "lastRun": "2026-04-01T22:00:00"
     },
     {
       "name": "X Strategic Replies",
@@ -510,7 +510,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-03-31T20:00:00"
+      "lastRun": "2026-04-01T20:00:00"
     },
     {
       "name": "Intelligence Feed",
@@ -527,55 +527,55 @@
             "time": "7:15 AM",
             "mode": "Full",
             "label": "Market open (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "10:00 AM",
             "mode": "Full",
             "label": "Mid-morning",
-            "done": true
+            "done": false
           },
           {
             "time": "12:00 PM",
             "mode": "Full",
             "label": "Midday (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "2:00 PM",
             "mode": "Full",
             "label": "Pulse (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Full",
             "label": "Close",
-            "done": true
+            "done": false
           },
           {
             "time": "6:00 PM",
             "mode": "Full",
             "label": "Evening (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "6:15 PM",
             "mode": "Full",
             "label": "Evening (weekend)",
-            "done": true
+            "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Full",
             "label": "Late (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Full",
             "label": "Wrap (weekday)",
-            "done": true
+            "done": false
           }
         ]
       }
@@ -584,25 +584,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-01T03:55:05Z",
+      "time": "2026-04-01T04:00:05Z",
       "event": "Session spend: $11.19"
     },
     {
-      "time": "2026-04-01T03:55:02Z",
+      "time": "2026-04-01T04:00:02Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-01T03:55:02Z",
+      "time": "2026-04-01T04:00:02Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-01T03:55:02Z",
+      "time": "2026-04-01T04:00:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-01T03:55:02Z",
+      "time": "2026-04-01T04:00:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-01T03:55:02Z"
+  "lastUpdated": "2026-04-01T04:00:02Z"
 }
