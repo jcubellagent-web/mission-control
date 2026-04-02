@@ -1,17 +1,18 @@
 {
-  "active": false,
-  "objective": "Intel FULL brief sent",
-  "status": "idle",
-  "updatedAt": "2026-04-02T03:02:51Z",
-  "model": "GPT-5.1-codex",
-  "messageReceived": "2026-04-02T03:00:00Z",
+  "active": true,
+  "messageReceived": "2026-04-02T05:23:06Z",
+  "objective": "Auditing April 1st crons",
+  "status": "active",
   "steps": [
     {
-      "label": "Starting",
-      "status": "done",
-      "tool": "intelligence_feed"
+      "label": "Checking cron logs",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "intelligence_feed",
-  "checkedAt": "2026-04-02T03:00:00Z"
+  "currentTool": "exec",
+  "updatedAt": "2026-04-02T05:23:06Z",
+  "checkedAt": "2026-04-02T05:23:06Z",
+  "idleUpdatedAt": "2026-03-28T03:55:01Z",
+  "model": "Sonnet 4.6"
 }
