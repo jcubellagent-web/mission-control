@@ -23,18 +23,18 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Fixing all cron errors \u2014 complete \u00b7 awaiting next instruction \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-04-02T11:10:02Z"
+    "updatedAt": "2026-04-02T11:15:02Z"
   },
   "contextWindow": {
-    "usedTokens": 17080,
+    "usedTokens": 17063,
     "limitTokens": 1000000,
     "pct": 0.0171,
     "model": "gemini-2.5-flash",
     "status": "green"
   },
   "modelUsage": {
-    "session": 13.232153,
-    "daily": 4.955379,
+    "session": 13.248174,
+    "daily": 4.9714,
     "weekly": 24.051213,
     "monthly": 0.0,
     "topModels": [
@@ -51,7 +51,7 @@
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 0.7233537299999999
+        "cost": 0.7393743399999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -94,12 +94,12 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 1796052,
-        "outputTokens": 40303,
-        "totalTokens": 1836355,
-        "sessionCost": 0.7233537299999999,
-        "dailyCost": 0.07165498,
-        "weeklyCost": 0.7233537299999999,
+        "inputTokens": 1779580,
+        "outputTokens": 40152,
+        "totalTokens": 1819732,
+        "sessionCost": 0.7393743399999999,
+        "dailyCost": 0.08767559,
+        "weeklyCost": 0.7393743399999999,
         "sessions": 8,
         "isGemini": true,
         "costEstimated": false
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-02T11:10:05Z",
+    "lastUpdated": "2026-04-02T11:15:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -169,15 +169,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.955379,
-      "total": 14.158763,
+      "daily": 4.9714,
+      "total": 14.174784,
       "monthly": 0.0
     }
   },
   "moltWorld": {
-    "sim_balance": 4.356222,
-    "total_earned": 4.356222,
-    "online_time": "43h 33m",
+    "sim_balance": 4.36525,
+    "total_earned": 4.36525,
+    "online_time": "43h 39m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -187,18 +187,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-02T11:10:06Z"
+    "updatedAt": "2026-04-02T11:15:06Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.4,
-      "cpu_user": 10.16,
-      "cpu_sys": 14.19,
-      "load1": 2.49,
-      "load5": 2.34,
-      "load15": 2.29,
+      "cpu_pct": 24.3,
+      "cpu_user": 10.35,
+      "cpu_sys": 13.95,
+      "load1": 2.5,
+      "load5": 2.31,
+      "load15": 2.27,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "164Gi",
@@ -206,14 +206,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.5,
-      "cpu_user": 3.28,
-      "cpu_sys": 9.21,
-      "load1": 1.69,
-      "load5": 1.8,
-      "load15": 1.76,
+      "cpu_pct": 14.0,
+      "cpu_user": 4.0,
+      "cpu_sys": 10.0,
+      "load1": 1.4,
+      "load5": 1.64,
+      "load15": 1.7,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "77Gi",
@@ -233,19 +233,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-02T11:10:02Z"
+      "lastChecked": "2026-04-02T11:15:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-02T11:10:02Z"
+      "lastChecked": "2026-04-02T11:15:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-02T11:10:02Z"
+      "lastChecked": "2026-04-02T11:15:02Z"
     }
   ],
   "crons": [
@@ -527,7 +527,7 @@
             "time": "7:15 AM",
             "mode": "Full",
             "label": "Market open (weekday)",
-            "done": false
+            "done": true
           },
           {
             "time": "10:00 AM",
@@ -584,25 +584,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-02T11:10:05Z",
-      "event": "Session spend: $13.23"
+      "time": "2026-04-02T11:15:05Z",
+      "event": "Session spend: $13.25"
     },
     {
-      "time": "2026-04-02T11:10:02Z",
+      "time": "2026-04-02T11:15:02Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-02T11:10:02Z",
+      "time": "2026-04-02T11:15:02Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-02T11:10:02Z",
+      "time": "2026-04-02T11:15:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-02T11:10:02Z",
+      "time": "2026-04-02T11:15:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-02T11:10:02Z"
+  "lastUpdated": "2026-04-02T11:15:02Z"
 }
