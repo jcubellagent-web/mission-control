@@ -1375,12 +1375,13 @@ def load_brain_feed_file() -> Dict[str, Any] | None:
 
 # Context window limits per model (tokens)
 CONTEXT_LIMITS: Dict[str, int] = {
-    "claude-sonnet-4-6":     200_000,
+    "claude-sonnet-4-6":   1_000_000,
     "claude-sonnet-4-5":     200_000,
-    "claude-opus-4":         200_000,
+    "claude-opus-4":       1_000_000,
     "claude-haiku-3-5":      200_000,
     "gpt-5.4":               128_000,
     "gpt-5.1-codex":         128_000,
+    "gpt-4.1":               128_000,
     "gpt-4o":                128_000,
     "gemini-2.5-flash":    1_000_000,
     "gemini-2.5-pro":      1_000_000,
