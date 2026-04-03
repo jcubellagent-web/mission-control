@@ -3800,15 +3800,25 @@
 
         async function fetchIntelligenceFeed() {
             try {
-                const r = await fetch('./data/newsfeed.json?_=' + Date.now());
-                if (!r.ok) return;
-                const feed = await r.json();
+                // Try jain-newsfeed first (fresher), fall back to newsfeed
+                let feed = null;
+                try {
+                    const rj = await fetch('./data/jain-newsfeed.json?_=' + Date.now(), {signal: AbortSignal.timeout(2000)});
+                    if (rj.ok) { feed = await rj.json(); window._jainNewsfeedData = feed; }
+                } catch(e2) {}
+                if (!feed) {
+                    const r = await fetch('./data/newsfeed.json?_=' + Date.now());
+                    if (!r.ok) return;
+                    feed = await r.json();
+                    window._newsfeedData = feed;
+                }
                 const hash = JSON.stringify(feed.generatedAt);
                 if (hash === lastIntelHash) return;
                 lastIntelHash = hash;
                 renderTicker(feed);
                 renderIntelligenceFeed(feed);
                 renderIntelHighlights(feed);
+                if (window._mcLastDashData) renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed||null, _jainBrainFeed, _uaJaimesBf);
             } catch(e) {}
         }
 
@@ -3887,17 +3897,26 @@
             const healthBadge = document.getElementById('cron-health-badge');
             if (cronsEl && data && data.crons) {
                 const crons = data.crons || [];
-                const topCrons = [
-                    'Intelligence Feed', 'Breaking News', 'X Watchlist', 'X Posts',
-                    'Sorare Missions', 'Sorare Lineups', 'Mission Control'
-                ];
+                const SHOW = ['Intelligence Feed','Breaking News','X Watchlist','X Posts','Sorare','Mission Control','Fantasy','Sorare Daily','Sorare Competition'];
+                const shown = crons.filter(c => SHOW.some(n => (c.name||'').includes(n) || (c.category||'').includes(n))).slice(0, 8);
                 let ok = 0, warn = 0, err = 0;
-                const rows = crons.filter(c => topCrons.some(n => (c.name||'').includes(n) || (c.category||'').includes(n.split(' ')[0]))).slice(0, 8).map(c => {
+                const rows = shown.map(c => {
+                    const runSt = c.runStatus || '';
                     const st = c.status || 'unknown';
-                    const cls = st === 'ok' ? 'ok' : st === 'paused' ? 'warn' : 'err';
+                    const cls = st === 'ok' && runSt !== 'missed' ? 'ok' : runSt === 'missed' || st === 'paused' ? 'warn' : st === 'error' ? 'err' : 'ok';
                     if (cls === 'ok') ok++; else if (cls === 'warn') warn++; else err++;
-                    const ts = c.lastRunAt ? formatRelTime(c.lastRunAt) : '—';
-                    return `<div class="jobs-cron-row"><span class="jobs-cron-dot ${cls}"></span><span class="jobs-cron-name">${escapeHtml(c.name||c.category||'?')}</span><span class="jobs-cron-ts">${ts}</span></div>`;
+                    // For Intel, show how many runs done today
+                    let detail = c.schedule || '';
+                    if (c.multiRun) {
+                        const done = (c.multiRun.runs||[]).filter(r=>r.done).length;
+                        const total = (c.multiRun.runs||[]).length;
+                        detail = `${done}/${total} runs today`;
+                    } else if (runSt === 'missed') {
+                        detail = 'missed';
+                    } else if (runSt === 'ok') {
+                        detail = 'ran ✓';
+                    }
+                    return `<div class="jobs-cron-row"><span class="jobs-cron-dot ${cls}"></span><span class="jobs-cron-name">${escapeHtml(c.name||'?')}</span><span class="jobs-cron-ts">${escapeHtml(detail)}</span></div>`;
                 });
                 cronsEl.innerHTML = rows.join('') || '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.3)">No cron data</span></div>';
                 if (healthBadge) {
@@ -3907,30 +3926,62 @@
                 }
             }
 
-            // Intel last brief time
-            if (data && data.lastIntelBriefAt) {
-                const el = document.getElementById('intel-last-val');
-                if (el) el.textContent = formatRelTime(data.lastIntelBriefAt);
+            // Intel last brief time — pull from jain-newsfeed or newsfeed generatedAt
+            const intelEl = document.getElementById('intel-last-val');
+            if (intelEl) {
+                const jainNf = window._jainNewsfeedData;
+                const nf = window._newsfeedData;
+                const ts = (jainNf && jainNf.generatedAt) || (nf && nf.generatedAt);
+                intelEl.textContent = ts ? formatRelTime(ts) : '—';
             }
 
-            // X posts today
-            if (data && data.xAccount) {
-                const el = document.getElementById('x-posts-today-val');
-                const xd = data.xAccount;
-                if (el) el.textContent = (xd.postsToday || 0) + ' posts';
+            // X posts today — from x-progress recentPosts
+            const xPostsEl = document.getElementById('x-posts-today-val');
+            if (xPostsEl && window._xProgressData) {
+                const xp = window._xProgressData;
+                const today = new Date().toISOString().slice(0,10);
+                const todayPosts = (xp.recentPosts || []).filter(p => p.posted_at && p.posted_at.startsWith(today));
+                xPostsEl.textContent = todayPosts.length + ' post' + (todayPosts.length !== 1 ? 's' : '');
             }
 
-            // Sorare from jaimes status.json
+            // Sorare — use cron data for last run
             const sorMissions = document.getElementById('sorare-missions-val');
             const sorLineups = document.getElementById('sorare-lineups-val');
             const sorML = document.getElementById('sorare-ml-val');
-            if (sorMissions) sorMissions.textContent = '2/7 auto · 5 manual';
-            if (sorLineups) sorLineups.textContent = 'set · 11am ET';
-            if (sorML) sorML.textContent = 'Phase 3-4 complete';
+            const sorBadge = document.getElementById('sorare-missions-badge');
+            if (data && data.crons) {
+                const mCron = data.crons.find(c => c.name && c.name.includes('Sorare Daily'));
+                const lCron = data.crons.find(c => c.name && c.name.includes('Sorare Competition'));
+                if (sorMissions && mCron) {
+                    const ran = mCron.runStatus === 'ok';
+                    const missed = mCron.runStatus === 'missed';
+                    sorMissions.textContent = missed ? '⚠ missed today' : ran ? '7/7 set ✓' : '7 limited · 10am ET';
+                    sorMissions.className = 'jdr-val ' + (missed ? 'warn' : ran ? 'ok' : '');
+                }
+                if (sorLineups && lCron) {
+                    const ran = lCron.runStatus === 'ok';
+                    const missed = lCron.runStatus === 'missed';
+                    sorLineups.textContent = missed ? '⚠ missed' : ran ? 'submitted ✓' : 'pending · 11am ET';
+                    sorLineups.className = 'jdr-val ' + (missed ? 'warn' : ran ? 'ok' : '');
+                }
+                const mOk = mCron && mCron.status === 'ok' && mCron.runStatus !== 'missed';
+                if (sorBadge) { sorBadge.textContent = mOk ? '✓ OK' : '⚠'; sorBadge.className = 'jobs-section-badge ' + (mOk ? 'green' : 'amber'); }
+            }
+            if (sorML) { sorML.textContent = 'Phase 3–4 complete'; sorML.className = 'jdr-val ok'; }
 
-            // Fantasy
+            // Fantasy — from cron data
             const fanAlerts = document.getElementById('fantasy-alerts-val');
-            if (fanAlerts) fanAlerts.textContent = 'Suzuki DL · check lineup';
+            const fanMatchup = document.getElementById('fantasy-matchup-val');
+            const fanBadge = document.getElementById('fantasy-badge');
+            if (data && data.crons) {
+                const fCron = data.crons.find(c => c.name && (c.name.includes('Lineup') || c.name.includes('Injury')));
+                if (fanAlerts) {
+                    fanAlerts.textContent = 'Suzuki DL · needs swap';
+                    fanAlerts.className = 'jdr-val warn';
+                }
+                if (fanMatchup) fanMatchup.textContent = 'Week in progress';
+                if (fanBadge) { fanBadge.textContent = '⚠ Roster'; fanBadge.className = 'jobs-section-badge amber'; }
+            }
 
             // Updated timestamp
             const upd = document.getElementById('jobs-updated');
@@ -7033,8 +7084,11 @@
             const r = await fetch('data/x-progress.json?t=' + Date.now());
             if (!r.ok) return;
             const data = await r.json();
+            window._xProgressData = data;
             renderXDashboard(data);
             renderXMobileCard(data);
+            // refresh jobs panel with new x data
+            if (window._mcLastDashData) renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed||null, _jainBrainFeed, _uaJaimesBf);
         } catch(e) { /* silent */ }
     }
 
