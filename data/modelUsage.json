@@ -1,13 +1,13 @@
 {
-  "session": 16.826095,
-  "daily": 8.549321,
+  "session": 17.523769,
+  "daily": 9.246995,
   "weekly": 35.440491,
   "monthly": 11.389278,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 12.6751569
+      "cost": 13.372830149999999
     },
     {
       "name": "google/gemini-2.5-flash",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 158,
-      "outputTokens": 126222,
-      "totalTokens": 126380,
-      "sessionCost": 12.6751569,
-      "dailyCost": 7.0971498,
-      "weeklyCost": 12.6751569,
+      "inputTokens": 151,
+      "outputTokens": 124313,
+      "totalTokens": 124464,
+      "sessionCost": 13.372830149999999,
+      "dailyCost": 7.79482305,
+      "weeklyCost": 13.372830149999999,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -108,15 +108,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.173662,
-      "dailyCost": 0.173662,
-      "sessionCost": 0.173662,
+      "weeklyCost": 0.267862,
+      "dailyCost": 0.267862,
+      "sessionCost": 0.267862,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-03T04:50:05Z",
+  "lastUpdated": "2026-04-03T04:55:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -134,9 +134,9 @@
     "daily": 0.00739345,
     "weekly": 0.00739345,
     "monthly": 0.00739345,
-    "byok_daily": 0.173662,
-    "byok_weekly": 0.173662,
-    "byok_monthly": 0.173662,
+    "byok_daily": 0.26786205,
+    "byok_weekly": 0.26786205,
+    "byok_monthly": 0.26786205,
     "available": true
   },
   "elevenlabs": {
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 8.722983,
-    "total": 17.926367,
-    "monthly": 11.56294
+    "daily": 9.514857,
+    "total": 18.718241,
+    "monthly": 11.65714
   }
 }
