@@ -530,6 +530,7 @@
         .ua-agent-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; padding: 1px 5px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
         .ua-agent-tag.josh { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
         .ua-agent-tag.jain { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .ua-agent-tag.jaimes { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
         .ua-agent-tag.agent { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
         .ua-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
         .ua-dot.active { background: #e53e3e; box-shadow: 0 0 4px #e53e3e; animation: pulse-dot 1.5s infinite; }
@@ -3395,6 +3396,22 @@
             renderUnifiedActivity();
         }
 
+        // ===== JAIMES Brain Feed =====
+        let _jaimesLocalOk = false; // JAIMES is on J.A.I.N, no local server — GH Pages only
+        let lastJaimesBrainFeedHash = null;
+        let _uaJaimesBf = null;
+
+        async function fetchJaimesBrainFeed() {
+            let bf = null;
+            bf = await fetchBrainFeedFromUrl('./data/jaimes-brain-feed.json', 5000);
+            if (!bf) return;
+            const h = JSON.stringify(bf);
+            if (h === lastJaimesBrainFeedHash) return;
+            lastJaimesBrainFeedHash = h;
+            _uaJaimesBf = bf || null;
+            renderUnifiedActivity();
+        }
+
         // ===== Agent Comms =====
         let lastAgentCommsHash = null;
 
@@ -3502,7 +3519,22 @@
                 });
             }
 
-            // 4. Recent agent comms (filtered, max 3)
+            // 4. JAIMES brain feed state
+            if (_uaJaimesBf) {
+                const bf = _uaJaimesBf;
+                const isActive = bf.active === true;
+                items.push({
+                    agentClass: 'jaimes',
+                    agentLabel: 'JAIMES',
+                    dot: isActive ? 'active' : 'idle',
+                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
+                    model: '',
+                    tool: bf.currentTool || '',
+                    ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
+                });
+            }
+
+            // 5. Recent agent comms (filtered, max 3)
             const filteredComms = (_uaComms || []).filter(e => {
                 const msg = (e.message || '').toLowerCase();
                 return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
@@ -4268,6 +4300,8 @@
             setInterval(fetchJainBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             fetchJainTasks();
             setInterval(fetchJainTasks, 15000);
+            fetchJaimesBrainFeed();
+            setInterval(fetchJaimesBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             fetchAgentComms();
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
