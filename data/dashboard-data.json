@@ -17,25 +17,25 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Mission Control layout redesign + Sorare browser b",
-    "updatedAt": "2026-04-03T23:55:02Z"
+    "updatedAt": "2026-04-03T23:57:47Z"
   },
   "contextWindow": {
-    "usedTokens": 146529,
+    "usedTokens": 146018,
     "limitTokens": 1000000,
-    "pct": 0.1465,
+    "pct": 0.146,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 6.190554,
-    "daily": 6.895361,
+    "session": 6.73911,
+    "daily": 7.443916,
     "weekly": 63.661812,
     "monthly": 39.610599,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 11.768561549999998
+        "cost": 12.317116799999997
       },
       {
         "name": "openai/gpt-5.4",
@@ -62,12 +62,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 150,
-        "outputTokens": 123690,
-        "totalTokens": 123840,
-        "sessionCost": 11.768561549999998,
-        "dailyCost": 6.190554449999999,
-        "weeklyCost": 11.768561549999998,
+        "inputTokens": 148,
+        "outputTokens": 123487,
+        "totalTokens": 123635,
+        "sessionCost": 12.317116799999997,
+        "dailyCost": 6.739109699999998,
+        "weeklyCost": 12.317116799999997,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -144,7 +144,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-03T23:55:06Z",
+    "lastUpdated": "2026-04-03T23:57:50Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -173,15 +173,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 8.003698,
-      "total": 17.207082,
+      "daily": 8.552253,
+      "total": 17.755637,
       "monthly": 40.718936
     }
   },
   "moltWorld": {
-    "sim_balance": 8.027972,
-    "total_earned": 8.027972,
-    "online_time": "80h 16m",
+    "sim_balance": 8.033389,
+    "total_earned": 8.033389,
+    "online_time": "80h 20m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -191,16 +191,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-03T23:55:06Z"
+    "updatedAt": "2026-04-03T23:57:50Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.6,
-      "cpu_user": 10.29,
-      "cpu_sys": 14.27,
-      "load1": 2.02,
-      "load5": 2.38,
-      "load15": 2.43,
+      "cpu_pct": 24.8,
+      "cpu_user": 11.66,
+      "cpu_sys": 13.17,
+      "load1": 2.04,
+      "load5": 2.15,
+      "load15": 2.32,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -210,14 +210,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 3.1,
-      "cpu_sys": 10.7,
-      "load1": 1.83,
-      "load5": 1.96,
-      "load15": 2.3,
+      "cpu_pct": 25.0,
+      "cpu_user": 14.6,
+      "cpu_sys": 10.93,
+      "load1": 1.85,
+      "load5": 1.83,
+      "load15": 2.18,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -237,19 +237,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-03T23:55:02Z"
+      "lastChecked": "2026-04-03T23:57:47Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-03T23:55:02Z"
+      "lastChecked": "2026-04-03T23:57:47Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-03T23:55:02Z"
+      "lastChecked": "2026-04-03T23:57:47Z"
     }
   ],
   "crons": [
@@ -288,7 +288,7 @@
       "schedule": "Mon 9:15 AM ET",
       "description": "Reviews starting lineup, flags IL players in active slots",
       "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
+      "agent": "JAIMES",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -298,7 +298,7 @@
       "schedule": "Mon 9:00 AM",
       "description": "Checks for injuries before Monday lineup lock \u2014 runs 15 min before lineup check",
       "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
+      "agent": "JAIMES",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -308,7 +308,7 @@
       "schedule": "Wed + Fri 9am",
       "description": "Scans top free agents and recommends add/drop moves",
       "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
+      "agent": "JAIMES",
       "status": "ok",
       "errors": 0,
       "lastError": null
@@ -318,7 +318,7 @@
       "schedule": "Daily 2:00 PM ET",
       "description": "Submits all 7 daily missions via sorare_mlb_bot.py --missions-only",
       "category": "Sorare MLB",
-      "agent": "J.A.I.N",
+      "agent": "JAIMES",
       "status": "ok",
       "errors": 0,
       "lastError": null,
@@ -330,7 +330,7 @@
       "schedule": "Daily 3:00 PM ET",
       "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only",
       "category": "Sorare MLB",
-      "agent": "J.A.I.N",
+      "agent": "JAIMES",
       "status": "ok",
       "errors": 0,
       "lastError": null,
@@ -578,25 +578,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-03T23:55:06Z",
-      "event": "Session spend: $6.19"
+      "time": "2026-04-03T23:57:50Z",
+      "event": "Session spend: $6.74"
     },
     {
-      "time": "2026-04-03T23:55:02Z",
+      "time": "2026-04-03T23:57:47Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-03T23:55:02Z",
+      "time": "2026-04-03T23:57:47Z",
       "event": "20 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-03T23:55:02Z",
+      "time": "2026-04-03T23:57:47Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-03T23:55:02Z",
+      "time": "2026-04-03T23:57:47Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-03T23:55:02Z"
+  "lastUpdated": "2026-04-03T23:57:47Z"
 }
