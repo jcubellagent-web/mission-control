@@ -3195,97 +3195,37 @@
                         </div>
                     </div>
 
-                    <!-- Existing jobs card -->
-                    <div id="today-jobs-card"></div>
-
-                    <!-- Sorare Section -->
-                    <div class="jobs-section" id="jobs-sorare-section">
-                        <div class="jobs-section-header">
-                            <span class="jobs-section-icon">🃏</span>
-                            <span class="jobs-section-title">Sorare MLB</span>
-                            <span class="jobs-section-badge" id="sorare-missions-badge">—</span>
-                        </div>
-                        <div class="jobs-section-body" id="jobs-sorare-body">
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Missions</span>
-                                <span class="jdr-val" id="sorare-missions-val">—</span>
+                    <!-- Jobs — single source of truth, expanded by default -->
+                    <div id="today-jobs-card" class="jobs-expanded">
+                        <div class="tjob-category" id="tjob-cat-intelligence-feed">
+                            <div class="tjob-cat-header" onclick="window.toggleJobCategory('Intelligence Feed')">
+                                <span class="tjob-cat-emoji">⚡</span>
+                                <span class="tjob-cat-name" style="color:#60a5fa">Intelligence Feed</span>
+                                <span class="tjob-cat-count">—</span>
+                                <span class="tjob-cat-chevron">▾</span>
+                                <div class="tjob-collapsed-preview"><span class="tjob-cp-name shimmer" style="width:80px;height:0.7rem;border-radius:3px;background:rgba(255,255,255,0.07);display:inline-block"></span></div>
                             </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Lineups</span>
-                                <span class="jdr-val" id="sorare-lineups-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">ML Pipeline</span>
-                                <span class="jdr-val" id="sorare-ml-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Next Run</span>
-                                <span class="jdr-val" id="sorare-next-val">10am ET</span>
-                            </div>
+                            <div class="tjob-rows"><div style="font-size:0.65rem;color:rgba(255,255,255,0.2);padding:4px 0">Loading…</div></div>
                         </div>
                     </div>
 
-                    <!-- Fantasy Baseball Section -->
-                    <div class="jobs-section" id="jobs-fantasy-section">
-                        <div class="jobs-section-header">
-                            <span class="jobs-section-icon">⚾</span>
-                            <span class="jobs-section-title">Fantasy Baseball</span>
-                            <span class="jobs-section-badge" id="fantasy-badge">—</span>
-                        </div>
-                        <div class="jobs-section-body" id="jobs-fantasy-body">
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Matchup</span>
-                                <span class="jdr-val" id="fantasy-matchup-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Roster Alerts</span>
-                                <span class="jdr-val" id="fantasy-alerts-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">ML Pipeline</span>
-                                <span class="jdr-val" id="fantasy-ml-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Next Waivers</span>
-                                <span class="jdr-val" id="fantasy-waivers-val">Sun 8am ET</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Intel & X Section -->
-                    <div class="jobs-section" id="jobs-intel-section">
-                        <div class="jobs-section-header">
-                            <span class="jobs-section-icon">📡</span>
-                            <span class="jobs-section-title">Intel &amp; X</span>
-                            <span class="jobs-section-badge green" id="intel-badge">—</span>
-                        </div>
-                        <div class="jobs-section-body">
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Last Brief</span>
-                                <span class="jdr-val" id="intel-last-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">X Posts Today</span>
-                                <span class="jdr-val" id="x-posts-today-val">—</span>
-                            </div>
-                            <div class="jobs-detail-row">
-                                <span class="jdr-label">Breaking Scans</span>
-                                <span class="jdr-val" id="breaking-scans-val">every 5m</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cron Health Section -->
-                    <div class="jobs-section" id="jobs-crons-section">
-                        <div class="jobs-section-header">
-                            <span class="jobs-section-icon">⏱</span>
-                            <span class="jobs-section-title">Cron Health</span>
-                            <span class="jobs-section-badge" id="cron-health-badge">—</span>
-                        </div>
-                        <div class="jobs-section-body" id="jobs-crons-body">
-                            <!-- populated by renderJobsCronHealth() -->
-                        </div>
-                    </div>
+                    <!-- Hidden IDs needed by renderJobsPanel JS — not visible -->
+                    <span id="sorare-missions-val" style="display:none"></span>
+                    <span id="sorare-lineups-val" style="display:none"></span>
+                    <span id="sorare-ml-val" style="display:none"></span>
+                    <span id="sorare-next-val" style="display:none"></span>
+                    <span id="sorare-missions-badge" style="display:none"></span>
+                    <span id="fantasy-matchup-val" style="display:none"></span>
+                    <span id="fantasy-alerts-val" style="display:none"></span>
+                    <span id="fantasy-ml-val" style="display:none"></span>
+                    <span id="fantasy-waivers-val" style="display:none"></span>
+                    <span id="fantasy-badge" style="display:none"></span>
+                    <span id="intel-last-val" style="display:none"></span>
+                    <span id="x-posts-today-val" style="display:none"></span>
+                    <span id="breaking-scans-val" style="display:none"></span>
+                    <span id="intel-badge" style="display:none"></span>
+                    <span id="jobs-crons-body" style="display:none"></span>
+                    <span id="cron-health-badge" style="display:none"></span>
                 </div>
             </div>
         </div><!-- /kiosk-main -->
@@ -5872,8 +5812,9 @@
         window._tjobCollapsed = window._tjobCollapsed || {};
         window._tjobCollapseInited = window._tjobCollapseInited || false;
         function isCatCollapsed(cat) {
-            // If user hasn't explicitly toggled, default to collapsed
-            return window._tjobCollapsed[cat] !== false;
+            // Default to EXPANDED — user can manually collapse
+            // Only collapsed if user explicitly set it to true
+            return window._tjobCollapsed[cat] === true;
         }
         window.toggleJobCategory = function(cat) {
             window._tjobCollapsed[cat] = isCatCollapsed(cat) ? false : true;
