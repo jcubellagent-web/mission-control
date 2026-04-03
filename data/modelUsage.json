@@ -1,13 +1,13 @@
 {
-  "session": 13.34329,
-  "daily": 5.066516,
+  "session": 14.727074,
+  "daily": 6.450301,
   "weekly": 35.440491,
   "monthly": 11.389278,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 9.2600262
+      "cost": 10.643811
     },
     {
       "name": "google/gemini-2.5-flash",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 151,
-      "outputTokens": 123983,
-      "totalTokens": 124134,
-      "sessionCost": 9.2600262,
-      "dailyCost": 3.6820191000000007,
-      "weeklyCost": 9.2600262,
+      "inputTokens": 173,
+      "outputTokens": 129587,
+      "totalTokens": 129760,
+      "sessionCost": 10.643811,
+      "dailyCost": 5.065803900000001,
+      "weeklyCost": 10.643811,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -108,15 +108,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.042961,
-      "dailyCost": 0.042961,
-      "sessionCost": 0.042961,
+      "weeklyCost": 0.122943,
+      "dailyCost": 0.122943,
+      "sessionCost": 0.122943,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-03T04:20:06Z",
+  "lastUpdated": "2026-04-03T04:25:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -134,9 +134,9 @@
     "daily": 0.00739345,
     "weekly": 0.00739345,
     "monthly": 0.00739345,
-    "byok_daily": 0.0429607,
-    "byok_weekly": 0.0429607,
-    "byok_monthly": 0.0429607,
+    "byok_daily": 0.12294275,
+    "byok_weekly": 0.12294275,
+    "byok_monthly": 0.12294275,
     "available": true
   },
   "elevenlabs": {
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 5.109477,
-    "total": 14.31286,
-    "monthly": 11.432239
+    "daily": 6.573244,
+    "total": 15.776627,
+    "monthly": 11.512221
   }
 }
