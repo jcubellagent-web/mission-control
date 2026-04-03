@@ -4710,6 +4710,14 @@
             setInterval(fetchJaimesBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
             // Pre-render jobs panel skeleton immediately so sections show on load
             renderJobsPanel(null, null, null, null);
+            // Restore cached jobs HTML instantly — replaced when fresh data arrives
+            try {
+                const cached = localStorage.getItem('mc_jobs_html');
+                if (cached) {
+                    const el = document.getElementById('today-jobs-card');
+                    if (el) el.innerHTML = cached;
+                }
+            } catch(e) {}
             fetchAgentComms();
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
@@ -5738,6 +5746,8 @@
             }).join('');
 
             todayJobsCard.innerHTML = cronHtml || '<div class="empty-state">No scheduled jobs</div>';
+            // Cache cron HTML for instant next-load
+            try { localStorage.setItem('mc_jobs_html', cronHtml); } catch(e) {}
             } // end crons sectionChanged guard
 
             // Render the enhanced jobs panel with agent status + sections
