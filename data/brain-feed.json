@@ -1,17 +1,17 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-04-03T01:18:28Z",
-  "objective": "Pulling Gemma 4 26B on JAIN",
-  "status": "active",
+  "objective": "Pulling Gemma 4 26B on JAIN \u2014 complete \u00b7 awaiting next instruction",
+  "status": "idle",
   "steps": [
     {
       "label": "ollama pull",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-04-03T01:18:28Z",
+  "updatedAt": "2026-04-03T01:34:36Z",
   "checkedAt": "2026-04-03T01:18:28Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
