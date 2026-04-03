@@ -1100,17 +1100,16 @@
         /* RIGHT col: priority-grid spans both rows — Today's Jobs full height */
         body.kiosk-mode .priority-grid {
             grid-column: 2; grid-row: 1 / 3;
-            display: grid !important;
-            grid-template-columns: 1fr;
-            grid-template-rows: 1fr;
-            gap: 12px;
+            display: flex !important;
+            flex-direction: column;
             min-height: 0;
+            overflow-y: auto;
         }
-        /* Jobs card fills full right column */
+        /* Jobs card fills full right column, scrolls as one unit */
         body.kiosk-mode .card-jobs-full {
-            grid-column: 1; grid-row: 1 / -1;
-            min-height: 0; overflow-y: auto;
+            min-height: 0;
             display: flex; flex-direction: column;
+            flex: 1;
         }
         /* Legacy card-newsfeed hidden in desktop — intel highlights takes its place */
         body.kiosk-mode .card-newsfeed { display: none; }
@@ -1851,7 +1850,6 @@
         }
         body.kiosk-mode #brain-feed-card,
         body.kiosk-mode #jain-brain-feed-card,
-        body.kiosk-mode #today-jobs-card,
         body.kiosk-mode #model-usage-card,
         body.kiosk-mode #events-list,
         body.kiosk-mode #device-list {
@@ -2291,7 +2289,7 @@
         /* ===== Card content overflow fixes ===== */
         #brain-feed-card { overflow-y: auto; max-height: 420px; }
         #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
-        #today-jobs-card { overflow-y: auto; max-height: 380px; }
+        #today-jobs-card { overflow-y: visible; max-height: none; }
         #model-usage-card { overflow-y: auto; flex: 1; min-height: 0; }
         #events-list { overflow-y: auto; max-height: 240px; }
         #device-list { overflow-y: auto; max-height: 240px; }
