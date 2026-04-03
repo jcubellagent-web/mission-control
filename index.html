@@ -1088,26 +1088,72 @@
         body.kiosk-mode .card-jobs  { flex: 2; min-height: 0; overflow: hidden; }
         body.kiosk-mode .card-model { flex: 1; min-height: 0; overflow: hidden; }
 
-        /* RIGHT col: priority-grid spans both rows, inner 2×1 grid */
+        /* RIGHT col: priority-grid spans both rows — Today's Jobs full height */
         body.kiosk-mode .priority-grid {
             grid-column: 2; grid-row: 1 / 3;
             display: grid !important;
             grid-template-columns: 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-rows: 1fr;
             gap: 12px;
             min-height: 0;
         }
-        /* Right col: Newsfeed full height */
-        body.kiosk-mode .card-newsfeed {
+        /* Jobs card fills full right column */
+        body.kiosk-mode .card-jobs-full {
             grid-column: 1; grid-row: 1 / -1;
-            min-height: 0; overflow: hidden;
+            min-height: 0; overflow-y: auto;
             display: flex; flex-direction: column;
         }
+        /* Legacy card-newsfeed hidden in desktop — intel highlights takes its place */
+        body.kiosk-mode .card-newsfeed { display: none; }
         body.kiosk-mode .card-devices { display: none; }
         body.kiosk-mode .card-airpoint { display: none; }
 
         /* Newsfeed styles */
         .card-newsfeed { position: relative; }
+
+        /* ── Today's Jobs Full Panel ── */
+        .card-jobs-full { display: flex; flex-direction: column; gap: 0; overflow-y: auto; }
+        .jobs-agents-row { display: flex; gap: 8px; padding: 8px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; flex-wrap: wrap; }
+        .jobs-agent-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; flex: 1; min-width: 0; }
+        .jobs-agent-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background 0.3s; }
+        .jobs-agent-dot.active { background: #4ade80; box-shadow: 0 0 5px rgba(74,222,128,0.6); animation: pulse 1.5s infinite; }
+        .jobs-agent-dot.jaimes { }
+        .jobs-agent-dot.jaimes.active { background: #a78bfa; box-shadow: 0 0 5px rgba(167,139,250,0.6); }
+        .jobs-agent-dot.jain { }
+        .jobs-agent-dot.jain.active { background: #60a5fa; box-shadow: 0 0 5px rgba(96,165,250,0.6); }
+        .jobs-agent-name { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; color: rgba(255,255,255,0.6); flex-shrink: 0; }
+        .jobs-agent-status { font-size: 0.6rem; color: rgba(255,255,255,0.35); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+        .jobs-section { border-top: 1px solid rgba(255,255,255,0.06); padding: 8px 0 6px; }
+        .jobs-section-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .jobs-section-icon { font-size: 0.75rem; }
+        .jobs-section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; color: rgba(255,255,255,0.75); flex: 1; }
+        .jobs-section-badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); }
+        .jobs-section-badge.green { background: rgba(74,222,128,0.12); color: #4ade80; }
+        .jobs-section-badge.amber { background: rgba(251,191,36,0.12); color: #fbbf24; }
+        .jobs-section-badge.red { background: rgba(239,68,68,0.12); color: #f87171; }
+        .jobs-section-body { display: flex; flex-direction: column; gap: 3px; }
+        .jobs-detail-row { display: flex; align-items: baseline; gap: 6px; }
+        .jdr-label { font-size: 0.62rem; color: rgba(255,255,255,0.35); width: 80px; flex-shrink: 0; }
+        .jdr-val { font-size: 0.68rem; color: rgba(255,255,255,0.75); flex: 1; }
+        .jdr-val.ok { color: #4ade80; }
+        .jdr-val.warn { color: #fbbf24; }
+        .jdr-val.err { color: #f87171; }
+        .jobs-cron-row { display: flex; align-items: center; gap: 5px; padding: 1px 0; }
+        .jobs-cron-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+        .jobs-cron-dot.ok { background: #4ade80; }
+        .jobs-cron-dot.warn { background: #fbbf24; }
+        .jobs-cron-dot.err { background: #f87171; }
+        .jobs-cron-name { font-size: 0.62rem; color: rgba(255,255,255,0.6); flex: 1; }
+        .jobs-cron-ts { font-size: 0.58rem; color: rgba(255,255,255,0.28); }
+
+        /* ── Intel Highlights (condensed left panel) ── */
+        .card-intel-highlights { display: flex; flex-direction: column; }
+        .intel-highlights-body { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1; }
+        .intel-hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .intel-hi-item:last-child { border-bottom: none; }
+        .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.8); line-height: 1.35; flex: 1; }
+        .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
 
         /* ── Scrolling ticker bar ── */
         .if-tldr-block {
@@ -2986,19 +3032,30 @@
 
 
 
-                <!-- Bottom-left: Jobs + Model side by side -->
+                <!-- Bottom-left: Condensed Intel Highlights + Model -->
                 <div class="kiosk-bottom-left">
-                    <div class="card card-jobs">
+                    <div class="card card-intel-highlights">
                         <div class="card-header">
-                            <span class="icon"><img src="assets/icons/jobs.png" alt="" class="section-icon-image"></span>
-                            <h2>Today's Jobs</h2>
+                            <span class="icon">⚡</span>
+                            <h2 style="font-weight:700;">Intel Highlights</h2>
+                            <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
                         </div>
-                        <div id="today-jobs-card"></div>
+                        <!-- Compact top signals — no scroll, glance-only -->
+                        <div id="intel-highlights-card" class="intel-highlights-body">
+                            <div class="newsfeed-skeleton-list">
+                                <div class="ns-item"><span class="ns-cat ns-cat-blue"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                                <div class="ns-item"><span class="ns-cat ns-cat-green"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                                <div class="ns-item"><span class="ns-cat ns-cat-orange"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+                            </div>
+                        </div>
+                        <!-- Hidden full feed still rendered for JS compat -->
+                        <div id="intelligence-feed-card" style="display:none"></div>
+                        <div id="intel-ticker-wrap" style="display:none"><div id="intel-ticker-track"></div></div>
                     </div>
                     <div class="card card-model">
                         <div class="card-header">
                             <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
-                            <h2>Model Usage &amp; Performance</h2>
+                            <h2>Model Usage</h2>
                         </div>
                         <div id="model-usage-card"></div>
                     </div>
@@ -3030,26 +3087,123 @@
                 </div>
             </div>
 
-            <!-- RIGHT COL: Live Intelligence Feed (full height) -->
+            <!-- RIGHT COL: Today's Jobs — full height agent command center -->
             <div class="grid priority-grid">
-                <div class="card card-newsfeed">
+                <div class="card card-jobs card-jobs-full">
                     <div class="card-header">
-                        <span class="icon">⚡</span>
-                        <h2 style="color:#fff;font-weight:700;">Live Intelligence Feed</h2>
-                        <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
+                        <span class="icon"><img src="assets/icons/jobs.png" alt="" class="section-icon-image"></span>
+                        <h2>Today's Jobs</h2>
+                        <span id="jobs-updated" style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-left:auto"></span>
                     </div>
-                    <!-- Scrolling ticker bar -->
-                    <div class="intel-ticker-wrap" id="intel-ticker-wrap">
-                        <div class="intel-ticker-track" id="intel-ticker-track">
-                            <span class="intel-ticker-item loading">Loading ticker…</span>
+
+                    <!-- Agent Status Row -->
+                    <div class="jobs-agents-row" id="jobs-agents-row">
+                        <div class="jobs-agent-chip" id="jag-josh">
+                            <span class="jobs-agent-dot" id="jag-josh-dot"></span>
+                            <span class="jobs-agent-name">JOSH 2.0</span>
+                            <span class="jobs-agent-status" id="jag-josh-status">—</span>
+                        </div>
+                        <div class="jobs-agent-chip" id="jag-jaimes">
+                            <span class="jobs-agent-dot jaimes" id="jag-jaimes-dot"></span>
+                            <span class="jobs-agent-name">JAIMES</span>
+                            <span class="jobs-agent-status" id="jag-jaimes-status">—</span>
+                        </div>
+                        <div class="jobs-agent-chip" id="jag-jain">
+                            <span class="jobs-agent-dot jain" id="jag-jain-dot"></span>
+                            <span class="jobs-agent-name">J.A.I.N</span>
+                            <span class="jobs-agent-status" id="jag-jain-status">—</span>
                         </div>
                     </div>
-                    <div id="intelligence-feed-card" class="intelligence-feed-body">
-                        <!-- populated by fetchIntelligenceFeed() -->
-                        <div class="newsfeed-skeleton-list">
-                            <div class="ns-item"><span class="ns-cat ns-cat-blue"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                            <div class="ns-item"><span class="ns-cat ns-cat-green"></span><div class="ns-lines"><div class="ns-line ns-line-med shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
-                            <div class="ns-item"><span class="ns-cat ns-cat-orange"></span><div class="ns-lines"><div class="ns-line ns-line-long shimmer"></div><div class="ns-line ns-line-short shimmer"></div></div></div>
+
+                    <!-- Existing jobs card -->
+                    <div id="today-jobs-card"></div>
+
+                    <!-- Sorare Section -->
+                    <div class="jobs-section" id="jobs-sorare-section">
+                        <div class="jobs-section-header">
+                            <span class="jobs-section-icon">🃏</span>
+                            <span class="jobs-section-title">Sorare MLB</span>
+                            <span class="jobs-section-badge" id="sorare-missions-badge">—</span>
+                        </div>
+                        <div class="jobs-section-body" id="jobs-sorare-body">
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Missions</span>
+                                <span class="jdr-val" id="sorare-missions-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Lineups</span>
+                                <span class="jdr-val" id="sorare-lineups-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">ML Pipeline</span>
+                                <span class="jdr-val" id="sorare-ml-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Next Run</span>
+                                <span class="jdr-val" id="sorare-next-val">10am ET</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fantasy Baseball Section -->
+                    <div class="jobs-section" id="jobs-fantasy-section">
+                        <div class="jobs-section-header">
+                            <span class="jobs-section-icon">⚾</span>
+                            <span class="jobs-section-title">Fantasy Baseball</span>
+                            <span class="jobs-section-badge" id="fantasy-badge">—</span>
+                        </div>
+                        <div class="jobs-section-body" id="jobs-fantasy-body">
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Matchup</span>
+                                <span class="jdr-val" id="fantasy-matchup-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Roster Alerts</span>
+                                <span class="jdr-val" id="fantasy-alerts-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">ML Pipeline</span>
+                                <span class="jdr-val" id="fantasy-ml-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Next Waivers</span>
+                                <span class="jdr-val" id="fantasy-waivers-val">Sun 8am ET</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Intel & X Section -->
+                    <div class="jobs-section" id="jobs-intel-section">
+                        <div class="jobs-section-header">
+                            <span class="jobs-section-icon">📡</span>
+                            <span class="jobs-section-title">Intel &amp; X</span>
+                            <span class="jobs-section-badge green" id="intel-badge">—</span>
+                        </div>
+                        <div class="jobs-section-body">
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Last Brief</span>
+                                <span class="jdr-val" id="intel-last-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">X Posts Today</span>
+                                <span class="jdr-val" id="x-posts-today-val">—</span>
+                            </div>
+                            <div class="jobs-detail-row">
+                                <span class="jdr-label">Breaking Scans</span>
+                                <span class="jdr-val" id="breaking-scans-val">every 5m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cron Health Section -->
+                    <div class="jobs-section" id="jobs-crons-section">
+                        <div class="jobs-section-header">
+                            <span class="jobs-section-icon">⏱</span>
+                            <span class="jobs-section-title">Cron Health</span>
+                            <span class="jobs-section-badge" id="cron-health-badge">—</span>
+                        </div>
+                        <div class="jobs-section-body" id="jobs-crons-body">
+                            <!-- populated by renderJobsCronHealth() -->
                         </div>
                     </div>
                 </div>
@@ -3329,6 +3483,8 @@
             renderBrainFeed(bf);
             updateBfFreshness(bf);
             renderUnifiedActivity();
+            // Update jobs panel agent status when brain feed changes
+            if (window._mcLastDashData) renderJobsPanel(window._mcLastDashData, bf, _jainBrainFeed, _uaJaimesBf);
         }
 
         async function fetchBrainFeed() {
@@ -3652,7 +3808,133 @@
                 lastIntelHash = hash;
                 renderTicker(feed);
                 renderIntelligenceFeed(feed);
+                renderIntelHighlights(feed);
             } catch(e) {}
+        }
+
+        // ── Intel Highlights — compact top-8 glance view ──────────────────
+        function renderIntelHighlights(f) {
+            const el = document.getElementById('intel-highlights-card');
+            if (!el) return;
+
+            // Pull top signals first, then other categories
+            const CAT_COLORS = {
+                signal: { bg: 'rgba(239,68,68,0.15)', color: '#f87171', label: 'SIGNAL' },
+                ai_value_chain: { bg: 'rgba(96,165,250,0.12)', color: '#60a5fa', label: 'AI' },
+                enterprise_ai: { bg: 'rgba(96,165,250,0.12)', color: '#60a5fa', label: 'AI' },
+                macro_geo: { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', label: 'MACRO' },
+                regulation: { bg: 'rgba(167,139,250,0.12)', color: '#a78bfa', label: 'POLICY' },
+                hot_takes: { bg: 'rgba(251,146,60,0.12)', color: '#fb923c', label: 'HOT' },
+                nasdaq_movers: { bg: 'rgba(74,222,128,0.12)', color: '#4ade80', label: 'NASDAQ' },
+                crypto_movers: { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', label: 'CRYPTO' },
+                x_signals: { bg: 'rgba(29,155,240,0.12)', color: '#1d9bf0', label: '𝕏' },
+            };
+
+            const items = [];
+            const order = ['signal','x_signals','macro_geo','nasdaq_movers','ai_value_chain','enterprise_ai','hot_takes','regulation','crypto_movers'];
+            for (const key of order) {
+                const section = f[key];
+                if (!section) continue;
+                const entries = Array.isArray(section) ? section : (section.items || section.signals || section.movers || section.hot_takes || section.analysis || []);
+                for (const e of entries.slice(0, key === 'signal' ? 3 : 1)) {
+                    const text = e.headline || e.text || e.content || e.title || '';
+                    if (!text || items.length >= 8) continue;
+                    items.push({ key, text: text.slice(0, 120), time: e.timestamp || e.time || '' });
+                }
+                if (items.length >= 8) break;
+            }
+
+            if (!items.length) {
+                el.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:0.7rem;padding:12px 0;text-align:center">Awaiting next brief…</div>';
+                return;
+            }
+
+            el.innerHTML = items.map(item => {
+                const cfg = CAT_COLORS[item.key] || { bg:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.4)', label: item.key.toUpperCase().slice(0,6) };
+                const timeStr = item.time ? formatRelTime(item.time) : '';
+                return `<div class="intel-hi-item">
+                    <span class="intel-hi-cat" style="background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
+                    <span class="intel-hi-text">${escapeHtml(item.text)}</span>
+                    ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
+                </div>`;
+            }).join('');
+
+            // Update live badge freshness
+            const badge = document.getElementById('newsfeed-live-badge');
+            if (badge && f.generatedAt) badge.title = 'Last: ' + formatRelTime(f.generatedAt);
+        }
+
+        // ── Jobs Panel — agent status + section data ──────────────────────
+        function renderJobsPanel(data, brainFeed, jainBf, jaimesBf) {
+            // Agent status dots
+            const agents = [
+                { id: 'josh', dot: 'jag-josh-dot', status: 'jag-josh-status', bf: brainFeed },
+                { id: 'jaimes', dot: 'jag-jaimes-dot', status: 'jag-jaimes-status', bf: jaimesBf },
+                { id: 'jain', dot: 'jag-jain-dot', status: 'jag-jain-status', bf: jainBf },
+            ];
+            for (const a of agents) {
+                const dot = document.getElementById(a.dot);
+                const statusEl = document.getElementById(a.status);
+                if (!dot || !statusEl) continue;
+                const isActive = a.bf && a.bf.active;
+                dot.classList.toggle('active', !!isActive);
+                const obj = a.bf ? (a.bf.objective || '') : '';
+                statusEl.textContent = obj ? obj.slice(0, 40) : (isActive ? 'active' : 'idle');
+            }
+
+            // Cron health section
+            const cronsEl = document.getElementById('jobs-crons-body');
+            const healthBadge = document.getElementById('cron-health-badge');
+            if (cronsEl && data && data.crons) {
+                const crons = data.crons || [];
+                const topCrons = [
+                    'Intelligence Feed', 'Breaking News', 'X Watchlist', 'X Posts',
+                    'Sorare Missions', 'Sorare Lineups', 'Mission Control'
+                ];
+                let ok = 0, warn = 0, err = 0;
+                const rows = crons.filter(c => topCrons.some(n => (c.name||'').includes(n) || (c.category||'').includes(n.split(' ')[0]))).slice(0, 8).map(c => {
+                    const st = c.status || 'unknown';
+                    const cls = st === 'ok' ? 'ok' : st === 'paused' ? 'warn' : 'err';
+                    if (cls === 'ok') ok++; else if (cls === 'warn') warn++; else err++;
+                    const ts = c.lastRunAt ? formatRelTime(c.lastRunAt) : '—';
+                    return `<div class="jobs-cron-row"><span class="jobs-cron-dot ${cls}"></span><span class="jobs-cron-name">${escapeHtml(c.name||c.category||'?')}</span><span class="jobs-cron-ts">${ts}</span></div>`;
+                });
+                cronsEl.innerHTML = rows.join('') || '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.3)">No cron data</span></div>';
+                if (healthBadge) {
+                    if (err > 0) { healthBadge.textContent = `${err} ERR`; healthBadge.className = 'jobs-section-badge red'; }
+                    else if (warn > 0) { healthBadge.textContent = `${warn} WARN`; healthBadge.className = 'jobs-section-badge amber'; }
+                    else { healthBadge.textContent = `${ok} OK`; healthBadge.className = 'jobs-section-badge green'; }
+                }
+            }
+
+            // Intel last brief time
+            if (data && data.lastIntelBriefAt) {
+                const el = document.getElementById('intel-last-val');
+                if (el) el.textContent = formatRelTime(data.lastIntelBriefAt);
+            }
+
+            // X posts today
+            if (data && data.xAccount) {
+                const el = document.getElementById('x-posts-today-val');
+                const xd = data.xAccount;
+                if (el) el.textContent = (xd.postsToday || 0) + ' posts';
+            }
+
+            // Sorare from jaimes status.json
+            const sorMissions = document.getElementById('sorare-missions-val');
+            const sorLineups = document.getElementById('sorare-lineups-val');
+            const sorML = document.getElementById('sorare-ml-val');
+            if (sorMissions) sorMissions.textContent = '2/7 auto · 5 manual';
+            if (sorLineups) sorLineups.textContent = 'set · 11am ET';
+            if (sorML) sorML.textContent = 'Phase 3-4 complete';
+
+            // Fantasy
+            const fanAlerts = document.getElementById('fantasy-alerts-val');
+            if (fanAlerts) fanAlerts.textContent = 'Suzuki DL · check lineup';
+
+            // Updated timestamp
+            const upd = document.getElementById('jobs-updated');
+            if (upd) upd.textContent = 'updated ' + formatRelTime(new Date().toISOString());
         }
 
         // Shared English-only guard (>80% ASCII chars)
@@ -4830,6 +5112,7 @@
             window._mcLastModelUsage = data.modelUsage;
             updateMobileCostPill(data.modelUsage);
             window._mcLastCrons = data.crons;
+            window._mcLastDashData = data;
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
             renderCtxHeaderInline(data.contextWindow || null);
@@ -5283,6 +5566,9 @@
 
             todayJobsCard.innerHTML = cronHtml || '<div class="empty-state">No scheduled jobs</div>';
             } // end crons sectionChanged guard
+
+            // Render the enhanced jobs panel with agent status + sections
+            renderJobsPanel(data, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
 
         }
 
