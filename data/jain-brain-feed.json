@@ -1,17 +1,18 @@
 {
-  "active": false,
-  "objective": "Intel FULL brief sent",
-  "status": "idle",
-  "updatedAt": "2026-04-02T22:02:29Z",
-  "model": "GPT-5.1",
-  "messageReceived": "2026-04-02T22:00:01Z",
+  "active": true,
+  "messageReceived": "2026-04-03T00:56:38Z",
+  "objective": "Fixing JAIN issues found by QA",
+  "status": "active",
   "steps": [
     {
-      "label": "Starting",
-      "status": "done",
-      "tool": "intelligence_feed"
+      "label": "Fixing git rebase + stale data",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "intelligence_feed",
-  "checkedAt": "2026-04-02T22:00:01Z"
+  "currentTool": "exec",
+  "updatedAt": "2026-04-03T00:56:38Z",
+  "checkedAt": "2026-04-03T00:56:38Z",
+  "idleUpdatedAt": "2026-03-28T03:55:01Z",
+  "model": "Sonnet 4.6"
 }
