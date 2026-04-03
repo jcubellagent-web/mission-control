@@ -1,13 +1,13 @@
 {
-  "session": 11.704335,
-  "daily": 2.109954,
+  "session": 12.411651,
+  "daily": 2.817269,
   "weekly": 35.440491,
   "monthly": 11.389278,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 7.687960949999999
+      "cost": 8.3952765
     },
     {
       "name": "google/gemini-2.5-flash",
@@ -35,11 +35,11 @@
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
       "inputTokens": 150,
-      "outputTokens": 124424,
-      "totalTokens": 124574,
-      "sessionCost": 7.687960949999999,
-      "dailyCost": 2.10995385,
-      "weeklyCost": 7.687960949999999,
+      "outputTokens": 124469,
+      "totalTokens": 124619,
+      "sessionCost": 8.3952765,
+      "dailyCost": 2.8172694000000003,
+      "weeklyCost": 8.3952765,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -108,15 +108,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.004352,
-      "dailyCost": 0.004352,
-      "sessionCost": 0.004352,
+      "weeklyCost": 0.022139,
+      "dailyCost": 0.022139,
+      "sessionCost": 0.022139,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-03T04:05:05Z",
+  "lastUpdated": "2026-04-03T04:10:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -134,9 +134,9 @@
     "daily": 0.0,
     "weekly": 0.0,
     "monthly": 0.0,
-    "byok_daily": 0.0043525,
-    "byok_weekly": 0.0043525,
-    "byok_monthly": 0.0043525,
+    "byok_daily": 0.02213855,
+    "byok_weekly": 0.02213855,
+    "byok_monthly": 0.02213855,
     "available": true
   },
   "elevenlabs": {
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 2.114307,
-    "total": 12.635298,
-    "monthly": 11.39363
+    "daily": 2.839408,
+    "total": 13.360399,
+    "monthly": 11.411417
   }
 }
