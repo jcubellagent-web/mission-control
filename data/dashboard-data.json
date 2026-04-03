@@ -3,45 +3,45 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-02T19:43:03Z",
-    "objective": "Researching Puro.earth + drafting competitive analysis email \u2014 complete \u00b7 awaiting next instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-03T00:55:00Z",
+    "objective": "Running post-update resiliency checks",
+    "status": "active",
     "steps": [
       {
-        "label": "Composing email",
-        "status": "done",
+        "label": "openclaw doctor",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-02T19:44:13Z",
-    "checkedAt": "2026-04-02T19:43:03Z",
+    "updatedAt": "2026-04-03T00:55:00Z",
+    "checkedAt": "2026-04-03T00:55:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Researching Puro.earth + drafting competitive analysis email \u2014 complete \u00b7 awaiting next instruction",
-    "updatedAt": "2026-04-03T00:50:02Z"
+    "status": "Brain Feed live",
+    "context": "Running post-update resiliency checks",
+    "updatedAt": "2026-04-03T00:55:03Z"
   },
   "contextWindow": {
-    "usedTokens": 57724,
-    "limitTokens": 1000000,
-    "pct": 0.0577,
-    "model": "gemini-2.5-flash",
+    "usedTokens": 109297,
+    "limitTokens": 200000,
+    "pct": 0.5465,
+    "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 14.934062,
-    "daily": 6.657288,
+    "session": 15.918226,
+    "daily": 7.641452,
     "weekly": 24.051213,
     "monthly": 0.0,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 11.13424695
+        "cost": 12.118411199999999
       },
       {
         "name": "google/gemini-2.5-flash",
@@ -68,12 +68,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 155,
-        "outputTokens": 128178,
-        "totalTokens": 128333,
-        "sessionCost": 11.13424695,
-        "dailyCost": 5.55623985,
-        "weeklyCost": 11.13424695,
+        "inputTokens": 149,
+        "outputTokens": 123946,
+        "totalTokens": 124095,
+        "sessionCost": 12.118411199999999,
+        "dailyCost": 6.540404100000001,
+        "weeklyCost": 12.118411199999999,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -140,7 +140,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-03T00:50:06Z",
+    "lastUpdated": "2026-04-03T00:55:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -169,15 +169,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.657288,
-      "total": 15.860672,
+      "daily": 7.641452,
+      "total": 16.844836,
       "monthly": 0.0
     }
   },
   "moltWorld": {
-    "sim_balance": 5.722194,
-    "total_earned": 5.722194,
-    "online_time": "57h 13m",
+    "sim_balance": 5.730667,
+    "total_earned": 5.730667,
+    "online_time": "57h 18m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -187,33 +187,33 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-03T00:50:06Z"
+    "updatedAt": "2026-04-03T00:55:07Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.5,
-      "cpu_user": 10.56,
-      "cpu_sys": 13.97,
-      "load1": 2.56,
-      "load5": 2.16,
-      "load15": 2.16,
+      "cpu_pct": 47.7,
+      "cpu_user": 29.3,
+      "cpu_sys": 18.37,
+      "load1": 2.59,
+      "load5": 2.23,
+      "load15": 2.15,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "164Gi",
+      "disk_avail": "163Gi",
       "disk_pct": 7,
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.3,
-      "cpu_user": 2.66,
-      "cpu_sys": 8.66,
-      "load1": 4.37,
-      "load5": 3.42,
-      "load15": 2.5,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 12.3,
+      "cpu_user": 3.22,
+      "cpu_sys": 9.3,
+      "load1": 2.06,
+      "load5": 2.52,
+      "load15": 2.33,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "77Gi",
@@ -233,19 +233,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-03T00:50:02Z"
+      "lastChecked": "2026-04-03T00:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-03T00:50:02Z"
+      "lastChecked": "2026-04-03T00:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-03T00:50:02Z"
+      "lastChecked": "2026-04-03T00:55:03Z"
     }
   ],
   "crons": [
@@ -585,25 +585,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-03T00:50:06Z",
-      "event": "Session spend: $14.93"
+      "time": "2026-04-03T00:55:06Z",
+      "event": "Session spend: $15.92"
     },
     {
-      "time": "2026-04-03T00:50:02Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-03T00:55:03Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-03T00:50:02Z",
+      "time": "2026-04-03T00:55:03Z",
       "event": "21 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-03T00:50:02Z",
+      "time": "2026-04-03T00:55:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-03T00:50:02Z",
+      "time": "2026-04-03T00:55:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-03T00:50:02Z"
+  "lastUpdated": "2026-04-03T00:55:03Z"
 }
