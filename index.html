@@ -4255,8 +4255,9 @@
             // has priority logic so local cannot overwrite an active Supabase state.
             fetchBrainFeedSupabase();
             initSupabaseRealtime();
-            // Fallback REST poll every 30s only (WebSocket is primary; this is a safety net)
-            setInterval(fetchBrainFeedSupabase, 30000);
+            // Fallback REST poll — 5s on mobile (no local server), 30s on desktop (WS + local server cover it)
+            const _sbPollInterval = /Mobi|Android/i.test(navigator.userAgent) ? 5000 : 30000;
+            setInterval(fetchBrainFeedSupabase, _sbPollInterval);
             // Fast local poll — catches updates when WS is lagging or recovering
             fetchBrainFeed();
             setInterval(fetchBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
