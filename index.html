@@ -3895,6 +3895,9 @@
             // Cron health section
             const cronsEl = document.getElementById('jobs-crons-body');
             const healthBadge = document.getElementById('cron-health-badge');
+            if (cronsEl && !data) {
+                cronsEl.innerHTML = '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.2)">Loading…</span></div>';
+            }
             if (cronsEl && data && data.crons) {
                 const crons = data.crons || [];
                 const SHOW = ['Intelligence Feed','Breaking News','X Watchlist','X Posts','Sorare','Mission Control','Fantasy','Sorare Daily','Sorare Competition'];
@@ -3937,11 +3940,20 @@
 
             // X posts today — from x-progress recentPosts
             const xPostsEl = document.getElementById('x-posts-today-val');
-            if (xPostsEl && window._xProgressData) {
-                const xp = window._xProgressData;
-                const today = new Date().toISOString().slice(0,10);
-                const todayPosts = (xp.recentPosts || []).filter(p => p.posted_at && p.posted_at.startsWith(today));
-                xPostsEl.textContent = todayPosts.length + ' post' + (todayPosts.length !== 1 ? 's' : '');
+            if (xPostsEl) {
+                if (window._xProgressData) {
+                    const xp = window._xProgressData;
+                    const today = new Date().toISOString().slice(0,10);
+                    const todayPosts = (xp.recentPosts || []).filter(p => p.posted_at && p.posted_at.startsWith(today));
+                    xPostsEl.textContent = todayPosts.length + ' post' + (todayPosts.length !== 1 ? 's' : '');
+                    xPostsEl.className = 'jdr-val ' + (todayPosts.length > 0 ? 'ok' : '');
+                } else {
+                    // Try to get from dashboard data crons
+                    if (data && data.crons) {
+                        const xCron = data.crons.find(c => c.name && (c.name.includes('X Post') || c.category === 'X Account'));
+                        if (xCron) xPostsEl.textContent = xCron.runStatus === 'ok' ? 'ran ✓' : xCron.schedule || '—';
+                    }
+                }
             }
 
             // Sorare — use cron data for last run
@@ -4635,6 +4647,8 @@
             setInterval(fetchJainTasks, 15000);
             fetchJaimesBrainFeed();
             setInterval(fetchJaimesBrainFeed, CONFIG.BRAIN_FEED_INTERVAL);
+            // Pre-render jobs panel skeleton immediately so sections show on load
+            renderJobsPanel(null, null, null, null);
             fetchAgentComms();
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
