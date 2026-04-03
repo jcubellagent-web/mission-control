@@ -1,18 +1,18 @@
 {
-  "session": 12.603449,
-  "daily": 3.009068,
+  "session": 13.34329,
+  "daily": 5.066516,
   "weekly": 35.440491,
   "monthly": 11.389278,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 8.58707475
+      "cost": 9.2600262
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 1.9693060800000002
+      "cost": 2.0361954
     },
     {
       "name": "openai/gpt-5.4",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 154,
-      "outputTokens": 125380,
-      "totalTokens": 125534,
-      "sessionCost": 8.58707475,
-      "dailyCost": 3.0090676500000004,
-      "weeklyCost": 8.58707475,
+      "inputTokens": 151,
+      "outputTokens": 123983,
+      "totalTokens": 124134,
+      "sessionCost": 9.2600262,
+      "dailyCost": 3.6820191000000007,
+      "weeklyCost": 9.2600262,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -47,12 +47,12 @@
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 1920003,
-      "outputTokens": 40321,
-      "totalTokens": 1960324,
-      "sessionCost": 1.9693060800000002,
-      "dailyCost": 0.0,
-      "weeklyCost": 1.9693060800000002,
+      "inputTokens": 1928605,
+      "outputTokens": 40502,
+      "totalTokens": 1969107,
+      "sessionCost": 2.0361954,
+      "dailyCost": 1.38449665,
+      "weeklyCost": 2.0361954,
       "sessions": 8,
       "isGemini": true,
       "costEstimated": false
@@ -108,15 +108,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.022139,
-      "dailyCost": 0.022139,
-      "sessionCost": 0.022139,
+      "weeklyCost": 0.042961,
+      "dailyCost": 0.042961,
+      "sessionCost": 0.042961,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-03T04:15:06Z",
+  "lastUpdated": "2026-04-03T04:20:06Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -131,12 +131,12 @@
     "available": false
   },
   "openrouter": {
-    "daily": 0.0,
-    "weekly": 0.0,
-    "monthly": 0.0,
-    "byok_daily": 0.02213855,
-    "byok_weekly": 0.02213855,
-    "byok_monthly": 0.02213855,
+    "daily": 0.00739345,
+    "weekly": 0.00739345,
+    "monthly": 0.00739345,
+    "byok_daily": 0.0429607,
+    "byok_weekly": 0.0429607,
+    "byok_monthly": 0.0429607,
     "available": true
   },
   "elevenlabs": {
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 3.031207,
-    "total": 13.552197,
-    "monthly": 11.411417
+    "daily": 5.109477,
+    "total": 14.31286,
+    "monthly": 11.432239
   }
 }
