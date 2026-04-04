@@ -17,30 +17,30 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Sorare Google Sheet + charts done \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-04T03:00:02Z"
+    "updatedAt": "2026-04-04T03:05:02Z"
   },
   "contextWindow": {
-    "usedTokens": 71158,
+    "usedTokens": 362066,
     "limitTokens": 1000000,
-    "pct": 0.0712,
-    "model": "gemini-2.5-flash",
+    "pct": 0.3621,
+    "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 55.383701,
-    "daily": 56.600965,
-    "weekly": 64.877738,
-    "monthly": 40.826525,
+    "session": 56.743396,
+    "daily": 58.021083,
+    "weekly": 66.297857,
+    "monthly": 42.246644,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 60.96170834999999
+        "cost": 62.32140359999999
       },
       {
         "name": "google/gemini-2.5-flash",
         "window": "session",
-        "cost": 1.86896205
+        "cost": 1.92938537
       },
       {
         "name": "openai/gpt-5.4",
@@ -63,11 +63,11 @@
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
         "inputTokens": 148,
-        "outputTokens": 123428,
-        "totalTokens": 123576,
-        "sessionCost": 60.96170834999999,
-        "dailyCost": 55.383701249999994,
-        "weeklyCost": 60.96170834999999,
+        "outputTokens": 123551,
+        "totalTokens": 123699,
+        "sessionCost": 62.32140359999999,
+        "dailyCost": 56.743396499999996,
+        "weeklyCost": 62.32140359999999,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -75,13 +75,13 @@
       {
         "name": "google/gemini-2.5-flash",
         "source": "openclaw",
-        "inputTokens": 2366855,
-        "outputTokens": 63990,
-        "totalTokens": 2430845,
-        "sessionCost": 1.86896205,
-        "dailyCost": 1.2172633000000002,
-        "weeklyCost": 1.86896205,
-        "sessions": 19,
+        "inputTokens": 2398370,
+        "outputTokens": 64187,
+        "totalTokens": 2462557,
+        "sessionCost": 1.92938537,
+        "dailyCost": 1.27768662,
+        "weeklyCost": 1.92938537,
+        "sessions": 20,
         "isGemini": true,
         "costEstimated": false
       },
@@ -144,7 +144,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-04T03:00:06Z",
+    "lastUpdated": "2026-04-04T03:05:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -173,15 +173,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 56.611849,
-      "total": 66.92357,
-      "monthly": 41.945746
+      "daily": 58.031967,
+      "total": 68.343688,
+      "monthly": 43.365865
     }
   },
   "moltWorld": {
-    "sim_balance": 8.336694,
-    "total_earned": 8.336694,
-    "online_time": "83h 22m",
+    "sim_balance": 8.345222,
+    "total_earned": 8.345222,
+    "online_time": "83h 27m",
     "is_online": true,
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
@@ -191,18 +191,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-04T03:00:07Z"
+    "updatedAt": "2026-04-04T03:05:08Z"
   },
   "machineHealth": {
     "josh": {
       "cpu_pct": 24.1,
-      "cpu_user": 9.55,
-      "cpu_sys": 14.52,
-      "load1": 2.32,
-      "load5": 2.26,
-      "load15": 2.17,
+      "cpu_user": 9.43,
+      "cpu_sys": 14.65,
+      "load1": 1.88,
+      "load5": 2.16,
+      "load15": 2.15,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "162Gi",
@@ -210,14 +210,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.7,
-      "cpu_user": 2.98,
-      "cpu_sys": 9.7,
-      "load1": 1.6,
-      "load5": 1.83,
-      "load15": 1.86,
-      "ram_used_gb": 9.8,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 13.4,
+      "cpu_user": 3.52,
+      "cpu_sys": 9.85,
+      "load1": 2.27,
+      "load5": 2.25,
+      "load15": 2.04,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "54Gi",
@@ -237,19 +237,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T03:00:02Z"
+      "lastChecked": "2026-04-04T03:05:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T03:00:02Z"
+      "lastChecked": "2026-04-04T03:05:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-04T03:00:02Z"
+      "lastChecked": "2026-04-04T03:05:02Z"
     }
   ],
   "crons": [
@@ -579,25 +579,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-04T03:00:06Z",
-      "event": "Session spend: $55.38"
+      "time": "2026-04-04T03:05:08Z",
+      "event": "Session spend: $56.74"
     },
     {
-      "time": "2026-04-04T03:00:02Z",
+      "time": "2026-04-04T03:05:02Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-04T03:00:02Z",
+      "time": "2026-04-04T03:05:02Z",
       "event": "20 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-04T03:00:02Z",
+      "time": "2026-04-04T03:05:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-04T03:00:02Z",
+      "time": "2026-04-04T03:05:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-04T03:00:02Z"
+  "lastUpdated": "2026-04-04T03:05:02Z"
 }
