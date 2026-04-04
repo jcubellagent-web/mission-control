@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-04T20:59:16Z",
-  "objective": "Isolated Sonnet spend to shared Anthropic key",
+  "messageReceived": "2026-04-04T20:59:38Z",
+  "objective": "Heartbeat check",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-04T20:59:16Z",
-  "checkedAt": "2026-04-04T20:59:16Z",
+  "steps": [
+    {
+      "label": "telegram",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-04T20:59:38Z",
+  "checkedAt": "2026-04-04T20:59:38Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
