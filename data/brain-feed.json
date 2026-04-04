@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-04T20:53:47Z",
-  "objective": "Session startup complete",
+  "messageReceived": "2026-04-04T20:55:09Z",
+  "objective": "Checking Sonnet token spike",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-04T20:53:47Z",
-  "checkedAt": "2026-04-04T20:53:47Z",
+  "steps": [
+    {
+      "label": "telegram",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-04T20:55:09Z",
+  "checkedAt": "2026-04-04T20:55:09Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "Gemini 2.5 Flash"
+  "model": "GPT-5.4"
 }
