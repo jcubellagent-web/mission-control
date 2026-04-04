@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Tightened run rate banner + removed model usage scroll",
-    "updatedAt": "2026-04-04T23:25:02Z"
+    "updatedAt": "2026-04-04T23:27:36Z"
   },
   "contextWindow": {
     "usedTokens": 59770,
@@ -131,7 +131,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-04T23:25:06Z",
+    "lastUpdated": "2026-04-04T23:27:39Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -185,16 +185,16 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-04T23:25:11Z"
+    "updatedAt": "2026-04-04T23:27:44Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 25.8,
-      "cpu_user": 11.3,
-      "cpu_sys": 14.51,
-      "load1": 2.79,
-      "load5": 2.33,
-      "load15": 1.82,
+      "cpu_pct": 29.3,
+      "cpu_user": 13.23,
+      "cpu_sys": 16.6,
+      "load1": 2.29,
+      "load5": 2.35,
+      "load15": 1.91,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.0,
       "uptime": "",
@@ -204,14 +204,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.9,
-      "cpu_user": 2.85,
-      "cpu_sys": 10.0,
-      "load1": 1.9,
-      "load5": 1.8,
-      "load15": 1.83,
+      "cpu_pct": 23.2,
+      "cpu_user": 12.58,
+      "cpu_sys": 10.59,
+      "load1": 1.62,
+      "load5": 1.77,
+      "load15": 1.81,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -220,8 +220,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -235,19 +235,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T23:25:02Z"
+      "lastChecked": "2026-04-04T23:27:36Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T23:25:02Z"
+      "lastChecked": "2026-04-04T23:27:36Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-04T23:25:02Z"
+      "lastChecked": "2026-04-04T23:27:36Z"
     }
   ],
   "crons": [
@@ -344,7 +344,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -352,10 +352,11 @@
       "description": "Updates Sorare MLB Google Sheet with today's results",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-03T23:31:11.229656-04:00"
     },
     {
       "name": "Sorare ML Training",
@@ -363,10 +364,11 @@
       "description": "Trains XGBoost model on latest Sorare MLB results data",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "done",
+      "lastRun": "2026-04-03T02:02:55.643544-04:00"
     },
     {
       "name": "X Feedback ML",
@@ -374,7 +376,7 @@
       "description": "Scores X post performance, updates strategy in SQLite + state.json",
       "category": "X Account",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null,
       "runStatus": "missed"
@@ -398,7 +400,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "paused"
     },
     {
       "name": "Daily Health Check",
@@ -409,7 +411,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "paused"
     },
     {
       "name": "Breaking News Scanner",
@@ -544,17 +546,17 @@
           {
             "time": "3:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "5:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "7:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "9:00 PM",
@@ -653,25 +655,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-04T23:25:06Z",
+      "time": "2026-04-04T23:27:39Z",
       "event": "Session spend: $2.05"
     },
     {
-      "time": "2026-04-04T23:25:02Z",
+      "time": "2026-04-04T23:27:36Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-04T23:25:02Z",
+      "time": "2026-04-04T23:27:36Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-04T23:25:02Z",
+      "time": "2026-04-04T23:27:36Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-04T23:25:02Z",
+      "time": "2026-04-04T23:27:36Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-04T23:25:02Z"
+  "lastUpdated": "2026-04-04T23:27:36Z"
 }
