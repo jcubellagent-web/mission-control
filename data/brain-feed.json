@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-04T20:48:21Z",
-  "objective": "Checked Sonnet wiring and OpenClaw caching status",
+  "messageReceived": "2026-04-04T20:53:19Z",
+  "objective": "Determining objective",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-04T20:48:21Z",
-  "checkedAt": "2026-04-04T20:48:21Z",
+  "steps": [
+    {
+      "label": "telegram",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-04T20:53:19Z",
+  "checkedAt": "2026-04-04T20:53:19Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Gemini 2.5 Flash"
 }
