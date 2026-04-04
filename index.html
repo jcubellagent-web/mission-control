@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- BUILD:1775264582 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mission Control</title>
     <link rel="manifest" href="./manifest.webmanifest">
@@ -150,14 +154,16 @@
             line-height: 1;
         }
         .logo-icon {
-            width: 36px; height: 36px;
-            border-radius: 10px;
+            width: 44px; height: 44px;
+            border-radius: 12px;
             overflow: hidden;
+            flex-shrink: 0;
         }
         .logo-icon img {
             width: 100%; height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             display: block;
+            background: rgba(255,255,255,0.06);
         }
         .logo h1 { font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.75); }
         .header-status { display: flex; align-items: center; gap: 12px; }
@@ -182,23 +188,49 @@
         .last-updated { color: var(--text-muted); font-size: 0.875rem; }
         .pull-indicator {
             position: fixed;
-            top: calc(env(safe-area-inset-top, 0px));
-            left: 0; right: 0;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            /* Sit just below Dynamic Island / notch */
+            top: calc(env(safe-area-inset-top, 44px) + 4px);
+            left: 50%; transform: translateX(-50%) translateY(-80px);
+            width: auto; min-width: 140px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 18px; border-radius: 999px;
+            background: rgba(20,20,28,0.92);
+            border: 1px solid rgba(229,62,62,0.35);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 12px rgba(229,62,62,0.15);
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+            color: rgba(255,255,255,0.8);
             pointer-events: none;
             opacity: 0;
-            transform: translateY(-40px);
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            z-index: 900;
+            transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.16,1,0.3,1);
+            z-index: 9999;
+            white-space: nowrap;
         }
         .pull-indicator.visible {
             opacity: 1;
+            transform: translateX(-50%) translateY(0px);
         }
+        .pull-indicator.releasing {
+            border-color: rgba(229,62,62,0.7);
+            box-shadow: 0 4px 28px rgba(0,0,0,0.6), 0 0 20px rgba(229,62,62,0.3);
+            color: #f87171;
+        }
+        .pull-indicator.refreshing {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0px);
+        }
+        @keyframes pull-spin { to { transform: rotate(360deg); } }
+        .pull-spinner {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid rgba(229,62,62,0.25);
+            border-top-color: #e53e3e;
+            animation: pull-spin 0.7s linear infinite;
+            display: none;
+            flex-shrink: 0;
+        }
+        .pull-indicator.refreshing .pull-spinner { display: block; }
+        .pull-icon { font-size: 1rem; transition: transform 0.2s ease; }
+        .pull-indicator.releasing .pull-icon { transform: rotate(180deg); }
+        .pull-indicator.refreshing .pull-icon { display: none; }
         .refresh-btn {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 8px 14px;
@@ -754,8 +786,8 @@
             flex-shrink: 0;
         }
         body.phone-mode .logo-icon {
-            width: 20px; height: 20px;
-            border-radius: 5px;
+            width: 32px; height: 32px;
+            border-radius: 8px;
         }
         body.phone-mode .logo h1 {
             font-size: 0.7rem;
@@ -1184,10 +1216,12 @@
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
         .intel-highlights-body { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1; }
-        .intel-hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .intel-hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .intel-hi-item:last-child { border-bottom: none; }
-        .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
-        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.8); line-height: 1.35; flex: 1; }
+        .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; white-space: nowrap; }
+        .intel-hi-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.85); line-height: 1.35; }
+        .intel-hi-reason { font-size: 0.63rem; color: rgba(255,255,255,0.55); line-height: 1.45; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
         .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
 
         /* ── Scrolling ticker bar ── */
@@ -1248,15 +1282,8 @@
 
         /* ── Remote Control Card — Premium Glass Panel ──── */
         body.phone-mode .card-remote {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(16, 18, 28, 0.97);
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.08) inset,
-                0 8px 32px rgba(0,0,0,0.5),
-                0 0 0 0.5px rgba(229,62,62,0.08);
+            display: block !important;
+            margin: 0 8px;
         }
 
         .remote-btn-row {
@@ -2653,7 +2680,6 @@
         body.phone-mode .card-airpoint,
         body.phone-mode .card-newsfeed,
         body.phone-mode .card-activity,
-        body.phone-mode .card-remote,
         body.phone-mode .stats-row,
         body.phone-mode .alert-banner,
         body.phone-mode .agent-comms-section,
@@ -2912,7 +2938,7 @@
 </head>
 <body>
     <div class="lobster-bg" aria-hidden="true"></div>
-    <div id="pull-indicator" class="pull-indicator">Pull to refresh</div>
+    <div id="pull-indicator" class="pull-indicator"><span class="pull-icon">↓</span><div class="pull-spinner"></div><span id="pull-label">Pull to refresh</span></div>
 
     <!-- Main Content (PIN removed - open access) -->
     <div class="container" id="main-content">
@@ -3056,6 +3082,8 @@
                             <div class="x-milestone-bar-fill" id="xm-ms-bar" style="width:0%"></div>
                         </div>
                     </div>
+                    <!-- Strategy line -->
+                    <div id="xm-strategy-line" style="font-size:0.6rem;color:rgba(255,255,255,0.35);padding:4px 0 2px;text-align:center;letter-spacing:0.03em;"></div>
                     <!-- Open full modal -->
                     <button class="x-mobile-open-btn" onclick="window.openXDashboard()">
                         <span style="font-family:serif;font-size:0.9rem;">𝕏</span>
@@ -3332,20 +3360,37 @@
             pullDistance = event.touches[0].clientY - pullStartY;
             if (pullDistance > 0) {
                 event.preventDefault();
-                const offset = Math.min(pullDistance, 120);
-                pullIndicator.style.transform = `translateY(${offset}px)`;
+                const label = document.getElementById('pull-label');
+                const isReleasing = pullDistance > PULL_THRESHOLD;
                 pullIndicator.classList.add('visible');
-                pullIndicator.textContent = pullDistance > PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh';
+                pullIndicator.classList.toggle('releasing', isReleasing);
+                if (label) label.textContent = isReleasing ? 'Release to refresh' : 'Pull to refresh';
             }
         }
 
         function handleTouchEnd() {
-            if (pullIndicator) {
-                pullIndicator.classList.remove('visible');
-                pullIndicator.style.transform = '';
-            }
             if (pullDistance > PULL_THRESHOLD) {
-                forceUpdate();
+                // Haptic feedback (iPhone)
+                if (navigator.vibrate) navigator.vibrate(10);
+                if (window.webkit && window.webkit.messageHandlers) {
+                    try { window.webkit.messageHandlers.haptics && window.webkit.messageHandlers.haptics.postMessage('impact'); } catch(e) {}
+                }
+                // Show refreshing state
+                if (pullIndicator) {
+                    const label = document.getElementById('pull-label');
+                    pullIndicator.classList.remove('releasing');
+                    pullIndicator.classList.add('refreshing');
+                    if (label) label.textContent = 'Refreshing…';
+                }
+                forceUpdate().finally(() => {
+                    if (pullIndicator) {
+                        pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
+                    }
+                });
+            } else {
+                if (pullIndicator) {
+                    pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
+                }
             }
             pullStartY = null;
             pullDistance = 0;
@@ -3361,6 +3406,16 @@
 
         // PIN removed - auto-init dashboard on load
         syncViewportMode();
+        // Restore night mode state if flag was set before last reload
+        (async () => {
+            try {
+                const r = await fetch('http://localhost:8765/nightmode/state', { signal: AbortSignal.timeout(1000) });
+                if (r.ok) {
+                    const s = await r.json();
+                    if (s.nightMode) setTimeout(() => enterNightMode && enterNightMode(), 500);
+                }
+            } catch(e) { /* not on localhost — GitHub Pages, skip */ }
+        })();
         setConnectionStatus(navigator.onLine ? 'online' : 'offline');
         window.addEventListener('online', () => setConnectionStatus('online'));
         window.addEventListener('offline', () => setConnectionStatus('offline'));
@@ -3861,18 +3916,71 @@
                 x_signals: { bg: 'rgba(29,155,240,0.12)', color: '#1d9bf0', label: '𝕏' },
             };
 
+            // Collect all items, deduplicating by headline — merge category tags
+            const seenTexts = new Map(); // headline -> item index
             const items = [];
             const order = ['signal','x_signals','macro_geo','nasdaq_movers','ai_value_chain','enterprise_ai','hot_takes','regulation','crypto_movers'];
             for (const key of order) {
                 const section = f[key];
                 if (!section) continue;
                 const entries = Array.isArray(section) ? section : (section.items || section.signals || section.movers || section.hot_takes || section.analysis || []);
-                for (const e of entries.slice(0, key === 'signal' ? 3 : 1)) {
-                    const text = e.headline || e.text || e.content || e.title || '';
-                    if (!text || items.length >= 8) continue;
-                    items.push({ key, text: text.slice(0, 120), time: e.timestamp || e.time || '' });
+                for (const e of entries.slice(0, key === 'signal' ? 4 : 2)) {
+                    const text = (e.headline || e.text || e.content || e.title || '').slice(0, 120);
+                    if (!text) continue;
+                    const norm = text.toLowerCase().slice(0, 60);
+                    if (seenTexts.has(norm)) {
+                        // Merge: add this category tag to existing item
+                        const idx = seenTexts.get(norm);
+                        if (!items[idx].keys.includes(key)) items[idx].keys.push(key);
+                    } else {
+                        if (items.length >= 6) continue;
+                        // Filter out URLs from insight field (sometimes populated incorrectly)
+                        let reason = (e.reason || '').trim();
+                        if (!reason) {
+                            const ins = (e.insight || '').trim();
+                            if (ins && !ins.startsWith('http') && ins.length > 20) reason = ins;
+                        }
+                        // Generate contextual bullet from available structured data
+                        if (!reason) {
+                            const parts = [];
+                            if (e.score >= 8) parts.push('High-signal (' + e.score + '/10)');
+                            if (e.mood === 'BULLISH') parts.push('Bullish sentiment');
+                            if (e.mood === 'BEARISH') parts.push('Bearish sentiment');
+                            if (e.source) parts.push('Source: ' + e.source);
+                            if (e.change_pct) parts.push((e.change_pct > 0 ? '+' : '') + e.change_pct.toFixed(1) + '% move');
+                            if (e.category) parts.push('Category: ' + e.category);
+                            if (parts.length) reason = parts.join(' · ');
+                        }
+                        reason = reason.slice(0, 180);
+                        const item = { keys: [key], text, reason, time: e.timestamp || e.published || e.time || '' };
+                        seenTexts.set(norm, items.length);
+                        items.push(item);
+                    }
                 }
-                if (items.length >= 8) break;
+            }
+
+            // If sparse, add TLDR bullets and macro context as synthetic items
+            const tldr = Array.isArray(f.tldr) ? f.tldr : (typeof f.tldr === 'string' ? JSON.parse(f.tldr || '[]') : []);
+            const macroCtx = f.macro_context || {};
+            const vix = macroCtx.vix;
+            const fg = f.fear_greed || {};
+
+            if (items.length < 4) {
+                // Add TLDR items
+                for (const t of (tldr || []).slice(0, 3 - items.length)) {
+                    if (!t || items.length >= 5) break;
+                    const norm = t.toLowerCase().slice(0, 60);
+                    if (!seenTexts.has(norm)) {
+                        seenTexts.set(norm, items.length);
+                        items.push({ keys: ['macro_geo'], text: t.slice(0, 120), reason: '', time: f.generatedAt || '' });
+                    }
+                }
+                // Add VIX/fear-greed context if still sparse
+                if (items.length < 3 && vix) {
+                    const vixText = 'VIX at ' + vix.toFixed(1) + ' — ' + (vix > 30 ? 'elevated fear, risk-off environment' : vix > 20 ? 'moderate uncertainty' : 'calm markets');
+                    const fgText = fg.label ? ' · Fear & Greed: ' + fg.label + ' (' + fg.value + ')' : '';
+                    items.push({ keys: ['signal'], text: vixText + fgText, reason: 'Elevated VIX signals institutional hedging and potential for outsized moves. Watch for capitulation or relief rallies.', time: f.generatedAt || '' });
+                }
             }
 
             if (!items.length) {
@@ -3881,12 +3989,21 @@
             }
 
             el.innerHTML = items.map(item => {
-                const cfg = CAT_COLORS[item.key] || { bg:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.4)', label: item.key.toUpperCase().slice(0,6) };
+                const tags = item.keys.map(k => {
+                    const cfg = CAT_COLORS[k] || { bg:'rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.4)', label: k.toUpperCase().slice(0,6) };
+                    return `<span class="intel-hi-cat" style="background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>`;
+                }).join('');
                 const timeStr = item.time ? formatRelTime(item.time) : '';
+                const reasonHtml = item.reason ? `<div class="intel-hi-reason">${escapeHtml(item.reason)}</div>` : '';
                 return `<div class="intel-hi-item">
-                    <span class="intel-hi-cat" style="background:${cfg.bg};color:${cfg.color}">${cfg.label}</span>
-                    <span class="intel-hi-text">${escapeHtml(item.text)}</span>
-                    ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
+                    <div class="intel-hi-body">
+                        <div style="display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap;">
+                            ${tags}
+                            <span class="intel-hi-text">${escapeHtml(item.text)}</span>
+                            ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
+                        </div>
+                        ${reasonHtml}
+                    </div>
                 </div>`;
             }).join('');
 
@@ -4543,14 +4660,16 @@
 
         function updateNightClock() {
             const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
+            let h = now.getHours();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
             const m = String(now.getMinutes()).padStart(2, '0');
             const s = String(now.getSeconds()).padStart(2, '0');
             const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
             const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
             const clock = document.getElementById('night-clock');
             const date  = document.getElementById('night-date');
-            if (clock) clock.textContent = `${h}:${m}:${s}`;
+            if (clock) clock.textContent = `${h}:${m}:${s} ${ampm}`;
             if (date)  date.textContent  = `${days[now.getDay()]}  ${months[now.getMonth()]} ${now.getDate()}  ${now.getFullYear()}`;
         }
 
@@ -4570,28 +4689,58 @@
         // ── Remote Control (from phone PWA) ──────────────────────────────
         const REMOTE_BASE = 'http://localhost:8765';
 
+        // Unified remote command: tries Supabase first (works cross-network), falls back to localhost
+        async function sendRemoteCmd(cmd) {
+            // Primary: Supabase agent_comms (works from anywhere)
+            try {
+                const res = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/agent_comms', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': CONFIG.SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal',
+                    },
+                    body: JSON.stringify({
+                        agent: 'phone', direction: 'phone→desktop',
+                        message: 'cmd:' + cmd, tool: cmd,
+                        status: 'pending', timestamp: new Date().toISOString(),
+                    }),
+                });
+                if (res.ok || res.status === 201) return { ok: true, via: 'supabase' };
+            } catch(e) {}
+            // Fallback: direct localhost (same-network only)
+            try {
+                const url = cmd === 'refresh' ? `${REMOTE_BASE}/refresh` :
+                            cmd === 'nightmode' ? `${REMOTE_BASE}/nightmode/on` :
+                            cmd === 'nightmode-off' ? `${REMOTE_BASE}/nightmode/off` : null;
+                if (url) {
+                    const r = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(2500) });
+                    const d = await r.json();
+                    return { ok: d.ok, via: 'localhost' };
+                }
+            } catch(e) {}
+            return { ok: false };
+        }
+
         async function remoteRefresh() {
             const status = document.getElementById('remote-status');
-            if (status) { status.textContent = 'Refreshing…'; status.className = ''; }
-            try {
-                const r = await fetch(`${REMOTE_BASE}/refresh`, { method: 'POST', signal: AbortSignal.timeout(3000) });
-                const d = await r.json();
-                if (status) { status.textContent = d.ok ? '✓ Refreshed' : '✗ Failed'; status.className = d.ok ? 'ok' : 'err'; }
-            } catch {
-                if (status) { status.textContent = '✗ Mac offline'; status.className = 'err'; }
+            if (status) { status.textContent = '↻ Sending…'; status.className = ''; }
+            const result = await sendRemoteCmd('refresh');
+            if (status) {
+                status.textContent = result.ok ? `✓ Refreshed (${result.via})` : '✗ Offline';
+                status.className = result.ok ? 'ok' : 'err';
             }
             setTimeout(() => { if (status) { status.textContent = ''; status.className = ''; } }, 3000);
         }
 
         async function remoteNightMode() {
             const status = document.getElementById('remote-status');
-            if (status) { status.textContent = 'Activating night mode…'; status.className = ''; }
-            try {
-                const r = await fetch(`${REMOTE_BASE}/nightmode/on`, { method: 'POST', signal: AbortSignal.timeout(3000) });
-                const d = await r.json();
-                if (status) { status.textContent = d.ok ? '🌙 Night mode on' : '✗ Failed'; status.className = d.ok ? 'ok' : 'err'; }
-            } catch {
-                if (status) { status.textContent = '✗ Mac offline'; status.className = 'err'; }
+            if (status) { status.textContent = '🌙 Sending…'; status.className = ''; }
+            const result = await sendRemoteCmd('nightmode');
+            if (status) {
+                status.textContent = result.ok ? `🌙 Night mode on (${result.via})` : '✗ Offline';
+                status.className = result.ok ? 'ok' : 'err';
             }
             setTimeout(() => { if (status) { status.textContent = ''; status.className = ''; } }, 3000);
         }
@@ -4731,6 +4880,7 @@
             if (!isPhoneMode()) {
                 pollRemoteCommands();
                 setInterval(pollRemoteCommands, 2000);
+                subscribeRemoteCommands(); // Realtime fallback for instant delivery
             }
         }
 
@@ -5158,8 +5308,14 @@
                                 tool: '', model: '',
                                 ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
                         } else {
+                            // Only show J.A.I.N objective if it's unique (not a copy of JOSH 2.0's objective)
+                            const jainObj = (jf.objective || 'Standby').trim();
+                            const joshObjNow = (joshObjective || '').trim();
+                            const isStaleJain = jainObj === joshObjNow ||
+                                ['standby','idle','working...','working…'].includes(jainObj.toLowerCase());
+                            const jainMsg = isStaleJain ? 'Standby · Crons active' : jainObj;
                             idleItems.push({ agentClass:'jain', agentLabel:'J.A.I.N', dot:'idle',
-                                msg: jf.objective || 'Standby', tool: jf.currentTool||'', model:'',
+                                msg: jainMsg, tool: jf.currentTool||'', model:'',
                                 ts: jf.updatedAt ? formatRelTime(jf.updatedAt) : '' });
                         }
                     }
@@ -5990,7 +6146,11 @@
 
             // Fallback: local server (same network only)
             try {
-                const endpoint = cmd === 'refresh' ? '/refresh' : '/nightmode/on';
+                const endpoint = cmd === 'refresh' ? '/refresh'
+                    : cmd === 'nightmode' ? '/nightmode/on'
+                    : cmd === 'nightmode-off' ? '/nightmode/off'
+                    : null;
+                if (!endpoint) return false;
                 const r = await fetch('http://localhost:8765' + endpoint, { method: 'POST', signal: AbortSignal.timeout(2000) });
                 if (r.ok) {
                     if (statusEl) { statusEl.textContent = '✓'; statusEl.className = 'pca-status ok'; }
@@ -6006,20 +6166,57 @@
 
         function phoneRefresh() {
             const btn = document.querySelector('.pca-refresh');
-            if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
-            sendRemoteCommand('refresh');
+            const statusEl = document.getElementById('phone-cmd-status');
+            if (btn) { btn.classList.add('pca-sending'); }
+            if (statusEl) { statusEl.textContent = '↻'; statusEl.className = 'pca-status'; }
+            sendRemoteCommand('refresh').then(ok => {
+                if (btn) btn.classList.remove('pca-sending');
+                if (ok) {
+                    // Flash button green with checkmark
+                    if (btn) {
+                        const orig = btn.textContent;
+                        btn.textContent = '✓';
+                        btn.style.color = '#4ade80';
+                        btn.style.borderColor = 'rgba(74,222,128,0.5)';
+                        btn.style.background = 'rgba(74,222,128,0.12)';
+                        if (statusEl) { statusEl.textContent = '✓ Refreshed'; statusEl.className = 'pca-status ok'; }
+                        setTimeout(() => {
+                            btn.textContent = orig;
+                            btn.style.color = '';
+                            btn.style.borderColor = '';
+                            btn.style.background = '';
+                            if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; }
+                        }, 2000);
+                    }
+                } else {
+                    if (statusEl) { statusEl.textContent = '✗'; statusEl.className = 'pca-status err'; }
+                    setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 2000);
+                }
+            });
         }
 
         // Track assumed desktop night-mode state so button acts as toggle
         let _desktopNightOn = false;
+        // Sync _desktopNightOn with actual server state on load
+        (async () => {
+            try {
+                const r = await fetch('http://localhost:8765/nightmode/state', { signal: AbortSignal.timeout(1000) });
+                if (r.ok) { const s = await r.json(); _desktopNightOn = !!s.nightMode; }
+            } catch {}
+        })();
         async function phoneNightMode() {
             const btn = document.querySelector('.pca-night');
             if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
-            const ok = await sendRemoteCommand('nightmode');
+            // Always check actual overlay state as truth (more reliable than variable)
+            const overlay = document.getElementById('night-mode-overlay');
+            const actuallyOn = overlay && overlay.style.display !== 'none';
+            _desktopNightOn = actuallyOn; // sync with real state
+            const cmd = _desktopNightOn ? 'nightmode-off' : 'nightmode';
+            const ok = await sendRemoteCommand(cmd);
             if (ok) {
                 _desktopNightOn = !_desktopNightOn;
                 if (btn) {
-                    btn.title = _desktopNightOn ? 'Exit night mode on desktop' : 'Desktop night mode';
+                    btn.title = _desktopNightOn ? 'Tap to exit night mode' : 'Desktop night mode';
                     btn.textContent = _desktopNightOn ? '☀️' : '🌙';
                 }
             }
@@ -6092,7 +6289,7 @@
         let _cmdPollerReady = false;
 
         async function pollRemoteCommands() {
-            if (isPhoneMode()) return;
+            // Desktop always polls — phone sends, desktop receives
             try {
                 const r = await fetch(
                     CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?agent=eq.phone&order=id.desc&limit=10&select=id,tool,status,timestamp',
@@ -6137,6 +6334,43 @@
             } catch(e) { console.warn('[MC] pollRemoteCommands error', e); }
         }
 
+        // ── Subscribe to agent_comms via Supabase Realtime (instant cmd delivery) ──
+        function subscribeRemoteCommands() {
+            // Desktop always subscribes — phone sends, desktop receives
+            if (!window.supabase) return;
+            try {
+                window.supabase
+                    .channel('agent-comms')
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'agent_comms',
+                        filter: "agent=eq.phone"
+                    }, payload => {
+                        const row = payload.new;
+                        if (!row || _seenCmdIds.has(row.id)) return;
+                        if (row.status === 'done') return;
+                        _seenCmdIds.add(row.id);
+                        // Mark done
+                        fetch(CONFIG.SUPABASE_URL + '/rest/v1/agent_comms?id=eq.' + row.id, {
+                            method: 'PATCH',
+                            headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                            body: JSON.stringify({ status: 'done' }),
+                        }).catch(() => {});
+                        const cmd = row.tool || '';
+                        if (cmd === 'refresh') {
+                            showRemoteRefreshFlash();
+                        } else if (cmd === 'nightmode') {
+                            const overlay = document.getElementById('night-mode-overlay');
+                            const isOn = overlay && overlay.style.display !== 'none';
+                            if (isOn) exitNightMode(); else enterNightMode();
+                        }
+                    })
+                    .subscribe();
+                console.log('[MC] Subscribed to agent_comms realtime');
+            } catch(e) { console.warn('[MC] Realtime subscribe error', e); }
+        }
+
         // === HEADER LIVE CLOCK ===
         function updateMcClock() {
             const now = new Date();
@@ -6161,7 +6395,26 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').catch(err => {
+                navigator.serviceWorker.register('./service-worker.js').then(reg => {
+                    // Auto-reload when a new SW takes over — ensures PWA always runs latest code
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (!newWorker) return;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New SW installed — tell it to skip waiting, then reload
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
+                    // Reload when SW controller changes (new SW activated)
+                    let refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (!refreshing) { refreshing = true; window.location.reload(); }
+                    });
+                    // Also check for updates every 60s (catches GitHub Pages deploys)
+                    setInterval(() => reg.update(), 60000);
+                }).catch(err => {
                     console.error('Service worker registration failed', err);
                 });
             });
@@ -7195,8 +7448,11 @@
             if (bh.original && bh.original.length) stratParts.push(`Best original hours: ${bh.original.join(', ')}`);
             if (bh.reply && bh.reply.length) stratParts.push(`Best reply hours: ${bh.reply.join(', ')}`);
         } else if (stratInfo.best_hours && stratInfo.best_hours.length) stratParts.push(`Best hours: ${stratInfo.best_hours.join(', ')}`);
-        if (stratInfo.best_reply_targets && stratInfo.best_reply_targets.length) stratParts.push(`Top reply targets: ${stratInfo.best_reply_targets.slice(0,3).join(', ')}`);
-        if (stratInfo.best_topics && stratInfo.best_topics.length) stratParts.push(`Top topics: ${stratInfo.best_topics.join(', ')}`);
+        if (stratInfo.best_reply_targets && stratInfo.best_reply_targets.length) stratParts.push(`🎯 Top targets: @${stratInfo.best_reply_targets.slice(0,3).join(', @')}`);
+        if (stratInfo.best_topics && stratInfo.best_topics.length) stratParts.push(`📌 Topics: ${stratInfo.best_topics.join(', ')}`);
+        if (stratInfo.brand_voice) stratParts.push(`🤖 Voice: ${stratInfo.brand_voice}`);
+        if (stratInfo.reply_slots_per_day) stratParts.push(`⚡ ${stratInfo.reply_slots_per_day} reply slots/day`);
+        if (stratInfo.replies_7d !== undefined) stratParts.push(`💬 ${stratInfo.replies_7d} replies this week`);
         if (stratInfo.avg_reply_impressions) stratParts.push(`Avg reply impr: ${fmtNum(stratInfo.avg_reply_impressions)}`);
         document.getElementById('xd-strat-text').textContent = stratParts.length
             ? stratParts.join(' · ')
@@ -7247,6 +7503,17 @@
         setN('xm-eng-today', eng);
         setN('xm-qt-today', qt);
         setN('xm-total-today', orig + eng + qt);
+
+        // Replies 7d + strategy
+        const replies7d = strat.replies_7d || 0;
+        const replyTargets = (strat.best_reply_targets || []).slice(0,2).map(a => '@'+a).join(', ');
+        const replySlots = strat.reply_slots_per_day || 8;
+        const stratEl = document.getElementById('xm-strategy-line');
+        if (stratEl) {
+            stratEl.textContent = replyTargets
+                ? `${replySlots} replies/day · ${replies7d} this week · Top: ${replyTargets}`
+                : `${replySlots} reply slots/day · ${replies7d} replies this week`;
+        }
 
         // Next unachieved milestone
         const milestones = (data.milestones || []).filter(m => !m.achieved);
