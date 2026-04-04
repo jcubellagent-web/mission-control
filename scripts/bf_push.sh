@@ -61,26 +61,43 @@ fi
 IS_ACTIVE="true"
 [[ "$STATE" == "idle" ]] && IS_ACTIVE="false"
 
-# On idle: auto-build objective from previous objective if caller passes empty/generic string
+# On idle: auto-build objective from previous objective + show JAIMES/JAIN status if active
 if [[ "$STATE" == "idle" ]]; then
   OBJECTIVE=$(python3 -c "
-import json, sys
+import json, sys, os
 bf_file = '$BF_FILE'
+jaimes_bf_file = os.path.join(os.path.dirname(bf_file), 'jaimes-brain-feed.json')
+jain_bf_file = os.path.join(os.path.dirname(bf_file), 'jain-brain-feed.json')
 new_obj = sys.argv[1]
-generic = ['Response sent · Awaiting instruction', 'Working…', '', 'Awaiting instruction']
+generic = ['Response sent · Awaiting instruction', 'Working…', '', 'Awaiting instruction', 'idle']
+
+# Check JAIMES activity
+jaimes_status = ''
+try:
+    jbf = json.load(open(jaimes_bf_file))
+    if jbf.get('active'):
+        obj = jbf.get('objective', 'working')[:50]
+        jaimes_status = f'JAIMES: {obj}'
+except:
+    pass
+
 try:
     bf = json.load(open(bf_file))
     prev = bf.get('objective', '')
-    # If caller passed a generic/empty string, build from previous objective
-    if new_obj.strip() in generic or not new_obj.strip():
-        if prev and prev not in generic:
-            print(prev + ' — complete · awaiting next instruction')
-        else:
-            print('Awaiting next instruction')
+    base = 'Awaiting instruction'
+    if new_obj.strip() not in generic and new_obj.strip():
+        base = new_obj
+    elif prev and prev not in generic:
+        base = prev + ' — complete'
+    if jaimes_status:
+        print(f'JOSH 2.0 idle · {jaimes_status}')
     else:
-        print(new_obj)
+        print(base + ' · awaiting next instruction' if base != 'Awaiting instruction' else base)
 except:
-    print(new_obj if new_obj.strip() else 'Awaiting next instruction')
+    if jaimes_status:
+        print(f'JOSH 2.0 idle · {jaimes_status}')
+    else:
+        print(new_obj if new_obj.strip() not in generic else 'Awaiting instruction')
 " "$OBJECTIVE")
 fi
 # "done" keeps active=true for 90s so the dashboard shows the completion flash

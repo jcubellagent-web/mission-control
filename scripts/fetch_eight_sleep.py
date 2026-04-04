@@ -203,6 +203,7 @@ def fetch_eight_sleep() -> dict:
     trends = parse_trends(trends_raw)
 
     return {
+        "available": True,
         "updatedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "status": status,
         "trends": trends,

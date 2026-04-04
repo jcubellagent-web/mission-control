@@ -32,11 +32,11 @@ CRON_TARGETS = [
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Real-time brain feed server for live dashboard laser + status updates", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites to calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     # ── J.A.I.N (background compute) ────────────────────────────────────────
-    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 9:00 AM", "description": "Checks for injuries before Monday lineup lock — runs 15 min before lineup check", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Daily Missions", "pattern": "sorare_mlb_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "Submits all 5 daily missions (Save Picker, SP Classic, etc.) via sorare_mlb_bot.py --missions-only", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Competition Lineups", "pattern": "sorare_mlb_bot.py --lineups-only", "schedule": "Daily 11:00 AM ET", "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:15 AM ET", "description": "Reviews starting lineup, flags IL players in active slots", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
+    {"name": "Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 9:00 AM", "description": "Checks for injuries before Monday lineup lock — runs 15 min before lineup check", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
+    {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
+    {"name": "Sorare Daily Missions", "pattern": "/Users/jc_agent/scripts/sorare_mlb_bot.py --missions-only", "schedule": "Daily 2:00 PM ET", "description": "Submits all 7 daily missions via sorare_mlb_bot.py --missions-only", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "Sorare Competition Lineups", "pattern": "/Users/jc_agent/scripts/sorare_mlb_bot.py --lineups-only", "schedule": "Daily 3:00 PM ET", "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements. Pushes score ≥8.5 to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min", "description": "Monitors X/Twitter watchlist for high-signal posts (score ≥8), pushes to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     # ── X Account Growth Strategy ──────────────────────────────────────────────
@@ -47,7 +47,6 @@ CRON_TARGETS = [
     #   - Gemini generates sharp value-adding reply (220 char max, no hashtags)
     #   - Posts via Playwright browser with human-like delays
     # Quote Tweets: 4/day via x_post_agent.py (J.A.I.N)
-    {"name": "X Feedback Loop",   "pattern": "x_post_agent.py", "schedule": "Daily 6:00 AM ET",  "description": "Pulls analytics, updates strategy, fires milestone alerts", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     # Originals (7/day)
     {"name": "X Pre-Market",      "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET",  "description": "[Original] Futures + overnight signals", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     {"name": "X Market Open",     "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET",  "description": "[Original] Market open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
@@ -798,6 +797,20 @@ def merge_jain_newsfeed() -> None:
         NEWSFEED_PATH.write_text(json.dumps(merged, indent=2))
 
 
+def fetch_current_session_cost() -> float:
+    """Return cost of the active main Telegram session only (resets when /new or /reset is called)."""
+    if not OPENCLAW_SESSIONS_PATH.exists():
+        return 0.0
+    try:
+        sessions = json.loads(OPENCLAW_SESSIONS_PATH.read_text())
+        # The primary session key for Josh's Telegram direct chat
+        main_key = "agent:main:telegram:direct:6218150306"
+        s = sessions.get(main_key, {})
+        return float(s.get("estimatedCostUsd") or 0)
+    except Exception:
+        return 0.0
+
+
 def fetch_model_usage() -> Dict[str, Any] | None:
     # Primary: merge OpenClaw sessions (all models incl. Gemini) + codexbar (precise Codex costs)
     session_rows = fetch_model_usage_from_sessions()
@@ -805,7 +818,10 @@ def fetch_model_usage() -> Dict[str, Any] | None:
     breakdown = merge_model_rows(session_rows, codexbar_rows)
 
     if breakdown:
+        # session_cost = sum of all weekly (all-time) — used for accumulator tracking only
         session_cost = sum(r.get("weeklyCost", 0) for r in breakdown)
+        # current_session_cost = only the live active session (resets on /new or /reset)
+        current_session_cost = fetch_current_session_cost()
 
         # ── Persistent daily/weekly accumulator ──────────────────────────────
         accum = load_accum()
@@ -912,7 +928,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
 
         payload = {
-            "session": round(session_cost, 6),
+            "session": round(current_session_cost, 6),
             "daily":   round(daily_cost,   6),
             "weekly":  round(weekly_cost,  6),
             "monthly": round(monthly_cost, 6),
@@ -1058,12 +1074,15 @@ def fetch_crons() -> List[Dict[str, Any]]:
     jain_listing = ""
     x_log_lines_raw = ""
     reply_state_raw = "{}"
+    x_log_runs: dict[str, str] = {}
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
             "echo '===XLOG==='; grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}.*X Post Agent|Posted' "
             "  /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null | tail -50 || true; "
-            "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'"
+            "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'; "
+            f"echo '===SORAREMISSIONS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_missions.log 2>/dev/null || echo ''; "
+            f"echo '===SORARELINEUPS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_lineups.log 2>/dev/null || echo ''"
         )
         r = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
@@ -1077,16 +1096,26 @@ def fetch_crons() -> List[Dict[str, Any]]:
             if len(parts) > 1:
                 reply_split = parts[1].split("===REPLY===")
                 x_log_lines_raw = reply_split[0].strip()
-                reply_state_raw = reply_split[1].strip() if len(reply_split) > 1 else "{}"
+                rest = reply_split[1] if len(reply_split) > 1 else ""
+                missions_split = rest.split("===SORAREMISSIONS===")
+                reply_state_raw = missions_split[0].strip()
+                if len(missions_split) > 1:
+                    lineups_split = missions_split[1].split("===SORARELINEUPS===")
+                    sorare_missions_tail = lineups_split[0].strip()
+                    sorare_lineups_tail = lineups_split[1].strip() if len(lineups_split) > 1 else ""
+                    # Mark Sorare as done if log shows COMPLETE or today's notification line
+                    if "COMPLETE" in sorare_missions_tail or f"{today_str}" in sorare_missions_tail:
+                        x_log_runs["Sorare Daily Missions"] = f"{today_str}T14:00:00"
+                    if "COMPLETE" in sorare_lineups_tail or f"{today_str}" in sorare_lineups_tail:
+                        x_log_runs["Sorare Competition Lineups"] = f"{today_str}T15:00:00"
     except Exception:
         pass
 
-    # Parse X post log for lastRun data
-    x_log_runs: dict[str, str] = {}
+    # Parse X post log for lastRun data (ET hours only, today only)
     try:
         log_lines = x_log_lines_raw.splitlines()
+        # Keys are ET hours (cron schedule hours) — log timestamps are also ET
         hour_to_job = {
-            6:  "X Feedback Loop",
             7:  "X Pre-Market",
             8:  "X Market Open",
             11: "X Mover",
@@ -1099,10 +1128,15 @@ def fetch_crons() -> List[Dict[str, Any]]:
             18: "X Quote Tweets",
             20: "X Quote Tweets",
         }
+        # We need date context — log lines don't include date so we only count if
+        # timestamp hour is plausible for today (hour <= now_et.hour + 1 guard)
         for line in log_lines:
             m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
             if m:
                 h = int(m.group(1))
+                # Only count hours that have already passed today (avoid yesterday bleed)
+                if h > now_et.hour:
+                    continue
                 job_name = hour_to_job.get(h)
                 if job_name:
                     iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"

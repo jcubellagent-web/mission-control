@@ -1041,14 +1041,14 @@
         body.kiosk-mode .container {
             width: 100%; max-width: 100%;
             height: 100vh; height: 100dvh;
-            padding: 12px 20px;
+            padding: 8px 16px;
             display: grid;
-            grid-template-rows: auto auto auto minmax(0, 1fr);
-            grid-template-areas: "hdr" "alert" "stats" "main";
-            gap: 12px;
+            grid-template-rows: auto auto minmax(0, 1fr);
+            grid-template-areas: "hdr" "stats" "main";
+            gap: 6px;
         }
-        body.kiosk-mode header        { grid-area: hdr;   margin-bottom: 0; }
-        body.kiosk-mode .alert-banner { grid-area: alert; margin-bottom: 0; }
+        body.kiosk-mode header        { grid-area: hdr;   margin-bottom: 0; padding: 6px 12px; }
+        body.kiosk-mode .alert-banner { display: none !important; }
         body.kiosk-mode .stats-row    { grid-area: stats; margin-bottom: 0; }
 
         /* kiosk-main: 2-col × 2-row */
@@ -5371,86 +5371,74 @@
                     </div>
                 </div>`;
 
-                // ── Provider aggregation (Claude / GPT / Gemini / Grok / Local / Other) ──
-                let providerHtml = '';
-                if (mu.breakdown && mu.breakdown.length) {
-                    const PROVIDER_MAP = [
-                        { key: 'claude',  label: 'Claude',  color: '#f97316', match: n => n.includes('claude') || n.includes('anthropic') },
-                        { key: 'openai',  label: 'GPT/OpenAI', color: '#10a37f', match: n => n.includes('gpt') || n.includes('openai') || n.includes('codex') || n.includes('o1') || n.includes('o3') || n.includes('o4') },
-                        { key: 'gemini',  label: 'Gemini',  color: '#4285f4', match: n => n.includes('gemini') || n.includes('google') },
-                        { key: 'grok',    label: 'Grok',    color: '#1da1f2', match: n => n.includes('grok') || n.includes('x-ai') || n.includes('xai') },
-                        { key: 'local',   label: 'Local',   color: '#4ade80', match: (n, src) => src === 'ollama' || n.includes('local/') || n.includes('llama3.2') || n.includes('qwen2.5-coder') },
-                        { key: 'or',      label: 'OpenRouter', color: '#a78bfa', match: (n, src) => src === 'openrouter' || n.includes('openrouter') },
-                    ];
-                    const providers = {};
-                    for (const p of PROVIDER_MAP) providers[p.key] = { label: p.label, color: p.color, weekly: 0, daily: 0, session: 0 };
-                    for (const m of mu.breakdown) {
-                        const n = (m.name||'').toLowerCase();
-                        const src = (m.source||'').toLowerCase();
-                        let matched = false;
-                        for (const p of PROVIDER_MAP) {
-                            if (p.match(n, src)) {
-                                providers[p.key].weekly += m.weeklyCost||0;
-                                providers[p.key].daily += m.dailyCost||0;
-                                providers[p.key].session += m.sessionCost||m.costUsd||0;
-                                matched = true; break;
-                            }
-                        }
-                        if (!matched) {
-                            if (!providers.other) providers.other = { label: 'Other', color: '#94a3b8', weekly:0, daily:0, session:0 };
-                            providers.other.weekly += m.weeklyCost||0;
-                        }
-                    }
-                    // Also add J.A.I.N costs
-                    if (mu.jain && mu.jain.available) {
-                        if (!providers.jain) providers.jain = { label: 'J.A.I.N', color: '#60a5fa', weekly: mu.jain.total||0, daily: mu.jain.daily||0, session: 0 };
-                    }
-                    const provRows = Object.values(providers).filter(p => p.weekly > 0.001 || p.daily > 0.001 || p.session > 0.001)
-                        .sort((a,b) => b.weekly - a.weekly);
-                    if (provRows.length) {
-                        providerHtml = `<div class="mu-provider-section">${provRows.map(p =>
-                            `<div class="mu-prov-row">
-                                <span class="mu-prov-dot" style="background:${p.color}"></span>
-                                <span class="mu-prov-name">${p.label}</span>
-                                <span class="mu-prov-costs"><span class="mu-prov-d">${fmtCost(p.daily)}</span><span class="mu-prov-sep">/d</span><span class="mu-prov-w">${fmtCost(p.weekly)}</span><span class="mu-prov-sep">/wk</span></span>
-                            </div>`
-                        ).join('')}</div>`;
-                    }
-                }
+                // Provider section removed — per-model breakdown below covers this
 
-// ── Per-model bar breakdown (compact) ──
+// ── Per-model breakdown (clean model names, sess/day/wk costs) ──
                 let breakdownHtml = '<div class="empty-state" style="font-size:0.68rem;padding:6px 0;">No model calls yet</div>';
                 if (mu.breakdown && mu.breakdown.length) {
-                    const sorted = [...mu.breakdown].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
+                    // Helper: clean model name → display label
+                    function modelDisplayName(raw) {
+                        const n = (raw || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '')
+                            .replace(/\s*\(BYOK\)/i, '').replace(/-codex\b/i, '').trim();
+                        const MAP = {
+                            'claude-sonnet-4-6': 'Sonnet 4.6',
+                            'claude-sonnet-4-5': 'Sonnet 4.5',
+                            'claude-haiku-3-5': 'Haiku 3.5',
+                            'gpt-5.4': 'GPT-5.4',
+                            'gpt-5.3': 'GPT-5.3',
+                            'gpt-4.1': 'GPT-4.1',
+                            'gpt-4o': 'GPT-4o',
+                            'gpt-4o-mini': 'GPT-4o mini',
+                            'o1': 'o1', 'o3': 'o3', 'o4-mini': 'o4-mini',
+                            'gemini-2.5-flash': 'Gemini 2.5 Flash',
+                            'gemini-2.5-pro': 'Gemini 2.5 Pro',
+                            'gemini-2.0-flash': 'Gemini 2.0 Flash',
+                            'auto (byok)': 'OpenRouter BYOK',
+                        };
+                        return MAP[n.toLowerCase()] || n;
+                    }
+                    // Agent tag: infer from source + name
+                    function agentTag(model) {
+                        const src = (model.source || '').toLowerCase();
+                        const n = (model.name || '').toLowerCase();
+                        if (n.startsWith('jain/')) return { label: 'J.A.I.N', color: '#60a5fa' };
+                        if (src.includes('jain')) return { label: 'J.A.I.N', color: '#60a5fa' };
+                        if (src === 'codex' || src === 'codexbar') return { label: 'Codex', color: '#a78bfa' };
+                        return { label: 'JOSH 2.0', color: '#4ade80' };
+                    }
+                    // Skip zero-cost local/free rows
+                    const filtered = mu.breakdown.filter(m => {
+                        const isLocal = m.isLocal === true || (m.source || '').toLowerCase() === 'ollama';
+                        return !isLocal || (m.weeklyCost || 0) > 0;
+                    });
+                    const sorted = [...filtered].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
                     const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
                     const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24','#22d3ee','#fb7185'];
-                    breakdownHtml = `<div class="mu-compact-list">${sorted.map((model, i) => {
-                        const total = model.weeklyCost || 0;
-                        const daily = model.dailyCost || 0;
-                        const pct = Math.max(2, (total / maxCost) * 100).toFixed(1);
+                    const colHdr = `<div class="mu-compact-row mu-compact-hdr" style="opacity:0.4;font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">
+                        <span style="flex:1">Model</span>
+                        <span style="width:34px;text-align:right">Sess</span>
+                        <span style="width:34px;text-align:right">Day</span>
+                        <span style="width:34px;text-align:right">Wk</span>
+                    </div>`;
+                    const rows = sorted.map((model, i) => {
+                        const sessC = model.sessionCost || model.costUsd || 0;
+                        const dayC  = model.dailyCost || 0;
+                        const wkC   = model.weeklyCost || 0;
+                        const pct   = Math.max(2, (wkC / maxCost) * 100).toFixed(1);
                         const color = palette[i % palette.length];
-                        const src = (model.source || '').toLowerCase();
-                        const isLocal = model.isLocal === true || src === 'ollama';
-                        const srcTag = isLocal ? '⚡' : src.includes('openrouter') ? 'OR' : src.includes('codexbar') ? 'CB' : src.includes('openclaw') ? 'OC' : src.includes('xai') ? 'xAI' : '?';
-                        const srcClass = isLocal ? 'local' : src.includes('openrouter') ? 'openrouter' : src.includes('codex') ? 'codexbar' : src.includes('openclaw') ? 'openclaw' : 'other';
-                        const shortName = (model.name || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local)\//, '').replace(/\s*\(BYOK\)/, '');
-                        const estimated = model.costEstimated ? ' ~' : '';
-                        const sizeLabel = isLocal && model.sizeGb ? ` · ${model.sizeGb}GB` : '';
-                        const costDisplay = isLocal
-                            ? `<span style="color:#4ade80;font-size:0.6rem;font-weight:600;">free${sizeLabel}</span>`
-                            : `<span class="mu-compact-cost">${estimated}${formatCurrencyAlways(daily)}<span style="color:#fff;opacity:0.4;margin:0 2px">/</span>${estimated}${formatCurrencyAlways(total)}</span>`;
-                        const localDot = isLocal && model.loaded ? `<span title="loaded in memory" style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#4ade80;margin-left:2px;vertical-align:middle;"></span>` : '';
+                        const est   = model.costEstimated ? '~' : '';
+                        const disp  = modelDisplayName(model.name);
+                        const ag    = agentTag(model);
                         return `<div class="mu-compact-row">
                             <span class="mu-compact-dot" style="background:${color}"></span>
-                            <span class="mu-compact-name" title="${escapeHtml(model.name)}">${escapeHtml(shortName)}${localDot}</span>
-                            <span class="mu-source-tag ${srcClass}" style="font-size:0.5rem;padding:0 3px;">${srcTag}</span>
-                            <div class="mu-compact-bar-wrap">
-                                <div class="mu-compact-bar-fill" style="width:${pct}%;background:${isLocal ? '#4ade8060' : color+'80'}"></div>
-                            </div>
-                            ${costDisplay}
+                            <span class="mu-compact-name" title="${escapeHtml(model.name)}" style="flex:1">${escapeHtml(disp)}</span>
+                            <span class="mu-agent-tag" style="font-size:0.5rem;color:${ag.color};margin-right:4px;white-space:nowrap;">${ag.label}</span>
+                            <span class="mu-compact-cost" style="width:34px;text-align:right">${est}${fmtCost(sessC)}</span>
+                            <span class="mu-compact-cost" style="width:34px;text-align:right;opacity:0.7">${est}${fmtCost(dayC)}</span>
+                            <span class="mu-compact-cost" style="width:34px;text-align:right;opacity:0.5">${est}${fmtCost(wkC)}</span>
                         </div>`;
-                    }).join('')}</div>
-                    `;
+                    }).join('');
+                    breakdownHtml = `<div class="mu-compact-list">${colHdr}${rows}</div>`;
                 }
 
                 // ── ElevenLabs usage chip ──
@@ -5494,7 +5482,7 @@
                     </div>
                 </div>`;
 
-                modelUsageCard.innerHTML = summaryHtml + providerHtml + breakdownHtml + elHtml + healthHtml;
+                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + elHtml + healthHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
@@ -5574,8 +5562,9 @@
                     const statusColor = hasErr ? '#e53e3e' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const statusLabel = hasErr ? 'ERROR' : isPaused ? 'PAUSED' : 'ACTIVE';
                     const agentName   = cron.agent || 'JOSH 2.0';
-                    const agentIsJain = agentName === 'J.A.I.N';
-                    const agentColor  = agentIsJain ? '#60a5fa' : '#4ade80';
+                    const agentIsJain   = agentName === 'J.A.I.N';
+                    const agentIsJaimes = agentName === 'JAIMES';
+                    const agentColor    = agentIsJain ? '#60a5fa' : agentIsJaimes ? '#a78bfa' : '#4ade80';
 
                     // Multi-run (Intelligence Feed style)
                     if (cron.multiRun && cron.multiRun.runs) {
