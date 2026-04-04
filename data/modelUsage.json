@@ -1,13 +1,13 @@
 {
-  "session": 0.05594,
-  "daily": 1.247614,
+  "session": 0.384433,
+  "daily": 1.576107,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 5.6339475
+      "cost": 5.962440599999999
     },
     {
       "name": "google/gemini-2.5-flash",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 150,
-      "outputTokens": 123759,
-      "totalTokens": 123909,
-      "sessionCost": 5.6339475,
-      "dailyCost": 0.0559404,
-      "weeklyCost": 5.6339475,
+      "inputTokens": 153,
+      "outputTokens": 124396,
+      "totalTokens": 124549,
+      "sessionCost": 5.962440599999999,
+      "dailyCost": 0.3844335,
+      "weeklyCost": 5.962440599999999,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -116,7 +116,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-04T05:15:05Z",
+  "lastUpdated": "2026-04-04T05:20:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 1.264261,
-    "total": 12.179623,
+    "daily": 1.592754,
+    "total": 12.508116,
     "monthly": 76.781686
   }
 }
