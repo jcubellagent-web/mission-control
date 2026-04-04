@@ -1,18 +1,18 @@
 {
-  "session": 0.565295,
-  "daily": 1.756969,
+  "session": 1.572512,
+  "daily": 2.787496,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 6.143302049999999
+      "cost": 7.15051935
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 2.44701341
+      "cost": 2.47032301
     },
     {
       "name": "openai/gpt-5.4",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 151,
-      "outputTokens": 124380,
-      "totalTokens": 124531,
-      "sessionCost": 6.143302049999999,
-      "dailyCost": 0.56529495,
-      "weeklyCost": 6.143302049999999,
+      "inputTokens": 164,
+      "outputTokens": 130071,
+      "totalTokens": 130235,
+      "sessionCost": 7.15051935,
+      "dailyCost": 1.57251225,
+      "weeklyCost": 7.15051935,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -47,13 +47,13 @@
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 2883585,
-      "outputTokens": 72395,
-      "totalTokens": 2955980,
-      "sessionCost": 2.44701341,
-      "dailyCost": 1.1916737999999998,
-      "weeklyCost": 2.44701341,
-      "sessions": 23,
+      "inputTokens": 2952217,
+      "outputTokens": 73483,
+      "totalTokens": 3025700,
+      "sessionCost": 2.47032301,
+      "dailyCost": 1.2149833999999997,
+      "weeklyCost": 2.47032301,
+      "sessions": 24,
       "isGemini": true,
       "costEstimated": false
     },
@@ -116,7 +116,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-04T05:25:05Z",
+  "lastUpdated": "2026-04-04T05:30:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 1.773616,
-    "total": 12.688978,
+    "daily": 2.804143,
+    "total": 13.719505,
     "monthly": 76.781686
   }
 }
