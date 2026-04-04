@@ -4,20 +4,20 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-04T20:12:11Z",
-    "objective": "exec:Running Mission Control audit + implementing fixes",
+    "messageReceived": "2026-04-04T20:15:03Z",
+    "objective": "exec:Implementing Mission Control resiliency and UI fixes",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-04T20:12:11Z",
-    "checkedAt": "2026-04-04T20:12:11Z",
+    "updatedAt": "2026-04-04T20:15:03Z",
+    "checkedAt": "2026-04-04T20:15:03Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "exec:Running Mission Control audit + implementing fixes",
-    "updatedAt": "2026-04-04T20:15:02Z"
+    "context": "exec:Implementing Mission Control resiliency and UI fixes",
+    "updatedAt": "2026-04-04T20:18:20Z"
   },
   "contextWindow": {
     "usedTokens": 398120,
@@ -144,7 +144,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-04T20:15:06Z",
+    "lastUpdated": "2026-04-04T20:18:23Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -179,10 +179,11 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 10.060167,
-    "total_earned": 10.060167,
-    "online_time": "100h 36m",
+    "sim_balance": 10.06525,
+    "total_earned": 10.06525,
+    "online_time": "100h 39m",
     "is_online": true,
+    "status": "online",
     "earning_rate": "0.1 SIM/hour",
     "position_x": 0,
     "position_y": 0,
@@ -191,18 +192,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-04T20:15:06Z"
+    "updatedAt": "2026-04-04T20:18:24Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.8,
-      "cpu_user": 10.26,
-      "cpu_sys": 13.48,
-      "load1": 2.11,
-      "load5": 2.05,
-      "load15": 2.0,
+      "cpu_pct": 25.2,
+      "cpu_user": 12.2,
+      "cpu_sys": 13.7,
+      "load1": 2.62,
+      "load5": 2.27,
+      "load15": 2.1,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "160Gi",
@@ -210,14 +211,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.5,
-      "cpu_user": 5.34,
-      "cpu_sys": 9.16,
-      "load1": 1.78,
-      "load5": 1.91,
-      "load15": 1.85,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 10.5,
+      "cpu_user": 2.18,
+      "cpu_sys": 8.75,
+      "load1": 1.69,
+      "load5": 1.85,
+      "load15": 1.83,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -237,19 +238,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T20:15:02Z"
+      "lastChecked": "2026-04-04T20:18:20Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-04T20:15:02Z"
+      "lastChecked": "2026-04-04T20:18:20Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-04T20:15:02Z"
+      "lastChecked": "2026-04-04T20:18:20Z"
     }
   ],
   "crons": [
@@ -523,28 +524,28 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-04T16:00:00",
+      "runStatus": "upcoming",
       "multiRun": {
         "runs": [
           {
             "time": "9:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "1:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "3:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "5:00 PM",
@@ -653,25 +654,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-04T20:15:06Z",
+      "time": "2026-04-04T20:18:23Z",
       "event": "Session spend: $71.46"
     },
     {
-      "time": "2026-04-04T20:15:02Z",
+      "time": "2026-04-04T20:18:20Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-04T20:15:02Z",
+      "time": "2026-04-04T20:18:20Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-04T20:15:02Z",
+      "time": "2026-04-04T20:18:20Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-04T20:15:02Z",
+      "time": "2026-04-04T20:18:20Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-04T20:15:02Z"
+  "lastUpdated": "2026-04-04T20:18:20Z"
 }
