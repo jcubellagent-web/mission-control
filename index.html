@@ -413,10 +413,12 @@
         .tjob-run-done     { background:rgba(74,222,128,0.15);  color:#4ade80; border:1px solid rgba(74,222,128,0.25); }
         .tjob-run-missed   { background:rgba(245,158,11,0.15);  color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
         .tjob-run-upcoming { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.08); }
+        .tjob-run-paused   { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.10); }
         .tjob-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
         .tjob-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
         .tjob-header-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
         .tjob-name { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        .tjob-subline { font-size: 0.58rem; color: rgba(255,255,255,0.42); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
         .tjob-agent { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; opacity: 0.8; }
         .tjob-meta-row { display: flex; align-items: center; gap: 5px; }
         .tjob-schedule { font-size: 0.6rem; color: rgba(255,255,255,0.6); white-space: nowrap; }
@@ -3642,6 +3644,10 @@
             lastJaimesBrainFeedHash = h;
             _uaJaimesBf = bf || null;
             renderUnifiedActivity();
+            if (window._mcLastDashData) {
+                renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+                renderSystemHealth(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+            }
         }
 
         // ===== Agent Comms =====
@@ -4046,10 +4052,19 @@
             const jaimesGw = document.getElementById('sh-jaimes-gw');
             const jaimesTasks = document.getElementById('sh-jaimes-tasks');
             const jaimesOnline = jaimesBf && jaimesBf.active;
-            const jaimesRecent = jaimesBf && (Date.now() - new Date(jaimesBf.updatedAt||0).getTime()) < 30*60*1000;
+            const jaimesAgeMs = jaimesBf && jaimesBf.updatedAt ? (Date.now() - new Date(jaimesBf.updatedAt).getTime()) : null;
+            const jaimesRecent = jaimesAgeMs !== null && jaimesAgeMs < 30*60*1000;
+            const jaimesStale = jaimesAgeMs !== null && jaimesAgeMs > 120*60*1000;
             if (jaimesDot) jaimesDot.classList.toggle('active', !!(jaimesOnline || jaimesRecent));
-            if (jaimesGw) { jaimesGw.textContent = jaimesOnline ? 'active' : jaimesRecent ? 'idle' : 'unknown'; jaimesGw.className = 'sh-mv ' + (jaimesOnline ? 'ok' : jaimesRecent ? '' : 'warn'); }
-            if (jaimesTasks && jaimesBf) { const obj = jaimesBf.objective||''; jaimesTasks.textContent = obj ? obj.slice(0,30) : '—'; }
+            if (jaimesGw) {
+                jaimesGw.textContent = jaimesOnline ? 'active' : jaimesRecent ? 'idle' : jaimesStale ? 'stale' : 'unknown';
+                jaimesGw.className = 'sh-mv ' + (jaimesOnline ? 'ok' : jaimesStale ? 'warn' : jaimesRecent ? '' : 'warn');
+            }
+            if (jaimesTasks && jaimesBf) {
+                const obj = jaimesBf.objective || '';
+                jaimesTasks.textContent = jaimesStale ? (jaimesOnline ? '⚠ Stale feed' : 'Standby') : (obj ? obj.slice(0,30) : '—');
+                jaimesTasks.className = 'sh-mv ' + (jaimesStale && jaimesOnline ? 'warn' : '');
+            }
         }
 
         // ── Jobs Panel — agent status + section data ──────────────────────
@@ -4065,9 +4080,11 @@
                 const statusEl = document.getElementById(a.status);
                 if (!dot || !statusEl) continue;
                 const isActive = a.bf && a.bf.active;
+                const ageMs = a.bf && a.bf.updatedAt ? (Date.now() - new Date(a.bf.updatedAt).getTime()) : null;
+                const isStale = ageMs !== null && ageMs > 120 * 60 * 1000;
                 dot.classList.toggle('active', !!isActive);
                 const obj = a.bf ? (a.bf.objective || '') : '';
-                statusEl.textContent = obj ? obj.slice(0, 40) : (isActive ? 'active' : 'idle');
+                statusEl.textContent = isStale ? (isActive ? 'stale feed' : 'standby') : (obj ? obj.slice(0, 40) : (isActive ? 'active' : 'idle'));
             }
 
             // Cron health section
@@ -4094,7 +4111,7 @@
                         detail = `${done}/${total} runs today`;
                     } else if (runSt === 'missed') {
                         detail = 'missed';
-                    } else if (runSt === 'ok') {
+                    } else if (runSt === 'done') {
                         detail = 'ran ✓';
                     }
                     return `<div class="jobs-cron-row"><span class="jobs-cron-dot ${cls}"></span><span class="jobs-cron-name">${escapeHtml(c.name||'?')}</span><span class="jobs-cron-ts">${escapeHtml(detail)}</span></div>`;
@@ -4114,6 +4131,10 @@
                 const nf = window._newsfeedData;
                 const ts = (jainNf && jainNf.generatedAt) || (nf && nf.generatedAt);
                 intelEl.textContent = ts ? formatRelTime(ts) : '—';
+                if (ts) {
+                    const ageHours = (Date.now() - new Date(ts).getTime()) / 3600000;
+                    intelEl.className = 'jdr-val ' + (ageHours > 4 ? 'warn' : 'ok');
+                }
             }
 
             // X posts today — from x-progress recentPosts
@@ -4129,7 +4150,7 @@
                     // Try to get from dashboard data crons
                     if (data && data.crons) {
                         const xCron = data.crons.find(c => c.name && (c.name.includes('X Post') || c.category === 'X Account'));
-                        if (xCron) xPostsEl.textContent = xCron.runStatus === 'ok' ? 'ran ✓' : xCron.schedule || '—';
+                        if (xCron) xPostsEl.textContent = xCron.runStatus === 'done' ? 'ran ✓' : xCron.schedule || '—';
                     }
                 }
             }
@@ -4143,15 +4164,15 @@
                 const mCron = data.crons.find(c => c.name && c.name.includes('Sorare Daily'));
                 const lCron = data.crons.find(c => c.name && c.name.includes('Sorare Competition'));
                 if (sorMissions && mCron) {
-                    const ran = mCron.runStatus === 'ok';
+                    const ran = mCron.runStatus === 'done';
                     const missed = mCron.runStatus === 'missed';
-                    sorMissions.textContent = missed ? '⚠ missed today' : ran ? '7/7 set ✓' : '7 limited · 10am ET';
+                    sorMissions.textContent = missed ? '⚠ missed today' : ran ? '7 missions · done ✓' : '7 limited · 2pm ET';
                     sorMissions.className = 'jdr-val ' + (missed ? 'warn' : ran ? 'ok' : '');
                 }
                 if (sorLineups && lCron) {
-                    const ran = lCron.runStatus === 'ok';
+                    const ran = lCron.runStatus === 'done';
                     const missed = lCron.runStatus === 'missed';
-                    sorLineups.textContent = missed ? '⚠ missed' : ran ? 'submitted ✓' : 'pending · 11am ET';
+                    sorLineups.textContent = missed ? '⚠ missed' : ran ? 'lineups set ✓' : 'pending · 3pm ET';
                     sorLineups.className = 'jdr-val ' + (missed ? 'warn' : ran ? 'ok' : '');
                 }
                 const mOk = mCron && mCron.status === 'ok' && mCron.runStatus !== 'missed';
@@ -4164,13 +4185,20 @@
             const fanMatchup = document.getElementById('fantasy-matchup-val');
             const fanBadge = document.getElementById('fantasy-badge');
             if (data && data.crons) {
-                const fCron = data.crons.find(c => c.name && (c.name.includes('Lineup') || c.name.includes('Injury')));
+                const fantasyCrons = data.crons.filter(c => (c.category || '').includes('Fantasy') || (c.name || '').includes('Fantasy') || (c.name || '').includes('Lineup') || (c.name || '').includes('Injury') || (c.name || '').includes('Waiver'));
+                const missedFantasy = fantasyCrons.some(c => c.runStatus === 'missed');
+                const erroredFantasy = fantasyCrons.some(c => c.status === 'error');
+                const activeFantasy = fantasyCrons.some(c => c.status === 'ok');
                 if (fanAlerts) {
-                    fanAlerts.textContent = 'Suzuki DL · needs swap';
-                    fanAlerts.className = 'jdr-val warn';
+                    fanAlerts.textContent = erroredFantasy ? 'automation error' : missedFantasy ? 'check lineup' : activeFantasy ? 'No alerts' : 'automation paused';
+                    fanAlerts.className = 'jdr-val ' + (erroredFantasy || missedFantasy ? 'warn' : activeFantasy ? 'ok' : '');
                 }
-                if (fanMatchup) fanMatchup.textContent = 'Week in progress';
-                if (fanBadge) { fanBadge.textContent = '⚠ Roster'; fanBadge.className = 'jobs-section-badge amber'; }
+                if (fanMatchup) fanMatchup.textContent = activeFantasy ? 'Week in progress' : 'Monitoring paused';
+                if (fanBadge) {
+                    const badgeState = erroredFantasy || missedFantasy ? 'amber' : activeFantasy ? 'green' : 'amber';
+                    fanBadge.textContent = erroredFantasy || missedFantasy ? '⚠ Check' : activeFantasy ? '✓ OK' : '⏸ Paused';
+                    fanBadge.className = 'jobs-section-badge ' + badgeState;
+                }
             }
 
             // Updated timestamp
@@ -5439,12 +5467,21 @@
             const pausedCrons = data.crons?.filter(c => c.status === 'paused').length || 0;
             const errorCrons = data.crons?.filter(c => c.errors > 0).length || 0;
             const upcomingCount = data.upcomingEvents?.length || 0;
+            const calendarHealth = data.calendarHealth || { status: 'unknown', message: 'Calendar' };
+            const calendarPill = calendarHealth.status === 'ok'
+                ? `<div class="stat-pill" style="border-color:rgba(74,222,128,0.25)"><span class="num" style="color:#4ade80">📅</span><span class="label">Calendar OK</span></div>`
+                : calendarHealth.status === 'auth_expired'
+                ? `<div class="stat-pill" style="border-color:rgba(251,191,36,0.35)"><span class="num" style="color:#fbbf24">📅</span><span class="label">Calendar Re-auth</span></div>`
+                : calendarHealth.status === 'error'
+                ? `<div class="stat-pill" style="border-color:rgba(239,68,68,0.35)"><span class="num" style="color:#f87171">📅</span><span class="label">Calendar Issue</span></div>`
+                : '';
             const deviceAttention = data.devices?.filter(d => d.status && d.status !== 'ok').length || 0;
             // Only show stats that have non-zero value or are actionable alerts
             statsRow.innerHTML = `
                 <div class="stat-pill"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
                 ${pausedCrons > 0 ? `<div class="stat-pill"><span class="num">${pausedCrons}</span><span class="label">Paused</span></div>` : ''}
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
+                ${calendarPill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
                 <div class="stat-pill stat-pill-x" id="x-progress-bubble" title="X Growth Dashboard">
@@ -5481,6 +5518,28 @@
                     if (tsEl) tsEl.textContent = updatedStr;
                 }
 
+                // Helper: clean model name → display label
+                function modelDisplayName(raw) {
+                    const n = (raw || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '')
+                        .replace(/\s*\(BYOK\)/i, '').replace(/-codex\b/i, '').trim();
+                    const MAP = {
+                        'claude-sonnet-4-6': 'Sonnet 4.6',
+                        'claude-sonnet-4-5': 'Sonnet 4.5',
+                        'claude-haiku-3-5': 'Haiku 3.5',
+                        'gpt-5.4': 'GPT-5.4',
+                        'gpt-5.3': 'GPT-5.3',
+                        'gpt-4.1': 'GPT-4.1',
+                        'gpt-4o': 'GPT-4o',
+                        'gpt-4o-mini': 'GPT-4o mini',
+                        'o1': 'o1', 'o3': 'o3', 'o4-mini': 'o4-mini',
+                        'gemini-2.5-flash': 'Gemini 2.5 Flash',
+                        'gemini-2.5-pro': 'Gemini 2.5 Pro',
+                        'gemini-2.0-flash': 'Gemini 2.0 Flash',
+                        'auto (byok)': 'OpenRouter BYOK',
+                    };
+                    return MAP[n.toLowerCase()] || n;
+                }
+
                 // ── Summary totals ──
                 const dailyV   = (mu.daily   == null || isNaN(mu.daily))   ? null : mu.daily;
                 const weeklyV  = (mu.weekly  == null || isNaN(mu.weekly))  ? null : mu.weekly;
@@ -5505,8 +5564,11 @@
                 const totalWeekly  = Math.max(rawWeekly, totalDaily);
                 const totalMonthly = Math.max(rawMonthly, totalWeekly);
 
+                const activeModelRaw = data.contextWindow?.model || '';
+                const activeModelDisp = activeModelRaw ? modelDisplayName(activeModelRaw) : '';
                 const summaryHtml = `
                 <div class="mu-totals-section">
+                    ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
                     <div class="mu-totals-row">
                         <div class="mu-total-cell">
                             <span class="mu-total-label">Sess</span>
@@ -5532,27 +5594,6 @@
 // ── Per-model breakdown (clean model names, sess/day/wk costs) ──
                 let breakdownHtml = '<div class="empty-state" style="font-size:0.68rem;padding:6px 0;">No model calls yet</div>';
                 if (mu.breakdown && mu.breakdown.length) {
-                    // Helper: clean model name → display label
-                    function modelDisplayName(raw) {
-                        const n = (raw || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '')
-                            .replace(/\s*\(BYOK\)/i, '').replace(/-codex\b/i, '').trim();
-                        const MAP = {
-                            'claude-sonnet-4-6': 'Sonnet 4.6',
-                            'claude-sonnet-4-5': 'Sonnet 4.5',
-                            'claude-haiku-3-5': 'Haiku 3.5',
-                            'gpt-5.4': 'GPT-5.4',
-                            'gpt-5.3': 'GPT-5.3',
-                            'gpt-4.1': 'GPT-4.1',
-                            'gpt-4o': 'GPT-4o',
-                            'gpt-4o-mini': 'GPT-4o mini',
-                            'o1': 'o1', 'o3': 'o3', 'o4-mini': 'o4-mini',
-                            'gemini-2.5-flash': 'Gemini 2.5 Flash',
-                            'gemini-2.5-pro': 'Gemini 2.5 Pro',
-                            'gemini-2.0-flash': 'Gemini 2.0 Flash',
-                            'auto (byok)': 'OpenRouter BYOK',
-                        };
-                        return MAP[n.toLowerCase()] || n;
-                    }
                     // Agent tag: infer from source + name
                     function agentTag(model) {
                         const src = (model.source || '').toLowerCase();
@@ -5660,6 +5701,10 @@
                         </div>
                     </div>
                 `).join('');
+            } else if (data.calendarHealth && data.calendarHealth.status === 'auth_expired') {
+                eventsList.innerHTML = '<div class="empty-state">Calendar needs re-auth</div>';
+            } else if (data.calendarHealth && data.calendarHealth.status === 'error') {
+                eventsList.innerHTML = '<div class="empty-state">Calendar temporarily unavailable</div>';
             } else {
                 eventsList.innerHTML = '<div class="empty-state">No upcoming events</div>';
             }
@@ -5725,6 +5770,7 @@
                     // Multi-run (Intelligence Feed style)
                     if (cron.multiRun && cron.multiRun.runs) {
                         const etHour = getETHour();
+                        const desc = (cron.description || '').trim();
                         let foundNext = false;
                         const timeBadges = cron.multiRun.runs.map(r => {
                             let runHour = null;
@@ -5757,6 +5803,7 @@
                                     <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
                                     <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
                                 </div>
+                                ${desc ? `<div class="tjob-subline">${escapeHtml(desc)}</div>` : ''}
                                 <div class="tjob-badges">${timeBadges}</div>
                             </div>
                         </div>`;
@@ -5767,6 +5814,9 @@
                     const isDone    = rs === 'done';
                     const isMissed  = rs === 'missed';
                     const isUpcoming = rs === 'upcoming';
+                    const desc = (cron.description || '').trim();
+                    const lastRunText = cron.lastRun ? `last ${formatRelTime(cron.lastRun)}` : '';
+                    const subline = [desc, lastRunText].filter(Boolean).join(' · ');
                     const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
                     const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const statusBadge = isDone
@@ -5775,11 +5825,13 @@
                         ? `<span class="tjob-run-badge tjob-run-missed">⚠ missed</span>`
                         : isUpcoming
                         ? `<span class="tjob-run-badge tjob-run-upcoming">upcoming</span>`
+                        : isPaused
+                        ? `<span class="tjob-run-badge tjob-run-paused">paused</span>`
                         : '';
 
                     return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}${rowExtra}">
                         <div class="tjob-status-dot" style="background:${dotColor}${isDone ? ';box-shadow:0 0 4px #4ade8070' : !hasErr && !isMissed && isOk ? ';box-shadow:0 0 4px '+dotColor+'70' : ''}"></div>
-                        <div class="tjob-body">
+                        <div class="tjob-body" style="flex-direction:column;align-items:flex-start;gap:2px;">
                             <div class="tjob-header-row">
                                 <span class="tjob-name${isDone ? ' tjob-name-done' : ''}">${escapeHtml(cron.name)}</span>
                                 <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
@@ -5787,6 +5839,7 @@
                                 ${hasErr ? `<span class="tjob-err-badge">${cron.errors} err</span>` : ''}
                                 <span class="tjob-agent" style="color:${agentColor};margin-left:auto;">${escapeHtml(agentName)}</span>
                             </div>
+                            ${subline ? `<div class="tjob-subline">${escapeHtml(subline)}</div>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -7306,8 +7359,8 @@
         return String(n);
     }
     function fmtPct(n) {
-        if (n == null || isNaN(n)) return '–';
-        return (n * 100).toFixed(1) + '%';
+        if (n == null || isNaN(n)) return '0.00%';
+        return (n * 100).toFixed(2) + '%';
     }
     function barPct(val, max) {
         if (!max || !val) return 0;

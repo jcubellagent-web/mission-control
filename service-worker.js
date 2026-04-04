@@ -1,4 +1,4 @@
-const CACHE_NAME = "mission-control-pwa-v15";
+const CACHE_NAME = "mission-control-pwa-v1775264582
 const FILES_TO_CACHE = [
   "./manifest.webmanifest",
   "./assets/logo.jpg",
@@ -17,14 +17,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-          return null;
-        })
-      )
+      Promise.all(keys.map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
@@ -39,14 +32,14 @@ self.addEventListener("fetch", (event) => {
 
   // Always network-first for: index.html, root, and all data JSON files
   // This ensures the dashboard always loads the latest code and data
+  // Never serve stale: all HTML, all data JSON, all JS files
   const alwaysFresh = (
-    url.pathname.endsWith("/data/dashboard-data.json") ||
-    url.pathname.endsWith("/data/brain-feed.json") ||
-    url.pathname.endsWith("/data/modelUsage.json") ||
-    url.pathname.endsWith("/data/newsfeed.json") ||
-    url.pathname.endsWith("/index.html") ||
-    url.pathname === "/mission-control/" ||
-    url.pathname.endsWith("/mission-control/")
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".json") ||
+    url.pathname === "/" ||
+    url.pathname.endsWith("/mission-control/") ||
+    url.pathname === "/mission-control"
   );
 
   if (alwaysFresh) {
@@ -87,4 +80,11 @@ self.addEventListener("fetch", (event) => {
         .catch(() => null);
     })
   );
+});
+
+// Allow the dashboard to force-update the SW
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

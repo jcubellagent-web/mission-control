@@ -8,7 +8,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BF_FILE="$ROOT_DIR/data/brain-feed.json"
 
-OBJECTIVE="${1:-Working…}"
+OBJECTIVE="${1:-Awaiting instruction}"
 STEPS_RAW="${2:-}"
 STATE="${3:-active}"
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -75,7 +75,8 @@ generic = ['Response sent · Awaiting instruction', 'Working…', '', 'Awaiting 
 jaimes_status = ''
 try:
     jbf = json.load(open(jaimes_bf_file))
-    if jbf.get('active'):
+    generic_jaimes = ['standby', 'idle', 'working...', 'working...', '']
+    if jbf.get('active') and jbf.get('objective','').lower().strip() not in generic_jaimes:
         obj = jbf.get('objective', 'working')[:50]
         jaimes_status = f'JAIMES: {obj}'
 except:
@@ -84,15 +85,17 @@ except:
 try:
     bf = json.load(open(bf_file))
     prev = bf.get('objective', '')
-    base = 'Awaiting instruction'
-    if new_obj.strip() not in generic and new_obj.strip():
-        base = new_obj
-    elif prev and prev not in generic:
-        base = prev + ' — complete'
     if jaimes_status:
         print(f'JOSH 2.0 idle · {jaimes_status}')
     else:
-        print(base + ' · awaiting next instruction' if base != 'Awaiting instruction' else base)
+        # Show last completed task so Josh can see what just finished
+        if new_obj.strip() not in generic and new_obj.strip():
+            base = new_obj
+        elif prev and prev not in generic and not prev.startswith('JOSH 2.0 idle') and not prev.startswith('Awaiting'):
+            base = prev
+        else:
+            base = ''
+        print((base + ' · Awaiting further instruction') if base else 'Awaiting further instruction')
 except:
     if jaimes_status:
         print(f'JOSH 2.0 idle · {jaimes_status}')
@@ -176,6 +179,22 @@ SUPABASE_KEY="sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
     git push origin main -q 2>/dev/null || true
   fi
 ) &
+
+# Sync J.A.I.N brain-feed.json when going idle (prevents stale JAIMES objective from showing)
+if [[ "$IS_ACTIVE" == "false" ]]; then
+  (
+    ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no jc_agent@100.121.89.84       "python3 -c \"
+import json
+from datetime import datetime,timezone
+from pathlib import Path
+p=Path('/Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json')
+d=json.loads(p.read_text()) if p.exists() else {}
+if not d.get('active',False):
+    d.update({'active':False,'objective':'Standby','status':'idle','updatedAt':datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')})
+    p.write_text(json.dumps(d,indent=2))
+\"" 2>/dev/null || true
+  ) &
+fi
 
 # Return immediately — caller is not blocked
 exit 0

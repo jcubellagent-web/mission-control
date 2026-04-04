@@ -37,6 +37,13 @@ CRON_TARGETS = [
     {"name": "Waiver Scan", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed + Fri 9am", "description": "Scans top free agents and recommends add/drop moves", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
     {"name": "Sorare Daily Missions", "pattern": "/Users/jc_agent/scripts/sorare_mlb_bot.py --missions-only", "schedule": "Daily 2:00 PM ET", "description": "Submits all 7 daily missions via sorare_mlb_bot.py --missions-only", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
     {"name": "Sorare Competition Lineups", "pattern": "/Users/jc_agent/scripts/sorare_mlb_bot.py --lineups-only", "schedule": "Daily 3:00 PM ET", "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "Sorare Nightly Claim", "pattern": "sorare_claim_bot.py", "schedule": "Daily 11:30 PM ET", "description": "Claims nightly Sorare rewards + preps next day missions", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "Sorare Sheet Updater", "pattern": "sorare_sheet_updater.py", "schedule": "Daily 11:30 PM ET", "description": "Updates Sorare MLB Google Sheet with today's results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Trains XGBoost model on latest Sorare MLB results data", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "X Feedback ML", "pattern": "x_feedback_ml.py", "schedule": "Daily 6:00 AM ET", "description": "Scores X post performance, updates strategy in SQLite + state.json", "category": "X Account", "agent": "JAIMES", "jain": True},
+    {"name": "Fantasy Weekly Recap", "pattern": "fantasy_weekly_recap.py", "schedule": "Sunday 10:00 PM ET", "description": "Sends weekly fantasy baseball recap to Josh via Telegram", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
+    {"name": "JAIMES Daily Report", "pattern": "jaimes_reporter.py", "schedule": "Daily 3:30 PM ET", "description": "Sends Sorare + fantasy daily summary to Josh via Telegram", "category": "Sorare MLB", "agent": "JAIMES", "jain": True},
+    {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "System health audit — disk, memory, process checks", "category": "Maintenance", "agent": "JAIMES", "jain": True},
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min", "description": "Scans high-signal breaking news + Trump statements. Pushes score ≥8.5 to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min", "description": "Monitors X/Twitter watchlist for high-signal posts (score ≥8), pushes to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     # ── X Account Growth Strategy ──────────────────────────────────────────────
@@ -57,7 +64,7 @@ CRON_TARGETS = [
     {"name": "X Nightcap",        "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] One sharp insight to end the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
     # Strategic Replies (8 slots/day — browser/cookie, fresh <4h tweets only)
     # multiRun slots are evaluated dynamically in fetch_crons() below
-    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "8x daily (9am–11pm ET)", "description": "[Reply] xAI finds fresh high-visibility tweets from @elonmusk, @sama, @pmarca, @saylor + 20 others → Gemini reply → Playwright browser post. Scores by freshness + likes. Never double-replies.", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "8x daily (9am–11pm ET)", "description": "[Reply] Targets @karpathy, @sama, @balajis, @saylor, @swyx, @amasad + AI/crypto niche → sharp contrarian replies via Gemini → Playwright browser post. Builds visibility in AI/agents+crypto niche.", "category": "X Account", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "runs": [
              {"time": "9:00 AM",  "label": "Strategic Reply"},
@@ -96,6 +103,8 @@ def fetch_next(endpoint: str) -> Dict[str, Any] | None:
         with urllib.request.urlopen(url, timeout=5) as resp:  # nosec B310
             return json.load(resp)
     except urllib.error.URLError as exc:  # pragma: no cover - diagnostics only
+        if '127.0.0.1:3030' in url and 'Connection refused' in str(exc):
+            return None
         print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
         return None
 
@@ -288,8 +297,8 @@ def fetch_model_usage_from_sessions() -> List[Dict[str, Any]]:
         today_et_str = now_et.strftime("%Y-%m-%d")
 
         for sess in sessions.values():
-            raw_model = sess.get("model") or sess.get("modelOverride") or ""
-            provider = sess.get("modelProvider") or ""
+            raw_model = sess.get("modelOverride") or sess.get("model") or ""
+            provider = sess.get("providerOverride") or sess.get("modelProvider") or ""
             if not raw_model:
                 continue
             # Normalize model name to "provider/model" form
@@ -502,6 +511,7 @@ def fetch_openrouter_usage() -> Dict[str, Any]:
     any_ok = False
     seen_user_ids: set = set()
 
+    warnings: list[str] = []
     for key in keys_to_try:
         try:
             req = urllib.request.Request(
@@ -533,9 +543,11 @@ def fetch_openrouter_usage() -> Dict[str, Any]:
             seen_user_ids.add(uid)
             any_ok = True
         except Exception as exc:
-            print(f"[warn] fetch_openrouter_usage key={key[:20]}... failed: {exc}", file=sys.stderr)
+            warnings.append(f"fetch_openrouter_usage key={key[:12]}... failed: {exc}")
 
     if not any_ok:
+        for msg in warnings[:2]:
+            print(f"[warn] {msg}", file=sys.stderr)
         return empty
     return {**agg, "available": True}
 
@@ -695,7 +707,10 @@ def fetch_jain_api_costs() -> Dict[str, Any]:
     jain_cost_file = ROOT.parent / "data" / "jain-api-costs.json"
     if jain_cost_file.exists():
         try:
-            data = json.loads(jain_cost_file.read_text())
+            raw = jain_cost_file.read_text().strip()
+            if not raw:
+                return empty
+            data = json.loads(raw)
             data["available"] = True
             return data
         except Exception as exc:
@@ -966,10 +981,11 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
 
 def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
+    fetch_upcoming_events._status = {"status": "unknown", "message": "Unknown"}  # type: ignore[attr-defined]
     try:
         result = subprocess.run(
             [
-                "gog", "calendar", "events", "list",
+                "gog", "calendar", "events", "primary",
                 "--account", "jcubellagent@gmail.com",
                 "--from", "today",
                 "--days", "3",
@@ -980,8 +996,15 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
             text=True,
             check=True,
         )
+        fetch_upcoming_events._status = {"status": "ok", "message": "Connected"}  # type: ignore[attr-defined]
     except subprocess.CalledProcessError as exc:
-        print(f"[warn] gog calendar list failed: {exc.stderr}", file=sys.stderr)
+        err = (exc.stderr or '').strip()
+        if 'invalid_grant' in err or 'expired or revoked' in err:
+            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Re-auth required"}  # type: ignore[attr-defined]
+            print("[info] gog calendar auth needs re-login; skipping calendar fetch", file=sys.stderr)
+            return []
+        fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
+        print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)
         return []
     raw = json.loads(result.stdout or "[]")
     # gog --results-only returns array directly; fallback to items envelope
@@ -1204,6 +1227,11 @@ def fetch_crons() -> List[Dict[str, Any]]:
                     run_status = 'missed'
                 else:
                     run_status = 'upcoming'
+        elif target['name'] == 'X Strategic Replies':
+            if last_run:
+                run_status = 'done'
+            elif now_et.hour >= 9:
+                run_status = 'upcoming'
 
         row = {
             'name': target['name'],
@@ -1211,7 +1239,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
             'description': target.get('description', ''),
             'category': target.get('category', 'Other'),
             'agent': target.get('agent', 'JOSH 2.0'),
-            'status': 'ok' if present else 'paused',
+            'status': 'ok' if (present or last_run) else 'paused',
             'errors': 0,
             'lastError': None,
         }
@@ -1268,6 +1296,10 @@ def fetch_crons() -> List[Dict[str, Any]]:
 
                 for i, run in enumerate(runs):
                     run['done'] = assigned[i] if i < len(assigned) else False
+                if any(assigned):
+                    row['runStatus'] = 'done'
+                elif now_et.hour >= 9 and 'runStatus' not in row:
+                    row['runStatus'] = 'upcoming'
             else:
                 for run in runs:
                     t_str = run['time']
@@ -1451,6 +1483,7 @@ def fetch_moltworld_data() -> Dict[str, Any]:
             "total_earned":       float(balance.get("totalEarned", 0.0)),
             "online_time":        str(balance.get("totalOnlineTime", "0h 0m")),
             "is_online":          bool(balance.get("isOnline", False)),
+            "status":             "online" if bool(balance.get("isOnline", False)) else "offline",
             "earning_rate":       str(balance.get("earningRate", "0 SIM/hour")),
             "position_x":         int(state_data.get("x", 0)),
             "position_y":         int(state_data.get("y", 0)),
@@ -1465,7 +1498,7 @@ def fetch_moltworld_data() -> Dict[str, Any]:
         print(f"[warn] fetch_moltworld_data failed: {exc}", file=sys.stderr)
         return { # Safe defaults on failure
             "sim_balance": 0.0, "total_earned": 0.0, "online_time": "0h 0m",
-            "is_online": False, "earning_rate": "0 SIM/hour",
+            "is_online": False, "status": "offline", "earning_rate": "0 SIM/hour",
             "position_x": 0, "position_y": 0, "run_count": 0,
             "nearby_agents": [], "last_thought": "Error fetching data",
             "blocks_built": 0, "projection_per_day": 0.0,
@@ -1620,6 +1653,7 @@ def main() -> None:
 
     dashboard["machineHealth"]  = _f_health.result()
     dashboard["upcomingEvents"] = _f_events.result()
+    dashboard["calendarHealth"] = getattr(fetch_upcoming_events, '_status', {"status": "unknown", "message": "Unknown"})
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
@@ -1722,6 +1756,22 @@ def main() -> None:
             strategy = xp.setdefault('strategy', {})
             strategy['replies_today'] = len(today_replies)
             strategy['engagement_today'] = len(today_replies)
+
+            # 7-day reply count
+            import datetime as _dt
+            week_ago = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=7)).isoformat()
+            week_replies = [p for p in browser_recent if p.get('posted_at', '') >= week_ago]
+            strategy['replies_7d'] = len(week_replies)
+
+            # Top reply targets (most replied-to authors this week)
+            from collections import Counter as _Counter
+            author_counts = _Counter(p.get('reply_to', '').lstrip('@') for p in week_replies if p.get('reply_to'))
+            strategy['best_reply_targets'] = [a for a, _ in author_counts.most_common(5)]
+
+            # Brand voice + slot config (for dashboard display)
+            strategy['brand_voice'] = 'AI character — sharp, irreverent, owns AI identity'
+            strategy['reply_slots_per_day'] = 12
+            strategy['target_accounts_count'] = 23
 
             # Update milestone for total replies
             for ms in xp.get('milestones', []):
