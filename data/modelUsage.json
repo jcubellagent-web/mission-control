@@ -1,23 +1,23 @@
 {
-  "session": 71.461358,
-  "daily": 76.479234,
+  "session": 73.390847,
+  "daily": 78.475224,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
-      "name": "anthropic/claude-sonnet-4-6",
+      "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 77.03936504999997
+      "cost": 75.00446994999997
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 6.256895900000002
+      "cost": 6.323397000000002
     },
     {
-      "name": "openai/gpt-5.4",
+      "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 1.6136225
+      "cost": 5.578007099999999
     },
     {
       "name": "gpt-5.3-codex",
@@ -32,41 +32,41 @@
   ],
   "breakdown": [
     {
-      "name": "anthropic/claude-sonnet-4-6",
+      "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 151,
-      "outputTokens": 124682,
-      "totalTokens": 124833,
-      "sessionCost": 77.03936504999997,
-      "dailyCost": 71.46135794999996,
-      "weeklyCost": 77.03936504999997,
-      "sessions": 5,
+      "inputTokens": 84671,
+      "outputTokens": 26113,
+      "totalTokens": 110784,
+      "sessionCost": 75.00446994999997,
+      "dailyCost": 73.39084744999997,
+      "weeklyCost": 75.00446994999997,
+      "sessions": 2,
       "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 3431428,
-      "outputTokens": 76208,
-      "totalTokens": 3507636,
-      "sessionCost": 6.256895900000002,
-      "dailyCost": 5.01787569,
-      "weeklyCost": 6.256895900000002,
+      "inputTokens": 3540521,
+      "outputTokens": 76057,
+      "totalTokens": 3616578,
+      "sessionCost": 6.323397000000002,
+      "dailyCost": 5.08437679,
+      "weeklyCost": 6.323397000000002,
       "sessions": 38,
       "isGemini": true,
       "costEstimated": false
     },
     {
-      "name": "openai/gpt-5.4",
+      "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 84163,
-      "outputTokens": 25281,
-      "totalTokens": 109444,
-      "sessionCost": 1.6136225,
+      "inputTokens": 145,
+      "outputTokens": 123421,
+      "totalTokens": 123566,
+      "sessionCost": 5.578007099999999,
       "dailyCost": 0.0,
-      "weeklyCost": 1.6136225,
-      "sessions": 1,
+      "weeklyCost": 5.578007099999999,
+      "sessions": 4,
       "isGemini": false,
       "costEstimated": false
     },
@@ -116,7 +116,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-04T20:20:05Z",
+  "lastUpdated": "2026-04-04T20:25:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 76.495881,
-    "total": 87.394923,
+    "daily": 78.491871,
+    "total": 89.390914,
     "monthly": 76.781686
   }
 }
