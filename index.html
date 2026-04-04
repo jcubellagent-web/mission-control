@@ -639,12 +639,288 @@
 
         .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 12px; }
         /* Compact model usage */
-        .mu-totals-section { margin-bottom: 8px; }
+        /* ── Weekly Run Rate Callout ── */
+        /* ── Run Rate Banner — compact single-row pill ── */
+        .mu-run-rate-banner {
+            background: linear-gradient(90deg, rgba(74,222,128,0.06) 0%, rgba(96,165,250,0.04) 100%);
+            border: 1px solid rgba(74,222,128,0.18);
+            border-radius: 8px;
+            padding: 5px 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            row-gap: 2px;
+        }
+        .mu-run-rate-label {
+            font-size: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(74,222,128,0.55);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .mu-run-rate-main {
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+        }
+        .mu-run-rate-total {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #4ade80;
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-run-rate-unit {
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.35);
+        }
+        .mu-run-rate-sep {
+            font-size: 0.5rem;
+            color: rgba(255,255,255,0.15);
+        }
+        .mu-run-rate-sub {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .mu-run-rate-sub-item {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+        .mu-run-rate-sub-label {
+            font-size: 0.48rem;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .mu-run-rate-sub-val {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.6);
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-run-rate-projected {
+            font-size: 0.5rem;
+            color: rgba(255,255,255,0.25);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .mu-run-rate-info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(74,222,128,0.45);
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: rgba(74,222,128,0.7);
+            cursor: pointer;
+            margin-left: 5px;
+            flex-shrink: 0;
+            vertical-align: middle;
+            transition: background 0.15s, color 0.15s;
+            user-select: none;
+        }
+        .mu-run-rate-info-btn:hover {
+            background: rgba(74,222,128,0.15);
+            color: #4ade80;
+            border-color: #4ade80;
+        }
+        /* ── Generic Stat Pill Modals ── */
+        .sp-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        .sp-modal-overlay.visible {
+            display: flex;
+        }
+        .sp-modal {
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 20px 22px 18px;
+            width: min(400px, 92vw);
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+            position: relative;
+            animation: rr-modal-in 0.18s ease;
+        }
+        .sp-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.35);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        .sp-modal-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .sp-modal-title {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .sp-modal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.72rem;
+        }
+        .sp-modal-row:last-child { border-bottom: none; }
+        .sp-modal-row-label { color: rgba(255,255,255,0.55); }
+        .sp-modal-row-val { color: #fff; font-variant-numeric: tabular-nums; font-weight: 500; }
+        .sp-cron-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .sp-cron-item:last-child { border-bottom: none; }
+        .sp-cron-name { font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 500; }
+        .sp-cron-meta { font-size: 0.6rem; color: rgba(255,255,255,0.4); }
+        .sp-badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .sp-badge-ok { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+        .sp-badge-upcoming { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+        .sp-badge-missed { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .sp-badge-done { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08); }
+        .sp-badge-paused { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.06); }
+        .sp-badge-error { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .sp-note { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 10px; line-height: 1.5; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        /* Run Rate Detail Modal */
+        #rr-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        #rr-modal-overlay.visible {
+            display: flex;
+        }
+        #rr-modal {
+            background: #141414;
+            border: 1px solid rgba(74,222,128,0.2);
+            border-radius: 14px;
+            padding: 20px 22px 18px;
+            width: min(380px, 92vw);
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(74,222,128,0.06);
+            position: relative;
+            animation: rr-modal-in 0.18s ease;
+        }
+        @keyframes rr-modal-in {
+            from { opacity:0; transform: scale(0.94) translateY(8px); }
+            to   { opacity:1; transform: scale(1)   translateY(0); }
+        }
+        #rr-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.35);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        #rr-modal-close:hover { color: #fff; background: rgba(255,255,255,0.06); }
+        .rr-modal-title {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(74,222,128,0.6);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .rr-modal-hero {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .rr-modal-hero-val {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4ade80;
+            font-variant-numeric: tabular-nums;
+        }
+        .rr-modal-hero-unit { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+        .rr-modal-section {
+            margin-bottom: 14px;
+        }
+        .rr-modal-section-title {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .rr-modal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.72rem;
+        }
+        .rr-modal-row:last-child { border-bottom: none; }
+        .rr-modal-row-label { color: rgba(255,255,255,0.55); }
+        .rr-modal-row-val { color: #fff; font-variant-numeric: tabular-nums; font-weight: 500; }
+        .rr-modal-row-val.green  { color: #4ade80; }
+        .rr-modal-row-val.blue   { color: #60a5fa; }
+        .rr-modal-row-val.orange { color: #f97316; }
+        .rr-modal-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            margin: 12px 0;
+        }
+        .rr-modal-note {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.25);
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+        .mu-totals-section { margin-bottom: 5px; }
         .mu-totals-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
-        .mu-total-cell { display: flex; align-items: center; gap: 4px; padding: 4px 6px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); min-width: 0; }
+        .mu-total-cell { display: flex; align-items: center; gap: 3px; padding: 3px 5px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); min-width: 0; }
         .mu-total-cell:last-child { border-right: none; }
-        .mu-total-val { font-size: 0.65rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: #4ade80; white-space: nowrap; }
-        .mu-total-label { font-size: 0.52rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .mu-total-val { font-size: 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: #4ade80; white-space: nowrap; }
+        .mu-total-label { font-size: 0.48rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
         .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
@@ -659,25 +935,25 @@
         .mu-prov-sep { font-size: 0.55rem; color: rgba(255,255,255,0.25); }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
         .mu-compact-row { display: grid; grid-template-columns: 6px 1fr auto 55px auto; align-items: center; gap: 5px; padding: 2px 0; }
-        .mu-compact-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .mu-compact-name { font-size: 0.64rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mu-compact-bar-wrap { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-compact-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
         .mu-compact-cost { font-size: 0.6rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
         .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: right; }
-        .mu-el-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .mu-el-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .mu-el-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mu-el-bar-wrap { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-el-bar-fill { height: 100%; border-radius: 3px; }
         /* Machine Health */
-        .mu-health-section { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .mu-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .mu-health-machine { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 7px 9px; }
-        .mu-health-machine-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        .mu-health-online-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-        .mu-health-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .mu-health-section { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .mu-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .mu-health-machine { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 7px; padding: 5px 7px; }
+        .mu-health-machine-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+        .mu-health-online-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+        .mu-health-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
         .mu-health-key { font-size: 0.58rem; color: rgba(255,255,255,0.55); }
-        .mu-health-val { font-size: 0.62rem; color: #fff; font-variant-numeric: tabular-nums; }
-        .mu-health-bar-wrap { width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 1px; margin-bottom: 4px; }
+        .mu-health-val { font-size: 0.58rem; color: #fff; font-variant-numeric: tabular-nums; }
+        .mu-health-bar-wrap { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-top: 0; margin-bottom: 2px; }
         .mu-health-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
         .mu-health-offline { font-size: 0.62rem; color: rgba(255,68,68,0.6); padding: 6px 0; text-align: center; }
         .model-pill { background: #0d0d0d; border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; }
@@ -1154,7 +1430,9 @@
         .card-newsfeed { position: relative; }
 
         /* ── Today's Jobs Full Panel ── */
-        .card-jobs-full { display: flex; flex-direction: column; gap: 0; overflow-y: auto; }
+        .card-jobs-full { display: flex; flex-direction: column; gap: 0; overflow-y: auto; min-height: 0; }
+        body.phone-mode .card-jobs-full { max-height: 75vh; }
+        body.kiosk-mode .card-jobs-full { max-height: 100%; }
         .jobs-agents-row { display: flex; gap: 8px; padding: 8px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; flex-wrap: wrap; }
         .jobs-agent-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; flex: 1; min-width: 0; }
         .jobs-agent-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background 0.3s; }
@@ -1879,7 +2157,11 @@
         }
         body.kiosk-mode #brain-feed-card,
         body.kiosk-mode #jain-brain-feed-card,
-        body.kiosk-mode #model-usage-card,
+        body.kiosk-mode #model-usage-card {
+            min-height: 0;
+            overflow: visible;
+            padding-right: 4px;
+        }
         body.kiosk-mode #events-list,
         body.kiosk-mode #device-list {
             min-height: 0;
@@ -2319,7 +2601,7 @@
         #brain-feed-card { overflow-y: auto; max-height: 420px; }
         #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
         #today-jobs-card { overflow-y: visible; max-height: none; }
-        #model-usage-card { overflow-y: auto; flex: 1; min-height: 0; }
+        #model-usage-card { overflow-y: visible; flex: 1; min-height: 0; }
         #events-list { overflow-y: auto; max-height: 240px; }
         #device-list { overflow-y: auto; max-height: 240px; }
 
@@ -2745,8 +3027,8 @@
 
         /* ── Model Usage ── */
         body.phone-mode #model-usage-card {
-            max-height: 240px;
-            overflow-y: auto;
+            max-height: none;
+            overflow-y: visible;
         }
         body.phone-mode .mu-summary-row { margin-bottom: 10px; }
         body.phone-mode .mu-summary-cell { padding: 8px 8px; }
@@ -5419,6 +5701,7 @@
         }
 
         function renderDashboard(data) {
+            window._latestDashboardData = data;  // expose for run rate modal
             const now = new Date();
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
@@ -5469,17 +5752,17 @@
             const upcomingCount = data.upcomingEvents?.length || 0;
             const calendarHealth = data.calendarHealth || { status: 'unknown', message: 'Calendar' };
             const calendarPill = calendarHealth.status === 'ok'
-                ? `<div class="stat-pill" style="border-color:rgba(74,222,128,0.25)"><span class="num" style="color:#4ade80">📅</span><span class="label">Calendar OK</span></div>`
+                ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(74,222,128,0.25);cursor:pointer;"><span class="num" style="color:#4ade80">📅</span><span class="label">Calendar OK</span></div>`
                 : calendarHealth.status === 'auth_expired'
-                ? `<div class="stat-pill" style="border-color:rgba(251,191,36,0.35)"><span class="num" style="color:#fbbf24">📅</span><span class="label">Calendar Re-auth</span></div>`
+                ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(251,191,36,0.35);cursor:pointer;"><span class="num" style="color:#fbbf24">📅</span><span class="label">Calendar Re-auth</span></div>`
                 : calendarHealth.status === 'error'
-                ? `<div class="stat-pill" style="border-color:rgba(239,68,68,0.35)"><span class="num" style="color:#f87171">📅</span><span class="label">Calendar Issue</span></div>`
-                : '';
+                ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(239,68,68,0.35);cursor:pointer;"><span class="num" style="color:#f87171">📅</span><span class="label">Calendar Issue</span></div>`
+                : `<div class="stat-pill" id="calendar-bubble" style="cursor:pointer;"><span class="num">📅</span><span class="label">Calendar</span></div>`;
             const deviceAttention = data.devices?.filter(d => d.status && d.status !== 'ok').length || 0;
             // Only show stats that have non-zero value or are actionable alerts
             statsRow.innerHTML = `
-                <div class="stat-pill"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
-                ${pausedCrons > 0 ? `<div class="stat-pill"><span class="num">${pausedCrons}</span><span class="label">Paused</span></div>` : ''}
+                <div class="stat-pill" id="active-crons-bubble" style="cursor:pointer;"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
+                ${pausedCrons > 0 ? `<div class="stat-pill" id="paused-crons-bubble" style="cursor:pointer;"><span class="num">${pausedCrons}</span><span class="label">Paused</span></div>` : ''}
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
                 ${calendarPill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
@@ -5566,6 +5849,35 @@
 
                 const activeModelRaw = data.contextWindow?.model || '';
                 const activeModelDisp = activeModelRaw ? modelDisplayName(activeModelRaw) : '';
+
+                // ── Weekly Run Rate banner ──
+                const wrr = mu.weeklyRunRate || {};
+                const wrrTotal       = wrr.total       ?? (totalWeekly || 0);
+                const wrrAuto        = wrr.automation  ?? 0;
+                const wrrInteractive = wrr.interactive ?? 0;
+                const wrrProjected   = wrr.projectedMonthly ?? (wrrTotal * (30/7));
+                const runRateHtml = `<div class="mu-run-rate-banner">
+                    <span class="mu-run-rate-label">&#9889; Run Rate</span>
+                    <div class="mu-run-rate-main">
+                        <span class="mu-run-rate-total">${fmtCost(wrrTotal)}</span>
+                        <span class="mu-run-rate-unit">/wk</span>
+                    </div>
+                    <span class="mu-run-rate-sep">·</span>
+                    <div class="mu-run-rate-sub">
+                        <div class="mu-run-rate-sub-item">
+                            <span class="mu-run-rate-sub-label">Auto&nbsp;</span>
+                            <span class="mu-run-rate-sub-val">${fmtCost(wrrAuto)}</span>
+                        </div>
+                        <span class="mu-run-rate-sep">·</span>
+                        <div class="mu-run-rate-sub-item">
+                            <span class="mu-run-rate-sub-label" style="color:rgba(96,165,250,0.45)">Chat&nbsp;</span>
+                            <span class="mu-run-rate-sub-val">${fmtCost(wrrInteractive)}</span>
+                        </div>
+                    </div>
+                    <span class="mu-run-rate-projected">&asymp;${fmtCost(wrrProjected)}/mo</span>
+                    <span class="mu-run-rate-info-btn" id="rr-info-btn" title="View detailed breakdown">i</span>
+                </div>`;
+
                 const summaryHtml = `
                 <div class="mu-totals-section">
                     ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
@@ -5679,7 +5991,7 @@
                     </div>
                 </div>`;
 
-                modelUsageCard.innerHTML = summaryHtml + breakdownHtml + elHtml + healthHtml;
+                modelUsageCard.innerHTML = runRateHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
@@ -7621,6 +7933,9 @@
     document.addEventListener('click', function(e) {
         if (e.target.closest('#x-progress-bubble')) window.openXDashboard();
         if (e.target.closest('#eightsleep-bubble')) window.openEightSleepDashboard && window.openEightSleepDashboard();
+        if (e.target.closest('#active-crons-bubble')) window.openActiveCronsModal && window.openActiveCronsModal();
+        if (e.target.closest('#paused-crons-bubble')) window.openPausedCronsModal && window.openPausedCronsModal();
+        if (e.target.closest('#calendar-bubble')) window.openCalendarModal && window.openCalendarModal();
     });
 
     // Close on Escape key
@@ -7903,6 +8218,270 @@
         });
     });
     </script>
+
+<!-- ⓘ Run Rate Detail Modal -->
+<div id="rr-modal-overlay">
+  <div id="rr-modal">
+    <button id="rr-modal-close" onclick="document.getElementById('rr-modal-overlay').classList.remove('visible')">&times;</button>
+    <div class="rr-modal-title">&#9889; Weekly Run Rate — Breakdown</div>
+    <div id="rr-modal-body"><div class="empty-state">Loading...</div></div>
+  </div>
+</div>
+<script>
+(function() {
+    // Store latest wrr data for modal re-render
+    window._rrData = null;
+
+    window.openRunRateModal = function(data) {
+        if (!data) return;
+        window._rrData = data;
+        const mu = data.modelUsage || {};
+        const wrr = mu.weeklyRunRate || {};
+        const wrrTotal       = wrr.total       || 0;
+        const wrrAuto        = wrr.automation  || 0;
+        const wrrInteractive = wrr.interactive || 0;
+        const wrrProjected   = wrr.projectedMonthly || (wrrTotal * (30/7));
+        const orData  = mu.openrouter  || {};
+        const jainData = mu.jain       || {};
+        const elData   = mu.elevenlabs || {};
+        const breakdown = mu.breakdown || [];
+
+        function fc(v) {
+            const n = parseFloat(v) || 0;
+            if (n >= 100)  return '$' + n.toFixed(0);
+            if (n >= 10)   return '$' + n.toFixed(1);
+            if (n >= 1)    return '$' + n.toFixed(2);
+            return '$' + n.toFixed(3);
+        }
+
+        // Build top per-model rows (weekly cost)
+        const filtered = breakdown.filter(m => (m.weeklyCost || 0) > 0.001);
+        const sorted   = [...filtered].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0)).slice(0, 8);
+        const modelRows = sorted.map(m => {
+            const name = (m.name || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '').replace(/\s*\(BYOK\)/i, '').replace(/-codex\b/i, '').trim();
+            const src  = (m.source || '').toLowerCase();
+            const agent = src.includes('jain') || (m.name||'').startsWith('jain/') ? '🔵 J.A.I.N' : src === 'codex' || src === 'codexbar' ? '🟣 Codex' : '🟢 JOSH 2.0';
+            return `<div class="rr-modal-row"><span class="rr-modal-row-label">${agent} · ${name}</span><span class="rr-modal-row-val">${fc(m.weeklyCost)}/wk</span></div>`;
+        }).join('');
+
+        const elPct = (elData.chars_limit > 0) ? ((elData.chars_used / elData.chars_limit) * 100).toFixed(1) : null;
+
+        const html = `
+            <div class="rr-modal-hero">
+                <span class="rr-modal-hero-val">${fc(wrrTotal)}</span>
+                <span class="rr-modal-hero-unit">/ week estimated</span>
+            </div>
+
+            <div class="rr-modal-section">
+                <div class="rr-modal-section-title">By Usage Type</div>
+                <div class="rr-modal-row">
+                    <span class="rr-modal-row-label">🟢 Interactive (Josh-initiated)</span>
+                    <span class="rr-modal-row-val green">${fc(wrrInteractive)}</span>
+                </div>
+                <div class="rr-modal-row">
+                    <span class="rr-modal-row-label">⚙️ Automation (background agents)</span>
+                    <span class="rr-modal-row-val blue">${fc(wrrAuto)}</span>
+                </div>
+            </div>
+
+            <div class="rr-modal-section">
+                <div class="rr-modal-section-title">By Source</div>
+                <div class="rr-modal-row">
+                    <span class="rr-modal-row-label">JOSH 2.0 (OpenClaw sessions)</span>
+                    <span class="rr-modal-row-val">${fc((mu.weekly || 0))}</span>
+                </div>
+                <div class="rr-modal-row">
+                    <span class="rr-modal-row-label">J.A.I.N (scripts + agents)</span>
+                    <span class="rr-modal-row-val">${fc(jainData.total || 0)}</span>
+                </div>
+                <div class="rr-modal-row">
+                    <span class="rr-modal-row-label">OpenRouter BYOK</span>
+                    <span class="rr-modal-row-val">${fc(orData.byok_weekly || 0)}</span>
+                </div>
+                ${elPct ? `<div class="rr-modal-row">
+                    <span class="rr-modal-row-label">ElevenLabs TTS</span>
+                    <span class="rr-modal-row-val">${elPct}% quota used</span>
+                </div>` : ''}
+            </div>
+
+            ${sorted.length ? `<div class="rr-modal-section">
+                <div class="rr-modal-section-title">Top Models This Week</div>
+                ${modelRows}
+            </div>` : ''}
+
+            <hr class="rr-modal-divider">
+            <div class="rr-modal-row">
+                <span class="rr-modal-row-label">📅 Projected Monthly</span>
+                <span class="rr-modal-row-val orange">${fc(wrrProjected)}</span>
+            </div>
+
+            <div class="rr-modal-note">Run rate is estimated from the rolling 7-day window. Interactive spend spikes during active dev sessions and normalizes during quieter periods.</div>
+        `;
+        document.getElementById('rr-modal-body').innerHTML = html;
+        document.getElementById('rr-modal-overlay').classList.add('visible');
+    };
+
+    // Delegate click — banner button may be re-rendered by dashboard updates
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#rr-info-btn');
+        if (btn) {
+            e.stopPropagation();
+            window.openRunRateModal(window._latestDashboardData);
+        }
+    });
+
+    // Close on overlay click
+    document.getElementById('rr-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('visible');
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') document.getElementById('rr-modal-overlay').classList.remove('visible');
+    });
+})();
+</script>
+
+<!-- ── Active Crons Modal ── -->
+<div id="active-crons-modal-overlay" class="sp-modal-overlay">
+  <div class="sp-modal" style="border-color:rgba(74,222,128,0.2);">
+    <button class="sp-modal-close" onclick="document.getElementById('active-crons-modal-overlay').classList.remove('visible')">&times;</button>
+    <div class="sp-modal-title" style="color:rgba(74,222,128,0.7);">✅ Active Crons</div>
+    <div id="active-crons-modal-body"><div class="empty-state">Loading...</div></div>
+  </div>
+</div>
+
+<!-- ── Paused Crons Modal ── -->
+<div id="paused-crons-modal-overlay" class="sp-modal-overlay">
+  <div class="sp-modal" style="border-color:rgba(255,255,255,0.1);">
+    <button class="sp-modal-close" onclick="document.getElementById('paused-crons-modal-overlay').classList.remove('visible')">&times;</button>
+    <div class="sp-modal-title" style="color:rgba(255,255,255,0.5);">⏸ Paused Crons</div>
+    <div id="paused-crons-modal-body"><div class="empty-state">Loading...</div></div>
+  </div>
+</div>
+
+<!-- ── Calendar Modal ── -->
+<div id="calendar-modal-overlay" class="sp-modal-overlay">
+  <div class="sp-modal" style="border-color:rgba(96,165,250,0.2);">
+    <button class="sp-modal-close" onclick="document.getElementById('calendar-modal-overlay').classList.remove('visible')">&times;</button>
+    <div class="sp-modal-title" style="color:rgba(96,165,250,0.7);">📅 Calendar</div>
+    <div id="calendar-modal-body"><div class="empty-state">Loading...</div></div>
+  </div>
+</div>
+
+<script>
+(function() {
+    function closeSPModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('visible');
+    }
+
+    // Close on overlay click
+    ['active-crons-modal-overlay','paused-crons-modal-overlay','calendar-modal-overlay'].forEach(function(id) {
+        document.addEventListener('DOMContentLoaded', function() {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('click', function(e) { if (e.target === el) el.classList.remove('visible'); });
+        });
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSPModal('active-crons-modal-overlay');
+            closeSPModal('paused-crons-modal-overlay');
+            closeSPModal('calendar-modal-overlay');
+        }
+    });
+
+    function cronStatusBadge(c) {
+        const s = (c.status || '').toLowerCase();
+        if (s === 'ok' || s === 'running') return '<span class="sp-badge sp-badge-ok">OK</span>';
+        if (s === 'upcoming') return '<span class="sp-badge sp-badge-upcoming">Upcoming</span>';
+        if (s === 'missed') return '<span class="sp-badge sp-badge-missed">Missed</span>';
+        if (s === 'done') return '<span class="sp-badge sp-badge-done">✓ Done</span>';
+        if (s === 'error' || s === 'failed') return '<span class="sp-badge sp-badge-error">Error</span>';
+        return '<span class="sp-badge sp-badge-done">' + (c.status || '—') + '</span>';
+    }
+
+    function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    window.openActiveCronsModal = function() {
+        const data = window._latestDashboardData || {};
+        const crons = (data.crons || []).filter(c => (c.status || '').toLowerCase() !== 'paused');
+        const body = document.getElementById('active-crons-modal-body');
+        if (!body) return;
+        if (!crons.length) {
+            body.innerHTML = '<div class="empty-state">No active crons</div>';
+        } else {
+            body.innerHTML = crons.map(function(c) {
+                return '<div class="sp-cron-item">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+                        '<span class="sp-cron-name">' + escH(c.name || c.job || '—') + '</span>' +
+                        cronStatusBadge(c) +
+                    '</div>' +
+                    '<div class="sp-cron-meta">' +
+                        (c.schedule ? '<span>⏱ ' + escH(c.schedule) + '</span>' : '') +
+                        (c.lastRun ? ' · Last: ' + escH(c.lastRun) : '') +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+        document.getElementById('active-crons-modal-overlay').classList.add('visible');
+    };
+
+    window.openPausedCronsModal = function() {
+        const data = window._latestDashboardData || {};
+        const crons = (data.crons || []).filter(c => (c.status || '').toLowerCase() === 'paused');
+        const body = document.getElementById('paused-crons-modal-body');
+        if (!body) return;
+        if (!crons.length) {
+            body.innerHTML = '<div class="empty-state">No paused crons</div>';
+        } else {
+            body.innerHTML = '<div class="sp-note">⚠️ These are <strong>Hermes-managed</strong> — run via JAIMES, not raw crontab. Unpause via the Hermes agent.</div>' +
+                crons.map(function(c) {
+                    return '<div class="sp-cron-item">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+                            '<span class="sp-cron-name">' + escH(c.name || c.job || '—') + '</span>' +
+                            '<span class="sp-badge sp-badge-paused">Paused</span>' +
+                        '</div>' +
+                        '<div class="sp-cron-meta">' +
+                            (c.agent ? '<span>Agent: ' + escH(c.agent) + '</span>' : '') +
+                            (c.schedule ? ' · ' + escH(c.schedule) : '') +
+                            (c.reason ? '<br>Reason: ' + escH(c.reason) : '') +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+        }
+        document.getElementById('paused-crons-modal-overlay').classList.add('visible');
+    };
+
+    window.openCalendarModal = function() {
+        const data = window._latestDashboardData || {};
+        const events = data.upcomingEvents || [];
+        const health = data.calendarHealth || { status: 'unknown' };
+        const body = document.getElementById('calendar-modal-body');
+        if (!body) return;
+
+        const statusHtml = (function() {
+            const s = health.status || 'unknown';
+            if (s === 'ok') return '<div class="sp-note" style="border-color:rgba(74,222,128,0.2);color:rgba(74,222,128,0.8);">✅ Calendar connected and syncing normally.</div>';
+            if (s === 'auth_expired') return '<div class="sp-note" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">⚠️ Calendar needs re-auth. Run <code style="background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">openclaw calendar reauth</code> on JOSH 2.0.</div>';
+            if (s === 'error') return '<div class="sp-note" style="border-color:rgba(239,68,68,0.3);color:#f87171;">⛔ Calendar error: ' + escH(health.message || 'Unknown error') + '</div>';
+            return '<div class="sp-note">Calendar status: ' + escH(s) + '</div>';
+        })();
+
+        const evHtml = events.length ? events.map(function(ev) {
+            return '<div class="sp-cron-item">' +
+                '<span class="sp-cron-name">' + escH(ev.title || '—') + '</span>' +
+                '<div class="sp-cron-meta">' + escH(ev.time || '') + (ev.source ? ' · ' + escH(ev.source) : '') + '</div>' +
+            '</div>';
+        }).join('') : '<div class="empty-state" style="padding:8px 0;">No upcoming events</div>';
+
+        body.innerHTML = statusHtml + evHtml;
+        document.getElementById('calendar-modal-overlay').classList.add('visible');
+    };
+})();
+</script>
 
 </body>
 </html>
