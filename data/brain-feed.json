@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T16:51:52Z",
-  "objective": "Receiving Josh voice memo",
+  "messageReceived": "2026-04-05T16:52:11Z",
+  "objective": "Checking Supabase credential requirements",
   "status": "active",
   "steps": [
     {
-      "label": "ingest audio",
+      "label": "search memory",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "compose reply",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-04-05T16:51:52Z",
-  "checkedAt": "2026-04-05T16:51:52Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T16:52:11Z",
+  "checkedAt": "2026-04-05T16:52:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
