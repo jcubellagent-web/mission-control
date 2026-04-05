@@ -1432,10 +1432,26 @@
         .card-newsfeed { position: relative; }
 
         /* ── Today's Jobs Full Panel ── */
-        .card-jobs-full { display: flex; flex-direction: column; gap: 0; overflow-y: auto; min-height: 0; }
+        .card-jobs-full { display: flex; flex-direction: column; gap: 0; overflow: hidden; min-height: 0; }
         body.phone-mode .card-jobs-full { max-height: 75vh; }
         body.kiosk-mode .card-jobs-full { max-height: 100%; }
+        .card-jobs-full .card-header {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(11,16,32,0.98) 0%, rgba(11,16,32,0.92) 100%);
+            backdrop-filter: blur(8px);
+            padding-bottom: 8px;
+            margin-bottom: 0;
+        }
         .jobs-agents-row { display: flex; gap: 8px; padding: 8px 0 10px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px; flex-wrap: wrap; }
+        .card-jobs-full .jobs-agents-row {
+            position: sticky;
+            top: 44px;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(11,16,32,0.96) 0%, rgba(11,16,32,0.88) 100%);
+            backdrop-filter: blur(8px);
+        }
         .jobs-agent-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; flex: 1; min-width: 0; }
         .jobs-agent-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background 0.3s; }
         .jobs-agent-dot.active { background: #4ade80; box-shadow: 0 0 5px rgba(74,222,128,0.6); animation: pulse 1.5s infinite; }
@@ -2609,7 +2625,29 @@
         /* ===== Card content overflow fixes ===== */
         #brain-feed-card { overflow-y: auto; max-height: 420px; }
         #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
-        #today-jobs-card { overflow-y: visible; max-height: none; }
+        #today-jobs-card {
+            flex: 1;
+            min-height: 0;
+            max-height: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 6px;
+            scrollbar-gutter: stable;
+            overscroll-behavior: contain;
+        }
+        #today-jobs-card::-webkit-scrollbar { width: 10px; }
+        #today-jobs-card::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.04);
+            border-radius: 999px;
+        }
+        #today-jobs-card::-webkit-scrollbar-thumb {
+            background: rgba(96,165,250,0.42);
+            border-radius: 999px;
+            border: 2px solid rgba(11,16,32,0.85);
+        }
+        #today-jobs-card::-webkit-scrollbar-thumb:hover {
+            background: rgba(96,165,250,0.62);
+        }
         #model-usage-card { overflow-y: visible; flex: 1; min-height: 0; }
         #events-list { overflow-y: auto; max-height: 240px; }
         #device-list { overflow-y: auto; max-height: 240px; }
