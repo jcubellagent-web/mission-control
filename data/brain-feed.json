@@ -1,23 +1,28 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Planning expandable Activity drawer",
+  "objective": "Finishing Brain Feed activity drawer",
   "status": "active",
   "steps": [
     {
-      "label": "capture task",
+      "label": "run QA",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "inspect layout",
+      "label": "reload dashboard",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "commit locally",
       "status": "active",
-      "tool": "read"
+      "tool": "git"
     }
   ],
-  "currentTool": "read",
-  "updatedAt": "2026-04-05T23:45:26Z",
-  "checkedAt": "2026-04-05T23:45:26Z",
+  "currentTool": "git",
+  "updatedAt": "2026-04-05T23:48:33Z",
+  "checkedAt": "2026-04-05T23:48:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
