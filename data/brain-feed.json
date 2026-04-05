@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T22:20:45Z",
-  "objective": "Running heartbeat checks",
+  "messageReceived": "2026-04-05T22:21:46Z",
+  "objective": "Starting directive implementation",
   "status": "active",
   "steps": [
     {
-      "label": "mission-control",
+      "label": "inspect tooling",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "inspect scripts",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-04-05T22:20:45Z",
-  "checkedAt": "2026-04-05T22:20:45Z",
+  "updatedAt": "2026-04-05T22:21:46Z",
+  "checkedAt": "2026-04-05T22:21:46Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
