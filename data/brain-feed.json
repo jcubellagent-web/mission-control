@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T16:38:12Z",
-  "objective": "Answered Gemini follow-up on deployment friction",
+  "messageReceived": "2026-04-05T16:39:28Z",
+  "objective": "Inspecting V4 deployment and Sorare adapter code",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T16:38:12Z",
-  "checkedAt": "2026-04-05T16:38:12Z",
+  "steps": [
+    {
+      "label": "read scripts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "ssh inspect",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T16:39:28Z",
+  "checkedAt": "2026-04-05T16:39:28Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
