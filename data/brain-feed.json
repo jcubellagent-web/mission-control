@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T21:45:22Z",
-  "objective": "Applied cache config tweaks and confirmed gateway is back",
+  "messageReceived": "2026-04-05T21:47:13Z",
+  "objective": "Reviewing Mission Control jobs UI",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T21:45:22Z",
-  "checkedAt": "2026-04-05T21:45:22Z",
+  "steps": [
+    {
+      "label": "capture voice",
+      "status": "done",
+      "tool": "whisper"
+    },
+    {
+      "label": "inspect UI",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T21:47:13Z",
+  "checkedAt": "2026-04-05T21:47:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
