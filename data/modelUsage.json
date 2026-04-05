@@ -1,18 +1,18 @@
 {
-  "session": 37.865256,
-  "daily": 68.637969,
+  "session": 38.970884,
+  "daily": 69.743596,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 75.82959821000001
+      "cost": 76.93522586000002
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 4.27822107
+      "cost": 4.10284865
     },
     {
       "name": "gpt-5.3-codex",
@@ -34,12 +34,12 @@
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 84444,
-      "outputTokens": 177889,
-      "totalTokens": 262333,
-      "sessionCost": 75.82959821000001,
-      "dailyCost": 68.63796861000002,
-      "weeklyCost": 75.82959821000001,
+      "inputTokens": 84455,
+      "outputTokens": 179798,
+      "totalTokens": 264253,
+      "sessionCost": 76.93522586000002,
+      "dailyCost": 69.74359626000002,
+      "weeklyCost": 76.93522586000002,
       "sessions": 21,
       "isGemini": false,
       "costEstimated": false
@@ -47,13 +47,13 @@
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 2997080,
-      "outputTokens": 73640,
-      "totalTokens": 3070720,
-      "sessionCost": 4.27822107,
+      "inputTokens": 2965613,
+      "outputTokens": 73462,
+      "totalTokens": 3039075,
+      "sessionCost": 4.10284865,
       "dailyCost": 0.0,
-      "weeklyCost": 4.27822107,
-      "sessions": 27,
+      "weeklyCost": 4.10284865,
+      "sessions": 26,
       "isGemini": true,
       "costEstimated": false
     },
@@ -95,15 +95,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 1.201828,
-      "dailyCost": 0.076844,
-      "sessionCost": 1.201828,
+      "weeklyCost": 1.203117,
+      "dailyCost": 0.078133,
+      "sessionCost": 1.203117,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-05T15:05:05Z",
+  "lastUpdated": "2026-04-05T15:10:06Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -118,12 +118,12 @@
     "available": false
   },
   "openrouter": {
-    "daily": 0.0,
-    "weekly": 0.01377205,
-    "monthly": 0.01377205,
-    "byok_daily": 0.07684405,
-    "byok_weekly": 1.2018282,
-    "byok_monthly": 1.2018282,
+    "daily": 0.0041745,
+    "weekly": 0.01794655,
+    "monthly": 0.01794655,
+    "byok_daily": 0.07813275,
+    "byok_weekly": 1.2031169,
+    "byok_monthly": 1.2031169,
     "available": true
   },
   "elevenlabs": {
@@ -132,14 +132,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 68.714813,
-    "total": 82.669703,
-    "monthly": 76.85853
+    "daily": 69.821729,
+    "total": 83.601247,
+    "monthly": 76.859819
   },
   "weeklyRunRate": {
-    "total": 101.836353,
-    "automation": 2.128438,
-    "interactive": 97.579477,
-    "projectedMonthly": 436.44
+    "total": 101.837642,
+    "automation": 2.129727,
+    "interactive": 97.578188,
+    "projectedMonthly": 436.45
   }
 }
