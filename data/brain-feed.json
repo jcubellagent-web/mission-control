@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T17:02:43Z",
-  "objective": "Receiving Josh voice update",
+  "messageReceived": "2026-04-05T17:02:59Z",
+  "objective": "Finishing Supabase table creation",
   "status": "active",
   "steps": [
     {
-      "label": "ingest audio",
+      "label": "mac GUI",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "rerun sync",
       "status": "active",
-      "tool": "whisper"
+      "tool": "exec"
     }
   ],
-  "currentTool": "whisper",
-  "updatedAt": "2026-04-05T17:02:43Z",
-  "checkedAt": "2026-04-05T17:02:43Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T17:02:59Z",
+  "checkedAt": "2026-04-05T17:02:59Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
