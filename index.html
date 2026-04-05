@@ -934,12 +934,12 @@
         .mu-prov-w { font-size: 0.65rem; color: rgba(255,255,255,0.75); }
         .mu-prov-sep { font-size: 0.55rem; color: rgba(255,255,255,0.25); }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
-        .mu-compact-row { display: grid; grid-template-columns: 6px 1fr 50px 50px; align-items: center; gap: 5px; padding: 2px 0; }
+        .mu-compact-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; min-width: 0; }
         .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-        .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
         .mu-compact-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
-        .mu-compact-cost { font-size: 0.6rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+        .mu-compact-cost { font-size: 0.58rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 36px; }
         .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: right; }
         .mu-el-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
         .mu-el-bar-wrap { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
