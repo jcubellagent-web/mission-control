@@ -1470,7 +1470,7 @@
 
         /* ── System Health ── */
         .card-model-health { display: flex; flex-direction: column; }
-        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
+        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; flex-shrink: 0; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
         .system-health-body { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
@@ -1493,7 +1493,7 @@
         .sh-mv.err { color: #f87171; }
         /* Left panel 50/50 — intel highlights and model card equal height */
         .kiosk-bottom-left .card-intel-highlights { flex: 1; min-height: 0; }
-        .kiosk-bottom-left .card-model-health { flex: 1; min-height: 0; overflow: hidden; }
+        .kiosk-bottom-left .card-model-health { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
 
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
@@ -2158,11 +2158,15 @@
             padding: 10px;
         }
         body.kiosk-mode #brain-feed-card,
-        body.kiosk-mode #jain-brain-feed-card,
-        body.kiosk-mode #model-usage-card {
+        body.kiosk-mode #jain-brain-feed-card {
             min-height: 0;
             overflow-y: auto;
             max-height: 45%;
+            padding-right: 4px;
+        }
+        body.kiosk-mode #model-usage-card {
+            overflow-y: visible;
+            flex-shrink: 0;
             padding-right: 4px;
         }
         body.kiosk-mode #events-list,
