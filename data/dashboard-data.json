@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Setting up JAIMES fantasy ML weekly loop",
-    "updatedAt": "2026-04-05T03:55:02Z"
+    "updatedAt": "2026-04-05T04:00:02Z"
   },
   "contextWindow": {
     "usedTokens": 115170,
@@ -34,7 +34,7 @@
   },
   "modelUsage": {
     "session": 5.283849,
-    "daily": 12.831687,
+    "daily": 0.0,
     "weekly": 99.707915,
     "monthly": 75.656702,
     "topModels": [
@@ -72,7 +72,7 @@
         "outputTokens": 148710,
         "totalTokens": 233021,
         "sessionCost": 12.475478599999997,
-        "dailyCost": 5.283848999999998,
+        "dailyCost": 0.0,
         "weeklyCost": 12.475478599999997,
         "sessions": 6,
         "isGemini": false,
@@ -85,7 +85,7 @@
         "outputTokens": 77112,
         "totalTokens": 3985678,
         "sessionCost": 8.635244300000004,
-        "dailyCost": 7.547838290000001,
+        "dailyCost": 0.0,
         "weeklyCost": 8.635244300000004,
         "sessions": 40,
         "isGemini": true,
@@ -137,7 +137,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T03:55:05Z",
+    "lastUpdated": "2026-04-05T04:00:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -166,7 +166,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 12.8374,
+      "daily": 0.005713,
       "total": 23.601475,
       "monthly": 76.787399
     },
@@ -191,18 +191,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T03:55:10Z"
+    "updatedAt": "2026-04-05T04:00:10Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.6,
-      "cpu_user": 10.62,
-      "cpu_sys": 13.99,
-      "load1": 2.48,
-      "load5": 2.5,
-      "load15": 3.96,
+      "cpu_pct": 25.1,
+      "cpu_user": 11.3,
+      "cpu_sys": 14.3,
+      "load1": 2.34,
+      "load5": 2.47,
+      "load15": 3.52,
       "ram_used_gb": 11.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "116Gi",
@@ -210,14 +210,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 2.64,
-      "cpu_sys": 9.93,
-      "load1": 1.72,
-      "load5": 1.91,
-      "load15": 1.86,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 12.3,
+      "cpu_user": 2.89,
+      "cpu_sys": 9.42,
+      "load1": 1.59,
+      "load5": 1.73,
+      "load15": 1.79,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -241,19 +241,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T03:55:02Z"
+      "lastChecked": "2026-04-05T04:00:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T03:55:02Z"
+      "lastChecked": "2026-04-05T04:00:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T03:55:02Z"
+      "lastChecked": "2026-04-05T04:00:02Z"
     }
   ],
   "crons": [
@@ -327,7 +327,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-04T14:00:00"
+      "lastRun": "2026-04-05T14:00:00"
     },
     {
       "name": "Sorare Competition Lineups",
@@ -339,7 +339,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-04T15:00:00"
+      "lastRun": "2026-04-05T15:00:00"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -385,7 +385,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Weekly Recap",
@@ -448,8 +448,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T07:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Market Open",
@@ -460,8 +459,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T08:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Mover",
@@ -472,8 +470,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T11:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Hot Take",
@@ -484,8 +481,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T12:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Market Close",
@@ -496,8 +492,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T17:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Prime Take",
@@ -508,8 +503,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T21:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Nightcap",
@@ -520,8 +514,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T22:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Strategic Replies",
@@ -533,48 +526,48 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-04T23:00:00",
+      "lastRun": "2026-04-05T00:00:00",
       "multiRun": {
         "runs": [
           {
             "time": "9:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "1:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "3:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "5:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "7:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "9:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           }
         ]
       }
@@ -588,8 +581,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-04T20:00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "Intelligence Feed",
@@ -606,55 +598,55 @@
             "time": "7:15 AM",
             "mode": "Full",
             "label": "Market open (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "10:00 AM",
             "mode": "Full",
             "label": "Mid-morning",
-            "done": true
+            "done": false
           },
           {
             "time": "12:00 PM",
             "mode": "Full",
             "label": "Midday (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "2:00 PM",
             "mode": "Full",
             "label": "Pulse (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Full",
             "label": "Close",
-            "done": true
+            "done": false
           },
           {
             "time": "6:00 PM",
             "mode": "Full",
             "label": "Evening (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "6:15 PM",
             "mode": "Full",
             "label": "Evening (weekend)",
-            "done": true
+            "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Full",
             "label": "Late (weekday)",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Full",
             "label": "Wrap (weekday)",
-            "done": true
+            "done": false
           }
         ]
       }
@@ -663,25 +655,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-05T03:55:05Z",
+      "time": "2026-04-05T04:00:05Z",
       "event": "Session spend: $5.28"
     },
     {
-      "time": "2026-04-05T03:55:02Z",
+      "time": "2026-04-05T04:00:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T03:55:02Z",
+      "time": "2026-04-05T04:00:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T03:55:02Z",
+      "time": "2026-04-05T04:00:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-05T03:55:02Z",
+      "time": "2026-04-05T04:00:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-05T03:55:02Z"
+  "lastUpdated": "2026-04-05T04:00:02Z"
 }
