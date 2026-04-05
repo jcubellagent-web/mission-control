@@ -1,18 +1,18 @@
 {
-  "session": 0.609575,
-  "daily": 7.385736,
+  "session": 1.066227,
+  "daily": 8.142654,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
-      "name": "google/gemini-2.5-flash",
-      "window": "session",
-      "cost": 7.954305360000002
-    },
-    {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 7.8012049999999995
+      "cost": 8.257856899999998
+    },
+    {
+      "name": "google/gemini-2.5-flash",
+      "window": "session",
+      "cost": 8.21422059
     },
     {
       "name": "gpt-5.3-codex",
@@ -32,29 +32,29 @@
   ],
   "breakdown": [
     {
-      "name": "google/gemini-2.5-flash",
+      "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 3519246,
-      "outputTokens": 76962,
-      "totalTokens": 3596208,
-      "sessionCost": 7.954305360000002,
-      "dailyCost": 6.776160410000002,
-      "weeklyCost": 7.954305360000002,
-      "sessions": 40,
-      "isGemini": true,
+      "inputTokens": 84313,
+      "outputTokens": 149377,
+      "totalTokens": 233690,
+      "sessionCost": 8.257856899999998,
+      "dailyCost": 1.0662273,
+      "weeklyCost": 8.257856899999998,
+      "sessions": 6,
+      "isGemini": false,
       "costEstimated": false
     },
     {
-      "name": "anthropic/claude-sonnet-4-6",
+      "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 84311,
-      "outputTokens": 148710,
-      "totalTokens": 233021,
-      "sessionCost": 7.8012049999999995,
-      "dailyCost": 0.6095754,
-      "weeklyCost": 7.8012049999999995,
-      "sessions": 6,
-      "isGemini": false,
+      "inputTokens": 3520614,
+      "outputTokens": 76890,
+      "totalTokens": 3597504,
+      "sessionCost": 8.21422059,
+      "dailyCost": 7.076427160000001,
+      "weeklyCost": 8.21422059,
+      "sessions": 40,
+      "isGemini": true,
       "costEstimated": false
     },
     {
@@ -103,7 +103,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-05T02:00:05Z",
+  "lastUpdated": "2026-04-05T02:05:06Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -132,8 +132,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 7.385736,
-    "total": 18.24055,
+    "daily": 8.142654,
+    "total": 18.957117,
     "monthly": 76.781686
   },
   "weeklyRunRate": {
