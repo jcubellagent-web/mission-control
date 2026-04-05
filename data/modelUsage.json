@@ -1,23 +1,23 @@
 {
-  "session": 0.165602,
-  "daily": 52.125484,
+  "session": 3.054911,
+  "daily": 58.137837,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
       "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 40.17934751000001
+      "cost": 43.30239086
     },
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 19.137765999999996
+      "cost": 22.027075499999995
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 2.58463099
+      "cost": 2.3263848399999993
     },
     {
       "name": "gpt-5.3-codex",
@@ -34,25 +34,25 @@
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 432806,
-      "outputTokens": 31998,
-      "totalTokens": 464804,
-      "sessionCost": 40.17934751000001,
-      "dailyCost": 40.17934751000001,
-      "weeklyCost": 40.17934751000001,
-      "sessions": 10,
+      "inputTokens": 467047,
+      "outputTokens": 36045,
+      "totalTokens": 503092,
+      "sessionCost": 43.30239086,
+      "dailyCost": 43.30239086,
+      "weeklyCost": 43.30239086,
+      "sessions": 11,
       "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 119216,
-      "outputTokens": 181132,
-      "totalTokens": 300348,
-      "sessionCost": 19.137765999999996,
-      "dailyCost": 11.946136399999999,
-      "weeklyCost": 19.137765999999996,
+      "inputTokens": 216979,
+      "outputTokens": 179237,
+      "totalTokens": 396216,
+      "sessionCost": 22.027075499999995,
+      "dailyCost": 14.835445899999998,
+      "weeklyCost": 22.027075499999995,
       "sessions": 19,
       "isGemini": false,
       "costEstimated": false
@@ -60,13 +60,13 @@
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 2744046,
-      "outputTokens": 71268,
-      "totalTokens": 2815314,
-      "sessionCost": 2.58463099,
+      "inputTokens": 2711665,
+      "outputTokens": 70970,
+      "totalTokens": 2782635,
+      "sessionCost": 2.3263848399999993,
       "dailyCost": 0.0,
-      "weeklyCost": 2.58463099,
-      "sessions": 19,
+      "weeklyCost": 2.3263848399999993,
+      "sessions": 18,
       "isGemini": true,
       "costEstimated": false
     },
@@ -116,7 +116,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-05T23:00:12Z",
+  "lastUpdated": "2026-04-05T23:05:12Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -145,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 52.217955,
-    "total": 64.479255,
+    "daily": 58.230308,
+    "total": 70.233362,
     "monthly": 76.874157
   },
   "weeklyRunRate": {
