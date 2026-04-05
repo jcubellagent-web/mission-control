@@ -1,23 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Receiving Josh voice note",
+  "objective": "Planning expandable Activity drawer",
   "status": "active",
   "steps": [
     {
-      "label": "transcribe audio",
+      "label": "capture task",
       "status": "done",
-      "tool": "whisper"
+      "tool": "exec"
     },
     {
-      "label": "capture task",
+      "label": "inspect layout",
       "status": "active",
-      "tool": "exec"
+      "tool": "read"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-04-05T23:45:16Z",
-  "checkedAt": "2026-04-05T23:45:16Z",
+  "currentTool": "read",
+  "updatedAt": "2026-04-05T23:45:26Z",
+  "checkedAt": "2026-04-05T23:45:26Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
