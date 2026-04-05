@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T21:29:59Z",
-  "objective": "Fixed handoff to include preferred reply format",
+  "messageReceived": "2026-04-05T21:31:03Z",
+  "objective": "Auditing OpenClaw cache config",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T21:29:59Z",
-  "checkedAt": "2026-04-05T21:29:59Z",
+  "steps": [
+    {
+      "label": "capture voice",
+      "status": "done",
+      "tool": "whisper"
+    },
+    {
+      "label": "audit config",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T21:31:03Z",
+  "checkedAt": "2026-04-05T21:31:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
