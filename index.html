@@ -946,7 +946,7 @@
         .mu-el-bar-fill { height: 100%; border-radius: 3px; }
         /* Machine Health */
         .mu-health-section { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
-        .mu-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .mu-health-grid { display: flex; flex-direction: column; gap: 6px; }
         .mu-health-machine { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 7px; padding: 5px 7px; }
         .mu-health-machine-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
         .mu-health-online-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
@@ -1405,7 +1405,7 @@
             gap: 12px; min-height: 0;
         }
         body.kiosk-mode .card-jobs  { flex: 2; min-height: 0; overflow: hidden; }
-        body.kiosk-mode .card-model { flex: 1; min-height: 0; overflow: hidden; }
+        body.kiosk-mode .card-model { flex: 1.5; min-height: 0; overflow: hidden; }
 
         /* RIGHT col: priority-grid spans both rows — Today's Jobs full height */
         body.kiosk-mode .priority-grid {
@@ -1414,6 +1414,8 @@
             flex-direction: column;
             min-height: 0;
             overflow-y: auto;
+            overflow: hidden;
+            min-width: 0;
         }
         /* Jobs card fills full right column, scrolls as one unit */
         body.kiosk-mode .card-jobs-full {
@@ -1468,11 +1470,11 @@
 
         /* ── System Health ── */
         .card-model-health { display: flex; flex-direction: column; }
-        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; }
+        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
         .system-health-body { display: flex; flex-direction: column; gap: 6px; }
-        .sh-agent-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 6px 8px; }
+        .sh-agent-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
         .sh-dot.active { background: #4ade80; box-shadow: 0 0 4px rgba(74,222,128,0.5); }
@@ -1482,8 +1484,8 @@
         .sh-dot.jaimes.active { background: #a78bfa; box-shadow: 0 0 4px rgba(167,139,250,0.5); }
         .sh-agent-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; color: rgba(255,255,255,0.75); flex: 1; }
         .sh-agent-tag { font-size: 0.55rem; color: rgba(255,255,255,0.25); }
-        .sh-metrics { display: flex; gap: 8px; flex-wrap: wrap; }
-        .sh-metric { display: flex; gap: 3px; align-items: baseline; }
+        .sh-metrics { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+        .sh-metric { display: flex; gap: 3px; align-items: baseline; min-width: 0; flex-shrink: 1; overflow: hidden; }
         .sh-ml { font-size: 0.58rem; color: rgba(255,255,255,0.3); }
         .sh-mv { font-size: 0.65rem; color: rgba(255,255,255,0.7); }
         .sh-mv.ok { color: #4ade80; }
@@ -5777,7 +5779,7 @@
                 </div>
                 <div class="stat-pill stat-pill-mw" id="moltworld-bubble" title="MoltWorld Agent" onclick="window.openMoltWorldDashboard && window.openMoltWorldDashboard()" style="cursor:pointer;">
                     <span class="num" id="mw-bubble-sim">⚡</span>
-                    <span class="label">MoltWorld</span>
+                    <span class="label" id="mw-bubble-label">MoltWorld</span>
                 </div>
             `;
             // bubble click handled by DOMContentLoaded listener below
@@ -8140,11 +8142,13 @@
         const isOnline = data?.is_online === true;
         toggleClass('mw-online-dot', 'mw-online', isOnline);
         toggleClass('mw-online-dot', 'mw-offline', !isOnline);
-        setEl('mw-status-text', isOnline ? `Online · earning ${data?.earning_rate || '—'}` : 'Offline');
+        const mwServerDown = data?.status === 'server_down';
+        setEl('mw-status-text', isOnline ? `Online · earning ${data?.earning_rate || '—'}` : mwServerDown ? '🔴 Server down' : 'Offline');
 
         // SIM balance
         setEl('mw-sim-balance', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(3) : '—');
-        setEl('mw-bubble-sim', data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(2) : '⚡');
+        setEl('mw-bubble-sim', isOnline ? (data?.sim_balance != null ? parseFloat(data.sim_balance).toFixed(2) : '⚡') : '🔴');
+        setEl('mw-bubble-label', mwServerDown ? 'Server ↓' : 'MoltWorld');
 
         // Stats Row
         setEl('mw-position', data?.position_x != null && data?.position_y != null ? `(${data.position_x},${data.position_y})` : '—');
