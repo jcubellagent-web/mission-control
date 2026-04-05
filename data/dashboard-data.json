@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Heartbeat checks complete",
-    "updatedAt": "2026-04-05T23:25:02Z"
+    "updatedAt": "2026-04-05T23:30:02Z"
   },
   "contextWindow": {
     "usedTokens": 139386,
@@ -46,12 +46,12 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-05T22:25:20Z",
+    "lastTriggeredAt": "2026-04-05T23:25:12Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 58832,
+    "usedTokens": 139386,
     "limitTokens": 272000,
-    "pct": 0.2163
+    "pct": 0.5124
   },
   "codingVisibility": {
     "workspaceDirty": 29,
@@ -65,7 +65,7 @@
       "scripts/delegate_to_jaimes.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-05T23:25:08Z"
+    "updatedAt": "2026-04-05T23:30:08Z"
   },
   "modelUsage": {
     "session": 3.961193,
@@ -185,7 +185,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T23:25:11Z",
+    "lastUpdated": "2026-04-05T23:30:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -239,18 +239,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T23:25:16Z"
+    "updatedAt": "2026-04-05T23:30:17Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.1,
-      "cpu_user": 14.5,
-      "cpu_sys": 20.62,
-      "load1": 3.01,
-      "load5": 3.06,
-      "load15": 2.99,
+      "cpu_pct": 34.6,
+      "cpu_user": 13.92,
+      "cpu_sys": 20.63,
+      "load1": 3.42,
+      "load5": 3.04,
+      "load15": 2.98,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -258,12 +258,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.4,
-      "cpu_user": 2.75,
-      "cpu_sys": 9.65,
-      "load1": 1.79,
-      "load5": 1.83,
-      "load15": 1.91,
+      "cpu_pct": 12.2,
+      "cpu_user": 2.56,
+      "cpu_sys": 9.61,
+      "load1": 1.56,
+      "load5": 1.7,
+      "load15": 1.82,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.0,
       "uptime": "",
@@ -289,19 +289,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:25:02Z"
+      "lastChecked": "2026-04-05T23:30:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:25:02Z"
+      "lastChecked": "2026-04-05T23:30:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T23:25:02Z"
+      "lastChecked": "2026-04-05T23:30:02Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 60065,
+      "elapsedSecs": 60366,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -732,7 +732,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 22%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 51%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -743,29 +743,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T23:25:11Z",
+      "time": "2026-04-05T23:30:12Z",
       "event": "Session spend: $3.96"
     },
     {
-      "time": "2026-04-05T23:25:08Z",
+      "time": "2026-04-05T23:30:08Z",
       "event": "Coding: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py"
     },
     {
-      "time": "2026-04-05T23:25:08Z",
+      "time": "2026-04-05T23:30:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-05T23:25:02Z",
+      "time": "2026-04-05T23:30:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T23:25:02Z",
+      "time": "2026-04-05T23:30:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T23:25:02Z",
+      "time": "2026-04-05T23:30:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-05T23:25:02Z"
+  "lastUpdated": "2026-04-05T23:30:02Z"
 }
