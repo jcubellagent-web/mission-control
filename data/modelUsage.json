@@ -1,6 +1,6 @@
 {
   "session": 11.461114,
-  "daily": 50.690393,
+  "daily": 53.16326,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
@@ -12,12 +12,12 @@
     {
       "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 27.44874411
+      "cost": 29.921611959999996
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
-      "cost": 3.51619639
+      "cost": 3.29833104
     },
     {
       "name": "gpt-5.3-codex",
@@ -47,26 +47,26 @@
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 262097,
-      "outputTokens": 14563,
-      "totalTokens": 276660,
-      "sessionCost": 27.44874411,
-      "dailyCost": 27.44874411,
-      "weeklyCost": 27.44874411,
-      "sessions": 5,
+      "inputTokens": 155047,
+      "outputTokens": 15980,
+      "totalTokens": 171027,
+      "sessionCost": 29.921611959999996,
+      "dailyCost": 29.921611959999996,
+      "weeklyCost": 29.921611959999996,
+      "sessions": 6,
       "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "google/gemini-2.5-flash",
       "source": "openclaw",
-      "inputTokens": 2871095,
-      "outputTokens": 72695,
-      "totalTokens": 2943790,
-      "sessionCost": 3.51619639,
+      "inputTokens": 2838376,
+      "outputTokens": 71917,
+      "totalTokens": 2910293,
+      "sessionCost": 3.29833104,
       "dailyCost": 0.0,
-      "weeklyCost": 3.51619639,
-      "sessions": 23,
+      "weeklyCost": 3.29833104,
+      "sessions": 22,
       "isGemini": true,
       "costEstimated": false
     },
@@ -108,15 +108,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 1.210835,
-      "dailyCost": 0.085851,
-      "sessionCost": 1.210835,
+      "weeklyCost": 1.217455,
+      "dailyCost": 0.092471,
+      "sessionCost": 1.217455,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-05T19:00:05Z",
+  "lastUpdated": "2026-04-05T19:05:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -134,9 +134,9 @@
     "daily": 0.0041745,
     "weekly": 0.01794655,
     "monthly": 0.01794655,
-    "byok_daily": 0.08585055,
-    "byok_weekly": 1.2108347,
-    "byok_monthly": 1.2108347,
+    "byok_daily": 0.09247105,
+    "byok_weekly": 1.2174552,
+    "byok_monthly": 1.2174552,
     "available": true
   },
   "elevenlabs": {
@@ -145,14 +145,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 50.776244,
-    "total": 63.969109,
-    "monthly": 76.867537
+    "daily": 53.255731,
+    "total": 66.230732,
+    "monthly": 76.874157
   },
   "weeklyRunRate": {
-    "total": 101.84536,
-    "automation": 2.137445,
-    "interactive": 97.57047,
-    "projectedMonthly": 436.48
+    "total": 101.85198,
+    "automation": 2.144065,
+    "interactive": 97.56385,
+    "projectedMonthly": 436.51
   }
 }
