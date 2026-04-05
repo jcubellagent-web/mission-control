@@ -4,38 +4,38 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-05T06:37:38Z",
-    "objective": "Need Supabase service key or manual SQL run from Josh",
+    "messageReceived": "2026-04-05T06:44:31Z",
+    "objective": "V3 complete \u2014 agent bus live, two Mac minis are one system",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-05T06:37:38Z",
-    "checkedAt": "2026-04-05T06:37:38Z",
+    "updatedAt": "2026-04-05T06:44:31Z",
+    "checkedAt": "2026-04-05T06:44:31Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Need Supabase service key or manual SQL run from Josh",
-    "updatedAt": "2026-04-05T06:40:02Z"
+    "context": "V3 complete \u2014 agent bus live, two Mac minis are one system",
+    "updatedAt": "2026-04-05T06:45:02Z"
   },
   "contextWindow": {
-    "usedTokens": 238183,
+    "usedTokens": 243239,
     "limitTokens": 1000000,
-    "pct": 0.2382,
+    "pct": 0.2432,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "modelUsage": {
-    "session": 26.570694,
-    "daily": 34.59957,
+    "session": 27.640239,
+    "daily": 35.669115,
     "weekly": 99.707915,
     "monthly": 75.656702,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 41.79119966
+        "cost": 42.86074435999999
       },
       {
         "name": "google/gemini-2.5-flash",
@@ -62,12 +62,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 84333,
-        "outputTokens": 149637,
-        "totalTokens": 233970,
-        "sessionCost": 41.79119966,
-        "dailyCost": 34.599570060000005,
-        "weeklyCost": 41.79119966,
+        "inputTokens": 84341,
+        "outputTokens": 151008,
+        "totalTokens": 235349,
+        "sessionCost": 42.86074435999999,
+        "dailyCost": 35.66911476,
+        "weeklyCost": 42.86074435999999,
         "sessions": 11,
         "isGemini": false,
         "costEstimated": false
@@ -131,7 +131,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T06:40:05Z",
+    "lastUpdated": "2026-04-05T06:45:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -160,8 +160,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 34.630597,
-      "total": 49.604159,
+      "daily": 35.700142,
+      "total": 50.673703,
       "monthly": 76.812713
     },
     "weeklyRunRate": {
@@ -185,18 +185,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T06:40:10Z"
+    "updatedAt": "2026-04-05T06:45:11Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.8,
-      "cpu_user": 9.91,
-      "cpu_sys": 13.84,
-      "load1": 2.16,
-      "load5": 2.24,
-      "load15": 2.27,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 23.1,
+      "cpu_user": 9.52,
+      "cpu_sys": 13.55,
+      "load1": 2.39,
+      "load5": 2.23,
+      "load15": 2.23,
+      "ram_used_gb": 11.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -204,12 +204,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 3.37,
-      "cpu_sys": 9.45,
-      "load1": 1.72,
-      "load5": 1.82,
-      "load15": 1.79,
+      "cpu_pct": 12.0,
+      "cpu_user": 2.66,
+      "cpu_sys": 9.33,
+      "load1": 1.64,
+      "load5": 1.71,
+      "load15": 1.74,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.0,
       "uptime": "",
@@ -235,19 +235,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T06:40:02Z"
+      "lastChecked": "2026-04-05T06:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T06:40:02Z"
+      "lastChecked": "2026-04-05T06:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T06:40:02Z"
+      "lastChecked": "2026-04-05T06:45:02Z"
     }
   ],
   "crons": [
@@ -649,25 +649,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-05T06:40:05Z",
-      "event": "Session spend: $26.57"
+      "time": "2026-04-05T06:45:06Z",
+      "event": "Session spend: $27.64"
     },
     {
-      "time": "2026-04-05T06:40:02Z",
+      "time": "2026-04-05T06:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T06:40:02Z",
+      "time": "2026-04-05T06:45:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T06:40:02Z",
+      "time": "2026-04-05T06:45:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-05T06:40:02Z",
+      "time": "2026-04-05T06:45:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-05T06:40:02Z"
+  "lastUpdated": "2026-04-05T06:45:02Z"
 }
