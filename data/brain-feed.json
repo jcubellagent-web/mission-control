@@ -1,23 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Receiving Josh voice note",
+  "objective": "Syncing memory backup to J.A.I.N",
   "status": "active",
   "steps": [
     {
-      "label": "transcribe audio",
+      "label": "run backup script",
       "status": "done",
-      "tool": "whisper"
+      "tool": "exec"
     },
     {
-      "label": "capture task",
+      "label": "verify remote backup",
       "status": "active",
-      "tool": "exec"
+      "tool": "ssh"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-04-05T22:56:57Z",
-  "checkedAt": "2026-04-05T22:56:57Z",
+  "currentTool": "ssh",
+  "updatedAt": "2026-04-05T23:01:01Z",
+  "checkedAt": "2026-04-05T23:01:01Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
