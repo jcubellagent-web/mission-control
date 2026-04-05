@@ -942,6 +942,22 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
         total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
 
+        # ── Weekly Run Rate: automation baseline vs interactive ───────────────
+        # automation = J.A.I.N scripts + OpenRouter background + JAIN API models
+        # interactive = JOSH 2.0 chat sessions (Sonnet-driven, Josh-initiated)
+        automation_weekly = round(
+            jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0), 6
+        )
+        interactive_weekly = round(max(0.0, weekly_cost - automation_weekly), 6)
+        total_weekly_all   = round(weekly_cost + or_weekly + jain.get("total", 0) + jain_api.get("weekly", 0), 6)
+        weekly_run_rate = {
+            "total":       total_weekly_all,
+            "automation":  automation_weekly,
+            "interactive": interactive_weekly,
+            # projected monthly = total * (30/7)
+            "projectedMonthly": round(total_weekly_all * (30 / 7), 2),
+        }
+
         payload = {
             "session": round(current_session_cost, 6),
             "daily":   round(daily_cost,   6),
@@ -959,6 +975,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 "total":   round(session_cost + jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0), 6),
                 "monthly": total_monthly,
             },
+            "weeklyRunRate": weekly_run_rate,
         }
         return payload
 
@@ -1098,6 +1115,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
     x_log_lines_raw = ""
     reply_state_raw = "{}"
     x_log_runs: dict[str, str] = {}
+    _jain_replies_today_from_log: list[int] = []
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
@@ -1105,7 +1123,9 @@ def fetch_crons() -> List[Dict[str, Any]]:
             "  /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null | tail -50 || true; "
             "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'; "
             f"echo '===SORAREMISSIONS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_missions.log 2>/dev/null || echo ''; "
-            f"echo '===SORARELINEUPS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_lineups.log 2>/dev/null || echo ''"
+            f"echo '===SORARELINEUPS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_lineups.log 2>/dev/null || echo ''; "
+            f"echo '===STRATEGICREPLIES==='; grep -E '^\\[([0-9]{{2}}):' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -20 || echo ''; "
+            f"echo '===HERMESJOBS==='; cat /Users/jc_agent/.hermes/cron/jobs.json 2>/dev/null || echo '{{}}'"
         )
         r = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
@@ -1125,12 +1145,60 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 if len(missions_split) > 1:
                     lineups_split = missions_split[1].split("===SORARELINEUPS===")
                     sorare_missions_tail = lineups_split[0].strip()
-                    sorare_lineups_tail = lineups_split[1].strip() if len(lineups_split) > 1 else ""
+                    rest2 = lineups_split[1] if len(lineups_split) > 1 else ""
+                    strategic_split = rest2.split("===STRATEGICREPLIES===")
+                    sorare_lineups_tail = strategic_split[0].strip()
+                    strategic_reply_log = strategic_split[1].strip() if len(strategic_split) > 1 else ""
                     # Mark Sorare as done if log shows COMPLETE or today's notification line
                     if "COMPLETE" in sorare_missions_tail or f"{today_str}" in sorare_missions_tail:
                         x_log_runs["Sorare Daily Missions"] = f"{today_str}T14:00:00"
                     if "COMPLETE" in sorare_lineups_tail or f"{today_str}" in sorare_lineups_tail:
                         x_log_runs["Sorare Competition Lineups"] = f"{today_str}T15:00:00"
+                    # Split out Hermes jobs JSON
+                    hermes_split = strategic_reply_log.split("===HERMESJOBS===")
+                    strategic_reply_log_clean = hermes_split[0].strip()
+                    hermes_jobs_raw = hermes_split[1].strip() if len(hermes_split) > 1 else "{}"
+                    # Parse strategic reply hours from log
+                    _strategic_reply_hours: list[int] = []
+                    for _srl in strategic_reply_log_clean.splitlines():
+                        _srm = _re.match(r'^\[(\d{2}):', _srl.strip())
+                        if _srm:
+                            _h = int(_srm.group(1))
+                            if _h <= now_et.hour:
+                                _strategic_reply_hours.append(_h)
+                    if _strategic_reply_hours:
+                        _jain_replies_today_from_log = _strategic_reply_hours
+                    else:
+                        _jain_replies_today_from_log = []
+                    # Parse Hermes jobs for JAIMES-agent last_run data
+                    _hermes_last_runs: dict[str, str] = {}
+                    try:
+                        _hdata = json.loads(hermes_jobs_raw)
+                        for _hj in _hdata.get('jobs', []):
+                            _hname = _hj.get('name', '')
+                            _hlast = _hj.get('last_run_at')
+                            _hstatus = _hj.get('last_status', '')
+                            if _hlast and _hstatus == 'ok':
+                                _hermes_last_runs[_hname] = _hlast
+                    except Exception:
+                        pass
+                    # Map hermes job names to CRON_TARGET names
+                    _hermes_name_map = {
+                        'sorare-train-model':   'Sorare ML Training',
+                        'x-feedback-ml':         'X Feedback ML',
+                        'daily-health-check':    'Daily Health Check',
+                        'sorare-daily-missions': 'Sorare Daily Missions',
+                        'sorare-competition-lineups': 'Sorare Competition Lineups',
+                        'sorare-nightly-claim':  'Sorare Nightly Claim',
+                        'sorare-sheet-updater':  'Sorare Sheet Updater',
+                        'fantasy-lineup-check':  'Lineup Check',
+                        'fantasy-injury-monitor':'Injury Monitor',
+                        'fantasy-waiver-scan':   'Waiver Scan',
+                        'fantasy-weekly-recap':  'Fantasy Weekly Recap',
+                    }
+                    for _hk, _tn in _hermes_name_map.items():
+                        if _hk in _hermes_last_runs and _tn not in x_log_runs:
+                            x_log_runs[_tn] = _hermes_last_runs[_hk]
     except Exception:
         pass
 
@@ -1182,8 +1250,12 @@ def fetch_crons() -> List[Dict[str, Any]]:
                         _jain_replies_today.append(dt_et.hour)
                 except Exception:
                     pass
+            # Also merge log-based hours (more reliable than stale reply_state.json)
+            for _lh in _jain_replies_today_from_log:
+                if _lh not in _jain_replies_today:
+                    _jain_replies_today.append(_lh)
             if _jain_replies_today:
-                x_log_runs["X Strategic Replies"] = f"{today_str}T{_jain_replies_today[-1]:02d}:00:00"
+                x_log_runs["X Strategic Replies"] = f"{today_str}T{max(_jain_replies_today):02d}:00:00"
     except Exception:
         pass
     fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
@@ -1216,6 +1288,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
         run_status = None  # 'done' | 'missed' | 'upcoming' | None
         last_run = x_log_runs.get(target['name'])
 
+        is_jaimes_agent = target.get('agent') == 'JAIMES'
         if sched.startswith('Daily'):
             sched_hour = parse_daily_hour(sched)
             if sched_hour is not None:
@@ -1223,6 +1296,9 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 now_min = now_et.minute
                 if last_run:
                     run_status = 'done'
+                elif is_jaimes_agent and not present:
+                    # JAIMES jobs run via Hermes — show paused if no last_run confirmed today
+                    run_status = 'paused'
                 elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= 10):
                     run_status = 'missed'
                 else:
@@ -1233,13 +1309,14 @@ def fetch_crons() -> List[Dict[str, Any]]:
             elif now_et.hour >= 9:
                 run_status = 'upcoming'
 
+        row_status = 'ok' if (present or last_run) else 'paused'
         row = {
             'name': target['name'],
             'schedule': target['schedule'],
             'description': target.get('description', ''),
             'category': target.get('category', 'Other'),
             'agent': target.get('agent', 'JOSH 2.0'),
-            'status': 'ok' if (present or last_run) else 'paused',
+            'status': row_status,
             'errors': 0,
             'lastError': None,
         }
@@ -1510,23 +1587,28 @@ def fetch_context_window() -> Dict[str, Any]:
     result = {"usedTokens": 0, "limitTokens": 0, "pct": 0.0, "model": "", "status": "green"}
     try:
         sessions = json.loads(OPENCLAW_SESSIONS_PATH.read_text())
-        # Pick the most-recently-updated session
-        best = max(sessions.values(), key=lambda s: s.get("updatedAt", ""), default=None)
+        preferred_key = "agent:main:telegram:direct:6218150306"
+        best = sessions.get(preferred_key)
+        # Fallback: pick the most-recently-updated session if the Josh DM session is absent.
+        if not best:
+            best = max(sessions.values(), key=lambda s: s.get("updatedAt", ""), default=None)
         if not best:
             return result
         model = (best.get("modelOverride") or best.get("model") or "").lower().replace("anthropic/", "").replace("google/", "").replace("openai/", "")
         ctx_tokens = int(best.get("contextTokens") or 0)
         total_tokens = int(best.get("totalTokens") or 0)
-        used = total_tokens  # totalTokens = cumulative context used in session
+        used = total_tokens  # OpenClaw session store uses totalTokens as current session context size.
 
-        # Find limit
-        limit = 0
-        for key, lim in CONTEXT_LIMITS.items():
-            if key in model:
-                limit = lim
-                break
+        # Prefer the real live context limit recorded by OpenClaw for this session.
+        # Only fall back to model heuristics if the field is missing.
+        limit = ctx_tokens if ctx_tokens > 0 else 0
         if limit == 0:
-            limit = ctx_tokens if ctx_tokens > 0 else 200_000  # fallback
+            for key, lim in CONTEXT_LIMITS.items():
+                if key in model:
+                    limit = lim
+                    break
+        if limit == 0:
+            limit = 200_000
 
         pct = round(used / limit, 4) if limit > 0 else 0.0
         pct = min(pct, 1.0)
