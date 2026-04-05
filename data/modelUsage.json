@@ -1,18 +1,23 @@
 {
   "session": 0.536589,
-  "daily": 31.961267,
+  "daily": 33.480047,
   "weekly": 99.707915,
   "monthly": 75.656702,
   "topModels": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "window": "session",
-      "cost": 39.152896559999995
+      "cost": 37.97304221
     },
     {
       "name": "google/gemini-2.5-flash",
       "window": "session",
       "cost": 4.10284865
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "window": "session",
+      "cost": 2.6986346999999995
     },
     {
       "name": "gpt-5.3-codex",
@@ -23,24 +28,19 @@
       "name": "local/qwen2.5-coder:7b",
       "window": "session",
       "cost": 0.0
-    },
-    {
-      "name": "local/nomic-embed-text:latest",
-      "window": "session",
-      "cost": 0.0
     }
   ],
   "breakdown": [
     {
       "name": "anthropic/claude-sonnet-4-6",
       "source": "openclaw",
-      "inputTokens": 99165,
-      "outputTokens": 185974,
-      "totalTokens": 285139,
-      "sessionCost": 39.152896559999995,
-      "dailyCost": 31.96126696,
-      "weeklyCost": 39.152896559999995,
-      "sessions": 21,
+      "inputTokens": 99161,
+      "outputTokens": 185807,
+      "totalTokens": 284968,
+      "sessionCost": 37.97304221,
+      "dailyCost": 30.78141261,
+      "weeklyCost": 37.97304221,
+      "sessions": 20,
       "isGemini": false,
       "costEstimated": false
     },
@@ -55,6 +55,19 @@
       "weeklyCost": 4.10284865,
       "sessions": 26,
       "isGemini": true,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 57392,
+      "outputTokens": 4970,
+      "totalTokens": 62362,
+      "sessionCost": 2.6986346999999995,
+      "dailyCost": 2.6986346999999995,
+      "weeklyCost": 2.6986346999999995,
+      "sessions": 2,
+      "isGemini": false,
       "costEstimated": false
     },
     {
@@ -103,7 +116,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-05T16:00:05Z",
+  "lastUpdated": "2026-04-05T16:05:05Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -132,8 +145,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 32.0394,
-    "total": 45.818918,
+    "daily": 33.55818,
+    "total": 47.337698,
     "monthly": 76.859819
   },
   "weeklyRunRate": {
