@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T15:51:07Z",
-  "objective": "Anthropic API note acknowledged \u2014 future runs routed away",
+  "messageReceived": "2026-04-05T15:51:43Z",
+  "objective": "Starting session startup",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T15:51:07Z",
-  "checkedAt": "2026-04-05T15:51:07Z",
+  "steps": [
+    {
+      "label": "load context",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T15:51:43Z",
+  "checkedAt": "2026-04-05T15:51:43Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
