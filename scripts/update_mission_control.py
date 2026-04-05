@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
@@ -25,6 +26,11 @@ EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
+AGENT_BUS_URL = "https://cdzaeptrggczynijegls.supabase.co"
+AGENT_BUS_KEY = "sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
+CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-state.json"
+CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
+CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
 
 CRON_TARGETS = [
     # ── JOSH 2.0 (this machine) ──────────────────────────────────────────────
@@ -1430,7 +1436,216 @@ def build_products(now_iso: str) -> List[Dict[str, str]]:
     ]
 
 
-def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focus: Dict[str, Any] | None, events: List[Dict[str, Any]], crons: List[Dict[str, Any]], devices: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+def fetch_agent_bus_tasks(limit: int = 12) -> List[Dict[str, Any]]:
+    query = urllib.parse.urlencode({
+        "select": "id,origin_node,target_node,task_type,status,payload,created_at,result,error_log",
+        "order": "created_at.desc",
+        "limit": str(limit),
+    })
+    url = f"{AGENT_BUS_URL}/rest/v1/agent_tasks?{query}"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "apikey": AGENT_BUS_KEY,
+            "Authorization": f"Bearer {AGENT_BUS_KEY}",
+            "Content-Type": "application/json",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode())
+        return data if isinstance(data, list) else []
+    except Exception as exc:
+        print(f"[warn] fetch_agent_bus_tasks failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_context_watchdog_status() -> Dict[str, Any]:
+    status = {
+        "loaded": False,
+        "label": CONTEXT_WATCHDOG_LABEL,
+        "threshold": 0.50,
+        "lastTriggeredAt": None,
+        "handoffExists": CONTEXT_HANDOFF_PATH.exists(),
+        "sessionKey": None,
+        "usedTokens": 0,
+        "limitTokens": 0,
+        "pct": 0.0,
+    }
+    try:
+        uid = str(os.getuid())
+        proc = subprocess.run(
+            ["launchctl", "print", f"gui/{uid}/{CONTEXT_WATCHDOG_LABEL}"],
+            capture_output=True, text=True, timeout=6,
+        )
+        status["loaded"] = proc.returncode == 0
+    except Exception:
+        pass
+
+    if CONTEXT_WATCHDOG_STATE_PATH.exists():
+        try:
+            state = json.loads(CONTEXT_WATCHDOG_STATE_PATH.read_text())
+            status["sessionKey"] = state.get("sessionKey")
+            status["usedTokens"] = int(state.get("usedTokens") or 0)
+            status["limitTokens"] = int(state.get("limitTokens") or 0)
+            limit = status["limitTokens"] or 1
+            status["pct"] = round(status["usedTokens"] / limit, 4)
+            status["threshold"] = 0.50
+            status["lastTriggeredAt"] = dt.datetime.fromtimestamp(
+                CONTEXT_WATCHDOG_STATE_PATH.stat().st_mtime, tz=dt.timezone.utc
+            ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        except Exception as exc:
+            print(f"[warn] fetch_context_watchdog_status failed: {exc}", file=sys.stderr)
+    elif CONTEXT_HANDOFF_PATH.exists():
+        status["lastTriggeredAt"] = dt.datetime.fromtimestamp(
+            CONTEXT_HANDOFF_PATH.stat().st_mtime, tz=dt.timezone.utc
+        ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return status
+
+
+def fetch_coding_visibility() -> Dict[str, Any]:
+    def recent_code_files() -> List[str]:
+        cutoff = dt.datetime.now(dt.timezone.utc).timestamp() - (3 * 60 * 60)
+        roots = [WORKSPACE_ROOT / "scripts", WORKSPACE_ROOT / "mission-control"]
+        seen: set[str] = set()
+        files: list[tuple[float, str]] = []
+        for root in roots:
+            if not root.exists():
+                continue
+            for path in root.rglob("*"):
+                if not path.is_file():
+                    continue
+                if any(part in {"node_modules", "data", "logs", "__pycache__"} for part in path.parts):
+                    continue
+                if path.suffix.lower() not in {".py", ".sh", ".js", ".ts", ".html", ".css", ".json", ".md"}:
+                    continue
+                try:
+                    mtime = path.stat().st_mtime
+                except OSError:
+                    continue
+                rel = str(path.relative_to(WORKSPACE_ROOT))
+                if mtime >= cutoff and rel not in seen:
+                    seen.add(rel)
+                    files.append((mtime, rel))
+        files.sort(key=lambda item: item[0], reverse=True)
+        return [name for _, name in files[:6]]
+
+    def git_dirty_count(repo: Path) -> int:
+        if not (repo / ".git").exists():
+            return 0
+        try:
+            proc = subprocess.run(
+                ["git", "-C", str(repo), "status", "--short", "--untracked-files=no"],
+                capture_output=True, text=True, timeout=6,
+            )
+            if proc.returncode != 0:
+                return 0
+            return len([line for line in proc.stdout.splitlines() if line.strip()])
+        except Exception:
+            return 0
+
+    codexbar_summary = "CodexBar available"
+    try:
+        codex_proc = subprocess.run(
+            ["/opt/homebrew/bin/codexbar", "usage", "--provider", "codex", "--status"],
+            capture_output=True, text=True, timeout=6,
+        )
+        gemini_proc = subprocess.run(
+            ["/opt/homebrew/bin/codexbar", "usage", "--provider", "gemini", "--status"],
+            capture_output=True, text=True, timeout=6,
+        )
+        lines: list[str] = []
+        for proc in (codex_proc, gemini_proc):
+            output = "\n".join([proc.stdout.strip(), proc.stderr.strip()]).strip()
+            lines.extend([line.strip() for line in output.splitlines() if line.strip()])
+        if lines:
+            codexbar_summary = " | ".join(lines[:2])[:220]
+    except Exception as exc:
+        codexbar_summary = f"CodexBar check failed: {exc}"
+
+    recent_files = recent_code_files()
+    return {
+        "workspaceDirty": git_dirty_count(WORKSPACE_ROOT),
+        "missionControlDirty": git_dirty_count(WORKSPACE_ROOT / "mission-control"),
+        "recentFiles": recent_files,
+        "codexbarStatus": codexbar_summary,
+        "updatedAt": utc_iso(),
+    }
+
+
+def build_visibility_agents(
+    agent_bus_tasks: List[Dict[str, Any]],
+    coding_visibility: Dict[str, Any],
+    watchdog: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    now = dt.datetime.now(dt.timezone.utc)
+
+    for task in agent_bus_tasks:
+        status = (task.get("status") or "").lower()
+        created_at = task.get("created_at") or utc_iso()
+        try:
+            created_dt = dt.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+            age_secs = max(0, int((now - created_dt).total_seconds()))
+        except Exception:
+            age_secs = 0
+        is_active = status in {"queued", "retry", "in_progress", "running"}
+        is_recent_done = status == "completed" and age_secs < 1800
+        if not (is_active or is_recent_done):
+            continue
+        payload = task.get("payload") or {}
+        label = payload.get("task") or task.get("task_type") or "Bus task"
+        target = str(task.get("target_node") or "AGENT").replace("_", ".")
+        rows.append({
+            "id": f"bus-{task.get('id', '')[:8]}",
+            "label": label,
+            "status": "running" if is_active else "done",
+            "elapsedSecs": age_secs,
+            "tool": "bus",
+            "model": status.upper(),
+            "agentLabel": target,
+            "agentClass": "agent",
+        })
+
+    wf = coding_visibility.get("recentFiles") or []
+    if wf:
+        rows.append({
+            "id": "coding-visibility",
+            "label": "Editing: " + ", ".join(wf[:2]),
+            "status": "running",
+            "elapsedSecs": 0,
+            "tool": "code",
+            "model": "live",
+            "agentLabel": "CODING",
+            "agentClass": "agent",
+        })
+
+    if watchdog.get("loaded"):
+        pct = round(float(watchdog.get("pct") or 0) * 100)
+        rows.append({
+            "id": "context-watchdog",
+            "label": f"Context watchdog armed at 50% · last trigger {pct}%",
+            "status": "done" if watchdog.get("lastTriggeredAt") else "running",
+            "elapsedSecs": 0,
+            "tool": "watchdog",
+            "model": "50% rule",
+            "agentLabel": "WATCHDOG",
+            "agentClass": "agent",
+        })
+    return rows[:6]
+
+
+def build_recent_activity(
+    now_iso: str,
+    model_usage: Dict[str, Any] | None,
+    focus: Dict[str, Any] | None,
+    events: List[Dict[str, Any]],
+    crons: List[Dict[str, Any]],
+    devices: List[Dict[str, Any]],
+    agent_bus_tasks: List[Dict[str, Any]] | None = None,
+    coding_visibility: Dict[str, Any] | None = None,
+    watchdog: Dict[str, Any] | None = None,
+) -> List[Dict[str, str]]:
     items: List[Dict[str, str]] = []
 
     if focus and focus.get("status"):
@@ -1452,6 +1667,33 @@ def build_recent_activity(now_iso: str, model_usage: Dict[str, Any] | None, focu
             "time": model_usage.get("lastUpdated") or now_iso,
             "event": f"Session spend: ${session_cost:.2f}",
         })
+
+    if watchdog and watchdog.get("loaded"):
+        items.append({
+            "time": watchdog.get("lastTriggeredAt") or now_iso,
+            "event": "Context watchdog armed at 50%",
+        })
+
+    if agent_bus_tasks:
+        active_bus = [t for t in agent_bus_tasks if (t.get("status") or "").lower() in {"queued", "retry", "in_progress", "running"}]
+        if active_bus:
+            items.append({
+                "time": active_bus[0].get("created_at") or now_iso,
+                "event": f"Agent bus: {len(active_bus)} queued task{'s' if len(active_bus) != 1 else ''}",
+            })
+
+    if coding_visibility:
+        recent_files = coding_visibility.get("recentFiles") or []
+        if recent_files:
+            items.append({
+                "time": coding_visibility.get("updatedAt") or now_iso,
+                "event": f"Coding: {', '.join(recent_files[:2])}",
+            })
+        if coding_visibility.get("codexbarStatus"):
+            items.append({
+                "time": coding_visibility.get("updatedAt") or now_iso,
+                "event": f"CodexBar: {coding_visibility.get('codexbarStatus')}",
+            })
 
     error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:
@@ -1613,11 +1855,11 @@ def fetch_context_window() -> Dict[str, Any]:
         pct = round(used / limit, 4) if limit > 0 else 0.0
         pct = min(pct, 1.0)
 
-        # RAG status
-        if pct >= 0.85:
-            status = "red"    # new session strongly recommended
-        elif pct >= 0.60:
-            status = "amber"  # getting full, consider /new soon
+        # Josh's hard rule: 50% is the ceiling.
+        if pct >= 0.50:
+            status = "red"    # new session immediately recommended
+        elif pct >= 0.40:
+            status = "amber"  # approaching hard ceiling
         else:
             status = "green"  # plenty of room
 
@@ -1704,6 +1946,12 @@ def main() -> None:
     brain = fetch_brain_feed()
     dashboard["focus"] = brain or build_focus_fallback(dashboard["brainFeed"], now_iso)
     dashboard["contextWindow"] = fetch_context_window()
+    agent_bus_tasks = fetch_agent_bus_tasks()
+    context_watchdog = fetch_context_watchdog_status()
+    coding_visibility = fetch_coding_visibility()
+    dashboard["agentBus"] = agent_bus_tasks
+    dashboard["contextWatchdog"] = context_watchdog
+    dashboard["codingVisibility"] = coding_visibility
 
     model_usage = fetch_model_usage() or {
         "session": 0.0,
@@ -1739,7 +1987,7 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
-    dashboard["activeAgents"]   = _f_agents.result()
+    dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
     # Wait for Eight Sleep subprocess
     try:
@@ -1759,6 +2007,9 @@ def main() -> None:
         dashboard["upcomingEvents"],
         dashboard["crons"],
         dashboard["devices"],
+        agent_bus_tasks,
+        coding_visibility,
+        context_watchdog,
     )
     dashboard["lastUpdated"] = now_iso
 

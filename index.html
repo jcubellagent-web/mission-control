@@ -4035,8 +4035,8 @@
             const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
             for (const a of running) {
                 items.push({
-                    agentClass: 'agent',
-                    agentLabel: 'AGENT',
+                    agentClass: a.agentClass || 'agent',
+                    agentLabel: a.agentLabel || 'AGENT',
                     dot: 'active',
                     msg: a.label || 'Running…',
                     model: a.model || '',
@@ -4046,12 +4046,12 @@
             }
             for (const a of recentAgents) {
                 items.push({
-                    agentClass: 'agent',
-                    agentLabel: 'AGENT',
+                    agentClass: a.agentClass || 'agent',
+                    agentLabel: a.agentLabel || 'AGENT',
                     dot: 'done',
                     msg: a.label || 'Done',
                     model: a.model || '',
-                    tool: '',
+                    tool: a.tool || '',
                     ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
                 });
             }

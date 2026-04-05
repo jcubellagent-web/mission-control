@@ -28,14 +28,54 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Implementing visibility + continuation layer",
-    "updatedAt": "2026-04-05T22:30:02Z"
+    "updatedAt": "2026-04-05T22:33:11Z"
   },
   "contextWindow": {
     "usedTokens": 128539,
     "limitTokens": 272000,
     "pct": 0.4726,
     "model": "claude-sonnet-4-6",
-    "status": "green"
+    "status": "amber"
+  },
+  "agentBus": [
+    {
+      "id": "221e910b-ab48-4254-b72a-1bbc8cbd4f28",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "TEST",
+      "status": "queued",
+      "payload": {
+        "test": true,
+        "message": "Agent bus is live. V3 nervous system online."
+      },
+      "created_at": "2026-04-05T06:44:12.728513+00:00",
+      "result": null,
+      "error_log": null
+    }
+  ],
+  "contextWatchdog": {
+    "loaded": true,
+    "label": "com.josh20.context-watchdog",
+    "threshold": 0.5,
+    "lastTriggeredAt": "2026-04-05T22:25:20Z",
+    "handoffExists": true,
+    "sessionKey": "agent:main:telegram:direct:6218150306",
+    "usedTokens": 58832,
+    "limitTokens": 272000,
+    "pct": 0.2163
+  },
+  "codingVisibility": {
+    "workspaceDirty": 29,
+    "missionControlDirty": 10,
+    "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/index.html",
+      "scripts/delegate_to_jaimes.sh",
+      "scripts/async_delegate.py",
+      "scripts/context_watchdog.py"
+    ],
+    "codexbarStatus": "CodexBar check failed: Command '['/opt/homebrew/bin/codexbar', 'usage', '--provider', 'codex', '--status']' timed out after 6 seconds",
+    "updatedAt": "2026-04-05T22:33:18Z"
   },
   "modelUsage": {
     "session": 1.716806,
@@ -155,7 +195,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T22:30:05Z",
+    "lastUpdated": "2026-04-05T22:33:26Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -179,8 +219,8 @@
       "available": true
     },
     "elevenlabs": {
-      "chars_used": 8470,
-      "chars_limit": 246062,
+      "chars_used": 4235,
+      "chars_limit": 123031,
       "available": true
     },
     "aggregate": {
@@ -209,33 +249,33 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T22:30:10Z"
+    "updatedAt": "2026-04-05T22:33:31Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 26.5,
-      "cpu_user": 12.54,
-      "cpu_sys": 14.39,
-      "load1": 3.08,
-      "load5": 2.69,
-      "load15": 2.57,
-      "ram_used_gb": 10.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 35.1,
+      "cpu_user": 15.7,
+      "cpu_sys": 20.0,
+      "load1": 2.55,
+      "load5": 2.5,
+      "load15": 2.5,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "116Gi",
+      "disk_avail": "115Gi",
       "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.3,
-      "cpu_user": 2.73,
+      "cpu_pct": 21.2,
+      "cpu_user": 12.32,
       "cpu_sys": 9.58,
-      "load1": 1.77,
-      "load5": 1.71,
-      "load15": 1.73,
+      "load1": 1.8,
+      "load5": 1.74,
+      "load15": 1.74,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -244,8 +284,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -259,19 +299,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T22:30:02Z"
+      "lastChecked": "2026-04-05T22:33:11Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T22:30:02Z"
+      "lastChecked": "2026-04-05T22:33:11Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T22:30:02Z"
+      "lastChecked": "2026-04-05T22:33:11Z"
     }
   ],
   "crons": [
@@ -679,28 +719,63 @@
       }
     }
   ],
-  "activeAgents": [],
+  "activeAgents": [
+    {
+      "id": "bus-221e910b",
+      "label": "TEST",
+      "status": "running",
+      "elapsedSecs": 56959,
+      "tool": "bus",
+      "model": "QUEUED",
+      "agentLabel": "JAIMES",
+      "agentClass": "agent"
+    },
+    {
+      "id": "coding-visibility",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    },
+    {
+      "id": "context-watchdog",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 22%",
+      "status": "done",
+      "elapsedSecs": 0,
+      "tool": "watchdog",
+      "model": "50% rule",
+      "agentLabel": "WATCHDOG",
+      "agentClass": "agent"
+    }
+  ],
   "recentActivity": [
     {
-      "time": "2026-04-05T22:30:05Z",
+      "time": "2026-04-05T22:33:26Z",
       "event": "Session spend: $1.72"
     },
     {
-      "time": "2026-04-05T22:30:02Z",
+      "time": "2026-04-05T22:33:18Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
+    },
+    {
+      "time": "2026-04-05T22:33:18Z",
+      "event": "CodexBar: CodexBar check failed: Command '['/opt/homebrew/bin/codexbar', 'usage', '--provider', 'codex', '--status']' timed out after 6 seconds"
+    },
+    {
+      "time": "2026-04-05T22:33:11Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T22:30:02Z",
+      "time": "2026-04-05T22:33:11Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T22:30:02Z",
+      "time": "2026-04-05T22:33:11Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-05T22:30:02Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-05T22:30:02Z"
+  "lastUpdated": "2026-04-05T22:33:11Z"
 }
