@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T22:36:12Z",
-  "objective": "Heartbeat checks complete",
+  "messageReceived": "2026-04-05T22:55:22Z",
+  "objective": "Starting new session for Josh",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T22:36:12Z",
-  "checkedAt": "2026-04-05T22:36:12Z",
+  "steps": [
+    {
+      "label": "objective triage",
+      "status": "done",
+      "tool": "telegram"
+    },
+    {
+      "label": "load context",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T22:55:22Z",
+  "checkedAt": "2026-04-05T22:55:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
