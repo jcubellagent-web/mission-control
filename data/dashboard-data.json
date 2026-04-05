@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Implementing visibility + continuation layer",
-    "updatedAt": "2026-04-05T22:33:11Z"
+    "updatedAt": "2026-04-05T22:34:05Z"
   },
   "contextWindow": {
     "usedTokens": 128539,
@@ -66,7 +66,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 29,
-    "missionControlDirty": 10,
+    "missionControlDirty": 3,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -74,8 +74,8 @@
       "scripts/async_delegate.py",
       "scripts/context_watchdog.py"
     ],
-    "codexbarStatus": "CodexBar check failed: Command '['/opt/homebrew/bin/codexbar', 'usage', '--provider', 'codex', '--status']' timed out after 6 seconds",
-    "updatedAt": "2026-04-05T22:33:18Z"
+    "codexbarStatus": "CodexBar check failed: Command '['/bin/zsh', '-lc', \"/opt/homebrew/bin/codexbar usage --provider codex --status 2>&1 | sed -n '1,2p'\"]' timed out after 6 seconds",
+    "updatedAt": "2026-04-05T22:34:11Z"
   },
   "modelUsage": {
     "session": 1.716806,
@@ -195,7 +195,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T22:33:26Z",
+    "lastUpdated": "2026-04-05T22:34:14Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -219,8 +219,8 @@
       "available": true
     },
     "elevenlabs": {
-      "chars_used": 4235,
-      "chars_limit": 123031,
+      "chars_used": 8470,
+      "chars_limit": 246062,
       "available": true
     },
     "aggregate": {
@@ -249,18 +249,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T22:33:31Z"
+    "updatedAt": "2026-04-05T22:34:19Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.1,
-      "cpu_user": 15.7,
-      "cpu_sys": 20.0,
-      "load1": 2.55,
-      "load5": 2.5,
-      "load15": 2.5,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 35.6,
+      "cpu_user": 15.89,
+      "cpu_sys": 20.6,
+      "load1": 2.69,
+      "load5": 2.53,
+      "load15": 2.51,
+      "ram_used_gb": 11.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -268,14 +268,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 21.2,
-      "cpu_user": 12.32,
-      "cpu_sys": 9.58,
-      "load1": 1.8,
-      "load5": 1.74,
-      "load15": 1.74,
+      "cpu_pct": 11.7,
+      "cpu_user": 3.44,
+      "cpu_sys": 8.27,
+      "load1": 1.53,
+      "load5": 1.68,
+      "load15": 1.72,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -299,19 +299,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T22:33:11Z"
+      "lastChecked": "2026-04-05T22:34:05Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T22:33:11Z"
+      "lastChecked": "2026-04-05T22:34:05Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T22:33:11Z"
+      "lastChecked": "2026-04-05T22:34:05Z"
     }
   ],
   "crons": [
@@ -724,7 +724,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 56959,
+      "elapsedSecs": 57007,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -753,29 +753,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T22:33:26Z",
+      "time": "2026-04-05T22:34:14Z",
       "event": "Session spend: $1.72"
     },
     {
-      "time": "2026-04-05T22:33:18Z",
+      "time": "2026-04-05T22:34:11Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-05T22:33:18Z",
-      "event": "CodexBar: CodexBar check failed: Command '['/opt/homebrew/bin/codexbar', 'usage', '--provider', 'codex', '--status']' timed out after 6 seconds"
+      "time": "2026-04-05T22:34:11Z",
+      "event": "CodexBar: CodexBar check failed: Command '['/bin/zsh', '-lc', \"/opt/homebrew/bin/codexbar usage --provider codex --status 2>&1 | sed -n '1,2p'\"]' timed out after 6 seconds"
     },
     {
-      "time": "2026-04-05T22:33:11Z",
+      "time": "2026-04-05T22:34:05Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T22:33:11Z",
+      "time": "2026-04-05T22:34:05Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T22:33:11Z",
+      "time": "2026-04-05T22:34:05Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-05T22:33:11Z"
+  "lastUpdated": "2026-04-05T22:34:05Z"
 }

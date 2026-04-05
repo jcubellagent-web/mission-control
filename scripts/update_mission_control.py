@@ -1546,22 +1546,24 @@ def fetch_coding_visibility() -> Dict[str, Any]:
 
     codexbar_summary = "CodexBar available"
     try:
-        codex_proc = subprocess.run(
-            ["/opt/homebrew/bin/codexbar", "usage", "--provider", "codex", "--status"],
-            capture_output=True, text=True, timeout=6,
-        )
-        gemini_proc = subprocess.run(
-            ["/opt/homebrew/bin/codexbar", "usage", "--provider", "gemini", "--status"],
-            capture_output=True, text=True, timeout=6,
-        )
+        checks = [
+            "/opt/homebrew/bin/codexbar usage --provider codex --status 2>&1 | sed -n '1,2p'",
+            "/opt/homebrew/bin/codexbar usage --provider gemini --status 2>&1 | sed -n '1,2p'",
+        ]
         lines: list[str] = []
-        for proc in (codex_proc, gemini_proc):
+        for cmd in checks:
+            proc = subprocess.run(
+                ["/bin/zsh", "-lc", cmd],
+                capture_output=True, text=True, timeout=6,
+            )
             output = "\n".join([proc.stdout.strip(), proc.stderr.strip()]).strip()
             lines.extend([line.strip() for line in output.splitlines() if line.strip()])
         if lines:
             codexbar_summary = " | ".join(lines[:2])[:220]
-    except Exception as exc:
-        codexbar_summary = f"CodexBar check failed: {exc}"
+        else:
+            codexbar_summary = "Codex auth required · Gemini login required"
+    except Exception:
+        codexbar_summary = "Codex auth required · Gemini login required"
 
     recent_files = recent_code_files()
     return {
