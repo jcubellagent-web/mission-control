@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T20:03:03Z",
-  "objective": "Verified Sorare ML state after denied SSH write",
+  "messageReceived": "2026-04-05T20:35:12Z",
+  "objective": "Running heartbeat check",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T20:03:03Z",
-  "checkedAt": "2026-04-05T20:03:03Z",
+  "steps": [
+    {
+      "label": "mission-control",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T20:35:12Z",
+  "checkedAt": "2026-04-05T20:35:12Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
