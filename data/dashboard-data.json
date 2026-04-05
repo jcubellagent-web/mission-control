@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Finalizing Brain Feed redesign",
-    "updatedAt": "2026-04-05T23:19:24Z"
+    "updatedAt": "2026-04-05T23:20:02Z"
   },
   "contextWindow": {
     "usedTokens": 133874,
@@ -66,7 +66,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 29,
-    "missionControlDirty": 5,
+    "missionControlDirty": 4,
     "recentFiles": [
       "scripts/finalize_brain_feed_redesign.sh",
       "scripts/check_mission_control_script.py",
@@ -76,7 +76,7 @@
       "scripts/delegate_to_jaimes.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-05T23:19:30Z"
+    "updatedAt": "2026-04-05T23:20:08Z"
   },
   "modelUsage": {
     "session": 3.054911,
@@ -196,7 +196,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T23:19:33Z",
+    "lastUpdated": "2026-04-05T23:20:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -250,16 +250,16 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T23:19:38Z"
+    "updatedAt": "2026-04-05T23:20:16Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.6,
-      "cpu_user": 15.72,
-      "cpu_sys": 20.91,
-      "load1": 3.0,
-      "load5": 2.95,
-      "load15": 2.94,
+      "cpu_pct": 38.2,
+      "cpu_user": 17.7,
+      "cpu_sys": 20.49,
+      "load1": 3.37,
+      "load5": 3.03,
+      "load15": 2.96,
       "ram_used_gb": 12.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -269,12 +269,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.7,
-      "cpu_user": 2.0,
-      "cpu_sys": 10.66,
-      "load1": 1.97,
-      "load5": 1.98,
-      "load15": 1.99,
+      "cpu_pct": 12.0,
+      "cpu_user": 2.53,
+      "cpu_sys": 9.49,
+      "load1": 1.87,
+      "load5": 1.97,
+      "load15": 1.98,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -285,8 +285,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
@@ -300,19 +300,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:19:24Z"
+      "lastChecked": "2026-04-05T23:20:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:19:24Z"
+      "lastChecked": "2026-04-05T23:20:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T23:19:24Z"
+      "lastChecked": "2026-04-05T23:20:02Z"
     }
   ],
   "crons": [
@@ -725,7 +725,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 59726,
+      "elapsedSecs": 59766,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -754,29 +754,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T23:19:33Z",
+      "time": "2026-04-05T23:20:11Z",
       "event": "Session spend: $3.05"
     },
     {
-      "time": "2026-04-05T23:19:30Z",
+      "time": "2026-04-05T23:20:08Z",
       "event": "Coding: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py"
     },
     {
-      "time": "2026-04-05T23:19:30Z",
+      "time": "2026-04-05T23:20:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-05T23:19:24Z",
+      "time": "2026-04-05T23:20:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T23:19:24Z",
+      "time": "2026-04-05T23:20:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T23:19:24Z",
+      "time": "2026-04-05T23:20:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-05T23:19:24Z"
+  "lastUpdated": "2026-04-05T23:20:02Z"
 }
