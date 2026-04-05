@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "V4 overnight deployment running \u2014 Josh asleep",
-    "updatedAt": "2026-04-05T07:30:02Z"
+    "updatedAt": "2026-04-05T07:35:02Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -123,15 +123,15 @@
       {
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
-        "weeklyCost": 1.156011,
-        "dailyCost": 0.031027,
-        "sessionCost": 1.156011,
+        "weeklyCost": 1.162287,
+        "dailyCost": 0.037303,
+        "sessionCost": 1.162287,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T07:30:06Z",
+    "lastUpdated": "2026-04-05T07:35:06Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -149,9 +149,9 @@
       "daily": 0.0,
       "weekly": 0.01377205,
       "monthly": 0.01377205,
-      "byok_daily": 0.03102665,
-      "byok_weekly": 1.1560108,
-      "byok_monthly": 1.1560108,
+      "byok_daily": 0.03730335,
+      "byok_weekly": 1.1622875,
+      "byok_monthly": 1.1622875,
       "available": true
     },
     "elevenlabs": {
@@ -160,15 +160,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 41.370877,
-      "total": 56.2542,
-      "monthly": 76.812713
+      "daily": 41.377153,
+      "total": 56.260477,
+      "monthly": 76.81899
     },
     "weeklyRunRate": {
-      "total": 101.790536,
-      "automation": 2.082621,
-      "interactive": 97.625294,
-      "projectedMonthly": 436.25
+      "total": 101.796813,
+      "automation": 2.088897,
+      "interactive": 97.619018,
+      "projectedMonthly": 436.27
     }
   },
   "moltWorld": {
@@ -185,31 +185,31 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T07:30:11Z"
+    "updatedAt": "2026-04-05T07:35:11Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.5,
-      "cpu_user": 9.76,
-      "cpu_sys": 13.68,
-      "load1": 2.69,
-      "load5": 2.49,
-      "load15": 2.38,
-      "ram_used_gb": 10.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 30.8,
+      "cpu_user": 15.79,
+      "cpu_sys": 15.4,
+      "load1": 2.56,
+      "load5": 2.51,
+      "load15": 2.41,
+      "ram_used_gb": 11.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "115Gi",
+      "disk_avail": "116Gi",
       "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.4,
-      "cpu_user": 2.75,
-      "cpu_sys": 9.65,
-      "load1": 1.59,
-      "load5": 1.66,
-      "load15": 1.69,
+      "cpu_pct": 11.5,
+      "cpu_user": 3.5,
+      "cpu_sys": 8.39,
+      "load1": 1.77,
+      "load5": 1.79,
+      "load15": 1.75,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -235,19 +235,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T07:30:02Z"
+      "lastChecked": "2026-04-05T07:35:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T07:30:02Z"
+      "lastChecked": "2026-04-05T07:35:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T07:30:02Z"
+      "lastChecked": "2026-04-05T07:35:02Z"
     }
   ],
   "crons": [
@@ -341,10 +341,11 @@
       "description": "Claims nightly Sorare rewards + preps next day missions",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "paused"
+      "runStatus": "done",
+      "lastRun": "2026-04-05T03:31:32.537051-04:00"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -652,31 +653,31 @@
       "label": "fec4de59-c5ac-4555-8577-999731",
       "status": "running",
       "startedAt": "2026-04-05T07:26:23.161000+00:00",
-      "elapsedSecs": 228,
-      "updatedAt": "2026-04-05T07:29:59.766000+00:00"
+      "elapsedSecs": 527,
+      "updatedAt": "2026-04-05T07:32:29.405000+00:00"
     }
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T07:30:06Z",
+      "time": "2026-04-05T07:35:06Z",
       "event": "Session spend: $31.93"
     },
     {
-      "time": "2026-04-05T07:30:02Z",
+      "time": "2026-04-05T07:35:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T07:30:02Z",
+      "time": "2026-04-05T07:35:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T07:30:02Z",
+      "time": "2026-04-05T07:35:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-05T07:30:02Z",
+      "time": "2026-04-05T07:35:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-05T07:30:02Z"
+  "lastUpdated": "2026-04-05T07:35:02Z"
 }
