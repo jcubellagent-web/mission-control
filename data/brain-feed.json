@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T21:50:41Z",
-  "objective": "Ran heartbeat checks",
+  "messageReceived": "2026-04-05T21:58:55Z",
+  "objective": "Auditing Brain Feed context meter",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T21:50:41Z",
-  "checkedAt": "2026-04-05T21:50:41Z",
+  "steps": [
+    {
+      "label": "inspect brain feed",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "inspect session status",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T21:58:55Z",
+  "checkedAt": "2026-04-05T21:58:55Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
