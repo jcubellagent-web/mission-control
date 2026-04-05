@@ -558,10 +558,19 @@
         .ctx-inline-track { width: 80px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
         .ctx-inline-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease, background 0.4s; }
         /* Unified activity log */
-        .ua-log { display: flex; flex-direction: column; gap: 3px; }
-        .ua-item { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .ua-item:last-child { border-bottom: none; }
-        .ua-agent-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; padding: 1px 5px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+        .ua-log { display: flex; flex-direction: column; gap: 6px; }
+        .ua-item {
+            display: grid;
+            grid-template-columns: auto auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.014));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
+        }
+        .ua-agent-tag { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.09em; padding: 3px 6px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
         .ua-agent-tag.josh { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
         .ua-agent-tag.jain { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
         .ua-agent-tag.jaimes { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
@@ -570,10 +579,10 @@
         .ua-dot.active { background: #e53e3e; box-shadow: 0 0 4px #e53e3e; animation: pulse-dot 1.5s infinite; }
         .ua-dot.done { background: #4ade80; }
         .ua-dot.idle { background: rgba(255,255,255,0.2); }
-        .ua-msg { font-size: 0.7rem; color: var(--text-secondary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ua-tool-pill { font-size: 0.58rem; color: var(--text-muted); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; padding: 0px 4px; white-space: nowrap; flex-shrink: 0; }
-        .ua-model-pill { font-size: 0.58rem; color: rgba(96,165,250,0.7); background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.15); border-radius: 3px; padding: 0px 4px; white-space: nowrap; flex-shrink: 0; }
-        .ua-ts { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+        .ua-msg { font-size: 0.68rem; color: rgba(255,255,255,0.78); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ua-tool-pill { font-size: 0.54rem; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 999px; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
+        .ua-model-pill { font-size: 0.54rem; color: rgba(96,165,250,0.82); background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.16); border-radius: 999px; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
+        .ua-ts { font-size: 0.58rem; color: rgba(255,255,255,0.36); white-space: nowrap; flex-shrink: 0; }
         .ua-empty { font-size: 0.68rem; color: rgba(255,255,255,0.18); padding: 4px 0; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
@@ -2213,9 +2222,11 @@
             100% { box-shadow: 0 0 0 1px rgba(229,62,62,0.12), 0 0 32px rgba(229,62,62,0.14), 0 1px 3px rgba(0,0,0,0.5); }
         }
         .card-brain {
-            border-color: rgba(229,62,62,0.15);
+            border-color: rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(18,18,22,0.9), rgba(8,8,10,0.96));
+            box-shadow: 0 18px 48px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04);
             overflow: hidden;
-            animation: brain-idle-glow 3.5s ease-in-out infinite;
+            animation: brain-idle-glow 4.5s ease-in-out infinite;
             display: flex;
             flex-direction: column;
         }
@@ -2256,8 +2267,9 @@
             content: '';
             position: absolute;
             inset: 2px;
-            background: #111111;
+            background: linear-gradient(180deg, rgba(19,19,24,0.96), rgba(10,10,12,0.98));
             border-radius: 12px;
+            backdrop-filter: blur(20px) saturate(125%);
             z-index: 1;
             pointer-events: none;
         }
@@ -2272,9 +2284,9 @@
 
         /* ============ BRAIN FEED - ACTIVE LASER STATE ============ */
         .card-brain.brain-active {
-            border-color: rgba(229,62,62,0.32);
+            border-color: rgba(229,62,62,0.22);
             overflow: hidden;
-            animation: brain-activate 0.8s ease-out forwards, brain-idle-glow 3s ease-in-out infinite 0.8s;
+            animation: brain-activate 0.8s ease-out forwards, brain-idle-glow 3.6s ease-in-out infinite 0.8s;
         }
         .card-brain.brain-active::before {
             content: '';
@@ -2301,8 +2313,9 @@
             content: '';
             position: absolute;
             inset: 2px;
-            background: #111111;
+            background: linear-gradient(180deg, rgba(22,16,18,0.97), rgba(10,10,12,0.99));
             border-radius: 12px;
+            backdrop-filter: blur(22px) saturate(128%);
             z-index: 1;
             pointer-events: none;
         }
@@ -2411,7 +2424,7 @@
         /* Active brain feed: fixed-height scrollable timeline */
         .bf-objective { flex-shrink: 0; }
         .bf-msg-banner { flex-shrink: 0; }
-        .bf-current-tool-bar { flex-shrink: 0; }
+        .bf-signal-row { flex-shrink: 0; }
         .bf-idle-container {
             animation: bf-fade-in 0.45s ease;
             display: flex;
@@ -2473,63 +2486,75 @@
             margin-bottom: 4px;
         }
         .bf-objective-text {
-            font-size: clamp(1.76rem, 3.2vw, 2.2rem);
+            font-size: clamp(1.18rem, 1.9vw, 1.5rem);
             font-weight: 600;
-            color: rgba(255,255,255,0.85);
-            line-height: 1.2;
+            color: rgba(255,255,255,0.92);
+            line-height: 1.24;
+            letter-spacing: -0.02em;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
-        .bf-current-tool-bar {
+        .bf-signal-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin: 2px 0 4px;
+        }
+        .bf-signal-chip {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: rgba(229,62,62,0.08);
-            border: 1px solid rgba(229,62,62,0.3);
-            border-radius: 8px;
-            box-shadow: 0 0 16px rgba(229,62,62,0.08), inset 0 0 8px rgba(229,62,62,0.03);
-            margin: 2px 0;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+            padding: 9px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
-        .bf-ct-pulse {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #e53e3e;
-            animation: pulse 1s infinite;
-            flex-shrink: 0;
-            box-shadow: 0 0 6px rgba(229,62,62,0.7);
-        }
-        .bf-ct-label {
-            font-size: 0.62rem;
-            color: rgba(229,62,62,0.55);
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
+        .bf-signal-chip-wide { grid-column: span 1; }
+        .bf-signal-label {
+            font-size: 0.57rem;
             font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.42);
+        }
+        .bf-signal-value {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .bf-ct-tool {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #ff6b6b;
+        .bf-signal-tool {
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
-            letter-spacing: 0.03em;
-            text-shadow: 0 0 8px rgba(229,62,62,0.3);
+            color: #ffb4b4;
         }
+        .bf-signal-progress { color: #f8fafc; }
+        .bf-signal-step { color: rgba(255,255,255,0.82); }
         .bf-timeline {
             display: flex;
             flex-direction: column;
-            background: #0d0d0d;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(10,10,12,0.78), rgba(15,15,18,0.92));
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 11px;
             padding: 8px 10px;
             flex: 1;
             min-height: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
         .bf-step {
-            display: flex;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
             align-items: flex-start;
-            gap: 8px;
-            padding: 5px 0;
+            gap: 9px;
+            padding: 7px 0;
         }
         .bf-step + .bf-step {
             border-top: 1px solid rgba(255,255,255,0.04);
@@ -2552,21 +2577,22 @@
         .bf-step { transition: background 0.25s ease; }
         .bf-step-body { flex: 1; min-width: 0; }
         .bf-step-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            line-height: 1.3;
+            font-size: 0.74rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.34;
         }
-        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.85); font-weight: 500; font-size: 0.75rem; line-height: 1.3; }
-        .bf-step.pending-step .bf-step-label { color: var(--text-muted); }
+        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.96); font-weight: 600; font-size: 0.76rem; line-height: 1.34; }
+        .bf-step.pending-step .bf-step-label { color: rgba(255,255,255,0.44); }
         .bf-tool-pill {
             display: inline-flex;
             align-items: center;
-            margin-top: 2px;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 0.62rem;
+            margin-top: 4px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.58rem;
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.02em;
         }
         .bf-tool-pill.tool-read   { background: rgba(99,179,237,0.1);  color: #63b3ed; border: 1px solid rgba(99,179,237,0.2); }
         .bf-tool-pill.tool-image  { background: rgba(154,117,245,0.1); color: #9a75f5; border: 1px solid rgba(154,117,245,0.2); }
@@ -2740,17 +2766,17 @@
         /* ===== Agent Comms ===== */
         /* ── Recent Activity — ultra-slim ───────────────────────────────────── */
         .agent-comms-section {
-            border-top: 1px solid rgba(255,255,255,0.04);
-            padding: 6px 0 2px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 9px 0 2px;
             margin-top: auto;
         }
         .agent-comms-header {
-            font-size: 0.52rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
+            font-size: 0.54rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.2);
-            margin-bottom: 4px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 6px;
         }
         #agent-comms-list {
             display: flex;
@@ -2880,18 +2906,20 @@
         /* ===== Brain feed freshness strip ===== */
         .bf-freshness-row {
             display: flex; align-items: center; gap: 8px;
-            padding: 5px 10px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.04);
-            border-radius: 8px;
-            font-size: 0.72rem;
-            margin-bottom: 6px;
+            padding: 7px 11px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 11px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            font-size: 0.7rem;
+            margin-bottom: 8px;
             flex-shrink: 0;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .card-brain.brain-active .bf-freshness-row {
-            background: rgba(229,62,62,0.06);
-            border-color: rgba(229,62,62,0.2);
+            background: linear-gradient(180deg, rgba(229,62,62,0.08), rgba(229,62,62,0.04));
+            border-color: rgba(229,62,62,0.16);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(229,62,62,0.04);
         }
         .bf-fresh-dot {
             width: 7px; height: 7px; border-radius: 50%;
@@ -3041,7 +3069,14 @@
         }
         body.phone-mode .bf-objective-text {
             font-size: 0.88rem;
-            line-height: 1.4;
+            line-height: 1.35;
+            -webkit-line-clamp: 2;
+        }
+        body.phone-mode .bf-signal-row {
+            grid-template-columns: 1fr 1fr;
+        }
+        body.phone-mode .bf-signal-chip-wide {
+            grid-column: 1 / -1;
         }
         body.phone-mode .brain-title {
             font-size: clamp(0.9rem, 5vw, 1.2rem);
@@ -5262,6 +5297,35 @@
             return 'tool-default';
         }
 
+        function getBrainFeedMetrics(bf) {
+            const steps = Array.isArray(bf?.steps) ? bf.steps : [];
+            const doneCount = steps.filter(step => step && step.status === 'done').length;
+            const activeStep = steps.find(step => step && step.status === 'active') || null;
+            const totalCount = steps.length;
+            const progressText = totalCount ? `${doneCount}/${totalCount} done` : 'Tracking live';
+            const liveStep = sanitizeLabel(activeStep?.label || steps[steps.length - 1]?.label || bf?.objective || 'Working') || 'Working';
+            const currentTool = sanitizeLabel(bf?.currentTool || activeStep?.tool || 'exec') || 'exec';
+            return { doneCount, activeStep, totalCount, progressText, liveStep, currentTool };
+        }
+
+        function renderBrainFeedSignalRow(bf) {
+            const metrics = getBrainFeedMetrics(bf);
+            return `<div class="bf-signal-row">
+                <div class="bf-signal-chip">
+                    <span class="bf-signal-label">Tool</span>
+                    <span class="bf-signal-value bf-signal-tool">${escapeHtml(metrics.currentTool)}</span>
+                </div>
+                <div class="bf-signal-chip">
+                    <span class="bf-signal-label">Flow</span>
+                    <span class="bf-signal-value bf-signal-progress">${escapeHtml(metrics.progressText)}</span>
+                </div>
+                <div class="bf-signal-chip bf-signal-chip-wide">
+                    <span class="bf-signal-label">Live step</span>
+                    <span class="bf-signal-value bf-signal-step" title="${escapeHtml(metrics.liveStep)}">${escapeHtml(metrics.liveStep)}</span>
+                </div>
+            </div>`;
+        }
+
         function renderCombinedBrainFeed(joshBf, jainBf) {
             // J.A.I.N status is now in the unified Activity & Agents log — not here.
             // Only keep brainCard active-state logic for laser/glow effects.
@@ -5287,7 +5351,7 @@
             const isWakingUp = (_prevBfState === 'idle' || _prevBfState === 'done') && newState === 'active';
             const isCompleting = _prevBfState === 'active' && (newState === 'done' || newState === 'idle');
             const objectiveChanged = bf && bf.objective && bf.objective !== _lastBfObjective;
-            const isReceivingMsg = bf && bf.objective && bf.objective.toLowerCase().startsWith('received:');
+            const isReceivingMsg = !!(bf && bf.objective && /^(received:|receiving\b)/i.test(bf.objective));
             const brainCard = brainFeedCard.closest('.card-brain');
             const kioskMode = isKioskMode();
             const phoneMode = isPhoneMode();
@@ -5299,7 +5363,7 @@
             const statusLabel = isActiveBf ? 'ACTIVE · MSG RECEIVED' : stateLabel;
             const statusDotColor = isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)';
             // Update header model badge
-            const modelLabel = (bf && bf.model) ? bf.model : '';
+            const modelLabel = (bf && bf.active && bf.model) ? bf.model : '';
             const modelBadgeEl = document.getElementById('bf-active-model-badge');
             if (modelBadgeEl) {
                 if (modelLabel) { modelBadgeEl.textContent = modelLabel; modelBadgeEl.style.display = ''; }
@@ -5339,16 +5403,10 @@
                         ${freshnessStrip}
                         <div class="bf-container">
                             <div class="bf-objective">
-                                <div class="bf-objective-kicker">Current Objective</div>
-                                <div class="bf-objective-text">${escapeHtml(bf.objective || 'Processing...')}</div>
+                                <div class="bf-objective-kicker">Live Objective</div>
+                                <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(bf.objective || 'Processing...')}</div>
                             </div>
-                            ${bf.currentTool ? `
-                            <div class="bf-current-tool-bar">
-                                <span class="bf-ct-pulse"></span>
-                                <span class="bf-ct-label">Active tool</span>
-                                <span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>
-                                ${updatedTime ? `<span class="bf-msg-time" style="margin-left:auto">${escapeHtml(updatedTime)}</span>` : ''}
-                            </div>` : ''}
+                            ${renderBrainFeedSignalRow(bf)}
                             <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
                         </div>
                     `;
@@ -5379,37 +5437,29 @@
                             objEl.style.transform = 'translateY(4px)';
                             setTimeout(() => {
                                 objEl.textContent = bf.objective || 'Processing...';
+                                objEl.setAttribute('title', bf.objective || 'Processing...');
                                 objEl.style.opacity = '1';
                                 objEl.style.transform = 'translateY(0)';
                             }, 200);
                         }
                     }
 
-                    // 3. Update tool bar smoothly
-                    let toolBar = brainFeedCard.querySelector('.bf-current-tool-bar');
-                    if (bf.currentTool) {
-                        if (!toolBar) {
-                            // Insert before timeline
-                            const timeline = brainFeedCard.querySelector('.bf-timeline');
-                            toolBar = document.createElement('div');
-                            toolBar.className = 'bf-current-tool-bar';
-                            toolBar.style.opacity = '0';
-                            toolBar.style.transition = 'opacity 0.25s ease';
-                            toolBar.innerHTML = `<span class="bf-ct-pulse"></span><span class="bf-ct-label">Active tool</span><span class="bf-ct-tool">${escapeHtml(bf.currentTool)}</span>`;
-                            if (timeline) timeline.before(toolBar);
-                            requestAnimationFrame(() => { toolBar.style.opacity = '1'; });
-                        } else {
-                            const ctEl = toolBar.querySelector('.bf-ct-tool');
-                            if (ctEl && ctEl.textContent !== bf.currentTool) {
-                                ctEl.style.transition = 'opacity 0.15s ease';
-                                ctEl.style.opacity = '0';
-                                setTimeout(() => { ctEl.textContent = bf.currentTool; ctEl.style.opacity = '1'; }, 160);
-                            }
-                        }
-                    } else if (toolBar) {
-                        toolBar.style.transition = 'opacity 0.25s ease';
-                        toolBar.style.opacity = '0';
-                        setTimeout(() => toolBar.remove(), 280);
+                    // 3. Update summary chips smoothly
+                    let signalRow = brainFeedCard.querySelector('.bf-signal-row');
+                    if (!signalRow) {
+                        const objective = brainFeedCard.querySelector('.bf-objective');
+                        objective?.insertAdjacentHTML('afterend', renderBrainFeedSignalRow(bf));
+                        signalRow = brainFeedCard.querySelector('.bf-signal-row');
+                    }
+                    const metrics = getBrainFeedMetrics(bf);
+                    const signalTool = brainFeedCard.querySelector('.bf-signal-tool');
+                    const signalProgress = brainFeedCard.querySelector('.bf-signal-progress');
+                    const signalStep = brainFeedCard.querySelector('.bf-signal-step');
+                    if (signalTool) signalTool.textContent = metrics.currentTool;
+                    if (signalProgress) signalProgress.textContent = metrics.progressText;
+                    if (signalStep) {
+                        signalStep.textContent = metrics.liveStep;
+                        signalStep.setAttribute('title', metrics.liveStep);
                     }
 
                     // 4. Diff-update steps — animate step status changes, slide in new steps

@@ -114,6 +114,7 @@ try:
   bf = json.load(open('$BF_FILE'))
 except:
   pass
+was_active = bool(bf.get('active'))
 bf['active']          = True if '$IS_ACTIVE' == 'true' else False
 bf['objective']       = '$OBJECTIVE'
 bf['status']          = '$STATE'
@@ -123,7 +124,7 @@ bf['model']           = os.environ.get('CURRENT_MODEL', '')
 if '$IS_ACTIVE' == 'true':
     bf['checkedAt'] = '$NOW'
 if '$IS_ACTIVE' == 'true':
-    bf['messageReceived'] = '$NOW'
+    bf['messageReceived'] = bf.get('messageReceived') if was_active and bf.get('messageReceived') else '$NOW'
 else:
     bf['messageReceived'] = bf.get('messageReceived', '$NOW')
 # Only overwrite steps if new steps were provided — preserve on done/idle

@@ -5,19 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Heartbeat checks complete",
+    "objective": "Finalizing Brain Feed redesign",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-05T23:04:52Z",
-    "checkedAt": "2026-04-05T23:04:52Z",
+    "steps": [
+      {
+        "label": "run QA",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "commit locally",
+        "status": "active",
+        "tool": "git"
+      }
+    ],
+    "currentTool": "git",
+    "updatedAt": "2026-04-05T23:19:21Z",
+    "checkedAt": "2026-04-05T23:19:21Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Heartbeat checks complete",
-    "updatedAt": "2026-04-05T23:15:02Z"
+    "context": "Finalizing Brain Feed redesign",
+    "updatedAt": "2026-04-05T23:19:24Z"
   },
   "contextWindow": {
     "usedTokens": 133874,
@@ -57,15 +68,15 @@
     "workspaceDirty": 29,
     "missionControlDirty": 5,
     "recentFiles": [
+      "scripts/finalize_brain_feed_redesign.sh",
+      "scripts/check_mission_control_script.py",
       "mission-control/index.html",
       "mission-control/scripts/bf_push.sh",
       "mission-control/scripts/update_mission_control.py",
-      "scripts/delegate_to_jaimes.sh",
-      "scripts/async_delegate.py",
-      "scripts/context_watchdog.py"
+      "scripts/delegate_to_jaimes.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-05T23:15:08Z"
+    "updatedAt": "2026-04-05T23:19:30Z"
   },
   "modelUsage": {
     "session": 3.054911,
@@ -185,7 +196,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T23:15:11Z",
+    "lastUpdated": "2026-04-05T23:19:33Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -239,18 +250,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T23:15:16Z"
+    "updatedAt": "2026-04-05T23:19:38Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.4,
-      "cpu_user": 13.1,
-      "cpu_sys": 20.34,
-      "load1": 2.85,
-      "load5": 2.88,
-      "load15": 2.92,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 36.6,
+      "cpu_user": 15.72,
+      "cpu_sys": 20.91,
+      "load1": 3.0,
+      "load5": 2.95,
+      "load15": 2.94,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -258,14 +269,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.8,
-      "cpu_user": 4.51,
-      "cpu_sys": 10.32,
-      "load1": 1.78,
-      "load5": 1.96,
-      "load15": 1.98,
+      "cpu_pct": 12.7,
+      "cpu_user": 2.0,
+      "cpu_sys": 10.66,
+      "load1": 1.97,
+      "load5": 1.98,
+      "load15": 1.99,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -274,8 +285,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -289,19 +300,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:15:02Z"
+      "lastChecked": "2026-04-05T23:19:24Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:15:02Z"
+      "lastChecked": "2026-04-05T23:19:24Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T23:15:02Z"
+      "lastChecked": "2026-04-05T23:19:24Z"
     }
   ],
   "crons": [
@@ -714,7 +725,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 59465,
+      "elapsedSecs": 59726,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -722,7 +733,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, mission-control/scripts/bf_push.sh",
+      "label": "Editing: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -743,29 +754,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T23:15:11Z",
+      "time": "2026-04-05T23:19:33Z",
       "event": "Session spend: $3.05"
     },
     {
-      "time": "2026-04-05T23:15:08Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/bf_push.sh"
+      "time": "2026-04-05T23:19:30Z",
+      "event": "Coding: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py"
     },
     {
-      "time": "2026-04-05T23:15:08Z",
+      "time": "2026-04-05T23:19:30Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-05T23:15:02Z",
+      "time": "2026-04-05T23:19:24Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T23:15:02Z",
+      "time": "2026-04-05T23:19:24Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T23:15:02Z",
+      "time": "2026-04-05T23:19:24Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-05T23:15:02Z"
+  "lastUpdated": "2026-04-05T23:19:24Z"
 }
