@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T03:27:50Z",
-  "objective": "Sorare GW4 verify passed \u2014 no card conflicts",
+  "messageReceived": "2026-04-05T03:28:50Z",
+  "objective": "Checking available cards for 2nd Hot Streak",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T03:27:50Z",
-  "checkedAt": "2026-04-05T03:27:50Z",
+  "steps": [
+    {
+      "label": "fetch cards",
+      "status": "active",
+      "tool": "sorare_api"
+    }
+  ],
+  "currentTool": "sorare_api",
+  "updatedAt": "2026-04-05T03:28:50Z",
+  "checkedAt": "2026-04-05T03:28:50Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
