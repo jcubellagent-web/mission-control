@@ -5,19 +5,35 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Heartbeat checks complete",
+    "objective": "Finishing Brain Feed activity drawer",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-05T23:21:09Z",
-    "checkedAt": "2026-04-05T23:21:09Z",
+    "steps": [
+      {
+        "label": "run QA",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "reload dashboard",
+        "status": "done",
+        "tool": "exec"
+      },
+      {
+        "label": "commit locally",
+        "status": "active",
+        "tool": "git"
+      }
+    ],
+    "currentTool": "git",
+    "updatedAt": "2026-04-05T23:48:33Z",
+    "checkedAt": "2026-04-05T23:48:33Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Heartbeat checks complete",
-    "updatedAt": "2026-04-05T23:45:02Z"
+    "context": "Finishing Brain Feed activity drawer",
+    "updatedAt": "2026-04-05T23:48:36Z"
   },
   "contextWindow": {
     "usedTokens": 139386,
@@ -46,7 +62,7 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-05T23:25:12Z",
+    "lastTriggeredAt": "2026-04-05T23:45:13Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
     "usedTokens": 139386,
@@ -55,17 +71,17 @@
   },
   "codingVisibility": {
     "workspaceDirty": 29,
-    "missionControlDirty": 3,
+    "missionControlDirty": 4,
     "recentFiles": [
+      "scripts/finalize_activity_drawer.sh",
+      "mission-control/index.html",
       "scripts/finalize_brain_feed_redesign.sh",
       "scripts/check_mission_control_script.py",
-      "mission-control/index.html",
       "mission-control/scripts/bf_push.sh",
-      "mission-control/scripts/update_mission_control.py",
-      "scripts/delegate_to_jaimes.sh"
+      "mission-control/scripts/update_mission_control.py"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-05T23:45:09Z"
+    "updatedAt": "2026-04-05T23:48:42Z"
   },
   "modelUsage": {
     "session": 3.961193,
@@ -185,7 +201,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T23:45:12Z",
+    "lastUpdated": "2026-04-05T23:48:45Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -239,18 +255,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T23:45:17Z"
+    "updatedAt": "2026-04-05T23:48:50Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.9,
-      "cpu_user": 13.31,
-      "cpu_sys": 20.53,
-      "load1": 4.6,
-      "load5": 3.68,
-      "load15": 3.28,
-      "ram_used_gb": 10.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 37.5,
+      "cpu_user": 16.13,
+      "cpu_sys": 21.36,
+      "load1": 2.65,
+      "load5": 3.3,
+      "load15": 3.21,
+      "ram_used_gb": 11.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -258,14 +274,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 3.49,
-      "cpu_sys": 9.9,
-      "load1": 1.41,
-      "load5": 1.6,
-      "load15": 1.66,
+      "cpu_pct": 16.7,
+      "cpu_user": 4.66,
+      "cpu_sys": 12.0,
+      "load1": 1.93,
+      "load5": 1.68,
+      "load15": 1.67,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -274,8 +290,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -289,19 +305,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:45:02Z"
+      "lastChecked": "2026-04-05T23:48:36Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T23:45:02Z"
+      "lastChecked": "2026-04-05T23:48:36Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T23:45:02Z"
+      "lastChecked": "2026-04-05T23:48:36Z"
     }
   ],
   "crons": [
@@ -714,7 +730,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 61266,
+      "elapsedSecs": 61479,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -722,7 +738,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py",
+      "label": "Editing: scripts/finalize_activity_drawer.sh, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -743,29 +759,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-05T23:45:12Z",
+      "time": "2026-04-05T23:48:45Z",
       "event": "Session spend: $3.96"
     },
     {
-      "time": "2026-04-05T23:45:09Z",
-      "event": "Coding: scripts/finalize_brain_feed_redesign.sh, scripts/check_mission_control_script.py"
+      "time": "2026-04-05T23:48:42Z",
+      "event": "Coding: scripts/finalize_activity_drawer.sh, mission-control/index.html"
     },
     {
-      "time": "2026-04-05T23:45:09Z",
+      "time": "2026-04-05T23:48:42Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-05T23:45:02Z",
+      "time": "2026-04-05T23:48:36Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T23:45:02Z",
+      "time": "2026-04-05T23:48:36Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T23:45:02Z",
+      "time": "2026-04-05T23:48:36Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-05T23:45:02Z"
+  "lastUpdated": "2026-04-05T23:48:36Z"
 }

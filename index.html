@@ -2236,6 +2236,9 @@
             display: flex;
             flex-direction: column;
         }
+        .card-brain.activity-expanded #brain-feed-card {
+            min-height: 220px;
+        }
         .bf-idle-container {
             flex: 1;
             min-height: 0;
@@ -2769,6 +2772,27 @@
             border-top: 1px solid rgba(255,255,255,0.05);
             padding: 9px 0 2px;
             margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 168px;
+            transition: max-height 0.26s ease, padding 0.22s ease;
+            overflow: hidden;
+        }
+        .card-brain.activity-expanded .agent-comms-section {
+            max-height: 48%;
+        }
+        .agent-comms-toggle {
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
         }
         .agent-comms-header {
             font-size: 0.54rem;
@@ -2776,7 +2800,29 @@
             letter-spacing: 0.16em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.3);
-            margin-bottom: 6px;
+            margin: 0;
+        }
+        .agent-comms-toggle-meta {
+            font-size: 0.54rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.34);
+        }
+        .agent-comms-chevron {
+            font-size: 0.92rem;
+            color: rgba(255,255,255,0.42);
+            transform: rotate(180deg);
+            transition: transform 0.22s ease, color 0.22s ease;
+        }
+        .card-brain.activity-expanded .agent-comms-chevron {
+            transform: rotate(0deg);
+            color: rgba(255,255,255,0.75);
+        }
+        #unified-activity-log {
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 2px;
         }
         #agent-comms-list {
             display: flex;
@@ -3391,7 +3437,11 @@
                     <div id="brain-feed-card"></div>
                     <!-- Activity & Agents — unified log -->
                     <div class="agent-comms-section">
-                        <div class="agent-comms-header">Activity &amp; Agents</div>
+                        <button class="agent-comms-toggle" id="agent-comms-toggle" type="button" onclick="toggleBrainActivityDrawer()" aria-expanded="false">
+                            <span class="agent-comms-header">Activity &amp; Agents</span>
+                            <span class="agent-comms-toggle-meta" id="agent-comms-toggle-meta">expand</span>
+                            <span class="agent-comms-chevron">⌃</span>
+                        </button>
                         <div id="unified-activity-log"></div>
                     </div>
                 </div>
@@ -4060,42 +4110,50 @@
         let _uaJoshBf = null;
         let _uaJainBf = null;
 
+        function isBrainActivityExpanded() {
+            return !!document.querySelector('.card-brain.activity-expanded');
+        }
+
+        function syncBrainActivityDrawer() {
+            const brainCard = document.querySelector('.card-brain');
+            const toggle = document.getElementById('agent-comms-toggle');
+            const meta = document.getElementById('agent-comms-toggle-meta');
+            if (!brainCard || !toggle || !meta) return;
+            const expanded = brainCard.classList.contains('activity-expanded');
+            toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            meta.textContent = expanded ? 'collapse' : 'expand';
+        }
+
+        function toggleBrainActivityDrawer(force) {
+            const brainCard = document.querySelector('.card-brain');
+            if (!brainCard) return;
+            const expanded = typeof force === 'boolean' ? force : !brainCard.classList.contains('activity-expanded');
+            brainCard.classList.toggle('activity-expanded', expanded);
+            try { localStorage.setItem('mc_brain_activity_expanded', expanded ? '1' : '0'); } catch(e) {}
+            syncBrainActivityDrawer();
+            renderUnifiedActivity();
+        }
+
+        function restoreBrainActivityDrawer() {
+            const brainCard = document.querySelector('.card-brain');
+            if (!brainCard) return;
+            let expanded = false;
+            try { expanded = localStorage.getItem('mc_brain_activity_expanded') === '1'; } catch(e) {}
+            brainCard.classList.toggle('activity-expanded', expanded);
+            syncBrainActivityDrawer();
+        }
+
         function renderUnifiedActivity() {
             const el = document.getElementById('unified-activity-log');
             if (!el) return;
-            const items = [];
+            const summaryItems = [];
+            const recentItems = [];
 
-            // 1. Active subagents first
-            const running = _uaAgents.filter(a => a.status === 'running');
-            const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
-            for (const a of running) {
-                items.push({
-                    agentClass: a.agentClass || 'agent',
-                    agentLabel: a.agentLabel || 'AGENT',
-                    dot: 'active',
-                    msg: a.label || 'Running…',
-                    model: a.model || '',
-                    tool: a.tool || '',
-                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'running',
-                });
-            }
-            for (const a of recentAgents) {
-                items.push({
-                    agentClass: a.agentClass || 'agent',
-                    agentLabel: a.agentLabel || 'AGENT',
-                    dot: 'done',
-                    msg: a.label || 'Done',
-                    model: a.model || '',
-                    tool: a.tool || '',
-                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
-                });
-            }
-
-            // 2. JOSH 2.0 brain feed state
+            // 1. Always pin primary agent states first so the live feed stays legible.
             if (_uaJoshBf) {
                 const bf = _uaJoshBf;
                 const isActive = bf.active === true;
-                items.push({
+                summaryItems.push({
                     agentClass: 'josh',
                     agentLabel: 'JOSH 2.0',
                     dot: isActive ? 'active' : 'idle',
@@ -4105,12 +4163,10 @@
                     ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
                 });
             }
-
-            // 3. J.A.I.N brain feed state
             if (_uaJainBf) {
                 const bf = _uaJainBf;
                 const isActive = bf.active === true;
-                items.push({
+                summaryItems.push({
                     agentClass: 'jain',
                     agentLabel: 'J.A.I.N',
                     dot: isActive ? 'active' : 'idle',
@@ -4120,12 +4176,10 @@
                     ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
                 });
             }
-
-            // 4. JAIMES brain feed state
             if (_uaJaimesBf) {
                 const bf = _uaJaimesBf;
                 const isActive = bf.active === true;
-                items.push({
+                summaryItems.push({
                     agentClass: 'jaimes',
                     agentLabel: 'JAIMES',
                     dot: isActive ? 'active' : 'idle',
@@ -4136,15 +4190,41 @@
                 });
             }
 
-            // 5. Recent agent comms (filtered, max 3)
+            // 2. Then show active support agents (watchdog, coding visibility, agent bus, etc.)
+            const running = _uaAgents.filter(a => a.status === 'running');
+            const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
+            for (const a of running.slice(0, 2)) {
+                summaryItems.push({
+                    agentClass: a.agentClass || 'agent',
+                    agentLabel: a.agentLabel || 'AGENT',
+                    dot: 'active',
+                    msg: a.label || 'Running…',
+                    model: a.model || '',
+                    tool: a.tool || '',
+                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'running',
+                });
+            }
+            for (const a of recentAgents) {
+                recentItems.push({
+                    agentClass: a.agentClass || 'agent',
+                    agentLabel: a.agentLabel || 'AGENT',
+                    dot: 'done',
+                    msg: a.label || 'Done',
+                    model: a.model || '',
+                    tool: a.tool || '',
+                    ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
+                });
+            }
+
+            // 3. Finally add recent comms when the drawer is expanded.
             const filteredComms = (_uaComms || []).filter(e => {
                 const msg = (e.message || '').toLowerCase();
                 return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
-            }).slice(0, 3);
+            }).slice(0, 4);
             for (const e of filteredComms) {
                 const dir = (e.direction || '').toLowerCase();
                 const agent = (e.agent || (dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
-                items.push({
+                recentItems.push({
                     agentClass: agent === 'jain' ? 'jain' : 'josh',
                     agentLabel: agent === 'jain' ? 'J.A.I.N' : 'JOSH 2.0',
                     dot: e.status === 'active' ? 'active' : 'done',
@@ -4155,12 +4235,18 @@
                 });
             }
 
+            const expanded = isBrainActivityExpanded();
+            const items = expanded ? [...summaryItems, ...recentItems] : summaryItems;
+            const maxItems = expanded ? 10 : 5;
+
+            syncBrainActivityDrawer();
+
             if (!items.length) {
                 el.innerHTML = '<div class="ua-empty">No recent activity.</div>';
                 return;
             }
 
-            el.innerHTML = `<div class="ua-log">${items.slice(0, 6).map(item => `
+            el.innerHTML = `<div class="ua-log">${items.slice(0, maxItems).map(item => `
                 <div class="ua-item">
                     <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
                     <span class="ua-dot ${escapeHtml(item.dot)}"></span>
@@ -5227,6 +5313,7 @@
 
         function initDashboard() {
             initAirpointState();
+            restoreBrainActivityDrawer();
             fetchData();
             // ── Brain feed: SUPABASE IS THE SINGLE SOURCE OF TRUTH ──
             // One initial REST fetch to populate immediately, then WebSocket takes over.
