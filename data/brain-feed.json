@@ -1,12 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T05:44:15Z",
-  "objective": "6/7 controls built and live \u2014 context watch pending",
+  "messageReceived": "2026-04-05T05:44:25Z",
+  "objective": "Checking macOS permissions and approvals",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T05:44:15Z",
-  "checkedAt": "2026-04-05T05:44:15Z",
+  "steps": [
+    {
+      "label": "audit",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T05:44:25Z",
+  "checkedAt": "2026-04-05T05:44:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
