@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T19:24:26Z",
-  "objective": "Fixed JAIMES Sorare ML bot bootstrap path",
+  "messageReceived": "2026-04-05T19:26:03Z",
+  "objective": "Starting real JAIMES Sorare ML build",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T19:24:26Z",
-  "checkedAt": "2026-04-05T19:24:26Z",
+  "steps": [
+    {
+      "label": "spawn worker",
+      "status": "done",
+      "tool": "sessions"
+    },
+    {
+      "label": "monitor",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T19:26:03Z",
+  "checkedAt": "2026-04-05T19:26:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
