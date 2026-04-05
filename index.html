@@ -934,9 +934,9 @@
         .mu-prov-w { font-size: 0.65rem; color: rgba(255,255,255,0.75); }
         .mu-prov-sep { font-size: 0.55rem; color: rgba(255,255,255,0.25); }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
-        .mu-compact-row { display: grid; grid-template-columns: 6px 1fr auto 55px auto; align-items: center; gap: 5px; padding: 2px 0; }
+        .mu-compact-row { display: grid; grid-template-columns: 6px 1fr 50px 50px; align-items: center; gap: 5px; padding: 2px 0; }
         .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-        .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
         .mu-compact-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
         .mu-compact-cost { font-size: 0.6rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
@@ -1473,7 +1473,7 @@
         .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
-        .system-health-body { display: flex; flex-direction: column; gap: 6px; }
+        .system-health-body { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
         .sh-agent-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
@@ -1493,7 +1493,7 @@
         .sh-mv.err { color: #f87171; }
         /* Left panel 50/50 — intel highlights and model card equal height */
         .kiosk-bottom-left .card-intel-highlights { flex: 1; min-height: 0; }
-        .kiosk-bottom-left .card-model-health { flex: 1; min-height: 0; overflow-y: auto; }
+        .kiosk-bottom-left .card-model-health { flex: 1; min-height: 0; overflow: hidden; }
 
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
@@ -2161,7 +2161,8 @@
         body.kiosk-mode #jain-brain-feed-card,
         body.kiosk-mode #model-usage-card {
             min-height: 0;
-            overflow: visible;
+            overflow-y: auto;
+            max-height: 45%;
             padding-right: 4px;
         }
         body.kiosk-mode #events-list,
