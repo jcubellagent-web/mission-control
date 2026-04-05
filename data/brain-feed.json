@@ -1,18 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T15:51:43Z",
-  "objective": "Starting session startup",
+  "messageReceived": "2026-04-05T15:51:58Z",
+  "objective": "Refreshing startup context",
   "status": "active",
   "steps": [
     {
-      "label": "load context",
+      "label": "read memory",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "check status",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-04-05T15:51:43Z",
-  "checkedAt": "2026-04-05T15:51:43Z",
+  "updatedAt": "2026-04-05T15:51:58Z",
+  "checkedAt": "2026-04-05T15:51:58Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
