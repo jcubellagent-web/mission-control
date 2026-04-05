@@ -1,12 +1,23 @@
 {
   "active": true,
-  "messageReceived": "2026-04-05T16:01:54Z",
-  "objective": "Synced memory backup to J.A.I.N",
+  "messageReceived": "2026-04-05T16:20:05Z",
+  "objective": "Heartbeat: checking Mission Control",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-05T16:01:54Z",
-  "checkedAt": "2026-04-05T16:01:54Z",
+  "steps": [
+    {
+      "label": "read heartbeat",
+      "status": "done",
+      "tool": "read"
+    },
+    {
+      "label": "check mission-control",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-05T16:20:05Z",
+  "checkedAt": "2026-04-05T16:20:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
