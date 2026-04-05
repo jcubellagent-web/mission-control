@@ -4,26 +4,26 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-05T03:49:47Z",
-    "objective": "Fixing items 2, 3, 4 + MoltWorld cron",
+    "messageReceived": "2026-04-05T03:51:48Z",
+    "objective": "Setting up JAIMES fantasy ML weekly loop",
     "status": "active",
     "steps": [
       {
-        "label": "exec",
+        "label": "delegate",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-05T03:49:47Z",
-    "checkedAt": "2026-04-05T03:49:47Z",
+    "updatedAt": "2026-04-05T03:51:48Z",
+    "checkedAt": "2026-04-05T03:51:48Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixing items 2, 3, 4 + MoltWorld cron",
-    "updatedAt": "2026-04-05T03:50:02Z"
+    "context": "Setting up JAIMES fantasy ML weekly loop",
+    "updatedAt": "2026-04-05T03:55:02Z"
   },
   "contextWindow": {
     "usedTokens": 115170,
@@ -137,7 +137,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-05T03:50:05Z",
+    "lastUpdated": "2026-04-05T03:55:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -191,18 +191,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-05T03:50:11Z"
+    "updatedAt": "2026-04-05T03:55:10Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 51.5,
-      "cpu_user": 28.3,
-      "cpu_sys": 23.41,
-      "load1": 2.73,
-      "load5": 2.77,
-      "load15": 4.64,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 24.6,
+      "cpu_user": 10.62,
+      "cpu_sys": 13.99,
+      "load1": 2.48,
+      "load5": 2.5,
+      "load15": 3.96,
+      "ram_used_gb": 11.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "116Gi",
@@ -210,14 +210,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.7,
-      "cpu_user": 3.92,
-      "cpu_sys": 9.8,
-      "load1": 2.09,
-      "load5": 1.83,
-      "load15": 1.82,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 16.0,
+      "cpu_pct": 12.6,
+      "cpu_user": 2.64,
+      "cpu_sys": 9.93,
+      "load1": 1.72,
+      "load5": 1.91,
+      "load15": 1.86,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -241,19 +241,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T03:50:02Z"
+      "lastChecked": "2026-04-05T03:55:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-05T03:50:02Z"
+      "lastChecked": "2026-04-05T03:55:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-05T03:50:02Z"
+      "lastChecked": "2026-04-05T03:55:02Z"
     }
   ],
   "crons": [
@@ -393,7 +393,7 @@
       "description": "Sends weekly fantasy baseball recap to Josh via Telegram",
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -663,25 +663,25 @@
   "activeAgents": [],
   "recentActivity": [
     {
-      "time": "2026-04-05T03:50:05Z",
+      "time": "2026-04-05T03:55:05Z",
       "event": "Session spend: $5.28"
     },
     {
-      "time": "2026-04-05T03:50:02Z",
+      "time": "2026-04-05T03:55:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-05T03:50:02Z",
+      "time": "2026-04-05T03:55:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-05T03:50:02Z",
+      "time": "2026-04-05T03:55:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-05T03:50:02Z",
+      "time": "2026-04-05T03:55:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-05T03:50:02Z"
+  "lastUpdated": "2026-04-05T03:55:02Z"
 }
