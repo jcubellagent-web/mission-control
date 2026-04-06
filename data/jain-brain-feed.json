@@ -1,10 +1,17 @@
 {
-  "active": false,
-  "objective": "Standby",
-  "status": "idle",
-  "updatedAt": "2026-04-06T03:02:12Z",
+  "active": true,
+  "objective": "Intel Feed: FULL brief",
+  "status": "active",
+  "updatedAt": "2026-04-06T11:15:01Z",
   "model": "GPT-5.1",
-  "messageReceived": "2026-04-06T03:02:11Z",
-  "steps": [],
-  "currentTool": ""
+  "messageReceived": "2026-04-06T11:15:01Z",
+  "steps": [
+    {
+      "label": "Starting",
+      "status": "active",
+      "tool": "intelligence_feed"
+    }
+  ],
+  "currentTool": "intelligence_feed",
+  "checkedAt": "2026-04-06T11:15:01Z"
 }
