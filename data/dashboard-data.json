@@ -5,30 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Auditing fantasy jobs + Google Sheets for week 2",
+    "objective": "Fantasy pipeline wired \u2014 Google Sheet live, crons fixed, week 1 W logged",
     "status": "active",
-    "steps": [
-      {
-        "label": "ssh jain",
-        "status": "done",
-        "tool": "exec"
-      },
-      {
-        "label": "gog",
-        "status": "active",
-        "tool": "api"
-      }
-    ],
-    "currentTool": "api",
-    "updatedAt": "2026-04-06T03:13:52Z",
-    "checkedAt": "2026-04-06T03:13:52Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-06T03:20:02Z",
+    "checkedAt": "2026-04-06T03:20:02Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Auditing fantasy jobs + Google Sheets for week 2",
-    "updatedAt": "2026-04-06T03:15:02Z"
+    "context": "Fantasy pipeline wired \u2014 Google Sheet live, crons fixed, week 1 W logged",
+    "updatedAt": "2026-04-06T03:20:02Z"
   },
   "contextWindow": {
     "usedTokens": 66605,
@@ -68,21 +57,22 @@
     "workspaceDirty": 29,
     "missionControlDirty": 5,
     "recentFiles": [
+      "scripts/fantasy_sheets_updater.py",
       "scripts/jaimes_brain_feed_poller.py"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-06T03:15:08Z"
+    "updatedAt": "2026-04-06T03:20:08Z"
   },
   "modelUsage": {
-    "session": 1.860944,
-    "daily": 74.873854,
+    "session": 2.685355,
+    "daily": 75.698265,
     "weekly": 99.707915,
     "monthly": 75.656702,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 64.61310431
+        "cost": 65.43751601
       },
       {
         "name": "openai/gpt-5.4",
@@ -109,12 +99,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 84476,
-        "outputTokens": 180890,
-        "totalTokens": 265366,
-        "sessionCost": 64.61310431,
-        "dailyCost": 57.42147471,
-        "weeklyCost": 64.61310431,
+        "inputTokens": 84486,
+        "outputTokens": 187362,
+        "totalTokens": 271848,
+        "sessionCost": 65.43751601,
+        "dailyCost": 58.24588641,
+        "weeklyCost": 65.43751601,
         "sessions": 25,
         "isGemini": false,
         "costEstimated": false
@@ -181,7 +171,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-06T03:15:12Z",
+    "lastUpdated": "2026-04-06T03:20:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -210,8 +200,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 74.873854,
-      "total": 84.613669,
+      "daily": 75.698265,
+      "total": 85.438081,
       "monthly": 76.874157
     },
     "weeklyRunRate": {
@@ -235,18 +225,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-06T03:15:17Z"
+    "updatedAt": "2026-04-06T03:20:16Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.5,
-      "cpu_user": 14.9,
-      "cpu_sys": 20.37,
-      "load1": 3.32,
-      "load5": 3.32,
-      "load15": 3.23,
+      "cpu_pct": 38.3,
+      "cpu_user": 17.92,
+      "cpu_sys": 21.0,
+      "load1": 3.12,
+      "load5": 3.08,
+      "load15": 3.14,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "115Gi",
@@ -254,14 +244,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.5,
-      "cpu_user": 2.51,
-      "cpu_sys": 9.43,
+      "cpu_pct": 11.2,
+      "cpu_user": 2.9,
+      "cpu_sys": 9.9,
       "load1": 1.71,
-      "load5": 1.83,
-      "load15": 1.82,
+      "load5": 1.77,
+      "load15": 1.79,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -285,19 +275,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T03:15:02Z"
+      "lastChecked": "2026-04-06T03:20:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T03:15:02Z"
+      "lastChecked": "2026-04-06T03:20:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-06T03:15:02Z"
+      "lastChecked": "2026-04-06T03:20:02Z"
     }
   ],
   "crons": [
@@ -337,7 +327,7 @@
       "description": "Reviews starting lineup, flags IL players in active slots",
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -347,7 +337,7 @@
       "description": "Checks for injuries before Monday lineup lock \u2014 runs 15 min before lineup check",
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -357,7 +347,7 @@
       "description": "Scans top free agents and recommends add/drop moves",
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "errors": 0,
       "lastError": null
     },
@@ -712,7 +702,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 73866,
+      "elapsedSecs": 74166,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -720,7 +710,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/jaimes_brain_feed_poller.py",
+      "label": "Editing: scripts/fantasy_sheets_updater.py, scripts/jaimes_brain_feed_poller.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -741,29 +731,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-06T03:15:12Z",
-      "event": "Session spend: $1.86"
+      "time": "2026-04-06T03:20:11Z",
+      "event": "Session spend: $2.69"
     },
     {
-      "time": "2026-04-06T03:15:08Z",
-      "event": "Coding: scripts/jaimes_brain_feed_poller.py"
+      "time": "2026-04-06T03:20:08Z",
+      "event": "Coding: scripts/fantasy_sheets_updater.py, scripts/jaimes_brain_feed_poller.py"
     },
     {
-      "time": "2026-04-06T03:15:08Z",
+      "time": "2026-04-06T03:20:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-06T03:15:02Z",
+      "time": "2026-04-06T03:20:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-06T03:15:02Z",
+      "time": "2026-04-06T03:20:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-06T03:15:02Z",
+      "time": "2026-04-06T03:20:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-06T03:15:02Z"
+  "lastUpdated": "2026-04-06T03:20:02Z"
 }
