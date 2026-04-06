@@ -1161,12 +1161,24 @@
         /* Hide desktop-only header elements */
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
-        body.phone-mode #refresh-btn,
         body.phone-mode #airpoint-toggle,
         body.phone-mode .connection-status,
-        body.phone-mode .header-status,
-        body.phone-mode .last-updated,
-        body.phone-mode #night-mode-btn { display: none !important; }
+        body.phone-mode .last-updated { display: none !important; }
+        /* Show header-status but compact — only night + refresh buttons visible */
+        body.phone-mode .header-status { display: flex; align-items: center; gap: 4px; }
+        body.phone-mode .nm-text,
+        body.phone-mode .rb-text { display: none !important; }
+        body.phone-mode #night-mode-btn {
+            padding: 6px 9px; font-size: 15px; line-height: 1;
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: inherit; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body.phone-mode #refresh-btn {
+            padding: 6px 9px; min-width: 0; border-radius: 8px;
+        }
+        body.phone-mode #refresh-btn .icon,
+        body.phone-mode #refresh-btn .spinner { font-size: 15px; }
 
         /* ── Card base ───────────────────────────────── */
         @keyframes pm-fadein {
@@ -1910,7 +1922,6 @@
             transition: background 0.15s;
         }
         #night-mode-btn:hover { background: rgba(180,0,0,0.1); }
-        body.phone-mode #night-mode-btn { display: none; }
 
         .intel-ticker-wrap {
             overflow: hidden;
@@ -3072,8 +3083,7 @@
             gap: 8px !important;
         }
         body.phone-mode .card-brain,
-        body.phone-mode .card-jobs,
-        body.phone-mode .card-model {
+        body.phone-mode .card-jobs {
             display: flex !important;
             flex-direction: column;
             margin: 0 8px;
@@ -3172,8 +3182,57 @@
         body.phone-mode .mu-source-tag { font-size: 0.56rem; padding: 1px 5px; }
         body.phone-mode .mu-footer { font-size: 0.6rem; margin-top: 6px; }
 
-        /* Phone-mode: hide mobile cost pill (redundant, model card does it) */
+        /* Phone-mode: hide mobile cost pill (replaced by pm-model-pill) */
         body.phone-mode #mobile-cost-pill { display: none !important; }
+
+        /* ── Collapsible model usage pill ─────────────────────────────── */
+        /* Hidden on desktop/kiosk — only shows in phone-mode */
+        #pm-model-pill { display: none; }
+        body.phone-mode #pm-model-pill {
+            display: block;
+            margin: 0 14px 10px;
+            background: rgba(14, 16, 26, 0.92);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 14px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        body.phone-mode .pm-pill-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.12s;
+        }
+        body.phone-mode .pm-pill-bar:active { background: rgba(255,255,255,0.04); }
+        body.phone-mode .pm-pill-icon { font-size: 13px; flex-shrink: 0; }
+        body.phone-mode .pm-pill-today {
+            font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.9); flex-shrink: 0;
+        }
+        body.phone-mode .pm-pill-today-val { color: #34d399; }
+        body.phone-mode .pm-pill-model-name {
+            font-size: 0.6rem; color: rgba(255,255,255,0.3);
+            flex: 1; text-align: right;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            padding-right: 4px;
+        }
+        body.phone-mode .pm-pill-chevron {
+            font-size: 1.1rem; color: rgba(255,255,255,0.2);
+            transition: transform 0.22s cubic-bezier(0.16,1,0.3,1);
+            flex-shrink: 0; line-height: 1;
+        }
+        body.phone-mode #pm-model-pill.expanded .pm-pill-chevron { transform: rotate(90deg); }
+        body.phone-mode .pm-pill-body {
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 12px 14px 14px;
+            overflow-y: auto;
+            max-height: 65vh;
+            -webkit-overflow-scrolling: touch;
+        }
 
         /* ── Brain active laser — phone simplified ── */
         body.phone-mode .card-brain.brain-active {
@@ -3376,11 +3435,11 @@
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
                 <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
-                <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙 Night</button>
+                <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙<span class="nm-text"> Night</span></button>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
                     <span class="spinner">↻</span>
-                    Update
+                    <span class="rb-text">Update</span>
                 </button>
                 <div class="connection-status" id="connection-status">
                     <span class="status-dot"></span>
@@ -3399,6 +3458,17 @@
         <div id="phone-status-strip">
             <span id="phone-status-dot"></span>
             <span id="phone-freshness-text">loading…</span>
+        </div>
+
+        <!-- Phone-only: collapsible model usage pill -->
+        <div id="pm-model-pill" class="pm-model-pill">
+            <div class="pm-pill-bar" onclick="togglePmModelPill()">
+                <span class="pm-pill-icon">💰</span>
+                <span class="pm-pill-today"><span class="pm-pill-today-val" id="pm-pill-cost">$0.00</span> today</span>
+                <span class="pm-pill-model-name" id="pm-pill-model"></span>
+                <span class="pm-pill-chevron" id="pm-pill-chevron">›</span>
+            </div>
+            <div class="pm-pill-body" id="pm-pill-body" style="display:none"></div>
         </div>
 
         <div class="alert-banner" id="action-required">
@@ -5233,6 +5303,36 @@
             sessionEl.style.color = costColor(sv);
             dailyEl.textContent   = fmtCost(dv);
             dailyEl.style.color   = costColor(dv);
+            // Sync collapsible model pill
+            const pillCost = document.getElementById('pm-pill-cost');
+            if (pillCost) { pillCost.textContent = fmtCost(dv); pillCost.style.color = costColor(dv); }
+        }
+
+        function updatePmPillModel(modelRaw) {
+            const el = document.getElementById('pm-pill-model');
+            if (!el || !modelRaw) return;
+            const MAP = {
+                'claude-sonnet-4-6':'Sonnet 4.6','claude-sonnet-4-5':'Sonnet 4.5',
+                'claude-haiku-4-5':'Haiku 4.5','claude-haiku-3-5':'Haiku 3.5',
+                'gpt-4.1':'GPT-4.1','gpt-4o':'GPT-4o','gpt-4o-mini':'GPT-4o mini',
+                'o3':'o3','o4-mini':'o4-mini','gemini-2.5-flash':'Gemini 2.5 Flash',
+            };
+            const n = modelRaw.replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '')
+                              .replace(/\s*\(BYOK\)/i, '').trim().toLowerCase();
+            el.textContent = MAP[n] || n;
+        }
+
+        function togglePmModelPill() {
+            const pill = document.getElementById('pm-model-pill');
+            const body = document.getElementById('pm-pill-body');
+            if (!pill || !body) return;
+            const isOpen = pill.classList.toggle('expanded');
+            body.style.display = isOpen ? 'block' : 'none';
+            if (isOpen) {
+                // Mirror content from the hidden model-usage-card
+                const src = document.getElementById('model-usage-card');
+                if (src && src.innerHTML.trim()) body.innerHTML = src.innerHTML;
+            }
         }
 
         // ── Supabase Realtime brain feed subscription ──────────────────────────
@@ -6033,6 +6133,8 @@
 
                 const activeModelRaw = data.contextWindow?.model || '';
                 const activeModelDisp = activeModelRaw ? modelDisplayName(activeModelRaw) : '';
+                // Keep pill model name in sync
+                if (activeModelRaw) updatePmPillModel(activeModelRaw);
 
                 // ── Weekly Run Rate banner ──
                 const wrr = mu.weeklyRunRate || {};
