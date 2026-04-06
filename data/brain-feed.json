@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Reviewed Molty prompt + integration status update",
+  "objective": "Enabling dreaming via docs",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-06T04:06:15Z",
-  "checkedAt": "2026-04-06T04:06:15Z",
+  "steps": [
+    {
+      "label": "web_fetch",
+      "status": "active",
+      "tool": "openclaw_dreaming_docs"
+    }
+  ],
+  "currentTool": "openclaw_dreaming_docs",
+  "updatedAt": "2026-04-06T04:06:47Z",
+  "checkedAt": "2026-04-06T04:06:47Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
