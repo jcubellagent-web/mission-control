@@ -1,12 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Sent louder Morgan Freeman style Sneedfest at -6 LUFS",
+  "objective": "Switching to American voice Bill + fixing consistent loudness",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-06T02:28:41Z",
-  "checkedAt": "2026-04-06T02:28:41Z",
+  "steps": [
+    {
+      "label": "elevenlabs tts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "ffmpeg",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-06T02:35:38Z",
+  "checkedAt": "2026-04-06T02:35:38Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
