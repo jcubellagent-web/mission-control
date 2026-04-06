@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Fixing Lumiere agent session issue",
+    "objective": "Re-enabling Tailscale Serve for Lumiere",
     "status": "active",
     "steps": [
       {
-        "label": "check config",
+        "label": "config",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-06T05:09:00Z",
-    "checkedAt": "2026-04-06T05:09:00Z",
+    "updatedAt": "2026-04-06T05:14:40Z",
+    "checkedAt": "2026-04-06T05:14:40Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixing Lumiere agent session issue",
-    "updatedAt": "2026-04-06T05:10:02Z"
+    "context": "Re-enabling Tailscale Serve for Lumiere",
+    "updatedAt": "2026-04-06T05:15:01Z"
   },
   "contextWindow": {
-    "usedTokens": 74770,
+    "usedTokens": 80128,
     "limitTokens": 1000000,
-    "pct": 0.0748,
+    "pct": 0.0801,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
@@ -70,18 +70,18 @@
       "scripts/jaimes_brain_feed_poller.py"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-06T05:10:09Z"
+    "updatedAt": "2026-04-06T05:15:08Z"
   },
   "modelUsage": {
-    "session": 9.183113,
-    "daily": 15.876454,
+    "session": 9.559158,
+    "daily": 16.2525,
     "weekly": 93.417402,
     "monthly": 169.074104,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 46.198939110000005
+        "cost": 46.57498506
       },
       {
         "name": "gpt-5.3-codex",
@@ -108,12 +108,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 15,
-        "outputTokens": 462,
-        "totalTokens": 477,
-        "sessionCost": 46.198939110000005,
-        "dailyCost": 15.876454400000004,
-        "weeklyCost": 46.198939110000005,
+        "inputTokens": 17,
+        "outputTokens": 960,
+        "totalTokens": 977,
+        "sessionCost": 46.57498506,
+        "dailyCost": 16.252500350000002,
+        "weeklyCost": 46.57498506,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -164,7 +164,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-06T05:10:12Z",
+    "lastUpdated": "2026-04-06T05:15:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -193,8 +193,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 15.885014,
-      "total": 47.567555,
+      "daily": 16.26106,
+      "total": 47.943601,
       "monthly": 170.300119
     },
     "weeklyRunRate": {
@@ -218,18 +218,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-06T05:10:17Z"
+    "updatedAt": "2026-04-06T05:15:16Z"
   },
   "machineHealth": {
     "josh": {
       "cpu_pct": 34.6,
-      "cpu_user": 14.1,
-      "cpu_sys": 20.6,
-      "load1": 3.34,
-      "load5": 3.28,
-      "load15": 3.21,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.1,
+      "cpu_user": 13.92,
+      "cpu_sys": 20.67,
+      "load1": 3.42,
+      "load5": 3.5,
+      "load15": 3.34,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "114Gi",
@@ -237,14 +237,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.4,
-      "cpu_user": 3.52,
-      "cpu_sys": 9.85,
-      "load1": 1.77,
-      "load5": 1.83,
-      "load15": 1.82,
+      "cpu_pct": 13.8,
+      "cpu_user": 4.82,
+      "cpu_sys": 8.96,
+      "load1": 2.09,
+      "load5": 1.87,
+      "load15": 1.83,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -268,19 +268,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T05:10:02Z"
+      "lastChecked": "2026-04-06T05:15:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T05:10:02Z"
+      "lastChecked": "2026-04-06T05:15:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-06T05:10:02Z"
+      "lastChecked": "2026-04-06T05:15:01Z"
     }
   ],
   "crons": [
@@ -695,7 +695,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 80766,
+      "elapsedSecs": 81065,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -724,29 +724,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-06T05:10:12Z",
-      "event": "Session spend: $9.18"
+      "time": "2026-04-06T05:15:11Z",
+      "event": "Session spend: $9.56"
     },
     {
-      "time": "2026-04-06T05:10:09Z",
+      "time": "2026-04-06T05:15:08Z",
       "event": "Coding: mission-control/scripts/bf_plan.sh, mission-control/index.html"
     },
     {
-      "time": "2026-04-06T05:10:09Z",
+      "time": "2026-04-06T05:15:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-06T05:10:02Z",
+      "time": "2026-04-06T05:15:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-06T05:10:02Z",
+      "time": "2026-04-06T05:15:01Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-06T05:10:02Z",
+      "time": "2026-04-06T05:15:01Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-06T05:10:02Z"
+  "lastUpdated": "2026-04-06T05:15:01Z"
 }
