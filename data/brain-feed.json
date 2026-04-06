@@ -1,18 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Checking best ElevenLabs models",
+  "objective": "Regenerating with Eleven Multilingual v2 - best quality",
   "status": "active",
   "steps": [
     {
-      "label": "elevenlabs api",
+      "label": "elevenlabs tts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "ffmpeg",
       "status": "active",
       "tool": "exec"
     }
   ],
   "currentTool": "exec",
-  "updatedAt": "2026-04-06T01:27:21Z",
-  "checkedAt": "2026-04-06T01:27:21Z",
+  "updatedAt": "2026-04-06T01:27:33Z",
+  "checkedAt": "2026-04-06T01:27:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
