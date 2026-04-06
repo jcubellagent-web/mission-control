@@ -5,14 +5,9 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Checking Sorare Google Sheets setup",
+    "objective": "Updating fantasy lineup check schedule",
     "status": "active",
     "steps": [
-      {
-        "label": "gog",
-        "status": "done",
-        "tool": "api"
-      },
       {
         "label": "ssh jain",
         "status": "active",
@@ -20,20 +15,20 @@
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-06T03:20:58Z",
-    "checkedAt": "2026-04-06T03:20:58Z",
+    "updatedAt": "2026-04-06T03:29:36Z",
+    "checkedAt": "2026-04-06T03:29:36Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Checking Sorare Google Sheets setup",
-    "updatedAt": "2026-04-06T03:25:02Z"
+    "context": "Updating fantasy lineup check schedule",
+    "updatedAt": "2026-04-06T03:30:02Z"
   },
   "contextWindow": {
-    "usedTokens": 89743,
+    "usedTokens": 98985,
     "limitTokens": 1000000,
-    "pct": 0.0897,
+    "pct": 0.099,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
@@ -69,22 +64,21 @@
     "missionControlDirty": 5,
     "recentFiles": [
       "scripts/sorare_sheet_updater_v2.py",
-      "scripts/fantasy_sheets_updater.py",
       "scripts/jaimes_brain_feed_poller.py"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-06T03:25:08Z"
+    "updatedAt": "2026-04-06T03:30:09Z"
   },
   "modelUsage": {
-    "session": 3.167308,
-    "daily": 76.889165,
+    "session": 4.813823,
+    "daily": 79.188819,
     "weekly": 99.707915,
     "monthly": 75.656702,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 66.62841580999999
+        "cost": 68.92806956
       },
       {
         "name": "openai/gpt-5.4",
@@ -111,12 +105,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 84462,
-        "outputTokens": 179038,
-        "totalTokens": 263500,
-        "sessionCost": 66.62841580999999,
-        "dailyCost": 59.436786209999994,
-        "weeklyCost": 66.62841580999999,
+        "inputTokens": 84463,
+        "outputTokens": 179269,
+        "totalTokens": 263732,
+        "sessionCost": 68.92806956,
+        "dailyCost": 61.73643996,
+        "weeklyCost": 68.92806956,
         "sessions": 25,
         "isGemini": false,
         "costEstimated": false
@@ -183,7 +177,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-06T03:25:11Z",
+    "lastUpdated": "2026-04-06T03:30:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -212,8 +206,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 76.889165,
-      "total": 86.62898,
+      "daily": 79.188819,
+      "total": 88.928634,
       "monthly": 76.874157
     },
     "weeklyRunRate": {
@@ -237,33 +231,33 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-06T03:25:16Z"
+    "updatedAt": "2026-04-06T03:30:17Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.5,
-      "cpu_user": 17.26,
-      "cpu_sys": 21.28,
-      "load1": 3.24,
-      "load5": 3.23,
-      "load15": 3.21,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 34.8,
+      "cpu_user": 14.16,
+      "cpu_sys": 20.63,
+      "load1": 4.05,
+      "load5": 3.61,
+      "load15": 3.36,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "115Gi",
+      "disk_avail": "114Gi",
       "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.8,
-      "cpu_user": 1.91,
-      "cpu_sys": 8.91,
-      "load1": 2.01,
-      "load5": 1.89,
-      "load15": 1.83,
+      "cpu_pct": 11.3,
+      "cpu_user": 2.12,
+      "cpu_sys": 9.21,
+      "load1": 1.72,
+      "load5": 1.82,
+      "load15": 1.82,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -287,19 +281,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T03:25:02Z"
+      "lastChecked": "2026-04-06T03:30:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-06T03:25:02Z"
+      "lastChecked": "2026-04-06T03:30:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-06T03:25:02Z"
+      "lastChecked": "2026-04-06T03:30:02Z"
     }
   ],
   "crons": [
@@ -714,7 +708,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 74466,
+      "elapsedSecs": 74766,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -722,7 +716,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_sheet_updater_v2.py, scripts/fantasy_sheets_updater.py",
+      "label": "Editing: scripts/sorare_sheet_updater_v2.py, scripts/jaimes_brain_feed_poller.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -743,29 +737,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-06T03:25:11Z",
-      "event": "Session spend: $3.17"
+      "time": "2026-04-06T03:30:12Z",
+      "event": "Session spend: $4.81"
     },
     {
-      "time": "2026-04-06T03:25:08Z",
-      "event": "Coding: scripts/sorare_sheet_updater_v2.py, scripts/fantasy_sheets_updater.py"
+      "time": "2026-04-06T03:30:09Z",
+      "event": "Coding: scripts/sorare_sheet_updater_v2.py, scripts/jaimes_brain_feed_poller.py"
     },
     {
-      "time": "2026-04-06T03:25:08Z",
+      "time": "2026-04-06T03:30:09Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-06T03:25:02Z",
+      "time": "2026-04-06T03:30:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-06T03:25:02Z",
+      "time": "2026-04-06T03:30:02Z",
       "event": "27 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-06T03:25:02Z",
+      "time": "2026-04-06T03:30:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-06T03:25:02Z"
+  "lastUpdated": "2026-04-06T03:30:02Z"
 }
