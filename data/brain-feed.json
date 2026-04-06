@@ -1,12 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Delivered slowed Sneedfest voiceover with dramatic pacing",
+  "objective": "Making voice deeper and slower with pitch shift",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-06T01:34:58Z",
-  "checkedAt": "2026-04-06T01:34:58Z",
+  "steps": [
+    {
+      "label": "elevenlabs tts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "ffmpeg",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-06T01:36:25Z",
+  "checkedAt": "2026-04-06T01:36:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
