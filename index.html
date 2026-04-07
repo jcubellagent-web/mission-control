@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1775264582 -->
+    <!-- BUILD:1775558516 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -75,7 +75,7 @@
             line-height: 1.45;
             padding-top: env(safe-area-inset-top, 0px);
             padding-bottom: env(safe-area-inset-bottom, 0px);
-            overscroll-behavior-y: contain;
+            overscroll-behavior-y: auto;
             position: relative;
         }
         body::-webkit-scrollbar {
@@ -191,6 +191,7 @@
             /* Sit just below Dynamic Island / notch */
             top: calc(env(safe-area-inset-top, 44px) + 4px);
             left: 50%; transform: translateX(-50%) translateY(-80px);
+            will-change: transform, opacity;
             width: auto; min-width: 140px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
             padding: 8px 18px; border-radius: 999px;
@@ -4106,8 +4107,16 @@
             }
         }
 
+        function getScrollTop() {
+            return Math.max(
+                window.scrollY || 0,
+                document.documentElement.scrollTop || 0,
+                document.body.scrollTop || 0
+            );
+        }
+
         function handleTouchStart(event) {
-            if (window.scrollY === 0) {
+            if (getScrollTop() <= 0) {
                 pullStartY = event.touches[0].clientY;
             } else {
                 pullStartY = null;
@@ -4117,17 +4126,28 @@
         function handleTouchMove(event) {
             if (pullStartY === null || !pullIndicator) return;
             pullDistance = event.touches[0].clientY - pullStartY;
-            if (pullDistance > 0) {
+            if (pullDistance > 0 && getScrollTop() <= 0) {
                 event.preventDefault();
                 const label = document.getElementById('pull-label');
                 const isReleasing = pullDistance > PULL_THRESHOLD;
+                const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+                // Nudge the page content down slightly for tactile feel
+                document.body.style.transform = `translateY(${Math.min(pullDistance * 0.3, 30)}px)`;
+                document.body.style.transition = 'none';
                 pullIndicator.classList.add('visible');
                 pullIndicator.classList.toggle('releasing', isReleasing);
                 if (label) label.textContent = isReleasing ? 'Release to refresh' : 'Pull to refresh';
+            } else if (pullDistance <= 0) {
+                // scrolling down — cancel
+                pullStartY = null;
+                pullDistance = 0;
             }
         }
 
         function handleTouchEnd() {
+            // Always restore body transform with animation
+            document.body.style.transition = 'transform 0.25s cubic-bezier(0.16,1,0.3,1)';
+            document.body.style.transform = '';
             if (pullDistance > PULL_THRESHOLD) {
                 // Haptic feedback (iPhone)
                 if (navigator.vibrate) navigator.vibrate(10);
@@ -4142,14 +4162,22 @@
                     if (label) label.textContent = 'Refreshing…';
                 }
                 forceUpdate().finally(() => {
-                    if (pullIndicator) {
-                        pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
-                    }
+                    setTimeout(() => {
+                        if (pullIndicator) {
+                            pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
+                        }
+                        document.body.style.transform = '';
+                        document.body.style.transition = '';
+                    }, 400);
                 });
             } else {
                 if (pullIndicator) {
                     pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
                 }
+                setTimeout(() => {
+                    document.body.style.transform = '';
+                    document.body.style.transition = '';
+                }, 300);
             }
             pullStartY = null;
             pullDistance = 0;
@@ -4159,7 +4187,7 @@
             if (window.__mcPullAttached || !pullIndicator) return;
             window.addEventListener('touchstart', handleTouchStart, { passive: true });
             window.addEventListener('touchmove', handleTouchMove, { passive: false });
-            window.addEventListener('touchend', handleTouchEnd);
+            window.addEventListener('touchend', handleTouchEnd, { passive: true });
             window.__mcPullAttached = true;
         }
 
