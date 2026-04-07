@@ -2835,6 +2835,115 @@
             overflow-y: auto;
             padding-right: 2px;
         }
+        /* Agent Chat Feed */
+        .agent-chat-section {
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 10px;
+        }
+        .agent-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .agent-chat-icon { font-size: 12px; opacity: 0.6; }
+        .agent-chat-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+        .agent-chat-live-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin-left: 2px;
+        }
+        .agent-chat-live-dot.live { background: #48bb78; box-shadow: 0 0 4px #48bb78; }
+        #agent-chat-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .agent-chat-empty {
+            font-size: 11px;
+            opacity: 0.35;
+            text-align: center;
+            padding: 10px 0;
+        }
+        .chat-bubble-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .chat-bubble-row.from-josh { flex-direction: row; }
+        .chat-bubble-row.from-jaimes { flex-direction: row-reverse; }
+        .chat-bubble-row.from-jain { flex-direction: row; }
+        .chat-avatar {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .chat-avatar.josh { background: #4a6cf7; color: #fff; }
+        .chat-avatar.jaimes { background: #805ad5; color: #fff; }
+        .chat-avatar.jain { background: #2d9e6b; color: #fff; }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            line-height: 1.4;
+            position: relative;
+        }
+        .chat-bubble-row.from-josh .chat-bubble {
+            background: rgba(74,108,247,0.2);
+            border: 1px solid rgba(74,108,247,0.3);
+            border-bottom-left-radius: 3px;
+        }
+        .chat-bubble-row.from-jaimes .chat-bubble {
+            background: rgba(128,90,213,0.2);
+            border: 1px solid rgba(128,90,213,0.3);
+            border-bottom-right-radius: 3px;
+            text-align: right;
+        }
+        .chat-bubble-row.from-jain .chat-bubble {
+            background: rgba(45,158,107,0.2);
+            border: 1px solid rgba(45,158,107,0.3);
+            border-bottom-left-radius: 3px;
+        }
+        .chat-bubble-sender {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            opacity: 0.55;
+            margin-bottom: 2px;
+        }
+        .chat-bubble-msg { opacity: 0.9; }
+        .chat-bubble-ts {
+            font-size: 9px;
+            opacity: 0.35;
+            margin-top: 3px;
+        }
+        .chat-status-pill {
+            display: inline-block;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .chat-status-pill.active { background: rgba(229,62,62,0.25); color: #fc8181; }
+        .chat-status-pill.done { background: rgba(72,187,120,0.2); color: #68d391; }
+        .chat-status-pill.sent { background: rgba(237,137,54,0.2); color: #f6ad55; }
+        /* Agent Chat Feed */
         #agent-comms-list {
             display: flex;
             flex-direction: column;
@@ -3513,6 +3622,15 @@
                             <span class="agent-comms-chevron">⌃</span>
                         </button>
                         <div id="unified-activity-log"></div>
+                    </div>
+                    <!-- Agent Comms Chat Feed -->
+                    <div class="agent-chat-section">
+                        <div class="agent-chat-header">
+                            <span class="agent-chat-icon">💬</span>
+                            <span class="agent-chat-title">Agent Comms</span>
+                            <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
+                        </div>
+                        <div id="agent-chat-feed"><div class="agent-chat-empty">No recent comms.</div></div>
                     </div>
                 </div>
                 <!-- Mobile X Growth Card — phone-mode only -->
@@ -4337,6 +4455,64 @@
             // Feed into unified activity log instead of old element
             _uaComms = entries || [];
             renderUnifiedActivity();
+            renderAgentChatFeed(entries || []);
+        }
+
+        function renderAgentChatFeed(entries) {
+            const el = document.getElementById('agent-chat-feed');
+            const dot = document.getElementById('agent-chat-live-dot');
+            if (!el) return;
+
+            // Show last 12 entries, newest at bottom
+            const items = [...entries].reverse().slice(0, 12).reverse();
+
+            if (!items.length) {
+                el.innerHTML = '<div class="agent-chat-empty">No recent comms.</div>';
+                if (dot) dot.classList.remove('live');
+                return;
+            }
+
+            // Check if any are active
+            const hasActive = items.some(e => e.status === 'active');
+            if (dot) dot.classList.toggle('live', hasActive);
+
+            el.innerHTML = items.map(e => {
+                const dir = (e.direction || '').toLowerCase();
+                const msg = e.message || '';
+                const ts = e.timestamp ? formatRelTime(e.timestamp) : '';
+                const status = e.status || '';
+
+                // Determine sender/receiver from direction field
+                let sender = 'josh', senderLabel = 'JOSH 2.0', rowClass = 'from-josh', avatarClass = 'josh', avatarInitial = 'J2';
+                if (dir.includes('jaimes') && dir.startsWith('jaimes')) {
+                    sender = 'jaimes'; senderLabel = 'JAIMES'; rowClass = 'from-jaimes'; avatarClass = 'jaimes'; avatarInitial = 'JM';
+                } else if (dir.startsWith('jain')) {
+                    sender = 'jain'; senderLabel = 'J.A.I.N'; rowClass = 'from-jain'; avatarClass = 'jain'; avatarInitial = 'JN';
+                } else if (dir.includes('jaimes')) {
+                    // josh2.0->jaimes: josh is sender
+                    sender = 'josh'; senderLabel = 'JOSH 2.0'; rowClass = 'from-josh'; avatarClass = 'josh'; avatarInitial = 'J2';
+                }
+
+                const statusPill = status === 'active'
+                    ? '<span class="chat-status-pill active">active</span>'
+                    : status === 'done'
+                    ? '<span class="chat-status-pill done">done</span>'
+                    : status === 'sent'
+                    ? '<span class="chat-status-pill sent">sent</span>'
+                    : '';
+
+                return `<div class="chat-bubble-row ${escapeHtml(rowClass)}">
+                    <div class="chat-avatar ${escapeHtml(avatarClass)}">${escapeHtml(avatarInitial)}</div>
+                    <div class="chat-bubble">
+                        <div class="chat-bubble-sender">${escapeHtml(senderLabel)}</div>
+                        <div class="chat-bubble-msg">${escapeHtml(msg)}${statusPill}</div>
+                        <div class="chat-bubble-ts">${escapeHtml(ts)}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Auto-scroll to bottom
+            el.scrollTop = el.scrollHeight;
         }
 
         async function fetchAgentComms() {
