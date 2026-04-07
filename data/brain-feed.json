@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Session startup complete",
+  "objective": "Diagnosing session error at 11:58pm",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-07T03:59:27Z",
-  "checkedAt": "2026-04-07T03:59:27Z",
+  "steps": [
+    {
+      "label": "read",
+      "status": "active",
+      "tool": "logs"
+    }
+  ],
+  "currentTool": "logs",
+  "updatedAt": "2026-04-07T03:59:49Z",
+  "checkedAt": "2026-04-07T03:59:49Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
