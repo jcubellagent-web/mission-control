@@ -1530,6 +1530,12 @@
         .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.85); line-height: 1.35; }
         .intel-hi-reason { font-size: 0.63rem; color: rgba(255,255,255,0.55); line-height: 1.45; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
         .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        /* Phone: compress intel highlights — hide reasons, max 3 items */
+        body.phone-mode .intel-hi-reason { display: none !important; }
+        body.phone-mode .intel-hi-item:nth-child(n+4) { display: none !important; }
+        body.phone-mode .card-intel-highlights .card-header h2 { font-size: 0.6rem; }
+        body.phone-mode .intel-highlights-body { gap: 2px; }
+        body.phone-mode .intel-hi-text { font-size: 0.72rem; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* ── Scrolling ticker bar ── */
         .if-tldr-block {
@@ -1589,8 +1595,7 @@
 
         /* ── Remote Control Card — Premium Glass Panel ──── */
         body.phone-mode .card-remote {
-            display: block !important;
-            margin: 0 8px;
+            display: none !important; /* Controls moved to top-right header buttons */
         }
 
         .remote-btn-row {
@@ -2945,6 +2950,71 @@
         .chat-status-pill.active { background: rgba(229,62,62,0.25); color: #fc8181; }
         .chat-status-pill.done { background: rgba(72,187,120,0.2); color: #68d391; }
         .chat-status-pill.sent { background: rgba(237,137,54,0.2); color: #f6ad55; }
+        /* ── Phone-mode: Agent Comms visual upgrade ────────────────────────── */
+        body.phone-mode .agent-chat-section {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        body.phone-mode .agent-chat-header {
+            margin-bottom: 10px;
+        }
+        body.phone-mode .agent-chat-icon { font-size: 14px; opacity: 0.8; }
+        body.phone-mode .agent-chat-title {
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0.7;
+            letter-spacing: 0.08em;
+        }
+        body.phone-mode .agent-chat-live-dot {
+            width: 7px; height: 7px;
+        }
+        body.phone-mode #agent-chat-feed {
+            max-height: 320px;
+            gap: 8px;
+        }
+        body.phone-mode .chat-bubble-row {
+            align-items: flex-start;
+        }
+        body.phone-mode .chat-avatar {
+            width: 28px; height: 28px;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+        body.phone-mode .chat-bubble {
+            font-size: 13px;
+            padding: 8px 12px;
+            max-width: 85%;
+            border-radius: 14px;
+        }
+        body.phone-mode .chat-bubble-row.from-josh .chat-bubble {
+            background: rgba(74,108,247,0.22);
+            border-color: rgba(74,108,247,0.4);
+        }
+        body.phone-mode .chat-bubble-row.from-jaimes .chat-bubble {
+            background: rgba(128,90,213,0.22);
+            border-color: rgba(128,90,213,0.4);
+        }
+        body.phone-mode .chat-bubble-row.from-jain .chat-bubble {
+            background: rgba(45,158,107,0.22);
+            border-color: rgba(45,158,107,0.4);
+        }
+        body.phone-mode .chat-bubble-sender {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        body.phone-mode .chat-bubble-msg {
+            opacity: 1;
+            line-height: 1.45;
+        }
+        body.phone-mode .chat-bubble-ts {
+            font-size: 10px;
+            opacity: 0.45;
+        }
+        body.phone-mode .chat-status-pill {
+            font-size: 10px;
+            padding: 2px 7px;
+        }
         /* Agent Chat Feed */
         #agent-comms-list {
             display: flex;
@@ -3609,16 +3679,7 @@
 
         <div class="stats-row" id="stats-row"></div>
 
-        <!-- MoltWorld popup button — phone-mode only (desktop uses stats-row bubble) -->
-        <div class="mw-popup-btn-row" id="mw-popup-btn-row">
-            <button class="mw-popup-btn" onclick="window.openMoltWorldDashboard && window.openMoltWorldDashboard()">
-                <span class="mw-popup-dot" id="mw-popup-dot"></span>
-                <span class="mw-popup-globe">🌍</span>
-                <span class="mw-popup-label">MoltWorld</span>
-                <span class="mw-popup-sim" id="mw-popup-sim">–</span>
-                <span class="mw-popup-arrow">↗</span>
-            </button>
-        </div>
+        <!-- MoltWorld popup button — HIDDEN per Josh request 2026-04-07 -->
 
         <div class="kiosk-main">
             <!-- LEFT COL: hero-grid (2-row grid: Brain Feed top, Jobs+Model bottom) -->
@@ -6994,6 +7055,7 @@
             // Fallback: local server (same network only)
             try {
                 const endpoint = cmd === 'refresh' ? '/refresh'
+                    : cmd === 'hard-refresh' ? '/hard-refresh'
                     : cmd === 'nightmode' ? '/nightmode/on'
                     : cmd === 'nightmode-off' ? '/nightmode/off'
                     : null;
@@ -7016,7 +7078,7 @@
             const statusEl = document.getElementById('phone-cmd-status');
             if (btn) { btn.classList.add('pca-sending'); }
             if (statusEl) { statusEl.textContent = '↻'; statusEl.className = 'pca-status'; }
-            sendRemoteCommand('refresh').then(ok => {
+            sendRemoteCommand('hard-refresh').then(ok => {
                 if (btn) btn.classList.remove('pca-sending');
                 if (ok) {
                     // Flash button green with checkmark
@@ -7059,6 +7121,12 @@
             const actuallyOn = overlay && overlay.style.display !== 'none';
             _desktopNightOn = actuallyOn; // sync with real state
             const cmd = _desktopNightOn ? 'nightmode-off' : 'nightmode';
+            // Also toggle local desktop view
+            if (_desktopNightOn) {
+                typeof exitNightMode === 'function' && exitNightMode();
+            } else {
+                typeof enterNightMode === 'function' && enterNightMode();
+            }
             const ok = await sendRemoteCommand(cmd);
             if (ok) {
                 _desktopNightOn = !_desktopNightOn;

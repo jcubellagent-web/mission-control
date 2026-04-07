@@ -247,8 +247,24 @@ class Handler(http.server.BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
 
         if path == "/refresh":
-            # Don't do a full page reload — let the JS call forceUpdate() for a smooth data refresh
+            # Soft refresh — JS forceUpdate()
             self._json({"ok": True, "action": "refresh"})
+
+        elif path == "/hard-refresh":
+            # Hard reload — Safari location.reload(true) on the Mission Control tab
+            run_applescript(
+                'tell application "Safari"\n'
+                '    repeat with w in windows\n'
+                '        repeat with t in tabs of w\n'
+                '            set u to URL of t\n'
+                '            if u contains "mission-control" or u contains "localhost:8765" or u contains "jcubellagent-web.github.io" then\n'
+                '                do JavaScript "location.reload(true)" in t\n'
+                '            end if\n'
+                '        end repeat\n'
+                '    end repeat\n'
+                'end tell'
+            )
+            self._json({"ok": True, "action": "hard-refresh"})
 
         elif path == "/nightmode/on":
             state = get_state()
@@ -353,21 +369,23 @@ def _poll_supabase_commands():
                 seen_ids.add(rid)
                 cmd = row.get("tool") or ""
 
-                if cmd == "refresh":
+                if cmd in ("refresh", "hard-refresh"):
+                    # hard-refresh: full page reload; refresh: forceUpdate() data refresh
+                    js = "location.reload(true)" if cmd == "hard-refresh" else "typeof forceUpdate==='function' && forceUpdate()"
                     run_applescript(
                         'tell application "Safari"\n'
-                        '    set jsCmd to "typeof forceUpdate===\'function\' && forceUpdate()"\n'
+                        f'    set jsCmd to "{js}"\n'
                         '    repeat with w in windows\n'
                         '        repeat with t in tabs of w\n'
                         '            set u to URL of t\n'
-                        '            if u contains "mission-control" or u contains "localhost:8765" then\n'
+                        '            if u contains "mission-control" or u contains "localhost:8765" or u contains "jcubellagent-web.github.io" then\n'
                         '                do JavaScript jsCmd in t\n'
                         '            end if\n'
                         '        end repeat\n'
                         '    end repeat\n'
                         'end tell'
                     )
-                    print("[remote] refresh via Supabase id=" + str(rid), flush=True)
+                    print(f"[remote] {cmd} via Supabase id=" + str(rid), flush=True)
 
                 elif cmd == "nightmode":
                     state = get_state()
