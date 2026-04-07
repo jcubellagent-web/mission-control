@@ -5,34 +5,42 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Deep dive: Lumiere incident post-mortem",
+    "objective": "Lumiere fully connected \u2014 all systems nominal",
     "status": "active",
-    "steps": [
-      {
-        "label": "audit logs",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-07T02:41:33Z",
-    "checkedAt": "2026-04-07T02:41:33Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-07T02:53:04Z",
+    "checkedAt": "2026-04-07T02:53:04Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Deep dive: Lumiere incident post-mortem",
-    "updatedAt": "2026-04-07T02:50:02Z"
+    "context": "Lumiere fully connected \u2014 all systems nominal",
+    "updatedAt": "2026-04-07T02:55:02Z"
   },
   "contextWindow": {
-    "usedTokens": 92939,
+    "usedTokens": 102599,
     "limitTokens": 1000000,
-    "pct": 0.0929,
+    "pct": 0.1026,
     "model": "claude-sonnet-4-6",
     "status": "green"
   },
   "agentBus": [
+    {
+      "id": "a1880614-d05e-40db-b0ca-e77839c83f54",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "queued",
+      "payload": {
+        "task": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
+        "details": ""
+      },
+      "created_at": "2026-04-07T02:50:49.110996+00:00",
+      "result": null,
+      "error_log": null
+    },
     {
       "id": "221e910b-ab48-4254-b72a-1bbc8cbd4f28",
       "origin_node": "JOSH_2_0",
@@ -61,21 +69,21 @@
   },
   "codingVisibility": {
     "workspaceDirty": 29,
-    "missionControlDirty": 5,
+    "missionControlDirty": 6,
     "recentFiles": [],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-07T02:50:08Z"
+    "updatedAt": "2026-04-07T02:55:09Z"
   },
   "modelUsage": {
-    "session": 11.516611,
-    "daily": 64.257018,
+    "session": 12.669497,
+    "daily": 65.409904,
     "weekly": 93.417402,
     "monthly": 169.074104,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 64.25701771
+        "cost": 65.40990375999999
       },
       {
         "name": "gpt-5.3-codex",
@@ -102,12 +110,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 44,
-        "outputTokens": 2616,
-        "totalTokens": 2660,
-        "sessionCost": 64.25701771,
-        "dailyCost": 64.25701771,
-        "weeklyCost": 64.25701771,
+        "inputTokens": 46,
+        "outputTokens": 3091,
+        "totalTokens": 3137,
+        "sessionCost": 65.40990375999999,
+        "dailyCost": 65.40990375999999,
+        "weeklyCost": 65.40990375999999,
         "sessions": 11,
         "isGemini": false,
         "costEstimated": false
@@ -158,7 +166,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-07T02:50:16Z",
+    "lastUpdated": "2026-04-07T02:55:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -182,13 +190,13 @@
       "available": true
     },
     "elevenlabs": {
-      "chars_used": 32835,
-      "chars_limit": 123031,
+      "chars_used": 65670,
+      "chars_limit": 246062,
       "available": true
     },
     "aggregate": {
-      "daily": 64.257018,
-      "total": 65.878973,
+      "daily": 65.409904,
+      "total": 67.031859,
       "monthly": 170.553458
     },
     "weeklyRunRate": {
@@ -212,18 +220,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-07T02:50:21Z"
+    "updatedAt": "2026-04-07T02:55:17Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.1,
-      "cpu_user": 14.51,
-      "cpu_sys": 20.57,
-      "load1": 3.36,
-      "load5": 3.34,
-      "load15": 3.1,
+      "cpu_pct": 34.4,
+      "cpu_user": 13.76,
+      "cpu_sys": 20.64,
+      "load1": 3.35,
+      "load5": 3.41,
+      "load15": 3.2,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "113Gi",
@@ -231,14 +239,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 2.75,
-      "cpu_sys": 8.96,
-      "load1": 1.66,
-      "load5": 1.69,
-      "load15": 1.74,
+      "cpu_pct": 14.7,
+      "cpu_user": 5.59,
+      "cpu_sys": 9.9,
+      "load1": 1.78,
+      "load5": 1.79,
+      "load15": 1.76,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "53Gi",
@@ -262,19 +270,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-07T02:50:02Z"
+      "lastChecked": "2026-04-07T02:55:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-07T02:50:02Z"
+      "lastChecked": "2026-04-07T02:55:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-07T02:50:02Z"
+      "lastChecked": "2026-04-07T02:55:02Z"
     }
   ],
   "crons": [
@@ -699,10 +707,20 @@
   ],
   "activeAgents": [
     {
+      "id": "bus-a1880614",
+      "label": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
+      "status": "running",
+      "elapsedSecs": 270,
+      "tool": "bus",
+      "model": "QUEUED",
+      "agentLabel": "JAIMES",
+      "agentClass": "agent"
+    },
+    {
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 158770,
+      "elapsedSecs": 159066,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -721,29 +739,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-07T02:50:16Z",
-      "event": "Session spend: $11.52"
+      "time": "2026-04-07T02:55:12Z",
+      "event": "Session spend: $12.67"
     },
     {
-      "time": "2026-04-07T02:50:08Z",
+      "time": "2026-04-07T02:55:09Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-07T02:50:02Z",
+      "time": "2026-04-07T02:55:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-07T02:50:02Z",
+      "time": "2026-04-07T02:55:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-07T02:50:02Z",
+      "time": "2026-04-07T02:55:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-07T02:50:02Z",
+      "time": "2026-04-07T02:55:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-07T02:50:02Z"
+  "lastUpdated": "2026-04-07T02:55:02Z"
 }
