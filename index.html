@@ -2250,6 +2250,10 @@
         .card-brain.activity-expanded #brain-feed-card {
             min-height: 220px;
         }
+        .card-brain.brain-active #brain-feed-card {
+            min-height: 200px;
+            flex: 1;
+        }
         .bf-idle-container {
             flex: 1;
             min-height: 0;
@@ -2842,6 +2846,14 @@
             margin-top: 10px;
             border-top: 1px solid rgba(255,255,255,0.08);
             padding-top: 10px;
+            flex-shrink: 0;
+        }
+        /* When brain is active, limit chat section height so objective has room */
+        .card-brain.brain-active .agent-chat-section {
+            max-height: 140px;
+        }
+        .card-brain.brain-active #agent-chat-feed {
+            max-height: 100px;
         }
         .agent-chat-header {
             display: flex;
