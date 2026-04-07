@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Trying raw Tailscale IP wss://100.114.50.48:18789",
+    "objective": "System health check post-launchd failure complete",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-07T03:05:20Z",
-    "checkedAt": "2026-04-07T03:05:20Z",
+    "updatedAt": "2026-04-07T03:24:16Z",
+    "checkedAt": "2026-04-07T03:24:16Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Sonnet 4.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Trying raw Tailscale IP wss://100.114.50.48:18789",
-    "updatedAt": "2026-04-07T03:20:02Z"
+    "context": "System health check post-launchd failure complete",
+    "updatedAt": "2026-04-07T03:25:02Z"
   },
   "contextWindow": {
     "usedTokens": 118436,
@@ -72,18 +72,18 @@
     "missionControlDirty": 6,
     "recentFiles": [],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-07T03:20:09Z"
+    "updatedAt": "2026-04-07T03:25:08Z"
   },
   "modelUsage": {
     "session": 14.262163,
-    "daily": 70.489959,
+    "daily": 70.562125,
     "weekly": 93.417402,
     "monthly": 169.074104,
     "topModels": [
       {
         "name": "anthropic/claude-sonnet-4-6",
         "window": "session",
-        "cost": 70.48995911
+        "cost": 70.56212546
       },
       {
         "name": "gpt-5.3-codex",
@@ -110,12 +110,12 @@
       {
         "name": "anthropic/claude-sonnet-4-6",
         "source": "openclaw",
-        "inputTokens": 48,
-        "outputTokens": 2778,
-        "totalTokens": 2826,
-        "sessionCost": 70.48995911,
-        "dailyCost": 70.48995911,
-        "weeklyCost": 70.48995911,
+        "inputTokens": 50,
+        "outputTokens": 3494,
+        "totalTokens": 3544,
+        "sessionCost": 70.56212546,
+        "dailyCost": 70.56212546,
+        "weeklyCost": 70.56212546,
         "sessions": 12,
         "isGemini": false,
         "costEstimated": false
@@ -166,7 +166,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-07T03:20:17Z",
+    "lastUpdated": "2026-04-07T03:25:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -190,13 +190,13 @@
       "available": true
     },
     "elevenlabs": {
-      "chars_used": 32835,
-      "chars_limit": 123031,
+      "chars_used": 65670,
+      "chars_limit": 246062,
       "available": true
     },
     "aggregate": {
-      "daily": 70.489959,
-      "total": 72.111914,
+      "daily": 70.562125,
+      "total": 72.18408,
       "monthly": 170.553458
     },
     "weeklyRunRate": {
@@ -220,18 +220,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-07T03:20:22Z"
+    "updatedAt": "2026-04-07T03:25:17Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 29.1,
-      "cpu_user": 16.43,
-      "cpu_sys": 13.47,
-      "load1": 3.4,
-      "load5": 3.69,
-      "load15": 3.37,
+      "cpu_pct": 18.2,
+      "cpu_user": 6.88,
+      "cpu_sys": 11.34,
+      "load1": 1.69,
+      "load5": 2.74,
+      "load15": 3.04,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "113Gi",
@@ -239,12 +239,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 2.5,
-      "cpu_sys": 9.58,
-      "load1": 1.63,
-      "load5": 1.73,
-      "load15": 1.74,
+      "cpu_pct": 12.8,
+      "cpu_user": 2.68,
+      "cpu_sys": 10.6,
+      "load1": 2.12,
+      "load5": 1.88,
+      "load15": 1.79,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -270,19 +270,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-07T03:20:02Z"
+      "lastChecked": "2026-04-07T03:25:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-07T03:20:02Z"
+      "lastChecked": "2026-04-07T03:25:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-07T03:20:02Z"
+      "lastChecked": "2026-04-07T03:25:02Z"
     }
   ],
   "crons": [
@@ -710,7 +710,7 @@
       "id": "bus-a1880614",
       "label": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
       "status": "running",
-      "elapsedSecs": 1775,
+      "elapsedSecs": 2070,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -720,7 +720,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 160572,
+      "elapsedSecs": 160866,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -739,29 +739,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-07T03:20:17Z",
+      "time": "2026-04-07T03:25:12Z",
       "event": "Session spend: $14.26"
     },
     {
-      "time": "2026-04-07T03:20:09Z",
+      "time": "2026-04-07T03:25:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-07T03:20:02Z",
+      "time": "2026-04-07T03:25:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-07T03:20:02Z",
+      "time": "2026-04-07T03:25:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-07T03:20:02Z",
+      "time": "2026-04-07T03:25:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-07T03:20:02Z",
+      "time": "2026-04-07T03:25:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-07T03:20:02Z"
+  "lastUpdated": "2026-04-07T03:25:02Z"
 }
