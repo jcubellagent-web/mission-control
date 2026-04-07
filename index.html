@@ -7081,25 +7081,24 @@
             sendRemoteCommand('hard-refresh').then(ok => {
                 if (btn) btn.classList.remove('pca-sending');
                 if (ok) {
-                    // Flash button green with checkmark
+                    // Flash button green with checkmark — update icon span, not textContent
+                    const iconEl = btn ? btn.querySelector('.pca-icon') : null;
+                    const origIcon = iconEl ? iconEl.textContent : '';
+                    if (iconEl) iconEl.textContent = '✓';
                     if (btn) {
-                        const orig = btn.textContent;
-                        btn.textContent = '✓';
                         btn.style.color = '#4ade80';
                         btn.style.borderColor = 'rgba(74,222,128,0.5)';
                         btn.style.background = 'rgba(74,222,128,0.12)';
-                        if (statusEl) { statusEl.textContent = '✓ Refreshed'; statusEl.className = 'pca-status ok'; }
-                        setTimeout(() => {
-                            btn.textContent = orig;
-                            btn.style.color = '';
-                            btn.style.borderColor = '';
-                            btn.style.background = '';
-                            if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; }
-                        }, 2000);
                     }
+                    if (statusEl) { statusEl.textContent = '✓ Sent'; statusEl.className = 'pca-status ok'; }
+                    setTimeout(() => {
+                        if (iconEl) iconEl.textContent = origIcon;
+                        if (btn) { btn.style.color = ''; btn.style.borderColor = ''; btn.style.background = ''; }
+                        if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; }
+                    }, 2000);
                 } else {
-                    if (statusEl) { statusEl.textContent = '✗'; statusEl.className = 'pca-status err'; }
-                    setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 2000);
+                    if (statusEl) { statusEl.textContent = '✗ Offline'; statusEl.className = 'pca-status err'; }
+                    setTimeout(() => { if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pca-status'; } }, 2500);
                 }
             });
         }
@@ -7116,17 +7115,13 @@
         async function phoneNightMode() {
             const btn = document.getElementById('pca-night-btn') || document.querySelector('.pca-night');
             if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
-            // Always check actual overlay state as truth (more reliable than variable)
-            const overlay = document.getElementById('night-mode-overlay');
-            const actuallyOn = overlay && overlay.style.display !== 'none';
-            _desktopNightOn = actuallyOn; // sync with real state
+            // On mobile, local overlay is always hidden — use server state (_desktopNightOn) as truth
+            // Re-sync from server if needed
+            try {
+                const r = await fetch('http://localhost:8765/nightmode/state', { signal: AbortSignal.timeout(1000) });
+                if (r.ok) { const s = await r.json(); _desktopNightOn = !!s.nightMode; }
+            } catch(e) {}
             const cmd = _desktopNightOn ? 'nightmode-off' : 'nightmode';
-            // Also toggle local desktop view
-            if (_desktopNightOn) {
-                typeof exitNightMode === 'function' && exitNightMode();
-            } else {
-                typeof enterNightMode === 'function' && enterNightMode();
-            }
             const ok = await sendRemoteCommand(cmd);
             if (ok) {
                 _desktopNightOn = !_desktopNightOn;
@@ -7247,10 +7242,14 @@
                     const cmd = row.tool || '';
                     if (cmd === 'refresh') {
                         showRemoteRefreshFlash(); // animated data refresh with overlay
+                    } else if (cmd === 'hard-refresh') {
+                        location.reload(true);
                     } else if (cmd === 'nightmode') {
                         const overlay = document.getElementById('night-mode-overlay');
                         const isOn = overlay && overlay.style.display !== 'none';
                         if (isOn) exitNightMode(); else enterNightMode();
+                    } else if (cmd === 'nightmode-off') {
+                        exitNightMode();
                     }
                 }
             } catch(e) { console.warn('[MC] pollRemoteCommands error', e); }
@@ -7282,10 +7281,14 @@
                         const cmd = row.tool || '';
                         if (cmd === 'refresh') {
                             showRemoteRefreshFlash();
+                        } else if (cmd === 'hard-refresh') {
+                            location.reload(true);
                         } else if (cmd === 'nightmode') {
                             const overlay = document.getElementById('night-mode-overlay');
                             const isOn = overlay && overlay.style.display !== 'none';
                             if (isOn) exitNightMode(); else enterNightMode();
+                        } else if (cmd === 'nightmode-off') {
+                            exitNightMode();
                         }
                     })
                     .subscribe();
