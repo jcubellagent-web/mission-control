@@ -1164,21 +1164,9 @@
         body.phone-mode #airpoint-toggle,
         body.phone-mode .connection-status,
         body.phone-mode .last-updated { display: none !important; }
-        /* Show header-status but compact — only night + refresh buttons visible */
-        body.phone-mode .header-status { display: flex; align-items: center; gap: 4px; }
-        body.phone-mode .nm-text,
-        body.phone-mode .rb-text { display: none !important; }
-        body.phone-mode #night-mode-btn {
-            padding: 6px 9px; font-size: 15px; line-height: 1;
-            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05); color: inherit; cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body.phone-mode #refresh-btn {
-            padding: 6px 9px; min-width: 0; border-radius: 8px;
-        }
-        body.phone-mode #refresh-btn .icon,
-        body.phone-mode #refresh-btn .spinner { font-size: 15px; }
+        /* Phone header — hide desktop-only controls, use pca-btn row instead */
+        body.phone-mode .header-status { display: none !important; }
+        body.phone-mode #airpoint-toggle { display: none !important; }
 
         /* ── Card base ───────────────────────────────── */
         @keyframes pm-fadein {
@@ -3133,22 +3121,34 @@
         body.phone-mode .phone-actions {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             flex-shrink: 0;
             margin-left: auto;
         }
         .pca-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 30px; height: 30px;
-            border-radius: 9px;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 52px; height: 44px;
+            padding: 6px 10px;
+            border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.12);
             background: rgba(255,255,255,0.07);
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             cursor: pointer;
             color: rgba(255,255,255,0.75);
             transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
             -webkit-tap-highlight-color: transparent;
             box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+        }
+        .pca-icon { font-size: 1rem; line-height: 1; }
+        .pca-label {
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            line-height: 1;
         }
         .pca-btn:active { transform: scale(0.88); filter: brightness(1.4); transition-duration: 0.06s; }
         .pca-btn.pca-refresh {
@@ -3158,10 +3158,10 @@
             box-shadow: 0 1px 0 rgba(147,197,253,0.1) inset;
         }
         .pca-btn.pca-night {
-            background: rgba(229,62,62,0.12);
-            border-color: rgba(229,62,62,0.25);
-            color: #fca5a5;
-            box-shadow: 0 1px 0 rgba(252,165,165,0.08) inset;
+            background: rgba(139,92,246,0.14);
+            border-color: rgba(139,92,246,0.28);
+            color: #c4b5fd;
+            box-shadow: 0 1px 0 rgba(196,181,253,0.08) inset;
         }
         .pca-btn.pca-sending { opacity: 0.5; pointer-events: none; }
         .pca-btn.pca-ok { filter: brightness(1.8); }
@@ -3573,8 +3573,14 @@
             <!-- Phone-only remote action buttons -->
             <div id="phone-actions" class="phone-actions">
                 <span id="phone-cmd-status" class="pca-status"></span>
-                <button class="pca-btn pca-refresh" onclick="phoneRefresh()" title="Force refresh desktop">↻</button>
-                <button class="pca-btn pca-night" onclick="phoneNightMode()" title="Desktop night mode">🌙</button>
+                <button class="pca-btn pca-refresh" onclick="phoneRefresh()" title="Force refresh desktop">
+                    <span class="pca-icon">↻</span>
+                    <span class="pca-label">Refresh</span>
+                </button>
+                <button class="pca-btn pca-night" id="pca-night-btn" onclick="phoneNightMode()" title="Toggle night mode">
+                    <span class="pca-icon">🌙</span>
+                    <span class="pca-label">Night</span>
+                </button>
             </div>
         </header>
         <!-- Phone-only status strip -->
@@ -7046,7 +7052,7 @@
             } catch {}
         })();
         async function phoneNightMode() {
-            const btn = document.querySelector('.pca-night');
+            const btn = document.getElementById('pca-night-btn') || document.querySelector('.pca-night');
             if (btn) { btn.classList.add('pca-sending'); setTimeout(() => btn.classList.remove('pca-sending'), 2200); }
             // Always check actual overlay state as truth (more reliable than variable)
             const overlay = document.getElementById('night-mode-overlay');
@@ -7057,8 +7063,15 @@
             if (ok) {
                 _desktopNightOn = !_desktopNightOn;
                 if (btn) {
-                    btn.title = _desktopNightOn ? 'Tap to exit night mode' : 'Desktop night mode';
-                    btn.textContent = _desktopNightOn ? '☀️' : '🌙';
+                    btn.title = _desktopNightOn ? 'Tap to exit night mode' : 'Toggle night mode';
+                    const iconEl = btn.querySelector('.pca-icon');
+                    const labelEl = btn.querySelector('.pca-label');
+                    if (iconEl) iconEl.textContent = _desktopNightOn ? '☀️' : '🌙';
+                    else btn.textContent = _desktopNightOn ? '☀️' : '🌙';
+                    if (labelEl) labelEl.textContent = _desktopNightOn ? 'Day' : 'Night';
+                    btn.style.background = _desktopNightOn ? 'rgba(251,191,36,0.14)' : '';
+                    btn.style.borderColor = _desktopNightOn ? 'rgba(251,191,36,0.3)' : '';
+                    btn.style.color = _desktopNightOn ? '#fcd34d' : '';
                 }
             }
         }
