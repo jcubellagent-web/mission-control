@@ -1,12 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "XMCP wired into JAIMES \u2014 replies now route XMCP-first with tweepy fallback",
+  "objective": "Auditing X growth scripts + ML pipeline for XMCP wiring",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-07T04:49:16Z",
-  "checkedAt": "2026-04-07T04:49:16Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "done",
+      "tool": "ssh"
+    },
+    {
+      "label": "read",
+      "status": "active",
+      "tool": "file"
+    }
+  ],
+  "currentTool": "file",
+  "updatedAt": "2026-04-07T04:50:53Z",
+  "checkedAt": "2026-04-07T04:50:53Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
