@@ -1,12 +1,28 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Trying raw Tailscale IP wss://100.114.50.48:18789",
+  "objective": "System health check post-launchd failure",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-07T03:05:20Z",
-  "checkedAt": "2026-04-07T03:05:20Z",
+  "steps": [
+    {
+      "label": "gateway",
+      "status": "done",
+      "tool": "check"
+    },
+    {
+      "label": "telegram",
+      "status": "done",
+      "tool": "check"
+    },
+    {
+      "label": "mcp",
+      "status": "active",
+      "tool": "check"
+    }
+  ],
+  "currentTool": "check",
+  "updatedAt": "2026-04-07T03:23:51Z",
+  "checkedAt": "2026-04-07T03:23:51Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
