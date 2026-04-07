@@ -1,12 +1,23 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Diagnosed 11:58pm session error",
+  "objective": "Checking MC mobile push status + refreshing Safari",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-07T04:00:06Z",
-  "checkedAt": "2026-04-07T04:00:06Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "done",
+      "tool": "git"
+    },
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "safari"
+    }
+  ],
+  "currentTool": "safari",
+  "updatedAt": "2026-04-07T04:01:14Z",
+  "checkedAt": "2026-04-07T04:01:14Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
