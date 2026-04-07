@@ -3732,7 +3732,7 @@
         <div id="pm-model-pill" class="pm-model-pill">
             <div class="pm-pill-bar" onclick="togglePmModelPill()">
                 <span class="pm-pill-icon">💰</span>
-                <span class="pm-pill-today"><span class="pm-pill-today-val" id="pm-pill-cost">$0.00</span> today</span>
+                <span class="pm-pill-today"><span class="pm-pill-today-val" id="pm-pill-cost">$0.00</span> <span id="pm-pill-cost-label" style="opacity:0.55;font-size:0.75em;font-weight:500">session</span></span>
                 <span class="pm-pill-model-name" id="pm-pill-model"></span>
                 <span class="pm-pill-chevron" id="pm-pill-chevron">›</span>
             </div>
@@ -5667,9 +5667,9 @@
             sessionEl.style.color = costColor(sv);
             dailyEl.textContent   = fmtCost(dv);
             dailyEl.style.color   = costColor(dv);
-            // Sync collapsible model pill
+            // Sync collapsible model pill — collapsed shows SESSION cost, not daily
             const pillCost = document.getElementById('pm-pill-cost');
-            if (pillCost) { pillCost.textContent = fmtCost(dv); pillCost.style.color = costColor(dv); }
+            if (pillCost) { pillCost.textContent = fmtCost(sv); pillCost.style.color = costColor(sv); }
         }
 
         function updatePmPillModel(modelRaw) {
