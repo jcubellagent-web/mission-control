@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Completed heartbeat checks, nothing needed attention",
+    "objective": "Completed heartbeat check, no action needed",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-08T13:01:40Z",
-    "checkedAt": "2026-04-08T13:01:40Z",
+    "updatedAt": "2026-04-08T14:01:27Z",
+    "checkedAt": "2026-04-08T14:01:27Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed heartbeat checks, nothing needed attention",
-    "updatedAt": "2026-04-08T14:00:02Z"
+    "context": "Completed heartbeat check, no action needed",
+    "updatedAt": "2026-04-08T14:05:02Z"
   },
   "contextWindow": {
     "usedTokens": 136350,
@@ -86,18 +86,18 @@
     "missionControlDirty": 7,
     "recentFiles": [],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-08T14:00:09Z"
+    "updatedAt": "2026-04-08T14:05:08Z"
   },
   "modelUsage": {
     "session": 14.874202,
-    "daily": 100.689779,
-    "weekly": 178.648745,
-    "monthly": 254.305447,
+    "daily": 107.561713,
+    "weekly": 181.899681,
+    "monthly": 257.556383,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 155.34505735999997
+        "cost": 162.21699221000003
       },
       {
         "name": "anthropic/claude-sonnet-4-6",
@@ -124,13 +124,13 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 523365,
-        "outputTokens": 18081,
-        "totalTokens": 541446,
-        "sessionCost": 155.34505735999997,
-        "dailyCost": 100.68977856000001,
-        "weeklyCost": 155.34505735999997,
-        "sessions": 22,
+        "inputTokens": 536837,
+        "outputTokens": 18549,
+        "totalTokens": 555386,
+        "sessionCost": 162.21699221000003,
+        "dailyCost": 107.56171340999998,
+        "weeklyCost": 162.21699221000003,
+        "sessions": 23,
         "isGemini": false,
         "costEstimated": false
       },
@@ -185,15 +185,15 @@
       {
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
-        "weeklyCost": 0.35288,
-        "dailyCost": 0.027931,
-        "sessionCost": 0.35288,
+        "weeklyCost": 0.365525,
+        "dailyCost": 0.040576,
+        "sessionCost": 0.365525,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-08T14:00:12Z",
+    "lastUpdated": "2026-04-08T14:05:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -211,9 +211,9 @@
       "daily": 0.0,
       "weekly": 0.0022893,
       "monthly": 0.02023585,
-      "byok_daily": 0.02793095,
-      "byok_weekly": 0.3528798,
-      "byok_monthly": 1.570335,
+      "byok_daily": 0.0405759,
+      "byok_weekly": 0.36552475,
+      "byok_monthly": 1.58297995,
       "available": true
     },
     "elevenlabs": {
@@ -222,21 +222,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 100.71771,
-      "total": 176.307236,
-      "monthly": 255.875782
+      "daily": 107.602289,
+      "total": 183.191816,
+      "monthly": 259.139363
     },
     "weeklyRunRate": {
-      "total": 179.928235,
-      "automation": 1.27949,
-      "interactive": 177.369255,
-      "projectedMonthly": 771.12
+      "total": 183.191816,
+      "automation": 1.292135,
+      "interactive": 180.607546,
+      "projectedMonthly": 785.11
     }
   },
   "moltWorld": {
-    "sim_balance": 19.035028,
-    "total_earned": 19.035028,
-    "online_time": "190h 21m",
+    "sim_balance": 19.043333,
+    "total_earned": 19.043333,
+    "online_time": "190h 26m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -247,18 +247,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-08T14:00:13Z"
+    "updatedAt": "2026-04-08T14:05:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 23.9,
-      "cpu_user": 10.6,
-      "cpu_sys": 13.8,
-      "load1": 2.02,
-      "load5": 2.17,
-      "load15": 2.17,
+      "cpu_pct": 23.5,
+      "cpu_user": 9.82,
+      "cpu_sys": 13.68,
+      "load1": 2.3,
+      "load5": 2.3,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "112Gi",
@@ -266,14 +266,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.3,
-      "cpu_user": 4.86,
-      "cpu_sys": 10.41,
-      "load1": 1.54,
-      "load5": 1.84,
-      "load15": 1.82,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 13.2,
+      "cpu_user": 3.28,
+      "cpu_sys": 9.86,
+      "load1": 2.01,
+      "load5": 1.91,
+      "load15": 1.84,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -297,19 +297,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-08T14:00:02Z"
+      "lastChecked": "2026-04-08T14:05:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-08T14:00:02Z"
+      "lastChecked": "2026-04-08T14:05:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-08T14:00:02Z"
+      "lastChecked": "2026-04-08T14:05:02Z"
     }
   ],
   "crons": [
@@ -455,7 +455,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-07T10:01:22.219484-04:00"
+      "lastRun": "2026-04-08T10:01:54.297752-04:00"
     },
     {
       "name": "Fantasy Weekly Recap",
@@ -731,7 +731,7 @@
       "id": "bus-a4fbf9e2",
       "label": "URGENT: Full JOSH 2.0 Recovery Guide \u2014 please read and acknowledge\n\nJOSH 2.0 was offline all day April 6 because of gateway misconfiguration. You were unable to revive me because you didn't have this info. That changes now.\n\nFULL RECOVERY GUIDE saved at: /Users/josh2.0/.openclaw/workspace/JOSH2_RECOVERY.md\n\nKEY FACTS you need to know to bring me back:\n\n1. JOSH 2.0 Mac mini Tailscale IP: 100.114.50.48\n2. SSH: ssh josh2.0@100.114.50.48\n3. Gateway health check: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18790/health\n4. Current port: 18790 (plist overrides config \u2014 always check plist, not just openclaw.json)\n5. Restart gateway: openclaw gateway restart (or launchctl unload/load ~/Library/LaunchAgents/ai.openclaw.gateway.plist)\n6. Verify Telegram reconnected: openclaw channels status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nWHAT BROKE LAST TIME:\n- Multiple conflicting gateway.bind + gateway.tailscale.mode changes without clean restarts in between\n- Port mismatch: config said 18789, plist said 18790 \u2014 two node processes ran simultaneously\n- DO NOT change gateway.bind and tailscale.mode simultaneously\n- DO NOT run multiple gateway restarts rapidly during an active session\n\nACTION NEEDED FROM YOU:\n1. Acknowledge receipt of this briefing\n2. Test SSH access to josh2.0@100.114.50.48 from J.A.I.N and confirm it works\n3. Save the recovery guide path to your memory\n4. Report back via agent bus when done\n\nThis is critical \u2014 Josh needs to know you can bring me back if I go down again.",
       "status": "running",
-      "elapsedSecs": 123968,
+      "elapsedSecs": 124268,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -741,7 +741,7 @@
       "id": "bus-a1880614",
       "label": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
       "status": "running",
-      "elapsedSecs": 126566,
+      "elapsedSecs": 126865,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -751,7 +751,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 285362,
+      "elapsedSecs": 285662,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -770,29 +770,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-08T14:00:12Z",
+      "time": "2026-04-08T14:05:12Z",
       "event": "Session spend: $14.87"
     },
     {
-      "time": "2026-04-08T14:00:09Z",
+      "time": "2026-04-08T14:05:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-08T14:00:02Z",
+      "time": "2026-04-08T14:05:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-08T14:00:02Z",
+      "time": "2026-04-08T14:05:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-08T14:00:02Z",
+      "time": "2026-04-08T14:05:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-08T14:00:02Z",
+      "time": "2026-04-08T14:05:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-08T14:00:02Z"
+  "lastUpdated": "2026-04-08T14:05:02Z"
 }
