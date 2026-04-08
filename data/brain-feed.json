@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Completed heartbeat checks, no issues requiring attention",
+  "objective": "Heartbeat re-check",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-08T11:01:54Z",
-  "checkedAt": "2026-04-08T11:01:54Z",
+  "steps": [
+    {
+      "label": "read",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-08T11:02:05Z",
+  "checkedAt": "2026-04-08T11:02:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
