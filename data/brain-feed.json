@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "heartbeat mission control check complete",
+  "objective": "Run memory sync to J.A.I.N",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-08T07:56:55Z",
-  "checkedAt": "2026-04-08T07:56:55Z",
+  "steps": [
+    {
+      "label": "cron",
+      "status": "active",
+      "tool": "memory-sync-to-jain"
+    }
+  ],
+  "currentTool": "memory-sync-to-jain",
+  "updatedAt": "2026-04-08T08:00:55Z",
+  "checkedAt": "2026-04-08T08:00:55Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
