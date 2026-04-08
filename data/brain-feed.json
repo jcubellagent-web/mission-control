@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Memory promotion dream complete",
+  "objective": "Run heartbeat instructions",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-08T07:01:28Z",
-  "checkedAt": "2026-04-08T07:01:28Z",
+  "steps": [
+    {
+      "label": "read",
+      "status": "active",
+      "tool": "HEARTBEAT"
+    }
+  ],
+  "currentTool": "HEARTBEAT",
+  "updatedAt": "2026-04-08T07:01:36Z",
+  "checkedAt": "2026-04-08T07:01:36Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
