@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Completed heartbeat check with no issues requiring attention",
-    "updatedAt": "2026-04-08T21:40:02Z"
+    "updatedAt": "2026-04-08T21:45:02Z"
   },
   "contextWindow": {
     "usedTokens": 136350,
@@ -86,7 +86,7 @@
     "missionControlDirty": 6,
     "recentFiles": [],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-08T21:40:09Z"
+    "updatedAt": "2026-04-08T21:45:08Z"
   },
   "modelUsage": {
     "session": 14.874202,
@@ -193,7 +193,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-08T21:40:12Z",
+    "lastUpdated": "2026-04-08T21:45:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -234,9 +234,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 19.801694,
-    "total_earned": 19.801694,
-    "online_time": "198h 1m",
+    "sim_balance": 19.81,
+    "total_earned": 19.81,
+    "online_time": "198h 6m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -247,16 +247,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-08T21:40:13Z"
+    "updatedAt": "2026-04-08T21:45:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.7,
-      "cpu_user": 10.22,
-      "cpu_sys": 14.5,
-      "load1": 2.9,
-      "load5": 2.42,
-      "load15": 2.29,
+      "cpu_pct": 23.8,
+      "cpu_user": 9.61,
+      "cpu_sys": 14.17,
+      "load1": 1.89,
+      "load5": 2.12,
+      "load15": 2.18,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -266,11 +266,11 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 3.18,
-      "cpu_sys": 8.91,
-      "load1": 2.01,
-      "load5": 1.99,
+      "cpu_pct": 12.4,
+      "cpu_user": 2.95,
+      "cpu_sys": 9.46,
+      "load1": 1.81,
+      "load5": 1.94,
       "load15": 1.91,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
@@ -297,19 +297,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-08T21:40:02Z"
+      "lastChecked": "2026-04-08T21:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-08T21:40:02Z"
+      "lastChecked": "2026-04-08T21:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-08T21:40:02Z"
+      "lastChecked": "2026-04-08T21:45:02Z"
     }
   ],
   "crons": [
@@ -349,10 +349,9 @@
       "description": "Monday-only: checks for overnight injuries before weekly lineup lock. Alerts via @JCUBELL_bot.",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T13:01:12.440391-04:00"
+      "lastError": null
     },
     {
       "name": "Lineup Check",
@@ -360,10 +359,9 @@
       "description": "Monday-only: reviews weekly starting lineup, recommends optimal set before first pitch. Alerts via @JCUBELL_bot.",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T13:15:50.453870-04:00"
+      "lastError": null
     },
     {
       "name": "Waiver Scan (post-process)",
@@ -371,7 +369,7 @@
       "description": "Runs right after Sunday 8am waivers process \u2014 scans top FAs, recommends add/drops for the week.",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -381,7 +379,7 @@
       "description": "Final waiver scan Monday morning before first game locks \u2014 last chance to act.",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -391,11 +389,10 @@
       "description": "Submits all 7 daily missions via sorare_mlb_bot.py --missions-only",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T14:00:00"
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Competition Lineups",
@@ -403,11 +400,10 @@
       "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T15:00:00"
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -415,11 +411,10 @@
       "description": "Claims nightly Sorare rewards + preps next day missions",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T03:31:36.676746-04:00"
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -427,11 +422,10 @@
       "description": "Updates Sorare MLB Tracker Google Sheet with daily mission/lineup data. Reads logs + Supabase canonical.",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-07T23:30:50.279171-04:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare ML Training",
@@ -439,11 +433,10 @@
       "description": "Trains XGBoost model on latest Sorare MLB results data",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T02:01:54.309189-04:00"
+      "runStatus": "paused"
     },
     {
       "name": "X Feedback ML",
@@ -451,11 +444,10 @@
       "description": "Scores X post performance, updates strategy in SQLite + state.json",
       "category": "X Account",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T10:01:54.297752-04:00"
+      "runStatus": "paused"
     },
     {
       "name": "Fantasy Weekly Recap",
@@ -463,10 +455,9 @@
       "description": "Weekly recap: W/L result, points scored, standings update. Sent to @JCUBELL_bot.",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T02:03:09.031650-04:00"
+      "lastError": null
     },
     {
       "name": "JAIMES Daily Report",
@@ -485,11 +476,10 @@
       "description": "System health audit \u2014 disk, memory, process checks",
       "category": "Maintenance",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T05:51:07.249729-04:00"
+      "runStatus": "paused"
     },
     {
       "name": "Breaking News Scanner",
@@ -497,7 +487,7 @@
       "description": "Scans high-signal breaking news + Trump statements. Pushes score \u22658.5 to @JAIN_BREAKING_BOT",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -507,7 +497,7 @@
       "description": "Monitors X/Twitter watchlist for high-signal posts (score \u22658), pushes to @JAIN_BREAKING_BOT",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -517,11 +507,10 @@
       "description": "[Original] Futures + overnight signals",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T07:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "X Market Open",
@@ -529,11 +518,10 @@
       "description": "[Original] Market open macro take",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T08:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "X Mover",
@@ -541,11 +529,10 @@
       "description": "[Original] Mid-morning mover / stat",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T11:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "X Hot Take",
@@ -553,11 +540,10 @@
       "description": "[Original] Bold contrarian take \u2014 max reply bait",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T12:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "X Market Close",
@@ -565,11 +551,10 @@
       "description": "[Original] Close wrap + next-day outlook",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T17:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "X Prime Take",
@@ -577,7 +562,7 @@
       "description": "[Original] Prime time hot take",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -588,7 +573,7 @@
       "description": "[Original] One sharp insight to end the day",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -599,37 +584,36 @@
       "description": "[Reply] Targets @karpathy, @sama, @balajis, @saylor, @swyx, @amasad + AI/crypto niche \u2192 sharp contrarian replies via Gemini \u2192 Playwright browser post. Builds visibility in AI/agents+crypto niche.",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T17:00:00",
+      "runStatus": "upcoming",
       "multiRun": {
         "runs": [
           {
             "time": "9:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "11:00 AM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "1:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "3:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "5:00 PM",
             "label": "Strategic Reply",
-            "done": true
+            "done": false
           },
           {
             "time": "7:00 PM",
@@ -655,11 +639,10 @@
       "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)",
       "category": "X Account",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-08T15:00:00"
+      "runStatus": "missed"
     },
     {
       "name": "Intelligence Feed",
@@ -667,7 +650,7 @@
       "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "multiRun": {
@@ -735,7 +718,7 @@
       "id": "bus-a4fbf9e2",
       "label": "URGENT: Full JOSH 2.0 Recovery Guide \u2014 please read and acknowledge\n\nJOSH 2.0 was offline all day April 6 because of gateway misconfiguration. You were unable to revive me because you didn't have this info. That changes now.\n\nFULL RECOVERY GUIDE saved at: /Users/josh2.0/.openclaw/workspace/JOSH2_RECOVERY.md\n\nKEY FACTS you need to know to bring me back:\n\n1. JOSH 2.0 Mac mini Tailscale IP: 100.114.50.48\n2. SSH: ssh josh2.0@100.114.50.48\n3. Gateway health check: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18790/health\n4. Current port: 18790 (plist overrides config \u2014 always check plist, not just openclaw.json)\n5. Restart gateway: openclaw gateway restart (or launchctl unload/load ~/Library/LaunchAgents/ai.openclaw.gateway.plist)\n6. Verify Telegram reconnected: openclaw channels status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nWHAT BROKE LAST TIME:\n- Multiple conflicting gateway.bind + gateway.tailscale.mode changes without clean restarts in between\n- Port mismatch: config said 18789, plist said 18790 \u2014 two node processes ran simultaneously\n- DO NOT change gateway.bind and tailscale.mode simultaneously\n- DO NOT run multiple gateway restarts rapidly during an active session\n\nACTION NEEDED FROM YOU:\n1. Acknowledge receipt of this briefing\n2. Test SSH access to josh2.0@100.114.50.48 from J.A.I.N and confirm it works\n3. Save the recovery guide path to your memory\n4. Report back via agent bus when done\n\nThis is critical \u2014 Josh needs to know you can bring me back if I go down again.",
       "status": "running",
-      "elapsedSecs": 151569,
+      "elapsedSecs": 151873,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -745,7 +728,7 @@
       "id": "bus-a1880614",
       "label": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
       "status": "running",
-      "elapsedSecs": 154166,
+      "elapsedSecs": 154470,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -755,7 +738,7 @@
       "id": "bus-221e910b",
       "label": "TEST",
       "status": "running",
-      "elapsedSecs": 312962,
+      "elapsedSecs": 313266,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -774,29 +757,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-08T21:40:12Z",
+      "time": "2026-04-08T21:45:12Z",
       "event": "Session spend: $14.87"
     },
     {
-      "time": "2026-04-08T21:40:09Z",
+      "time": "2026-04-08T21:45:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-08T21:40:02Z",
+      "time": "2026-04-08T21:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-08T21:40:02Z",
+      "time": "2026-04-08T21:45:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-08T21:40:02Z",
+      "time": "2026-04-08T21:45:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-08T21:40:02Z",
+      "time": "2026-04-08T21:45:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-08T21:40:02Z"
+  "lastUpdated": "2026-04-08T21:45:02Z"
 }
