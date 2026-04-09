@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "reviewed inbound media for Logan bachelor party videos \u2014 none received yet, asking Josh to resend",
+  "objective": "waiting for Logan bachelor party videos to arrive",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-09T23:43:07Z",
-  "checkedAt": "2026-04-09T23:43:07Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-09T23:48:11Z",
+  "checkedAt": "2026-04-09T23:48:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
