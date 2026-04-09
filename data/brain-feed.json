@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Completed heartbeat review and flagged X suspension email",
+  "objective": "Run heartbeat review",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-09T21:08:32Z",
-  "checkedAt": "2026-04-09T21:08:32Z",
+  "steps": [
+    {
+      "label": "heartbeat",
+      "status": "active",
+      "tool": "review"
+    }
+  ],
+  "currentTool": "review",
+  "updatedAt": "2026-04-09T21:09:15Z",
+  "checkedAt": "2026-04-09T21:09:15Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
