@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "completed scheduled memory sync to J.A.I.N and verified fresh backup files at 12:01",
+  "objective": "heartbeat review",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-10T16:02:15Z",
-  "checkedAt": "2026-04-10T16:02:15Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "mission_control_check"
+    }
+  ],
+  "currentTool": "mission_control_check",
+  "updatedAt": "2026-04-10T16:03:56Z",
+  "checkedAt": "2026-04-10T16:03:56Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
