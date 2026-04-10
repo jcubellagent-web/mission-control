@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Sorare ML pipeline built - player ranker, champion submit script, Sheets logging, crons fixed on JAIN",
+  "objective": "Run scheduled memory sync to J.A.I.N",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-10T05:36:45Z",
-  "checkedAt": "2026-04-10T05:36:45Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "sync_memory_to_jain"
+    }
+  ],
+  "currentTool": "sync_memory_to_jain",
+  "updatedAt": "2026-04-10T06:01:11Z",
+  "checkedAt": "2026-04-10T06:01:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
