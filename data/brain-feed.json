@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "finished scheduled heartbeat review, confirmed only Mission Control was due, updated heartbeat-state and task tracker, nothing needs attention",
+  "objective": "running scheduled memory sync to J.A.I.N",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-10T17:05:23Z",
-  "checkedAt": "2026-04-10T17:05:23Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "memory-sync-to-jain"
+    }
+  ],
+  "currentTool": "memory-sync-to-jain",
+  "updatedAt": "2026-04-10T18:01:39Z",
+  "checkedAt": "2026-04-10T18:01:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Sonnet 4.6"
 }
