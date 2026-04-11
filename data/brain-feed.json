@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "memory sync to J.A.I.N verified successfully",
+  "objective": "running heartbeat review",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-11T11:01:52Z",
-  "checkedAt": "2026-04-11T11:01:52Z",
+  "steps": [
+    {
+      "label": "heartbeat",
+      "status": "active",
+      "tool": "review"
+    }
+  ],
+  "currentTool": "review",
+  "updatedAt": "2026-04-11T11:03:25Z",
+  "checkedAt": "2026-04-11T11:03:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
