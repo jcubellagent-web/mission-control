@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Completed heartbeat review, confirmed Mission Control is fresh, flagged the 401 Prime overlap as within 2 hours, and logged that Gmail heartbeat auth failed with invalid_grant.",
+  "objective": "check OpenClaw update path and active memory plugin",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-11T21:02:34Z",
-  "checkedAt": "2026-04-11T21:02:34Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-11T21:59:37Z",
+  "checkedAt": "2026-04-11T21:59:37Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
