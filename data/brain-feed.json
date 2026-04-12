@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "dream diary entry written from provided memory fragments",
+  "objective": "writing dream diary entry from provided fragments",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-12T11:25:37Z",
-  "checkedAt": "2026-04-12T11:25:37Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-12T11:26:03Z",
+  "checkedAt": "2026-04-12T11:26:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Unknown"
 }
