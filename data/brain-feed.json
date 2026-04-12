@@ -1,23 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-05T22:56:57Z",
-  "objective": "Handled memory sync completion event",
-  "status": "done",
+  "objective": "Run memory sync backup to J.A.I.N and confirm success",
+  "status": "active",
   "steps": [
     {
-      "label": "Checked result",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Updated task tracker",
-      "status": "done",
-      "tool": "edit"
+      "label": "exec",
+      "status": "active",
+      "tool": "sync_memory_to_jain"
     }
   ],
-  "currentTool": "edit",
-  "updatedAt": "2026-04-12T12:29:48Z",
-  "checkedAt": "2026-04-12T12:29:48Z",
+  "currentTool": "sync_memory_to_jain",
+  "updatedAt": "2026-04-12T13:01:09Z",
+  "checkedAt": "2026-04-12T13:01:09Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "Unknown"
 }
