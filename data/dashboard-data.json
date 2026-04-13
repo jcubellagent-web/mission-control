@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "inspecting desktop Mission Control UI on screen",
+    "objective": "handling async desktop brain feed push completion internally",
     "status": "active",
     "steps": [
       {
@@ -15,24 +15,38 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-13T01:59:40Z",
-    "checkedAt": "2026-04-13T01:59:40Z",
+    "updatedAt": "2026-04-13T02:05:01Z",
+    "checkedAt": "2026-04-13T02:05:01Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "inspecting desktop Mission Control UI on screen",
-    "updatedAt": "2026-04-13T02:00:02Z"
+    "context": "handling async desktop brain feed push completion internally",
+    "updatedAt": "2026-04-13T02:05:02Z"
   },
   "contextWindow": {
-    "usedTokens": 127038,
+    "usedTokens": 143679,
     "limitTokens": 200000,
-    "pct": 0.6352,
+    "pct": 0.7184,
     "model": "gpt-5.4",
     "status": "red"
   },
   "agentBus": [
+    {
+      "id": "5564716a-3d28-4ca1-abca-81f5f69c3d7b",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "queued",
+      "payload": {
+        "task": "Stand down: prior forwarded voice note was accidental, no action needed",
+        "details": "Josh accidentally forwarded a voice/context message that was intended for JOSH 2.0, not JAIMES. Please disregard that message, treat it as a no-op, and do not send any further user-facing follow-up based on it. No response needed unless there is a real new task addressed directly to JAIMES."
+      },
+      "created_at": "2026-04-13T02:03:52.236648+00:00",
+      "result": null,
+      "error_log": null
+    },
     {
       "id": "a4fbf9e2-7567-41e2-b750-ca74aa8b1569",
       "origin_node": "JOSH_2_0",
@@ -80,34 +94,34 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T01:58:59Z",
+    "lastTriggeredAt": "2026-04-13T02:03:59Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 127038,
+    "usedTokens": 138651,
     "limitTokens": 200000,
-    "pct": 0.6352
+    "pct": 0.6933
   },
   "codingVisibility": {
     "workspaceDirty": 34,
-    "missionControlDirty": 6,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T02:00:08Z"
+    "updatedAt": "2026-04-13T02:05:08Z"
   },
   "modelUsage": {
-    "session": 1.866845,
-    "daily": 20.074246,
+    "session": 3.339025,
+    "daily": 23.713124,
     "weekly": 783.847162,
     "monthly": 859.503864,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 20.074246000000002
+        "cost": 23.713123999999993
       },
       {
         "name": "gpt-5.3-codex",
@@ -134,13 +148,13 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1830463,
-        "outputTokens": 202346,
-        "totalTokens": 2032809,
-        "sessionCost": 20.074246000000002,
-        "dailyCost": 20.074246000000002,
-        "weeklyCost": 20.074246000000002,
-        "sessions": 95,
+        "inputTokens": 1995888,
+        "outputTokens": 205870,
+        "totalTokens": 2201758,
+        "sessionCost": 23.713123999999993,
+        "dailyCost": 23.713123999999993,
+        "weeklyCost": 23.713123999999993,
+        "sessions": 96,
         "isGemini": false,
         "costEstimated": false
       },
@@ -190,7 +204,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T02:00:13Z",
+    "lastUpdated": "2026-04-13T02:05:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -219,8 +233,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 20.088032,
-      "total": 21.448088,
+      "daily": 23.72691,
+      "total": 25.086966,
       "monthly": 861.507818
     },
     "weeklyRunRate": {
@@ -231,9 +245,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.835056,
-    "total_earned": 29.835056,
-    "online_time": "298h 21m",
+    "sim_balance": 29.843333,
+    "total_earned": 29.843333,
+    "online_time": "298h 26m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -244,18 +258,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T02:00:14Z"
+    "updatedAt": "2026-04-13T02:05:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.3,
-      "cpu_user": 11.7,
-      "cpu_sys": 13.85,
-      "load1": 3.59,
-      "load5": 2.93,
-      "load15": 2.64,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 24.7,
+      "cpu_user": 9.94,
+      "cpu_sys": 14.76,
+      "load1": 2.06,
+      "load5": 2.3,
+      "load15": 2.43,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "102Gi",
@@ -263,14 +277,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 19.8,
-      "cpu_user": 8.38,
-      "cpu_sys": 11.37,
-      "load1": 2.28,
-      "load5": 1.88,
-      "load15": 1.82,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 13.3,
+      "cpu_user": 4.0,
+      "cpu_sys": 9.33,
+      "load1": 1.91,
+      "load5": 1.9,
+      "load15": 1.84,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -294,19 +308,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:00:02Z"
+      "lastChecked": "2026-04-13T02:05:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:00:02Z"
+      "lastChecked": "2026-04-13T02:05:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T02:00:02Z"
+      "lastChecked": "2026-04-13T02:05:02Z"
     }
   ],
   "crons": [
@@ -731,6 +745,16 @@
   ],
   "activeAgents": [
     {
+      "id": "bus-5564716a",
+      "label": "Stand down: prior forwarded voice note was accidental, no action needed",
+      "status": "running",
+      "elapsedSecs": 82,
+      "tool": "bus",
+      "model": "QUEUED",
+      "agentLabel": "JAIMES",
+      "agentClass": "agent"
+    },
+    {
       "id": "coding-visibility",
       "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "running",
@@ -742,7 +766,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 64%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 69%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -753,29 +777,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T02:00:13Z",
-      "event": "Session spend: $1.87"
+      "time": "2026-04-13T02:05:12Z",
+      "event": "Session spend: $3.34"
     },
     {
-      "time": "2026-04-13T02:00:08Z",
+      "time": "2026-04-13T02:05:08Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T02:00:08Z",
+      "time": "2026-04-13T02:05:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T02:00:02Z",
+      "time": "2026-04-13T02:05:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T02:00:02Z",
+      "time": "2026-04-13T02:05:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T02:00:02Z",
+      "time": "2026-04-13T02:05:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T02:00:02Z"
+  "lastUpdated": "2026-04-13T02:05:02Z"
 }
