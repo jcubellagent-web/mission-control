@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "auditing Mission Control model usage and Today's Jobs, taking a fresh screenshot, and fixing any UI/data issues",
-    "updatedAt": "2026-04-13T17:35:02Z"
+    "updatedAt": "2026-04-13T17:40:02Z"
   },
   "contextWindow": {
     "usedTokens": 171856,
@@ -117,9 +117,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 38,
-    "missionControlDirty": 3,
+    "missionControlDirty": 9,
     "recentFiles": [
       "mission-control/index.html",
+      "mission-control/scripts/update_mission_control.py",
       "scripts/context_watchdog.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
@@ -128,7 +129,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 6m",
+        "Resets in 4h 1m",
         "Weekly: 100% left [============]",
         "Pace: 7% in reserve | Expected 7% used | Lasts until reset",
         "Resets in 6d 11h",
@@ -139,11 +140,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 6m",
+      "sessionReset": "4h 1m",
       "weeklyReset": "6d 11h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T17:35:04Z"
+    "updatedAt": "2026-04-13T17:40:05Z"
   },
   "modelUsage": {
     "session": 4.841621,
@@ -237,7 +238,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T17:35:08Z",
+    "lastUpdated": "2026-04-13T17:40:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -278,9 +279,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.393222,
-    "total_earned": 31.393222,
-    "online_time": "313h 55m",
+    "sim_balance": 31.401611,
+    "total_earned": 31.401611,
+    "online_time": "314h 0m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -291,31 +292,31 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T17:35:08Z"
+    "updatedAt": "2026-04-13T17:40:10Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 27.2,
-      "cpu_user": 11.81,
-      "cpu_sys": 15.38,
-      "load1": 2.4,
-      "load5": 2.12,
-      "load15": 2.17,
+      "cpu_pct": 30.8,
+      "cpu_user": 14.17,
+      "cpu_sys": 16.58,
+      "load1": 2.52,
+      "load5": 2.18,
+      "load15": 2.16,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "103Gi",
-      "disk_pct": 11,
+      "disk_avail": "108Gi",
+      "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.8,
-      "cpu_user": 1.8,
-      "cpu_sys": 9.0,
-      "load1": 1.53,
-      "load5": 1.68,
-      "load15": 1.79,
+      "cpu_pct": 13.8,
+      "cpu_user": 3.44,
+      "cpu_sys": 10.34,
+      "load1": 1.3,
+      "load5": 1.43,
+      "load15": 1.63,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -341,19 +342,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T17:35:02Z"
+      "lastChecked": "2026-04-13T17:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T17:35:02Z"
+      "lastChecked": "2026-04-13T17:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T17:35:02Z"
+      "lastChecked": "2026-04-13T17:40:02Z"
     }
   ],
   "crons": [
@@ -406,7 +407,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "J.A.I.N Medic",
@@ -463,48 +464,56 @@
             "time": "7:15 AM",
             "mode": "Weekday",
             "label": "Market open brief",
-            "done": true
+            "past": true,
+            "done": false
           },
           {
             "time": "10:00 AM",
             "mode": "Weekday",
             "label": "Mid-morning brief",
-            "done": true
+            "past": true,
+            "done": false
           },
           {
             "time": "12:00 PM",
             "mode": "Weekday",
             "label": "Midday brief",
-            "done": true
+            "past": true,
+            "done": false
           },
           {
             "time": "2:00 PM",
             "mode": "Weekday",
             "label": "Pulse brief",
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Daily",
             "label": "Close brief",
+            "past": false,
             "done": false
           },
           {
             "time": "6:00 PM",
             "mode": "Weekday",
             "label": "Evening brief",
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Daily",
             "label": "Late brief",
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Daily",
             "label": "Wrap brief",
+            "past": false,
             "done": false
           }
         ]
@@ -539,7 +548,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "Log Rotation",
@@ -570,7 +579,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "X Pre-Market",
@@ -630,26 +639,31 @@
       "errors": 0,
       "lastError": null,
       "lastRun": "2026-04-13T13:00:00",
+      "runStatus": "done",
       "multiRun": {
         "runs": [
           {
             "time": "1:00 PM",
             "label": "Quote Tweet",
+            "past": true,
             "done": true
           },
           {
             "time": "3:00 PM",
             "label": "Quote Tweet",
+            "past": false,
             "done": false
           },
           {
             "time": "6:00 PM",
             "label": "Quote Tweet",
+            "past": false,
             "done": false
           },
           {
             "time": "8:00 PM",
             "label": "Quote Tweet",
+            "past": false,
             "done": false
           }
         ]
@@ -773,7 +787,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "Sorare ML Training",
@@ -808,7 +822,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "Sorare Daily Prep",
@@ -819,7 +833,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "Sorare ML Missions",
@@ -925,7 +939,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "due"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -971,10 +985,43 @@
       "lastError": null
     }
   ],
+  "trackedTasks": [
+    {
+      "id": "T-20260413-660",
+      "title": "Audit Mission Control model usage and Today\u2019s Jobs",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-04-13 13:26",
+      "updatedAt": "2026-04-13 13:26",
+      "notes": "Josh asked for a full check of the Model Usage module, a fresh screenshot of Mission Control on JOSH 2.0, UI fixes for anything visibly wrong, and a deep dive on Today\u2019s Jobs model accuracy and progress tracking.",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "T-20260409-94",
+      "title": "Rebalance GW5 lineups",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-04-09 17:35",
+      "updatedAt": "2026-04-09 18:07",
+      "background": "crisp-ocean (99378) on JOSH Mac mini \u2014 `bash tmp/retry_sorare_gw5_rebalance_2026.sh`",
+      "notes": "Waiting for Sorare leaderboard submission to open.",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "T-20260409-89",
+      "title": "Review X suspension notice",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-04-09 17:04",
+      "updatedAt": "2026-04-09 17:04",
+      "notes": "Decide appeal or recovery path for @AgentJc11443.",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, scripts/context_watchdog.py",
+      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -995,29 +1042,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T17:35:08Z",
+      "time": "2026-04-13T17:40:09Z",
       "event": "Session spend: $4.84"
     },
     {
-      "time": "2026-04-13T17:35:04Z",
-      "event": "Coding: mission-control/index.html, scripts/context_watchdog.py"
+      "time": "2026-04-13T17:40:05Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T17:35:04Z",
+      "time": "2026-04-13T17:40:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T17:35:02Z",
+      "time": "2026-04-13T17:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T17:35:02Z",
+      "time": "2026-04-13T17:40:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T17:35:02Z",
+      "time": "2026-04-13T17:40:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T17:35:02Z"
+  "lastUpdated": "2026-04-13T17:40:02Z"
 }
