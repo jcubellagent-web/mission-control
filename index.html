@@ -3090,6 +3090,82 @@
             text-align: center;
             padding: 10px 0;
         }
+        .memory-roadmap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .memory-roadmap-scale,
+        .memory-roadmap-track {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .memory-roadmap-scale {
+            margin-bottom: 2px;
+        }
+        .memory-roadmap-week {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.44);
+            text-align: center;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .memory-roadmap-week.current {
+            color: #7dd3fc;
+            border-bottom-color: rgba(125,211,252,0.45);
+        }
+        .memory-roadmap-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .memory-roadmap-row-head {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .memory-roadmap-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.88);
+            letter-spacing: 0.01em;
+        }
+        .memory-roadmap-note {
+            font-size: 10px;
+            line-height: 1.35;
+            color: rgba(255,255,255,0.5);
+        }
+        .memory-roadmap-seg {
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.05);
+        }
+        .memory-roadmap-seg.active {
+            border-color: rgba(56,189,248,0.55);
+            background: linear-gradient(90deg, rgba(14,165,233,0.95), rgba(45,212,191,0.92));
+            box-shadow: 0 0 14px rgba(34,211,238,0.22);
+        }
+        .memory-roadmap-seg.planned {
+            border-color: rgba(255,255,255,0.16);
+            background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.1));
+        }
+        .memory-roadmap-seg.future {
+            border-color: rgba(251,191,36,0.22);
+            background: linear-gradient(90deg, rgba(251,191,36,0.16), rgba(255,255,255,0.06));
+        }
+        .memory-roadmap-footer {
+            margin-top: 2px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 10px;
+            line-height: 1.4;
+            color: rgba(255,255,255,0.46);
+        }
         .chat-bubble-row {
             display: flex;
             align-items: flex-end;
@@ -4412,20 +4488,20 @@
                         </button>
                         <div id="unified-activity-log"></div>
                     </div>
-                    <!-- Agent Comms Chat Feed -->
+                    <!-- Memory roadmap -->
                     <div class="agent-chat-section">
                     <div class="agent-chat-header">
                         <div class="agent-chat-heading">
-                            <span class="agent-chat-icon">💬</span>
-                            <span class="agent-chat-title">AGENT COMMS</span>
+                            <span class="agent-chat-icon">🗺️</span>
+                            <span class="agent-chat-title">MEMORY ROADMAP</span>
                             <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
                         </div>
                         <div class="agent-chat-tools">
                             <span id="agent-chat-agents" class="agent-chat-agents"></span>
-                            <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand agent comms">↗</button>
+                            <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand memory roadmap">↗</button>
                         </div>
                     </div>
-                        <div id="agent-chat-feed"><div class="agent-chat-empty">No recent comms.</div></div>
+                        <div id="agent-chat-feed"><div class="agent-chat-empty">Loading roadmap…</div></div>
                     </div>
                 </div>
                 <!-- Mobile X Growth Card — phone-mode only -->
@@ -5437,31 +5513,77 @@
             };
         }
 
+        function buildMemoryRoadmapMarkup(expanded = false) {
+            const roadmap = [
+                {
+                    title: 'Week 1 · Active Memory soak',
+                    note: 'Run the safe setup in real conversations, watch recall quality, latency, and weirdness.',
+                    weeks: [1],
+                    tone: 'active',
+                },
+                {
+                    title: 'Week 2 · Memory hygiene + tuning',
+                    note: 'Tighten durable memory, trim noise, and validate which recall patterns actually help.',
+                    weeks: [1, 2],
+                    tone: 'planned',
+                },
+                {
+                    title: 'Week 3 · QMD pilot',
+                    note: 'Test the stronger retrieval engine on current memory files only, no session indexing yet.',
+                    weeks: [3],
+                    tone: 'planned',
+                },
+                {
+                    title: 'Week 4 · Session indexing decision',
+                    note: 'Only add transcript recall if QMD clearly earns it. Keep helper transcript persistence off unless debugging.',
+                    weeks: [4],
+                    tone: 'future',
+                },
+            ];
+
+            const scale = `<div class="memory-roadmap-scale">${[1, 2, 3, 4].map(week => `<span class="memory-roadmap-week${week === 1 ? ' current' : ''}">W${week}</span>`).join('')}</div>`;
+
+            const rows = roadmap.map(item => `
+                <div class="memory-roadmap-row">
+                    <div class="memory-roadmap-row-head">
+                        <div class="memory-roadmap-title">${escapeHtml(item.title)}</div>
+                        <div class="memory-roadmap-note">${escapeHtml(item.note)}</div>
+                    </div>
+                    <div class="memory-roadmap-track">
+                        ${[1, 2, 3, 4].map(week => {
+                            const tone = item.weeks.includes(week) ? item.tone : '';
+                            return `<span class="memory-roadmap-seg${tone ? ' ' + tone : ''}"></span>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            const footer = expanded
+                ? '<div class="memory-roadmap-footer">Target state: Active Memory first, then cleaner durable memory, then QMD only if it materially improves recall, then transcript indexing only if it proves worth the added complexity.</div>'
+                : '<div class="memory-roadmap-footer">Current stance: safe rollout first, stronger retrieval later, transcript recall only if it earns its keep.</div>';
+
+            return {
+                html: `<div class="memory-roadmap">${scale}${rows}${footer}</div>`,
+                meta: 'Weeks 1-4',
+            };
+        }
+
         function renderAgentChatFeed(entries) {
             const el = document.getElementById('agent-chat-feed');
             const dot = document.getElementById('agent-chat-live-dot');
             if (!el) return;
 
-            const items = getRenderableAgentComms(entries);
-            const compact = buildAgentChatFeedMarkup(items, 6);
-            const expanded = buildAgentChatFeedMarkup(items, 24);
+            const compact = buildMemoryRoadmapMarkup(false);
+            const expanded = buildMemoryRoadmapMarkup(true);
             window._moduleModalCommsHtml = expanded.html;
 
-            if (!items.length) {
-                el.innerHTML = '<div class="agent-chat-empty" style="padding:16px 0;text-align:center"><div style="font-size:20px;margin-bottom:6px;opacity:0.3">🤖</div><div style="font-size:11px;opacity:0.3;letter-spacing:0.05em">No agent comms yet</div></div>';
-                if (dot) dot.classList.remove('live');
-                return;
-            }
-
-            if (dot) dot.classList.toggle('live', compact.hasActive);
+            if (dot) dot.classList.add('live');
 
             const agentsEl = document.getElementById('agent-chat-agents');
-            if (agentsEl) agentsEl.textContent = compact.agentsText;
+            if (agentsEl) agentsEl.textContent = compact.meta;
 
             el.innerHTML = compact.html;
-
-            // Auto-scroll to bottom
-            el.scrollTop = el.scrollHeight;
+            el.scrollTop = 0;
         }
 
         function openModuleModal(kind) {
@@ -5490,10 +5612,9 @@
                 const liveHealth = document.getElementById('system-health-card')?.innerHTML || '';
                 body = `<div class="module-modal-stack">${window._moduleHealthHtml || ''}${liveHealth ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live node status</div>${liveHealth}</div>` : ''}</div>` || body;
             } else if (kind === 'comms') {
-                title = 'Agent Comms';
-                const activity = document.getElementById('unified-activity-log')?.innerHTML || '';
-                const comms = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
-                body = `<div class="module-modal-stack">${activity ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live Coordination</div>${activity}</div>` : ''}${comms ? `<div class="module-modal-panel"><div class="module-modal-section-title">Conversation Feed</div><div class="module-modal-chat">${comms}</div></div>` : ''}</div>`;
+                title = 'Memory Roadmap';
+                const roadmap = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
+                body = `<div class="module-modal-stack">${roadmap ? `<div class="module-modal-panel"><div class="module-modal-section-title">3-4 Week Rollout</div><div class="module-modal-chat">${roadmap}</div></div>` : body}</div>`;
             }
 
             titleEl.textContent = title;
