@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "publishing JAIMES Mission Control fix and cleaning stale agent entries",
+    "objective": "fixing Mission Control brain feed visibility and agent comms cutoff",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-13T01:43:52Z",
-    "checkedAt": "2026-04-13T01:43:52Z",
+    "updatedAt": "2026-04-13T01:47:35Z",
+    "checkedAt": "2026-04-13T01:47:35Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "publishing JAIMES Mission Control fix and cleaning stale agent entries",
-    "updatedAt": "2026-04-13T01:45:02Z"
+    "context": "fixing Mission Control brain feed visibility and agent comms cutoff",
+    "updatedAt": "2026-04-13T01:49:44Z"
   },
   "contextWindow": {
-    "usedTokens": 82007,
+    "usedTokens": 99794,
     "limitTokens": 200000,
-    "pct": 0.41,
+    "pct": 0.499,
     "model": "gpt-5.4",
     "status": "amber"
   },
@@ -89,24 +89,25 @@
   },
   "codingVisibility": {
     "workspaceDirty": 34,
-    "missionControlDirty": 7,
+    "missionControlDirty": 9,
     "recentFiles": [
+      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T01:45:08Z"
+    "updatedAt": "2026-04-13T01:49:50Z"
   },
   "modelUsage": {
-    "session": 0.727961,
-    "daily": 18.935362,
+    "session": 1.730324,
+    "daily": 19.937725,
     "weekly": 783.847162,
     "monthly": 859.503864,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 18.935361500000003
+        "cost": 19.937725
       },
       {
         "name": "gpt-5.3-codex",
@@ -128,12 +129,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1864878,
-        "outputTokens": 209016,
-        "totalTokens": 2073894,
-        "sessionCost": 18.935361500000003,
-        "dailyCost": 18.935361500000003,
-        "weeklyCost": 18.935361500000003,
+        "inputTokens": 1929504,
+        "outputTokens": 202144,
+        "totalTokens": 2131648,
+        "sessionCost": 19.937725,
+        "dailyCost": 19.937725,
+        "weeklyCost": 19.937725,
         "sessions": 95,
         "isGemini": false,
         "costEstimated": false
@@ -174,7 +175,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-13T01:45:12Z",
+    "lastUpdated": "2026-04-13T01:49:53Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -203,8 +204,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 18.935362,
-      "total": 20.295417,
+      "daily": 19.937725,
+      "total": 21.297781,
       "monthly": 861.494031
     },
     "weeklyRunRate": {
@@ -215,9 +216,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.81,
-    "total_earned": 29.81,
-    "online_time": "298h 6m",
+    "sim_balance": 29.817833,
+    "total_earned": 29.817833,
+    "online_time": "298h 10m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -228,18 +229,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T01:45:12Z"
+    "updatedAt": "2026-04-13T01:49:54Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 25.1,
-      "cpu_user": 11.31,
-      "cpu_sys": 13.8,
-      "load1": 2.17,
-      "load5": 2.41,
-      "load15": 2.45,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 26.5,
+      "cpu_user": 12.33,
+      "cpu_sys": 14.11,
+      "load1": 2.41,
+      "load5": 2.39,
+      "load15": 2.41,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -247,14 +248,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.6,
-      "cpu_user": 5.84,
-      "cpu_sys": 9.74,
-      "load1": 1.63,
-      "load5": 1.76,
-      "load15": 1.85,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 12.1,
+      "cpu_user": 2.68,
+      "cpu_sys": 9.39,
+      "load1": 1.82,
+      "load5": 1.75,
+      "load15": 1.81,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -263,8 +264,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "auth_expired",
+    "message": "Re-auth required"
   },
   "devices": [
     {
@@ -278,19 +279,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T01:45:02Z"
+      "lastChecked": "2026-04-13T01:49:44Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T01:45:02Z"
+      "lastChecked": "2026-04-13T01:49:44Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T01:45:02Z"
+      "lastChecked": "2026-04-13T01:49:44Z"
     }
   ],
   "crons": [
@@ -715,7 +716,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh",
+      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -736,29 +737,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T01:45:12Z",
-      "event": "Session spend: $0.73"
+      "time": "2026-04-13T01:49:53Z",
+      "event": "Session spend: $1.73"
     },
     {
-      "time": "2026-04-13T01:45:08Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh"
+      "time": "2026-04-13T01:49:50Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T01:45:08Z",
+      "time": "2026-04-13T01:49:50Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T01:45:02Z",
+      "time": "2026-04-13T01:49:44Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T01:45:02Z",
+      "time": "2026-04-13T01:49:44Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T01:45:02Z",
+      "time": "2026-04-13T01:49:44Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T01:45:02Z"
+  "lastUpdated": "2026-04-13T01:49:44Z"
 }
