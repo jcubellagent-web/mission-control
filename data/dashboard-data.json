@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "audit /new startup latency and optimize",
+    "objective": "audited and optimized /new startup flow",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-13T04:38:41Z",
-    "checkedAt": "2026-04-13T04:38:41Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-13T04:41:51Z",
+    "checkedAt": "2026-04-13T04:41:51Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "audit /new startup latency and optimize",
-    "updatedAt": "2026-04-13T04:40:02Z"
+    "context": "audited and optimized /new startup flow",
+    "updatedAt": "2026-04-13T04:45:02Z"
   },
   "contextWindow": {
-    "usedTokens": 34737,
+    "usedTokens": 59531,
     "limitTokens": 200000,
-    "pct": 0.1737,
+    "pct": 0.2977,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -146,18 +140,18 @@
       "weeklyReset": "7d",
       "summary": "Pro \u00b7 100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T04:40:05Z"
+    "updatedAt": "2026-04-13T04:45:04Z"
   },
   "modelUsage": {
-    "session": 0.191298,
-    "daily": 5.164146,
+    "session": 0.596572,
+    "daily": 5.569421,
     "weekly": 35.003747,
     "monthly": 894.507611,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 25.639761999999997
+        "cost": 26.045036500000002
       },
       {
         "name": "gpt-5.3-codex",
@@ -184,12 +178,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1916496,
-        "outputTokens": 211429,
-        "totalTokens": 2127925,
-        "sessionCost": 25.639761999999997,
-        "dailyCost": 5.164146499999999,
-        "weeklyCost": 25.639761999999997,
+        "inputTokens": 1898120,
+        "outputTokens": 220232,
+        "totalTokens": 2118352,
+        "sessionCost": 26.045036500000002,
+        "dailyCost": 5.569421,
+        "weeklyCost": 26.045036500000002,
         "sessions": 98,
         "isGemini": false,
         "costEstimated": false
@@ -240,7 +234,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T04:40:08Z",
+    "lastUpdated": "2026-04-13T04:45:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -269,8 +263,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 5.182872,
-      "total": 27.018543,
+      "daily": 5.588147,
+      "total": 27.423818,
       "monthly": 896.516504
     },
     "weeklyRunRate": {
@@ -281,9 +275,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.101556,
-    "total_earned": 30.101556,
-    "online_time": "301h 0m",
+    "sim_balance": 30.109889,
+    "total_earned": 30.109889,
+    "online_time": "301h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -294,18 +288,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T04:40:08Z"
+    "updatedAt": "2026-04-13T04:45:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 27.2,
-      "cpu_user": 11.3,
-      "cpu_sys": 15.85,
-      "load1": 2.78,
-      "load5": 2.43,
-      "load15": 2.38,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "cpu_pct": 25.4,
+      "cpu_user": 9.83,
+      "cpu_sys": 15.57,
+      "load1": 2.08,
+      "load5": 2.15,
+      "load15": 2.26,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "104Gi",
@@ -313,12 +307,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 2.59,
-      "cpu_sys": 9.9,
-      "load1": 1.64,
-      "load5": 1.69,
-      "load15": 1.81,
+      "cpu_pct": 11.3,
+      "cpu_user": 2.64,
+      "cpu_sys": 9.27,
+      "load1": 1.74,
+      "load5": 1.75,
+      "load15": 1.8,
       "ram_used_gb": 12.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -344,19 +338,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T04:40:02Z"
+      "lastChecked": "2026-04-13T04:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T04:40:02Z"
+      "lastChecked": "2026-04-13T04:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T04:40:02Z"
+      "lastChecked": "2026-04-13T04:45:02Z"
     }
   ],
   "crons": [
@@ -774,7 +768,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 8218,
+      "elapsedSecs": 8518,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -784,7 +778,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 9378,
+      "elapsedSecs": 9678,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -813,29 +807,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T04:40:08Z",
-      "event": "Session spend: $0.19"
+      "time": "2026-04-13T04:45:07Z",
+      "event": "Session spend: $0.60"
     },
     {
-      "time": "2026-04-13T04:40:05Z",
+      "time": "2026-04-13T04:45:04Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T04:40:05Z",
+      "time": "2026-04-13T04:45:04Z",
       "event": "CodexBar: Pro \u00b7 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T04:40:02Z",
+      "time": "2026-04-13T04:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T04:40:02Z",
+      "time": "2026-04-13T04:45:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T04:40:02Z",
+      "time": "2026-04-13T04:45:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T04:40:02Z"
+  "lastUpdated": "2026-04-13T04:45:02Z"
 }
