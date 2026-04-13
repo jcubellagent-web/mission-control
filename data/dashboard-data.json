@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "fixed desktop summary card clipping in the Model Usage module",
+    "objective": "transcribe Josh voice note about model usage visualization",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T18:43:54Z",
-    "checkedAt": "2026-04-13T18:43:54Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-13T18:45:09Z",
+    "checkedAt": "2026-04-13T18:45:09Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "fixed desktop summary card clipping in the Model Usage module",
-    "updatedAt": "2026-04-13T18:45:02Z"
+    "context": "transcribe Josh voice note about model usage visualization",
+    "updatedAt": "2026-04-13T18:50:02Z"
   },
   "contextWindow": {
     "usedTokens": 124127,
@@ -102,12 +108,12 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T18:43:16Z",
+    "lastTriggeredAt": "2026-04-13T18:48:16Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 120422,
+    "usedTokens": 124127,
     "limitTokens": 200000,
-    "pct": 0.6021
+    "pct": 0.6206
   },
   "codingVisibility": {
     "workspaceDirty": 38,
@@ -124,7 +130,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 56m",
+        "Resets in 2h 51m",
         "Weekly: 100% left [============]",
         "Pace: 8% in reserve | Expected 8% used | Lasts until reset",
         "Resets in 6d 10h",
@@ -135,11 +141,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 56m",
+      "sessionReset": "2h 51m",
       "weeklyReset": "6d 10h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T18:45:04Z"
+    "updatedAt": "2026-04-13T18:50:04Z"
   },
   "modelUsage": {
     "session": 3.048325,
@@ -233,7 +239,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T18:45:07Z",
+    "lastUpdated": "2026-04-13T18:50:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -274,9 +280,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.509889,
-    "total_earned": 31.509889,
-    "online_time": "315h 5m",
+    "sim_balance": 31.518222,
+    "total_earned": 31.518222,
+    "online_time": "315h 10m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -287,18 +293,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T18:45:08Z"
+    "updatedAt": "2026-04-13T18:50:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 30.1,
-      "cpu_user": 14.47,
-      "cpu_sys": 15.61,
-      "load1": 3.48,
-      "load5": 2.77,
-      "load15": 2.51,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 30.7,
+      "cpu_user": 14.83,
+      "cpu_sys": 15.84,
+      "load1": 1.89,
+      "load5": 2.5,
+      "load15": 2.49,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -306,12 +312,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.7,
-      "cpu_user": 2.54,
-      "cpu_sys": 10.16,
-      "load1": 1.99,
-      "load5": 1.71,
-      "load15": 1.65,
+      "cpu_pct": 17.8,
+      "cpu_user": 5.6,
+      "cpu_sys": 12.14,
+      "load1": 2.47,
+      "load5": 2.0,
+      "load15": 1.78,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -337,19 +343,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T18:45:02Z"
+      "lastChecked": "2026-04-13T18:50:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T18:45:02Z"
+      "lastChecked": "2026-04-13T18:50:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T18:45:02Z"
+      "lastChecked": "2026-04-13T18:50:02Z"
     }
   ],
   "crons": [
@@ -982,6 +988,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260413-671",
+      "title": "Build richer model-usage visuals in Mission Control",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-04-13 14:43",
+      "updatedAt": "2026-04-13 14:43",
+      "notes": "Josh wants a more visual, detailed model-usage breakdown in the Model Usage Health & Architecture module, explicitly separating OpenAI API, OpenAI Pro, Gemini API, Grok API, and local usage, plus budget impact against floor/target/cap.",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260409-94",
       "title": "Rebalance GW5 lineups",
       "status": "active",
@@ -1016,7 +1032,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 60%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 62%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1027,29 +1043,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T18:45:07Z",
+      "time": "2026-04-13T18:50:07Z",
       "event": "Session spend: $3.05"
     },
     {
-      "time": "2026-04-13T18:45:04Z",
+      "time": "2026-04-13T18:50:04Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/brain_feed_server.py"
     },
     {
-      "time": "2026-04-13T18:45:04Z",
+      "time": "2026-04-13T18:50:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T18:45:02Z",
+      "time": "2026-04-13T18:50:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T18:45:02Z",
+      "time": "2026-04-13T18:50:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T18:45:02Z",
+      "time": "2026-04-13T18:50:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T18:45:02Z"
+  "lastUpdated": "2026-04-13T18:50:02Z"
 }
