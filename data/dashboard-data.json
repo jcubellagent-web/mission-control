@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "async memory sync completion event handled",
-    "updatedAt": "2026-04-13T03:05:03Z"
+    "updatedAt": "2026-04-13T03:10:02Z"
   },
   "contextWindow": {
     "usedTokens": 43593,
@@ -113,12 +113,13 @@
     "workspaceDirty": 34,
     "missionControlDirty": 6,
     "recentFiles": [
+      "scripts/fast_voice_transcribe.sh",
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T03:05:09Z"
+    "updatedAt": "2026-04-13T03:10:08Z"
   },
   "modelUsage": {
     "session": 0.186991,
@@ -212,7 +213,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T03:05:12Z",
+    "lastUpdated": "2026-04-13T03:10:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -253,9 +254,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.943361,
-    "total_earned": 29.943361,
-    "online_time": "299h 26m",
+    "sim_balance": 29.951667,
+    "total_earned": 29.951667,
+    "online_time": "299h 31m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -266,18 +267,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T03:05:13Z"
+    "updatedAt": "2026-04-13T03:10:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 25.0,
-      "cpu_user": 9.92,
-      "cpu_sys": 15.1,
-      "load1": 1.91,
-      "load5": 2.11,
-      "load15": 2.19,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 25.7,
+      "cpu_user": 10.65,
+      "cpu_sys": 15.0,
+      "load1": 3.06,
+      "load5": 2.65,
+      "load15": 2.39,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -285,12 +286,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.3,
-      "cpu_user": 2.64,
-      "cpu_sys": 9.27,
-      "load1": 1.72,
+      "cpu_pct": 10.7,
+      "cpu_user": 1.33,
+      "cpu_sys": 9.33,
+      "load1": 1.78,
       "load5": 1.9,
-      "load15": 1.85,
+      "load15": 1.87,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -316,19 +317,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:05:03Z"
+      "lastChecked": "2026-04-13T03:10:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:05:03Z"
+      "lastChecked": "2026-04-13T03:10:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T03:05:03Z"
+      "lastChecked": "2026-04-13T03:10:02Z"
     }
   ],
   "crons": [
@@ -756,7 +757,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 2522,
+      "elapsedSecs": 2822,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -766,7 +767,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 3683,
+      "elapsedSecs": 3982,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -774,7 +775,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Editing: scripts/fast_voice_transcribe.sh, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -795,29 +796,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T03:05:12Z",
+      "time": "2026-04-13T03:10:12Z",
       "event": "Session spend: $0.19"
     },
     {
-      "time": "2026-04-13T03:05:09Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-13T03:10:08Z",
+      "event": "Coding: scripts/fast_voice_transcribe.sh, mission-control/index.html"
     },
     {
-      "time": "2026-04-13T03:05:09Z",
+      "time": "2026-04-13T03:10:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T03:05:03Z",
+      "time": "2026-04-13T03:10:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T03:05:03Z",
+      "time": "2026-04-13T03:10:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T03:05:03Z",
+      "time": "2026-04-13T03:10:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T03:05:03Z"
+  "lastUpdated": "2026-04-13T03:10:02Z"
 }
