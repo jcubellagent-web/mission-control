@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Finished the Mission Control CodexBar integration and layout fix, verified the desktop Brain Feed and lower cards look right, and pushed the live update",
+  "objective": "session startup and greeting",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T04:35:40Z",
-  "checkedAt": "2026-04-13T04:35:40Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-13T04:36:16Z",
+  "checkedAt": "2026-04-13T04:36:16Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
