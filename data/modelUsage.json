@@ -1,13 +1,13 @@
 {
-  "session": 0.233327,
-  "daily": 19.445153,
+  "session": 0.385715,
+  "daily": 19.597541,
   "weekly": 46.873555,
   "monthly": 906.377419,
   "topModels": [
     {
       "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 19.445152999999998
+      "cost": 19.5975415
     },
     {
       "name": "gpt-5.3-codex",
@@ -27,19 +27,19 @@
     {
       "name": "openrouter/auto (BYOK)",
       "window": "session",
-      "cost": 0.238442
+      "cost": 0.249231
     }
   ],
   "breakdown": [
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 2214836,
-      "outputTokens": 169568,
-      "totalTokens": 2384404,
-      "sessionCost": 19.445152999999998,
-      "dailyCost": 19.445152999999998,
-      "weeklyCost": 19.445152999999998,
+      "inputTokens": 2182656,
+      "outputTokens": 170074,
+      "totalTokens": 2352730,
+      "sessionCost": 19.5975415,
+      "dailyCost": 19.5975415,
+      "weeklyCost": 19.5975415,
       "sessions": 151,
       "isGemini": false,
       "costEstimated": false
@@ -82,15 +82,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.238442,
-      "dailyCost": 0.238442,
-      "sessionCost": 0.238442,
+      "weeklyCost": 0.249231,
+      "dailyCost": 0.249231,
+      "sessionCost": 0.249231,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-13T16:50:09Z",
+  "lastUpdated": "2026-04-13T16:55:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -108,9 +108,9 @@
     "daily": 0.0,
     "weekly": 0.0,
     "monthly": 0.02023585,
-    "byok_daily": 0.23844155,
-    "byok_weekly": 0.23844155,
-    "byok_monthly": 2.22860895,
+    "byok_daily": 0.2492308,
+    "byok_weekly": 0.2492308,
+    "byok_monthly": 2.2393982,
     "available": true
   },
   "elevenlabs": {
@@ -119,14 +119,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 19.683595,
-    "total": 21.04365,
-    "monthly": 908.606028
+    "daily": 19.846772,
+    "total": 21.206828,
+    "monthly": 908.616817
   },
   "weeklyRunRate": {
-    "total": 48.038607,
-    "automation": 1.165052,
-    "interactive": 45.708503,
-    "projectedMonthly": 205.88
+    "total": 48.049396,
+    "automation": 1.175841,
+    "interactive": 45.697714,
+    "projectedMonthly": 205.93
   }
 }
