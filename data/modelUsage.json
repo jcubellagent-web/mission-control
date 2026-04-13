@@ -1,13 +1,13 @@
 {
-  "session": 1.031214,
-  "daily": 20.24304,
+  "session": 1.345204,
+  "daily": 22.422466,
   "weekly": 46.873555,
   "monthly": 906.377419,
   "topModels": [
     {
       "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 20.2430405
+      "cost": 22.422465500000005
     },
     {
       "name": "gpt-5.3-codex",
@@ -27,20 +27,20 @@
     {
       "name": "openrouter/auto (BYOK)",
       "window": "session",
-      "cost": 0.249231
+      "cost": 0.256903
     }
   ],
   "breakdown": [
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 2263797,
-      "outputTokens": 168801,
-      "totalTokens": 2432598,
-      "sessionCost": 20.2430405,
-      "dailyCost": 20.2430405,
-      "weeklyCost": 20.2430405,
-      "sessions": 151,
+      "inputTokens": 2204043,
+      "outputTokens": 170525,
+      "totalTokens": 2374568,
+      "sessionCost": 22.422465500000005,
+      "dailyCost": 22.422465500000005,
+      "weeklyCost": 22.422465500000005,
+      "sessions": 152,
       "isGemini": false,
       "costEstimated": false
     },
@@ -82,15 +82,15 @@
     {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
-      "weeklyCost": 0.249231,
-      "dailyCost": 0.249231,
-      "sessionCost": 0.249231,
+      "weeklyCost": 0.256903,
+      "dailyCost": 0.256903,
+      "sessionCost": 0.256903,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-13T17:00:07Z",
+  "lastUpdated": "2026-04-13T17:05:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -108,9 +108,9 @@
     "daily": 0.0,
     "weekly": 0.0,
     "monthly": 0.02023585,
-    "byok_daily": 0.2492308,
-    "byok_weekly": 0.2492308,
-    "byok_monthly": 2.2393982,
+    "byok_daily": 0.25690325,
+    "byok_weekly": 0.25690325,
+    "byok_monthly": 2.24707065,
     "available": true
   },
   "elevenlabs": {
@@ -119,14 +119,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 20.492271,
-    "total": 21.852327,
-    "monthly": 908.616817
+    "daily": 22.679369,
+    "total": 24.039424,
+    "monthly": 908.62449
   },
   "weeklyRunRate": {
-    "total": 48.049396,
-    "automation": 1.175841,
-    "interactive": 45.697714,
-    "projectedMonthly": 205.93
+    "total": 48.057068,
+    "automation": 1.183513,
+    "interactive": 45.690042,
+    "projectedMonthly": 205.96
   }
 }
