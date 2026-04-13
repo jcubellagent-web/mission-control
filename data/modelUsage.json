@@ -1,18 +1,18 @@
 {
   "session": 0.0,
-  "daily": 0.080202,
+  "daily": 0.661748,
   "weekly": 46.873555,
   "monthly": 906.377419,
   "topModels": [
     {
+      "name": "openai/gpt-5.4",
+      "window": "session",
+      "cost": 0.6617475
+    },
+    {
       "name": "gpt-5.3-codex",
       "window": "session",
       "cost": 0.43344559999999993
-    },
-    {
-      "name": "openai/gpt-5.4",
-      "window": "session",
-      "cost": 0.080202
     },
     {
       "name": "local/qwen2.5-coder:7b",
@@ -32,25 +32,25 @@
   ],
   "breakdown": [
     {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 119729,
+      "outputTokens": 10903,
+      "totalTokens": 130632,
+      "sessionCost": 0.6617475,
+      "dailyCost": 0.6617475,
+      "weeklyCost": 0.6617475,
+      "sessions": 10,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "gpt-5.3-codex",
       "source": "codex",
       "weeklyCost": 0.43344559999999993,
       "dailyCost": 0.0,
       "sessionCost": 0.43344559999999993,
       "totalTokens": 0,
-      "costEstimated": false
-    },
-    {
-      "name": "openai/gpt-5.4",
-      "source": "openclaw",
-      "inputTokens": 18052,
-      "outputTokens": 960,
-      "totalTokens": 19012,
-      "sessionCost": 0.080202,
-      "dailyCost": 0.080202,
-      "weeklyCost": 0.080202,
-      "sessions": 2,
-      "isGemini": false,
       "costEstimated": false
     },
     {
@@ -90,7 +90,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-13T09:15:08Z",
+  "lastUpdated": "2026-04-13T09:20:07Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -119,8 +119,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.201005,
-    "total": 1.56106,
+    "daily": 0.782551,
+    "total": 2.142606,
     "monthly": 908.488389
   },
   "weeklyRunRate": {
