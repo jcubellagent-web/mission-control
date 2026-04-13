@@ -5,24 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Handled async command completion internally",
+    "objective": "Restored reply format and gave OpenAI Pro 20x recommendation",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-13T02:35:01Z",
-    "checkedAt": "2026-04-13T02:35:01Z",
+    "updatedAt": "2026-04-13T02:37:58Z",
+    "checkedAt": "2026-04-13T02:37:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Handled async command completion internally",
-    "updatedAt": "2026-04-13T02:35:02Z"
+    "context": "Restored reply format and gave OpenAI Pro 20x recommendation",
+    "updatedAt": "2026-04-13T02:40:02Z"
   },
   "contextWindow": {
-    "usedTokens": 83971,
+    "usedTokens": 98211,
     "limitTokens": 200000,
-    "pct": 0.4199,
+    "pct": 0.4911,
     "model": "gpt-5.4",
     "status": "amber"
   },
@@ -118,18 +118,18 @@
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T02:35:08Z"
+    "updatedAt": "2026-04-13T02:40:08Z"
   },
   "modelUsage": {
-    "session": 1.987124,
-    "daily": 22.361224,
+    "session": 2.593815,
+    "daily": 22.967914,
     "weekly": 783.847162,
     "monthly": 859.503864,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 22.3612235
+        "cost": 22.967914
       },
       {
         "name": "gpt-5.3-codex",
@@ -156,12 +156,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 2028095,
-        "outputTokens": 203757,
-        "totalTokens": 2231852,
-        "sessionCost": 22.3612235,
-        "dailyCost": 22.3612235,
-        "weeklyCost": 22.3612235,
+        "inputTokens": 1860533,
+        "outputTokens": 206030,
+        "totalTokens": 2066563,
+        "sessionCost": 22.967914,
+        "dailyCost": 22.967914,
+        "weeklyCost": 22.967914,
         "sessions": 96,
         "isGemini": false,
         "costEstimated": false
@@ -212,7 +212,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T02:35:11Z",
+    "lastUpdated": "2026-04-13T02:40:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -241,8 +241,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 22.37501,
-      "total": 23.735065,
+      "daily": 22.9817,
+      "total": 24.341756,
       "monthly": 861.507818
     },
     "weeklyRunRate": {
@@ -253,9 +253,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.893333,
-    "total_earned": 29.893333,
-    "online_time": "298h 56m",
+    "sim_balance": 29.901667,
+    "total_earned": 29.901667,
+    "online_time": "299h 1m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -266,33 +266,33 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T02:35:12Z"
+    "updatedAt": "2026-04-13T02:40:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.6,
-      "cpu_user": 9.99,
-      "cpu_sys": 14.96,
-      "load1": 2.26,
-      "load5": 2.48,
-      "load15": 2.69,
+      "cpu_pct": 24.8,
+      "cpu_user": 9.93,
+      "cpu_sys": 14.9,
+      "load1": 2.38,
+      "load5": 2.26,
+      "load15": 2.5,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "104Gi",
+      "disk_avail": "103Gi",
       "disk_pct": 11,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.4,
-      "cpu_user": 1.86,
-      "cpu_sys": 10.55,
-      "load1": 1.55,
-      "load5": 1.79,
-      "load15": 1.8,
+      "cpu_pct": 10.6,
+      "cpu_user": 1.32,
+      "cpu_sys": 9.27,
+      "load1": 1.44,
+      "load5": 1.62,
+      "load15": 1.71,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -316,19 +316,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:35:02Z"
+      "lastChecked": "2026-04-13T02:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:35:02Z"
+      "lastChecked": "2026-04-13T02:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T02:35:02Z"
+      "lastChecked": "2026-04-13T02:40:02Z"
     }
   ],
   "crons": [
@@ -756,7 +756,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 722,
+      "elapsedSecs": 1021,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -766,7 +766,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 1882,
+      "elapsedSecs": 2182,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -795,29 +795,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T02:35:11Z",
-      "event": "Session spend: $1.99"
+      "time": "2026-04-13T02:40:11Z",
+      "event": "Session spend: $2.59"
     },
     {
-      "time": "2026-04-13T02:35:08Z",
+      "time": "2026-04-13T02:40:08Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T02:35:08Z",
+      "time": "2026-04-13T02:40:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T02:35:02Z",
+      "time": "2026-04-13T02:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T02:35:02Z",
+      "time": "2026-04-13T02:40:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T02:35:02Z",
+      "time": "2026-04-13T02:40:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T02:35:02Z"
+  "lastUpdated": "2026-04-13T02:40:02Z"
 }
