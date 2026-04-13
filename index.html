@@ -526,18 +526,31 @@
 
 
         .focus-status { font-weight: 600; font-size: 1.1rem; }
-        .focus-context { color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 16px; }
+        .focus-context {
+            color: rgba(255,255,255,0.76);
+            font-size: 0.9rem;
+            line-height: 1.55;
+            margin: 10px 0 0;
+            max-width: 92%;
+        }
         .focus-meter { display: flex; align-items: center; gap: 12px; }
         .focus-meter-bar { flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 999px; overflow: hidden; }
         .focus-meter-bar span { display: block; height: 100%; background: var(--accent-focus); border-radius: 999px; }
         .focus-meter-value { font-weight: 600; color: var(--accent-focus); }
         /* Context window meter */
-        .ctx-meter-wrap { margin: 12px 0 4px; }
-        .ctx-meter-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+        .ctx-meter-wrap {
+            margin: 14px 0 0;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.018));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .ctx-meter-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
         .ctx-meter-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
-        .ctx-meter-pct { font-size: 0.88rem; font-weight: 700; }
+        .ctx-meter-pct { font-size: 0.95rem; font-weight: 800; }
         .ctx-meter-hint { font-size: 0.75rem; margin-left: auto; }
-        .ctx-meter-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; }
+        .ctx-meter-sub { font-size: 0.72rem; color: rgba(255,255,255,0.52); margin-top: 7px; }
         /* Idle brain feed insights */
         .bf-idle-insights { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
         .bf-idle-activity-log { display: flex; flex-direction: column; gap: 4px; }
@@ -546,18 +559,38 @@
         .bf-stat { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 12px; min-width: 60px; flex: 1; }
         .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
         .bf-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
-        .bf-model-badge { font-size: 0.58rem; font-weight: 600; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 1px 6px; margin-left: 6px; letter-spacing: 0.02em; white-space: nowrap; }
+        .bf-model-badge {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.78);
+            background: rgba(229,62,62,0.12);
+            border: 1px solid rgba(229,62,62,0.18);
+            border-radius: 999px;
+            padding: 3px 8px;
+            margin-left: 6px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
         .bf-models-row { display: flex; gap: 5px; flex-wrap: wrap; }
         .bf-model-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 8px; }
         .bf-model-name { font-size: 0.65rem; color: var(--text-secondary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .bf-model-cost { font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
         .bf-idle-warning { font-size: 0.68rem; border: 1px solid; border-radius: 6px; padding: 5px 10px; margin-top: 8px; }
         /* Inline context bar in brain feed header */
-        .ctx-inline-bar { display: flex; align-items: center; gap: 6px; }
-        .ctx-inline-label { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
-        .ctx-inline-pct { font-size: 0.72rem; font-weight: 700; }
-        .ctx-inline-track { width: 80px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
-        .ctx-inline-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease, background 0.4s; }
+        .ctx-inline-bar {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.035);
+        }
+        .ctx-inline-label { font-size: 0.58rem; color: rgba(255,255,255,0.48); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
+        .ctx-inline-pct { font-size: 0.72rem; font-weight: 800; }
+        .ctx-inline-track { width: 88px; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+        .ctx-inline-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease, background 0.4s; }
         /* Unified activity log */
         .ua-log { display: flex; flex-direction: column; gap: 6px; }
         .ua-item {
@@ -586,26 +619,105 @@
         .ua-ts { font-size: 0.58rem; color: rgba(255,255,255,0.36); white-space: nowrap; flex-shrink: 0; }
         .ua-empty { font-size: 0.68rem; color: rgba(255,255,255,0.18); padding: 4px 0; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
-        .brain-feed { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+        .brain-feed { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
         .brain-hero {
-            background: #0d0d0d;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 8px 12px 8px;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top right, rgba(229,62,62,0.18), transparent 34%),
+                linear-gradient(180deg, rgba(25,18,22,0.96), rgba(12,12,14,0.98));
+            border: 1px solid rgba(229,62,62,0.14);
+            border-radius: 18px;
+            padding: 18px 18px 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 36px rgba(0,0,0,0.24);
+        }
+        .brain-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent 42%);
+            pointer-events: none;
+        }
+        .brain-hero::after {
+            content: '';
+            position: absolute;
+            top: -42px;
+            right: -18px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(229,62,62,0.18), transparent 68%);
+            pointer-events: none;
         }
         .brain-kicker {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 3px 8px; border-radius: 5px;
-            border: 1px solid rgba(229,62,62,0.15);
-            background: rgba(229,62,62,0.08);
-            color: #e53e3e; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
-            margin-bottom: 6px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(229,62,62,0.2);
+            background: rgba(229,62,62,0.12);
+            color: #fca5a5;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
         }
         .brain-title {
-            font-size: clamp(0.95rem, 1.8vw, 1.3rem);
-            line-height: 1.1; font-weight: 600; color: rgba(255,255,255,0.75); margin-bottom: 5px;
+            font-size: clamp(1.28rem, 2.6vw, 2.1rem);
+            line-height: 1.02;
+            font-weight: 750;
+            color: rgba(255,255,255,0.98);
+            margin-bottom: 0;
+            max-width: 92%;
+            letter-spacing: -0.04em;
+            position: relative;
+            z-index: 1;
         }
-        .brain-meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--text-muted); font-size: 0.72rem; }
+        .brain-signal-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            position: relative;
+            z-index: 1;
+        }
+        .brain-signal-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.045);
+            color: rgba(255,255,255,0.78);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+        .brain-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            color: rgba(255,255,255,0.56);
+            font-size: 0.72rem;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+            z-index: 1;
+        }
+        .brain-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.68);
+        }
         .brain-stream, .jobs-shell {
             background: #0d0d0d;
             border: 1px solid rgba(255,255,255,0.05);
@@ -2263,7 +2375,18 @@
             animation: brain-idle-glow 4.5s ease-in-out infinite;
             display: flex;
             flex-direction: column;
-            padding-bottom: 18px;
+            padding: 18px 18px 20px;
+        }
+        .card-brain .card-header {
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .card-brain .card-header h2 {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            color: rgba(255,255,255,0.82);
         }
         #brain-feed-card {
             flex: 1;
@@ -2516,59 +2639,65 @@
             margin-left: auto;
         }
         .bf-objective {
-            padding: 8px 12px;
-            background: #0d0d0d;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            padding: 16px 16px 14px;
+            background:
+                radial-gradient(circle at top right, rgba(229,62,62,0.16), transparent 32%),
+                linear-gradient(180deg, rgba(20,14,17,0.98), rgba(11,11,13,0.98));
+            border: 1px solid rgba(229,62,62,0.16);
+            border-radius: 18px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(0,0,0,0.2);
         }
         .bf-objective-kicker {
             font-size: 0.62rem;
-            font-weight: 600;
-            letter-spacing: 0.16em;
+            font-weight: 800;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 4px;
+            color: #fca5a5;
+            margin-bottom: 8px;
         }
         .bf-objective-text {
-            font-size: clamp(1.18rem, 1.9vw, 1.5rem);
-            font-weight: 600;
-            color: rgba(255,255,255,0.92);
-            line-height: 1.24;
-            letter-spacing: -0.02em;
+            font-size: clamp(1.38rem, 2.5vw, 2.2rem);
+            font-weight: 760;
+            color: rgba(255,255,255,0.99);
+            line-height: 1.06;
+            letter-spacing: -0.045em;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-shadow: 0 1px 14px rgba(0,0,0,0.32);
         }
         .bf-signal-row {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 8px;
-            margin: 2px 0 4px;
+            gap: 10px;
+            margin: 2px 0 6px;
         }
         .bf-signal-chip {
             display: flex;
             flex-direction: column;
             gap: 3px;
             min-width: 0;
-            padding: 9px 10px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            padding: 11px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.022));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
         .bf-signal-chip-wide { grid-column: span 1; }
         .bf-signal-label {
-            font-size: 0.57rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.42);
         }
         .bf-signal-value {
-            font-size: 0.76rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.9);
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.96);
             min-width: 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -2583,33 +2712,33 @@
         .bf-timeline {
             display: flex;
             flex-direction: column;
-            background: linear-gradient(180deg, rgba(10,10,12,0.78), rgba(15,15,18,0.92));
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 11px;
-            padding: 8px 10px;
+            background: linear-gradient(180deg, rgba(12,12,16,0.82), rgba(17,17,20,0.94));
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 10px 12px;
             flex: 1;
             min-height: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
         .bf-step {
             display: grid;
             grid-template-columns: auto minmax(0, 1fr);
             align-items: flex-start;
-            gap: 9px;
-            padding: 7px 0;
+            gap: 10px;
+            padding: 9px 0;
         }
         .bf-step + .bf-step {
             border-top: 1px solid rgba(255,255,255,0.04);
         }
         .bf-step-icon {
-            width: 16px; height: 16px;
+            width: 18px; height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.58rem;
+            font-size: 0.62rem;
             font-weight: 700;
             flex-shrink: 0;
             margin-top: 1px;
@@ -2621,11 +2750,11 @@
         .bf-step { transition: background 0.25s ease; }
         .bf-step-body { flex: 1; min-width: 0; }
         .bf-step-label {
-            font-size: 0.74rem;
-            color: rgba(255,255,255,0.72);
+            font-size: 0.76rem;
+            color: rgba(255,255,255,0.78);
             line-height: 1.34;
         }
-        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.96); font-weight: 600; font-size: 0.76rem; line-height: 1.34; }
+        .bf-step.active-step .bf-step-label { color: rgba(255,255,255,0.98); font-weight: 700; font-size: 0.8rem; line-height: 1.34; }
         .bf-step.pending-step .bf-step-label { color: rgba(255,255,255,0.44); }
         .bf-tool-pill {
             display: inline-flex;
@@ -3336,28 +3465,28 @@
         /* ===== Brain feed freshness strip ===== */
         .bf-freshness-row {
             display: flex; align-items: center; gap: 8px;
-            padding: 7px 11px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018));
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 11px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-            font-size: 0.7rem;
-            margin-bottom: 8px;
+            padding: 10px 13px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            font-size: 0.72rem;
+            margin-bottom: 12px;
             flex-shrink: 0;
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .card-brain.brain-active .bf-freshness-row {
-            background: linear-gradient(180deg, rgba(229,62,62,0.08), rgba(229,62,62,0.04));
-            border-color: rgba(229,62,62,0.16);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(229,62,62,0.04);
+            background: linear-gradient(180deg, rgba(229,62,62,0.14), rgba(229,62,62,0.06));
+            border-color: rgba(229,62,62,0.24);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 28px rgba(229,62,62,0.12);
         }
         .bf-fresh-dot {
             width: 7px; height: 7px; border-radius: 50%;
             flex-shrink: 0;
             transition: background 0.5s ease;
         }
-        .bf-freshness-label { color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
-        #bf-last-updated { color: var(--text-secondary); margin-left: auto; font-variant-numeric: tabular-nums; }
+        .bf-freshness-label { color: rgba(255,255,255,0.78); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.68rem; font-weight: 800; }
+        #bf-last-updated { color: rgba(255,255,255,0.62); margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.72rem; }
 
         /* ===== Offline/degraded banner improvements ===== */
         .connection-status.offline {
@@ -3520,12 +3649,13 @@
             grid-column: 1 / -1;
         }
         body.phone-mode .brain-title {
-            font-size: clamp(0.9rem, 5vw, 1.2rem);
-            margin-bottom: 5px;
+            font-size: clamp(1rem, 5.8vw, 1.38rem);
         }
-        body.phone-mode .brain-hero { padding: 10px 12px; }
+        body.phone-mode .brain-hero { padding: 12px 13px; }
         body.phone-mode .focus-context { font-size: 0.75rem; }
-        body.phone-mode .ctx-meter-wrap { margin: 8px 0 2px; }
+        body.phone-mode .ctx-meter-wrap { margin: 10px 0 0; padding: 10px 11px; }
+        body.phone-mode .brain-signal-strip { margin-top: 10px; gap: 6px; }
+        body.phone-mode .brain-signal-pill { font-size: 0.64rem; padding: 5px 8px; }
         body.phone-mode .brain-meta { margin-top: 8px !important; padding-top: 8px !important; font-size: 0.62rem; }
 
         /* ── Today's Jobs ── */
@@ -5012,7 +5142,7 @@
             const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
             const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
             el.innerHTML = `<div class="ctx-inline-bar" title="${usedK}K / ${limK}K tokens">
-                <span class="ctx-inline-label">ctx</span>
+                <span class="ctx-inline-label">Context</span>
                 <div class="ctx-inline-track"><div class="ctx-inline-fill" style="width:${pct}%;background:${barColor}"></div></div>
                 <span class="ctx-inline-pct" style="color:${barColor}">${pct}%</span>
             </div>`;
@@ -6971,9 +7101,9 @@
                 }).slice(0, 5);
                 for (const e of filteredCommsIdle) {
                     const dir = (e.direction || '').toLowerCase();
-                    const agent = (e.agent || (dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
-                    idleItems.push({ agentClass: agent==='jain'?'jain':'josh',
-                        agentLabel: agent==='jain'?'J.A.I.N':'JOSH 2.0',
+                    const agent = (e.agent || (dir.startsWith('jaimes') ? 'jaimes' : dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
+                    idleItems.push({ agentClass: agent==='jaimes' ? 'jaimes' : agent==='jain'?'jain':'josh',
+                        agentLabel: agent==='jaimes' ? 'JAIMES' : agent==='jain'?'J.A.I.N':'JOSH 2.0',
                         dot: 'done', msg: e.message||'', model: e.model||'', tool: e.tool||'',
                         ts: e.timestamp ? formatRelTime(e.timestamp) : '' });
                 }
@@ -6998,6 +7128,14 @@
                 const idleActivityHtml = idleStepsHtml;
 
                 const lastUpdatedStr = bf?.updatedAt ? formatRelTime(bf.updatedAt) : '';
+                const signalStripHtml = liveSignals.length
+                    ? `<div class="brain-signal-strip">${liveSignals.map(signal => `<span class="brain-signal-pill">${escapeHtml(signal)}</span>`).join('')}</div>`
+                    : '';
+                const metaPills = [
+                    lastUpdatedStr ? `Updated ${lastUpdatedStr}` : 'Awaiting refresh',
+                    ctxWin && ctxWin.limitTokens ? `${Math.round((ctxWin.pct || 0) * 100)}% context` : null,
+                    modelUsageData ? `Session ${formatCurrencyAlways(modelUsageData.session)}` : null,
+                ].filter(Boolean);
 
                 brainFeedCard.innerHTML = `
                     ${freshnessStrip}
@@ -7006,12 +7144,14 @@
                             <div class="brain-kicker">JOSH 2.0 · Standby</div>
                             <div class="brain-title">${escapeHtml(idleTitle)}</div>
                             ${idleContext ? `<p class="focus-context">${escapeHtml(idleContext)}</p>` : ''}
+                            ${ctxMeterHtml}
+                            ${signalStripHtml}
                             ${ctxWarning}
                         </div>
                         <div class="bf-idle-insights">
                             ${idleActivityHtml}
-                            <div class="brain-meta" style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.05);padding-top:6px">
-                                <span>${lastUpdatedStr ? `Updated ${lastUpdatedStr}` : 'Awaiting refresh'}</span>
+                            <div class="brain-meta">
+                                ${metaPills.map(item => `<span class="brain-meta-pill">${escapeHtml(item)}</span>`).join('')}
                             </div>
                         </div>
                     </div>
