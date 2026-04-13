@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Resolve ambiguous direct-chat reply: user sent 1",
+  "objective": "Restart gateway and retest Telegram inline buttons",
   "status": "active",
   "steps": [
     {
-      "label": "chat",
+      "label": "exec",
       "status": "active",
-      "tool": "8182"
+      "tool": "gateway_restart"
     }
   ],
-  "currentTool": "8182",
-  "updatedAt": "2026-04-13T23:47:25Z",
-  "checkedAt": "2026-04-13T23:47:25Z",
+  "currentTool": "gateway_restart",
+  "updatedAt": "2026-04-13T23:48:52Z",
+  "checkedAt": "2026-04-13T23:48:52Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
