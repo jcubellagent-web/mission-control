@@ -2665,6 +2665,22 @@
         /* ===== Card content overflow fixes ===== */
         #brain-feed-card { overflow-y: auto; max-height: 420px; }
         #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
+        body:not(.phone-mode) .card-brain,
+        body:not(.phone-mode) .card-brain.brain-active {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+        }
+        body:not(.phone-mode) #brain-feed-card {
+            flex: 0 0 auto;
+            max-height: min(360px, 42vh);
+        }
+        body:not(.phone-mode) .agent-chat-section {
+            flex: 0 0 auto;
+        }
+        body:not(.phone-mode) #agent-chat-feed {
+            max-height: 160px;
+        }
         #today-jobs-card {
             flex: 1;
             min-height: 0;
