@@ -2968,8 +2968,34 @@
             display: flex; justify-content: center;
             padding: 2px 0;
         }
-        /* ── Phone-mode: Agent Comms — HIDDEN on mobile (Brain Feed takes the space) ── */
-        body.phone-mode .agent-chat-section { display: none !important; }
+        /* ── Phone-mode: keep Activity & Agent Comms fully visible inside Brain Feed ── */
+        body.phone-mode .agent-comms-section {
+            max-height: none !important;
+            overflow: visible;
+            margin-top: 12px;
+            padding-bottom: 0;
+        }
+        body.phone-mode #unified-activity-log {
+            max-height: none;
+            overflow: visible;
+        }
+        body.phone-mode .agent-chat-section {
+            display: block !important;
+            max-height: none;
+        }
+        body.phone-mode #agent-chat-feed {
+            max-height: none;
+            overflow: visible;
+            padding-right: 0;
+        }
+        body.phone-mode .agent-comms-toggle {
+            cursor: default;
+            pointer-events: none;
+        }
+        body.phone-mode .agent-comms-toggle-meta,
+        body.phone-mode .agent-comms-chevron {
+            display: none;
+        }
         /* Keep desktop styles intact below — these only apply in non-phone-mode */
         .agent-chat-section-desktop-only {
             background: rgba(10,10,18,0.6);
@@ -4070,6 +4096,9 @@
             document.body.classList.toggle('kiosk-mode', isKioskMode());
             document.body.classList.toggle('phone-mode', phoneMode);
             document.body.classList.toggle('edge-laser-on', !!(phoneMode && window._mcLastBrainFeed && window._mcLastBrainFeed.active));
+            if (document.getElementById('agent-comms-toggle')) {
+                restoreBrainActivityDrawer();
+            }
         }
 
         function setConnectionStatus(state) {
@@ -4509,8 +4538,11 @@
         function restoreBrainActivityDrawer() {
             const brainCard = document.querySelector('.card-brain');
             if (!brainCard) return;
-            let expanded = false;
-            try { expanded = localStorage.getItem('mc_brain_activity_expanded') === '1'; } catch(e) {}
+            const forceExpanded = document.body.classList.contains('phone-mode');
+            let expanded = forceExpanded;
+            if (!forceExpanded) {
+                try { expanded = localStorage.getItem('mc_brain_activity_expanded') === '1'; } catch(e) {}
+            }
             brainCard.classList.toggle('activity-expanded', expanded);
             syncBrainActivityDrawer();
         }

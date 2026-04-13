@@ -1592,7 +1592,8 @@ def build_visibility_agents(
             age_secs = max(0, int((now - created_dt).total_seconds()))
         except Exception:
             age_secs = 0
-        is_active = status in {"queued", "retry", "in_progress", "running"}
+        stale_queue = status in {"queued", "retry"} and age_secs > 6 * 3600
+        is_active = status in {"queued", "retry", "in_progress", "running"} and not stale_queue
         is_recent_done = status == "completed" and age_secs < 1800
         if not (is_active or is_recent_done):
             continue
@@ -1678,7 +1679,21 @@ def build_recent_activity(
         })
 
     if agent_bus_tasks:
-        active_bus = [t for t in agent_bus_tasks if (t.get("status") or "").lower() in {"queued", "retry", "in_progress", "running"}]
+        now_dt = dt.datetime.now(dt.timezone.utc)
+        active_bus = []
+        for task in agent_bus_tasks:
+            status = (task.get("status") or "").lower()
+            if status not in {"queued", "retry", "in_progress", "running"}:
+                continue
+            created_at = task.get("created_at") or now_iso
+            try:
+                created_dt = dt.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                age_secs = max(0, int((now_dt - created_dt).total_seconds()))
+            except Exception:
+                age_secs = 0
+            if status in {"queued", "retry"} and age_secs > 6 * 3600:
+                continue
+            active_bus.append(task)
         if active_bus:
             items.append({
                 "time": active_bus[0].get("created_at") or now_iso,

@@ -25,7 +25,7 @@ python3 scripts/update_mission_control.py
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json
+git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0
