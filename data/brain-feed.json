@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Narrowed Telegram inline button failure to DNS/network reachability plus duplicate Telegram polling conflicts",
+  "objective": "Fix runtime DNS reachability, then remove duplicate Telegram poller",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T23:22:57Z",
-  "checkedAt": "2026-04-13T23:22:57Z",
+  "steps": [
+    {
+      "label": "dns-and-telegram-poller",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-13T23:23:19Z",
+  "checkedAt": "2026-04-13T23:23:19Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
