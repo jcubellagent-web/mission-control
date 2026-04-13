@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "mission control overhaul and infra audits",
-    "updatedAt": "2026-04-13T04:55:02Z"
+    "updatedAt": "2026-04-13T05:00:03Z"
   },
   "contextWindow": {
     "usedTokens": 59531,
@@ -117,7 +117,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 35,
-    "missionControlDirty": 8,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -146,18 +146,18 @@
       "weeklyReset": "7d",
       "summary": "Pro \u00b7 100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T04:55:04Z"
+    "updatedAt": "2026-04-13T05:00:05Z"
   },
   "modelUsage": {
     "session": 0.596572,
-    "daily": 6.382991,
+    "daily": 5.569421,
     "weekly": 35.003747,
     "monthly": 894.507611,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 26.858606500000004
+        "cost": 26.045036500000002
       },
       {
         "name": "gpt-5.3-codex",
@@ -184,13 +184,13 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 2029546,
-        "outputTokens": 231147,
-        "totalTokens": 2260693,
-        "sessionCost": 26.858606500000004,
-        "dailyCost": 6.3829910000000005,
-        "weeklyCost": 26.858606500000004,
-        "sessions": 100,
+        "inputTokens": 1898120,
+        "outputTokens": 220232,
+        "totalTokens": 2118352,
+        "sessionCost": 26.045036500000002,
+        "dailyCost": 5.569421,
+        "weeklyCost": 26.045036500000002,
+        "sessions": 98,
         "isGemini": false,
         "costEstimated": false
       },
@@ -240,7 +240,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T04:55:07Z",
+    "lastUpdated": "2026-04-13T05:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -269,8 +269,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.407802,
-      "total": 28.243473,
+      "daily": 5.594232,
+      "total": 27.429903,
       "monthly": 896.522589
     },
     "weeklyRunRate": {
@@ -281,9 +281,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.126556,
-    "total_earned": 30.126556,
-    "online_time": "301h 15m",
+    "sim_balance": 30.134917,
+    "total_earned": 30.134917,
+    "online_time": "301h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -294,18 +294,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T04:55:08Z"
+    "updatedAt": "2026-04-13T05:00:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 26.2,
-      "cpu_user": 10.74,
-      "cpu_sys": 15.39,
-      "load1": 1.95,
-      "load5": 2.04,
-      "load15": 2.15,
+      "cpu_pct": 61.8,
+      "cpu_user": 48.1,
+      "cpu_sys": 13.82,
+      "load1": 3.99,
+      "load5": 2.64,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "104Gi",
@@ -313,14 +313,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.5,
-      "cpu_user": 3.94,
-      "cpu_sys": 8.55,
-      "load1": 1.56,
-      "load5": 1.7,
-      "load15": 1.77,
+      "cpu_pct": 12.9,
+      "cpu_user": 3.89,
+      "cpu_sys": 9.9,
+      "load1": 2.27,
+      "load5": 2.01,
+      "load15": 1.87,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -344,26 +344,26 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T04:55:02Z"
+      "lastChecked": "2026-04-13T05:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T04:55:02Z"
+      "lastChecked": "2026-04-13T05:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T04:55:02Z"
+      "lastChecked": "2026-04-13T05:00:03Z"
     }
   ],
   "crons": [
     {
       "name": "Mission Control Refresh",
-      "schedule": "Every 10 min",
-      "description": "Pushes live dashboard data to GitHub Pages",
+      "schedule": "Every 5 min",
+      "description": "Refreshes Mission Control data and pushes local dashboard updates",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
@@ -373,7 +373,7 @@
     {
       "name": "Brain Feed Server",
       "schedule": "Every 2 min (keepalive)",
-      "description": "Real-time brain feed server for live dashboard laser + status updates",
+      "description": "Keeps the live Brain Feed endpoint available for Mission Control",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
@@ -383,7 +383,7 @@
     {
       "name": "Chiro Invite Sync",
       "schedule": "Hourly",
-      "description": "Syncs chiropractic client invites to calendar",
+      "description": "Syncs chiropractic client invites into calendar",
       "category": "Appointments",
       "agent": "JOSH 2.0",
       "status": "ok",
@@ -391,111 +391,194 @@
       "lastError": null
     },
     {
-      "name": "Injury Monitor",
-      "schedule": "Mon 8:45 AM ET",
-      "description": "Monday-only: checks for overnight injuries before weekly lineup lock. Alerts via @JCUBELL_bot.",
-      "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
+      "name": "J.A.I.N Silence Detector",
+      "schedule": "Hourly",
+      "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly",
+      "category": "Maintenance",
+      "agent": "JOSH 2.0",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Sorare Cookie Freshness",
+      "schedule": "Daily 1:00 PM ET",
+      "description": "Checks Sorare cookie age before it turns into a submission blocker",
+      "category": "Maintenance",
+      "agent": "JOSH 2.0",
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-06T13:01:12.440391-04:00"
+      "runStatus": "upcoming"
     },
     {
-      "name": "Lineup Check",
-      "schedule": "Mon 9:00 AM ET",
-      "description": "Monday-only: reviews weekly starting lineup, recommends optimal set before first pitch. Alerts via @JCUBELL_bot.",
-      "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
+      "name": "J.A.I.N Medic",
+      "schedule": "Hourly",
+      "description": "Runs local watchdog and recovery checks for J.A.I.N",
+      "category": "Maintenance",
+      "agent": "JOSH 2.0",
       "status": "ok",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T13:15:50.453870-04:00"
+      "lastError": null
     },
     {
-      "name": "Waiver Scan (post-process)",
-      "schedule": "Sun 8:00 PM ET",
-      "description": "Runs right after Sunday 8am waivers process \u2014 scans top FAs, recommends add/drops for the week.",
-      "category": "Fantasy Baseball",
+      "name": "Sorare Cookie Auto-Refresh",
+      "schedule": "Sun 2:00 PM ET",
+      "description": "Weekly forced refresh for Sorare auth cookies",
+      "category": "Maintenance",
+      "agent": "JOSH 2.0",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Breaking News Scanner",
+      "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
+      "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT",
+      "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "Waiver Scan (pre-game)",
-      "schedule": "Mon 7:00 AM ET",
-      "description": "Final waiver scan Monday morning before first game locks \u2014 last chance to act.",
-      "category": "Fantasy Baseball",
+      "name": "X Watchlist Monitor",
+      "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
+      "description": "Watches priority X accounts for high-signal posts and routes urgent hits",
+      "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null
     },
     {
-      "name": "Sorare Daily Missions",
-      "schedule": "Daily 2:00 PM ET",
-      "description": "Submits all 7 daily missions via sorare_mlb_bot.py --missions-only",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-13T14:00:00"
-    },
-    {
-      "name": "Sorare Competition Lineups",
-      "schedule": "Daily 3:00 PM ET",
-      "description": "Sets Champion L1, Champion L2, Challenger, and Hot Streak lineups (priority order, no card reuse) via sorare_mlb_bot.py --lineups-only",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-13T15:00:00"
-    },
-    {
-      "name": "Sorare Nightly Claim",
-      "schedule": "Daily 11:30 PM ET",
-      "description": "Claims nightly Sorare rewards + preps next day missions",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-12T03:31:05.253398-04:00"
-    },
-    {
-      "name": "Sorare Sheet Updater",
-      "schedule": "Daily 11:30 PM ET",
-      "description": "Updates Sorare MLB Tracker Google Sheet with daily mission/lineup data. Reads logs + Supabase canonical.",
-      "category": "Sorare MLB",
+      "name": "Intelligence Feed",
+      "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p \u00b7 Weekends 10a/4:15p/9p/11p ET",
+      "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence",
+      "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-12T23:31:04.131639-04:00"
+      "multiRun": {
+        "runs": [
+          {
+            "time": "7:15 AM",
+            "mode": "Weekday",
+            "label": "Market open brief",
+            "done": false
+          },
+          {
+            "time": "10:00 AM",
+            "mode": "Weekday",
+            "label": "Mid-morning brief",
+            "done": false
+          },
+          {
+            "time": "12:00 PM",
+            "mode": "Weekday",
+            "label": "Midday brief",
+            "done": false
+          },
+          {
+            "time": "2:00 PM",
+            "mode": "Weekday",
+            "label": "Pulse brief",
+            "done": false
+          },
+          {
+            "time": "4:15 PM",
+            "mode": "Daily",
+            "label": "Close brief",
+            "done": false
+          },
+          {
+            "time": "6:00 PM",
+            "mode": "Weekday",
+            "label": "Evening brief",
+            "done": false
+          },
+          {
+            "time": "9:00 PM",
+            "mode": "Daily",
+            "label": "Late brief",
+            "done": false
+          },
+          {
+            "time": "11:00 PM",
+            "mode": "Daily",
+            "label": "Wrap brief",
+            "done": false
+          }
+        ]
+      }
     },
     {
-      "name": "Sorare ML Training",
-      "schedule": "Daily 2:00 AM ET",
-      "description": "Trains XGBoost model on latest Sorare MLB results data",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
+      "name": "Intel Feedback Loop",
+      "schedule": "Every 5 min (keepalive)",
+      "description": "Restarts the persistent intelligence feedback loop if it drops",
+      "category": "Intelligence Feed",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "JOSH Health Check",
+      "schedule": "Every 30 min",
+      "description": "Remote health check from J.A.I.N back to Josh 2.0",
+      "category": "Maintenance",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Error Rate Monitor",
+      "schedule": "Daily 3:00 AM ET",
+      "description": "Nightly scan for elevated error rates across automations",
+      "category": "Maintenance",
+      "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-12T02:01:18.104313-04:00"
+      "runStatus": "upcoming"
     },
     {
-      "name": "X Feedback ML",
+      "name": "Log Rotation",
+      "schedule": "Sun 3:00 AM ET",
+      "description": "Weekly log rotation on J.A.I.N",
+      "category": "Maintenance",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "XMCP Boot",
+      "schedule": "On boot",
+      "description": "Starts XMCP services whenever J.A.I.N reboots",
+      "category": "Maintenance",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Feedback ML (cron)",
       "schedule": "Daily 6:00 AM ET",
-      "description": "Scores X post performance, updates strategy in SQLite + state.json",
+      "description": "Raw cron path that scores yesterday\u2019s X performance and refreshes strategy state",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Feedback ML (Hermes)",
+      "schedule": "Daily 10:00 AM ET",
+      "description": "Hermes X-feedback lane that overlaps the raw cron path",
       "category": "X Account",
       "agent": "JAIMES",
       "status": "ok",
@@ -505,63 +588,9 @@
       "lastRun": "2026-04-12T10:01:40.617783-04:00"
     },
     {
-      "name": "Fantasy Weekly Recap",
-      "schedule": "Sun 8:00 AM ET",
-      "description": "Weekly recap: W/L result, points scored, standings update. Sent to @JCUBELL_bot.",
-      "category": "Fantasy Baseball",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T02:03:09.031650-04:00"
-    },
-    {
-      "name": "JAIMES Daily Report",
-      "schedule": "Daily 3:30 PM ET",
-      "description": "Sends Sorare + fantasy daily summary to Josh via Telegram",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "paused",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "paused"
-    },
-    {
-      "name": "Daily Health Check",
-      "schedule": "Daily 5:50 AM ET",
-      "description": "System health audit \u2014 disk, memory, process checks",
-      "category": "Maintenance",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-12T05:50:52.418692-04:00"
-    },
-    {
-      "name": "Breaking News Scanner",
-      "schedule": "Every 5 min",
-      "description": "Scans high-signal breaking news + Trump statements. Pushes score \u22658.5 to @JAIN_BREAKING_BOT",
-      "category": "Intelligence Feed",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Watchlist Monitor",
-      "schedule": "Every 5 min",
-      "description": "Monitors X/Twitter watchlist for high-signal posts (score \u22658), pushes to @JAIN_BREAKING_BOT",
-      "category": "Intelligence Feed",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
       "name": "X Pre-Market",
       "schedule": "Daily 7:00 AM ET",
-      "description": "[Original] Futures + overnight signals",
+      "description": "[Original] Futures and overnight setup",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -572,7 +601,7 @@
     {
       "name": "X Market Open",
       "schedule": "Daily 8:00 AM ET",
-      "description": "[Original] Market open macro take",
+      "description": "[Original] Market-open macro take",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -583,7 +612,7 @@
     {
       "name": "X Mover",
       "schedule": "Daily 11:00 AM ET",
-      "description": "[Original] Mid-morning mover / stat",
+      "description": "[Original] Mid-morning mover or stat",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -594,7 +623,7 @@
     {
       "name": "X Hot Take",
       "schedule": "Daily 12:00 PM ET",
-      "description": "[Original] Bold contrarian take \u2014 max reply bait",
+      "description": "[Original] Contrarian take built to spark replies",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -603,9 +632,43 @@
       "runStatus": "upcoming"
     },
     {
+      "name": "X Quote Tweets",
+      "schedule": "Daily 1p/3p/6p/8p ET",
+      "description": "[QT] Quotes breaking or viral posts with our angle",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "multiRun": {
+        "runs": [
+          {
+            "time": "1:00 PM",
+            "label": "Quote Tweet",
+            "done": false
+          },
+          {
+            "time": "3:00 PM",
+            "label": "Quote Tweet",
+            "done": false
+          },
+          {
+            "time": "6:00 PM",
+            "label": "Quote Tweet",
+            "done": false
+          },
+          {
+            "time": "8:00 PM",
+            "label": "Quote Tweet",
+            "done": false
+          }
+        ]
+      }
+    },
+    {
       "name": "X Market Close",
       "schedule": "Daily 5:00 PM ET",
-      "description": "[Original] Close wrap + next-day outlook",
+      "description": "[Original] Close wrap and next-day setup",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -616,7 +679,7 @@
     {
       "name": "X Prime Take",
       "schedule": "Daily 9:00 PM ET",
-      "description": "[Original] Prime time hot take",
+      "description": "[Original] Prime-time flagship take",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -627,7 +690,7 @@
     {
       "name": "X Nightcap",
       "schedule": "Daily 10:00 PM ET",
-      "description": "[Original] One sharp insight to end the day",
+      "description": "[Original] Last sharp insight of the day",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -637,8 +700,8 @@
     },
     {
       "name": "X Strategic Replies",
-      "schedule": "8x daily (9am\u201311pm ET)",
-      "description": "[Reply] Targets @karpathy, @sama, @balajis, @saylor, @swyx, @amasad + AI/crypto niche \u2192 sharp contrarian replies via Gemini \u2192 Playwright browser post. Builds visibility in AI/agents+crypto niche.",
+      "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)",
+      "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -648,6 +711,11 @@
         "runs": [
           {
             "time": "9:00 AM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "10:00 AM",
             "label": "Strategic Reply",
             "done": false
           },
@@ -662,12 +730,27 @@
             "done": false
           },
           {
+            "time": "2:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
             "time": "3:00 PM",
             "label": "Strategic Reply",
             "done": false
           },
           {
+            "time": "4:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
             "time": "5:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "6:00 PM",
             "label": "Strategic Reply",
             "done": false
           },
@@ -690,9 +773,9 @@
       }
     },
     {
-      "name": "X Quote Tweets",
-      "schedule": "Daily 10am/1pm/6pm/8pm ET",
-      "description": "[QT] Find breaking/viral posts, quote with our take (3-4 slots)",
+      "name": "X Growth Tracker",
+      "schedule": "Daily 12:00 PM ET",
+      "description": "Snapshots follower and impression growth into dashboard state",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -701,96 +784,276 @@
       "runStatus": "upcoming"
     },
     {
-      "name": "Intelligence Feed",
-      "schedule": "8x weekday / 2x weekend",
-      "description": "Full AI/macro/crypto/market intelligence briefing pushed to @Jain_win_news_bot",
-      "category": "Intelligence Feed",
+      "name": "Sorare ML Training",
+      "schedule": "Daily 2:00 AM ET",
+      "description": "Hermes retrains the Sorare MLB model on the latest results",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T02:01:18.104313-04:00"
+    },
+    {
+      "name": "Sorare Nightly Claim",
+      "schedule": "Daily 3:30 AM ET",
+      "description": "Hermes claim job for overnight Sorare rewards",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T03:31:05.253398-04:00"
+    },
+    {
+      "name": "Sorare Sheet Updater (cron)",
+      "schedule": "Daily 3:30 AM ET",
+      "description": "Raw cron sheet updater writing fresh Sorare data into the tracker sheet",
+      "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "multiRun": {
-        "runs": [
-          {
-            "time": "7:15 AM",
-            "mode": "Full",
-            "label": "Market open (weekday)",
-            "done": false
-          },
-          {
-            "time": "10:00 AM",
-            "mode": "Full",
-            "label": "Mid-morning",
-            "done": false
-          },
-          {
-            "time": "12:00 PM",
-            "mode": "Full",
-            "label": "Midday (weekday)",
-            "done": false
-          },
-          {
-            "time": "2:00 PM",
-            "mode": "Full",
-            "label": "Pulse (weekday)",
-            "done": false
-          },
-          {
-            "time": "4:15 PM",
-            "mode": "Full",
-            "label": "Close",
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "mode": "Full",
-            "label": "Evening (weekday)",
-            "done": false
-          },
-          {
-            "time": "6:15 PM",
-            "mode": "Full",
-            "label": "Evening (weekend)",
-            "done": false
-          },
-          {
-            "time": "9:00 PM",
-            "mode": "Full",
-            "label": "Late (weekday)",
-            "done": false
-          },
-          {
-            "time": "11:00 PM",
-            "mode": "Full",
-            "label": "Wrap (weekday)",
-            "done": false
-          }
-        ]
-      }
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "Sorare Daily Prep",
+      "schedule": "Daily 9:00 AM ET",
+      "description": "Raw prep pipeline before model-driven Sorare submissions",
+      "category": "Sorare MLB",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "Sorare ML Missions",
+      "schedule": "Daily 10:00 AM ET",
+      "description": "Hermes ML mission picker for Sorare",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T10:00:46.343632-04:00"
+    },
+    {
+      "name": "Sorare ML Lineups",
+      "schedule": "Daily 11:00 AM ET",
+      "description": "Hermes ML lineup builder for Sorare competitions",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T11:01:17.896236-04:00"
+    },
+    {
+      "name": "Sorare Daily Missions (Hermes)",
+      "schedule": "Daily 2:00 PM ET",
+      "description": "Legacy Hermes mission lane still scheduled separately",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T14:01:15.926083-04:00"
+    },
+    {
+      "name": "Sorare Champion Submit",
+      "schedule": "Daily 3:00 PM ET",
+      "description": "Champion lineup submitter running from raw crontab",
+      "category": "Sorare MLB",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "Sorare Competition Lineups (Hermes)",
+      "schedule": "Daily 3:00 PM ET",
+      "description": "Legacy Hermes competition-lineup lane still scheduled separately",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T15:00:59.862369-04:00"
+    },
+    {
+      "name": "Sorare Sheet Updater (Hermes)",
+      "schedule": "Daily 11:30 PM ET",
+      "description": "Hermes Sorare sheet-updater lane still scheduled separately",
+      "category": "Sorare MLB",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T23:31:04.131639-04:00"
+    },
+    {
+      "name": "Sorare Canonical Reflector",
+      "schedule": "Every 15 min (8:00 AM\u201310:45 PM ET)",
+      "description": "Keeps canonical Sorare state mirrored into Mission Control data",
+      "category": "Sorare MLB",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Sorare Deadline Guard",
+      "schedule": "Mon 9:45 PM ET",
+      "description": "Late lineup-deadline safety check for Sorare",
+      "category": "Sorare MLB",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Fantasy Waiver Scan (post-process)",
+      "schedule": "Mon 12:00 AM ET",
+      "description": "Post-waiver scan right after the Sunday-night processing window",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Fantasy Weekly Recap",
+      "schedule": "Sun 12:00 PM ET",
+      "description": "Raw weekly recap sent to Josh",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Fantasy Injury Monitor",
+      "schedule": "Mon 12:45 PM ET",
+      "description": "Monday injury check before setting the weekly roster",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Fantasy Lineup Check",
+      "schedule": "Mon 1:00 PM ET",
+      "description": "Monday lineup review on the live cron path",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Waiver Injury Alert",
+      "schedule": "Daily 1:00 PM ET",
+      "description": "Surfaces injured-player replacement opportunities",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "Fantasy Waiver Review (Hermes)",
+      "schedule": "Wed/Fri 1:00 PM ET",
+      "description": "Hermes waiver review lane that runs mid-week",
+      "category": "Fantasy Baseball",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "lastRun": "2026-04-10T13:00:47.049761-04:00"
+    },
+    {
+      "name": "Fantasy Injury Review (Hermes)",
+      "schedule": "Mon 1:00 PM ET",
+      "description": "Hermes injury-monitor lane separate from the raw cron path",
+      "category": "Fantasy Baseball",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "lastRun": "2026-04-06T13:01:12.440391-04:00"
+    },
+    {
+      "name": "Fantasy Lineup Review (Hermes)",
+      "schedule": "Mon 1:15 PM ET",
+      "description": "Hermes lineup-review lane separate from the raw cron path",
+      "category": "Fantasy Baseball",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "lastRun": "2026-04-06T13:15:50.453870-04:00"
+    },
+    {
+      "name": "Fantasy Waiver Scan (pre-game)",
+      "schedule": "Mon 11:00 AM ET",
+      "description": "Final waiver review before first-pitch lineup lock",
+      "category": "Fantasy Baseball",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "Fantasy Weekly Recap (Hermes)",
+      "schedule": "Mon 2:00 AM ET",
+      "description": "Hermes recap lane that overlaps the raw Sunday recap",
+      "category": "Fantasy Baseball",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "lastRun": "2026-04-06T02:03:09.031650-04:00"
+    },
+    {
+      "name": "Daily Health Check",
+      "schedule": "Daily 5:50 AM ET",
+      "description": "Hermes daily system-health pass",
+      "category": "Maintenance",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-12T05:50:52.418692-04:00"
+    },
+    {
+      "name": "JAIMES Weekly Report",
+      "schedule": "Sat 1:00 PM ET",
+      "description": "Weekly JAIMES summary sent back to Josh",
+      "category": "Maintenance",
+      "agent": "JAIMES",
+      "status": "ok",
+      "errors": 0,
+      "lastError": null
     }
   ],
   "activeAgents": [
     {
-      "id": "72bfd2f1-019b-4012-b474-b92b19a4bea5",
-      "label": "infra-audit",
-      "status": "done",
-      "startedAt": "2026-04-13T04:46:37.763000+00:00",
-      "elapsedSecs": 510,
-      "updatedAt": "2026-04-13T04:48:52.888000+00:00"
-    },
-    {
-      "id": "15fb9b71-a471-494f-b40c-5ad25594c889",
-      "label": "cron-jobs-audit",
-      "status": "done",
-      "startedAt": "2026-04-13T04:46:38.037000+00:00",
-      "elapsedSecs": 510,
-      "updatedAt": "2026-04-13T04:48:25.757000+00:00"
-    },
-    {
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 9117,
+      "elapsedSecs": 9419,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -800,7 +1063,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 10278,
+      "elapsedSecs": 10579,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -829,29 +1092,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T04:55:07Z",
+      "time": "2026-04-13T05:00:08Z",
       "event": "Session spend: $0.60"
     },
     {
-      "time": "2026-04-13T04:55:04Z",
+      "time": "2026-04-13T05:00:05Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T04:55:04Z",
+      "time": "2026-04-13T05:00:05Z",
       "event": "CodexBar: Pro \u00b7 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T04:55:02Z",
+      "time": "2026-04-13T05:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T04:55:02Z",
-      "event": "28 scheduled jobs healthy"
+      "time": "2026-04-13T05:00:03Z",
+      "event": "51 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T04:55:02Z",
+      "time": "2026-04-13T05:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T04:55:02Z"
+  "lastUpdated": "2026-04-13T05:00:03Z"
 }
