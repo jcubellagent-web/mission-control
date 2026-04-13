@@ -4,27 +4,27 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "async memory sync completion event handled",
+    "messageReceived": "2026-04-13T03:11:49Z",
+    "objective": "Google AI Pro inventory review finished",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-13T03:01:57Z",
-    "checkedAt": "2026-04-13T03:01:57Z",
+    "updatedAt": "2026-04-13T03:13:53Z",
+    "checkedAt": "2026-04-13T03:13:53Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "async memory sync completion event handled",
-    "updatedAt": "2026-04-13T03:10:02Z"
+    "context": "Google AI Pro inventory review finished",
+    "updatedAt": "2026-04-13T03:15:02Z"
   },
   "contextWindow": {
-    "usedTokens": 43593,
+    "usedTokens": 90971,
     "limitTokens": 200000,
-    "pct": 0.218,
+    "pct": 0.4549,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -111,26 +111,27 @@
   },
   "codingVisibility": {
     "workspaceDirty": 34,
-    "missionControlDirty": 6,
+    "missionControlDirty": 7,
     "recentFiles": [
+      "mission-control/scripts/bf_push.sh",
       "scripts/fast_voice_transcribe.sh",
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T03:10:08Z"
+    "updatedAt": "2026-04-13T03:15:08Z"
   },
   "modelUsage": {
-    "session": 0.186991,
-    "daily": 22.952361,
+    "session": 1.603968,
+    "daily": 24.369339,
     "weekly": 783.847162,
     "monthly": 859.503864,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 22.9523605
+        "cost": 24.3693385
       },
       {
         "name": "gpt-5.3-codex",
@@ -157,12 +158,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1909241,
-        "outputTokens": 207633,
-        "totalTokens": 2116874,
-        "sessionCost": 22.9523605,
-        "dailyCost": 22.9523605,
-        "weeklyCost": 22.9523605,
+        "inputTokens": 1897355,
+        "outputTokens": 208632,
+        "totalTokens": 2105987,
+        "sessionCost": 24.3693385,
+        "dailyCost": 24.3693385,
+        "weeklyCost": 24.3693385,
         "sessions": 97,
         "isGemini": false,
         "costEstimated": false
@@ -213,7 +214,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T03:10:12Z",
+    "lastUpdated": "2026-04-13T03:15:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -242,8 +243,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 22.966147,
-      "total": 24.326202,
+      "daily": 24.383125,
+      "total": 25.74318,
       "monthly": 861.507818
     },
     "weeklyRunRate": {
@@ -254,9 +255,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.951667,
-    "total_earned": 29.951667,
-    "online_time": "299h 31m",
+    "sim_balance": 29.96,
+    "total_earned": 29.96,
+    "online_time": "299h 36m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -267,18 +268,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T03:10:12Z"
+    "updatedAt": "2026-04-13T03:15:12Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 25.7,
-      "cpu_user": 10.65,
-      "cpu_sys": 15.0,
-      "load1": 3.06,
-      "load5": 2.65,
-      "load15": 2.39,
-      "ram_used_gb": 10.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 25.2,
+      "cpu_user": 10.3,
+      "cpu_sys": 14.92,
+      "load1": 1.7,
+      "load5": 2.03,
+      "load15": 2.17,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -286,14 +287,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.7,
-      "cpu_user": 1.33,
-      "cpu_sys": 9.33,
-      "load1": 1.78,
+      "cpu_pct": 12.1,
+      "cpu_user": 2.54,
+      "cpu_sys": 9.55,
+      "load1": 1.76,
       "load5": 1.9,
-      "load15": 1.87,
+      "load15": 1.89,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -317,19 +318,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:10:02Z"
+      "lastChecked": "2026-04-13T03:15:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:10:02Z"
+      "lastChecked": "2026-04-13T03:15:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T03:10:02Z"
+      "lastChecked": "2026-04-13T03:15:02Z"
     }
   ],
   "crons": [
@@ -757,7 +758,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 2822,
+      "elapsedSecs": 3122,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -767,7 +768,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 3982,
+      "elapsedSecs": 4282,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -775,7 +776,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/fast_voice_transcribe.sh, mission-control/index.html",
+      "label": "Editing: mission-control/scripts/bf_push.sh, scripts/fast_voice_transcribe.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -796,29 +797,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T03:10:12Z",
-      "event": "Session spend: $0.19"
+      "time": "2026-04-13T03:15:11Z",
+      "event": "Session spend: $1.60"
     },
     {
-      "time": "2026-04-13T03:10:08Z",
-      "event": "Coding: scripts/fast_voice_transcribe.sh, mission-control/index.html"
+      "time": "2026-04-13T03:15:08Z",
+      "event": "Coding: mission-control/scripts/bf_push.sh, scripts/fast_voice_transcribe.sh"
     },
     {
-      "time": "2026-04-13T03:10:08Z",
+      "time": "2026-04-13T03:15:08Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T03:10:02Z",
+      "time": "2026-04-13T03:15:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T03:10:02Z",
+      "time": "2026-04-13T03:15:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T03:10:02Z",
+      "time": "2026-04-13T03:15:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T03:10:02Z"
+  "lastUpdated": "2026-04-13T03:15:02Z"
 }
