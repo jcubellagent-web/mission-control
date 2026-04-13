@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
-    "updatedAt": "2026-04-13T05:15:02Z"
+    "updatedAt": "2026-04-13T05:16:30Z"
   },
   "contextWindow": {
     "usedTokens": 184873,
@@ -117,10 +117,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 35,
-    "missionControlDirty": 13,
+    "missionControlDirty": 9,
     "recentFiles": [
-      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
+      "mission-control/index.html",
       "mission-control/scripts/bf_push.sh",
       "scripts/fast_voice_transcribe.sh"
     ],
@@ -146,7 +146,7 @@
       "weeklyReset": "7d",
       "summary": "Pro \u00b7 100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T05:15:04Z"
+    "updatedAt": "2026-04-13T05:16:31Z"
   },
   "modelUsage": {
     "session": 2.130141,
@@ -240,7 +240,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T05:15:07Z",
+    "lastUpdated": "2026-04-13T05:16:34Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -281,9 +281,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.159861,
-    "total_earned": 30.159861,
-    "online_time": "301h 35m",
+    "sim_balance": 30.162306,
+    "total_earned": 30.162306,
+    "online_time": "301h 37m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -294,18 +294,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T05:15:07Z"
+    "updatedAt": "2026-04-13T05:16:35Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 25.2,
-      "cpu_user": 10.15,
-      "cpu_sys": 14.99,
-      "load1": 2.57,
-      "load5": 2.63,
-      "load15": 2.52,
+      "cpu_pct": 26.5,
+      "cpu_user": 11.78,
+      "cpu_sys": 14.72,
+      "load1": 2.7,
+      "load5": 2.66,
+      "load15": 2.53,
       "ram_used_gb": 11.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -313,14 +313,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 2.7,
-      "cpu_sys": 10.13,
-      "load1": 2.06,
-      "load5": 1.94,
-      "load15": 1.86,
+      "cpu_pct": 24.5,
+      "cpu_user": 13.83,
+      "cpu_sys": 10.69,
+      "load1": 2.33,
+      "load5": 2.09,
+      "load15": 1.92,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -329,8 +329,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "auth_expired",
+    "message": "Re-auth required"
   },
   "devices": [
     {
@@ -344,19 +344,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T05:15:02Z"
+      "lastChecked": "2026-04-13T05:16:30Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T05:15:02Z"
+      "lastChecked": "2026-04-13T05:16:30Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T05:15:02Z"
+      "lastChecked": "2026-04-13T05:16:30Z"
     }
   ],
   "crons": [
@@ -565,27 +565,15 @@
       "lastError": null
     },
     {
-      "name": "X Feedback ML (cron)",
+      "name": "X Feedback ML",
       "schedule": "Daily 6:00 AM ET",
-      "description": "Raw cron path that scores yesterday\u2019s X performance and refreshes strategy state",
+      "description": "Scores yesterday\u2019s X performance and refreshes strategy state",
       "category": "X Account",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
-    },
-    {
-      "name": "X Feedback ML (Hermes)",
-      "schedule": "Daily 10:00 AM ET",
-      "description": "Hermes X-feedback lane that overlaps the raw cron path",
-      "category": "X Account",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-12T10:01:40.617783-04:00"
     },
     {
       "name": "X Pre-Market",
@@ -808,9 +796,9 @@
       "lastRun": "2026-04-12T03:31:05.253398-04:00"
     },
     {
-      "name": "Sorare Sheet Updater (cron)",
+      "name": "Sorare Sheet Updater",
       "schedule": "Daily 3:30 AM ET",
-      "description": "Raw cron sheet updater writing fresh Sorare data into the tracker sheet",
+      "description": "Writes fresh Sorare data into the tracker sheet",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -854,18 +842,6 @@
       "lastRun": "2026-04-12T11:01:17.896236-04:00"
     },
     {
-      "name": "Sorare Daily Missions (Hermes)",
-      "schedule": "Daily 2:00 PM ET",
-      "description": "Legacy Hermes mission lane still scheduled separately",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-12T14:01:15.926083-04:00"
-    },
-    {
       "name": "Sorare Champion Submit",
       "schedule": "Daily 3:00 PM ET",
       "description": "Champion lineup submitter running from raw crontab",
@@ -875,30 +851,6 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
-    },
-    {
-      "name": "Sorare Competition Lineups (Hermes)",
-      "schedule": "Daily 3:00 PM ET",
-      "description": "Legacy Hermes competition-lineup lane still scheduled separately",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-12T15:00:59.862369-04:00"
-    },
-    {
-      "name": "Sorare Sheet Updater (Hermes)",
-      "schedule": "Daily 11:30 PM ET",
-      "description": "Hermes Sorare sheet-updater lane still scheduled separately",
-      "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-12T23:31:04.131639-04:00"
     },
     {
       "name": "Sorare Canonical Reflector",
@@ -983,28 +935,6 @@
       "lastRun": "2026-04-10T13:00:47.049761-04:00"
     },
     {
-      "name": "Fantasy Injury Review (Hermes)",
-      "schedule": "Mon 1:00 PM ET",
-      "description": "Hermes injury-monitor lane separate from the raw cron path",
-      "category": "Fantasy Baseball",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T13:01:12.440391-04:00"
-    },
-    {
-      "name": "Fantasy Lineup Review (Hermes)",
-      "schedule": "Mon 1:15 PM ET",
-      "description": "Hermes lineup-review lane separate from the raw cron path",
-      "category": "Fantasy Baseball",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T13:15:50.453870-04:00"
-    },
-    {
       "name": "Fantasy Waiver Scan (pre-game)",
       "schedule": "Mon 11:00 AM ET",
       "description": "Final waiver review before first-pitch lineup lock",
@@ -1013,17 +943,6 @@
       "status": "ok",
       "errors": 0,
       "lastError": null
-    },
-    {
-      "name": "Fantasy Weekly Recap (Hermes)",
-      "schedule": "Mon 2:00 AM ET",
-      "description": "Hermes recap lane that overlaps the raw Sunday recap",
-      "category": "Fantasy Baseball",
-      "agent": "JAIMES",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-06T02:03:09.031650-04:00"
     },
     {
       "name": "Daily Health Check",
@@ -1053,7 +972,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 10317,
+      "elapsedSecs": 10404,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -1063,7 +982,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 11477,
+      "elapsedSecs": 11564,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -1071,7 +990,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1092,29 +1011,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T05:15:07Z",
+      "time": "2026-04-13T05:16:34Z",
       "event": "Session spend: $2.13"
     },
     {
-      "time": "2026-04-13T05:15:04Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-13T05:16:31Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-13T05:15:04Z",
+      "time": "2026-04-13T05:16:31Z",
       "event": "CodexBar: Pro \u00b7 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T05:15:02Z",
+      "time": "2026-04-13T05:16:30Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T05:15:02Z",
-      "event": "51 scheduled jobs healthy"
+      "time": "2026-04-13T05:16:30Z",
+      "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T05:15:02Z",
+      "time": "2026-04-13T05:16:30Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T05:15:02Z"
+  "lastUpdated": "2026-04-13T05:16:30Z"
 }

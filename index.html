@@ -3746,6 +3746,392 @@
 
         /* Card brain padding */
         .card-brain { padding: 14px; }
+
+        /* 2026-04-13 polish pass */
+        body {
+            background:
+                radial-gradient(circle at top, rgba(229,62,62,0.08), transparent 32%),
+                linear-gradient(180deg, #06080d 0%, #090c12 45%, #05070b 100%);
+        }
+        .hero-grid { grid-template-columns: minmax(0, 1.55fr) minmax(330px, 0.95fr); gap: 12px; }
+        .card {
+            background: linear-gradient(180deg, rgba(13,16,24,0.96) 0%, rgba(9,12,18,0.98) 100%);
+            border: 1px solid rgba(255,255,255,0.075);
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.025);
+        }
+        .card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 0 1px rgba(229,62,62,0.06); }
+        .card-header {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .card-header h2 {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.62);
+        }
+        .module-action-btn {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.65);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            flex-shrink: 0;
+        }
+        .module-action-btn:hover {
+            color: #fff;
+            background: rgba(229,62,62,0.12);
+            border-color: rgba(229,62,62,0.22);
+            transform: translateY(-1px);
+        }
+
+        .card-brain {
+            background:
+                radial-gradient(circle at top right, rgba(229,62,62,0.12), transparent 32%),
+                linear-gradient(180deg, rgba(14,17,25,0.98) 0%, rgba(8,11,18,0.98) 100%);
+            border-color: rgba(229,62,62,0.12);
+        }
+        #brain-feed-card,
+        #jain-brain-feed-card,
+        #model-usage-card,
+        .system-health-body,
+        #unified-activity-log,
+        #agent-chat-feed {
+            overflow: hidden !important;
+            max-height: none !important;
+            padding-right: 0 !important;
+            scrollbar-width: none;
+        }
+        #today-jobs-card {
+            overflow-y: auto !important;
+            padding-right: 6px;
+            min-height: 0;
+            flex: 1;
+        }
+        #today-jobs-card::-webkit-scrollbar { width: 8px; }
+        #today-jobs-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
+
+        .bf-freshness-row {
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+        }
+        .bf-objective {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .bf-objective-text { font-size: 0.92rem; line-height: 1.35; color: rgba(255,255,255,0.96); }
+        .bf-signal-row { gap: 8px; margin-bottom: 10px; }
+        .bf-signal-chip {
+            background: rgba(255,255,255,0.032);
+            border: 1px solid rgba(255,255,255,0.065);
+            border-radius: 12px;
+            padding: 9px 10px;
+        }
+        .bf-signal-step {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .bf-timeline { gap: 8px; }
+        .bf-step {
+            background: rgba(255,255,255,0.026);
+            border: 1px solid rgba(255,255,255,0.055);
+            border-radius: 12px;
+            padding: 9px 10px;
+        }
+        .bf-empty-note {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.48);
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.022);
+            border: 1px dashed rgba(255,255,255,0.08);
+        }
+
+        .agent-comms-section,
+        .agent-chat-section {
+            background: rgba(255,255,255,0.018);
+            border: 1px solid rgba(255,255,255,0.055);
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-top: 10px;
+        }
+        .agent-comms-section {
+            max-height: none;
+            gap: 10px;
+        }
+        .card-brain.activity-expanded .agent-comms-section { max-height: none; }
+        .agent-chat-section { min-height: 0; padding-bottom: 10px; }
+        .agent-chat-header { margin-bottom: 10px; }
+        .ua-log { display: flex; flex-direction: column; gap: 7px; }
+        .ua-item {
+            display: grid;
+            grid-template-columns: auto auto minmax(0,1fr) auto auto auto;
+            gap: 7px;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.024);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .ua-agent-tag { border-radius: 999px; padding: 3px 7px; }
+        .ua-msg { color: rgba(255,255,255,0.84); }
+        .ua-tool-pill,
+        .ua-model-pill {
+            border-radius: 999px;
+            padding: 2px 7px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        #agent-chat-feed { gap: 8px; padding-bottom: 0; }
+        .chat-avatar { width: 24px; height: 24px; }
+        .chat-bubble {
+            max-width: 84%;
+            padding: 8px 10px;
+            border-radius: 14px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .chat-bubble.synthetic { opacity: 0.92; }
+        .chat-bubble-msg { line-height: 1.45; }
+
+        .card-intel-highlights,
+        .card-model-health,
+        .card-jobs-full {
+            background: linear-gradient(180deg, rgba(11,14,21,0.97) 0%, rgba(8,11,17,0.99) 100%);
+        }
+        .intel-highlights-body { gap: 6px; }
+        .intel-hi-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .intel-hi-text { font-size: 0.72rem; }
+        .intel-hi-reason { font-size: 0.62rem; }
+
+        .card-jobs-full .card-header,
+        .card-jobs-full .jobs-agents-row {
+            background: linear-gradient(180deg, rgba(11,14,21,0.98) 0%, rgba(11,14,21,0.9) 100%);
+        }
+        .jobs-agents-row { gap: 10px; padding-top: 10px; }
+        .jobs-agent-chip {
+            border-radius: 999px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px 10px;
+        }
+        .tjob-category {
+            background: rgba(255,255,255,0.018);
+            border: 1px solid rgba(255,255,255,0.045);
+            border-radius: 14px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .tjob-cat-header { margin-bottom: 6px; padding: 4px 6px; }
+        .tjob-row {
+            padding: 7px 8px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+        }
+        .tjob-row:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.05); }
+        .tjob-subline { white-space: normal; }
+
+        .system-health-body { gap: 8px; }
+        .mu-drill-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .mu-drill-card {
+            appearance: none;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.04);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: left;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+            position: relative;
+        }
+        .mu-drill-card::after {
+            content: '↗';
+            position: absolute;
+            top: 10px;
+            right: 11px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .mu-drill-card:hover,
+        .module-click-row:hover {
+            transform: translateY(-1px);
+            border-color: rgba(229,62,62,0.18);
+            background: rgba(255,255,255,0.055);
+        }
+        .mu-drill-kicker {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.52);
+            margin-bottom: 7px;
+        }
+        .mu-drill-main {
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+            padding-right: 16px;
+        }
+        .mu-drill-sub {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.72);
+            line-height: 1.45;
+        }
+        .mu-drill-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .mu-drill-chip {
+            font-size: 0.58rem;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.72);
+        }
+        .mu-drill-note {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.34);
+            text-align: right;
+            margin-top: 4px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .sh-agent-row {
+            border-radius: 12px;
+            background: rgba(255,255,255,0.028);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 11px;
+        }
+        .module-click-row { cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
+
+        .mu-arch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .mu-arch-node {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .mu-arch-node-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+        .mu-arch-node-role { font-size: 0.72rem; color: rgba(255,255,255,0.82); margin-bottom: 8px; }
+        .mu-arch-node-meta { font-size: 0.64rem; color: rgba(255,255,255,0.52); line-height: 1.5; }
+        .mu-arch-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .mu-arch-list-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.68rem;
+        }
+        .mu-arch-list-key { color: rgba(255,255,255,0.48); }
+        .mu-arch-list-val { color: rgba(255,255,255,0.86); text-align: right; }
+        @media (max-width: 1100px) {
+            .mu-drill-grid,
+            .mu-arch-grid { grid-template-columns: 1fr; }
+        }
+
+        #module-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 120000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3,5,9,0.74);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        #module-modal-overlay.closing { animation: xFadeOut 0.22s ease forwards; }
+        #module-modal {
+            width: min(920px, calc(100vw - 36px));
+            max-height: min(86vh, 920px);
+            position: relative;
+            background: linear-gradient(180deg, rgba(14,17,25,0.99) 0%, rgba(8,11,17,0.99) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+            overflow: hidden;
+        }
+        #module-modal-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+        }
+        #module-modal-inner {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: min(86vh, 920px);
+        }
+        .module-modal-header { margin-bottom: 16px; }
+        .module-modal-kicker {
+            font-size: 0.62rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.38);
+            margin-bottom: 6px;
+        }
+        .module-modal-header h2 {
+            font-size: 1.1rem;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+        .module-modal-stack { display: flex; flex-direction: column; gap: 14px; }
+        .module-modal-panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        .module-modal-section-title {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 10px;
+        }
+        .module-modal-chat { display: flex; flex-direction: column; gap: 8px; }
     </style>
 </head>
 <body>
@@ -3854,16 +4240,17 @@
                     </div>
                     <!-- Agent Comms Chat Feed -->
                     <div class="agent-chat-section">
-                        <div class="agent-chat-header">
-                            <div style="display:flex;align-items:center;gap:7px">
-                                <span class="agent-chat-icon">💬</span>
-                                <span class="agent-chat-title">AGENT COMMS</span>
-                                <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:6px">
-                                <span id="agent-chat-agents" style="font-size:10px;opacity:0.45;font-weight:600;letter-spacing:0.04em"></span>
-                            </div>
+                    <div class="agent-chat-header">
+                        <div style="display:flex;align-items:center;gap:7px">
+                            <span class="agent-chat-icon">💬</span>
+                            <span class="agent-chat-title">AGENT COMMS</span>
+                            <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
                         </div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <span id="agent-chat-agents" style="font-size:10px;opacity:0.45;font-weight:600;letter-spacing:0.04em"></span>
+                            <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand agent comms">↗</button>
+                        </div>
+                    </div>
                         <div id="agent-chat-feed"><div class="agent-chat-empty">No recent comms.</div></div>
                     </div>
                 </div>
@@ -3939,6 +4326,7 @@
                             <span class="icon">⚡</span>
                             <h2 style="font-weight:700;">Intel Highlights</h2>
                             <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
+                            <button class="module-action-btn" type="button" onclick="openModuleModal('intel')" aria-label="Expand intel highlights">↗</button>
                         </div>
                         <!-- Compact top signals — no scroll, glance-only -->
                         <div id="intel-highlights-card" class="intel-highlights-body">
@@ -3955,17 +4343,18 @@
                     <div class="card card-model card-model-health">
                         <div class="card-header">
                             <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
-                            <h2>Model Usage</h2>
+                            <h2>Model Usage Health &amp; Architecture</h2>
+                            <button class="module-action-btn" type="button" onclick="openModuleModal('usage')" aria-label="Expand model usage">↗</button>
                         </div>
                         <!-- Top: Model Usage totals + per-provider breakdown -->
                         <div id="model-usage-card"></div>
                         <!-- Divider -->
                         <div class="mu-health-divider">
-                            <span class="mu-health-divider-label">System &amp; Agent Health</span>
+                            <span class="mu-health-divider-label">Architecture &amp; Device Health</span>
                         </div>
                         <!-- Bottom: System Health — JOSH 2.0, J.A.I.N, JAIMES -->
                         <div id="system-health-card" class="system-health-body">
-                            <div class="sh-agent-row" id="sh-josh">
+                            <div class="sh-agent-row module-click-row" id="sh-josh" onclick="openModuleModal('health')">
                                 <div class="sh-agent-header">
                                     <span class="sh-dot" id="sh-josh-dot"></span>
                                     <span class="sh-agent-name">JOSH 2.0</span>
@@ -3977,7 +4366,7 @@
                                     <span class="sh-metric"><span class="sh-ml">Context</span><span class="sh-mv" id="sh-josh-ctx">—</span></span>
                                 </div>
                             </div>
-                            <div class="sh-agent-row" id="sh-jain">
+                            <div class="sh-agent-row module-click-row" id="sh-jain" onclick="openModuleModal('health')">
                                 <div class="sh-agent-header">
                                     <span class="sh-dot jain" id="sh-jain-dot"></span>
                                     <span class="sh-agent-name">J.A.I.N</span>
@@ -3989,7 +4378,7 @@
                                     <span class="sh-metric"><span class="sh-ml">Load</span><span class="sh-mv" id="sh-jain-load">—</span></span>
                                 </div>
                             </div>
-                            <div class="sh-agent-row" id="sh-jaimes">
+                            <div class="sh-agent-row module-click-row" id="sh-jaimes" onclick="openModuleModal('health')">
                                 <div class="sh-agent-header">
                                     <span class="sh-dot jaimes" id="sh-jaimes-dot"></span>
                                     <span class="sh-agent-name">JAIMES</span>
@@ -4649,9 +5038,16 @@
             // 2. Then show active support agents (watchdog, coding visibility, agent bus, etc.)
             const running = _uaAgents.filter(a => a.status === 'running');
             const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
+            const inferAgentClass = (a) => {
+                const label = `${a.agentLabel || ''} ${a.label || ''}`.toLowerCase();
+                if (label.includes('jaimes')) return 'jaimes';
+                if (label.includes('j.a.i.n') || label.includes('jain')) return 'jain';
+                if (label.includes('watchdog')) return 'agent';
+                return a.agentClass || 'agent';
+            };
             for (const a of running.slice(0, 2)) {
                 summaryItems.push({
-                    agentClass: a.agentClass || 'agent',
+                    agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
                     dot: 'active',
                     msg: a.label || 'Running…',
@@ -4662,7 +5058,7 @@
             }
             for (const a of recentAgents) {
                 recentItems.push({
-                    agentClass: a.agentClass || 'agent',
+                    agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
                     dot: 'done',
                     msg: a.label || 'Done',
@@ -4693,7 +5089,7 @@
 
             const expanded = isBrainActivityExpanded();
             const items = expanded ? [...summaryItems, ...recentItems] : summaryItems;
-            const maxItems = expanded ? 10 : 5;
+            const maxItems = expanded ? 8 : 4;
 
             syncBrainActivityDrawer();
 
@@ -4726,13 +5122,8 @@
             renderAgentChatFeed(entries || []);
         }
 
-        function renderAgentChatFeed(entries) {
-            const el = document.getElementById('agent-chat-feed');
-            const dot = document.getElementById('agent-chat-live-dot');
-            if (!el) return;
-
-            // Filter out phone→desktop control commands — those are not comms, they're signals
-            const realComms = (entries || []).filter(e => {
+        function getRenderableAgentComms(entries) {
+            const base = (entries || []).filter(e => {
                 const msg = (e.message || '').toLowerCase();
                 const dir = (e.direction || '').toLowerCase();
                 if (dir === 'phone→desktop') return false;
@@ -4741,54 +5132,81 @@
                 return true;
             });
 
-            // Show last 8 real comms, newest at bottom
-            const items = [...realComms].reverse().slice(0, 8).reverse();
+            const seen = new Set(base.map(e => `${e.timestamp || ''}|${e.direction || ''}|${e.message || ''}`));
+            const pushSynthetic = (entry) => {
+                if (!entry || !entry.message) return;
+                const key = `${entry.timestamp || ''}|${entry.direction || ''}|${entry.message || ''}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                base.push(entry);
+            };
 
-            if (!items.length) {
-                el.innerHTML = '<div class="agent-chat-empty" style="padding:16px 0;text-align:center"><div style="font-size:20px;margin-bottom:6px;opacity:0.3">🤖</div><div style="font-size:11px;opacity:0.3;letter-spacing:0.05em">No agent comms yet</div></div>';
-                if (dot) dot.classList.remove('live');
-                return;
-            }
-
-            // Check if any are active
-            const hasActive = items.some(e => e.status === 'active');
-            if (dot) dot.classList.toggle('live', hasActive);
-
-            // Update agents label
-            const agentsEl = document.getElementById('agent-chat-agents');
-            if (agentsEl) {
-                const agentsSeen = new Set();
-                items.forEach(e => {
-                    const d = (e.direction || '').toLowerCase();
-                    if (d.startsWith('jaimes')) agentsSeen.add('JAIMES');
-                    else if (d.startsWith('jain')) agentsSeen.add('J.A.I.N');
-                    else agentsSeen.add('JOSH 2.0');
+            const addBrainStatus = (bf, direction, fallbackLabel) => {
+                if (!bf) return;
+                const updatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : 0;
+                const recentEnough = updatedTs && (Date.now() - updatedTs) < (60 * 60 * 1000);
+                if (!bf.active && !recentEnough) return;
+                pushSynthetic({
+                    timestamp: bf.updatedAt || new Date().toISOString(),
+                    direction,
+                    message: bf.objective || fallbackLabel,
+                    status: bf.active ? 'active' : 'done',
+                    tool: bf.currentTool || '',
+                    synthetic: true,
                 });
-                agentsEl.textContent = [...agentsSeen].join(' · ');
-            }
+            };
 
-            el.innerHTML = items.map(e => {
+            addBrainStatus(_uaJoshBf, 'josh2.0→team', 'Mission Control standing by');
+            addBrainStatus(_uaJainBf, 'jain→josh', 'J.A.I.N standing by');
+            addBrainStatus(_uaJaimesBf, 'jaimes→josh', 'JAIMES standing by');
+
+            (_uaAgents || []).slice(0, 8).forEach(agent => {
+                const label = agent.label || 'Agent update';
+                const agentLabel = (agent.agentLabel || '').toUpperCase();
+                let direction = 'josh2.0→team';
+                if (agentLabel.includes('JAIMES')) direction = agent.status === 'done' ? 'jaimes→josh' : 'josh2.0→jaimes';
+                else if (agentLabel.includes('J.A.I.N')) direction = agent.status === 'done' ? 'jain→josh' : 'josh2.0→jain';
+                else if (agentLabel.includes('WATCHDOG')) direction = 'watchdog→josh';
+                pushSynthetic({
+                    timestamp: agent.updatedAt || agent.startedAt || new Date().toISOString(),
+                    direction,
+                    message: agent.tool === 'bus' ? label : `${agent.agentLabel || 'Agent'}: ${label}`,
+                    status: agent.status === 'running' ? 'active' : 'done',
+                    tool: agent.tool || '',
+                    synthetic: true,
+                });
+            });
+
+            return base.sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
+        }
+
+        function buildAgentChatFeedMarkup(items, limit) {
+            const sliced = limit ? items.slice(-limit) : items;
+            const agentsSeen = new Set();
+            const hasActive = sliced.some(e => e.status === 'active');
+            const html = sliced.map(e => {
                 const dir = (e.direction || '').toLowerCase();
                 const msg = e.message || '';
                 const ts = e.timestamp ? formatRelTime(e.timestamp) : '';
                 const status = e.status || '';
                 const tool = e.tool || '';
 
-                // cmd: messages — render as centered system pill, not a chat bubble
                 if (msg.startsWith('cmd:') || msg === 'refresh' || msg === 'hard-refresh' || msg === 'nightmode') {
                     const cmdText = msg.replace(/^cmd:/, '');
                     return `<div class="chat-cmd-row"><span class="chat-cmd-pill">${escapeHtml(cmdText)}${ts ? ' · ' + escapeHtml(ts) : ''}</span></div>`;
                 }
 
-                // Determine sender from direction field
                 let senderLabel = 'JOSH 2.0', rowClass = 'from-josh', avatarClass = 'josh', avatarInitial = 'J2';
                 if (dir.startsWith('jaimes→') || (dir.startsWith('jaimes') && !dir.includes('→jaimes'))) {
                     senderLabel = 'JAIMES'; rowClass = 'from-jaimes'; avatarClass = 'jaimes'; avatarInitial = 'JM';
                 } else if (dir.startsWith('jain')) {
                     senderLabel = 'J.A.I.N'; rowClass = 'from-jain'; avatarClass = 'jain'; avatarInitial = 'JN';
+                } else if (dir.startsWith('watchdog')) {
+                    senderLabel = 'WATCHDOG'; rowClass = 'from-josh'; avatarClass = 'josh'; avatarInitial = 'WD';
                 } else if (dir === 'phone→desktop') {
                     senderLabel = 'Phone'; rowClass = 'from-josh'; avatarClass = 'josh'; avatarInitial = '📱';
                 }
+                agentsSeen.add(senderLabel);
 
                 const statusPill = status === 'active'
                     ? '<span class="chat-status-pill active">● active</span>'
@@ -4798,12 +5216,11 @@
                     ? '<span class="chat-status-pill sent">↦ sent</span>'
                     : '';
 
-                // Truncate long messages
-                const displayMsg = msg.length > 140 ? msg.slice(0, 137) + '…' : msg;
+                const displayMsg = msg.length > 180 ? msg.slice(0, 177) + '…' : msg;
 
                 return `<div class="chat-bubble-row ${escapeHtml(rowClass)}">
                     <div class="chat-avatar ${escapeHtml(avatarClass)}">${escapeHtml(avatarInitial)}</div>
-                    <div class="chat-bubble">
+                    <div class="chat-bubble${e.synthetic ? ' synthetic' : ''}">
                         <div class="chat-bubble-sender">${escapeHtml(senderLabel)}${tool ? ' · <span style="opacity:0.5;font-weight:500">' + escapeHtml(tool) + '</span>' : ''}</div>
                         <div class="chat-bubble-msg">${escapeHtml(displayMsg)} ${statusPill}</div>
                         ${ts ? '<div class="chat-bubble-ts">' + escapeHtml(ts) + '</div>' : ''}
@@ -4811,9 +5228,101 @@
                 </div>`;
             }).join('');
 
+            return {
+                html,
+                hasActive,
+                agentsText: [...agentsSeen].join(' · '),
+            };
+        }
+
+        function renderAgentChatFeed(entries) {
+            const el = document.getElementById('agent-chat-feed');
+            const dot = document.getElementById('agent-chat-live-dot');
+            if (!el) return;
+
+            const items = getRenderableAgentComms(entries);
+            const compact = buildAgentChatFeedMarkup(items, 5);
+            const expanded = buildAgentChatFeedMarkup(items, 18);
+            window._moduleModalCommsHtml = expanded.html;
+
+            if (!items.length) {
+                el.innerHTML = '<div class="agent-chat-empty" style="padding:16px 0;text-align:center"><div style="font-size:20px;margin-bottom:6px;opacity:0.3">🤖</div><div style="font-size:11px;opacity:0.3;letter-spacing:0.05em">No agent comms yet</div></div>';
+                if (dot) dot.classList.remove('live');
+                return;
+            }
+
+            if (dot) dot.classList.toggle('live', compact.hasActive);
+
+            const agentsEl = document.getElementById('agent-chat-agents');
+            if (agentsEl) agentsEl.textContent = compact.agentsText;
+
+            el.innerHTML = compact.html;
+
             // Auto-scroll to bottom
             el.scrollTop = el.scrollHeight;
         }
+
+        function openModuleModal(kind) {
+            const overlay = document.getElementById('module-modal-overlay');
+            const titleEl = document.getElementById('module-modal-title');
+            const bodyEl = document.getElementById('module-modal-body');
+            if (!overlay || !titleEl || !bodyEl) return;
+
+            let title = 'Details';
+            let body = '<div class="agent-chat-empty">Nothing to show yet.</div>';
+
+            if (kind === 'intel') {
+                title = 'Intel Highlights';
+                body = document.getElementById('intelligence-feed-card')?.innerHTML || document.getElementById('intel-highlights-card')?.innerHTML || body;
+            } else if (kind === 'usage') {
+                title = 'Model Usage Health & Architecture';
+                body = window._moduleUsageHubHtml || body;
+            } else if (kind === 'usage_stats') {
+                title = 'Model Usage';
+                body = window._moduleUsageStatsHtml ? `<div class="module-modal-panel">${window._moduleUsageStatsHtml}</div>` : body;
+            } else if (kind === 'architecture') {
+                title = 'Architecture Overview';
+                body = window._moduleArchitectureHtml || body;
+            } else if (kind === 'health') {
+                title = 'Device Health';
+                const liveHealth = document.getElementById('system-health-card')?.innerHTML || '';
+                body = `<div class="module-modal-stack">${window._moduleHealthHtml || ''}${liveHealth ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live node status</div>${liveHealth}</div>` : ''}</div>` || body;
+            } else if (kind === 'comms') {
+                title = 'Agent Comms';
+                const activity = document.getElementById('unified-activity-log')?.innerHTML || '';
+                const comms = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
+                body = `<div class="module-modal-stack">${activity ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live Coordination</div>${activity}</div>` : ''}${comms ? `<div class="module-modal-panel"><div class="module-modal-section-title">Conversation Feed</div><div class="module-modal-chat">${comms}</div></div>` : ''}</div>`;
+            }
+
+            titleEl.textContent = title;
+            bodyEl.innerHTML = body;
+            overlay.classList.remove('closing');
+            overlay.style.display = 'flex';
+        }
+
+        function closeModuleModal() {
+            const overlay = document.getElementById('module-modal-overlay');
+            if (!overlay) return;
+            overlay.classList.add('closing');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.classList.remove('closing');
+            }, 220);
+        }
+
+        window.openModuleModal = openModuleModal;
+        window.closeModuleModal = closeModuleModal;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeBtn = document.getElementById('module-modal-close');
+            const overlay = document.getElementById('module-modal-overlay');
+            if (closeBtn) closeBtn.addEventListener('click', closeModuleModal);
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModuleModal();
+                });
+            }
+        });
 
         async function fetchAgentComms() {
             try {
@@ -6070,7 +6579,7 @@
                                 <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(bf.objective || 'Processing...')}</div>
                             </div>
                             ${renderBrainFeedSignalRow(bf)}
-                            <div class="bf-timeline">${stepsHtml || '<div class="empty-state">No steps yet</div>'}</div>
+                            <div class="bf-timeline">${stepsHtml || '<div class="bf-empty-note">Awaiting the first concrete action…</div>'}</div>
                         </div>
                     `;
                     bfCont = brainFeedCard.querySelector('.bf-container');
@@ -6761,6 +7270,7 @@
 
 // ── Per-model breakdown (clean model names, sess/day/wk costs) ──
                 let breakdownHtml = '<div class="empty-state" style="font-size:0.68rem;padding:6px 0;">No model calls yet</div>';
+                let breakdownCount = 0;
                 if (mu.breakdown && mu.breakdown.length) {
                     // Agent tag: infer from source + name
                     function agentTag(model) {
@@ -6777,6 +7287,7 @@
                         return !isLocal || (m.weeklyCost || 0) > 0;
                     });
                     const sorted = [...filtered].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
+                    breakdownCount = sorted.length;
                     const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
                     const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24','#22d3ee','#fb7185'];
                     const colHdr = `<div class="mu-compact-row mu-compact-hdr" style="opacity:0.4;font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">
@@ -6785,7 +7296,7 @@
                         <span style="width:34px;text-align:right">Day</span>
                         <span style="width:34px;text-align:right">Wk</span>
                     </div>`;
-                    const rows = sorted.map((model, i) => {
+                    const rows = sorted.slice(0, 4).map((model, i) => {
                         const sessC = model.sessionCost || model.costUsd || 0;
                         const dayC  = model.dailyCost || 0;
                         const wkC   = model.weeklyCost || 0;
@@ -6803,7 +7314,8 @@
                             <span class="mu-compact-cost" style="width:34px;text-align:right;opacity:0.5">${est}${fmtCost(wkC)}</span>
                         </div>`;
                     }).join('');
-                    breakdownHtml = `<div class="mu-compact-list">${colHdr}${rows}</div>`;
+                    const moreNote = sorted.length > 4 ? `<div class="mu-compact-legend">+${sorted.length - 4} more models in details</div>` : '';
+                    breakdownHtml = `<div class="mu-compact-list">${colHdr}${rows}${moreNote}</div>`;
                 }
 
                 // ── ElevenLabs usage chip ──
@@ -6847,7 +7359,86 @@
                     </div>
                 </div>`;
 
-                modelUsageCard.innerHTML = runRateHtml + budgetHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
+                const usageDetailHtml = runRateHtml + budgetHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml;
+                const activeBus = (data.agentBus || []).filter(task => ['queued', 'retry', 'running', 'in_progress'].includes((task.status || '').toLowerCase()));
+                const jaimesQueue = activeBus.filter(task => (task.target_node || '').toUpperCase() === 'JAIMES').length;
+                const runningAgents = (data.activeAgents || []).filter(agent => agent.status === 'running').length;
+                const contextPct = Math.round((data.contextWindow?.pct || 0) * 100);
+                const architectureHtml = `
+                    <div class="module-modal-stack">
+                        <div class="module-modal-panel">
+                            <div class="module-modal-section-title">Architecture overview</div>
+                            <div class="mu-arch-grid">
+                                <div class="mu-arch-node">
+                                    <div class="mu-arch-node-title" style="color:#4ade80">JOSH 2.0</div>
+                                    <div class="mu-arch-node-role">Primary orchestrator and live chat lane</div>
+                                    <div class="mu-arch-node-meta">Context ${contextPct}% · active chat ${escapeHtml(activeModelDisp || 'unknown')}</div>
+                                </div>
+                                <div class="mu-arch-node">
+                                    <div class="mu-arch-node-title" style="color:#60a5fa">J.A.I.N</div>
+                                    <div class="mu-arch-node-role">Automation engine for X, intelligence, and background schedulers</div>
+                                    <div class="mu-arch-node-meta">SSH reachable · cron-backed workflows live</div>
+                                </div>
+                                <div class="mu-arch-node">
+                                    <div class="mu-arch-node-title" style="color:#a78bfa">JAIMES</div>
+                                    <div class="mu-arch-node-role">Hermes scheduled lane for Sorare, fantasy, and reporting</div>
+                                    <div class="mu-arch-node-meta">${jaimesQueue} queued handoff${jaimesQueue === 1 ? '' : 's'} · queue needs cleanup</div>
+                                </div>
+                            </div>
+                            <div class="mu-arch-list">
+                                <div class="mu-arch-list-row"><span class="mu-arch-list-key">Active chat model</span><span class="mu-arch-list-val">${escapeHtml(activeModelDisp || 'unknown')}</span></div>
+                                <div class="mu-arch-list-row"><span class="mu-arch-list-key">Running helper agents</span><span class="mu-arch-list-val">${runningAgents}</span></div>
+                                <div class="mu-arch-list-row"><span class="mu-arch-list-key">Queued agent-bus handoffs</span><span class="mu-arch-list-val">${activeBus.length}</span></div>
+                                <div class="mu-arch-list-row"><span class="mu-arch-list-key">Mission Control products</span><span class="mu-arch-list-val">${(data.products || []).length}</span></div>
+                            </div>
+                        </div>
+                        <div class="module-modal-panel">
+                            <div class="module-modal-section-title">Current handoffs</div>
+                            <div class="mu-arch-list">
+                                ${activeBus.length ? activeBus.slice(0, 6).map(task => `<div class="mu-arch-list-row"><span class="mu-arch-list-key">${escapeHtml((task.target_node || 'agent').replaceAll('_', '.'))}</span><span class="mu-arch-list-val">${escapeHtml(task.status || 'queued')} · ${formatRelTime(task.created_at)}</span></div>`).join('') : '<div class="mu-arch-list-row"><span class="mu-arch-list-key">Queue</span><span class="mu-arch-list-val">No active handoffs</span></div>'}
+                            </div>
+                        </div>
+                    </div>`;
+                const healthDetailHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
+                const healthAlerts = [mhData.josh, mhData.jain].filter(mh => mh && mh.available && ((mh.cpu_pct || 0) > 80 || (mh.disk_pct || 0) > 85)).length;
+                const onlineNodes = [mhData.josh, mhData.jain].filter(mh => mh && mh.available).length;
+                window._moduleUsageStatsHtml = usageDetailHtml;
+                window._moduleArchitectureHtml = architectureHtml;
+                window._moduleHealthHtml = healthDetailHtml;
+                window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
+
+                modelUsageCard.innerHTML = `
+                    <div class="mu-drill-grid">
+                        <button class="mu-drill-card" type="button" onclick="openModuleModal('usage_stats')">
+                            <div class="mu-drill-kicker">Model usage</div>
+                            <div class="mu-drill-main">${fmtCost(totalSession)} session · ${fmtCost(totalDaily)} today</div>
+                            <div class="mu-drill-sub">Run rate ${fmtCost(wrrTotal)}/wk · ${breakdownCount || 0} active model rows</div>
+                            <div class="mu-drill-chip-row">
+                                <span class="mu-drill-chip">Week ${fmtCost(totalWeekly)}</span>
+                                <span class="mu-drill-chip">Month ${fmtCost(totalMonthly)}</span>
+                            </div>
+                        </button>
+                        <button class="mu-drill-card" type="button" onclick="openModuleModal('architecture')">
+                            <div class="mu-drill-kicker">Architecture</div>
+                            <div class="mu-drill-main">3 lanes · ${runningAgents} running helpers</div>
+                            <div class="mu-drill-sub">JOSH 2.0 orchestrates, J.A.I.N automates, JAIMES handles Hermes schedules.</div>
+                            <div class="mu-drill-chip-row">
+                                <span class="mu-drill-chip">Ctx ${contextPct}%</span>
+                                <span class="mu-drill-chip">Bus ${activeBus.length}</span>
+                            </div>
+                        </button>
+                        <button class="mu-drill-card" type="button" onclick="openModuleModal('health')">
+                            <div class="mu-drill-kicker">Device health</div>
+                            <div class="mu-drill-main">${onlineNodes}/2 machines live · ${healthAlerts} hot spots</div>
+                            <div class="mu-drill-sub">Open detailed CPU, RAM, disk, load, and uptime views for the active nodes.</div>
+                            <div class="mu-drill-chip-row">
+                                <span class="mu-drill-chip">Josh</span>
+                                <span class="mu-drill-chip">J.A.I.N</span>
+                                <span class="mu-drill-chip">JAIMES</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="mu-drill-note">click any card to expand</div>`;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
@@ -7661,6 +8252,19 @@
 
     <!-- Mobile edge laser — traces the screen border as a comet -->
     <canvas id="edge-laser" aria-hidden="true"></canvas>
+
+    <div id="module-modal-overlay" style="display:none;">
+        <div id="module-modal">
+            <button id="module-modal-close">✕</button>
+            <div id="module-modal-inner">
+                <div class="module-modal-header">
+                    <div class="module-modal-kicker">Mission Control</div>
+                    <h2 id="module-modal-title">Details</h2>
+                </div>
+                <div id="module-modal-body"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════
          X PROGRESS DASHBOARD MODAL
