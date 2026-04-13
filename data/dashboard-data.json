@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "continue cron and workflow bug sweep",
-    "updatedAt": "2026-04-13T19:55:02Z"
+    "updatedAt": "2026-04-13T20:00:02Z"
   },
   "contextWindow": {
     "usedTokens": 139534,
@@ -108,7 +108,7 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T19:53:18Z",
+    "lastTriggeredAt": "2026-04-13T19:58:18Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
     "usedTokens": 139534,
@@ -116,12 +116,14 @@
     "pct": 0.6977
   },
   "codingVisibility": {
-    "workspaceDirty": 38,
-    "missionControlDirty": 5,
+    "workspaceDirty": 39,
+    "missionControlDirty": 7,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
+      "scripts/breaking_news_scanner.py",
+      "scripts/chiro_invite_sync.sh",
       "mission-control/index.html",
-      "mission-control/scripts/brain_feed_server.py",
-      "mission-control/scripts/update_mission_control.py"
+      "mission-control/scripts/brain_feed_server.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -129,7 +131,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 46m",
+        "Resets in 1h 41m",
         "Weekly: 100% left [============]",
         "Pace: 9% in reserve | Expected 9% used | Lasts until reset",
         "Resets in 6d 9h",
@@ -140,11 +142,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 46m",
+      "sessionReset": "1h 41m",
       "weeklyReset": "6d 9h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T19:55:04Z"
+    "updatedAt": "2026-04-13T20:00:04Z"
   },
   "modelUsage": {
     "session": 3.641584,
@@ -238,7 +240,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T19:55:07Z",
+    "lastUpdated": "2026-04-13T20:00:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -279,9 +281,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.626556,
-    "total_earned": 31.626556,
-    "online_time": "316h 15m",
+    "sim_balance": 31.634889,
+    "total_earned": 31.634889,
+    "online_time": "316h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -292,16 +294,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T19:55:08Z"
+    "updatedAt": "2026-04-13T20:00:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 29.5,
-      "cpu_user": 13.96,
-      "cpu_sys": 15.53,
-      "load1": 2.33,
+      "cpu_pct": 29.9,
+      "cpu_user": 14.22,
+      "cpu_sys": 15.67,
+      "load1": 2.54,
       "load5": 2.63,
-      "load15": 2.55,
+      "load15": 2.58,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -311,14 +313,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.6,
-      "cpu_user": 0.96,
-      "cpu_sys": 9.61,
-      "load1": 2.2,
-      "load5": 2.12,
-      "load15": 2.09,
+      "cpu_pct": 12.7,
+      "cpu_user": 1.81,
+      "cpu_sys": 10.9,
+      "load1": 1.84,
+      "load5": 2.02,
+      "load15": 2.06,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -342,19 +344,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T19:55:02Z"
+      "lastChecked": "2026-04-13T20:00:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T19:55:02Z"
+      "lastChecked": "2026-04-13T20:00:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T19:55:02Z"
+      "lastChecked": "2026-04-13T20:00:02Z"
     }
   ],
   "crons": [
@@ -541,14 +543,14 @@
     },
     {
       "name": "Error Rate Monitor",
-      "schedule": "Daily 3:00 AM ET",
+      "schedule": "Daily 11:00 PM ET",
       "description": "Nightly scan for elevated error rates across automations",
       "category": "Maintenance",
       "agent": "J.A.I.N",
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -712,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-13T15:00:00",
+      "lastRun": "2026-04-13T16:00:00",
       "multiRun": {
         "runs": [
           {
@@ -748,7 +750,7 @@
           {
             "time": "4:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "5:00 PM",
@@ -780,7 +782,7 @@
     },
     {
       "name": "X Growth Tracker",
-      "schedule": "Daily 12:00 PM ET",
+      "schedule": "Daily 8:00 AM ET",
       "description": "Snapshots follower and impression growth into dashboard state",
       "category": "X Account",
       "agent": "J.A.I.N",
@@ -861,7 +863,7 @@
     },
     {
       "name": "Sorare Champion Submit",
-      "schedule": "Daily 3:00 PM ET",
+      "schedule": "Daily 11:00 AM ET",
       "description": "Champion lineup submitter running from raw crontab",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
@@ -882,7 +884,7 @@
     },
     {
       "name": "Sorare Deadline Guard",
-      "schedule": "Mon 9:45 PM ET",
+      "schedule": "Mon 5:45 PM ET",
       "description": "Late lineup-deadline safety check for Sorare",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
@@ -892,7 +894,7 @@
     },
     {
       "name": "Fantasy Waiver Scan (post-process)",
-      "schedule": "Mon 12:00 AM ET",
+      "schedule": "Sun 8:00 PM ET",
       "description": "Post-waiver scan right after the Sunday-night processing window",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
@@ -902,7 +904,7 @@
     },
     {
       "name": "Fantasy Weekly Recap",
-      "schedule": "Sun 12:00 PM ET",
+      "schedule": "Sun 8:00 AM ET",
       "description": "Raw weekly recap sent to Josh",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
@@ -912,7 +914,7 @@
     },
     {
       "name": "Fantasy Injury Monitor",
-      "schedule": "Mon 12:45 PM ET",
+      "schedule": "Mon 8:45 AM ET",
       "description": "Monday injury check before setting the weekly roster",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
@@ -922,7 +924,7 @@
     },
     {
       "name": "Fantasy Lineup Check",
-      "schedule": "Mon 1:00 PM ET",
+      "schedule": "Mon 9:00 AM ET",
       "description": "Monday lineup review on the live cron path",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
@@ -954,7 +956,7 @@
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
-      "schedule": "Mon 11:00 AM ET",
+      "schedule": "Mon 7:00 AM ET",
       "description": "Final waiver review before first-pitch lineup lock",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
@@ -976,7 +978,7 @@
     },
     {
       "name": "JAIMES Weekly Report",
-      "schedule": "Sat 1:00 PM ET",
+      "schedule": "Sat 9:00 AM ET",
       "description": "Weekly JAIMES summary sent back to Josh",
       "category": "Maintenance",
       "agent": "JAIMES",
@@ -1021,7 +1023,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, mission-control/scripts/brain_feed_server.py",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, scripts/breaking_news_scanner.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1042,29 +1044,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T19:55:07Z",
+      "time": "2026-04-13T20:00:07Z",
       "event": "Session spend: $3.64"
     },
     {
-      "time": "2026-04-13T19:55:04Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/brain_feed_server.py"
+      "time": "2026-04-13T20:00:04Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/breaking_news_scanner.py"
     },
     {
-      "time": "2026-04-13T19:55:04Z",
+      "time": "2026-04-13T20:00:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T19:55:02Z",
+      "time": "2026-04-13T20:00:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T19:55:02Z",
+      "time": "2026-04-13T20:00:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T19:55:02Z",
+      "time": "2026-04-13T20:00:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T19:55:02Z"
+  "lastUpdated": "2026-04-13T20:00:02Z"
 }
