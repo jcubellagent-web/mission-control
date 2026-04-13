@@ -1546,25 +1546,46 @@ def fetch_coding_visibility() -> Dict[str, Any]:
             return 0
 
     codexbar_summary = "CodexBar available"
+    codexbar_data: Dict[str, Any] = {"available": False}
     try:
-        checks = [
-            "/opt/homebrew/bin/codexbar usage --provider codex --status 2>&1 | sed -n '1,2p'",
-            "/opt/homebrew/bin/codexbar usage --provider gemini --status 2>&1 | sed -n '1,2p'",
-        ]
-        lines: list[str] = []
-        for cmd in checks:
-            proc = subprocess.run(
-                ["/bin/zsh", "-lc", cmd],
-                capture_output=True, text=True, timeout=6,
-            )
-            output = "\n".join([proc.stdout.strip(), proc.stderr.strip()]).strip()
-            lines.extend([line.strip() for line in output.splitlines() if line.strip()])
+        proc = subprocess.run(
+            ["/bin/zsh", "-lc", "/opt/homebrew/bin/codexbar usage --provider codex --pretty | sed -n '1,8p'"],
+            capture_output=True, text=True, timeout=8,
+        )
+        output = "\n".join([proc.stdout.strip(), proc.stderr.strip()]).strip()
+        lines = [line.strip() for line in output.splitlines() if line.strip()]
         if lines:
-            codexbar_summary = " | ".join(lines[:2])[:220]
+            codexbar_data = {"available": True, "raw": lines[:8]}
+            resets: list[str] = []
+            for line in lines:
+                if line.startswith("Session:"):
+                    codexbar_data["session"] = line.split(":", 1)[1].strip().split("[")[0].strip()
+                elif line.startswith("Weekly:"):
+                    codexbar_data["weekly"] = line.split(":", 1)[1].strip().split("[")[0].strip()
+                elif line.startswith("Resets in"):
+                    resets.append(line.replace("Resets in", "").strip())
+                elif line.startswith("Credits:"):
+                    codexbar_data["credits"] = line.split(":", 1)[1].strip()
+                elif line.startswith("Account:"):
+                    codexbar_data["account"] = line.split(":", 1)[1].strip()
+                elif line.startswith("Plan:"):
+                    codexbar_data["plan"] = line.split(":", 1)[1].strip()
+            if resets:
+                codexbar_data["sessionReset"] = resets[0]
+            if len(resets) > 1:
+                codexbar_data["weeklyReset"] = resets[1]
+            codexbar_summary = " · ".join(
+                part for part in [
+                    codexbar_data.get("plan"),
+                    codexbar_data.get("session"),
+                    f"wk {codexbar_data.get('weekly')}" if codexbar_data.get("weekly") else None,
+                ] if part
+            ) or "CodexBar available"
+            codexbar_data["summary"] = codexbar_summary
         else:
-            codexbar_summary = "Codex auth required · Gemini login required"
+            codexbar_summary = "Codex auth required"
     except Exception:
-        codexbar_summary = "Codex auth required · Gemini login required"
+        codexbar_summary = "Codex auth required"
 
     recent_files = recent_code_files()
     return {
@@ -1572,6 +1593,7 @@ def fetch_coding_visibility() -> Dict[str, Any]:
         "missionControlDirty": git_dirty_count(WORKSPACE_ROOT / "mission-control"),
         "recentFiles": recent_files,
         "codexbarStatus": codexbar_summary,
+        "codexbar": codexbar_data,
         "updatedAt": utc_iso(),
     }
 

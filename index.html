@@ -952,6 +952,14 @@
         .mu-budget-threshold { position: absolute; top: -2px; bottom: -2px; width: 1px; background: rgba(255,255,255,0.18); }
         .mu-budget-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; font-size: 0.5rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.05em; }
         .mu-budget-note { margin-top: 6px; font-size: 0.56rem; color: rgba(255,255,255,0.62); line-height: 1.35; }
+        .mu-codexbar-section { margin-bottom: 6px; padding: 7px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); }
+        .mu-codexbar-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+        .mu-codexbar-pill { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #a78bfa; border: 1px solid rgba(167,139,250,0.22); background: rgba(167,139,250,0.08); border-radius: 999px; padding: 3px 7px; }
+        .mu-codexbar-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; }
+        .mu-codexbar-cell { min-width: 0; }
+        .mu-codexbar-label { display: block; font-size: 0.46rem; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1px; }
+        .mu-codexbar-value { display: block; font-size: 0.62rem; color: rgba(255,255,255,0.82); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-codexbar-note { margin-top: 6px; font-size: 0.54rem; color: rgba(255,255,255,0.48); line-height: 1.35; }
         .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
@@ -1421,7 +1429,7 @@
         /* To get jobs+model side-by-side we make card-jobs a grid item too */
         /* Simplest: make the bottom-left a mini 2-col grid */
         body.kiosk-mode .hero-grid {
-            grid-template-rows: 1fr 1fr; /* not flex — use grid */
+            grid-template-rows: minmax(0, 1.5fr) minmax(0, 0.9fr); /* not flex — use grid */
             display: grid !important;
             grid-template-columns: 1fr;
         }
@@ -1433,7 +1441,7 @@
         body.kiosk-mode .kiosk-bottom-left {
             grid-column: 1; grid-row: 2;
             display: flex; flex-direction: row;
-            gap: 12px; min-height: 0;
+            gap: 12px; min-height: 0; align-items: stretch;
         }
         body.kiosk-mode .card-jobs  { flex: 2; min-height: 0; overflow: hidden; }
         body.kiosk-mode .card-model { flex: 1; min-height: 0; overflow: hidden; }
@@ -1539,8 +1547,8 @@
         .sh-mv.warn { color: #fbbf24; }
         .sh-mv.err { color: #f87171; }
         /* Left panel 50/50 — intel highlights and model card equal height */
-        .kiosk-bottom-left .card-intel-highlights { flex: 1.1; min-height: 0; }
-        .kiosk-bottom-left .card-model-health { flex: 0.9; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+        .kiosk-bottom-left .card-intel-highlights { flex: 1 1 0; min-height: 0; overflow: hidden; }
+        .kiosk-bottom-left .card-model-health { flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
 
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
@@ -2255,6 +2263,7 @@
             animation: brain-idle-glow 4.5s ease-in-out infinite;
             display: flex;
             flex-direction: column;
+            padding-bottom: 18px;
         }
         #brain-feed-card {
             flex: 1;
@@ -2263,11 +2272,11 @@
             flex-direction: column;
         }
         .card-brain.activity-expanded #brain-feed-card {
-            min-height: 220px;
+            min-height: 160px;
         }
         .card-brain.brain-active #brain-feed-card {
-            min-height: 200px;
-            flex: 1;
+            min-height: 150px;
+            flex: 1 1 0;
         }
         .bf-idle-container {
             flex: 1;
@@ -2693,14 +2702,16 @@
             scrollbar-gutter: stable;
         }
         body:not(.phone-mode) #brain-feed-card {
-            flex: 0 0 auto;
-            max-height: min(360px, 42vh);
+            flex: 1 1 0;
+            max-height: none;
+            min-height: 120px;
+            padding-right: 4px;
         }
         body:not(.phone-mode) .agent-chat-section {
             flex: 0 0 auto;
         }
         body:not(.phone-mode) #agent-chat-feed {
-            max-height: 160px;
+            max-height: 120px;
         }
         #today-jobs-card {
             flex: 1;
@@ -2725,7 +2736,7 @@
         #today-jobs-card::-webkit-scrollbar-thumb:hover {
             background: rgba(96,165,250,0.62);
         }
-        #model-usage-card { overflow-y: visible; flex: 1; min-height: 0; }
+        #model-usage-card { overflow-y: auto; flex: 1; min-height: 0; padding-right: 4px; scrollbar-gutter: stable; }
         #events-list { overflow-y: auto; max-height: 240px; }
         #device-list { overflow-y: auto; max-height: 240px; }
 
@@ -2818,17 +2829,17 @@
         /* ── Recent Activity — ultra-slim ───────────────────────────────────── */
         .agent-comms-section {
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding: 9px 0 2px;
-            margin-top: auto;
+            padding: 9px 0 4px;
+            margin-top: 0;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 168px;
+            max-height: 180px;
             transition: max-height 0.26s ease, padding 0.22s ease;
             overflow: hidden;
         }
         .card-brain.activity-expanded .agent-comms-section {
-            max-height: 48%;
+            max-height: min(260px, 34vh);
         }
         .agent-comms-toggle {
             width: 100%;
@@ -2875,9 +2886,12 @@
         /* Agent Chat Feed */
         .agent-chat-section {
             margin-top: 10px;
+            margin-bottom: 2px;
             border-top: 1px solid rgba(255,255,255,0.08);
             padding-top: 10px;
+            padding-bottom: 4px;
             flex-shrink: 0;
+            min-height: 124px;
         }
         /* When brain is active, limit chat section height so objective has room */
         .card-brain.brain-active .agent-chat-section {
@@ -2914,6 +2928,7 @@
             max-height: 220px;
             overflow-y: auto;
             padding-right: 2px;
+            padding-bottom: 6px;
         }
         .agent-chat-empty {
             font-size: 11px;
@@ -6691,6 +6706,34 @@
                     <div class="mu-budget-note">${budgetNote}</div>
                 </div>`;
 
+                const codexbar = data.codingVisibility?.codexbar || null;
+                const codexbarHtml = codexbar?.available ? `
+                <div class="mu-codexbar-section">
+                    <div class="mu-codexbar-head">
+                        <span class="mu-budget-kicker">CodexBar</span>
+                        <span class="mu-codexbar-pill">${escapeHtml(codexbar.plan || 'Ready')}</span>
+                    </div>
+                    <div class="mu-codexbar-grid">
+                        <div class="mu-codexbar-cell">
+                            <span class="mu-codexbar-label">Account</span>
+                            <span class="mu-codexbar-value">${escapeHtml(codexbar.account || '—')}</span>
+                        </div>
+                        <div class="mu-codexbar-cell">
+                            <span class="mu-codexbar-label">Session</span>
+                            <span class="mu-codexbar-value">${escapeHtml(codexbar.session || '—')}</span>
+                        </div>
+                        <div class="mu-codexbar-cell">
+                            <span class="mu-codexbar-label">Weekly</span>
+                            <span class="mu-codexbar-value">${escapeHtml(codexbar.weekly || '—')}</span>
+                        </div>
+                        <div class="mu-codexbar-cell">
+                            <span class="mu-codexbar-label">Resets</span>
+                            <span class="mu-codexbar-value">${escapeHtml(`${codexbar.sessionReset || '—'} · ${codexbar.weeklyReset || '—'}`)}</span>
+                        </div>
+                    </div>
+                    <div class="mu-codexbar-note">${escapeHtml(codexbar.summary || data.codingVisibility?.codexbarStatus || 'CodexBar available')}</div>
+                </div>` : '';
+
                 const summaryHtml = `
                 <div class="mu-totals-section">
                     ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
@@ -6804,7 +6847,7 @@
                     </div>
                 </div>`;
 
-                modelUsageCard.innerHTML = runRateHtml + budgetHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
+                modelUsageCard.innerHTML = runRateHtml + budgetHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
