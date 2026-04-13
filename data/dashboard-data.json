@@ -5,28 +5,22 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Fix runtime DNS reachability, then remove duplicate Telegram poller",
+    "objective": "Restored Telegram inline-button delivery by restarting the host gateway and verifying successful sends",
     "status": "active",
-    "steps": [
-      {
-        "label": "dns-and-telegram-poller",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-13T23:23:19Z",
-    "checkedAt": "2026-04-13T23:23:19Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-13T23:26:33Z",
+    "checkedAt": "2026-04-13T23:26:33Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fix runtime DNS reachability, then remove duplicate Telegram poller",
-    "updatedAt": "2026-04-13T23:25:02Z"
+    "context": "Restored Telegram inline-button delivery by restarting the host gateway and verifying successful sends",
+    "updatedAt": "2026-04-13T23:30:03Z"
   },
   "contextWindow": {
-    "usedTokens": 2022021,
+    "usedTokens": 6112108,
     "limitTokens": 400000,
     "pct": 1.0,
     "model": "gpt-5.4",
@@ -108,12 +102,12 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T23:23:23Z",
+    "lastTriggeredAt": "2026-04-13T23:28:23Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 2022021,
+    "usedTokens": 6112108,
     "limitTokens": 400000,
-    "pct": 5.0551
+    "pct": 15.2803
   },
   "codingVisibility": {
     "workspaceDirty": 40,
@@ -128,7 +122,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 96% left [===========-]",
-        "Resets in 3h 16m",
+        "Resets in 3h 11m",
         "Weekly: 99% left [===========-]",
         "Pace: 10% in reserve | Expected 11% used | Lasts until reset",
         "Resets in 6d 5h",
@@ -139,17 +133,17 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 16m",
+      "sessionReset": "3h 11m",
       "weeklyReset": "6d 5h",
       "summary": "96% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-13T23:25:05Z"
+    "updatedAt": "2026-04-13T23:30:05Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 48.877691,
-    "weekly": 49.311137,
-    "monthly": 908.815001,
+    "daily": 49.440829,
+    "weekly": 49.874275,
+    "monthly": 909.378139,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
@@ -159,7 +153,7 @@
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 12.21143375
+        "cost": 12.77457175
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -194,9 +188,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 12.21143375,
-        "dailyCost": 12.21143375,
-        "sessionCost": 12.21143375,
+        "weeklyCost": 12.77457175,
+        "dailyCost": 12.77457175,
+        "sessionCost": 12.77457175,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -216,9 +210,9 @@
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 2125104,
-        "outputTokens": 16339,
-        "totalTokens": 2141443,
+        "inputTokens": 4235671,
+        "outputTokens": 22281,
+        "totalTokens": 4257952,
         "sessionCost": 4.357312500000001,
         "dailyCost": 4.357312500000001,
         "weeklyCost": 4.357312500000001,
@@ -281,7 +275,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T23:25:08Z",
+    "lastUpdated": "2026-04-13T23:30:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -310,21 +304,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 49.174112,
-      "total": 50.534168,
-      "monthly": 911.101589
+      "daily": 49.73725,
+      "total": 51.097306,
+      "monthly": 911.664727
     },
     "weeklyRunRate": {
-      "total": 50.534168,
+      "total": 51.097306,
       "automation": 1.223031,
-      "interactive": 48.088106,
-      "projectedMonthly": 216.58
+      "interactive": 48.651244,
+      "projectedMonthly": 218.99
     }
   },
   "moltWorld": {
-    "sim_balance": 31.976556,
-    "total_earned": 31.976556,
-    "online_time": "319h 45m",
+    "sim_balance": 31.984889,
+    "total_earned": 31.984889,
+    "online_time": "319h 50m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -335,18 +329,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T23:25:08Z"
+    "updatedAt": "2026-04-13T23:30:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.5,
-      "cpu_user": 18.56,
-      "cpu_sys": 17.89,
-      "load1": 3.31,
-      "load5": 2.9,
-      "load15": 2.69,
+      "cpu_pct": 33.4,
+      "cpu_user": 17.97,
+      "cpu_sys": 15.95,
+      "load1": 2.39,
+      "load5": 2.48,
+      "load15": 2.54,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -354,12 +348,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.3,
-      "cpu_user": 1.75,
-      "cpu_sys": 10.52,
-      "load1": 1.54,
-      "load5": 1.61,
-      "load15": 1.66,
+      "cpu_pct": 13.3,
+      "cpu_user": 4.68,
+      "cpu_sys": 8.59,
+      "load1": 1.6,
+      "load5": 1.57,
+      "load15": 1.61,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -385,19 +379,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T23:25:02Z"
+      "lastChecked": "2026-04-13T23:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T23:25:02Z"
+      "lastChecked": "2026-04-13T23:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T23:25:02Z"
+      "lastChecked": "2026-04-13T23:30:03Z"
     }
   ],
   "crons": [
@@ -1029,18 +1023,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260413-688",
-      "title": "Fix Telegram inline button delivery",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "requestedAt": "2026-04-13 19:19",
-      "updatedAt": "2026-04-13 19:26",
-      "notes": "Real `openclaw message send --buttons` path exists, but outbound Telegram send is failing with `Network request for 'sendMessage' failed!`; direct shell tests cannot resolve `api.telegram.org` or `www.google.com`, so the active blocker is DNS/network reachability in this runtime, with additional repeated `getUpdates` 409 conflicts indicating multiple Telegram pollers.",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1054,7 +1037,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 506%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 1528%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1065,29 +1048,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T23:25:08Z",
+      "time": "2026-04-13T23:30:08Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-13T23:25:05Z",
+      "time": "2026-04-13T23:30:05Z",
       "event": "Coding: mission-control/index.html, scripts/chiro_invite_sync.sh"
     },
     {
-      "time": "2026-04-13T23:25:05Z",
+      "time": "2026-04-13T23:30:05Z",
       "event": "CodexBar: 96% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-13T23:25:02Z",
+      "time": "2026-04-13T23:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T23:25:02Z",
+      "time": "2026-04-13T23:30:03Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T23:25:02Z",
+      "time": "2026-04-13T23:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T23:25:02Z"
+  "lastUpdated": "2026-04-13T23:30:03Z"
 }
