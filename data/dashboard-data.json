@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-05T22:56:57Z",
-    "objective": "Restored reply format and gave OpenAI Pro 20x recommendation",
+    "objective": "Remove Anthropic defaults and make GPT the foundation with Gemini and Grok as primary alternates",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T02:37:58Z",
-    "checkedAt": "2026-04-13T02:37:58Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-13T02:40:38Z",
+    "checkedAt": "2026-04-13T02:40:38Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Restored reply format and gave OpenAI Pro 20x recommendation",
-    "updatedAt": "2026-04-13T02:40:02Z"
+    "context": "Remove Anthropic defaults and make GPT the foundation with Gemini and Grok as primary alternates",
+    "updatedAt": "2026-04-13T02:45:03Z"
   },
   "contextWindow": {
     "usedTokens": 98211,
@@ -118,7 +124,7 @@
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "Codex auth required \u00b7 Gemini login required",
-    "updatedAt": "2026-04-13T02:40:08Z"
+    "updatedAt": "2026-04-13T02:45:09Z"
   },
   "modelUsage": {
     "session": 2.593815,
@@ -212,7 +218,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T02:40:11Z",
+    "lastUpdated": "2026-04-13T02:45:13Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -253,9 +259,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 29.901667,
-    "total_earned": 29.901667,
-    "online_time": "299h 1m",
+    "sim_balance": 29.910028,
+    "total_earned": 29.910028,
+    "online_time": "299h 6m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -266,16 +272,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T02:40:12Z"
+    "updatedAt": "2026-04-13T02:45:13Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 24.8,
-      "cpu_user": 9.93,
-      "cpu_sys": 14.9,
-      "load1": 2.38,
-      "load5": 2.26,
-      "load15": 2.5,
+      "cpu_pct": 25.2,
+      "cpu_user": 9.81,
+      "cpu_sys": 15.36,
+      "load1": 1.99,
+      "load5": 2.35,
+      "load15": 2.47,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -285,12 +291,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.6,
-      "cpu_user": 1.32,
-      "cpu_sys": 9.27,
-      "load1": 1.44,
-      "load5": 1.62,
-      "load15": 1.71,
+      "cpu_pct": 12.3,
+      "cpu_user": 3.22,
+      "cpu_sys": 9.3,
+      "load1": 2.01,
+      "load5": 1.82,
+      "load15": 1.77,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -316,19 +322,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:40:02Z"
+      "lastChecked": "2026-04-13T02:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T02:40:02Z"
+      "lastChecked": "2026-04-13T02:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T02:40:02Z"
+      "lastChecked": "2026-04-13T02:45:03Z"
     }
   ],
   "crons": [
@@ -756,7 +762,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 1021,
+      "elapsedSecs": 1323,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -766,7 +772,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 2182,
+      "elapsedSecs": 2483,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -795,29 +801,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T02:40:11Z",
+      "time": "2026-04-13T02:45:13Z",
       "event": "Session spend: $2.59"
     },
     {
-      "time": "2026-04-13T02:40:08Z",
+      "time": "2026-04-13T02:45:09Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T02:40:08Z",
+      "time": "2026-04-13T02:45:09Z",
       "event": "CodexBar: Codex auth required \u00b7 Gemini login required"
     },
     {
-      "time": "2026-04-13T02:40:02Z",
+      "time": "2026-04-13T02:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T02:40:02Z",
+      "time": "2026-04-13T02:45:03Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T02:40:02Z",
+      "time": "2026-04-13T02:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T02:40:02Z"
+  "lastUpdated": "2026-04-13T02:45:03Z"
 }
