@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "verified gateway restart succeeded and confirmed current session is still on the old API-backed model",
+  "objective": "pressure-testing Codex-first routing with strict pass/fail audit",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T21:23:12Z",
-  "checkedAt": "2026-04-13T21:23:12Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-13T21:25:04Z",
+  "checkedAt": "2026-04-13T21:25:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
