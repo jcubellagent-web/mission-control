@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "restored the local Mission Control server on localhost:8765, reopened it in Safari, and pushed the threaded-server fix in commit 1d462281",
+  "objective": "tightening Mission Control pop-out buttons and checking the Brain Feed activity/agents layering issue",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T17:49:41Z",
-  "checkedAt": "2026-04-13T17:49:41Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-13T17:56:10Z",
+  "checkedAt": "2026-04-13T17:56:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
