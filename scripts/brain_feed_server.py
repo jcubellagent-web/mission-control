@@ -451,6 +451,10 @@ if __name__ == "__main__":
     t3.start()
     print("Supabase remote command poller started (3s interval)", flush=True)
 
-    server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
+    class BrainFeedThreadingServer(http.server.ThreadingHTTPServer):
+        daemon_threads = True
+        allow_reuse_address = True
+
+    server = BrainFeedThreadingServer(("0.0.0.0", PORT), Handler)
     print(f"Brain Feed + Dashboard server on http://localhost:{PORT}", flush=True)
     server.serve_forever()
