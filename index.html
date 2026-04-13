@@ -1639,7 +1639,7 @@
 
         /* ── System Health ── */
         .card-model-health { display: flex; flex-direction: column; }
-        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px; flex-shrink: 0; }
+        .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; flex-shrink: 0; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
         .system-health-body { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; overflow-y: auto; max-height: 200px; }
@@ -4199,13 +4199,17 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .bf-signal-row { gap: 8px; margin-bottom: 10px; }
+        .bf-signal-row { gap: 8px; margin-bottom: 8px; }
         .bf-signal-chip {
             background: rgba(255,255,255,0.032);
             border: 1px solid rgba(255,255,255,0.065);
             border-radius: 12px;
-            padding: 9px 10px;
+            min-height: 52px;
+            padding: 8px 10px;
+            justify-content: center;
         }
+        .bf-signal-label { font-size: 0.5rem; letter-spacing: 0.14em; }
+        .bf-signal-value { font-size: 0.76rem; line-height: 1.18; }
         .bf-signal-step {
             white-space: normal;
             overflow: visible;
@@ -4328,17 +4332,17 @@
         .system-health-body { gap: 8px; }
         .mu-drill-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 10px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 6px;
         }
         .mu-drill-card {
             appearance: none;
             border: 1px solid rgba(255,255,255,0.07);
             background: rgba(255,255,255,0.04);
             border-radius: 14px;
-            min-height: 104px;
-            padding: 13px 14px 12px;
+            min-height: 82px;
+            padding: 10px 11px 9px;
             text-align: left;
             color: #fff;
             cursor: pointer;
@@ -4346,13 +4350,13 @@
             position: relative;
             overflow: hidden;
         }
-        .mu-drill-card:last-child { grid-column: 1 / -1; }
+        .mu-drill-card:last-child { grid-column: auto; }
         .mu-drill-card::after {
             content: '↗';
             position: absolute;
-            top: 11px;
+            top: 9px;
             right: 12px;
-            font-size: 0.8rem;
+            font-size: 0.74rem;
             color: rgba(255,255,255,0.5);
         }
         .mu-drill-card:hover,
@@ -4362,50 +4366,45 @@
             background: rgba(255,255,255,0.055);
         }
         .mu-drill-kicker {
-            font-size: 0.6rem;
+            font-size: 0.54rem;
             font-weight: 700;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.52);
-            margin-bottom: 7px;
+            margin-bottom: 5px;
         }
         .mu-drill-main {
-            font-size: 0.88rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 6px;
-            padding-right: 20px;
-            line-height: 1.22;
+            margin-bottom: 5px;
+            padding-right: 18px;
+            line-height: 1.16;
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             overflow: hidden;
         }
         .mu-drill-sub {
-            font-size: 0.64rem;
+            font-size: 0.56rem;
             color: rgba(255,255,255,0.72);
-            line-height: 1.33;
+            line-height: 1.22;
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             overflow: hidden;
         }
-        .mu-drill-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .mu-drill-chip-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
         .mu-drill-chip {
-            font-size: 0.54rem;
-            padding: 2px 6px;
+            font-size: 0.5rem;
+            padding: 1px 5px;
             border-radius: 999px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.72);
         }
         .mu-drill-note {
-            font-size: 0.58rem;
-            color: rgba(255,255,255,0.34);
-            text-align: right;
-            margin-top: 4px;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
+            display: none;
         }
         .sh-agent-row {
             border-radius: 12px;
