@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "reported provider and model only after retry",
+  "objective": "report provider and model only",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T22:15:05Z",
-  "checkedAt": "2026-04-13T22:15:05Z",
+  "steps": [
+    {
+      "label": "session_status",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-13T22:15:54Z",
+  "checkedAt": "2026-04-13T22:15:54Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
