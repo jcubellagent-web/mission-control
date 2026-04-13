@@ -1,13 +1,23 @@
 {
   "active": false,
-  "objective": "Sorare ML Training",
+  "objective": "X Growth Tracker",
   "status": "idle",
-  "updatedAt": "2026-04-07T03:55:22Z",
+  "updatedAt": "2026-04-13T01:30:46Z",
   "model": "gpt-4.1",
-  "messageReceived": "2026-04-07T03:55:22Z",
+  "messageReceived": "2026-04-13T01:30:46Z",
   "steps": [
     {
-      "label": "X Feedback ML \u2014 Follower delta: +0",
+      "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+      "status": "error",
+      "tool": "exec"
+    },
+    {
+      "label": "Fantasy Weekly Recap \u2014 requests.exceptions.HTTPError: 400 Client Error:  for url: https://lm-api-rea...",
+      "status": "error",
+      "tool": "exec"
+    },
+    {
+      "label": "X Feedback ML \u2014 Reply targets today: []",
       "status": "done",
       "tool": "exec"
     },
@@ -15,14 +25,9 @@
       "label": "X Growth Tracker \u2014 Could not get follower count \u2014 skipping snapshot",
       "status": "done",
       "tool": "exec"
-    },
-    {
-      "label": "Sorare ML Training \u2014 session_id: 20260403_000600_9681b7",
-      "status": "done",
-      "tool": "exec"
     }
   ],
   "currentTool": "",
-  "checkedAt": "2026-04-07T03:55:22Z",
+  "checkedAt": "2026-04-13T01:30:46Z",
   "agent": "JAIMES"
 }
