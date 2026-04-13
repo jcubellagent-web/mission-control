@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "codified reply format and refreshed core markdowns for the OpenAI Gemini Grok stack",
+    "objective": "audit cron jobs and verify JAIMES ML pipelines",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T19:27:24Z",
-    "checkedAt": "2026-04-13T19:27:24Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-13T19:35:10Z",
+    "checkedAt": "2026-04-13T19:35:10Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "codified reply format and refreshed core markdowns for the OpenAI Gemini Grok stack",
-    "updatedAt": "2026-04-13T19:35:02Z"
+    "context": "audit cron jobs and verify JAIMES ML pipelines",
+    "updatedAt": "2026-04-13T19:40:02Z"
   },
   "contextWindow": {
     "usedTokens": 87186,
@@ -123,7 +129,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 6m",
+        "Resets in 2h 1m",
         "Weekly: 100% left [============]",
         "Pace: 8% in reserve | Expected 8% used | Lasts until reset",
         "Resets in 6d 9h",
@@ -134,11 +140,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 6m",
+      "sessionReset": "2h 1m",
       "weeklyReset": "6d 9h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T19:35:04Z"
+    "updatedAt": "2026-04-13T19:40:04Z"
   },
   "modelUsage": {
     "session": 0.92075,
@@ -232,7 +238,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T19:35:07Z",
+    "lastUpdated": "2026-04-13T19:40:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -273,9 +279,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.593222,
-    "total_earned": 31.593222,
-    "online_time": "315h 55m",
+    "sim_balance": 31.601583,
+    "total_earned": 31.601583,
+    "online_time": "316h 0m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -286,18 +292,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T19:35:08Z"
+    "updatedAt": "2026-04-13T19:40:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.8,
-      "cpu_user": 18.94,
-      "cpu_sys": 15.8,
+      "cpu_pct": 31.1,
+      "cpu_user": 15.3,
+      "cpu_sys": 16.3,
       "load1": 2.07,
-      "load5": 2.53,
-      "load15": 2.52,
+      "load5": 2.33,
+      "load15": 2.44,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -305,14 +311,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.8,
-      "cpu_user": 2.72,
-      "cpu_sys": 9.9,
-      "load1": 2.3,
-      "load5": 1.92,
-      "load15": 1.82,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 15.2,
+      "cpu_user": 3.57,
+      "cpu_sys": 11.6,
+      "load1": 1.64,
+      "load5": 1.76,
+      "load15": 1.76,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -336,19 +342,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T19:35:02Z"
+      "lastChecked": "2026-04-13T19:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T19:35:02Z"
+      "lastChecked": "2026-04-13T19:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T19:35:02Z"
+      "lastChecked": "2026-04-13T19:40:02Z"
     }
   ],
   "crons": [
@@ -981,6 +987,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260413-674",
+      "title": "Audit cron jobs + verify JAIMES ML pipelines",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-04-13 15:34",
+      "updatedAt": "2026-04-13 15:34",
+      "notes": "Audit current cron jobs, then verify JAIMES ML-related jobs are firing cleanly and producing expected outputs.",
+      "owner": "JAIMES"
+    },
+    {
       "id": "T-20260409-94",
       "title": "Rebalance GW5 lineups",
       "status": "active",
@@ -1026,29 +1042,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T19:35:07Z",
+      "time": "2026-04-13T19:40:08Z",
       "event": "Session spend: $0.92"
     },
     {
-      "time": "2026-04-13T19:35:04Z",
+      "time": "2026-04-13T19:40:04Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/brain_feed_server.py"
     },
     {
-      "time": "2026-04-13T19:35:04Z",
+      "time": "2026-04-13T19:40:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T19:35:02Z",
+      "time": "2026-04-13T19:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T19:35:02Z",
+      "time": "2026-04-13T19:40:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T19:35:02Z",
+      "time": "2026-04-13T19:40:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T19:35:02Z"
+  "lastUpdated": "2026-04-13T19:40:02Z"
 }
