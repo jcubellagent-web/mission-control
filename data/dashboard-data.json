@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Transcribing Josh voice note and preparing routing plus Mission Control budget revamp",
+    "objective": "Transcribing Josh voice note and finishing Mission Control model-usage budget revamp plus routing cleanup",
     "status": "active",
     "steps": [
       {
@@ -15,15 +15,15 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-13T03:48:37Z",
-    "checkedAt": "2026-04-13T03:48:37Z",
+    "updatedAt": "2026-04-13T03:52:18Z",
+    "checkedAt": "2026-04-13T03:52:18Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Transcribing Josh voice note and preparing routing plus Mission Control budget revamp",
-    "updatedAt": "2026-04-13T03:50:02Z"
+    "context": "Transcribing Josh voice note and finishing Mission Control model-usage budget revamp plus routing cleanup",
+    "updatedAt": "2026-04-13T03:55:02Z"
   },
   "contextWindow": {
     "usedTokens": 129226,
@@ -108,7 +108,7 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T03:49:03Z",
+    "lastTriggeredAt": "2026-04-13T03:54:03Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
     "usedTokens": 129226,
@@ -116,17 +116,17 @@
     "pct": 0.6461
   },
   "codingVisibility": {
-    "workspaceDirty": 34,
-    "missionControlDirty": 7,
+    "workspaceDirty": 35,
+    "missionControlDirty": 12,
     "recentFiles": [
+      "mission-control/index.html",
       "mission-control/scripts/bf_push.sh",
       "scripts/fast_voice_transcribe.sh",
-      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh"
     ],
     "codexbarStatus": "== Codex 0.116.0 (codex-cli) == | Session: 100% left [============]",
-    "updatedAt": "2026-04-13T03:50:04Z"
+    "updatedAt": "2026-04-13T03:55:04Z"
   },
   "modelUsage": {
     "session": 5.523745,
@@ -220,7 +220,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T03:50:08Z",
+    "lastUpdated": "2026-04-13T03:55:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -261,9 +261,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.018222,
-    "total_earned": 30.018222,
-    "online_time": "300h 10m",
+    "sim_balance": 30.026556,
+    "total_earned": 30.026556,
+    "online_time": "300h 15m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -274,18 +274,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T03:50:08Z"
+    "updatedAt": "2026-04-13T03:55:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 29.4,
-      "cpu_user": 14.25,
-      "cpu_sys": 15.17,
-      "load1": 2.88,
-      "load5": 2.83,
-      "load15": 2.54,
+      "cpu_pct": 25.7,
+      "cpu_user": 10.77,
+      "cpu_sys": 14.89,
+      "load1": 1.59,
+      "load5": 2.31,
+      "load15": 2.4,
       "ram_used_gb": 11.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -293,12 +293,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 3.31,
-      "cpu_sys": 9.27,
-      "load1": 2.09,
-      "load5": 1.92,
-      "load15": 1.85,
+      "cpu_pct": 12.3,
+      "cpu_user": 1.94,
+      "cpu_sys": 10.38,
+      "load1": 2.2,
+      "load5": 2.1,
+      "load15": 1.93,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -324,19 +324,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:50:02Z"
+      "lastChecked": "2026-04-13T03:55:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T03:50:02Z"
+      "lastChecked": "2026-04-13T03:55:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T03:50:02Z"
+      "lastChecked": "2026-04-13T03:55:02Z"
     }
   ],
   "crons": [
@@ -764,7 +764,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 5218,
+      "elapsedSecs": 5518,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -774,7 +774,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 6378,
+      "elapsedSecs": 6678,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -782,7 +782,7 @@
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/scripts/bf_push.sh, scripts/fast_voice_transcribe.sh",
+      "label": "Editing: mission-control/index.html, mission-control/scripts/bf_push.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -803,29 +803,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T03:50:08Z",
+      "time": "2026-04-13T03:55:07Z",
       "event": "Session spend: $5.52"
     },
     {
-      "time": "2026-04-13T03:50:04Z",
-      "event": "Coding: mission-control/scripts/bf_push.sh, scripts/fast_voice_transcribe.sh"
+      "time": "2026-04-13T03:55:04Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/bf_push.sh"
     },
     {
-      "time": "2026-04-13T03:50:04Z",
+      "time": "2026-04-13T03:55:04Z",
       "event": "CodexBar: == Codex 0.116.0 (codex-cli) == | Session: 100% left [============]"
     },
     {
-      "time": "2026-04-13T03:50:02Z",
+      "time": "2026-04-13T03:55:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T03:50:02Z",
+      "time": "2026-04-13T03:55:02Z",
       "event": "28 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T03:50:02Z",
+      "time": "2026-04-13T03:55:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T03:50:02Z"
+  "lastUpdated": "2026-04-13T03:55:02Z"
 }
