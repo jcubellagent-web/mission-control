@@ -32,6 +32,7 @@ AGENT_BUS_KEY = "sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
 CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-state.json"
 CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
 CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
+TASKS_PATH = WORKSPACE_ROOT / "memory" / "tasks.md"
 
 CRON_TARGETS = [
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
@@ -180,6 +181,81 @@ def load_json_file(path: Path, default: Any) -> Any:
         return json.loads(path.read_text())
     except Exception:
         return default
+
+
+def infer_task_owner(title: str, notes: str = "", background: str = "") -> str:
+    blob = f"{title} {notes} {background}".lower()
+    if any(token in blob for token in ["jaimes", "hermes"]):
+        return "JAIMES"
+    if any(token in blob for token in ["j.a.i.n", "jain", "jc_agent"]):
+        return "J.A.I.N"
+    return "JOSH 2.0"
+
+
+def fetch_tracked_tasks() -> List[Dict[str, Any]]:
+    if not TASKS_PATH.exists():
+        return []
+    try:
+        import re as _re
+
+        text = TASKS_PATH.read_text()
+        active_block = text.split("# Completed", 1)[0]
+        tasks: List[Dict[str, Any]] = []
+        current: Dict[str, Any] | None = None
+
+        for raw_line in active_block.splitlines():
+            line = raw_line.rstrip()
+            if line.startswith("## "):
+                if current:
+                    current["owner"] = infer_task_owner(
+                        current.get("title", ""),
+                        current.get("notes", ""),
+                        current.get("background", ""),
+                    )
+                    tasks.append(current)
+                m = _re.match(r"^##\s+(T-\d+-\d+)\s+(.*)$", line)
+                if not m:
+                    current = None
+                    continue
+                current = {
+                    "id": m.group(1),
+                    "title": m.group(2).strip(),
+                    "status": "active",
+                    "statusLabel": "Active",
+                }
+                continue
+
+            if not current or not line.startswith("- **"):
+                continue
+
+            field_match = _re.match(r"^- \*\*(.+?)\*\*: ?(.*)$", line)
+            if not field_match:
+                continue
+            field = field_match.group(1).strip().lower()
+            value = field_match.group(2).strip()
+            if field == "status":
+                current["statusLabel"] = value or "Active"
+            elif field == "requested":
+                current["requestedAt"] = value
+            elif field == "updated":
+                current["updatedAt"] = value
+            elif field == "background":
+                current["background"] = value
+            elif field == "notes":
+                current["notes"] = value
+
+        if current:
+            current["owner"] = infer_task_owner(
+                current.get("title", ""),
+                current.get("notes", ""),
+                current.get("background", ""),
+            )
+            tasks.append(current)
+
+        return tasks
+    except Exception as exc:
+        print(f"[warn] fetch_tracked_tasks failed: {exc}", file=sys.stderr)
+        return []
 
 
 def normalize_node_slug(raw: Any) -> str:
@@ -1287,6 +1363,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
     x_log_lines_raw = ""
     reply_state_raw = "{}"
     x_log_runs: dict[str, str] = {}
+    x_log_hours: dict[str, list[int]] = {}
     _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
     try:
@@ -1380,6 +1457,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 if job_name:
                     iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
                     x_log_runs[job_name] = iso
+                    x_log_hours.setdefault(job_name, []).append(h)
     except Exception:
         pass
 
@@ -1450,6 +1528,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 last_run_today = False
 
         is_jaimes_agent = target.get('agent') == 'JAIMES'
+        can_verify_run = bool(last_run) or hermes_job is not None
         if sched.startswith('Daily'):
             sched_hour = parse_daily_hour(sched)
             if sched_hour is not None:
@@ -1461,7 +1540,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
                     # JAIMES jobs run via Hermes — show paused if no last_run confirmed today
                     run_status = 'paused'
                 elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= 10):
-                    run_status = 'missed'
+                    run_status = 'missed' if can_verify_run else 'due'
                 else:
                     run_status = 'upcoming'
         elif target['name'] == 'X Strategic Replies':
@@ -1547,6 +1626,26 @@ def fetch_crons() -> List[Dict[str, Any]]:
                     row['runStatus'] = 'done'
                 elif now_et.hour >= 9 and 'runStatus' not in row:
                     row['runStatus'] = 'upcoming'
+            elif target['name'] == 'X Quote Tweets':
+                done_hours = set(x_log_hours.get(target['name'], []))
+                for run in runs:
+                    t_str = run['time']
+                    try:
+                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                            year=now_et.year, month=now_et.month, day=now_et.day,
+                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                        )
+                        run['past'] = now_et >= t
+                        run['done'] = t.hour in done_hours
+                    except Exception:
+                        run['past'] = False
+                        run['done'] = False
+                if any(run.get('done') for run in runs):
+                    row['runStatus'] = 'done'
+                elif any(run.get('past') for run in runs):
+                    row['runStatus'] = 'due'
+                elif 'runStatus' not in row:
+                    row['runStatus'] = 'upcoming'
             else:
                 for run in runs:
                     t_str = run['time']
@@ -1555,8 +1654,10 @@ def fetch_crons() -> List[Dict[str, Any]]:
                             year=now_et.year, month=now_et.month, day=now_et.day,
                             tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
                         )
-                        run['done'] = now_et >= t
+                        run['past'] = now_et >= t
+                        run['done'] = False
                     except Exception:
+                        run['past'] = False
                         run['done'] = False
             row['multiRun'] = {'runs': runs}
         rows.append(row)
@@ -2190,6 +2291,7 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
     jain_brain_feed = load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {})

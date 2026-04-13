@@ -412,6 +412,7 @@
         .tjob-name-done { text-decoration: line-through; opacity: 0.5; }
         .tjob-run-badge { font-size:0.55rem; font-weight:700; letter-spacing:0.06em; border-radius:4px; padding:1px 5px; white-space:nowrap; flex-shrink:0; }
         .tjob-run-done     { background:rgba(74,222,128,0.15);  color:#4ade80; border:1px solid rgba(74,222,128,0.25); }
+        .tjob-run-due      { background:rgba(96,165,250,0.12); color:#93c5fd; border:1px solid rgba(96,165,250,0.22); }
         .tjob-run-missed   { background:rgba(245,158,11,0.15);  color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
         .tjob-run-upcoming { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.08); }
         .tjob-run-paused   { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.10); }
@@ -429,6 +430,7 @@
         .tjob-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
         .tjob-badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
         .tjob-badge.done   { background: rgba(74,222,128,0.08); color: #4ade80; border-color: rgba(74,222,128,0.2); }
+        .tjob-badge.past   { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.10); }
         .tjob-badge.next   { background: rgba(229,62,62,0.15); color: #fca5a5; border-color: rgba(229,62,62,0.3); font-weight: 600; }
         .tjob-badge.future { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.07); }
         .tjob-badge.lite   { opacity: 0.65; }
@@ -6051,11 +6053,13 @@
         function renderJobsPanel(data, brainFeed, jainBf, jaimesBf) {
             // Agent status dots
             const crons = data && Array.isArray(data.crons) ? data.crons : [];
+            const trackedTasks = data && Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
             const ownedCounts = crons.reduce((acc, cron) => {
                 const owner = cron && cron.agent ? cron.agent : 'JOSH 2.0';
                 acc[owner] = (acc[owner] || 0) + 1;
                 return acc;
             }, {});
+            const activeTaskByOwner = owner => trackedTasks.find(task => (task.owner || 'JOSH 2.0') === owner) || null;
             const freshJainTasks = getFreshJainTasks();
             const activeJainTask = freshJainTasks.active && freshJainTasks.active.length ? freshJainTasks.active[0] : null;
             const liveAgents = Array.isArray(_uaAgents) ? _uaAgents.filter(agent => agent && agent.status === 'running') : [];
@@ -6069,7 +6073,7 @@
                     bf: brainFeed,
                     owner: 'JOSH 2.0',
                     role: 'foreground',
-                    live: brainFeed && brainFeed.active ? (brainFeed.objective || 'working') : 'front desk',
+                    live: activeTaskByOwner('JOSH 2.0')?.title || (brainFeed && brainFeed.active ? (brainFeed.objective || 'working') : 'front desk'),
                 },
                 {
                     id: 'jaimes',
@@ -6078,7 +6082,7 @@
                     bf: jaimesBf,
                     owner: 'JAIMES',
                     role: 'specialist',
-                    live: activeJaimesAgent?.label || (jaimesBf && jaimesBf.active ? (jaimesBf.objective || 'working') : 'specialist lane'),
+                    live: activeTaskByOwner('JAIMES')?.title || activeJaimesAgent?.label || (jaimesBf && jaimesBf.active ? (jaimesBf.objective || 'working') : 'specialist lane'),
                 },
                 {
                     id: 'jain',
@@ -6087,7 +6091,7 @@
                     bf: jainBf,
                     owner: 'J.A.I.N',
                     role: 'worker',
-                    live: activeJainTask?.label || activeJainAgent?.label || (jainBf && jainBf.active ? (jainBf.objective || 'working') : 'worker lane'),
+                    live: activeTaskByOwner('J.A.I.N')?.title || activeJainTask?.label || activeJainAgent?.label || (jainBf && jainBf.active ? (jainBf.objective || 'working') : 'worker lane'),
                 },
             ];
             for (const a of agents) {
@@ -6947,8 +6951,11 @@
             setInterval(fetchAgentComms, 10000);
             fetchIntelligenceFeed();
             setInterval(fetchIntelligenceFeed, 60000);
-            fetchMoltWorldData();
-            setInterval(fetchMoltWorldData, 30000);
+            if (typeof window.fetchMoltWorldData === 'function' && !window._moltWorldBootstrapped) {
+                window._moltWorldBootstrapped = true;
+                window.fetchMoltWorldData();
+                window._moltWorldPollInterval = setInterval(window.fetchMoltWorldData, 30000);
+            }
             attachPullToRefresh();
             const godBadge = document.getElementById('god-mode-badge');
             if (godBadge) godBadge.style.display = 'inline-flex';
@@ -7791,6 +7798,7 @@
 // ── Per-model breakdown (clean model names, sess/day/wk costs) ──
                 let breakdownHtml = '<div class="empty-state" style="font-size:0.68rem;padding:6px 0;">No model calls yet</div>';
                 let breakdownCount = 0;
+                let topModelLabel = activeModelDisp || '—';
                 if (mu.breakdown && mu.breakdown.length) {
                     // Agent tag: infer from source + name
                     function agentTag(model) {
@@ -7808,6 +7816,7 @@
                     });
                     const sorted = [...filtered].sort((a, b) => (b.weeklyCost || 0) - (a.weeklyCost || 0));
                     breakdownCount = sorted.length;
+                    if (sorted.length) topModelLabel = modelDisplayName(sorted[0].name || activeModelDisp || '—');
                     const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
                     const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24','#22d3ee','#fb7185'];
                     const colHdr = `<div class="mu-compact-row mu-compact-hdr" style="opacity:0.4;font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">
@@ -7931,11 +7940,11 @@
                     <div class="mu-drill-grid">
                         <button class="mu-drill-card" type="button" onclick="openModuleModal('usage_stats')">
                             <div class="mu-drill-kicker">Model usage</div>
-                            <div class="mu-drill-main">${fmtCost(totalSession)} session · ${fmtCost(totalDaily)} today</div>
-                            <div class="mu-drill-sub">Run rate ${fmtCost(wrrTotal)}/wk · ${breakdownCount || 0} rows</div>
+                            <div class="mu-drill-main">${fmtCost(totalSession)} current · ${fmtCost(totalDaily)} today</div>
+                            <div class="mu-drill-sub">Top ${escapeHtml(topModelLabel)} · ${breakdownCount || 0} tracked models</div>
                             <div class="mu-drill-chip-row">
-                                <span class="mu-drill-chip">Week ${fmtCost(totalWeekly)}</span>
-                                <span class="mu-drill-chip">Month ${fmtCost(totalMonthly)}</span>
+                                <span class="mu-drill-chip">7d ${fmtCost(totalWeekly)}</span>
+                                <span class="mu-drill-chip">Proj ${fmtCost(wrrProjected)}</span>
                             </div>
                         </button>
                         <button class="mu-drill-card" type="button" onclick="openModuleModal('architecture')">
@@ -7970,7 +7979,7 @@
             // Upcoming events (diff-guarded)
             if (sectionChanged('upcomingEvents', data.upcomingEvents)) {
             const eventsList = document.getElementById('events-list');
-            if (data.upcomingEvents && data.upcomingEvents.length > 0) {
+            if (eventsList && data.upcomingEvents && data.upcomingEvents.length > 0) {
                 eventsList.innerHTML = data.upcomingEvents.slice(0, compactMode ? 3 : 4).map(event => `
                     <div class="event-item">
                         <div class="event-time">${formatEventTime(event.time)}</div>
@@ -7980,11 +7989,11 @@
                         </div>
                     </div>
                 `).join('');
-            } else if (data.calendarHealth && data.calendarHealth.status === 'auth_expired') {
+            } else if (eventsList && data.calendarHealth && data.calendarHealth.status === 'auth_expired') {
                 eventsList.innerHTML = '<div class="empty-state">Calendar needs re-auth</div>';
-            } else if (data.calendarHealth && data.calendarHealth.status === 'error') {
+            } else if (eventsList && data.calendarHealth && data.calendarHealth.status === 'error') {
                 eventsList.innerHTML = '<div class="empty-state">Calendar temporarily unavailable</div>';
-            } else {
+            } else if (eventsList) {
                 eventsList.innerHTML = '<div class="empty-state">No upcoming events</div>';
             }
             } // end events diff guard
@@ -7992,7 +8001,7 @@
             // Device & watchdog status (diff-guarded)
             if (sectionChanged('devices', data.devices)) {
             const deviceList = document.getElementById('device-list');
-            if (data.devices && data.devices.length > 0) {
+            if (deviceList && data.devices && data.devices.length > 0) {
                 deviceList.innerHTML = data.devices.map(device => {
                     const s = (device.status || '').toLowerCase();
                     const statusClass = (s === 'live' || s === 'ok') ? 'ok' : (s === 'attention' || s === 'warning') ? 'attention' : (s === 'down' || s === 'error') ? 'error' : 'attention';
@@ -8005,7 +8014,7 @@
                         </div>
                     `;
                 }).join('');
-            } else {
+            } else if (deviceList) {
                 deviceList.innerHTML = '<div class="empty-state">No device data</div>';
             }
             } // end devices diff guard
@@ -8025,6 +8034,32 @@
                 'Other':             { color: 'rgba(255,255,255,0.3)', emoji: '·' },
             };
             const categoryOrder = ['Intelligence Feed', 'X Account', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
+            const trackedTasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
+
+            const trackedHtml = trackedTasks.length ? `<div class="tjob-category" id="tjob-cat-active-work" data-cat="Active Work">
+                <div class="tjob-cat-header">
+                    <span class="tjob-cat-emoji">🧠</span>
+                    <span class="tjob-cat-name" style="color:#4ade80">Active Work</span>
+                    <span class="tjob-cat-count">${trackedTasks.length}</span>
+                    <span class="tjob-cat-chevron">•</span>
+                </div>
+                <div class="tjob-rows">${trackedTasks.map(task => {
+                    const owner = task.owner || 'JOSH 2.0';
+                    const agentColor = owner === 'J.A.I.N' ? '#60a5fa' : owner === 'JAIMES' ? '#a78bfa' : '#4ade80';
+                    const detail = [task.notes, task.background].filter(Boolean)[0] || 'Live tracked task';
+                    return `<div class="tjob-row">
+                        <div class="tjob-status-dot" style="background:${agentColor};box-shadow:0 0 4px ${agentColor}70"></div>
+                        <div class="tjob-body" style="flex-direction:column;align-items:flex-start;gap:2px;">
+                            <div class="tjob-header-row">
+                                <span class="tjob-name">${escapeHtml(task.title || 'Untitled task')}</span>
+                                <span class="tjob-run-badge tjob-run-due">live</span>
+                                <span class="tjob-agent" style="color:${agentColor};margin-left:auto;">${escapeHtml(owner)}</span>
+                            </div>
+                            <div class="tjob-subline">${escapeHtml(detail)}</div>
+                        </div>
+                    </div>`;
+                }).join('')}</div>
+            </div>` : '';
 
             const grouped = {};
             (data.crons || []).forEach(cron => {
@@ -8064,8 +8099,10 @@
                             }
                             let cls, label;
                             const shortTime = r.time.replace(' AM','a').replace(' PM','p');
-                            if (r.done || (runHour !== null && runHour < etHour)) {
+                            if (r.done) {
                                 cls = 'tjob-badge done'; label = '✓ ' + shortTime;
+                            } else if (r.past) {
+                                cls = 'tjob-badge past'; label = '• ' + shortTime;
                             } else if (!foundNext) {
                                 foundNext = true;
                                 cls = 'tjob-badge next'; label = '▶ ' + shortTime;
@@ -8091,15 +8128,18 @@
                     // done / missed / upcoming state
                     const rs = cron.runStatus;
                     const isDone    = rs === 'done';
+                    const isDue     = rs === 'due';
                     const isMissed  = rs === 'missed';
                     const isUpcoming = rs === 'upcoming';
                     const desc = (cron.description || '').trim();
                     const lastRunText = cron.lastRun ? `last ${formatRelTime(cron.lastRun)}` : '';
                     const subline = [desc, lastRunText].filter(Boolean).join(' · ');
                     const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
-                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isDue ? '#60a5fa' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const statusBadge = isDone
                         ? `<span class="tjob-run-badge tjob-run-done">✓ done</span>`
+                        : isDue
+                        ? `<span class="tjob-run-badge tjob-run-due">due</span>`
                         : isMissed
                         ? `<span class="tjob-run-badge tjob-run-missed">⚠ missed</span>`
                         : isUpcoming
@@ -8222,7 +8262,7 @@
                 </div>`;
             }).join('');
 
-            todayJobsCard.innerHTML = cronHtml || '<div class="empty-state">No scheduled jobs</div>';
+            todayJobsCard.innerHTML = (trackedHtml + cronHtml) || '<div class="empty-state">No scheduled jobs</div>';
             // Cache cron HTML for instant next-load
             try { localStorage.setItem('mc_jobs_html', cronHtml); } catch(e) {}
             } // end crons sectionChanged guard
@@ -10107,9 +10147,9 @@
     // ═══════════════════════════════════════════════════════════════════
     // MOLTWORLD DASHBOARD
     // ═══════════════════════════════════════════════════════════════════
-    let _moltWorldPollInterval = null;
+    window._moltWorldPollInterval = window._moltWorldPollInterval || null;
 
-    async function fetchMoltWorldData() {
+    window.fetchMoltWorldData = async function() {
         let data = null;
         try {
             const r = await fetch('data/moltworld-data.json?t=' + Date.now());
@@ -10197,16 +10237,22 @@
         const overlay = document.getElementById('mw-modal-overlay');
         overlay.classList.remove('closing');
         overlay.style.display = 'flex';
-        await fetchMoltWorldData();
-        _moltWorldPollInterval = setInterval(fetchMoltWorldData, 30000); // Poll every 30s
+        await window.fetchMoltWorldData();
+        window._moltWorldPollInterval = setInterval(window.fetchMoltWorldData, 30000); // Poll every 30s
     };
 
     window.closeMoltWorldDashboard = function() {
         const overlay = document.getElementById('mw-modal-overlay');
         overlay.classList.add('closing');
-        clearInterval(_moltWorldPollInterval);
+        clearInterval(window._moltWorldPollInterval);
         setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); }, 220);
     };
+
+    if (!window._moltWorldBootstrapped) {
+        window._moltWorldBootstrapped = true;
+        window.fetchMoltWorldData();
+        window._moltWorldPollInterval = setInterval(window.fetchMoltWorldData, 30000);
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const mwClose = document.getElementById('mw-modal-close');
