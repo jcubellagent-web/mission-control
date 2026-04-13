@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Handled async memory sync and Telegram send completion events",
+    "objective": "writing dream diary entry from memory fragments",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T11:05:45Z",
-    "checkedAt": "2026-04-13T11:05:45Z",
+    "steps": [
+      {
+        "label": "read",
+        "status": "active",
+        "tool": "task-tracker"
+      }
+    ],
+    "currentTool": "task-tracker",
+    "updatedAt": "2026-04-13T12:04:49Z",
+    "checkedAt": "2026-04-13T12:04:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "Unknown"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Handled async memory sync and Telegram send completion events",
-    "updatedAt": "2026-04-13T12:00:02Z"
+    "context": "writing dream diary entry from memory fragments",
+    "updatedAt": "2026-04-13T12:05:02Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -134,18 +140,18 @@
       "weeklyReset": "6d 17h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T12:00:05Z"
+    "updatedAt": "2026-04-13T12:05:05Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 8.109531,
+    "daily": 9.511117,
     "weekly": 46.873555,
     "monthly": 906.377419,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 8.109531000000002
+        "cost": 9.511117
       },
       {
         "name": "gpt-5.3-codex",
@@ -172,13 +178,13 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1349050,
-        "outputTokens": 104770,
-        "totalTokens": 1453820,
-        "sessionCost": 8.109531000000002,
-        "dailyCost": 8.109531000000002,
-        "weeklyCost": 8.109531000000002,
-        "sessions": 100,
+        "inputTokens": 1463301,
+        "outputTokens": 114900,
+        "totalTokens": 1578201,
+        "sessionCost": 9.511117,
+        "dailyCost": 9.511117,
+        "weeklyCost": 9.511117,
+        "sessions": 108,
         "isGemini": false,
         "costEstimated": false
       },
@@ -228,7 +234,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T12:00:08Z",
+    "lastUpdated": "2026-04-13T12:05:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -257,8 +263,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 8.234346,
-      "total": 9.594402,
+      "daily": 9.635932,
+      "total": 10.995988,
       "monthly": 908.492402
     },
     "weeklyRunRate": {
@@ -269,9 +275,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.834917,
-    "total_earned": 30.834917,
-    "online_time": "308h 20m",
+    "sim_balance": 30.843306,
+    "total_earned": 30.843306,
+    "online_time": "308h 25m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -282,18 +288,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T12:00:09Z"
+    "updatedAt": "2026-04-13T12:05:11Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 27.5,
-      "cpu_user": 11.13,
-      "cpu_sys": 16.34,
-      "load1": 2.58,
-      "load5": 2.38,
-      "load15": 2.35,
+      "cpu_pct": 33.3,
+      "cpu_user": 17.57,
+      "cpu_sys": 15.67,
+      "load1": 2.38,
+      "load5": 2.41,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "105Gi",
@@ -301,14 +307,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 27.0,
-      "cpu_user": 15.95,
-      "cpu_sys": 11.4,
-      "load1": 1.95,
-      "load5": 1.91,
-      "load15": 1.83,
+      "cpu_pct": 12.9,
+      "cpu_user": 2.59,
+      "cpu_sys": 10.38,
+      "load1": 1.8,
+      "load5": 1.83,
+      "load15": 1.81,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -332,19 +338,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T12:00:02Z"
+      "lastChecked": "2026-04-13T12:05:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T12:00:02Z"
+      "lastChecked": "2026-04-13T12:05:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T12:00:02Z"
+      "lastChecked": "2026-04-13T12:05:02Z"
     }
   ],
   "crons": [
@@ -971,29 +977,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T12:00:08Z",
+      "time": "2026-04-13T12:05:11Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-13T12:00:05Z",
+      "time": "2026-04-13T12:05:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T12:00:02Z",
+      "time": "2026-04-13T12:05:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T12:00:02Z",
+      "time": "2026-04-13T12:05:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T12:00:02Z",
+      "time": "2026-04-13T12:05:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-13T12:00:02Z",
+      "time": "2026-04-13T12:05:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-13T12:00:02Z"
+  "lastUpdated": "2026-04-13T12:05:02Z"
 }
