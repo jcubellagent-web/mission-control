@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Handled completed async transcription result internally",
+    "objective": "fix desktop dashboard issue",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T18:53:56Z",
-    "checkedAt": "2026-04-13T18:53:56Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-13T18:56:12Z",
+    "checkedAt": "2026-04-13T18:56:12Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Handled completed async transcription result internally",
-    "updatedAt": "2026-04-13T18:55:02Z"
+    "context": "fix desktop dashboard issue",
+    "updatedAt": "2026-04-13T19:00:02Z"
   },
   "contextWindow": {
     "usedTokens": 56782,
@@ -124,7 +130,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 46m",
+        "Resets in 2h 41m",
         "Weekly: 100% left [============]",
         "Pace: 8% in reserve | Expected 8% used | Lasts until reset",
         "Resets in 6d 10h",
@@ -135,11 +141,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 46m",
+      "sessionReset": "2h 41m",
       "weeklyReset": "6d 10h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T18:55:04Z"
+    "updatedAt": "2026-04-13T19:00:04Z"
   },
   "modelUsage": {
     "session": 4.520742,
@@ -233,7 +239,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T18:55:07Z",
+    "lastUpdated": "2026-04-13T19:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -274,9 +280,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.526528,
-    "total_earned": 31.526528,
-    "online_time": "315h 15m",
+    "sim_balance": 31.534917,
+    "total_earned": 31.534917,
+    "online_time": "315h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -287,18 +293,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T18:55:07Z"
+    "updatedAt": "2026-04-13T19:00:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 30.2,
-      "cpu_user": 15.1,
-      "cpu_sys": 15.8,
-      "load1": 2.54,
-      "load5": 2.62,
-      "load15": 2.55,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 26.9,
+      "cpu_user": 12.99,
+      "cpu_sys": 13.86,
+      "load1": 2.46,
+      "load5": 2.38,
+      "load15": 2.44,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -306,12 +312,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 3.3,
+      "cpu_pct": 12.4,
+      "cpu_user": 2.47,
       "cpu_sys": 9.91,
-      "load1": 1.79,
-      "load5": 1.94,
-      "load15": 1.81,
+      "load1": 2.8,
+      "load5": 2.01,
+      "load15": 1.84,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -337,19 +343,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T18:55:02Z"
+      "lastChecked": "2026-04-13T19:00:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T18:55:02Z"
+      "lastChecked": "2026-04-13T19:00:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T18:55:02Z"
+      "lastChecked": "2026-04-13T19:00:02Z"
     }
   ],
   "crons": [
@@ -633,7 +639,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-13T13:00:00",
+      "lastRun": "2026-04-13T15:00:00",
       "runStatus": "done",
       "multiRun": {
         "runs": [
@@ -646,8 +652,8 @@
           {
             "time": "3:00 PM",
             "label": "Quote Tweet",
-            "past": false,
-            "done": false
+            "past": true,
+            "done": true
           },
           {
             "time": "6:00 PM",
@@ -707,7 +713,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-13T14:00:00",
+      "lastRun": "2026-04-13T15:00:00",
       "multiRun": {
         "runs": [
           {
@@ -738,7 +744,7 @@
           {
             "time": "3:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "4:00 PM",
@@ -1037,29 +1043,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T18:55:07Z",
+      "time": "2026-04-13T19:00:08Z",
       "event": "Session spend: $4.52"
     },
     {
-      "time": "2026-04-13T18:55:04Z",
+      "time": "2026-04-13T19:00:04Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/brain_feed_server.py"
     },
     {
-      "time": "2026-04-13T18:55:04Z",
+      "time": "2026-04-13T19:00:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T18:55:02Z",
+      "time": "2026-04-13T19:00:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T18:55:02Z",
+      "time": "2026-04-13T19:00:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T18:55:02Z",
+      "time": "2026-04-13T19:00:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T18:55:02Z"
+  "lastUpdated": "2026-04-13T19:00:02Z"
 }
