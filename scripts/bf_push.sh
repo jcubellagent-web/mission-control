@@ -107,41 +107,65 @@ fi
 # The idle cron will not overwrite while active=true
 
 # ── Write JSON instantly (synchronous, fast) ──────────────────────────────────
-CURRENT_MODEL="$CURRENT_MODEL" python3 -c "
-import json, os
+BF_FILE="$BF_FILE" \
+IS_ACTIVE="$IS_ACTIVE" \
+OBJECTIVE="$OBJECTIVE" \
+STATE="$STATE" \
+NOW="$NOW" \
+STEPS_JSON="$STEPS_JSON" \
+CURRENT_MODEL="$CURRENT_MODEL" \
+python3 - <<'PYEOF'
+import json
+import os
+from pathlib import Path
+
+bf_file = Path(os.environ['BF_FILE'])
+is_active = os.environ['IS_ACTIVE'] == 'true'
+objective = os.environ['OBJECTIVE']
+state = os.environ['STATE']
+now = os.environ['NOW']
+model = os.environ.get('CURRENT_MODEL', '')
+
+try:
+    new_steps = json.loads(os.environ.get('STEPS_JSON', '[]'))
+except Exception:
+    new_steps = []
+
 bf = {}
 try:
-  bf = json.load(open('$BF_FILE'))
-except:
-  pass
+    bf = json.loads(bf_file.read_text())
+except Exception:
+    pass
+
 was_active = bool(bf.get('active'))
-bf['active']          = True if '$IS_ACTIVE' == 'true' else False
-bf['objective']       = '$OBJECTIVE'
-bf['status']          = '$STATE'
-bf['updatedAt']       = '$NOW'
-bf['model']           = os.environ.get('CURRENT_MODEL', '')
+bf['active'] = is_active
+bf['objective'] = objective
+bf['status'] = state
+bf['updatedAt'] = now
+bf['model'] = model
+
 # checkedAt only set on active pushes — never on idle — so hash stays stable when nothing changes
-if '$IS_ACTIVE' == 'true':
-    bf['checkedAt'] = '$NOW'
-if '$IS_ACTIVE' == 'true':
-    bf['messageReceived'] = bf.get('messageReceived') if was_active and bf.get('messageReceived') else '$NOW'
+if is_active:
+    bf['checkedAt'] = now
+if is_active:
+    bf['messageReceived'] = bf.get('messageReceived') if was_active and bf.get('messageReceived') else now
 else:
-    bf['messageReceived'] = bf.get('messageReceived', '$NOW')
+    bf['messageReceived'] = bf.get('messageReceived', now)
+
 # Only overwrite steps if new steps were provided — preserve on done/idle
-new_steps = $STEPS_JSON
 if new_steps:
     bf['steps'] = new_steps
-elif '$STATE' in ('done', 'idle'):
-    # Mark all existing steps as done on completion so UI shows them correctly
+elif state in ('done', 'idle'):
     existing = bf.get('steps', [])
     for s in existing:
         s['status'] = 'done'
     bf['steps'] = existing
 else:
     bf['steps'] = new_steps
-bf['currentTool']     = bf['steps'][-1].get('tool', '') if bf['steps'] else ''
-json.dump(bf, open('$BF_FILE', 'w'), indent=2)
-"
+
+bf['currentTool'] = bf['steps'][-1].get('tool', '') if bf['steps'] else ''
+bf_file.write_text(json.dumps(bf, indent=2))
+PYEOF
 
 # ── Push to Supabase Realtime in background (non-blocking, fast) ──────────────
 SUPABASE_URL="https://cdzaeptrggczynijegls.supabase.co"

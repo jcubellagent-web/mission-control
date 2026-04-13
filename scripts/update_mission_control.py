@@ -23,6 +23,7 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 DASHBOARD_PATH = ROOT.parent / "data" / "dashboard-data.json"
 MODEL_USAGE_PATH = ROOT.parent / "data" / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
+AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -172,6 +173,140 @@ def is_valid_iso8601(ts: Any) -> bool:
 def should_exclude_model(name: str, source: str = "") -> bool:
     slug = f"{source} {name}".lower()
     return "opus" in slug
+
+
+def load_json_file(path: Path, default: Any) -> Any:
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return default
+
+
+def normalize_node_slug(raw: Any) -> str:
+    text = str(raw or "").strip().lower().replace("_", "")
+    if text in {"josh20", "josh2.0", "josh"}:
+        return "josh2.0"
+    if text in {"jain", "j.a.i.n"}:
+        return "jain"
+    if text == "jaimes":
+        return "jaimes"
+    return text or "system"
+
+
+def squash_text(value: Any, limit: int = 180) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
+
+
+def iso_to_dt(value: Any) -> dt.datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def is_recent_ts(value: Any, *, hours: int = 18) -> bool:
+    stamp = iso_to_dt(value)
+    if not stamp:
+        return False
+    return (dt.datetime.now(dt.timezone.utc) - stamp) <= dt.timedelta(hours=hours)
+
+
+def canonicalize_timestamp(value: Any) -> str:
+    stamp = iso_to_dt(value)
+    if not stamp:
+        return str(value or "")
+    return stamp.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def agent_bus_status_to_comm_status(status: Any) -> str:
+    slug = str(status or "").strip().lower()
+    if slug in {"running", "in_progress", "retry"}:
+        return "active"
+    if slug in {"done", "completed", "success", "succeeded"}:
+        return "done"
+    if slug in {"error", "failed", "failure"}:
+        return "done"
+    return "sent"
+
+
+def extract_agent_bus_message(task: Dict[str, Any]) -> str:
+    payload = task.get("payload") or {}
+    for key in ("task", "message", "title", "summary"):
+        text = squash_text(payload.get(key))
+        if text:
+            return text
+    details = squash_text(payload.get("details"), limit=140)
+    if details:
+        return details
+    task_type = str(task.get("task_type") or "Agent task").replace("_", " ").title()
+    target = normalize_node_slug(task.get("target_node") or "agent").upper()
+    return f"{task_type} for {target}"
+
+
+def build_agent_comms(
+    existing_entries: List[Dict[str, Any]],
+    agent_bus_tasks: List[Dict[str, Any]],
+    jain_brain_feed: Dict[str, Any] | None,
+    jaimes_brain_feed: Dict[str, Any] | None,
+) -> List[Dict[str, Any]]:
+    merged: List[Dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def push(entry: Dict[str, Any]) -> None:
+        message = squash_text(entry.get("message"))
+        timestamp = canonicalize_timestamp(entry.get("timestamp"))
+        direction = str(entry.get("direction") or "")
+        if not (message and timestamp and direction):
+            return
+        key = (timestamp, direction, message)
+        if key in seen:
+            return
+        seen.add(key)
+        clean = {
+            "timestamp": timestamp,
+            "direction": direction,
+            "message": message,
+            "status": str(entry.get("status") or "sent"),
+        }
+        merged.append(clean)
+
+    for entry in existing_entries or []:
+        if isinstance(entry, dict):
+            push(entry)
+
+    for task in agent_bus_tasks or []:
+        origin = normalize_node_slug(task.get("origin_node"))
+        target = normalize_node_slug(task.get("target_node"))
+        push({
+            "timestamp": task.get("created_at") or utc_iso(),
+            "direction": f"{origin}→{target}",
+            "message": extract_agent_bus_message(task),
+            "status": agent_bus_status_to_comm_status(task.get("status")),
+        })
+
+    if jain_brain_feed and is_recent_ts(jain_brain_feed.get("updatedAt"), hours=6):
+        push({
+            "timestamp": jain_brain_feed.get("updatedAt") or utc_iso(),
+            "direction": "jain→josh",
+            "message": jain_brain_feed.get("objective") or "J.A.I.N standing by",
+            "status": "active" if jain_brain_feed.get("active") else "done",
+        })
+
+    if jaimes_brain_feed and is_recent_ts(jaimes_brain_feed.get("updatedAt"), hours=12):
+        push({
+            "timestamp": jaimes_brain_feed.get("updatedAt") or utc_iso(),
+            "direction": "jaimes→josh",
+            "message": jaimes_brain_feed.get("objective") or "JAIMES standing by",
+            "status": "active" if jaimes_brain_feed.get("active") else "done",
+        })
+
+    merged.sort(key=lambda item: iso_to_dt(item.get("timestamp")) or dt.datetime.min.replace(tzinfo=dt.timezone.utc), reverse=True)
+    return merged[:24]
 
 
 # Known model aliases to canonical "provider/model" names (for models that appear without provider prefix)
@@ -2057,6 +2192,15 @@ def main() -> None:
     dashboard["crons"]          = _f_crons.result()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
+    jain_brain_feed = load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {})
+    jaimes_brain_feed = load_json_file(ROOT.parent / "data" / "jaimes-brain-feed.json", {})
+    agent_comms = build_agent_comms(
+        load_json_file(AGENT_COMMS_PATH, []),
+        agent_bus_tasks,
+        jain_brain_feed if isinstance(jain_brain_feed, dict) else {},
+        jaimes_brain_feed if isinstance(jaimes_brain_feed, dict) else {},
+    )
+
     # Wait for Eight Sleep subprocess
     try:
         _eight_proc.wait(timeout=20)
@@ -2086,10 +2230,12 @@ def main() -> None:
 
     DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))
     MODEL_USAGE_PATH.write_text(json.dumps(model_usage, indent=2))
+    AGENT_COMMS_PATH.write_text(json.dumps(agent_comms, indent=2))
     MOLTWORLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True) # Ensure data dir exists
     (ROOT.parent / "data" / "moltworld-data.json").write_text(json.dumps(moltworld_data, indent=2))
     print(f"Updated {DASHBOARD_PATH}")
     print(f"Updated {MODEL_USAGE_PATH}")
+    print(f"Updated {AGENT_COMMS_PATH}")
     print(f"Updated {ROOT.parent / 'data' / 'moltworld-data.json'}")
 
     # ── Sync browser reply state into x-progress.json ──────────────────────
