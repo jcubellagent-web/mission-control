@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Completed gog calendar auth recovery and verified Mission Control plus chiro sync",
+    "objective": "Transcribe Josh voice note and tighten Brain Feed live objective + memory roadmap UI",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-13T20:39:31Z",
-    "checkedAt": "2026-04-13T20:39:31Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-13T20:42:16Z",
+    "checkedAt": "2026-04-13T20:42:16Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed gog calendar auth recovery and verified Mission Control plus chiro sync",
-    "updatedAt": "2026-04-13T20:40:02Z"
+    "context": "Transcribe Josh voice note and tighten Brain Feed live objective + memory roadmap UI",
+    "updatedAt": "2026-04-13T20:45:02Z"
   },
   "contextWindow": {
     "usedTokens": 111711,
@@ -111,13 +117,13 @@
   },
   "codingVisibility": {
     "workspaceDirty": 40,
-    "missionControlDirty": 11,
+    "missionControlDirty": 6,
     "recentFiles": [
+      "mission-control/index.html",
       "scripts/chiro_invite_sync.sh",
       "scripts/x_growth_tracker.py",
       "mission-control/scripts/update_mission_control.py",
       "scripts/breaking_news_scanner.py",
-      "mission-control/index.html",
       "mission-control/scripts/brain_feed_server.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
@@ -126,7 +132,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 1m",
+        "Resets in 56m",
         "Weekly: 100% left [============]",
         "Pace: 9% in reserve | Expected 9% used | Lasts until reset",
         "Resets in 6d 8h",
@@ -137,11 +143,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 1m",
+      "sessionReset": "56m",
       "weeklyReset": "6d 8h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T20:40:04Z"
+    "updatedAt": "2026-04-13T20:45:04Z"
   },
   "modelUsage": {
     "session": 9.795181,
@@ -235,7 +241,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T20:40:07Z",
+    "lastUpdated": "2026-04-13T20:45:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -276,9 +282,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.701528,
-    "total_earned": 31.701528,
-    "online_time": "317h 0m",
+    "sim_balance": 31.709889,
+    "total_earned": 31.709889,
+    "online_time": "317h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -289,18 +295,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T20:40:08Z"
+    "updatedAt": "2026-04-13T20:45:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 29.1,
-      "cpu_user": 13.6,
-      "cpu_sys": 15.48,
-      "load1": 2.65,
-      "load5": 2.64,
-      "load15": 2.5,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 32.8,
+      "cpu_user": 16.16,
+      "cpu_sys": 16.61,
+      "load1": 2.17,
+      "load5": 2.67,
+      "load15": 2.56,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -308,14 +314,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.5,
-      "cpu_user": 1.92,
-      "cpu_sys": 10.57,
-      "load1": 1.93,
-      "load5": 1.93,
-      "load15": 1.92,
+      "cpu_pct": 12.7,
+      "cpu_user": 1.85,
+      "cpu_sys": 11.11,
+      "load1": 1.84,
+      "load5": 1.96,
+      "load15": 1.94,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -339,19 +345,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T20:40:02Z"
+      "lastChecked": "2026-04-13T20:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T20:40:02Z"
+      "lastChecked": "2026-04-13T20:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T20:40:02Z"
+      "lastChecked": "2026-04-13T20:45:02Z"
     }
   ],
   "crons": [
@@ -1008,7 +1014,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/chiro_invite_sync.sh, scripts/x_growth_tracker.py",
+      "label": "Editing: mission-control/index.html, scripts/chiro_invite_sync.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1029,29 +1035,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T20:40:07Z",
+      "time": "2026-04-13T20:45:07Z",
       "event": "Session spend: $9.80"
     },
     {
-      "time": "2026-04-13T20:40:04Z",
-      "event": "Coding: scripts/chiro_invite_sync.sh, scripts/x_growth_tracker.py"
+      "time": "2026-04-13T20:45:04Z",
+      "event": "Coding: mission-control/index.html, scripts/chiro_invite_sync.sh"
     },
     {
-      "time": "2026-04-13T20:40:04Z",
+      "time": "2026-04-13T20:45:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T20:40:02Z",
+      "time": "2026-04-13T20:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T20:40:02Z",
+      "time": "2026-04-13T20:45:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T20:40:02Z",
+      "time": "2026-04-13T20:45:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T20:40:02Z"
+  "lastUpdated": "2026-04-13T20:45:02Z"
 }
