@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "restored the local Mission Control server on localhost:8765, reopened it in Safari, and pushed the threaded-server fix in commit 1d462281",
-    "updatedAt": "2026-04-13T17:50:02Z"
+    "updatedAt": "2026-04-13T17:55:02Z"
   },
   "contextWindow": {
     "usedTokens": 142747,
@@ -102,12 +102,12 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T17:48:15Z",
+    "lastTriggeredAt": "2026-04-13T17:53:15Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 120554,
+    "usedTokens": 142747,
     "limitTokens": 200000,
-    "pct": 0.6028
+    "pct": 0.7137
   },
   "codingVisibility": {
     "workspaceDirty": 38,
@@ -124,7 +124,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 51m",
+        "Resets in 3h 46m",
         "Weekly: 100% left [============]",
         "Pace: 7% in reserve | Expected 7% used | Lasts until reset",
         "Resets in 6d 11h",
@@ -135,11 +135,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 51m",
+      "sessionReset": "3h 46m",
       "weeklyReset": "6d 11h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T17:50:04Z"
+    "updatedAt": "2026-04-13T17:55:05Z"
   },
   "modelUsage": {
     "session": 8.5129,
@@ -233,7 +233,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T17:50:07Z",
+    "lastUpdated": "2026-04-13T17:55:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -274,9 +274,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.418222,
-    "total_earned": 31.418222,
-    "online_time": "314h 10m",
+    "sim_balance": 31.426556,
+    "total_earned": 31.426556,
+    "online_time": "314h 15m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -287,18 +287,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T17:50:08Z"
+    "updatedAt": "2026-04-13T17:55:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.2,
-      "cpu_user": 21.14,
-      "cpu_sys": 18.4,
-      "load1": 2.54,
-      "load5": 2.35,
-      "load15": 2.24,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 31.2,
+      "cpu_user": 14.62,
+      "cpu_sys": 16.55,
+      "load1": 3.17,
+      "load5": 2.79,
+      "load15": 2.46,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -306,11 +306,11 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.3,
-      "cpu_user": 1.7,
-      "cpu_sys": 8.54,
-      "load1": 1.36,
-      "load5": 1.58,
+      "cpu_pct": 11.8,
+      "cpu_user": 2.72,
+      "cpu_sys": 9.9,
+      "load1": 1.83,
+      "load5": 1.66,
       "load15": 1.63,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.0,
@@ -337,19 +337,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T17:50:02Z"
+      "lastChecked": "2026-04-13T17:55:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T17:50:02Z"
+      "lastChecked": "2026-04-13T17:55:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T17:50:02Z"
+      "lastChecked": "2026-04-13T17:55:02Z"
     }
   ],
   "crons": [
@@ -1016,7 +1016,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 60%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 71%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1027,29 +1027,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T17:50:07Z",
+      "time": "2026-04-13T17:55:08Z",
       "event": "Session spend: $8.51"
     },
     {
-      "time": "2026-04-13T17:50:04Z",
+      "time": "2026-04-13T17:55:05Z",
       "event": "Coding: mission-control/scripts/brain_feed_server.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-13T17:50:04Z",
+      "time": "2026-04-13T17:55:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T17:50:02Z",
+      "time": "2026-04-13T17:55:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T17:50:02Z",
+      "time": "2026-04-13T17:55:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T17:50:02Z",
+      "time": "2026-04-13T17:55:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T17:50:02Z"
+  "lastUpdated": "2026-04-13T17:55:02Z"
 }
