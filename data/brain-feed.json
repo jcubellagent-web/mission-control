@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Fix context percent bug and complete Codex-first hardening",
+  "objective": "report provider and model before repo file read gateway",
   "status": "active",
   "steps": [
     {
-      "label": "codex",
+      "label": "session_status",
       "status": "active",
-      "tool": "gpt-5.4"
+      "tool": "exec"
     }
   ],
-  "currentTool": "gpt-5.4",
-  "updatedAt": "2026-04-13T22:21:57Z",
-  "checkedAt": "2026-04-13T22:21:57Z",
+  "currentTool": "exec",
+  "updatedAt": "2026-04-13T22:27:01Z",
+  "checkedAt": "2026-04-13T22:27:01Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
