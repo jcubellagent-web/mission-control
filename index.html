@@ -3095,6 +3095,76 @@
             flex-direction: column;
             gap: 10px;
         }
+        .memory-roadmap.compact {
+            gap: 6px;
+        }
+        .memory-roadmap-compact-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .memory-roadmap-card {
+            min-width: 0;
+            padding: 7px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+        .memory-roadmap-card.active {
+            border-color: rgba(56,189,248,0.42);
+            background: linear-gradient(180deg, rgba(14,165,233,0.18), rgba(34,211,238,0.06));
+        }
+        .memory-roadmap-card.planned {
+            border-color: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.045);
+        }
+        .memory-roadmap-card.future {
+            border-color: rgba(251,191,36,0.18);
+            background: linear-gradient(180deg, rgba(251,191,36,0.12), rgba(255,255,255,0.04));
+        }
+        .memory-roadmap-card-week {
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.46);
+        }
+        .memory-roadmap-card-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.2;
+        }
+        .memory-roadmap-card-pill {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 1px 5px;
+            border-radius: 999px;
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.64);
+        }
+        @media (max-width: 720px) {
+            .memory-roadmap-compact-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        .memory-roadmap-card.active .memory-roadmap-card-pill {
+            background: rgba(34,211,238,0.16);
+            color: #7dd3fc;
+        }
+        .memory-roadmap-card.future .memory-roadmap-card-pill {
+            background: rgba(251,191,36,0.14);
+            color: rgba(253,224,71,0.92);
+        }
         .memory-roadmap-scale,
         .memory-roadmap-track {
             display: grid;
@@ -5106,6 +5176,24 @@
             } catch(e) {}
         }
 
+        function getFreshJainTasks(maxAgeHours = 6) {
+            const jt = window._jainTasks || {};
+            const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+            const freshActive = Array.isArray(jt.active)
+                ? jt.active.filter(task => {
+                    const ts = task && task.delegatedAt ? new Date(task.delegatedAt).getTime() : 0;
+                    return ts && (Date.now() - ts) <= maxAgeMs;
+                })
+                : [];
+            return { ...jt, active: freshActive };
+        }
+
+        function truncateStatus(text, max = 28) {
+            const clean = String(text || '').trim();
+            if (!clean) return '';
+            return clean.length > max ? clean.slice(0, max - 1) + '…' : clean;
+        }
+
         // ===== J.A.I.N Brain Feed =====
         let _jainLocalOk = true;
         let lastJainBrainFeedHash = null;
@@ -5516,37 +5604,60 @@
         function buildMemoryRoadmapMarkup(expanded = false) {
             const roadmap = [
                 {
-                    title: 'Week 1 · Active Memory soak',
-                    note: 'Run the safe setup in real conversations, watch recall quality, latency, and weirdness.',
+                    week: 'W1',
+                    title: 'Active Memory',
+                    note: 'Soak it in live chats and watch recall quality.',
+                    pill: 'Now',
                     weeks: [1],
                     tone: 'active',
                 },
                 {
-                    title: 'Week 2 · Memory hygiene + tuning',
-                    note: 'Tighten durable memory, trim noise, and validate which recall patterns actually help.',
+                    week: 'W2',
+                    title: 'Memory hygiene',
+                    note: 'Trim noise, tighten durable notes, tune recall.',
+                    pill: 'Next',
                     weeks: [1, 2],
                     tone: 'planned',
                 },
                 {
-                    title: 'Week 3 · QMD pilot',
-                    note: 'Test the stronger retrieval engine on current memory files only, no session indexing yet.',
+                    week: 'W3',
+                    title: 'QMD pilot',
+                    note: 'Test stronger retrieval on current memory only.',
+                    pill: 'Pilot',
                     weeks: [3],
                     tone: 'planned',
                 },
                 {
-                    title: 'Week 4 · Session indexing decision',
-                    note: 'Only add transcript recall if QMD clearly earns it. Keep helper transcript persistence off unless debugging.',
+                    week: 'W4',
+                    title: 'Session recall?',
+                    note: 'Only add transcript indexing if it clearly earns it.',
+                    pill: 'Decision',
                     weeks: [4],
                     tone: 'future',
                 },
             ];
+
+            if (!expanded) {
+                const cards = roadmap.map(item => `
+                    <div class="memory-roadmap-card ${item.tone}">
+                        <div class="memory-roadmap-card-week">${escapeHtml(item.week)}</div>
+                        <div class="memory-roadmap-card-title">${escapeHtml(item.title)}</div>
+                        <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
+                    </div>
+                `).join('');
+
+                return {
+                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
+                    meta: '4-stage plan',
+                };
+            }
 
             const scale = `<div class="memory-roadmap-scale">${[1, 2, 3, 4].map(week => `<span class="memory-roadmap-week${week === 1 ? ' current' : ''}">W${week}</span>`).join('')}</div>`;
 
             const rows = roadmap.map(item => `
                 <div class="memory-roadmap-row">
                     <div class="memory-roadmap-row-head">
-                        <div class="memory-roadmap-title">${escapeHtml(item.title)}</div>
+                        <div class="memory-roadmap-title">${escapeHtml(item.week)} · ${escapeHtml(item.title)}</div>
                         <div class="memory-roadmap-note">${escapeHtml(item.note)}</div>
                     </div>
                     <div class="memory-roadmap-track">
@@ -5558,13 +5669,11 @@
                 </div>
             `).join('');
 
-            const footer = expanded
-                ? '<div class="memory-roadmap-footer">Target state: Active Memory first, then cleaner durable memory, then QMD only if it materially improves recall, then transcript indexing only if it proves worth the added complexity.</div>'
-                : '<div class="memory-roadmap-footer">Current stance: safe rollout first, stronger retrieval later, transcript recall only if it earns its keep.</div>';
+            const footer = '<div class="memory-roadmap-footer">Target state: Active Memory first, then cleaner durable memory, then QMD only if it materially improves recall, then transcript indexing only if it proves worth the added complexity.</div>';
 
             return {
                 html: `<div class="memory-roadmap">${scale}${rows}${footer}</div>`,
-                meta: 'Weeks 1-4',
+                meta: '4-stage plan',
             };
         }
 
@@ -5890,10 +5999,45 @@
         // ── Jobs Panel — agent status + section data ──────────────────────
         function renderJobsPanel(data, brainFeed, jainBf, jaimesBf) {
             // Agent status dots
+            const crons = data && Array.isArray(data.crons) ? data.crons : [];
+            const ownedCounts = crons.reduce((acc, cron) => {
+                const owner = cron && cron.agent ? cron.agent : 'JOSH 2.0';
+                acc[owner] = (acc[owner] || 0) + 1;
+                return acc;
+            }, {});
+            const freshJainTasks = getFreshJainTasks();
+            const activeJainTask = freshJainTasks.active && freshJainTasks.active.length ? freshJainTasks.active[0] : null;
+            const liveAgents = Array.isArray(_uaAgents) ? _uaAgents.filter(agent => agent && agent.status === 'running') : [];
+            const activeJaimesAgent = liveAgents.find(agent => String(agent.agentLabel || '').toUpperCase().includes('JAIMES')) || null;
+            const activeJainAgent = liveAgents.find(agent => String(agent.agentLabel || '').toUpperCase().includes('J.A.I.N')) || null;
             const agents = [
-                { id: 'josh', dot: 'jag-josh-dot', status: 'jag-josh-status', bf: brainFeed },
-                { id: 'jaimes', dot: 'jag-jaimes-dot', status: 'jag-jaimes-status', bf: jaimesBf },
-                { id: 'jain', dot: 'jag-jain-dot', status: 'jag-jain-status', bf: jainBf },
+                {
+                    id: 'josh',
+                    dot: 'jag-josh-dot',
+                    status: 'jag-josh-status',
+                    bf: brainFeed,
+                    owner: 'JOSH 2.0',
+                    role: 'foreground',
+                    live: brainFeed && brainFeed.active ? (brainFeed.objective || 'working') : 'front desk',
+                },
+                {
+                    id: 'jaimes',
+                    dot: 'jag-jaimes-dot',
+                    status: 'jag-jaimes-status',
+                    bf: jaimesBf,
+                    owner: 'JAIMES',
+                    role: 'specialist',
+                    live: activeJaimesAgent?.label || (jaimesBf && jaimesBf.active ? (jaimesBf.objective || 'working') : 'specialist lane'),
+                },
+                {
+                    id: 'jain',
+                    dot: 'jag-jain-dot',
+                    status: 'jag-jain-status',
+                    bf: jainBf,
+                    owner: 'J.A.I.N',
+                    role: 'worker',
+                    live: activeJainTask?.label || activeJainAgent?.label || (jainBf && jainBf.active ? (jainBf.objective || 'working') : 'worker lane'),
+                },
             ];
             for (const a of agents) {
                 const dot = document.getElementById(a.dot);
@@ -5902,9 +6046,12 @@
                 const isActive = a.bf && a.bf.active;
                 const ageMs = a.bf && a.bf.updatedAt ? (Date.now() - new Date(a.bf.updatedAt).getTime()) : null;
                 const isStale = ageMs !== null && ageMs > 120 * 60 * 1000;
-                dot.classList.toggle('active', !!isActive);
-                const obj = a.bf ? (a.bf.objective || '') : '';
-                statusEl.textContent = isStale ? (isActive ? 'stale feed' : 'standby') : (obj ? obj.slice(0, 40) : (isActive ? 'active' : 'idle'));
+                const owned = ownedCounts[a.owner] || 0;
+                const liveLabel = truncateStatus(a.live, 26);
+                dot.classList.toggle('active', !!(isActive || (liveLabel && !isStale)));
+                statusEl.textContent = isStale && !isActive
+                    ? `${a.role} · ${owned} jobs · standby`
+                    : `${a.role} · ${owned} jobs${liveLabel ? ' · ' + liveLabel : ''}`;
             }
 
             // Cron health section
@@ -5914,7 +6061,6 @@
                 cronsEl.innerHTML = '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.2)">Loading…</span></div>';
             }
             if (cronsEl && data && data.crons) {
-                const crons = data.crons || [];
                 const SHOW = ['Intelligence Feed','Breaking News','X Watchlist','X Posts','Sorare','Mission Control','Fantasy','Sorare Daily','Sorare Competition'];
                 const shown = crons.filter(c => SHOW.some(n => (c.name||'').includes(n) || (c.category||'').includes(n))).slice(0, 8);
                 let ok = 0, warn = 0, err = 0;
@@ -7178,7 +7324,7 @@
                     const jf = _uaJainBf;
                     const jsteps = jf.steps || [];
                     // Active delegated tasks take priority
-                    const jt = window._jainTasks || null;
+                    const jt = getFreshJainTasks();
                     const activeTasks = jt && jt.active && jt.active.length ? jt.active : null;
                     if (activeTasks) {
                         for (const task of activeTasks.slice(0, 3)) {
