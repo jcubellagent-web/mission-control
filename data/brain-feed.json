@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "heartbeat check: HEARTBEAT.md reviewed, due checks evaluated, gog auth blocker surfaced",
+  "objective": "new-session bootstrap and greeting",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T22:37:50Z",
-  "checkedAt": "2026-04-13T22:37:50Z",
+  "steps": [
+    {
+      "label": "codex",
+      "status": "active",
+      "tool": "gpt-5.4"
+    }
+  ],
+  "currentTool": "gpt-5.4",
+  "updatedAt": "2026-04-13T22:43:44Z",
+  "checkedAt": "2026-04-13T22:43:44Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
