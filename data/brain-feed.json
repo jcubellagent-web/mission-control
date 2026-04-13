@@ -1,18 +1,12 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Restart gateway and retest Telegram inline buttons",
+  "objective": "investigated missing Telegram inline buttons after /new, confirmed gateway/sendMessage failure, and documented runtime restart blocker",
   "status": "active",
-  "steps": [
-    {
-      "label": "exec",
-      "status": "active",
-      "tool": "gateway_restart"
-    }
-  ],
-  "currentTool": "gateway_restart",
-  "updatedAt": "2026-04-13T23:48:52Z",
-  "checkedAt": "2026-04-13T23:48:52Z",
+  "steps": [],
+  "currentTool": "",
+  "updatedAt": "2026-04-13T23:49:20Z",
+  "checkedAt": "2026-04-13T23:49:20Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
