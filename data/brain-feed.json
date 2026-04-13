@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Tightened the Brain Feed live objective bubble further and added a bit more bottom cushion under the memory roadmap",
+  "objective": "Transcribe Josh voice note and debug Brain Feed overrides plus stale header chips",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T20:48:44Z",
-  "checkedAt": "2026-04-13T20:48:44Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-13T20:51:42Z",
+  "checkedAt": "2026-04-13T20:51:42Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
