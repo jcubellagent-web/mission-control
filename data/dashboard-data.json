@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
-    "updatedAt": "2026-04-13T05:16:30Z"
+    "updatedAt": "2026-04-13T05:20:02Z"
   },
   "contextWindow": {
     "usedTokens": 184873,
@@ -108,7 +108,7 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-13T05:14:05Z",
+    "lastTriggeredAt": "2026-04-13T05:19:05Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
     "usedTokens": 184873,
@@ -116,8 +116,8 @@
     "pct": 0.9244
   },
   "codingVisibility": {
-    "workspaceDirty": 35,
-    "missionControlDirty": 9,
+    "workspaceDirty": 36,
+    "missionControlDirty": 3,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -146,7 +146,7 @@
       "weeklyReset": "7d",
       "summary": "Pro \u00b7 100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T05:16:31Z"
+    "updatedAt": "2026-04-13T05:20:04Z"
   },
   "modelUsage": {
     "session": 2.130141,
@@ -240,7 +240,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T05:16:34Z",
+    "lastUpdated": "2026-04-13T05:20:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -281,9 +281,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 30.162306,
-    "total_earned": 30.162306,
-    "online_time": "301h 37m",
+    "sim_balance": 30.168222,
+    "total_earned": 30.168222,
+    "online_time": "301h 40m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -294,18 +294,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T05:16:35Z"
+    "updatedAt": "2026-04-13T05:20:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 26.5,
-      "cpu_user": 11.78,
-      "cpu_sys": 14.72,
-      "load1": 2.7,
-      "load5": 2.66,
-      "load15": 2.53,
-      "ram_used_gb": 11.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 24.2,
+      "cpu_user": 10.4,
+      "cpu_sys": 14.86,
+      "load1": 2.04,
+      "load5": 2.34,
+      "load15": 2.42,
+      "ram_used_gb": 12.0,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "103Gi",
@@ -313,14 +313,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.5,
-      "cpu_user": 13.83,
-      "cpu_sys": 10.69,
-      "load1": 2.33,
-      "load5": 2.09,
+      "cpu_pct": 12.0,
+      "cpu_user": 2.0,
+      "cpu_sys": 10.0,
+      "load1": 2.07,
+      "load5": 2.03,
       "load15": 1.92,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "51Gi",
@@ -329,8 +329,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Re-auth required"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
@@ -344,19 +344,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T05:16:30Z"
+      "lastChecked": "2026-04-13T05:20:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T05:16:30Z"
+      "lastChecked": "2026-04-13T05:20:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T05:16:30Z"
+      "lastChecked": "2026-04-13T05:20:02Z"
     }
   ],
   "crons": [
@@ -972,7 +972,7 @@
       "id": "bus-d7b10c14",
       "label": "New urgent voice-alert rule for Josh",
       "status": "running",
-      "elapsedSecs": 10404,
+      "elapsedSecs": 10618,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -982,7 +982,7 @@
       "id": "bus-5564716a",
       "label": "Stand down: prior forwarded voice note was accidental, no action needed",
       "status": "running",
-      "elapsedSecs": 11564,
+      "elapsedSecs": 11778,
       "tool": "bus",
       "model": "QUEUED",
       "agentLabel": "JAIMES",
@@ -1011,29 +1011,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T05:16:34Z",
+      "time": "2026-04-13T05:20:08Z",
       "event": "Session spend: $2.13"
     },
     {
-      "time": "2026-04-13T05:16:31Z",
+      "time": "2026-04-13T05:20:04Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-13T05:16:31Z",
+      "time": "2026-04-13T05:20:04Z",
       "event": "CodexBar: Pro \u00b7 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T05:16:30Z",
+      "time": "2026-04-13T05:20:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T05:16:30Z",
+      "time": "2026-04-13T05:20:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T05:16:30Z",
+      "time": "2026-04-13T05:20:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T05:16:30Z"
+  "lastUpdated": "2026-04-13T05:20:02Z"
 }
