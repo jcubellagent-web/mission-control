@@ -931,6 +931,27 @@
         .mu-total-cell:last-child { border-right: none; }
         .mu-total-val { font-size: 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; color: #4ade80; white-space: nowrap; }
         .mu-total-label { font-size: 0.48rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .mu-budget-section { margin-bottom: 6px; padding: 7px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.025); }
+        .mu-budget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+        .mu-budget-kicker { display: block; font-size: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.42); margin-bottom: 2px; }
+        .mu-budget-main { font-size: 0.74rem; font-weight: 700; color: #fff; line-height: 1.1; }
+        .mu-budget-sub { font-size: 0.56rem; color: rgba(255,255,255,0.58); margin-top: 2px; }
+        .mu-budget-score { min-width: 52px; border-radius: 8px; padding: 5px 6px; text-align: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+        .mu-budget-score.good { color: #4ade80; }
+        .mu-budget-score.ok { color: #60a5fa; }
+        .mu-budget-score.watch { color: #f59e0b; }
+        .mu-budget-score.bad { color: #f87171; }
+        .mu-budget-score-num { display: block; font-size: 0.88rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+        .mu-budget-score-label { display: block; font-size: 0.46rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .mu-budget-bar { position: relative; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; }
+        .mu-budget-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; }
+        .mu-budget-fill.good { background: linear-gradient(90deg, rgba(34,197,94,0.55), rgba(74,222,128,0.95)); }
+        .mu-budget-fill.ok { background: linear-gradient(90deg, rgba(37,99,235,0.5), rgba(96,165,250,0.95)); }
+        .mu-budget-fill.watch { background: linear-gradient(90deg, rgba(217,119,6,0.55), rgba(245,158,11,0.95)); }
+        .mu-budget-fill.bad { background: linear-gradient(90deg, rgba(220,38,38,0.55), rgba(248,113,113,0.95)); }
+        .mu-budget-threshold { position: absolute; top: -2px; bottom: -2px; width: 1px; background: rgba(255,255,255,0.18); }
+        .mu-budget-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; font-size: 0.5rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.05em; }
+        .mu-budget-note { margin-top: 6px; font-size: 0.56rem; color: rgba(255,255,255,0.62); line-height: 1.35; }
         .mu-src-breakdown { display: none; }
         .mu-source-tag.local { background: rgba(74,222,128,0.15); color: #4ade80; border-color: rgba(74,222,128,0.3); }
         .mu-src-chip { font-size: 0.65rem; color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 2px 7px; }
@@ -6604,6 +6625,72 @@
                     <span class="mu-run-rate-info-btn" id="rr-info-btn" title="View detailed breakdown">i</span>
                 </div>`;
 
+                const budgetFloor = 200;
+                const budgetTarget = 400;
+                const budgetCap = 500;
+                const budgetNow = new Date();
+                const budgetDaysInMonth = new Date(budgetNow.getFullYear(), budgetNow.getMonth() + 1, 0).getDate();
+                const budgetDayOfMonth = Math.min(budgetDaysInMonth, Math.max(1, budgetNow.getDate()));
+                const budgetActualMonthly = totalMonthly;
+                const budgetPaceProjected = budgetActualMonthly > 0
+                    ? (budgetActualMonthly / budgetDayOfMonth) * budgetDaysInMonth
+                    : 0;
+                const budgetProjected = Math.max(budgetActualMonthly, budgetPaceProjected);
+                const budgetFillPct = Math.max(0, Math.min(100, (budgetProjected / budgetCap) * 100));
+                let budgetTone = 'good';
+                let budgetLabel = 'Excellent';
+                let budgetScore = 100;
+                let budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetFloor - budgetProjected))} below the floor.`;
+                if (budgetProjected <= budgetFloor) {
+                    budgetTone = 'good';
+                    budgetLabel = 'Excellent';
+                    budgetScore = 100;
+                } else if (budgetProjected <= budgetTarget) {
+                    budgetTone = 'ok';
+                    budgetLabel = 'On target';
+                    const t = (budgetProjected - budgetFloor) / Math.max(1, budgetTarget - budgetFloor);
+                    budgetScore = Math.round(100 - (t * 15));
+                    budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetTarget - budgetProjected))} under the $${budgetTarget} target.`;
+                } else if (budgetProjected <= budgetCap) {
+                    budgetTone = 'watch';
+                    budgetLabel = 'Watch closely';
+                    const t = (budgetProjected - budgetTarget) / Math.max(1, budgetCap - budgetTarget);
+                    budgetScore = Math.round(85 - (t * 25));
+                    budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetCap - budgetProjected))} under the $${budgetCap} cap.`;
+                } else {
+                    budgetTone = 'bad';
+                    budgetLabel = 'Over budget';
+                    const over = budgetProjected - budgetCap;
+                    budgetScore = Math.max(0, Math.round(60 - ((over / budgetCap) * 60)));
+                    budgetNote = `Projected to miss the $${budgetCap} cap by ${fmtCost(over)} unless usage cools off.`;
+                }
+
+                const budgetHtml = `
+                <div class="mu-budget-section">
+                    <div class="mu-budget-head">
+                        <div>
+                            <span class="mu-budget-kicker">Budget health</span>
+                            <div class="mu-budget-main">${budgetLabel}</div>
+                            <div class="mu-budget-sub">Month ${fmtCost(budgetActualMonthly)} · Pace ${fmtCost(budgetPaceProjected)}/mo</div>
+                        </div>
+                        <div class="mu-budget-score ${budgetTone}">
+                            <span class="mu-budget-score-num">${budgetScore}</span>
+                            <span class="mu-budget-score-label">Health</span>
+                        </div>
+                    </div>
+                    <div class="mu-budget-bar">
+                        <div class="mu-budget-fill ${budgetTone}" style="width:${budgetFillPct}%"></div>
+                        <span class="mu-budget-threshold" style="left:40%"></span>
+                        <span class="mu-budget-threshold" style="left:80%"></span>
+                    </div>
+                    <div class="mu-budget-footer">
+                        <span>Floor $${budgetFloor}</span>
+                        <span>Target $${budgetTarget}</span>
+                        <span>Cap $${budgetCap}</span>
+                    </div>
+                    <div class="mu-budget-note">${budgetNote}</div>
+                </div>`;
+
                 const summaryHtml = `
                 <div class="mu-totals-section">
                     ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
@@ -6717,7 +6804,7 @@
                     </div>
                 </div>`;
 
-                modelUsageCard.innerHTML = runRateHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
+                modelUsageCard.innerHTML = runRateHtml + budgetHtml + summaryHtml + breakdownHtml + elHtml + healthHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
