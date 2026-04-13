@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Morning greeting reply sent",
+  "objective": "Transcribing Josh's voice note about Mission Control agent comms",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T13:07:06Z",
-  "checkedAt": "2026-04-13T13:07:06Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-13T13:09:30Z",
+  "checkedAt": "2026-04-13T13:09:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "Unknown"
+  "model": "GPT-5.4"
 }
