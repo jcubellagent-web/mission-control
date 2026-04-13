@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Complete cron follow-ups, patch remaining workflow bugs, and scan logs",
+    "objective": "Investigate and patch remaining async cron results, especially feedback_loop today undefined",
     "status": "active",
     "steps": [
       {
@@ -15,22 +15,22 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-13T20:00:15Z",
-    "checkedAt": "2026-04-13T20:00:15Z",
+    "updatedAt": "2026-04-13T20:09:47Z",
+    "checkedAt": "2026-04-13T20:09:47Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Complete cron follow-ups, patch remaining workflow bugs, and scan logs",
-    "updatedAt": "2026-04-13T20:05:02Z"
+    "context": "Investigate and patch remaining async cron results, especially feedback_loop today undefined",
+    "updatedAt": "2026-04-13T20:10:02Z"
   },
   "contextWindow": {
-    "usedTokens": 139534,
+    "usedTokens": 54816,
     "limitTokens": 200000,
-    "pct": 0.6977,
+    "pct": 0.2741,
     "model": "gpt-5.4",
-    "status": "red"
+    "status": "green"
   },
   "agentBus": [
     {
@@ -117,7 +117,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 40,
-    "missionControlDirty": 12,
+    "missionControlDirty": 7,
     "recentFiles": [
       "scripts/x_growth_tracker.py",
       "mission-control/scripts/update_mission_control.py",
@@ -132,7 +132,7 @@
       "raw": [
         "== Codex 0.116.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 36m",
+        "Resets in 1h 31m",
         "Weekly: 100% left [============]",
         "Pace: 9% in reserve | Expected 9% used | Lasts until reset",
         "Resets in 6d 9h",
@@ -143,22 +143,22 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 36m",
+      "sessionReset": "1h 31m",
       "weeklyReset": "6d 9h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-13T20:05:05Z"
+    "updatedAt": "2026-04-13T20:10:05Z"
   },
   "modelUsage": {
-    "session": 3.641584,
-    "daily": 33.069355,
+    "session": 7.585694,
+    "daily": 37.013466,
     "weekly": 46.873555,
     "monthly": 906.377419,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 33.069355
+        "cost": 37.01346550000001
       },
       {
         "name": "gpt-5.3-codex",
@@ -185,12 +185,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 2454707,
-        "outputTokens": 174050,
-        "totalTokens": 2628757,
-        "sessionCost": 33.069355,
-        "dailyCost": 33.069355,
-        "weeklyCost": 33.069355,
+        "inputTokens": 2315156,
+        "outputTokens": 173653,
+        "totalTokens": 2488809,
+        "sessionCost": 37.01346550000001,
+        "dailyCost": 37.01346550000001,
+        "weeklyCost": 37.01346550000001,
         "sessions": 155,
         "isGemini": false,
         "costEstimated": false
@@ -241,7 +241,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-13T20:05:09Z",
+    "lastUpdated": "2026-04-13T20:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -270,8 +270,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 33.346205,
-      "total": 34.70626,
+      "daily": 37.290316,
+      "total": 38.650371,
       "monthly": 908.644436
     },
     "weeklyRunRate": {
@@ -282,9 +282,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 31.64325,
-    "total_earned": 31.64325,
-    "online_time": "316h 25m",
+    "sim_balance": 31.651583,
+    "total_earned": 31.651583,
+    "online_time": "316h 30m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -295,18 +295,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-13T20:05:09Z"
+    "updatedAt": "2026-04-13T20:10:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 28.2,
-      "cpu_user": 13.9,
-      "cpu_sys": 15.12,
-      "load1": 2.76,
-      "load5": 2.75,
-      "load15": 2.64,
+      "cpu_pct": 28.8,
+      "cpu_user": 13.39,
+      "cpu_sys": 15.39,
+      "load1": 2.51,
+      "load5": 2.47,
+      "load15": 2.54,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "108Gi",
@@ -314,12 +314,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 25.4,
-      "cpu_user": 7.89,
-      "cpu_sys": 17.54,
-      "load1": 1.88,
-      "load5": 1.97,
-      "load15": 2.03,
+      "cpu_pct": 16.2,
+      "cpu_user": 5.71,
+      "cpu_sys": 10.47,
+      "load1": 1.85,
+      "load5": 1.83,
+      "load15": 1.93,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -345,19 +345,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T20:05:02Z"
+      "lastChecked": "2026-04-13T20:10:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-13T20:05:02Z"
+      "lastChecked": "2026-04-13T20:10:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-13T20:05:02Z"
+      "lastChecked": "2026-04-13T20:10:02Z"
     }
   ],
   "crons": [
@@ -990,13 +990,13 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260413-675",
-      "title": "Finish cron follow-ups + bug scan",
+      "id": "T-20260413-677",
+      "title": "Restore local Google Calendar OAuth",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "requestedAt": "2026-04-13 15:47",
-      "updatedAt": "2026-04-13 15:47",
-      "notes": "Complete remaining cron follow-ups from the audit, fix workflow-impacting bugs, and scan for any other cron/workflow breakage.",
+      "requestedAt": "2026-04-13 16:08",
+      "updatedAt": "2026-04-13 16:08",
+      "notes": "`scripts/chiro_invite_sync.sh` is now migrated from dead `gws` auth to `gog`, but local calendar access still needs a fresh `gog` OAuth grant for `jcubellagent@gmail.com`. Step 1 auth URL generated; waiting on Josh to open it and send back the full redirect URL so step 2 can store the new token.",
       "owner": "JOSH 2.0"
     },
     {
@@ -1045,29 +1045,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-13T20:05:09Z",
-      "event": "Session spend: $3.64"
+      "time": "2026-04-13T20:10:08Z",
+      "event": "Session spend: $7.59"
     },
     {
-      "time": "2026-04-13T20:05:05Z",
+      "time": "2026-04-13T20:10:05Z",
       "event": "Coding: scripts/x_growth_tracker.py, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-13T20:05:05Z",
+      "time": "2026-04-13T20:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-13T20:05:02Z",
+      "time": "2026-04-13T20:10:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-13T20:05:02Z",
+      "time": "2026-04-13T20:10:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-13T20:05:02Z",
+      "time": "2026-04-13T20:10:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-13T20:05:02Z"
+  "lastUpdated": "2026-04-13T20:10:02Z"
 }
