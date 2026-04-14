@@ -5,24 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "generated filename slug for sorare lineup conversation",
+    "objective": "audit model inventory and routing so Codex is used heavily where it fits without being forced as the main chat model",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-14T02:29:45Z",
-    "checkedAt": "2026-04-14T02:29:45Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-14T02:32:28Z",
+    "checkedAt": "2026-04-14T02:32:28Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "generated filename slug for sorare lineup conversation",
-    "updatedAt": "2026-04-14T02:30:03Z"
+    "context": "audit model inventory and routing so Codex is used heavily where it fits without being forced as the main chat model",
+    "updatedAt": "2026-04-14T02:35:02Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 128000,
-    "pct": 0.0,
+    "usedTokens": 19046,
+    "limitTokens": 400000,
+    "pct": 0.0476,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -119,7 +125,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 94% left [===========-]",
-        "Resets in 10m",
+        "Resets in 6m",
         "Weekly: 99% left [===========-]",
         "Pace: 12% in reserve | Expected 13% used | Lasts until reset",
         "Resets in 6d 2h",
@@ -130,11 +136,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "10m",
+      "sessionReset": "6m",
       "weeklyReset": "6d 2h",
       "summary": "94% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-14T02:30:05Z"
+    "updatedAt": "2026-04-14T02:35:04Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -172,9 +178,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 2234309,
-        "outputTokens": 172447,
-        "totalTokens": 2406756,
+        "inputTokens": 2253105,
+        "outputTokens": 173296,
+        "totalTokens": 2426401,
         "sessionCost": 27.562726000000005,
         "dailyCost": 27.562726000000005,
         "weeklyCost": 27.562726000000005,
@@ -264,15 +270,15 @@
       {
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
-        "weeklyCost": 0.5059,
-        "dailyCost": 0.209479,
-        "sessionCost": 0.5059,
+        "weeklyCost": 0.539582,
+        "dailyCost": 0.243161,
+        "sessionCost": 0.539582,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-14T02:30:09Z",
+    "lastUpdated": "2026-04-14T02:35:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -290,9 +296,9 @@
       "daily": 0.0,
       "weekly": 0.0,
       "monthly": 0.02023585,
-      "byok_daily": 0.20947915,
-      "byok_weekly": 0.50589995,
-      "byok_monthly": 2.49606735,
+      "byok_daily": 0.2431612,
+      "byok_weekly": 0.539582,
+      "byok_monthly": 2.5297494,
       "available": true
     },
     "elevenlabs": {
@@ -301,21 +307,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 65.921443,
-      "total": 67.577919,
-      "monthly": 928.14534
+      "daily": 65.955125,
+      "total": 67.611601,
+      "monthly": 928.179022
     },
     "weeklyRunRate": {
-      "total": 67.577919,
-      "automation": 1.43251,
-      "interactive": 64.712899,
-      "projectedMonthly": 289.62
+      "total": 67.611601,
+      "automation": 1.466192,
+      "interactive": 64.679217,
+      "projectedMonthly": 289.76
     }
   },
   "moltWorld": {
-    "sim_balance": 32.284917,
-    "total_earned": 32.284917,
-    "online_time": "322h 50m",
+    "sim_balance": 32.293222,
+    "total_earned": 32.293222,
+    "online_time": "322h 55m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -326,33 +332,33 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-14T02:30:09Z"
+    "updatedAt": "2026-04-14T02:35:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.9,
-      "cpu_user": 18.91,
-      "cpu_sys": 16.95,
-      "load1": 3.11,
-      "load5": 2.54,
-      "load15": 2.39,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.7,
+      "cpu_pct": 35.3,
+      "cpu_user": 18.65,
+      "cpu_sys": 16.62,
+      "load1": 2.63,
+      "load5": 2.44,
+      "load15": 2.36,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "107Gi",
+      "disk_avail": "108Gi",
       "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.6,
-      "cpu_user": 0.96,
-      "cpu_sys": 9.61,
-      "load1": 2.1,
-      "load5": 2.27,
-      "load15": 2.2,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 11.1,
+      "cpu_user": 2.77,
+      "cpu_sys": 8.33,
+      "load1": 2.0,
+      "load5": 2.38,
+      "load15": 2.29,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -376,19 +382,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-14T02:30:03Z"
+      "lastChecked": "2026-04-14T02:35:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-14T02:30:03Z"
+      "lastChecked": "2026-04-14T02:35:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-14T02:30:03Z"
+      "lastChecked": "2026-04-14T02:35:02Z"
     }
   ],
   "crons": [
@@ -1037,29 +1043,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-14T02:30:09Z",
+      "time": "2026-04-14T02:35:08Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-14T02:30:05Z",
+      "time": "2026-04-14T02:35:04Z",
       "event": "CodexBar: 94% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-14T02:30:03Z",
+      "time": "2026-04-14T02:35:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-14T02:30:03Z",
+      "time": "2026-04-14T02:35:02Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-14T02:30:03Z",
+      "time": "2026-04-14T02:35:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-14T02:30:03Z",
+      "time": "2026-04-14T02:35:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-14T02:30:03Z"
+  "lastUpdated": "2026-04-14T02:35:02Z"
 }
