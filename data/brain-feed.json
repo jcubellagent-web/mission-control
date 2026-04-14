@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Generate a short filename slug for the provided conversation",
+  "objective": "session reset greeting and startup re-anchor",
   "status": "active",
   "steps": [
     {
-      "label": "codex",
+      "label": "exec",
       "status": "active",
-      "tool": "slug"
+      "tool": "bf_step"
     }
   ],
-  "currentTool": "slug",
-  "updatedAt": "2026-04-14T01:02:32Z",
-  "checkedAt": "2026-04-14T01:02:32Z",
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-14T01:03:04Z",
+  "checkedAt": "2026-04-14T01:03:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
