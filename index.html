@@ -1086,6 +1086,133 @@
         .mu-prov-d { font-size: 0.65rem; color: rgba(255,255,255,0.75); }
         .mu-prov-w { font-size: 0.65rem; color: rgba(255,255,255,0.75); }
         .mu-prov-sep { font-size: 0.55rem; color: rgba(255,255,255,0.25); }
+        .mu-lane-budget-strip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+        }
+        .mu-lane-budget-strip strong {
+            font-size: 0.82rem;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-lane-budget-kicker {
+            font-size: 0.52rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+        }
+        .mu-lane-budget-copy {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.66);
+            line-height: 1.35;
+            min-width: 0;
+        }
+        .mu-lane-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .mu-lane-card {
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 10px 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 96px;
+            min-width: 0;
+        }
+        .mu-lane-card.local {
+            grid-column: 1 / -1;
+        }
+        .mu-lane-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .mu-lane-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+        .mu-lane-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .mu-lane-name {
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.82);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mu-lane-impact {
+            font-size: 0.46rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 2px 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            white-space: nowrap;
+        }
+        .mu-lane-impact.good { color: #4ade80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.08); }
+        .mu-lane-impact.ok { color: #60a5fa; border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.08); }
+        .mu-lane-impact.watch { color: #f59e0b; border-color: rgba(245,158,11,0.28); background: rgba(245,158,11,0.08); }
+        .mu-lane-impact.bad { color: #f87171; border-color: rgba(248,113,113,0.28); background: rgba(248,113,113,0.08); }
+        .mu-lane-main {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .mu-lane-bar {
+            position: relative;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .mu-lane-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            border-radius: 999px;
+        }
+        .mu-lane-threshold {
+            position: absolute;
+            top: -1px;
+            bottom: -1px;
+            width: 1px;
+            background: rgba(255,255,255,0.18);
+        }
+        .mu-lane-threshold.floor { left: 40%; }
+        .mu-lane-threshold.target { left: 80%; }
+        .mu-lane-meta {
+            font-size: 0.54rem;
+            color: rgba(255,255,255,0.62);
+            line-height: 1.35;
+        }
+        .mu-lane-legend {
+            margin-top: 7px;
+            font-size: 0.52rem;
+            color: rgba(255,255,255,0.42);
+            line-height: 1.35;
+        }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
         .mu-compact-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; min-width: 0; }
         .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
@@ -1543,7 +1670,7 @@
         /* To get jobs+model side-by-side we make card-jobs a grid item too */
         /* Simplest: make the bottom-left a mini 2-col grid */
         body.kiosk-mode .hero-grid {
-            grid-template-rows: minmax(0, 1.5fr) minmax(0, 0.9fr); /* not flex — use grid */
+            grid-template-rows: minmax(0, 1.35fr) minmax(0, 1.05fr); /* give the desktop bottom row more room */
             display: grid !important;
             grid-template-columns: 1fr;
         }
@@ -1639,6 +1766,41 @@
 
         /* ── System Health ── */
         .card-model-health { display: flex; flex-direction: column; }
+        .card-model-health .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .card-model-health .card-header-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        .card-model-health .card-header-main h2 {
+            min-width: 0;
+            line-height: 1.15;
+        }
+        .card-model-health .card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .card-model-health .mu-header-ts {
+            margin: 0;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.28);
+            white-space: nowrap;
+        }
+        .card-model-health .module-action-btn {
+            margin-left: 0;
+        }
+        .card-model-health .mu-health-divider {
+            margin: 10px 0 8px;
+        }
         .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; flex-shrink: 0; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
@@ -1661,8 +1823,8 @@
         .sh-mv.warn { color: #fbbf24; }
         .sh-mv.err { color: #f87171; }
         /* Left panel 50/50 — intel highlights and model card equal height */
-        .kiosk-bottom-left .card-intel-highlights { flex: 1 1 0; min-height: 0; overflow: hidden; }
-        .kiosk-bottom-left .card-model-health { flex: 1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
+        .kiosk-bottom-left .card-intel-highlights { flex: 0.9 1 0; min-height: 0; overflow: hidden; }
+        .kiosk-bottom-left .card-model-health { flex: 1.1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
 
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
@@ -2840,25 +3002,33 @@
         }
 
         /* ===== Card content overflow fixes ===== */
-        #brain-feed-card { overflow-y: auto; max-height: 420px; }
-        #jain-brain-feed-card { overflow-y: auto; max-height: 420px; }
+        #brain-feed-card { overflow: hidden; max-height: 420px; }
+        #jain-brain-feed-card { overflow: hidden; max-height: 420px; }
         body:not(.phone-mode) .card-brain,
         body:not(.phone-mode) .card-brain.brain-active {
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-gutter: stable;
+            overflow: hidden;
         }
         body:not(.phone-mode) #brain-feed-card {
             flex: 1 1 0;
             max-height: none;
             min-height: 120px;
-            padding-right: 4px;
+            padding-right: 0;
+        }
+        body:not(.phone-mode) .bf-container,
+        body:not(.phone-mode) .bf-idle-container,
+        body:not(.phone-mode) .bf-idle-insights,
+        body:not(.phone-mode) .bf-timeline {
+            overflow: hidden !important;
+            max-height: none !important;
+            padding-right: 0 !important;
         }
         body:not(.phone-mode) .agent-chat-section {
             flex: 0 0 auto;
         }
         body:not(.phone-mode) #agent-chat-feed {
-            max-height: 120px;
+            max-height: none;
+            overflow: visible;
+            padding-right: 0;
         }
         #today-jobs-card {
             flex: 1;
@@ -3798,8 +3968,25 @@
 
         /* ── Brain feed ── */
         body.phone-mode #brain-feed-card {
-            max-height: 520px;
-            overflow-y: auto;
+            max-height: none;
+            overflow: visible;
+        }
+        body.phone-mode .bf-container,
+        body.phone-mode .bf-idle-container,
+        body.phone-mode .bf-idle-insights,
+        body.phone-mode .bf-timeline,
+        body.phone-mode #unified-activity-log,
+        body.phone-mode .agent-chat-section,
+        body.phone-mode #agent-chat-feed {
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
+            padding-right: 0 !important;
+            -webkit-overflow-scrolling: auto;
+        }
+        body.phone-mode .card-brain.brain-active .agent-chat-section,
+        body.phone-mode .card-brain.brain-active #agent-chat-feed {
+            max-height: none !important;
         }
         body.phone-mode .bf-objective-text {
             font-size: 0.88rem;
@@ -3939,6 +4126,8 @@
             .mu-summary-row { flex-direction: column; }
             .mu-summary-cell { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05); }
             .mu-summary-cell:last-child { border-bottom: none; }
+            .mu-lane-grid { grid-template-columns: 1fr; }
+            .mu-lane-card.local { grid-column: auto; }
         }
 
         /* ============ MODEL USAGE - REDESIGN ============ */
@@ -4169,12 +4358,12 @@
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.06);
             border-radius: 14px;
-            padding: 14px 15px;
-            margin-bottom: 10px;
-            min-height: 148px;
+            padding: 8px 11px;
+            margin-bottom: 6px;
+            min-height: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -4184,15 +4373,15 @@
             letter-spacing: 0.14em;
         }
         .bf-objective-text {
-            font-size: clamp(1.3rem, 2.35vw, 1.92rem);
+            font-size: clamp(1rem, 1.78vw, 1.5rem);
             line-height: 1.03;
             color: rgba(255,255,255,0.98);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             overflow: hidden;
-            padding-right: 8px;
-            padding-bottom: 4px;
+            padding-right: 2px;
+            padding-bottom: 1px;
         }
         #bf-last-updated {
             margin-left: auto;
@@ -4201,17 +4390,18 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .bf-signal-row { gap: 8px; margin-bottom: 8px; }
+        .bf-signal-row { gap: 5px; margin-bottom: 4px; }
         .bf-signal-chip {
-            background: rgba(255,255,255,0.032);
-            border: 1px solid rgba(255,255,255,0.065);
-            border-radius: 12px;
-            min-height: 52px;
-            padding: 8px 10px;
+            background: rgba(255,255,255,0.022);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            min-height: 0;
+            padding: 5px 7px;
             justify-content: center;
+            box-shadow: none;
         }
-        .bf-signal-label { font-size: 0.5rem; letter-spacing: 0.14em; }
-        .bf-signal-value { font-size: 0.76rem; line-height: 1.18; }
+        .bf-signal-label { font-size: 0.46rem; letter-spacing: 0.13em; }
+        .bf-signal-value { font-size: 0.72rem; line-height: 1.14; }
         .bf-signal-step {
             white-space: normal;
             overflow: visible;
@@ -4238,7 +4428,7 @@
 
         .agent-comms-section,
         .agent-chat-section {
-            margin-top: 10px;
+            margin-top: 8px;
         }
         .agent-comms-section {
             background: transparent;
@@ -4254,7 +4444,7 @@
             background: rgba(255,255,255,0.018);
             border: 1px solid rgba(255,255,255,0.055);
             border-radius: 14px;
-            padding: 10px 12px 10px;
+            padding: 8px 12px 16px;
             min-height: 0;
         }
         .agent-chat-header { margin-bottom: 10px; }
@@ -4338,6 +4528,13 @@
             gap: 8px;
             margin-bottom: 6px;
         }
+        .card-model-health .mu-drill-grid {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+        }
+        body.kiosk-mode .card-model-health .mu-drill-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
         .mu-drill-card {
             appearance: none;
             border: 1px solid rgba(255,255,255,0.07);
@@ -4414,6 +4611,78 @@
             border: 1px solid rgba(255,255,255,0.06);
             padding: 10px 11px;
         }
+        .card-model-health .mu-drill-card {
+            min-height: 102px;
+            padding: 12px 13px 11px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-model-health .mu-drill-kicker {
+            margin-bottom: 6px;
+        }
+        .card-model-health .mu-drill-main {
+            display: block;
+            overflow: visible;
+            -webkit-line-clamp: unset;
+            padding-right: 22px;
+            line-height: 1.24;
+        }
+        .card-model-health .mu-drill-sub {
+            display: block;
+            overflow: visible;
+            -webkit-line-clamp: unset;
+            line-height: 1.3;
+        }
+        .card-model-health .mu-drill-chip-row {
+            margin-top: 8px;
+        }
+        .card-model-health .sh-agent-header {
+            gap: 8px;
+            margin-bottom: 7px;
+        }
+        .card-model-health .sh-agent-name {
+            font-size: 0.66rem;
+            letter-spacing: 0.05em;
+        }
+        .card-model-health .sh-agent-tag {
+            font-size: 0.54rem;
+        }
+        .card-model-health .sh-metrics {
+            grid-template-columns: repeat(auto-fit, minmax(98px, 1fr));
+            gap: 10px 14px;
+        }
+        .card-model-health .system-health-body {
+            gap: 10px;
+        }
+        .card-model-health .sh-agent-row {
+            padding: 12px 13px;
+        }
+        body.kiosk-mode .card-model-health .mu-health-divider {
+            margin: 12px 0 10px;
+        }
+        body.kiosk-mode .card-model-health .system-health-body {
+            gap: 12px;
+        }
+        body.kiosk-mode .card-model-health .mu-lane-budget-strip {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            align-items: end;
+            gap: 6px 12px;
+            padding: 11px 12px;
+            margin-bottom: 10px;
+        }
+        body.kiosk-mode .card-model-health .mu-lane-budget-strip strong {
+            font-size: 0.96rem;
+        }
+        body.kiosk-mode .card-model-health .mu-lane-budget-copy {
+            grid-column: 1 / -1;
+            font-size: 0.62rem;
+            line-height: 1.4;
+        }
+        body.kiosk-mode .card-model-health .mu-usage-overview-grid {
+            margin-top: 2px;
+        }
         .module-click-row { cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
 
         .mu-arch-grid {
@@ -4446,6 +4715,26 @@
         @media (max-width: 1100px) {
             .mu-drill-grid,
             .mu-arch-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 900px) {
+            .card-model-health .card-header-actions {
+                gap: 8px;
+            }
+        }
+        @media (max-width: 560px) {
+            .card-model-health .card-header {
+                align-items: flex-start;
+            }
+            .card-model-health .card-header-actions {
+                gap: 8px;
+            }
+            .card-model-health .mu-drill-grid,
+            .card-model-health .sh-metrics {
+                grid-template-columns: 1fr;
+            }
+            .card-model-health .mu-drill-card {
+                min-height: 0;
+            }
         }
 
         #module-modal-overlay {
@@ -4708,9 +4997,9 @@
                     <div class="card card-intel-highlights">
                         <div class="card-header">
                             <span class="icon">⚡</span>
-                            <h2 style="font-weight:700;">Intel Highlights</h2>
+                            <h2 style="font-weight:700;">Breaking Highlights</h2>
                             <span class="live-badge" id="newsfeed-live-badge">● LIVE</span>
-                            <button class="module-action-btn" type="button" onclick="openModuleModal('intel')" aria-label="Expand intel highlights">↗</button>
+                            <button class="module-action-btn" type="button" onclick="openModuleModal('intel')" aria-label="Expand breaking highlights">↗</button>
                         </div>
                         <!-- Compact top signals — no scroll, glance-only -->
                         <div id="intel-highlights-card" class="intel-highlights-body">
@@ -4726,9 +5015,14 @@
                     </div>
                     <div class="card card-model card-model-health">
                         <div class="card-header">
-                            <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
-                            <h2>Model Usage Health &amp; Architecture</h2>
-                            <button class="module-action-btn" type="button" onclick="openModuleModal('usage')" aria-label="Expand model usage">↗</button>
+                            <div class="card-header-main">
+                                <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
+                                <h2>Model Usage Health &amp; Architecture</h2>
+                            </div>
+                            <div class="card-header-actions">
+                                <span class="mu-updated mu-header-ts"></span>
+                                <button class="module-action-btn" type="button" onclick="openModuleModal('usage')" aria-label="Expand model usage">↗</button>
+                            </div>
                         </div>
                         <!-- Top: Model Usage totals + per-provider breakdown -->
                         <div id="model-usage-card"></div>
@@ -4969,7 +5263,27 @@
             );
         }
 
+        function getPullSurface() {
+            return document.querySelector('.container') || document.body;
+        }
+
+        function hasScrollableAncestor(target) {
+            let el = target instanceof Element ? target : null;
+            while (el && el !== document.body) {
+                const style = window.getComputedStyle(el);
+                const overflowY = style.overflowY || style.overflow;
+                const canScroll = /(auto|scroll|overlay)/.test(overflowY) && el.scrollHeight > el.clientHeight + 2;
+                if (canScroll) return true;
+                el = el.parentElement;
+            }
+            return false;
+        }
+
         function handleTouchStart(event) {
+            if (hasScrollableAncestor(event.target)) {
+                pullStartY = null;
+                return;
+            }
             if (getScrollTop() <= 0) {
                 pullStartY = event.touches[0].clientY;
             } else {
@@ -4985,9 +5299,10 @@
                 const label = document.getElementById('pull-label');
                 const isReleasing = pullDistance > PULL_THRESHOLD;
                 const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
-                // Nudge the page content down slightly for tactile feel
-                document.body.style.transform = `translateY(${Math.min(pullDistance * 0.3, 30)}px)`;
-                document.body.style.transition = 'none';
+                // Nudge the content down slightly for tactile feel without disturbing fixed overlays
+                const pullSurface = getPullSurface();
+                pullSurface.style.transform = `translateY(${Math.min(pullDistance * 0.3, 30)}px)`;
+                pullSurface.style.transition = 'none';
                 pullIndicator.classList.add('visible');
                 pullIndicator.classList.toggle('releasing', isReleasing);
                 if (label) label.textContent = isReleasing ? 'Release to refresh' : 'Pull to refresh';
@@ -4999,9 +5314,10 @@
         }
 
         function handleTouchEnd() {
-            // Always restore body transform with animation
-            document.body.style.transition = 'transform 0.25s cubic-bezier(0.16,1,0.3,1)';
-            document.body.style.transform = '';
+            // Always restore pull surface transform with animation
+            const pullSurface = getPullSurface();
+            pullSurface.style.transition = 'transform 0.25s cubic-bezier(0.16,1,0.3,1)';
+            pullSurface.style.transform = '';
             if (pullDistance > PULL_THRESHOLD) {
                 // Haptic feedback (iPhone)
                 if (navigator.vibrate) navigator.vibrate(10);
@@ -5020,8 +5336,8 @@
                         if (pullIndicator) {
                             pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
                         }
-                        document.body.style.transform = '';
-                        document.body.style.transition = '';
+                        pullSurface.style.transform = '';
+                        pullSurface.style.transition = '';
                     }, 400);
                 });
             } else {
@@ -5029,8 +5345,8 @@
                     pullIndicator.classList.remove('visible', 'releasing', 'refreshing');
                 }
                 setTimeout(() => {
-                    document.body.style.transform = '';
-                    document.body.style.transition = '';
+                    pullSurface.style.transform = '';
+                    pullSurface.style.transition = '';
                 }, 300);
             }
             pullStartY = null;
@@ -5769,7 +6085,7 @@
             let body = '<div class="agent-chat-empty">Nothing to show yet.</div>';
 
             if (kind === 'intel') {
-                title = 'Intel Highlights';
+                title = 'Breaking Highlights';
                 body = document.getElementById('intelligence-feed-card')?.innerHTML || document.getElementById('intel-highlights-card')?.innerHTML || body;
             } else if (kind === 'usage') {
                 title = 'Model Usage Health & Architecture';
@@ -5873,6 +6189,22 @@
         // ===== Intelligence Feed =====
         let lastIntelHash = null;
 
+        async function fetchBreakingHighlightsData() {
+            const paths = [
+                './data/jain-breaking-highlights.json?_=' + Date.now(),
+                './data/breaking-highlights.json?_=' + Date.now(),
+            ];
+            for (const path of paths) {
+                try {
+                    const r = await fetch(path, { signal: AbortSignal.timeout(2000) });
+                    if (!r.ok) continue;
+                    const data = await r.json();
+                    if (data && Array.isArray(data.items)) return data;
+                } catch (e) {}
+            }
+            return null;
+        }
+
         async function fetchIntelligenceFeed() {
             try {
                 // Try jain-newsfeed first (fresher), fall back to newsfeed
@@ -5887,14 +6219,65 @@
                     feed = await r.json();
                     window._newsfeedData = feed;
                 }
-                const hash = JSON.stringify(feed.generatedAt);
+                const breaking = await fetchBreakingHighlightsData();
+                const hash = JSON.stringify({
+                    feed: feed.generatedAt || null,
+                    breaking: breaking?.updatedAt || breaking?.items?.[0]?.sentAt || null,
+                });
                 if (hash === lastIntelHash) return;
                 lastIntelHash = hash;
                 renderTicker(feed);
                 renderIntelligenceFeed(feed);
-                renderIntelHighlights(feed);
+                if (breaking && Array.isArray(breaking.items) && breaking.items.length) {
+                    renderBreakingHighlights(breaking);
+                } else {
+                    renderIntelHighlights(feed);
+                }
                 if (window._mcLastDashData) renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed||null, _jainBrainFeed, _uaJaimesBf);
             } catch(e) {}
+        }
+
+        function renderBreakingHighlights(data) {
+            const el = document.getElementById('intel-highlights-card');
+            const fullEl = document.getElementById('intelligence-feed-card');
+            if (!el) return;
+
+            const items = Array.isArray(data?.items) ? data.items : [];
+            if (!items.length) {
+                renderIntelHighlights(window._jainNewsfeedData || window._newsfeedData || {});
+                return;
+            }
+
+            const renderItem = item => {
+                const label = escapeHtml(item.label || 'BREAKING');
+                const title = escapeHtml(item.title || 'Untitled alert');
+                const score = Number(item.score);
+                const scoreTag = Number.isFinite(score)
+                    ? `<span class="intel-hi-cat" style="background:rgba(251,191,36,0.12);color:#fbbf24">${Math.round(score)}/10</span>`
+                    : '';
+                const timeStr = item.sentAt ? formatRelTime(item.sentAt) : escapeHtml(item.displayTime || '');
+                const reasonHtml = item.reason ? `<div class="intel-hi-reason">⚡ ${escapeHtml(item.reason)}</div>` : '';
+                const sourceLine = [item.source || '', item.url || ''].filter(Boolean).join(' → ');
+                const sourceHtml = sourceLine ? `<div class="intel-hi-reason">${escapeHtml(sourceLine)}</div>` : '';
+                return `<div class="intel-hi-item">
+                    <div class="intel-hi-body">
+                        <div style="display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap;">
+                            <span class="intel-hi-cat" style="background:rgba(239,68,68,0.15);color:#f87171">${label}</span>
+                            ${scoreTag}
+                            <span class="intel-hi-text">${title}</span>
+                            ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
+                        </div>
+                        ${reasonHtml}
+                        ${sourceHtml}
+                    </div>
+                </div>`;
+            };
+
+            el.innerHTML = items.slice(0, 6).map(renderItem).join('');
+            if (fullEl) fullEl.innerHTML = items.slice(0, 20).map(renderItem).join('');
+
+            const badge = document.getElementById('newsfeed-live-badge');
+            if (badge) badge.title = 'Last: ' + formatRelTime(data.updatedAt || items[0]?.sentAt || '');
         }
 
         // ── Intel Highlights — compact top-8 glance view ──────────────────
@@ -7445,7 +7828,7 @@
                 // Show last steps from brain feed in idle (no header — bottom Activity & Agents handles that)
                 const idleStepsHtml = joshSteps.length ? `
                     <div class="bf-idle-activity-log" style="flex:1;min-height:0;overflow:hidden;">
-                        <div class="bf-timeline" style="max-height:100%;overflow-y:auto;">
+                        <div class="bf-timeline" style="max-height:100%;overflow:hidden;">
                             ${[...joshSteps].reverse().slice(0, 8).map(step => {
                                 const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
                                 const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
@@ -7596,16 +7979,9 @@
             if (data.modelUsage) {
                 const mu = data.modelUsage;
                 const updatedStr = mu.lastUpdated ? formatTime(mu.lastUpdated) : null;
-                const muHeader = modelUsageCard.closest('.card')?.querySelector('.card-header h2');
-                if (muHeader && updatedStr) {
-                    if (!muHeader.parentElement.querySelector('.mu-header-ts')) {
-                        const ts = document.createElement('span');
-                        ts.className = 'mu-updated mu-header-ts';
-                        ts.style.cssText = 'margin-left:auto;font-size:0.6rem;color:rgba(255,255,255,0.25);';
-                        muHeader.parentElement.appendChild(ts);
-                    }
-                    const tsEl = muHeader.parentElement.querySelector('.mu-header-ts');
-                    if (tsEl) tsEl.textContent = updatedStr;
+                const muTsEl = modelUsageCard.closest('.card')?.querySelector('.mu-header-ts');
+                if (muTsEl) {
+                    muTsEl.textContent = updatedStr || '';
                 }
 
                 // Helper: clean model name → display label
@@ -7781,6 +8157,153 @@
                     <div class="mu-codexbar-note">${escapeHtml(codexbar.summary || data.codingVisibility?.codexbarStatus || 'CodexBar available')}</div>
                 </div>` : '';
 
+                const breakdownModels = Array.isArray(mu.breakdown) ? mu.breakdown : [];
+                const isLocalModel = model => model.isLocal === true || ['ollama', 'local'].includes((model.source || '').toLowerCase()) || (model.name || '').toLowerCase().startsWith('local/');
+                const isCodexModel = model => {
+                    const src = (model.source || '').toLowerCase();
+                    const name = (model.name || '').toLowerCase();
+                    return src.includes('codex') || src.includes('codexbar') || name.includes('codex');
+                };
+                const isGeminiModel = model => {
+                    const src = (model.source || '').toLowerCase();
+                    const name = (model.name || '').toLowerCase();
+                    return src.includes('google') || src.includes('gemini') || name.includes('gemini');
+                };
+                const isGrokModel = model => {
+                    const src = (model.source || '').toLowerCase();
+                    const name = (model.name || '').toLowerCase();
+                    return src.includes('xai') || src.includes('grok') || src.includes('openrouter') || name.includes('grok') || name.includes('openrouter/');
+                };
+                const isOpenAiApiModel = model => {
+                    const src = (model.source || '').toLowerCase();
+                    const name = (model.name || '').toLowerCase();
+                    if (isLocalModel(model) || isCodexModel(model) || isGeminiModel(model) || isGrokModel(model)) return false;
+                    return name.startsWith('openai/') || src === 'openclaw' || name.includes('gpt-');
+                };
+                const sumCost = (models, field) => models.reduce((sum, model) => sum + Number(model[field] || model.costUsd || 0), 0);
+                const sumField = (models, field) => models.reduce((sum, model) => sum + Number(model[field] || 0), 0);
+                const projectedMonthlyForModels = models => {
+                    if (!models.length) return 0;
+                    const monthly = sumField(models, 'monthlyCost');
+                    const daily = sumField(models, 'dailyCost');
+                    const weekly = sumField(models, 'weeklyCost');
+                    const session = sumCost(models, 'sessionCost');
+                    return Math.max(monthly, daily * budgetDaysInMonth, weekly * (budgetDaysInMonth / 7), session);
+                };
+                const laneBudgetImpact = (projected, key) => {
+                    if (key === 'local') return { tone: 'good', short: 'free', long: 'No metered spend' };
+                    if (projected <= 0.01) return { tone: 'good', short: 'idle', long: 'No meaningful tracked spend' };
+                    if (projected > budgetCap) return { tone: 'bad', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Can exceed the cap on its own' };
+                    if (projected > budgetTarget) return { tone: 'watch', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Above the target on its own' };
+                    if (projected > budgetFloor) return { tone: 'ok', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Above the floor on its own' };
+                    return { tone: 'good', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Below the floor on its own' };
+                };
+                const laneModelList = models => models.map(model => modelDisplayName(model.name)).filter(Boolean);
+                const localModels = breakdownModels.filter(isLocalModel);
+                const laneRows = [
+                    {
+                        key: 'openai_api',
+                        name: 'OpenAI API',
+                        color: '#4ade80',
+                        models: breakdownModels.filter(isOpenAiApiModel),
+                    },
+                    {
+                        key: 'openai_pro',
+                        name: 'OpenAI Pro',
+                        color: '#a78bfa',
+                        models: breakdownModels.filter(isCodexModel),
+                    },
+                    {
+                        key: 'gemini_api',
+                        name: 'Gemini API',
+                        color: '#60a5fa',
+                        models: breakdownModels.filter(isGeminiModel),
+                    },
+                    {
+                        key: 'grok_api',
+                        name: 'Grok API',
+                        color: '#f59e0b',
+                        models: breakdownModels.filter(isGrokModel),
+                    },
+                    {
+                        key: 'local',
+                        name: 'Local models',
+                        color: '#22c55e',
+                        models: localModels,
+                    },
+                ].map(lane => {
+                    const models = lane.models;
+                    const session = sumCost(models, 'sessionCost');
+                    const daily = sumField(models, 'dailyCost');
+                    const weekly = sumField(models, 'weeklyCost');
+                    const projected = lane.key === 'local' ? 0 : projectedMonthlyForModels(models);
+                    const impact = laneBudgetImpact(projected, lane.key);
+                    const topModels = laneModelList(models).slice(0, 2);
+                    const capPct = Math.max(0, Math.min(100, (projected / budgetCap) * 100));
+
+                    let main = `${fmtCost(projected)}/mo pace`;
+                    let meta = `Sess ${fmtCost(session)} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}`;
+
+                    if (lane.key === 'openai_api') {
+                        const lead = topModels[0] || 'No active OpenAI model';
+                        main = models.length ? `${fmtCost(projected)}/mo · ${lead}` : 'Idle';
+                        meta = models.length ? `Sess ${fmtCost(session)} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No direct OpenAI API calls tracked in this window.';
+                    } else if (lane.key === 'openai_pro') {
+                        main = codexbar?.available ? `Allowance ${codexbar.session || 'available'}` : (models.length ? `${fmtCost(projected)}/mo metered` : 'Idle');
+                        meta = codexbar?.available
+                            ? `CodexBar ${codexbar.summary || 'ready'} · tracked wk ${fmtCost(weekly)}`
+                            : (models.length ? `Sess ${fmtCost(session)} · Wk ${fmtCost(weekly)} · ${topModels.join(', ')}` : 'No OpenAI Pro / Codex activity tracked.');
+                    } else if (lane.key === 'gemini_api') {
+                        main = models.length ? `${fmtCost(projected)}/mo pace` : 'Idle';
+                        meta = models.length ? `${topModels.join(', ')} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No Gemini API calls tracked right now.';
+                    } else if (lane.key === 'grok_api') {
+                        const grokMonthly = Math.max(projected, orData?.byok_monthly || 0, orData?.monthly || 0);
+                        main = grokMonthly > 0 ? `${fmtCost(grokMonthly)}/mo pace` : 'Idle';
+                        meta = grokMonthly > 0
+                            ? `BYOK via OpenRouter · Day ${fmtCost(Math.max(daily, orData?.byok_daily || 0))} · Wk ${fmtCost(Math.max(weekly, orData?.byok_weekly || 0))}`
+                            : 'No Grok/xAI spend tracked, only the lane is wired.';
+                    } else if (lane.key === 'local') {
+                        const localNames = laneModelList(models).slice(0, 2);
+                        main = `${models.length} model${models.length === 1 ? '' : 's'} · ${fmtCost(0)} metered`;
+                        meta = models.length ? `${localNames.join(', ')}${models.length > 2 ? ` +${models.length - 2} more` : ''} · keeps spend off the API budget` : 'No local models registered.';
+                    }
+
+                    return {
+                        ...lane,
+                        modelCount: models.length,
+                        topModels,
+                        session,
+                        daily,
+                        weekly,
+                        projected: lane.key === 'grok_api' ? Math.max(projected, orData?.byok_monthly || 0, orData?.monthly || 0) : projected,
+                        capPct,
+                        impact,
+                        main,
+                        meta,
+                    };
+                });
+                const laneCardsHtml = laneRows.map(lane => {
+                    const fillPct = lane.key === 'local' ? 0 : Math.max(0, Math.min(100, (lane.projected / budgetCap) * 100));
+                    return `<div class="mu-lane-card ${lane.key === 'local' ? 'local' : ''}">
+                        <div class="mu-lane-head">
+                            <div class="mu-lane-title">
+                                <span class="mu-lane-dot" style="background:${lane.color}"></span>
+                                <span class="mu-lane-name">${escapeHtml(lane.name)}</span>
+                            </div>
+                            <span class="mu-lane-impact ${lane.impact.tone}" title="${escapeHtml(lane.impact.long)}">${escapeHtml(lane.impact.short)}</span>
+                        </div>
+                        <div class="mu-lane-main">${escapeHtml(lane.main)}</div>
+                        <div class="mu-lane-bar">
+                            <div class="mu-lane-fill" style="width:${fillPct.toFixed(1)}%;background:linear-gradient(90deg, ${lane.color}55, ${lane.color});"></div>
+                            <span class="mu-lane-threshold floor"></span>
+                            <span class="mu-lane-threshold target"></span>
+                        </div>
+                        <div class="mu-lane-meta">${escapeHtml(lane.meta)}</div>
+                    </div>`;
+                }).join('');
+                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Bars show each lane’s projected monthly burn against the $${budgetFloor} floor, $${budgetTarget} target, and $${budgetCap} cap. Local stays at zero because it is on-device.</div>`;
+                const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">Run rate</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${budgetLabel} against floor $${budgetFloor}, target $${budgetTarget}, cap $${budgetCap}</span></div>`;
+
                 const summaryHtml = `
                 <div class="mu-totals-section">
                     ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
@@ -7869,6 +8392,44 @@
                         <span style="font-size:0.6rem;color:#fff;">${elPct.toFixed(0)}% used</span>
                     </div>` : '';
 
+                const meteredLanes = laneRows.filter(lane => lane.key !== 'local' && lane.projected > 0);
+                const leadLane = [...laneRows.filter(lane => lane.key !== 'local')].sort((a, b) => (b.projected || 0) - (a.projected || 0))[0] || null;
+                const capPct = budgetCap > 0 ? Math.round((budgetProjected / budgetCap) * 100) : 0;
+                const targetPct = budgetTarget > 0 ? Math.round((budgetProjected / budgetTarget) * 100) : 0;
+                const budgetDelta = budgetProjected > budgetCap ? fmtCost(budgetProjected - budgetCap) : null;
+                const overviewDrillHtml = `<div class="mu-drill-grid mu-usage-overview-grid">
+                    <button class="mu-drill-card" type="button" onclick="openModuleModal('usage')">
+                        <div>
+                            <div class="mu-drill-kicker">Budget pace</div>
+                            <div class="mu-drill-main">${fmtCost(budgetProjected)}/mo</div>
+                            <div class="mu-drill-sub">${budgetLabel} vs $${budgetCap} cap${budgetDelta ? ` · +${budgetDelta}` : ''}</div>
+                        </div>
+                        <div class="mu-drill-chip-row">
+                            <span class="mu-drill-chip">${capPct}% of cap</span>
+                            <span class="mu-drill-chip">${targetPct}% of target</span>
+                        </div>
+                    </button>
+                    <button class="mu-drill-card" type="button" onclick="openModuleModal('usage')">
+                        <div>
+                            <div class="mu-drill-kicker">Lead lane</div>
+                            <div class="mu-drill-main">${escapeHtml(leadLane && leadLane.projected > 0 ? leadLane.name : 'Paid lanes idle')}</div>
+                            <div class="mu-drill-sub">${escapeHtml(leadLane && leadLane.projected > 0 ? `${fmtCost(leadLane.projected)}/mo · ${leadLane.impact.short}` : 'No metered provider activity in this window.')}</div>
+                        </div>
+                        <div class="mu-drill-chip-row">${leadLane && leadLane.topModels && leadLane.topModels.length ? leadLane.topModels.slice(0, 2).map(model => `<span class="mu-drill-chip">${escapeHtml(model)}</span>`).join('') : '<span class="mu-drill-chip">overview</span>'}</div>
+                    </button>
+                    <button class="mu-drill-card" type="button" onclick="openModuleModal('usage')">
+                        <div>
+                            <div class="mu-drill-kicker">Live mix</div>
+                            <div class="mu-drill-main">${escapeHtml(activeModelDisp || topModelLabel || 'Waiting for first call')}</div>
+                            <div class="mu-drill-sub">${escapeHtml(breakdownCount ? `${breakdownCount} tracked model${breakdownCount === 1 ? '' : 's'} · ${meteredLanes.length} paid lane${meteredLanes.length === 1 ? '' : 's'} active` : 'No tracked spend yet, keeping the overview quiet.')}</div>
+                        </div>
+                        <div class="mu-drill-chip-row">
+                            <span class="mu-drill-chip">${meteredLanes.length ? `${meteredLanes.length} paid lane${meteredLanes.length === 1 ? '' : 's'}` : 'paid lanes idle'}</span>
+                            <span class="mu-drill-chip">${localModels.length} local</span>
+                        </div>
+                    </button>
+                </div>`;
+
                 // ── Machine Health ──
                 function renderMachineHealth(mh, label, color) {
                     if (!mh || !mh.available) return `<div class="mu-health-machine">
@@ -7899,7 +8460,7 @@
                     </div>
                 </div>`;
 
-                const usageDetailHtml = runRateHtml + budgetHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml;
+                const usageDetailHtml = runRateHtml + budgetHtml + laneGridHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml;
                 const activeBus = (data.agentBus || []).filter(task => ['queued', 'retry', 'running', 'in_progress'].includes((task.status || '').toLowerCase()));
                 const jaimesQueue = activeBus.filter(task => (task.target_node || '').toUpperCase() === 'JAIMES').length;
                 const runningAgents = (data.activeAgents || []).filter(agent => agent.status === 'running').length;
@@ -7947,38 +8508,7 @@
                 window._moduleHealthHtml = healthDetailHtml;
                 window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
 
-                modelUsageCard.innerHTML = `
-                    <div class="mu-drill-grid">
-                        <button class="mu-drill-card" type="button" onclick="openModuleModal('usage_stats')">
-                            <div class="mu-drill-kicker">Model usage</div>
-                            <div class="mu-drill-main">${fmtCost(totalSession)} current · ${fmtCost(totalDaily)} today</div>
-                            <div class="mu-drill-sub">Top ${escapeHtml(topModelLabel)} · ${breakdownCount || 0} tracked models</div>
-                            <div class="mu-drill-chip-row">
-                                <span class="mu-drill-chip">7d ${fmtCost(totalWeekly)}</span>
-                                <span class="mu-drill-chip">Proj ${fmtCost(wrrProjected)}</span>
-                            </div>
-                        </button>
-                        <button class="mu-drill-card" type="button" onclick="openModuleModal('architecture')">
-                            <div class="mu-drill-kicker">Architecture</div>
-                            <div class="mu-drill-main">3 lanes · ${runningAgents} live</div>
-                            <div class="mu-drill-sub">Chat, automation, and Hermes specialist work.</div>
-                            <div class="mu-drill-chip-row">
-                                <span class="mu-drill-chip">Ctx ${contextPct}%</span>
-                                <span class="mu-drill-chip">Bus ${activeBus.length}</span>
-                            </div>
-                        </button>
-                        <button class="mu-drill-card" type="button" onclick="openModuleModal('health')">
-                            <div class="mu-drill-kicker">Device health</div>
-                            <div class="mu-drill-main">${onlineNodes}/2 live · ${healthAlerts} alerts</div>
-                            <div class="mu-drill-sub">CPU, RAM, disk, load, and uptime.</div>
-                            <div class="mu-drill-chip-row">
-                                <span class="mu-drill-chip">Josh</span>
-                                <span class="mu-drill-chip">J.A.I.N</span>
-                                <span class="mu-drill-chip">JAIMES</span>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="mu-drill-note">click any card to expand</div>`;
+                modelUsageCard.innerHTML = budgetStripHtml + (phoneMode ? laneGridHtml : overviewDrillHtml);
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
