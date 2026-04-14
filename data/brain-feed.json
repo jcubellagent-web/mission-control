@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "heartbeat run at 2026-04-13 20:27 ET: due checks re-run, gog auth blocker confirmed, same-evening schedule conflict surfaced",
+  "objective": "Generate a short filename slug for this conversation",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-14T00:28:28Z",
-  "checkedAt": "2026-04-14T00:28:28Z",
+  "steps": [
+    {
+      "label": "codex",
+      "status": "active",
+      "tool": "slug"
+    }
+  ],
+  "currentTool": "slug",
+  "updatedAt": "2026-04-14T00:34:52Z",
+  "checkedAt": "2026-04-14T00:34:52Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
