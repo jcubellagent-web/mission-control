@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "pre-compaction memory flush durable update stored",
+  "objective": "Inspect Telegram gateway state and run full fallback restart with end-to-end retest",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-13T23:59:29Z",
-  "checkedAt": "2026-04-13T23:59:29Z",
+  "steps": [
+    {
+      "label": "codex",
+      "status": "active",
+      "tool": "gpt-5.4"
+    }
+  ],
+  "currentTool": "gpt-5.4",
+  "updatedAt": "2026-04-14T00:00:07Z",
+  "checkedAt": "2026-04-14T00:00:07Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
