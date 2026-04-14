@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Ran sync_memory_to_jain.sh successfully and confirmed memory backup to J.A.I.N",
+    "objective": "investigate J.A.I.N DNS and provider-path issues blocking the openai-codex route",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-14T20:00:55Z",
-    "checkedAt": "2026-04-14T20:00:55Z",
+    "updatedAt": "2026-04-14T20:18:04Z",
+    "checkedAt": "2026-04-14T20:18:04Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Ran sync_memory_to_jain.sh successfully and confirmed memory backup to J.A.I.N",
-    "updatedAt": "2026-04-14T20:15:03Z"
+    "context": "investigate J.A.I.N DNS and provider-path issues blocking the openai-codex route",
+    "updatedAt": "2026-04-14T20:20:03Z"
   },
   "contextWindow": {
     "usedTokens": 183599,
@@ -111,7 +111,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 40,
-    "missionControlDirty": 7,
+    "missionControlDirty": 9,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 99% left",
     "codexbar": {
@@ -119,7 +119,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 46m",
+        "Resets in 2h 41m",
         "Weekly: 99% left [===========-]",
         "Pace: 22% in reserve | Expected 23% used | Lasts until reset",
         "Resets in 5d 9h",
@@ -130,11 +130,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 46m",
+      "sessionReset": "2h 41m",
       "weeklyReset": "5d 9h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-14T20:15:05Z"
+    "updatedAt": "2026-04-14T20:20:05Z"
   },
   "modelUsage": {
     "session": 9.609167,
@@ -272,7 +272,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-14T20:15:08Z",
+    "lastUpdated": "2026-04-14T20:20:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -313,9 +313,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 34.059917,
-    "total_earned": 34.059917,
-    "online_time": "340h 35m",
+    "sim_balance": 34.06825,
+    "total_earned": 34.06825,
+    "online_time": "340h 40m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -326,18 +326,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-14T20:15:09Z"
+    "updatedAt": "2026-04-14T20:20:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.5,
-      "cpu_user": 17.69,
-      "cpu_sys": 16.84,
-      "load1": 2.38,
-      "load5": 2.41,
-      "load15": 2.32,
+      "cpu_pct": 35.6,
+      "cpu_user": 17.99,
+      "cpu_sys": 17.58,
+      "load1": 2.7,
+      "load5": 2.43,
+      "load15": 2.34,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "107Gi",
@@ -345,14 +345,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.5,
-      "cpu_user": 5.55,
-      "cpu_sys": 12.96,
-      "load1": 1.63,
-      "load5": 2.07,
-      "load15": 2.08,
+      "cpu_pct": 14.6,
+      "cpu_user": 3.88,
+      "cpu_sys": 10.67,
+      "load1": 2.67,
+      "load5": 2.29,
+      "load15": 2.16,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "50Gi",
@@ -376,19 +376,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-14T20:15:03Z"
+      "lastChecked": "2026-04-14T20:20:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-14T20:15:03Z"
+      "lastChecked": "2026-04-14T20:20:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-14T20:15:03Z"
+      "lastChecked": "2026-04-14T20:20:03Z"
     }
   ],
   "crons": [
@@ -1034,29 +1034,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-14T20:15:08Z",
+      "time": "2026-04-14T20:20:08Z",
       "event": "Session spend: $9.61"
     },
     {
-      "time": "2026-04-14T20:15:05Z",
+      "time": "2026-04-14T20:20:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-14T20:15:03Z",
+      "time": "2026-04-14T20:20:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-14T20:15:03Z",
+      "time": "2026-04-14T20:20:03Z",
       "event": "44 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-14T20:15:03Z",
+      "time": "2026-04-14T20:20:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-14T20:15:03Z",
+      "time": "2026-04-14T20:20:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-14T20:15:03Z"
+  "lastUpdated": "2026-04-14T20:20:03Z"
 }
