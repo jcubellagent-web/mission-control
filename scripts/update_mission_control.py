@@ -46,7 +46,6 @@ CRON_TARGETS = [
 
     # ── J.A.I.N intelligence + maintenance ──────────────────────────────────
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts for high-signal posts and routes urgent hits", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "weekdayRuns": [
@@ -68,46 +67,8 @@ CRON_TARGETS = [
      }},
     {"name": "Intel Feedback Loop", "pattern": "intel_feedback_loop.py", "schedule": "Every 5 min (keepalive)", "description": "Restarts the persistent intelligence feedback loop if it drops", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "JOSH Health Check", "pattern": "check_josh_health.sh", "schedule": "Every 30 min", "description": "Remote health check from J.A.I.N back to Josh 2.0", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
-    {"name": "Error Rate Monitor", "pattern": "error_rate_monitor.py", "schedule": "Daily 3:00 AM ET", "description": "Nightly scan for elevated error rates across automations", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
+    {"name": "Error Rate Monitor", "pattern": "error_rate_monitor.py", "schedule": "Daily 11:00 PM ET", "description": "Nightly scan for elevated error rates across automations", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
-    {"name": "XMCP Boot", "pattern": "start_xmcp.sh", "schedule": "On boot", "description": "Starts XMCP services whenever J.A.I.N reboots", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
-
-    # ── X account engine ─────────────────────────────────────────────────────
-    {"name": "X Feedback ML", "pattern": "x_feedback_ml.py", "schedule": "Daily 6:00 AM ET", "description": "Scores yesterday’s X performance and refreshes strategy state", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Pre-Market", "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET", "description": "[Original] Futures and overnight setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Market Open", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "[Original] Market-open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Mover", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Hot Take", "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Contrarian take built to spark replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Quote Tweets", "pattern": "x_post_agent.py qt", "schedule": "Daily 1p/3p/6p/8p ET", "description": "[QT] Quotes breaking or viral posts with our angle", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "1:00 PM", "label": "Quote Tweet"},
-             {"time": "3:00 PM", "label": "Quote Tweet"},
-             {"time": "6:00 PM", "label": "Quote Tweet"},
-             {"time": "8:00 PM", "label": "Quote Tweet"},
-         ]
-     }},
-    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "[Original] Close wrap and next-day setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Prime Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "[Original] Prime-time flagship take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Nightcap", "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] Last sharp insight of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Strategic Replies", "pattern": "x_strategic_reply.py", "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)", "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "9:00 AM",  "label": "Strategic Reply"},
-             {"time": "10:00 AM", "label": "Strategic Reply"},
-             {"time": "11:00 AM", "label": "Strategic Reply"},
-             {"time": "1:00 PM",  "label": "Strategic Reply"},
-             {"time": "2:00 PM",  "label": "Strategic Reply"},
-             {"time": "3:00 PM",  "label": "Strategic Reply"},
-             {"time": "4:00 PM",  "label": "Strategic Reply"},
-             {"time": "5:00 PM",  "label": "Strategic Reply"},
-             {"time": "6:00 PM",  "label": "Strategic Reply"},
-             {"time": "7:00 PM",  "label": "Strategic Reply"},
-             {"time": "9:00 PM",  "label": "Strategic Reply"},
-             {"time": "11:00 PM", "label": "Strategic Reply"},
-         ]
-     }},
-    {"name": "X Growth Tracker", "pattern": "x_growth_tracker.py", "schedule": "Daily 12:00 PM ET", "description": "Snapshots follower and impression growth into dashboard state", "category": "X Account", "agent": "J.A.I.N", "jain": True},
 
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
@@ -116,22 +77,22 @@ CRON_TARGETS = [
     {"name": "Sorare Daily Prep", "pattern": "sorare_daily_prep.sh", "schedule": "Daily 9:00 AM ET", "description": "Raw prep pipeline before model-driven Sorare submissions", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Sorare ML Missions", "pattern": "ml_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "Hermes ML mission picker for Sorare", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-missions"},
     {"name": "Sorare ML Lineups", "pattern": "ml_bot.py --lineups-only", "schedule": "Daily 11:00 AM ET", "description": "Hermes ML lineup builder for Sorare competitions", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-lineups"},
-    {"name": "Sorare Champion Submit", "pattern": "sorare_missions.py --sp-classic", "schedule": "Daily 3:00 PM ET", "description": "Champion lineup submitter running from raw crontab", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Sorare Champion Submit", "pattern": "sorare_missions.py --sp-classic", "schedule": "Daily 11:00 AM ET", "description": "Champion lineup submitter running from raw crontab", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Sorare Canonical Reflector", "pattern": "sorare_canonical_reflector.py", "schedule": "Every 15 min (8:00 AM–10:45 PM ET)", "description": "Keeps canonical Sorare state mirrored into Mission Control data", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Deadline Guard", "pattern": "sorare_deadline_guard.py", "schedule": "Mon 9:45 PM ET", "description": "Late lineup-deadline safety check for Sorare", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Sorare Deadline Guard", "pattern": "sorare_deadline_guard.py", "schedule": "Mon 5:45 PM ET", "description": "Late lineup-deadline safety check for Sorare", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
 
     # ── Fantasy baseball ────────────────────────────────────────────────────
-    {"name": "Fantasy Waiver Scan (post-process)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 12:00 AM ET", "description": "Post-waiver scan right after the Sunday-night processing window", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Fantasy Weekly Recap", "pattern": "fantasy_weekly_recap.py", "schedule": "Sun 12:00 PM ET", "description": "Raw weekly recap sent to Josh", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Fantasy Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 12:45 PM ET", "description": "Monday injury check before setting the weekly roster", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Fantasy Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 1:00 PM ET", "description": "Monday lineup review on the live cron path", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Waiver Scan (post-process)", "pattern": "fantasy_waiver_scan.py", "schedule": "Sun 8:00 PM ET", "description": "Post-waiver scan right after the Sunday-night processing window", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Weekly Recap", "pattern": "fantasy_weekly_recap.py", "schedule": "Sun 8:00 AM ET", "description": "Raw weekly recap sent to Josh", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Injury Monitor", "pattern": "fantasy_injury_monitor.py", "schedule": "Mon 8:45 AM ET", "description": "Monday injury check before setting the weekly roster", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Lineup Check", "pattern": "fantasy_lineup_check.py", "schedule": "Mon 9:00 AM ET", "description": "Monday lineup review on the live cron path", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Waiver Injury Alert", "pattern": "waiver_injury_alert.py", "schedule": "Daily 1:00 PM ET", "description": "Surfaces injured-player replacement opportunities", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Fantasy Waiver Review (Hermes)", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed/Fri 1:00 PM ET", "description": "Hermes waiver review lane that runs mid-week", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "fantasy-waiver-scan"},
-    {"name": "Fantasy Waiver Scan (pre-game)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 11:00 AM ET", "description": "Final waiver review before first-pitch lineup lock", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Waiver Scan (pre-game)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 7:00 AM ET", "description": "Final waiver review before first-pitch lineup lock", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
 
     # ── JAIMES / Hermes maintenance ─────────────────────────────────────────
     {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Hermes daily system-health pass", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
-    {"name": "JAIMES Weekly Report", "pattern": "jaimes_weekly_report.py", "schedule": "Sat 1:00 PM ET", "description": "Weekly JAIMES summary sent back to Josh", "category": "Maintenance", "agent": "JAIMES", "jain": True},
+    {"name": "JAIMES Weekly Report", "pattern": "jaimes_weekly_report.py", "schedule": "Sat 9:00 AM ET", "description": "Weekly JAIMES summary sent back to Josh", "category": "Maintenance", "agent": "JAIMES", "jain": True},
 ]
 
 
@@ -2082,6 +2043,7 @@ CONTEXT_LIMITS: Dict[str, int] = {
 MOLTWORLD_AGENT_ID = "agent_9bon7uvreysrf2z6"
 MOLTWORLD_API_BASE = "https://moltworld.io"
 MOLTWORLD_STATE_PATH = ROOT.parent / "data" / "moltworld-state.json"
+MOLTWORLD_CACHE_PATH = ROOT.parent / "data" / "moltworld-cache.json"
 
 def fetch_moltworld_data() -> Dict[str, Any]:
     try:
@@ -2101,7 +2063,7 @@ def fetch_moltworld_data() -> Dict[str, Any]:
                 pass # Will use empty dict
 
         # 3. Construct the return dict
-        return {
+        payload = {
             "sim_balance":        float(balance.get("sim", 0.0)),
             "total_earned":       float(balance.get("totalEarned", 0.0)),
             "online_time":        str(balance.get("totalOnlineTime", "0h 0m")),
@@ -2117,15 +2079,29 @@ def fetch_moltworld_data() -> Dict[str, Any]:
             "projection_per_day": float(tokenomics.get("perDay", 0.0)),
             "updatedAt":          utc_iso(),
         }
+        try:
+            MOLTWORLD_CACHE_PATH.write_text(json.dumps(payload, indent=2))
+        except OSError:
+            pass
+        return payload
     except Exception as exc:
         print(f"[warn] fetch_moltworld_data failed: {exc}", file=sys.stderr)
+        if MOLTWORLD_CACHE_PATH.exists():
+            try:
+                cached = json.loads(MOLTWORLD_CACHE_PATH.read_text())
+                if isinstance(cached, dict):
+                    cached["stale"] = True
+                    cached["lastError"] = str(exc)
+                    return cached
+            except Exception:
+                pass
         return { # Safe defaults on failure
             "sim_balance": 0.0, "total_earned": 0.0, "online_time": "0h 0m",
             "is_online": False, "status": "offline", "earning_rate": "0 SIM/hour",
             "position_x": 0, "position_y": 0, "run_count": 0,
             "nearby_agents": [], "last_thought": "Error fetching data",
             "blocks_built": 0, "projection_per_day": 0.0,
-            "updatedAt": utc_iso(),
+            "updatedAt": utc_iso(), "stale": True, "lastError": str(exc),
         }
 
 def fetch_context_window() -> Dict[str, Any]:
