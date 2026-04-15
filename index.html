@@ -1831,17 +1831,31 @@
         .intel-highlights-body { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1; }
         .intel-hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .intel-hi-item:last-child { border-bottom: none; }
+        .intel-hi-item.breaking-fresh { animation: breaking-highlight-in 900ms cubic-bezier(.16,1,.3,1); }
         .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; white-space: nowrap; }
         .intel-hi-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.85); line-height: 1.35; }
+        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.85); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .intel-hi-reason { font-size: 0.63rem; color: rgba(255,255,255,0.55); line-height: 1.45; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
+        .intel-hi-source { font-size: 0.58rem; color: rgba(255,255,255,0.32); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+        #newsfeed-live-badge.breaking-pulse { animation: breaking-badge-pulse 1200ms ease; }
+        @keyframes breaking-highlight-in {
+            0% { opacity: 0; transform: translateY(-8px); background: rgba(239,68,68,0.14); }
+            60% { opacity: 1; transform: translateY(0); background: rgba(239,68,68,0.08); }
+            100% { opacity: 1; transform: translateY(0); background: transparent; }
+        }
+        @keyframes breaking-badge-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
         /* Phone: compress intel highlights — hide reasons, max 3 items */
-        body.phone-mode .intel-hi-reason { display: none !important; }
+        body.phone-mode .intel-hi-reason,
+        body.phone-mode .intel-hi-source { display: none !important; }
         body.phone-mode .intel-hi-item:nth-child(n+4) { display: none !important; }
         body.phone-mode .card-intel-highlights .card-header h2 { font-size: 0.6rem; }
         body.phone-mode .intel-highlights-body { gap: 2px; }
-        body.phone-mode .intel-hi-text { font-size: 0.72rem; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+        body.phone-mode .intel-hi-text { font-size: 0.72rem; }
 
         /* ── Scrolling ticker bar ── */
         .if-tldr-block {
@@ -6188,6 +6202,7 @@
 
         // ===== Intelligence Feed =====
         let lastIntelHash = null;
+        let lastBreakingIds = [];
 
         async function fetchBreakingHighlightsData() {
             const paths = [
@@ -6245,10 +6260,16 @@
             const items = Array.isArray(data?.items) ? data.items : [];
             if (!items.length) {
                 renderIntelHighlights(window._jainNewsfeedData || window._newsfeedData || {});
+                lastBreakingIds = [];
                 return;
             }
 
-            const renderItem = item => {
+            const newIds = items.map(item => item.id || item.sentAt || item.title || '');
+            const freshIds = new Set(newIds.filter(id => id && !lastBreakingIds.includes(id)));
+            const compactItems = items.slice(0, 6);
+            const modalItems = items.slice(0, 20);
+
+            const renderItem = (item, mode = 'compact') => {
                 const label = escapeHtml(item.label || 'BREAKING');
                 const title = escapeHtml(item.title || 'Untitled alert');
                 const score = Number(item.score);
@@ -6256,10 +6277,14 @@
                     ? `<span class="intel-hi-cat" style="background:rgba(251,191,36,0.12);color:#fbbf24">${Math.round(score)}/10</span>`
                     : '';
                 const timeStr = item.sentAt ? formatRelTime(item.sentAt) : escapeHtml(item.displayTime || '');
-                const reasonHtml = item.reason ? `<div class="intel-hi-reason">⚡ ${escapeHtml(item.reason)}</div>` : '';
-                const sourceLine = [item.source || '', item.url || ''].filter(Boolean).join(' → ');
-                const sourceHtml = sourceLine ? `<div class="intel-hi-reason">${escapeHtml(sourceLine)}</div>` : '';
-                return `<div class="intel-hi-item">
+                const reasonText = (item.reason || '').trim();
+                const sourceText = [item.source || '', item.url || ''].filter(Boolean).join(' → ');
+                const freshClass = freshIds.has(item.id || item.sentAt || item.title || '') ? ' breaking-fresh' : '';
+                const compactReason = reasonText || sourceText;
+                const compactMeta = compactReason ? `<div class="intel-hi-source">${escapeHtml(compactReason)}</div>` : '';
+                const fullReason = reasonText ? `<div class="intel-hi-reason">⚡ ${escapeHtml(reasonText)}</div>` : '';
+                const fullSource = sourceText ? `<div class="intel-hi-source">${escapeHtml(sourceText)}</div>` : '';
+                return `<div class="intel-hi-item${freshClass}">
                     <div class="intel-hi-body">
                         <div style="display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap;">
                             <span class="intel-hi-cat" style="background:rgba(239,68,68,0.15);color:#f87171">${label}</span>
@@ -6267,17 +6292,26 @@
                             <span class="intel-hi-text">${title}</span>
                             ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
                         </div>
-                        ${reasonHtml}
-                        ${sourceHtml}
+                        ${mode === 'full' ? `${fullReason}${fullSource}` : compactMeta}
                     </div>
                 </div>`;
             };
 
-            el.innerHTML = items.slice(0, 6).map(renderItem).join('');
-            if (fullEl) fullEl.innerHTML = items.slice(0, 20).map(renderItem).join('');
+            el.innerHTML = compactItems.map(item => renderItem(item, 'compact')).join('');
+            if (fullEl) fullEl.innerHTML = modalItems.map(item => renderItem(item, 'full')).join('');
 
             const badge = document.getElementById('newsfeed-live-badge');
-            if (badge) badge.title = 'Last: ' + formatRelTime(data.updatedAt || items[0]?.sentAt || '');
+            if (badge) {
+                badge.title = 'Last: ' + formatRelTime(data.updatedAt || items[0]?.sentAt || '');
+                if (freshIds.size) {
+                    badge.classList.remove('breaking-pulse');
+                    void badge.offsetWidth;
+                    badge.classList.add('breaking-pulse');
+                    setTimeout(() => badge.classList.remove('breaking-pulse'), 1400);
+                }
+            }
+
+            lastBreakingIds = newIds;
         }
 
         // ── Intel Highlights — compact top-8 glance view ──────────────────
