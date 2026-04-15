@@ -4842,9 +4842,6 @@
                 <div class="mcp-sep"></div>
                 <div class="mcp-row"><span class="mcp-label">Today</span><span class="mcp-val" id="mcp-daily">$0.00</span></div>
             </div>
-            <!-- Mobile X Growth button -->
-            <button id="x-header-btn" onclick="window.openXDashboard()"><span style="font-family:serif">𝕏</span></button>
-
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
@@ -4941,71 +4938,6 @@
                         <div id="agent-chat-feed"><div class="agent-chat-empty">Loading roadmap…</div></div>
                     </div>
                 </div>
-                <!-- Mobile X Growth Card — phone-mode only -->
-                <div class="card card-x-mobile">
-                    <div class="x-mobile-header">
-                        <div class="x-mobile-account">
-                            <span class="x-mobile-logo">𝕏</span>
-                            <span class="x-mobile-handle" id="xm-handle">@AgentJc11443</span>
-                        </div>
-                        <span class="x-mobile-updated" id="xm-updated">–</span>
-                    </div>
-                    <!-- Key stats row -->
-                    <div class="x-mobile-stats">
-                        <div class="x-stat x-stat-blue">
-                            <span class="x-stat-val" id="xm-followers">–</span>
-                            <span class="x-stat-label">Followers</span>
-                        </div>
-                        <div class="x-stat x-stat-blue">
-                            <span class="x-stat-val" id="xm-impr7d">–</span>
-                            <span class="x-stat-label">Impr 7d</span>
-                        </div>
-                        <div class="x-stat x-stat-green">
-                            <span class="x-stat-val" id="xm-posts7d">–</span>
-                            <span class="x-stat-label">Posts 7d</span>
-                        </div>
-                    </div>
-                    <!-- Today's post mix -->
-                    <div class="x-mobile-mix">
-                        <div class="x-mix-pill x-mix-orig">
-                            <span class="x-mix-pill-val" id="xm-orig-today">0</span>
-                            <span>Orig</span>
-                        </div>
-                        <div class="x-mix-pill x-mix-reply">
-                            <span class="x-mix-pill-val" id="xm-eng-today">0</span>
-                            <span>Eng</span>
-                        </div>
-                        <div class="x-mix-pill x-mix-qt">
-                            <span class="x-mix-pill-val" id="xm-qt-today">0</span>
-                            <span>QT</span>
-                        </div>
-                        <div class="x-mix-pill x-mix-total">
-                            <span class="x-mix-pill-val" id="xm-total-today">0</span>
-                            <span>Today</span>
-                        </div>
-                    </div>
-                    <!-- Next milestone progress bar -->
-                    <div class="x-milestone-row">
-                        <div class="x-milestone-label">
-                            <span class="x-milestone-name" id="xm-ms-name">500 Followers</span>
-                            <span class="x-milestone-pct" id="xm-ms-pct">0%</span>
-                        </div>
-                        <div class="x-milestone-bar-bg">
-                            <div class="x-milestone-bar-fill" id="xm-ms-bar" style="width:0%"></div>
-                        </div>
-                    </div>
-                    <!-- Strategy line -->
-                    <div id="xm-strategy-line" style="font-size:0.6rem;color:rgba(255,255,255,0.35);padding:4px 0 2px;text-align:center;letter-spacing:0.03em;"></div>
-                    <!-- Open full modal -->
-                    <button class="x-mobile-open-btn" onclick="window.openXDashboard()">
-                        <span style="font-family:serif;font-size:0.9rem;">𝕏</span>
-                        Full Growth Dashboard
-                        <span style="opacity:0.5;font-size:0.85rem;">↗</span>
-                    </button>
-                </div>
-
-
-
                 <!-- Bottom-left: Condensed Intel Highlights + Model -->
                 <div class="kiosk-bottom-left">
                     <div class="card card-intel-highlights">
@@ -6183,9 +6115,17 @@
 
         async function forceUpdate() {
             const btn = document.getElementById('refresh-btn');
+            if (!btn || window._forceUpdating) return;
+            window._forceUpdating = true;
             btn.classList.add('loading');
-            await fetchData();
-            setTimeout(() => btn.classList.remove('loading'), 500);
+            try {
+                await fetchData();
+            } finally {
+                setTimeout(() => {
+                    btn.classList.remove('loading');
+                    window._forceUpdating = false;
+                }, 500);
+            }
         }
 
         /* ---- AirPoint copilot notch toggle ---- */
@@ -7991,10 +7931,6 @@
                 ${calendarPill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
-                <div class="stat-pill stat-pill-x" id="x-progress-bubble" title="X Growth Dashboard">
-                    <span class="num" style="font-family:serif;font-size:1.1em;">𝕏</span>
-                    <span class="label">Progress</span>
-                </div>
                 <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleep && window.openEightSleep()" style="cursor:pointer;">
                     <span class="num">🛏️</span>
                     <span class="label">Sleep</span>
@@ -9359,26 +9295,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').then(reg => {
-                    // Auto-reload when a new SW takes over — ensures PWA always runs latest code
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        if (!newWorker) return;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // New SW installed — tell it to skip waiting, then reload
-                                newWorker.postMessage({ type: 'SKIP_WAITING' });
-                            }
-                        });
-                    });
-                    // Reload when SW controller changes (new SW activated)
-                    let refreshing = false;
-                    navigator.serviceWorker.addEventListener('controllerchange', () => {
-                        if (!refreshing) { refreshing = true; window.location.reload(); }
-                    });
-                    // Also check for updates every 60s (catches GitHub Pages deploys)
-                    setInterval(() => reg.update(), 60000);
-                }).catch(err => {
+                navigator.serviceWorker.register('./service-worker.js').catch(err => {
                     console.error('Service worker registration failed', err);
                 });
             });
