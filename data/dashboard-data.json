@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "remove all X account cron jobs from Josh 2.0, J.A.I.N, and JAIMES and make Mission Control stop showing the X section in Today's Jobs",
-    "updatedAt": "2026-04-15T02:20:03Z"
+    "updatedAt": "2026-04-15T02:25:03Z"
   },
   "contextWindow": {
     "usedTokens": 140690,
@@ -113,6 +113,7 @@
     "workspaceDirty": 40,
     "missionControlDirty": 7,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html"
     ],
     "codexbarStatus": "100% left \u00b7 wk 99% left",
@@ -121,10 +122,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 41m",
+        "Resets in 1h 36m",
         "Weekly: 99% left [===========-]",
         "Pace: 26% in reserve | Expected 27% used | Lasts until reset",
-        "Resets in 5d 3h",
+        "Resets in 5d 2h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -132,11 +133,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 41m",
-      "weeklyReset": "5d 3h",
+      "sessionReset": "1h 36m",
+      "weeklyReset": "5d 2h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-15T02:20:05Z"
+    "updatedAt": "2026-04-15T02:25:05Z"
   },
   "modelUsage": {
     "session": 15.948232,
@@ -274,7 +275,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-15T02:20:08Z",
+    "lastUpdated": "2026-04-15T02:25:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -315,9 +316,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 34.66825,
-    "total_earned": 34.66825,
-    "online_time": "346h 40m",
+    "sim_balance": 34.676583,
+    "total_earned": 34.676583,
+    "online_time": "346h 45m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -328,18 +329,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-15T02:20:09Z"
+    "updatedAt": "2026-04-15T02:25:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.0,
-      "cpu_user": 16.36,
-      "cpu_sys": 18.67,
-      "load1": 3.83,
-      "load5": 3.62,
-      "load15": 3.07,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 32.3,
+      "cpu_user": 16.74,
+      "cpu_sys": 15.54,
+      "load1": 2.43,
+      "load5": 3.14,
+      "load15": 3.01,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "106Gi",
@@ -347,12 +348,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.2,
-      "cpu_user": 0.92,
-      "cpu_sys": 9.25,
-      "load1": 1.91,
-      "load5": 1.99,
-      "load15": 2.09,
+      "cpu_pct": 10.0,
+      "cpu_user": 0.9,
+      "cpu_sys": 9.9,
+      "load1": 2.35,
+      "load5": 1.9,
+      "load15": 1.99,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -378,19 +379,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-15T02:20:03Z"
+      "lastChecked": "2026-04-15T02:25:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-15T02:20:03Z"
+      "lastChecked": "2026-04-15T02:25:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-15T02:20:03Z"
+      "lastChecked": "2026-04-15T02:25:03Z"
     }
   ],
   "crons": [
@@ -469,16 +470,6 @@
       "name": "Breaking News Scanner",
       "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
       "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT",
-      "category": "Intelligence Feed",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Watchlist Monitor",
-      "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
-      "description": "Watches priority X accounts for high-signal posts and routes urgent hits",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -595,238 +586,6 @@
       "status": "ok",
       "errors": 0,
       "lastError": null
-    },
-    {
-      "name": "XMCP Boot",
-      "schedule": "On boot",
-      "description": "Starts XMCP services whenever J.A.I.N reboots",
-      "category": "Maintenance",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null
-    },
-    {
-      "name": "X Feedback ML",
-      "schedule": "Daily 6:00 AM ET",
-      "description": "Scores yesterday\u2019s X performance and refreshes strategy state",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "due"
-    },
-    {
-      "name": "X Pre-Market",
-      "schedule": "Daily 7:00 AM ET",
-      "description": "[Original] Futures and overnight setup",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T07:00:00"
-    },
-    {
-      "name": "X Market Open",
-      "schedule": "Daily 8:00 AM ET",
-      "description": "[Original] Market-open macro take",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T08:00:00"
-    },
-    {
-      "name": "X Mover",
-      "schedule": "Daily 11:00 AM ET",
-      "description": "[Original] Mid-morning mover or stat",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T11:00:00"
-    },
-    {
-      "name": "X Hot Take",
-      "schedule": "Daily 12:00 PM ET",
-      "description": "[Original] Contrarian take built to spark replies",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T12:00:00"
-    },
-    {
-      "name": "X Quote Tweets",
-      "schedule": "Daily 1p/3p/6p/8p ET",
-      "description": "[QT] Quotes breaking or viral posts with our angle",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-14T20:00:00",
-      "runStatus": "done",
-      "multiRun": {
-        "runs": [
-          {
-            "time": "1:00 PM",
-            "label": "Quote Tweet",
-            "past": true,
-            "done": true
-          },
-          {
-            "time": "3:00 PM",
-            "label": "Quote Tweet",
-            "past": true,
-            "done": true
-          },
-          {
-            "time": "6:00 PM",
-            "label": "Quote Tweet",
-            "past": true,
-            "done": true
-          },
-          {
-            "time": "8:00 PM",
-            "label": "Quote Tweet",
-            "past": true,
-            "done": true
-          }
-        ]
-      }
-    },
-    {
-      "name": "X Market Close",
-      "schedule": "Daily 5:00 PM ET",
-      "description": "[Original] Close wrap and next-day setup",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T17:00:00"
-    },
-    {
-      "name": "X Prime Take",
-      "schedule": "Daily 9:00 PM ET",
-      "description": "[Original] Prime-time flagship take",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T21:00:00"
-    },
-    {
-      "name": "X Nightcap",
-      "schedule": "Daily 10:00 PM ET",
-      "description": "[Original] Last sharp insight of the day",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T22:00:00"
-    },
-    {
-      "name": "X Strategic Replies",
-      "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)",
-      "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-14T21:00:00",
-      "multiRun": {
-        "runs": [
-          {
-            "time": "9:00 AM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "10:00 AM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "11:00 AM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "1:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "2:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "3:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "4:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "5:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "6:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "7:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "9:00 PM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "11:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          }
-        ]
-      }
-    },
-    {
-      "name": "X Growth Tracker",
-      "schedule": "Daily 8:00 AM ET",
-      "description": "Snapshots follower and impression growth into dashboard state",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "due"
     },
     {
       "name": "Sorare ML Training",
@@ -1028,7 +787,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1049,29 +808,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-15T02:20:08Z",
+      "time": "2026-04-15T02:25:08Z",
       "event": "Session spend: $15.95"
     },
     {
-      "time": "2026-04-15T02:20:05Z",
-      "event": "Coding: mission-control/index.html"
+      "time": "2026-04-15T02:25:05Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-15T02:20:05Z",
+      "time": "2026-04-15T02:25:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-15T02:20:03Z",
+      "time": "2026-04-15T02:25:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-15T02:20:03Z",
-      "event": "44 scheduled jobs healthy"
+      "time": "2026-04-15T02:25:03Z",
+      "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-15T02:20:03Z",
+      "time": "2026-04-15T02:25:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-15T02:20:03Z"
+  "lastUpdated": "2026-04-15T02:25:03Z"
 }
