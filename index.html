@@ -2576,8 +2576,8 @@
             min-height: 160px;
         }
         .card-brain.brain-active #brain-feed-card {
-            min-height: 150px;
-            flex: 1 1 0;
+            min-height: 110px;
+            flex: 0 1 auto;
         }
         .bf-idle-container {
             flex: 1;
@@ -3023,9 +3023,9 @@
             overflow: hidden;
         }
         body:not(.phone-mode) #brain-feed-card {
-            flex: 1 1 0;
-            max-height: none;
-            min-height: 120px;
+            flex: 0 1 auto;
+            max-height: min(340px, 40vh);
+            min-height: 0;
             padding-right: 0;
         }
         body:not(.phone-mode) .bf-container,
