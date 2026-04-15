@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Handled the async voice-test completion events with no extra user-facing follow-up needed",
+  "objective": "Transcribe Josh's voice note, recover the old Sonny-like Josh 2.0 voice, and set a broad-strokes spoken attention process",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-15T23:03:02Z",
-  "checkedAt": "2026-04-15T23:03:02Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-15T23:04:16Z",
+  "checkedAt": "2026-04-15T23:04:16Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
