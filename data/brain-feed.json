@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "heartbeat triage completed, mission control recency checked",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-15T16:16:18Z",
-  "checkedAt": "2026-04-15T16:16:18Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-15T16:46:10Z",
+  "checkedAt": "2026-04-15T16:46:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
