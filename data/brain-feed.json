@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Recovered the old Sonny voice, tested new Josh 2.0 voice candidates, and formalized broad-strokes spoken attention alerts",
+  "objective": "Handle async completion of the voice-memory search and Sonny-style voice tests without interrupting Josh",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-15T23:09:04Z",
-  "checkedAt": "2026-04-15T23:09:04Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-15T23:09:32Z",
+  "checkedAt": "2026-04-15T23:09:32Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
