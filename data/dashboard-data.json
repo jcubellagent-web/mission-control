@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "audit Today's Jobs and Sorare MLB job tracking accuracy",
+    "objective": "processed async verification results for Today\u2019s Jobs audit",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-15T23:28:34Z",
-    "checkedAt": "2026-04-15T23:28:34Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-15T23:36:03Z",
+    "checkedAt": "2026-04-15T23:36:03Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "audit Today's Jobs and Sorare MLB job tracking accuracy",
-    "updatedAt": "2026-04-15T23:35:03Z"
+    "context": "processed async verification results for Today\u2019s Jobs audit",
+    "updatedAt": "2026-04-15T23:40:02Z"
   },
   "contextWindow": {
-    "usedTokens": 36206,
+    "usedTokens": 108383,
     "limitTokens": 400000,
-    "pct": 0.0905,
+    "pct": 0.271,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 40,
-    "missionControlDirty": 12,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "scripts/josh_voice.sh"
@@ -142,7 +136,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 26m",
+        "Resets in 21m",
         "Weekly: 99% left [===========-]",
         "Pace: 38% in reserve | Expected 39% used | Lasts until reset",
         "Resets in 4d 5h",
@@ -153,15 +147,15 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "26m",
+      "sessionReset": "21m",
       "weeklyReset": "4d 5h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-15T23:35:05Z"
+    "updatedAt": "2026-04-15T23:40:07Z"
   },
   "modelUsage": {
-    "session": 0.776255,
-    "daily": 52.496234,
+    "session": 2.46057,
+    "daily": 54.180549,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -178,7 +172,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 9.7802635
+        "cost": 11.4645775
       },
       {
         "name": "gpt-5.3-codex",
@@ -217,12 +211,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 758608,
-        "outputTokens": 25099,
-        "totalTokens": 783707,
-        "sessionCost": 9.7802635,
-        "dailyCost": 9.7802635,
-        "weeklyCost": 9.7802635,
+        "inputTokens": 817684,
+        "outputTokens": 24260,
+        "totalTokens": 841944,
+        "sessionCost": 11.4645775,
+        "dailyCost": 11.4645775,
+        "weeklyCost": 11.4645775,
         "sessions": 28,
         "isGemini": false,
         "costEstimated": false
@@ -282,7 +276,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-15T23:35:08Z",
+    "lastUpdated": "2026-04-15T23:40:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -311,8 +305,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 52.569288,
-      "total": 76.485621,
+      "daily": 54.253603,
+      "total": 78.169935,
       "monthly": 1000.151665
     },
     "weeklyRunRate": {
@@ -323,9 +317,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 36.79325,
-    "total_earned": 36.79325,
-    "online_time": "367h 55m",
+    "sim_balance": 36.801639,
+    "total_earned": 36.801639,
+    "online_time": "368h 0m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -336,18 +330,18 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-15T23:35:09Z"
+    "updatedAt": "2026-04-15T23:40:11Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.6,
-      "cpu_user": 27.81,
-      "cpu_sys": 14.79,
-      "load1": 4.36,
-      "load5": 4.21,
-      "load15": 4.25,
+      "cpu_pct": 41.6,
+      "cpu_user": 26.87,
+      "cpu_sys": 14.71,
+      "load1": 3.6,
+      "load5": 3.99,
+      "load15": 4.13,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "96Gi",
@@ -355,11 +349,11 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.6,
-      "cpu_user": 1.76,
-      "cpu_sys": 8.84,
-      "load1": 2.27,
-      "load5": 2.12,
+      "cpu_pct": 19.7,
+      "cpu_user": 7.14,
+      "cpu_sys": 12.5,
+      "load1": 2.41,
+      "load5": 2.11,
       "load15": 2.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
@@ -386,19 +380,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-15T23:35:03Z"
+      "lastChecked": "2026-04-15T23:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-15T23:35:03Z"
+      "lastChecked": "2026-04-15T23:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-15T23:35:03Z"
+      "lastChecked": "2026-04-15T23:40:02Z"
     }
   ],
   "crons": [
@@ -801,9 +795,9 @@
       "title": "Audit Mission Control Today\u2019s Jobs accuracy for Sorare MLB and daily completion state",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Deep-auditing Today\u2019s Jobs as the live source of truth for what was actually done today vs still due, with emphasis on Sorare sheet updater, daily prep, and champion submit. Local fixes now in `mission-control/scripts/update_mission_control.py`: J.A.I.N Sorare jobs are verified from remote log evidence so today\u2019s completed runs stop showing as due, and inline `memory/tasks.md` bullets now parse into Active Work for today. Background: warm-pine (PID 6479) on local \u2014 `bash scripts/fast_voice_transcribe.sh /Users/josh2.0/.openclaw/media/inbound/file_1046---06d4f730-ebe2-4ba8-96d5-cf979e13405c.ogg`.",
+      "notes": "Deep-auditing Today\u2019s Jobs as the live source of truth for what was actually done today vs still due, with emphasis on Sorare sheet updater, daily prep, and champion submit. Local fixes now in `mission-control/scripts/update_mission_control.py`: J.A.I.N Sorare jobs are verified from remote log evidence so today\u2019s completed runs stop showing as due, inline `memory/tasks.md` bullets now parse into Active Work for today, and regenerated `dashboard-data.json` verified the Sorare rows as done. Background: warm-pine (PID 6479) on local \u2014 `bash scripts/fast_voice_transcribe.sh /Users/josh2.0/.openclaw/media/inbound/file_1046---06d4f730-ebe2-4ba8-96d5-cf979e13405c.ogg`.",
       "requestedAt": "2026-04-15 19:28",
-      "updatedAt": "2026-04-15 19:37",
+      "updatedAt": "2026-04-15 19:35",
       "owner": "J.A.I.N"
     },
     {
@@ -841,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-15T23:35:08Z",
-      "event": "Session spend: $0.78"
+      "time": "2026-04-15T23:40:10Z",
+      "event": "Session spend: $2.46"
     },
     {
-      "time": "2026-04-15T23:35:05Z",
+      "time": "2026-04-15T23:40:07Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/josh_voice.sh"
     },
     {
-      "time": "2026-04-15T23:35:05Z",
+      "time": "2026-04-15T23:40:07Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-15T23:35:03Z",
+      "time": "2026-04-15T23:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-15T23:35:03Z",
+      "time": "2026-04-15T23:40:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-15T23:35:03Z",
+      "time": "2026-04-15T23:40:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-15T23:35:03Z"
+  "lastUpdated": "2026-04-15T23:40:02Z"
 }
