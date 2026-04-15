@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "synced memory to J.A.I.N successfully",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-15T19:00:59Z",
-  "checkedAt": "2026-04-15T19:00:59Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-15T19:31:14Z",
+  "checkedAt": "2026-04-15T19:31:14Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
