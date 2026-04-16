@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Executed approved Sorare Phase 1 bundle: pushed Mission Control live, ran live smoke test, and reported Supabase SQL apply blocker",
+  "objective": "Handle async results for approved Sorare Phase 1 bundle silently",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-16T00:54:22Z",
-  "checkedAt": "2026-04-16T00:54:22Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-16T00:54:44Z",
+  "checkedAt": "2026-04-16T00:54:44Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
