@@ -2202,31 +2202,42 @@ def fetch_moltworld_data() -> Dict[str, Any]:
         balance = balance_data.get("balance", {})
         tokenomics = balance_data.get("tokenomics", {}).get("projection", {})
 
-        # 2. Read moltworld-state.json
+        # 2. Read moltworld-state.json plus the last richer dashboard snapshot if available.
         state_data = {}
         if MOLTWORLD_STATE_PATH.exists():
             try:
                 state_data = json.loads(MOLTWORLD_STATE_PATH.read_text())
             except json.JSONDecodeError:
-                pass # Will use empty dict
+                pass
+
+        existing_data = {}
+        current_data_path = ROOT.parent / "data" / "moltworld-data.json"
+        if current_data_path.exists():
+            try:
+                existing_data = json.loads(current_data_path.read_text())
+            except json.JSONDecodeError:
+                pass
 
         # 3. Construct the return dict
         payload = {
-            "sim_balance":        float(balance.get("sim", 0.0)),
-            "total_earned":       float(balance.get("totalEarned", 0.0)),
-            "online_time":        str(balance.get("totalOnlineTime", "0h 0m")),
-            "is_online":          bool(balance.get("isOnline", False)),
-            "status":             "online" if bool(balance.get("isOnline", False)) else "offline",
-            "earning_rate":       str(balance.get("earningRate", "0 SIM/hour")),
-            "position_x":         int(state_data.get("x", 0)),
-            "position_y":         int(state_data.get("y", 0)),
-            "run_count":          int(state_data.get("run_count", 0)),
-            "nearby_agents":      list(state_data.get("nearby_agents", [])),
-            "last_thought":       str(state_data.get("last_thought", "...")),
-            "blocks_built":       int(state_data.get("blocks_built", 0)),
-            "projection_per_day": float(tokenomics.get("perDay", 0.0)),
+            "sim_balance":        float(balance.get("sim", existing_data.get("sim_balance", 0.0))),
+            "total_earned":       float(balance.get("totalEarned", existing_data.get("total_earned", 0.0))),
+            "online_time":        str(balance.get("totalOnlineTime", existing_data.get("online_time", "0h 0m"))),
+            "is_online":          bool(balance.get("isOnline", existing_data.get("is_online", False))),
+            "status":             "online" if bool(balance.get("isOnline", existing_data.get("is_online", False))) else existing_data.get("status", "offline"),
+            "earning_rate":       str(balance.get("earningRate", existing_data.get("earning_rate", "0 SIM/hour"))),
+            "position_x":         int(state_data.get("x", existing_data.get("position_x", 0))),
+            "position_y":         int(state_data.get("y", existing_data.get("position_y", 0))),
+            "run_count":          int(state_data.get("run_count", existing_data.get("run_count", 0))),
+            "nearby_agents":      list(state_data.get("nearby_agents", existing_data.get("nearby_agents", []))),
+            "last_thought":       str(state_data.get("last_thought", existing_data.get("last_thought", "..."))),
+            "blocks_built":       int(state_data.get("blocks_built", existing_data.get("blocks_built", 0))),
+            "projection_per_day": float(tokenomics.get("perDay", existing_data.get("projection_per_day", 0.0))),
             "updatedAt":          utc_iso(),
         }
+        for extra_key in ["statusMessage", "last_action", "biome", "health", "hunger", "thirst", "stamina", "system_warning", "tick", "world", "last_error"]:
+            if extra_key in existing_data:
+                payload[extra_key] = existing_data[extra_key]
         try:
             MOLTWORLD_CACHE_PATH.write_text(json.dumps(payload, indent=2))
         except OSError:

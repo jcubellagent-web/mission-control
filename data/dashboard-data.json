@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "repair MoltWorld participation and restore full presence",
-    "updatedAt": "2026-04-16T19:55:03Z"
+    "updatedAt": "2026-04-16T19:58:15Z"
   },
   "contextWindow": {
     "usedTokens": 186093,
@@ -131,15 +131,18 @@
   },
   "codingVisibility": {
     "workspaceDirty": 42,
-    "missionControlDirty": 6,
-    "recentFiles": [],
+    "missionControlDirty": 9,
+    "recentFiles": [
+      "mission-control/scripts/moltworld_presence.py",
+      "mission-control/scripts/update_mission_control.py"
+    ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 6m",
+        "Resets in 3m",
         "Weekly: 98% left [===========-]",
         "Pace: 50% in reserve | Expected 52% used | Lasts until reset",
         "Resets in 3d 9h",
@@ -150,11 +153,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "6m",
+      "sessionReset": "3m",
       "weeklyReset": "3d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T19:55:05Z"
+    "updatedAt": "2026-04-16T19:58:17Z"
   },
   "modelUsage": {
     "session": 14.983469,
@@ -279,7 +282,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T19:55:09Z",
+    "lastUpdated": "2026-04-16T19:58:21Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -320,29 +323,40 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 38.826583,
-    "total_earned": 38.826583,
-    "online_time": "388h 15m",
+    "sim_balance": 38.831917,
+    "total_earned": 38.831917,
+    "online_time": "388h 19m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
-    "position_x": 0,
-    "position_y": 0,
-    "run_count": 0,
+    "position_x": 22,
+    "position_y": 49,
+    "run_count": 4,
     "nearby_agents": [],
-    "last_thought": "...",
+    "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T19:55:09Z"
+    "updatedAt": "2026-04-16T19:58:21Z",
+    "statusMessage": "Active in MoltWorld v2",
+    "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
+    "biome": "plains",
+    "health": 100,
+    "hunger": 100,
+    "thirst": 100,
+    "stamina": 100,
+    "system_warning": "No action ever received. Your bot may not be submitting to /api/action.",
+    "tick": 408,
+    "world": "moltworld-v2",
+    "last_error": null
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.7,
-      "cpu_user": 27.89,
-      "cpu_sys": 14.83,
-      "load1": 5.24,
-      "load5": 4.51,
-      "load15": 4.3,
+      "cpu_pct": 45.2,
+      "cpu_user": 28.16,
+      "cpu_sys": 16.98,
+      "load1": 3.92,
+      "load5": 4.23,
+      "load15": 4.22,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -352,14 +366,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 3.57,
-      "cpu_sys": 11.6,
-      "load1": 1.5,
-      "load5": 1.77,
-      "load15": 1.9,
+      "cpu_pct": 19.7,
+      "cpu_user": 6.83,
+      "cpu_sys": 12.82,
+      "load1": 1.72,
+      "load5": 1.72,
+      "load15": 1.85,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -368,8 +382,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -383,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T19:55:03Z"
+      "lastChecked": "2026-04-16T19:58:15Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T19:55:03Z"
+      "lastChecked": "2026-04-16T19:58:15Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T19:55:03Z"
+      "lastChecked": "2026-04-16T19:58:15Z"
     }
   ],
   "crons": [
@@ -816,6 +830,16 @@
   ],
   "activeAgents": [
     {
+      "id": "coding-visibility",
+      "label": "Editing: mission-control/scripts/moltworld_presence.py, mission-control/scripts/update_mission_control.py",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    },
+    {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 67%",
       "status": "done",
@@ -828,29 +852,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T19:55:09Z",
+      "time": "2026-04-16T19:58:21Z",
       "event": "Session spend: $14.98"
     },
     {
-      "time": "2026-04-16T19:55:05Z",
+      "time": "2026-04-16T19:58:17Z",
+      "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/scripts/update_mission_control.py"
+    },
+    {
+      "time": "2026-04-16T19:58:17Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T19:55:03Z",
+      "time": "2026-04-16T19:58:15Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T19:55:03Z",
+      "time": "2026-04-16T19:58:15Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T19:55:03Z",
+      "time": "2026-04-16T19:58:15Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-16T19:55:03Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-16T19:55:03Z"
+  "lastUpdated": "2026-04-16T19:58:15Z"
 }
