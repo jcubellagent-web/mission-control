@@ -159,6 +159,8 @@ def fetch_tracked_tasks() -> List[Dict[str, Any]]:
     try:
         import re as _re
 
+        today_local = dt.datetime.now().strftime('%Y-%m-%d')
+
         text = TASKS_PATH.read_text()
         active_block = text.split("# Completed", 1)[0]
         tasks: List[Dict[str, Any]] = []
@@ -213,7 +215,49 @@ def fetch_tracked_tasks() -> List[Dict[str, Any]]:
             )
             tasks.append(current)
 
-        return tasks
+        if not tasks:
+            for raw_line in active_block.splitlines():
+                line = raw_line.strip()
+                if not line.startswith("- T-"):
+                    continue
+                m = _re.match(r"^- (T-\d+-\d+)\s+(.*?)\s+—\s+([🔄✅❌⏸️][^()]*)\s*(?:\(([^)]*)\))?\s*(.*)$", line)
+                if not m:
+                    continue
+                status_label = (m.group(3) or "").strip()
+                if "🔄" not in status_label:
+                    continue
+                meta = (m.group(4) or "").strip()
+                notes = (m.group(5) or "").strip()
+                requested_match = _re.search(r"requested\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})", meta)
+                updated_match = _re.search(r"updated\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})", meta)
+                task = {
+                    "id": m.group(1),
+                    "title": m.group(2).strip(),
+                    "status": "active",
+                    "statusLabel": status_label,
+                    "notes": notes,
+                    "requestedAt": requested_match.group(1) if requested_match else None,
+                    "updatedAt": updated_match.group(1) if updated_match else None,
+                }
+                task["owner"] = infer_task_owner(task.get("title", ""), task.get("notes", ""), task.get("background", ""))
+                tasks.append(task)
+
+        def _is_live_today(task: Dict[str, Any]) -> bool:
+            status_label = str(task.get("statusLabel", ""))
+            if "✅" in status_label or "❌" in status_label or "⏸️" in status_label:
+                return False
+            requested_at = str(task.get("requestedAt") or "")
+            updated_at = str(task.get("updatedAt") or "")
+            if requested_at.startswith(today_local) or updated_at.startswith(today_local):
+                return True
+            return not requested_at and not updated_at
+
+        def _task_sort_key(task: Dict[str, Any]) -> str:
+            return str(task.get("updatedAt") or task.get("requestedAt") or "")
+
+        live_tasks = [task for task in tasks if _is_live_today(task)]
+        live_tasks.sort(key=_task_sort_key, reverse=True)
+        return live_tasks[:6]
     except Exception as exc:
         print(f"[warn] fetch_tracked_tasks failed: {exc}", file=sys.stderr)
         return []
@@ -1327,6 +1371,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
     x_log_hours: dict[str, list[int]] = {}
     _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
+    jain_verified_runs: dict[str, dict[str, Any]] = {}
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
@@ -1385,6 +1430,105 @@ def fetch_crons() -> List[Dict[str, Any]]:
                                 hermes_jobs[_hname] = _hj
                     except Exception:
                         pass
+    except Exception:
+        pass
+
+    try:
+        jain_verify_cmd = rf"""python3 - <<'PY'
+import datetime as dt
+import json
+import pathlib
+import re
+from zoneinfo import ZoneInfo
+
+today = {today_str!r}
+et = ZoneInfo('America/New_York')
+jobs = {{
+    'Sorare Sheet Updater': '/Users/jc_agent/.openclaw/workspace/logs/sorare_sheet_updater.log',
+    'Sorare Daily Prep': '/Users/jc_agent/.openclaw/workspace/logs/sorare_daily_prep.log',
+    'Sorare Champion Submit': '/Users/jc_agent/.openclaw/workspace/logs/sorare_missions.log',
+    'Sorare Canonical Reflector': '/Users/jc_agent/.openclaw/workspace/logs/sorare_canonical_reflector.log',
+    'Sorare Deadline Guard': '/Users/jc_agent/.openclaw/workspace/logs/sorare_deadline_guard.log',
+}}
+ops_runs_path = pathlib.Path('/Users/jc_agent/.openclaw/workspace/data/sorare-ops/latest-runs.json')
+ops_submissions_path = pathlib.Path('/Users/jc_agent/.openclaw/workspace/data/sorare-ops/latest-submissions.json')
+
+def load_json_list(path: pathlib.Path):
+    try:
+        data = json.loads(path.read_text())
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+latest_runs = load_json_list(ops_runs_path)
+latest_submissions = load_json_list(ops_submissions_path)
+
+def is_today(ts: str | None) -> bool:
+    if not ts:
+        return False
+    try:
+        parsed = dt.datetime.fromisoformat(ts.replace('Z', '+00:00'))
+        return parsed.astimezone(et).strftime('%Y-%m-%d') == today
+    except Exception:
+        return False
+
+def latest_matching_submission(kind: str, source_lane: str):
+    for item in latest_submissions:
+        if not isinstance(item, dict):
+            continue
+        if item.get('submission_kind') != kind or item.get('source_lane') != source_lane:
+            continue
+        if is_today(item.get('created_at') or item.get('updated_at')):
+            return item
+    return None
+
+def read_tail(path: pathlib.Path, lines: int = 160) -> str:
+    try:
+        return '\n'.join(path.read_text(errors='ignore').splitlines()[-lines:])
+    except Exception:
+        return ''
+
+out = {{}}
+for name, raw_path in jobs.items():
+    path = pathlib.Path(raw_path)
+    info = {{'verifiedToday': False}}
+    if path.exists():
+        mtime = dt.datetime.fromtimestamp(path.stat().st_mtime, tz=dt.timezone.utc)
+        info['lastRun'] = mtime.isoformat()
+        tail = read_tail(path)
+        mtime_today = mtime.astimezone(et).strftime('%Y-%m-%d') == today
+        if name == 'Sorare Sheet Updater':
+            info['verifiedToday'] = f'✅ Row appended for {{today}}' in tail
+        elif name == 'Sorare Daily Prep':
+            info['verifiedToday'] = today in tail and 'Sorare daily prep complete' in tail
+        elif name == 'Sorare Champion Submit':
+            structured = latest_matching_submission('lineup', 'live_submitter')
+            if structured and structured.get('status') in ('submitted', 'unchanged'):
+                info['lastRun'] = structured.get('updated_at') or structured.get('created_at') or info.get('lastRun')
+                info['verifiedToday'] = True
+            else:
+                info['verifiedToday'] = mtime_today and 'MISSIONS COMPLETE' in tail
+        elif name == 'Sorare Canonical Reflector':
+            matches = re.findall(r'\[(\d{{4}}-\d{{2}}-\d{{2}} \d{{2}}:\d{{2}}:\d{{2}})\].*?sorare_canonical_reflector\\.py — done', tail)
+            if matches:
+                last_local = dt.datetime.strptime(matches[-1], '%Y-%m-%d %H:%M:%S').replace(tzinfo=et)
+                info['lastRun'] = last_local.astimezone(dt.timezone.utc).isoformat()
+                info['verifiedToday'] = matches[-1].startswith(today)
+            else:
+                info['verifiedToday'] = mtime_today
+        elif name == 'Sorare Deadline Guard':
+            info['verifiedToday'] = mtime_today and bool(tail.strip())
+    out[name] = info
+
+print(json.dumps(out))
+PY"""
+        vr = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "jc_agent@100.121.89.84", jain_verify_cmd],
+            capture_output=True, text=True, timeout=12
+        )
+        if vr.returncode == 0:
+            jain_verified_runs = json.loads(vr.stdout.strip() or "{}")
     except Exception:
         pass
 
@@ -1470,6 +1614,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
         listing = jain_listing if is_jain else josh_listing
         source = target.get('source', 'cron')
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
+        jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
         present = bool(hermes_job) if source == 'hermes' else target['pattern'] in listing
 
         # Compute runStatus for daily jobs
@@ -1480,6 +1625,8 @@ def fetch_crons() -> List[Dict[str, Any]]:
             _hlast = hermes_job.get('last_run_at')
             if _hlast and hermes_job.get('last_status') == 'ok':
                 last_run = _hlast
+        if not last_run and jain_verified and jain_verified.get('lastRun'):
+            last_run = jain_verified.get('lastRun')
         last_run_today = False
         if last_run:
             try:
@@ -1487,15 +1634,16 @@ def fetch_crons() -> List[Dict[str, Any]]:
                 last_run_today = _last_run_dt.strftime('%Y-%m-%d') == today_str
             except Exception:
                 last_run_today = False
+        verified_today = bool(jain_verified and jain_verified.get('verifiedToday'))
 
         is_jaimes_agent = target.get('agent') == 'JAIMES'
-        can_verify_run = bool(last_run) or hermes_job is not None
+        can_verify_run = bool(last_run) or hermes_job is not None or bool(jain_verified)
         if sched.startswith('Daily'):
             sched_hour = parse_daily_hour(sched)
             if sched_hour is not None:
                 now_hour = now_et.hour
                 now_min = now_et.minute
-                if last_run_today:
+                if last_run_today or verified_today:
                     run_status = 'done'
                 elif is_jaimes_agent and not present:
                     # JAIMES jobs run via Hermes — show paused if no last_run confirmed today
