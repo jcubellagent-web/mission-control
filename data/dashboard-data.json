@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Clarify Sorare GW numbering and which series I meant",
+    "objective": "Run the approved next steps: audit GW8 Champion now and keep the pre-lock recheck queued",
     "status": "active",
     "steps": [
       {
-        "label": "tool",
+        "label": "exec",
         "status": "active",
-        "tool": "exec"
+        "tool": "bf_step"
       }
     ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-16T03:19:08Z",
-    "checkedAt": "2026-04-16T03:19:08Z",
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-16T03:22:51Z",
+    "checkedAt": "2026-04-16T03:22:51Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Clarify Sorare GW numbering and which series I meant",
-    "updatedAt": "2026-04-16T03:20:03Z"
+    "context": "Run the approved next steps: audit GW8 Champion now and keep the pre-lock recheck queued",
+    "updatedAt": "2026-04-16T03:25:03Z"
   },
   "contextWindow": {
-    "usedTokens": 188070,
+    "usedTokens": 197467,
     "limitTokens": 400000,
-    "pct": 0.4702,
+    "pct": 0.4937,
     "model": "gpt-5.4",
     "status": "amber"
   },
@@ -144,10 +144,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 41m",
+        "Resets in 1h 36m",
         "Weekly: 99% left [===========-]",
         "Pace: 41% in reserve | Expected 42% used | Lasts until reset",
-        "Resets in 4d 2h",
+        "Resets in 4d 1h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -155,15 +155,15 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 41m",
-      "weeklyReset": "4d 2h",
+      "sessionReset": "1h 36m",
+      "weeklyReset": "4d 1h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-16T03:20:05Z"
+    "updatedAt": "2026-04-16T03:25:05Z"
   },
   "modelUsage": {
-    "session": 16.652617,
-    "daily": 77.865034,
+    "session": 17.148337,
+    "daily": 78.360754,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -175,7 +175,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 25.656625
+        "cost": 26.152344999999997
       },
       {
         "name": "gpt-5.4",
@@ -210,12 +210,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1104033,
-        "outputTokens": 23482,
-        "totalTokens": 1127515,
-        "sessionCost": 25.656625,
-        "dailyCost": 25.656625,
-        "weeklyCost": 25.656625,
+        "inputTokens": 742579,
+        "outputTokens": 25312,
+        "totalTokens": 767891,
+        "sessionCost": 26.152344999999997,
+        "dailyCost": 26.152344999999997,
+        "weeklyCost": 26.152344999999997,
         "sessions": 28,
         "isGemini": false,
         "costEstimated": false
@@ -284,7 +284,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T03:20:08Z",
+    "lastUpdated": "2026-04-16T03:25:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -313,8 +313,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 77.865034,
-      "total": 101.854421,
+      "daily": 78.360754,
+      "total": 102.350141,
       "monthly": 1000.151665
     },
     "weeklyRunRate": {
@@ -325,9 +325,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.16825,
-    "total_earned": 37.16825,
-    "online_time": "371h 40m",
+    "sim_balance": 37.176583,
+    "total_earned": 37.176583,
+    "online_time": "371h 45m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -338,31 +338,31 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T03:20:09Z"
+    "updatedAt": "2026-04-16T03:25:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.4,
-      "cpu_user": 29.47,
-      "cpu_sys": 13.96,
-      "load1": 3.57,
-      "load5": 3.88,
-      "load15": 4.09,
+      "cpu_pct": 40.3,
+      "cpu_user": 26.27,
+      "cpu_sys": 14.1,
+      "load1": 4.06,
+      "load5": 4.45,
+      "load15": 4.32,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "95Gi",
+      "disk_avail": "96Gi",
       "disk_pct": 11,
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.4,
-      "cpu_user": 3.57,
-      "cpu_sys": 9.82,
-      "load1": 2.43,
-      "load5": 2.36,
-      "load15": 2.21,
+      "cpu_pct": 12.9,
+      "cpu_user": 3.96,
+      "cpu_sys": 8.91,
+      "load1": 1.58,
+      "load5": 1.96,
+      "load15": 2.06,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -388,19 +388,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T03:20:03Z"
+      "lastChecked": "2026-04-16T03:25:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T03:20:03Z"
+      "lastChecked": "2026-04-16T03:25:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T03:20:03Z"
+      "lastChecked": "2026-04-16T03:25:03Z"
     }
   ],
   "crons": [
@@ -799,16 +799,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260415-790",
-      "title": "Re-optimize Sorare Champion lineups to best-possible standard",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh challenged whether the current Champion lineups are truly the best possible. Re-audit GW125/GW126 Champion only using full inventory, injury filters, matchup/probable-starter context, and ML/heuristic signals, then upgrade the live slates if stronger combinations exist.",
-      "requestedAt": "2026-04-15 22:57",
-      "updatedAt": "2026-04-15 22:58",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260415-772",
       "title": "Kick off JAIMES-owned true mission-ML build",
       "status": "active",
@@ -843,29 +833,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T03:20:08Z",
-      "event": "Session spend: $16.65"
+      "time": "2026-04-16T03:25:08Z",
+      "event": "Session spend: $17.15"
     },
     {
-      "time": "2026-04-16T03:20:05Z",
+      "time": "2026-04-16T03:25:05Z",
       "event": "Coding: scripts/sorare_player_ranker.py, scripts/sorare_missions.py"
     },
     {
-      "time": "2026-04-16T03:20:05Z",
+      "time": "2026-04-16T03:25:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-16T03:20:03Z",
+      "time": "2026-04-16T03:25:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T03:20:03Z",
+      "time": "2026-04-16T03:25:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T03:20:03Z",
+      "time": "2026-04-16T03:25:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T03:20:03Z"
+  "lastUpdated": "2026-04-16T03:25:03Z"
 }
