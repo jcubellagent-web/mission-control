@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "handled async optimizer completions and hardened Sorare lineup search pruning",
+    "objective": "rerun tightened Sorare optimizer, apply best live builds, and audit Codex leverage opportunities",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-16T03:38:16Z",
-    "checkedAt": "2026-04-16T03:38:16Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-16T03:40:26Z",
+    "checkedAt": "2026-04-16T03:40:26Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "handled async optimizer completions and hardened Sorare lineup search pruning",
-    "updatedAt": "2026-04-16T03:40:03Z"
+    "context": "rerun tightened Sorare optimizer, apply best live builds, and audit Codex leverage opportunities",
+    "updatedAt": "2026-04-16T03:45:03Z"
   },
   "contextWindow": {
     "usedTokens": 98917,
@@ -138,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 21m",
+        "Resets in 1h 16m",
         "Weekly: 99% left [===========-]",
         "Pace: 41% in reserve | Expected 42% used | Lasts until reset",
         "Resets in 4d 1h",
@@ -149,11 +155,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 21m",
+      "sessionReset": "1h 16m",
       "weeklyReset": "4d 1h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-16T03:40:05Z"
+    "updatedAt": "2026-04-16T03:45:05Z"
   },
   "modelUsage": {
     "session": 1.833879,
@@ -278,7 +284,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T03:40:08Z",
+    "lastUpdated": "2026-04-16T03:45:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -319,9 +325,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.201583,
-    "total_earned": 37.201583,
-    "online_time": "372h 0m",
+    "sim_balance": 37.209917,
+    "total_earned": 37.209917,
+    "online_time": "372h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -332,16 +338,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T03:40:09Z"
+    "updatedAt": "2026-04-16T03:45:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.5,
-      "cpu_user": 28.5,
-      "cpu_sys": 14.97,
-      "load1": 4.61,
-      "load5": 4.18,
-      "load15": 4.2,
+      "cpu_pct": 42.5,
+      "cpu_user": 28.2,
+      "cpu_sys": 14.73,
+      "load1": 3.28,
+      "load5": 3.85,
+      "load15": 4.06,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -351,14 +357,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 31.7,
-      "cpu_user": 22.77,
-      "cpu_sys": 8.91,
-      "load1": 3.97,
-      "load5": 3.4,
-      "load15": 2.75,
+      "cpu_pct": 21.3,
+      "cpu_user": 11.7,
+      "cpu_sys": 9.57,
+      "load1": 3.27,
+      "load5": 3.46,
+      "load15": 2.97,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -382,19 +388,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T03:40:03Z"
+      "lastChecked": "2026-04-16T03:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T03:40:03Z"
+      "lastChecked": "2026-04-16T03:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T03:40:03Z"
+      "lastChecked": "2026-04-16T03:45:03Z"
     }
   ],
   "crons": [
@@ -793,6 +799,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260415-793",
+      "title": "Re-run tightened Sorare optimizer, apply best lineups, and audit Codex leverage opportunities",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh asked to do all next steps after the scoring-model tighten pass, which means re-running the sharpened optimizer, applying stronger live GW125/GW126 builds if warranted, then auditing the current workflow/configuration for net-positive Codex expansion opportunities.",
+      "requestedAt": "2026-04-15 23:39",
+      "updatedAt": "2026-04-15 23:39",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260415-772",
       "title": "Kick off JAIMES-owned true mission-ML build",
       "status": "active",
@@ -827,29 +843,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T03:40:08Z",
+      "time": "2026-04-16T03:45:08Z",
       "event": "Session spend: $1.83"
     },
     {
-      "time": "2026-04-16T03:40:05Z",
+      "time": "2026-04-16T03:45:05Z",
       "event": "Coding: scripts/sorare_player_ranker.py, scripts/sorare_missions.py"
     },
     {
-      "time": "2026-04-16T03:40:05Z",
+      "time": "2026-04-16T03:45:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-16T03:40:03Z",
+      "time": "2026-04-16T03:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T03:40:03Z",
+      "time": "2026-04-16T03:45:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T03:40:03Z",
+      "time": "2026-04-16T03:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T03:40:03Z"
+  "lastUpdated": "2026-04-16T03:45:03Z"
 }
