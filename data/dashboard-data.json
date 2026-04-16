@@ -5,32 +5,26 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Fix Sorare Challenger blocker, harden ML loop, and queue GW8 recheck",
+    "objective": "Finished Sorare Challenger fix, submitted all GW125/GW126 lineups, hardened sealed-card filtering, and queued the GW126 recheck",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-16T02:16:56Z",
-    "checkedAt": "2026-04-16T02:16:56Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-16T02:29:37Z",
+    "checkedAt": "2026-04-16T02:29:37Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fix Sorare Challenger blocker, harden ML loop, and queue GW8 recheck",
-    "updatedAt": "2026-04-16T02:25:03Z"
+    "context": "Finished Sorare Challenger fix, submitted all GW125/GW126 lineups, hardened sealed-card filtering, and queued the GW126 recheck",
+    "updatedAt": "2026-04-16T02:30:03Z"
   },
   "contextWindow": {
-    "usedTokens": 124386,
+    "usedTokens": 181288,
     "limitTokens": 400000,
-    "pct": 0.311,
+    "pct": 0.4532,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -145,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 36m",
+        "Resets in 2h 31m",
         "Weekly: 99% left [===========-]",
         "Pace: 40% in reserve | Expected 41% used | Lasts until reset",
         "Resets in 4d 2h",
@@ -156,15 +150,15 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 36m",
+      "sessionReset": "2h 31m",
       "weeklyReset": "4d 2h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-16T02:25:05Z"
+    "updatedAt": "2026-04-16T02:30:05Z"
   },
   "modelUsage": {
-    "session": 4.438485,
-    "daily": 63.277793,
+    "session": 7.668969,
+    "daily": 66.508277,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -181,7 +175,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 13.442493500000001
+        "cost": 16.672977500000002
       },
       {
         "name": "gpt-5.3-codex",
@@ -220,12 +214,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 853532,
-        "outputTokens": 24309,
-        "totalTokens": 877841,
-        "sessionCost": 13.442493500000001,
-        "dailyCost": 13.442493500000001,
-        "weeklyCost": 13.442493500000001,
+        "inputTokens": 932043,
+        "outputTokens": 47152,
+        "totalTokens": 979195,
+        "sessionCost": 16.672977500000002,
+        "dailyCost": 16.672977500000002,
+        "weeklyCost": 16.672977500000002,
         "sessions": 28,
         "isGemini": false,
         "costEstimated": false
@@ -285,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T02:25:08Z",
+    "lastUpdated": "2026-04-16T02:30:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -314,8 +308,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 63.277793,
-      "total": 87.26718,
+      "daily": 66.508277,
+      "total": 90.497664,
       "monthly": 1000.151665
     },
     "weeklyRunRate": {
@@ -326,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.076583,
-    "total_earned": 37.076583,
-    "online_time": "370h 45m",
+    "sim_balance": 37.084917,
+    "total_earned": 37.084917,
+    "online_time": "370h 50m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -339,16 +333,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T02:25:09Z"
+    "updatedAt": "2026-04-16T02:30:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 45.2,
-      "cpu_user": 30.22,
-      "cpu_sys": 15.0,
-      "load1": 5.43,
-      "load5": 4.58,
-      "load15": 4.27,
+      "cpu_pct": 42.1,
+      "cpu_user": 27.91,
+      "cpu_sys": 14.98,
+      "load1": 3.57,
+      "load5": 4.15,
+      "load15": 4.17,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -358,14 +352,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.1,
-      "cpu_user": 3.73,
-      "cpu_sys": 9.34,
-      "load1": 2.37,
-      "load5": 2.21,
-      "load15": 2.17,
+      "cpu_pct": 14.2,
+      "cpu_user": 3.77,
+      "cpu_sys": 10.37,
+      "load1": 1.8,
+      "load5": 2.12,
+      "load15": 2.15,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -389,19 +383,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:25:03Z"
+      "lastChecked": "2026-04-16T02:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:25:03Z"
+      "lastChecked": "2026-04-16T02:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T02:25:03Z"
+      "lastChecked": "2026-04-16T02:30:03Z"
     }
   ],
   "crons": [
@@ -800,16 +794,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260415-786",
-      "title": "Optimize Sorare GW7/GW8 lineups and harden ML feedback loop",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh approved all next steps. Champion/Hot Streak are already live for GW125/GW126; now actively debugging the Challenger `Missing manager team` blocker, filtering sealed OOS cards out of the Challenger pool, hardening the lineup analytics feedback loop, and queuing a pre-lock GW126 recheck.",
-      "requestedAt": "2026-04-15 21:30",
-      "updatedAt": "2026-04-15 22:17",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260415-772",
       "title": "Kick off JAIMES-owned true mission-ML build",
       "status": "active",
@@ -844,29 +828,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T02:25:08Z",
-      "event": "Session spend: $4.44"
+      "time": "2026-04-16T02:30:08Z",
+      "event": "Session spend: $7.67"
     },
     {
-      "time": "2026-04-16T02:25:05Z",
+      "time": "2026-04-16T02:30:05Z",
       "event": "Coding: scripts/sorare_canonical_reflector.py, scripts/sorare_player_ranker.py"
     },
     {
-      "time": "2026-04-16T02:25:05Z",
+      "time": "2026-04-16T02:30:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-16T02:25:03Z",
+      "time": "2026-04-16T02:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T02:25:03Z",
+      "time": "2026-04-16T02:30:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T02:25:03Z",
+      "time": "2026-04-16T02:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T02:25:03Z"
+  "lastUpdated": "2026-04-16T02:30:03Z"
 }
