@@ -5,26 +5,32 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "answered that no immediate input is required from Josh",
+    "objective": "generate filename slug for conversation",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-16T23:29:26Z",
-    "checkedAt": "2026-04-16T23:29:26Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-16T23:30:18Z",
+    "checkedAt": "2026-04-16T23:30:18Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "answered that no immediate input is required from Josh",
-    "updatedAt": "2026-04-16T23:30:03Z"
+    "context": "generate filename slug for conversation",
+    "updatedAt": "2026-04-16T23:35:03Z"
   },
   "contextWindow": {
-    "usedTokens": 235972,
-    "limitTokens": 400000,
-    "pct": 0.5899,
+    "usedTokens": 0,
+    "limitTokens": 128000,
+    "pct": 0.0,
     "model": "gpt-5.4",
-    "status": "red"
+    "status": "green"
   },
   "agentBus": [
     {
@@ -133,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 31m",
+        "Resets in 1h 26m",
         "Weekly: 98% left [===========-]",
         "Pace: 52% in reserve | Expected 54% used | Lasts until reset",
         "Resets in 3d 5h",
@@ -144,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 31m",
+      "sessionReset": "1h 26m",
       "weeklyReset": "3d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T23:30:06Z"
+    "updatedAt": "2026-04-16T23:35:05Z"
   },
   "modelUsage": {
-    "session": 20.12873,
-    "daily": 90.724268,
+    "session": 0.0,
+    "daily": 70.595538,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -164,7 +170,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 42.75876649999999
+        "cost": 22.630035999999993
       },
       {
         "name": "gpt-5.4",
@@ -199,12 +205,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1922944,
-        "outputTokens": 63786,
-        "totalTokens": 1986730,
-        "sessionCost": 42.75876649999999,
-        "dailyCost": 40.347875499999994,
-        "weeklyCost": 42.75876649999999,
+        "inputTokens": 1687768,
+        "outputTokens": 56067,
+        "totalTokens": 1743835,
+        "sessionCost": 22.630035999999993,
+        "dailyCost": 20.219144999999994,
+        "weeklyCost": 22.630035999999993,
         "sessions": 71,
         "isGemini": false,
         "costEstimated": false
@@ -273,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T23:30:09Z",
+    "lastUpdated": "2026-04-16T23:35:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -302,8 +308,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 90.817767,
-      "total": 126.710483,
+      "daily": 70.689037,
+      "total": 106.581753,
       "monthly": 1000.245164
     },
     "weeklyRunRate": {
@@ -314,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 39.184944,
-    "total_earned": 39.184944,
-    "online_time": "391h 50m",
+    "sim_balance": 39.193222,
+    "total_earned": 39.193222,
+    "online_time": "391h 55m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,7 +333,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T23:30:10Z",
+    "updatedAt": "2026-04-16T23:35:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -342,12 +348,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.6,
-      "cpu_user": 26.65,
-      "cpu_sys": 14.94,
-      "load1": 3.84,
-      "load5": 4.3,
-      "load15": 4.17,
+      "cpu_pct": 52.2,
+      "cpu_user": 35.7,
+      "cpu_sys": 16.48,
+      "load1": 4.5,
+      "load5": 4.21,
+      "load15": 4.14,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -357,14 +363,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.8,
-      "cpu_user": 4.62,
-      "cpu_sys": 11.11,
-      "load1": 2.86,
-      "load5": 2.52,
-      "load15": 2.28,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 14.0,
+      "cpu_user": 3.3,
+      "cpu_sys": 10.74,
+      "load1": 2.84,
+      "load5": 2.37,
+      "load15": 2.24,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -388,19 +394,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T23:30:03Z"
+      "lastChecked": "2026-04-16T23:35:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T23:30:03Z"
+      "lastChecked": "2026-04-16T23:35:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T23:30:03Z"
+      "lastChecked": "2026-04-16T23:35:03Z"
     }
   ],
   "crons": [
@@ -689,7 +695,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-16T23:16:16.265551+00:00"
+      "lastRun": "2026-04-16T23:31:15.435788+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -799,6 +805,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260416-823",
+      "title": "Generate short filename slug for MoltWorld v2 repair conversation",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Producing a concise 1\u20132 word lowercase hyphenated filename slug for the conversation about restoring MoltWorld v2 participation and fixing the dashboard/feed mapping.",
+      "requestedAt": "2026-04-16 19:30",
+      "updatedAt": "2026-04-16 19:30",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260416-818",
       "title": "Clean stale J.A.I.N session state and tighten local security warnings",
       "status": "active",
@@ -823,29 +839,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T23:30:09Z",
-      "event": "Session spend: $20.13"
+      "time": "2026-04-16T23:35:08Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-16T23:30:06Z",
+      "time": "2026-04-16T23:35:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T23:30:03Z",
+      "time": "2026-04-16T23:35:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T23:30:03Z",
+      "time": "2026-04-16T23:35:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T23:30:03Z",
+      "time": "2026-04-16T23:35:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-16T23:30:03Z",
+      "time": "2026-04-16T23:35:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-16T23:30:03Z"
+  "lastUpdated": "2026-04-16T23:35:03Z"
 }
