@@ -8531,7 +8531,11 @@
             } // end devices diff guard
 
             // Today's Jobs (diff-guarded) — reskinned
-            if (sectionChanged('crons', data.crons)) {
+            const todayJobsPayload = {
+                crons: Array.isArray(data.crons) ? data.crons : [],
+                trackedTasks: Array.isArray(data.trackedTasks) ? data.trackedTasks : [],
+            };
+            if (sectionChanged('todayJobs', todayJobsPayload)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
 
             // Category config: accent color + emoji
@@ -8775,7 +8779,7 @@
 
             todayJobsCard.innerHTML = (trackedHtml + cronHtml) || '<div class="empty-state">No scheduled jobs</div>';
             // Cache cron HTML for instant next-load
-            try { localStorage.setItem('mc_jobs_html', cronHtml); } catch(e) {}
+            try { localStorage.setItem('mc_jobs_html', trackedHtml + cronHtml); } catch(e) {}
             } // end crons sectionChanged guard
 
             // Render the enhanced jobs panel with agent status + sections
