@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "handled async Molt World follow-up completions",
+    "objective": "repair MoltWorld participation and restore full presence",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-16T19:30:20Z",
-    "checkedAt": "2026-04-16T19:30:20Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-16T19:50:23Z",
+    "checkedAt": "2026-04-16T19:50:23Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "handled async Molt World follow-up completions",
-    "updatedAt": "2026-04-16T19:50:03Z"
+    "context": "repair MoltWorld participation and restore full presence",
+    "updatedAt": "2026-04-16T19:55:03Z"
   },
   "contextWindow": {
     "usedTokens": 186093,
@@ -133,9 +139,9 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 11m",
+        "Resets in 6m",
         "Weekly: 98% left [===========-]",
-        "Pace: 49% in reserve | Expected 51% used | Lasts until reset",
+        "Pace: 50% in reserve | Expected 52% used | Lasts until reset",
         "Resets in 3d 9h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
@@ -144,11 +150,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "11m",
+      "sessionReset": "6m",
       "weeklyReset": "3d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T19:50:05Z"
+    "updatedAt": "2026-04-16T19:55:05Z"
   },
   "modelUsage": {
     "session": 14.983469,
@@ -273,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T19:50:09Z",
+    "lastUpdated": "2026-04-16T19:55:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -314,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 38.81825,
-    "total_earned": 38.81825,
-    "online_time": "388h 10m",
+    "sim_balance": 38.826583,
+    "total_earned": 38.826583,
+    "online_time": "388h 15m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,16 +333,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T19:50:09Z"
+    "updatedAt": "2026-04-16T19:55:09Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 44.6,
-      "cpu_user": 29.12,
-      "cpu_sys": 15.46,
-      "load1": 3.65,
-      "load5": 4.14,
-      "load15": 4.17,
+      "cpu_pct": 42.7,
+      "cpu_user": 27.89,
+      "cpu_sys": 14.83,
+      "load1": 5.24,
+      "load5": 4.51,
+      "load15": 4.3,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -346,12 +352,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.2,
-      "cpu_user": 4.42,
-      "cpu_sys": 9.73,
-      "load1": 2.1,
-      "load5": 1.84,
-      "load15": 1.96,
+      "cpu_pct": 15.2,
+      "cpu_user": 3.57,
+      "cpu_sys": 11.6,
+      "load1": 1.5,
+      "load5": 1.77,
+      "load15": 1.9,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -377,19 +383,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T19:50:03Z"
+      "lastChecked": "2026-04-16T19:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T19:50:03Z"
+      "lastChecked": "2026-04-16T19:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T19:50:03Z"
+      "lastChecked": "2026-04-16T19:55:03Z"
     }
   ],
   "crons": [
@@ -788,6 +794,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260416-820",
+      "title": "Restore full MoltWorld participation and repair the Mission Control feed",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh approved the MoltWorld follow-through. Need to trace why J.A.I.N keeps timing out while re-registering without an API key, restore a healthy presence/auth path if MoltWorld is still active, and make the Mission Control bubble trustworthy again.",
+      "requestedAt": "2026-04-16 15:49",
+      "updatedAt": "2026-04-16 15:49",
+      "owner": "J.A.I.N"
+    },
+    {
       "id": "T-20260416-818",
       "title": "Clean stale J.A.I.N session state and tighten local security warnings",
       "status": "active",
@@ -812,29 +828,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T19:50:09Z",
+      "time": "2026-04-16T19:55:09Z",
       "event": "Session spend: $14.98"
     },
     {
-      "time": "2026-04-16T19:50:05Z",
+      "time": "2026-04-16T19:55:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T19:50:03Z",
+      "time": "2026-04-16T19:55:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T19:50:03Z",
+      "time": "2026-04-16T19:55:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T19:50:03Z",
+      "time": "2026-04-16T19:55:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-16T19:50:03Z",
+      "time": "2026-04-16T19:55:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-16T19:50:03Z"
+  "lastUpdated": "2026-04-16T19:55:03Z"
 }
