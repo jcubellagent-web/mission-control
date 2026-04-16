@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "generate filename slug for conversation",
+    "objective": "Investigating slow new-session startup and unresponsiveness for Josh 2.0",
     "status": "active",
     "steps": [
       {
-        "label": "tool",
+        "label": "exec",
         "status": "active",
-        "tool": "exec"
+        "tool": "bf_step"
       }
     ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-16T23:30:18Z",
-    "checkedAt": "2026-04-16T23:30:18Z",
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-16T23:42:17Z",
+    "checkedAt": "2026-04-16T23:42:17Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "generate filename slug for conversation",
-    "updatedAt": "2026-04-16T23:40:03Z"
+    "context": "Investigating slow new-session startup and unresponsiveness for Josh 2.0",
+    "updatedAt": "2026-04-16T23:45:02Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 128000,
-    "pct": 0.0,
+    "usedTokens": 34399,
+    "limitTokens": 400000,
+    "pct": 0.086,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 21m",
+        "Resets in 1h 16m",
         "Weekly: 98% left [===========-]",
         "Pace: 52% in reserve | Expected 54% used | Lasts until reset",
         "Resets in 3d 5h",
@@ -150,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 21m",
+      "sessionReset": "1h 16m",
       "weeklyReset": "3d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T23:40:04Z"
+    "updatedAt": "2026-04-16T23:45:05Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 70.595538,
+    "session": 0.124544,
+    "daily": 70.720081,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -170,7 +170,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 22.630035999999993
+        "cost": 22.754579499999995
       },
       {
         "name": "gpt-5.4",
@@ -205,12 +205,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1687768,
-        "outputTokens": 56067,
-        "totalTokens": 1743835,
-        "sessionCost": 22.630035999999993,
-        "dailyCost": 20.219144999999994,
-        "weeklyCost": 22.630035999999993,
+        "inputTokens": 1721801,
+        "outputTokens": 57486,
+        "totalTokens": 1779287,
+        "sessionCost": 22.754579499999995,
+        "dailyCost": 20.343688499999995,
+        "weeklyCost": 22.754579499999995,
         "sessions": 71,
         "isGemini": false,
         "costEstimated": false
@@ -271,15 +271,15 @@
       {
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
-        "weeklyCost": 0.812621,
-        "dailyCost": 0.109668,
-        "sessionCost": 0.812621,
+        "weeklyCost": 0.820994,
+        "dailyCost": 0.11804,
+        "sessionCost": 0.820994,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T23:40:08Z",
+    "lastUpdated": "2026-04-16T23:45:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -297,9 +297,9 @@
       "daily": 0.0,
       "weekly": 0.0,
       "monthly": 0.02023585,
-      "byok_daily": 0.10966795,
-      "byok_weekly": 0.81262135,
-      "byok_monthly": 2.80278875,
+      "byok_daily": 0.1180401,
+      "byok_weekly": 0.8209935,
+      "byok_monthly": 2.8111609,
       "available": true
     },
     "elevenlabs": {
@@ -308,21 +308,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 70.705206,
-      "total": 106.597922,
-      "monthly": 1000.261333
+      "daily": 70.838121,
+      "total": 106.730837,
+      "monthly": 1000.269705
     },
     "weeklyRunRate": {
-      "total": 139.693911,
-      "automation": 1.739231,
-      "interactive": 136.215449,
-      "projectedMonthly": 598.69
+      "total": 139.702283,
+      "automation": 1.747604,
+      "interactive": 136.207076,
+      "projectedMonthly": 598.72
     }
   },
   "moltWorld": {
-    "sim_balance": 39.201556,
-    "total_earned": 39.201556,
-    "online_time": "392h 0m",
+    "sim_balance": 39.209889,
+    "total_earned": 39.209889,
+    "online_time": "392h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -333,7 +333,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T23:40:08Z",
+    "updatedAt": "2026-04-16T23:45:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -348,14 +348,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.5,
-      "cpu_user": 27.17,
-      "cpu_sys": 14.37,
-      "load1": 4.66,
-      "load5": 4.5,
-      "load15": 4.29,
+      "cpu_pct": 52.4,
+      "cpu_user": 34.89,
+      "cpu_sys": 17.52,
+      "load1": 4.33,
+      "load5": 4.33,
+      "load15": 4.25,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "92Gi",
@@ -363,14 +363,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 2.43,
-      "cpu_sys": 9.75,
-      "load1": 2.02,
-      "load5": 2.3,
-      "load15": 2.25,
+      "cpu_pct": 22.3,
+      "cpu_user": 7.14,
+      "cpu_sys": 15.17,
+      "load1": 1.55,
+      "load5": 1.96,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -394,19 +394,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T23:40:03Z"
+      "lastChecked": "2026-04-16T23:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T23:40:03Z"
+      "lastChecked": "2026-04-16T23:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T23:40:03Z"
+      "lastChecked": "2026-04-16T23:45:02Z"
     }
   ],
   "crons": [
@@ -805,6 +805,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260416-824",
+      "title": "Diagnose slow Josh 2.0 new-session startup and temporary unresponsiveness",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Investigating why `/new` took several minutes and the fresh session appeared unresponsive, using live OpenClaw status, process checks, and recent logs before applying any safe fix.",
+      "requestedAt": "2026-04-16 19:41",
+      "updatedAt": "2026-04-16 19:41",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260416-823",
       "title": "Generate short filename slug for MoltWorld v2 repair conversation",
       "status": "active",
@@ -839,29 +849,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T23:40:08Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-16T23:45:08Z",
+      "event": "Session spend: $0.12"
     },
     {
-      "time": "2026-04-16T23:40:04Z",
+      "time": "2026-04-16T23:45:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T23:40:03Z",
+      "time": "2026-04-16T23:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T23:40:03Z",
+      "time": "2026-04-16T23:45:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T23:40:03Z",
+      "time": "2026-04-16T23:45:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-16T23:40:03Z",
+      "time": "2026-04-16T23:45:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-16T23:40:03Z"
+  "lastUpdated": "2026-04-16T23:45:02Z"
 }
