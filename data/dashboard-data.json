@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "heartbeat triage completed, mission control recency checked",
+    "objective": "clean stale J.A.I.N session state and tighten local security warnings",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-16T16:16:05Z",
-    "checkedAt": "2026-04-16T16:16:05Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-16T16:21:49Z",
+    "checkedAt": "2026-04-16T16:21:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "heartbeat triage completed, mission control recency checked",
-    "updatedAt": "2026-04-16T16:20:03Z"
+    "context": "clean stale J.A.I.N session state and tighten local security warnings",
+    "updatedAt": "2026-04-16T16:25:03Z"
   },
   "contextWindow": {
     "usedTokens": 175345,
@@ -133,10 +139,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 41m",
+        "Resets in 3h 36m",
         "Weekly: 98% left [===========-]",
         "Pace: 47% in reserve | Expected 49% used | Lasts until reset",
-        "Resets in 3d 13h",
+        "Resets in 3d 12h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -144,11 +150,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 41m",
-      "weeklyReset": "3d 13h",
+      "sessionReset": "3h 36m",
+      "weeklyReset": "3d 12h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T16:20:05Z"
+    "updatedAt": "2026-04-16T16:25:05Z"
   },
   "modelUsage": {
     "session": 10.409912,
@@ -273,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T16:20:09Z",
+    "lastUpdated": "2026-04-16T16:25:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -314,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 38.46825,
-    "total_earned": 38.46825,
-    "online_time": "384h 40m",
+    "sim_balance": 38.476639,
+    "total_earned": 38.476639,
+    "online_time": "384h 45m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,16 +333,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T16:20:09Z"
+    "updatedAt": "2026-04-16T16:25:11Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.7,
-      "cpu_user": 27.16,
-      "cpu_sys": 15.53,
-      "load1": 3.45,
-      "load5": 3.84,
-      "load15": 3.92,
+      "cpu_pct": 42.5,
+      "cpu_user": 27.71,
+      "cpu_sys": 14.78,
+      "load1": 4.63,
+      "load5": 4.19,
+      "load15": 4.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -346,14 +352,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 1.94,
-      "cpu_sys": 9.7,
-      "load1": 2.62,
-      "load5": 2.3,
-      "load15": 2.2,
+      "cpu_pct": 13.6,
+      "cpu_user": 3.38,
+      "cpu_sys": 10.16,
+      "load1": 1.51,
+      "load5": 1.91,
+      "load15": 2.05,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -377,19 +383,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T16:20:03Z"
+      "lastChecked": "2026-04-16T16:25:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T16:20:03Z"
+      "lastChecked": "2026-04-16T16:25:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T16:20:03Z"
+      "lastChecked": "2026-04-16T16:25:03Z"
     }
   ],
   "crons": [
@@ -786,7 +792,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260416-818",
+      "title": "Clean stale J.A.I.N session state and tighten local security warnings",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh approved the next-step cleanup pass. Need to address the actionable local OpenClaw warnings, then inspect and clean the stale J.A.I.N session state without disrupting the healthy remote gateway/runtime.",
+      "requestedAt": "2026-04-16 12:21",
+      "updatedAt": "2026-04-16 12:21",
+      "owner": "J.A.I.N"
+    }
+  ],
   "activeAgents": [
     {
       "id": "context-watchdog",
@@ -801,29 +818,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T16:20:09Z",
+      "time": "2026-04-16T16:25:09Z",
       "event": "Session spend: $10.41"
     },
     {
-      "time": "2026-04-16T16:20:05Z",
+      "time": "2026-04-16T16:25:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T16:20:03Z",
+      "time": "2026-04-16T16:25:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T16:20:03Z",
+      "time": "2026-04-16T16:25:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T16:20:03Z",
+      "time": "2026-04-16T16:25:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-16T16:20:03Z",
+      "time": "2026-04-16T16:25:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-16T16:20:03Z"
+  "lastUpdated": "2026-04-16T16:25:03Z"
 }
