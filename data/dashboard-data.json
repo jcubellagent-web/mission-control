@@ -5,25 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Transcribe Josh voice note and clean injury status out of Sorare lineups",
+    "objective": "Finished Sorare injury cleanup, reverified GW125/GW126, and patched injury filtering into lineup builders",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-16T02:44:13Z",
-    "checkedAt": "2026-04-16T02:44:13Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-16T02:54:52Z",
+    "checkedAt": "2026-04-16T02:54:52Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Transcribe Josh voice note and clean injury status out of Sorare lineups",
-    "updatedAt": "2026-04-16T02:50:03Z"
+    "context": "Finished Sorare injury cleanup, reverified GW125/GW126, and patched injury filtering into lineup builders",
+    "updatedAt": "2026-04-16T02:55:02Z"
   },
   "contextWindow": {
     "usedTokens": 79591,
@@ -133,10 +127,10 @@
     "workspaceDirty": 42,
     "missionControlDirty": 7,
     "recentFiles": [
-      "mission-control/index.html",
-      "scripts/sorare_canonical_reflector.py",
       "scripts/sorare_player_ranker.py",
       "scripts/sorare_missions.py",
+      "mission-control/index.html",
+      "scripts/sorare_canonical_reflector.py",
       "mission-control/scripts/update_mission_control.py",
       "scripts/sorare_ops_store.py"
     ],
@@ -146,7 +140,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 11m",
+        "Resets in 2h 6m",
         "Weekly: 99% left [===========-]",
         "Pace: 40% in reserve | Expected 41% used | Lasts until reset",
         "Resets in 4d 2h",
@@ -157,11 +151,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 11m",
+      "sessionReset": "2h 6m",
       "weeklyReset": "4d 2h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-16T02:50:05Z"
+    "updatedAt": "2026-04-16T02:55:05Z"
   },
   "modelUsage": {
     "session": 10.375617,
@@ -286,7 +280,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T02:50:08Z",
+    "lastUpdated": "2026-04-16T02:55:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -327,9 +321,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.11825,
-    "total_earned": 37.11825,
-    "online_time": "371h 10m",
+    "sim_balance": 37.126556,
+    "total_earned": 37.126556,
+    "online_time": "371h 15m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -340,16 +334,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T02:50:09Z"
+    "updatedAt": "2026-04-16T02:55:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.2,
-      "cpu_user": 27.99,
-      "cpu_sys": 14.17,
-      "load1": 4.67,
-      "load5": 4.56,
-      "load15": 4.33,
+      "cpu_pct": 44.1,
+      "cpu_user": 29.37,
+      "cpu_sys": 14.75,
+      "load1": 3.06,
+      "load5": 3.91,
+      "load15": 4.11,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -359,14 +353,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.1,
-      "cpu_user": 5.4,
-      "cpu_sys": 11.71,
-      "load1": 2.73,
-      "load5": 2.21,
-      "load15": 2.11,
+      "cpu_pct": 14.3,
+      "cpu_user": 3.57,
+      "cpu_sys": 10.71,
+      "load1": 1.95,
+      "load5": 2.11,
+      "load15": 2.1,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -390,19 +384,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:50:03Z"
+      "lastChecked": "2026-04-16T02:55:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:50:03Z"
+      "lastChecked": "2026-04-16T02:55:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T02:50:03Z"
+      "lastChecked": "2026-04-16T02:55:02Z"
     }
   ],
   "crons": [
@@ -801,16 +795,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260415-789",
-      "title": "Sorare injury clean sweep for live lineups",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh flagged that some live MLB lineups still include day-to-day or 15-day IL players. Clean-sweep the current GW125/GW126 lineups, replace injured cards where possible, and harden the lineup-setting checks so injury status is treated as a real filter going forward.",
-      "requestedAt": "2026-04-15 22:34",
-      "updatedAt": "2026-04-15 22:44",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260415-772",
       "title": "Kick off JAIMES-owned true mission-ML build",
       "status": "active",
@@ -824,7 +808,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, scripts/sorare_canonical_reflector.py",
+      "label": "Editing: scripts/sorare_player_ranker.py, scripts/sorare_missions.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -845,29 +829,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T02:50:08Z",
+      "time": "2026-04-16T02:55:08Z",
       "event": "Session spend: $10.38"
     },
     {
-      "time": "2026-04-16T02:50:05Z",
-      "event": "Coding: mission-control/index.html, scripts/sorare_canonical_reflector.py"
+      "time": "2026-04-16T02:55:05Z",
+      "event": "Coding: scripts/sorare_player_ranker.py, scripts/sorare_missions.py"
     },
     {
-      "time": "2026-04-16T02:50:05Z",
+      "time": "2026-04-16T02:55:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-16T02:50:03Z",
+      "time": "2026-04-16T02:55:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T02:50:03Z",
+      "time": "2026-04-16T02:55:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T02:50:03Z",
+      "time": "2026-04-16T02:55:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T02:50:03Z"
+  "lastUpdated": "2026-04-16T02:55:02Z"
 }
