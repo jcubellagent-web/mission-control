@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "handled async MoltWorld repair follow-up completions",
+    "objective": "watch live MoltWorld bubble deployment and probe stale v2 warning",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-16T20:02:10Z",
-    "checkedAt": "2026-04-16T20:02:10Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-16T20:13:43Z",
+    "checkedAt": "2026-04-16T20:13:43Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "handled async MoltWorld repair follow-up completions",
-    "updatedAt": "2026-04-16T20:10:03Z"
+    "context": "watch live MoltWorld bubble deployment and probe stale v2 warning",
+    "updatedAt": "2026-04-16T20:15:03Z"
   },
   "contextWindow": {
     "usedTokens": 223555,
@@ -136,7 +142,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 51m",
+        "Resets in 4h 46m",
         "Weekly: 98% left [===========-]",
         "Pace: 50% in reserve | Expected 52% used | Lasts until reset",
         "Resets in 3d 9h",
@@ -147,11 +153,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 51m",
+      "sessionReset": "4h 46m",
       "weeklyReset": "3d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T20:10:05Z"
+    "updatedAt": "2026-04-16T20:15:05Z"
   },
   "modelUsage": {
     "session": 17.982147,
@@ -276,7 +282,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T20:10:08Z",
+    "lastUpdated": "2026-04-16T20:15:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -317,9 +323,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 38.851583,
-    "total_earned": 38.851583,
-    "online_time": "388h 30m",
+    "sim_balance": 38.859917,
+    "total_earned": 38.859917,
+    "online_time": "388h 35m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -330,7 +336,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T20:10:09Z",
+    "updatedAt": "2026-04-16T20:15:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -345,12 +351,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.7,
-      "cpu_user": 28.57,
-      "cpu_sys": 15.11,
-      "load1": 5.38,
-      "load5": 4.42,
-      "load15": 4.24,
+      "cpu_pct": 43.6,
+      "cpu_user": 28.87,
+      "cpu_sys": 14.73,
+      "load1": 3.84,
+      "load5": 4.04,
+      "load15": 4.11,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -360,14 +366,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.0,
-      "cpu_user": 3.47,
-      "cpu_sys": 9.56,
-      "load1": 1.57,
-      "load5": 1.82,
-      "load15": 1.83,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 15.0,
+      "cpu_user": 4.42,
+      "cpu_sys": 10.61,
+      "load1": 2.33,
+      "load5": 1.91,
+      "load15": 1.85,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -391,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T20:10:03Z"
+      "lastChecked": "2026-04-16T20:15:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T20:10:03Z"
+      "lastChecked": "2026-04-16T20:15:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T20:10:03Z"
+      "lastChecked": "2026-04-16T20:15:03Z"
     }
   ],
   "crons": [
@@ -531,7 +537,7 @@
             "time": "4:15 PM",
             "mode": "Daily",
             "label": "Close brief",
-            "past": false,
+            "past": true,
             "done": false
           },
           {
@@ -836,29 +842,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T20:10:08Z",
+      "time": "2026-04-16T20:15:08Z",
       "event": "Session spend: $17.98"
     },
     {
-      "time": "2026-04-16T20:10:05Z",
+      "time": "2026-04-16T20:15:05Z",
       "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-16T20:10:05Z",
+      "time": "2026-04-16T20:15:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T20:10:03Z",
+      "time": "2026-04-16T20:15:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T20:10:03Z",
+      "time": "2026-04-16T20:15:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T20:10:03Z",
+      "time": "2026-04-16T20:15:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T20:10:03Z"
+  "lastUpdated": "2026-04-16T20:15:03Z"
 }
