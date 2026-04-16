@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Do Sorare clean follow-up pass and sync Mission Control Today's Jobs to latest live state",
+    "objective": "Transcribe Josh voice note and clean injury status out of Sorare lineups",
     "status": "active",
     "steps": [
       {
@@ -15,22 +15,22 @@
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-16T02:33:15Z",
-    "checkedAt": "2026-04-16T02:33:15Z",
+    "updatedAt": "2026-04-16T02:44:13Z",
+    "checkedAt": "2026-04-16T02:44:13Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Do Sorare clean follow-up pass and sync Mission Control Today's Jobs to latest live state",
-    "updatedAt": "2026-04-16T02:41:19Z"
+    "context": "Transcribe Josh voice note and clean injury status out of Sorare lineups",
+    "updatedAt": "2026-04-16T02:45:03Z"
   },
   "contextWindow": {
-    "usedTokens": 181288,
+    "usedTokens": 79591,
     "limitTokens": 400000,
-    "pct": 0.4532,
+    "pct": 0.199,
     "model": "gpt-5.4",
-    "status": "amber"
+    "status": "green"
   },
   "agentBus": [
     {
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 42,
-    "missionControlDirty": 6,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "scripts/sorare_canonical_reflector.py",
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 20m",
+        "Resets in 2h 16m",
         "Weekly: 99% left [===========-]",
         "Pace: 40% in reserve | Expected 41% used | Lasts until reset",
         "Resets in 4d 2h",
@@ -157,15 +157,15 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 20m",
+      "sessionReset": "2h 16m",
       "weeklyReset": "4d 2h",
       "summary": "100% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-16T02:41:20Z"
+    "updatedAt": "2026-04-16T02:45:06Z"
   },
   "modelUsage": {
-    "session": 7.668969,
-    "daily": 66.508277,
+    "session": 10.375617,
+    "daily": 69.214924,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -182,7 +182,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 16.672977500000002
+        "cost": 19.379624999999997
       },
       {
         "name": "gpt-5.3-codex",
@@ -221,12 +221,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 932043,
-        "outputTokens": 47152,
-        "totalTokens": 979195,
-        "sessionCost": 16.672977500000002,
-        "dailyCost": 16.672977500000002,
-        "weeklyCost": 16.672977500000002,
+        "inputTokens": 802714,
+        "outputTokens": 23687,
+        "totalTokens": 826401,
+        "sessionCost": 19.379624999999997,
+        "dailyCost": 19.379624999999997,
+        "weeklyCost": 19.379624999999997,
         "sessions": 28,
         "isGemini": false,
         "costEstimated": false
@@ -286,7 +286,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T02:41:23Z",
+    "lastUpdated": "2026-04-16T02:45:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -315,8 +315,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 66.508277,
-      "total": 90.497664,
+      "daily": 69.214924,
+      "total": 93.204311,
       "monthly": 1000.151665
     },
     "weeklyRunRate": {
@@ -327,9 +327,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.103667,
-    "total_earned": 37.103667,
-    "online_time": "371h 2m",
+    "sim_balance": 37.109944,
+    "total_earned": 37.109944,
+    "online_time": "371h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -340,33 +340,33 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T02:41:24Z"
+    "updatedAt": "2026-04-16T02:45:10Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.1,
-      "cpu_user": 25.89,
-      "cpu_sys": 14.16,
-      "load1": 4.13,
-      "load5": 3.99,
-      "load15": 4.02,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 41.9,
+      "cpu_user": 27.94,
+      "cpu_sys": 13.93,
+      "load1": 5.33,
+      "load5": 4.52,
+      "load15": 4.23,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "96Gi",
+      "disk_avail": "94Gi",
       "disk_pct": 11,
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 3.88,
-      "cpu_sys": 9.7,
-      "load1": 1.75,
-      "load5": 2.08,
-      "load15": 2.09,
+      "cpu_pct": 15.5,
+      "cpu_user": 3.63,
+      "cpu_sys": 11.81,
+      "load1": 1.97,
+      "load5": 2.09,
+      "load15": 2.08,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -375,8 +375,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
@@ -390,19 +390,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:41:19Z"
+      "lastChecked": "2026-04-16T02:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T02:41:19Z"
+      "lastChecked": "2026-04-16T02:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T02:41:19Z"
+      "lastChecked": "2026-04-16T02:45:03Z"
     }
   ],
   "crons": [
@@ -801,6 +801,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260415-789",
+      "title": "Sorare injury clean sweep for live lineups",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh flagged that some live MLB lineups still include day-to-day or 15-day IL players. Clean-sweep the current GW125/GW126 lineups, replace injured cards where possible, and harden the lineup-setting checks so injury status is treated as a real filter going forward.",
+      "requestedAt": "2026-04-15 22:34",
+      "updatedAt": "2026-04-15 22:44",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260415-772",
       "title": "Kick off JAIMES-owned true mission-ML build",
       "status": "active",
@@ -835,29 +845,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T02:41:23Z",
-      "event": "Session spend: $7.67"
+      "time": "2026-04-16T02:45:09Z",
+      "event": "Session spend: $10.38"
     },
     {
-      "time": "2026-04-16T02:41:20Z",
+      "time": "2026-04-16T02:45:06Z",
       "event": "Coding: mission-control/index.html, scripts/sorare_canonical_reflector.py"
     },
     {
-      "time": "2026-04-16T02:41:20Z",
+      "time": "2026-04-16T02:45:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-16T02:41:19Z",
+      "time": "2026-04-16T02:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T02:41:19Z",
+      "time": "2026-04-16T02:45:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T02:41:19Z",
+      "time": "2026-04-16T02:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T02:41:19Z"
+  "lastUpdated": "2026-04-16T02:45:03Z"
 }
