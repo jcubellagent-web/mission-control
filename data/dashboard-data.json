@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "queue GW126 pre-lock recheck and refine Codex usage",
+    "objective": "check queued follow-up and continue Codex refinement next steps",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-16T04:06:39Z",
-    "checkedAt": "2026-04-16T04:06:39Z",
+    "updatedAt": "2026-04-16T04:12:32Z",
+    "checkedAt": "2026-04-16T04:12:32Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "queue GW126 pre-lock recheck and refine Codex usage",
-    "updatedAt": "2026-04-16T04:10:03Z"
+    "context": "check queued follow-up and continue Codex refinement next steps",
+    "updatedAt": "2026-04-16T04:15:03Z"
   },
   "contextWindow": {
-    "usedTokens": 210374,
+    "usedTokens": 214573,
     "limitTokens": 400000,
-    "pct": 0.5259,
+    "pct": 0.5364,
     "model": "gpt-5.4",
     "status": "red"
   },
@@ -145,7 +145,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 51m",
+        "Resets in 46m",
         "Weekly: 98% left [===========-]",
         "Pace: 40% in reserve | Expected 42% used | Lasts until reset",
         "Resets in 4d 1h",
@@ -156,15 +156,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "51m",
+      "sessionReset": "46m",
       "weeklyReset": "4d 1h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-16T04:10:05Z"
+    "updatedAt": "2026-04-16T04:15:05Z"
   },
   "modelUsage": {
-    "session": 6.962089,
-    "daily": 11.970681,
+    "session": 7.500978,
+    "daily": 12.78829,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -176,12 +176,12 @@
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 22.18875125
+        "cost": 22.46747125
       },
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 15.9660965
+        "cost": 16.5049855
       },
       {
         "name": "gpt-5.3-codex",
@@ -211,21 +211,21 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 22.18875125,
-        "dailyCost": 0.2623735,
-        "sessionCost": 22.18875125,
+        "weeklyCost": 22.46747125,
+        "dailyCost": 0.5410935,
+        "sessionCost": 22.46747125,
         "totalTokens": 0,
         "costEstimated": false
       },
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 935782,
-        "outputTokens": 27050,
-        "totalTokens": 962832,
-        "sessionCost": 15.9660965,
-        "dailyCost": 6.9620885,
-        "weeklyCost": 15.9660965,
+        "inputTokens": 738585,
+        "outputTokens": 29246,
+        "totalTokens": 767831,
+        "sessionCost": 16.5049855,
+        "dailyCost": 7.5009775,
+        "weeklyCost": 16.5049855,
         "sessions": 28,
         "isGemini": false,
         "costEstimated": false
@@ -285,7 +285,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-16T04:10:08Z",
+    "lastUpdated": "2026-04-16T04:15:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -314,8 +314,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 11.976461,
-      "total": 94.805155,
+      "daily": 12.79407,
+      "total": 95.622764,
       "monthly": 1000.157445
     },
     "weeklyRunRate": {
@@ -326,9 +326,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 37.251583,
-    "total_earned": 37.251583,
-    "online_time": "372h 30m",
+    "sim_balance": 37.259889,
+    "total_earned": 37.259889,
+    "online_time": "372h 35m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -339,16 +339,16 @@
     "last_thought": "...",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-16T04:10:09Z"
+    "updatedAt": "2026-04-16T04:15:08Z"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.5,
-      "cpu_user": 27.37,
-      "cpu_sys": 15.1,
-      "load1": 3.26,
-      "load5": 3.59,
-      "load15": 3.73,
+      "cpu_pct": 43.1,
+      "cpu_user": 28.74,
+      "cpu_sys": 14.4,
+      "load1": 3.67,
+      "load5": 3.93,
+      "load15": 3.86,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -358,12 +358,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 30.3,
-      "cpu_user": 16.16,
-      "cpu_sys": 14.14,
-      "load1": 3.48,
-      "load5": 3.02,
-      "load15": 2.83,
+      "cpu_pct": 34.3,
+      "cpu_user": 19.6,
+      "cpu_sys": 14.7,
+      "load1": 2.78,
+      "load5": 2.95,
+      "load15": 2.84,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -389,19 +389,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T04:10:03Z"
+      "lastChecked": "2026-04-16T04:15:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-16T04:10:03Z"
+      "lastChecked": "2026-04-16T04:15:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-16T04:10:03Z"
+      "lastChecked": "2026-04-16T04:15:03Z"
     }
   ],
   "crons": [
@@ -798,18 +798,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260416-795",
-      "title": "Refine Codex usage after the local routing upgrade",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh asked to do all next steps and then focus only on Codex usage. GW126 stays queued for the real pre-lock check, and a local Codex refinement pass is now running in temp worktree `/tmp/josh2-codex-refine-20260416` via session `brisk-shoal` using `codex exec --full-auto -m gpt-5.4 ...` against the current local routing/docs changes.",
-      "requestedAt": "2026-04-16 00:06",
-      "updatedAt": "2026-04-16 00:06",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -834,29 +823,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-16T04:10:08Z",
-      "event": "Session spend: $6.96"
+      "time": "2026-04-16T04:15:08Z",
+      "event": "Session spend: $7.50"
     },
     {
-      "time": "2026-04-16T04:10:05Z",
+      "time": "2026-04-16T04:15:05Z",
       "event": "Coding: scripts/llm_router.py, scripts/sorare_player_ranker.py"
     },
     {
-      "time": "2026-04-16T04:10:05Z",
+      "time": "2026-04-16T04:15:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-16T04:10:03Z",
+      "time": "2026-04-16T04:15:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-16T04:10:03Z",
+      "time": "2026-04-16T04:15:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-16T04:10:03Z",
+      "time": "2026-04-16T04:15:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-16T04:10:03Z"
+  "lastUpdated": "2026-04-16T04:15:03Z"
 }
