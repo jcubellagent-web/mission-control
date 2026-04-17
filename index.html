@@ -594,17 +594,34 @@
         .ctx-inline-track { width: 88px; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
         .ctx-inline-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease, background 0.4s; }
         /* Unified activity log */
-        .ua-log { display: flex; flex-direction: column; gap: 6px; }
+        .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
-            display: grid;
-            grid-template-columns: auto auto minmax(0, 1fr) auto;
-            align-items: center;
+            display: flex;
+            flex-direction: column;
             gap: 7px;
-            padding: 7px 8px;
+            padding: 8px 10px;
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 10px;
+            border-radius: 12px;
             background: linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.014));
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
+        }
+        .ua-item.stale {
+            border-color: rgba(251,191,36,0.16);
+            background: linear-gradient(180deg, rgba(251,191,36,0.08), rgba(255,255,255,0.016));
+        }
+        .ua-main {
+            display: grid;
+            grid-template-columns: auto auto minmax(0, 1fr);
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        .ua-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
         }
         .ua-agent-tag { font-size: 0.56rem; font-weight: 800; letter-spacing: 0.09em; padding: 3px 6px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
         .ua-agent-tag.josh { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
@@ -615,10 +632,33 @@
         .ua-dot.active { background: #e53e3e; box-shadow: 0 0 4px #e53e3e; animation: pulse-dot 1.5s infinite; }
         .ua-dot.done { background: #4ade80; }
         .ua-dot.idle { background: rgba(255,255,255,0.2); }
-        .ua-msg { font-size: 0.68rem; color: rgba(255,255,255,0.78); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ua-tool-pill { font-size: 0.54rem; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); border-radius: 999px; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
-        .ua-model-pill { font-size: 0.54rem; color: rgba(96,165,250,0.82); background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.16); border-radius: 999px; padding: 2px 6px; white-space: nowrap; flex-shrink: 0; }
-        .ua-ts { font-size: 0.58rem; color: rgba(255,255,255,0.36); white-space: nowrap; flex-shrink: 0; }
+        .ua-msg {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.8);
+            min-width: 0;
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-height: 1.3;
+        }
+        .ua-tool-pill,
+        .ua-model-pill,
+        .ua-stale-pill {
+            font-size: 0.54rem;
+            border-radius: 999px;
+            padding: 2px 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.05);
+        }
+        .ua-tool-pill { color: rgba(255,255,255,0.64); }
+        .ua-model-pill { color: rgba(96,165,250,0.82); background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.16); }
+        .ua-stale-pill { color: rgba(253,224,71,0.92); background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.22); }
+        .ua-ts { margin-left: auto; font-size: 0.58rem; color: rgba(255,255,255,0.36); white-space: nowrap; flex-shrink: 0; }
         .ua-empty { font-size: 0.68rem; color: rgba(255,255,255,0.18); padding: 4px 0; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
         .brain-feed { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
@@ -2865,22 +2905,24 @@
         }
         .bf-signal-row {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
-            margin: 2px 0 6px;
+            margin: 4px 0 8px;
+            align-items: stretch;
         }
         .bf-signal-chip {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
             min-width: 0;
             padding: 11px 12px;
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.07);
             background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.022));
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            justify-content: flex-start;
         }
-        .bf-signal-chip-wide { grid-column: span 1; }
+        .bf-signal-chip-wide { grid-column: 1 / -1; }
         .bf-signal-label {
             font-size: 0.56rem;
             font-weight: 800;
@@ -2893,16 +2935,31 @@
             font-weight: 700;
             color: rgba(255,255,255,0.96);
             min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.18;
         }
         .bf-signal-tool {
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
             color: #ffb4b4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .bf-signal-progress { color: #f8fafc; }
-        .bf-signal-step { color: rgba(255,255,255,0.82); }
+        .bf-signal-progress {
+            color: #f8fafc;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-signal-step {
+            color: rgba(255,255,255,0.82);
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            line-height: 1.28;
+        }
         .bf-timeline {
             display: flex;
             flex-direction: column;
@@ -3160,17 +3217,17 @@
         /* ── Recent Activity — ultra-slim ───────────────────────────────────── */
         .agent-comms-section {
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding: 9px 0 4px;
+            padding: 10px 0 2px;
             margin-top: 0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 180px;
+            gap: 10px;
+            max-height: 196px;
             transition: max-height 0.26s ease, padding 0.22s ease;
             overflow: hidden;
         }
         .card-brain.activity-expanded .agent-comms-section {
-            max-height: min(260px, 34vh);
+            max-height: min(320px, 38vh);
         }
         .agent-comms-toggle {
             width: 100%;
@@ -3224,14 +3281,13 @@
             background: linear-gradient(180deg, rgba(18,18,24,0.96), rgba(11,11,15,0.96));
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
             flex-shrink: 0;
-            min-height: 136px;
+            min-height: 166px;
         }
-        /* When brain is active, limit chat section height so objective has room */
         .card-brain.brain-active .agent-chat-section {
-            max-height: 176px;
+            max-height: none;
         }
         .card-brain.brain-active #agent-chat-feed {
-            max-height: 122px;
+            max-height: none;
         }
         .agent-chat-header {
             display: flex;
@@ -3298,22 +3354,52 @@
             gap: 10px;
         }
         .memory-roadmap.compact {
+            gap: 8px;
+        }
+        .memory-roadmap-summary {
+            display: flex;
+            flex-wrap: wrap;
             gap: 6px;
+        }
+        .memory-roadmap-summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.055);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .memory-roadmap-summary-pill.live {
+            color: #6ee7b7;
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.24);
+        }
+        .memory-roadmap-summary-pill.warn {
+            color: rgba(253,224,71,0.92);
+            background: rgba(251,191,36,0.12);
+            border-color: rgba(251,191,36,0.22);
         }
         .memory-roadmap-compact-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 6px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
         }
         .memory-roadmap-card {
             min-width: 0;
-            padding: 7px 8px;
+            min-height: 88px;
+            padding: 10px 11px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.08);
             background: rgba(255,255,255,0.04);
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 5px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
         .memory-roadmap-card.active {
@@ -3328,6 +3414,12 @@
             border-color: rgba(251,191,36,0.18);
             background: linear-gradient(180deg, rgba(251,191,36,0.12), rgba(255,255,255,0.04));
         }
+        .memory-roadmap-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
         .memory-roadmap-card-week {
             font-size: 8px;
             font-weight: 800;
@@ -3336,10 +3428,19 @@
             color: rgba(255,255,255,0.46);
         }
         .memory-roadmap-card-title {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             color: rgba(255,255,255,0.9);
-            line-height: 1.2;
+            line-height: 1.24;
+        }
+        .memory-roadmap-card-note {
+            font-size: 10px;
+            line-height: 1.35;
+            color: rgba(255,255,255,0.58);
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
         }
         .memory-roadmap-card-pill {
             display: inline-flex;
@@ -3353,11 +3454,6 @@
             text-transform: uppercase;
             background: rgba(255,255,255,0.06);
             color: rgba(255,255,255,0.64);
-        }
-        @media (max-width: 720px) {
-            .memory-roadmap-compact-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
         }
         .memory-roadmap-card.active .memory-roadmap-card-pill {
             background: rgba(34,211,238,0.16);
@@ -3393,12 +3489,24 @@
         .memory-roadmap-row {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
+            padding: 10px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .memory-roadmap-row:first-of-type {
+            padding-top: 0;
+            border-top: 0;
         }
         .memory-roadmap-row-head {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
+        }
+        .memory-roadmap-row-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
         .memory-roadmap-title {
             font-size: 11px;
@@ -4404,25 +4512,30 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        .bf-signal-row { gap: 5px; margin-bottom: 4px; }
+        .bf-signal-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 6px;
+        }
         .bf-signal-chip {
             background: rgba(255,255,255,0.022);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 10px;
             min-height: 0;
-            padding: 5px 7px;
-            justify-content: center;
+            padding: 7px 8px;
+            justify-content: flex-start;
             box-shadow: none;
         }
+        .bf-signal-chip-wide { grid-column: 1 / -1; }
         .bf-signal-label { font-size: 0.46rem; letter-spacing: 0.13em; }
-        .bf-signal-value { font-size: 0.72rem; line-height: 1.14; }
+        .bf-signal-value { font-size: 0.73rem; line-height: 1.18; }
         .bf-signal-step {
             white-space: normal;
             overflow: visible;
             text-overflow: clip;
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
         }
         .bf-timeline { gap: 8px; }
         .bf-step {
@@ -4449,41 +4562,40 @@
             border: 0;
             border-top: 1px solid rgba(255,255,255,0.05);
             border-radius: 0;
-            padding: 10px 0 0;
-            max-height: none;
+            padding: 10px 0 2px;
+            max-height: 196px;
             gap: 10px;
+            overflow: hidden;
         }
-        .card-brain.activity-expanded .agent-comms-section { max-height: none; }
+        .card-brain.activity-expanded .agent-comms-section { max-height: min(320px, 38vh); }
         .agent-chat-section {
             background: rgba(255,255,255,0.018);
             border: 1px solid rgba(255,255,255,0.055);
             border-radius: 14px;
-            padding: 8px 12px 16px;
-            min-height: 0;
+            padding: 10px 12px 14px;
+            min-height: 166px;
         }
         .agent-chat-header { margin-bottom: 10px; }
-        .ua-log { display: flex; flex-direction: column; gap: 7px; }
+        .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
-            display: grid;
-            grid-template-columns: auto auto minmax(0,1fr) auto auto auto;
-            gap: 7px;
-            align-items: center;
-            padding: 8px 10px;
-            border-radius: 10px;
+            gap: 8px;
+            padding: 9px 10px;
+            border-radius: 12px;
             background: rgba(255,255,255,0.024);
             border: 1px solid rgba(255,255,255,0.05);
         }
         .ua-agent-tag { border-radius: 999px; padding: 3px 7px; }
         .ua-msg { color: rgba(255,255,255,0.84); }
         .ua-tool-pill,
-        .ua-model-pill {
+        .ua-model-pill,
+        .ua-stale-pill {
             border-radius: 999px;
             padding: 2px 7px;
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.08);
         }
 
-        #agent-chat-feed { gap: 8px; padding-bottom: 0; }
+        #agent-chat-feed { gap: 10px; padding-bottom: 0; }
         .chat-avatar { width: 24px; height: 24px; }
         .chat-bubble {
             max-width: 84%;
@@ -5680,54 +5792,66 @@
             syncBrainActivityDrawer();
         }
 
+        function getFeedAgeMs(feed) {
+            if (!feed || !feed.updatedAt) return null;
+            const ageMs = Date.now() - new Date(feed.updatedAt).getTime();
+            return Number.isFinite(ageMs) ? ageMs : null;
+        }
+
+        function isFeedStale(feed, maxAgeMs = 45 * 60 * 1000) {
+            const ageMs = getFeedAgeMs(feed);
+            return ageMs !== null && ageMs > maxAgeMs;
+        }
+
+        function prettyToolLabel(tool) {
+            const raw = sanitizeLabel(tool || '');
+            if (!raw) return '';
+            const key = raw.toLowerCase();
+            const aliases = {
+                bf_step: 'brain feed',
+                bf_push: 'brain feed',
+                exec: 'shell',
+                process: 'shell',
+                apply_patch: 'patch',
+                memory_search: 'memory',
+                memory_get: 'memory',
+                session_status: 'status',
+                update_plan: 'plan',
+                sessions_spawn: 'agents',
+                sessions_send: 'agents',
+                sessions_list: 'agents',
+                web_search: 'search',
+                web_fetch: 'web',
+            };
+            return aliases[key] || raw.replace(/_/g, ' ');
+        }
+
         function renderUnifiedActivity() {
             const el = document.getElementById('unified-activity-log');
             if (!el) return;
             const summaryItems = [];
             const recentItems = [];
 
-            // 1. Always pin primary agent states first so the live feed stays legible.
-            if (_uaJoshBf) {
-                const bf = _uaJoshBf;
-                const isActive = bf.active === true;
+            const pushBrainSummary = (bf, agentClass, agentLabel) => {
+                if (!bf) return;
+                const stale = isFeedStale(bf);
+                const isActive = bf.active === true && !stale;
                 summaryItems.push({
-                    agentClass: 'josh',
-                    agentLabel: 'JOSH 2.0',
+                    agentClass,
+                    agentLabel,
                     dot: isActive ? 'active' : 'idle',
                     msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
                     model: '',
-                    tool: bf.currentTool || '',
+                    tool: prettyToolLabel(bf.currentTool || ''),
                     ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
+                    stale,
                 });
-            }
-            if (_uaJainBf) {
-                const bf = _uaJainBf;
-                const isActive = bf.active === true;
-                summaryItems.push({
-                    agentClass: 'jain',
-                    agentLabel: 'J.A.I.N',
-                    dot: isActive ? 'active' : 'idle',
-                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
-                    model: '',
-                    tool: bf.currentTool || '',
-                    ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
-                });
-            }
-            if (_uaJaimesBf) {
-                const bf = _uaJaimesBf;
-                const isActive = bf.active === true;
-                summaryItems.push({
-                    agentClass: 'jaimes',
-                    agentLabel: 'JAIMES',
-                    dot: isActive ? 'active' : 'idle',
-                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
-                    model: '',
-                    tool: bf.currentTool || '',
-                    ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
-                });
-            }
+            };
 
-            // 2. Then show active support agents (watchdog, coding visibility, agent bus, etc.)
+            pushBrainSummary(_uaJoshBf, 'josh', 'JOSH 2.0');
+            pushBrainSummary(_uaJainBf, 'jain', 'J.A.I.N');
+            pushBrainSummary(_uaJaimesBf, 'jaimes', 'JAIMES');
+
             const running = _uaAgents.filter(a => a.status === 'running');
             const recentAgents = _uaAgents.filter(a => a.status === 'done').slice(0, 2);
             const inferAgentClass = (a) => {
@@ -5744,8 +5868,9 @@
                     dot: 'active',
                     msg: a.label || 'Running…',
                     model: a.model || '',
-                    tool: a.tool || '',
+                    tool: prettyToolLabel(a.tool || ''),
                     ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'running',
+                    stale: false,
                 });
             }
             for (const a of recentAgents) {
@@ -5755,12 +5880,12 @@
                     dot: 'done',
                     msg: a.label || 'Done',
                     model: a.model || '',
-                    tool: a.tool || '',
+                    tool: prettyToolLabel(a.tool || ''),
                     ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
+                    stale: false,
                 });
             }
 
-            // 3. Finally add recent comms when the drawer is expanded.
             const filteredComms = (_uaComms || []).filter(e => {
                 const msg = (e.message || '').toLowerCase();
                 return !msg.startsWith('cmd:') && msg !== 'refresh' && msg !== 'nightmode';
@@ -5774,8 +5899,9 @@
                     dot: e.status === 'active' ? 'active' : 'done',
                     msg: e.message || '',
                     model: e.model || '',
-                    tool: e.tool || '',
+                    tool: prettyToolLabel(e.tool || ''),
                     ts: e.timestamp ? formatRelTime(e.timestamp) : '',
+                    stale: false,
                 });
             }
 
@@ -5790,16 +5916,22 @@
                 return;
             }
 
-            el.innerHTML = `<div class="ua-log">${items.slice(0, maxItems).map(item => `
-                <div class="ua-item">
-                    <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
-                    <span class="ua-dot ${escapeHtml(item.dot)}"></span>
-                    <span class="ua-msg">${escapeHtml(item.msg)}</span>
-                    ${item.tool ? `<span class="ua-tool-pill">${escapeHtml(item.tool)}</span>` : ''}
-                    ${item.model ? `<span class="ua-model-pill">${escapeHtml(item.model)}</span>` : ''}
-                    <span class="ua-ts">${escapeHtml(item.ts)}</span>
-                </div>`).join('')}
-            </div>`;
+            el.innerHTML = `<div class="ua-log">${items.slice(0, maxItems).map(item => {
+                const meta = [
+                    item.tool ? `<span class="ua-tool-pill">${escapeHtml(item.tool)}</span>` : '',
+                    item.model ? `<span class="ua-model-pill">${escapeHtml(item.model)}</span>` : '',
+                    item.stale ? '<span class="ua-stale-pill">stale</span>' : '',
+                    item.ts ? `<span class="ua-ts">${escapeHtml(item.ts)}</span>` : '',
+                ].filter(Boolean).join('');
+                return `<div class="ua-item${item.stale ? ' stale' : ''}">
+                    <div class="ua-main">
+                        <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
+                        <span class="ua-dot ${escapeHtml(item.dot)}"></span>
+                        <span class="ua-msg" title="${escapeHtml(item.msg)}">${escapeHtml(item.msg)}</span>
+                    </div>
+                    ${meta ? `<div class="ua-meta">${meta}</div>` : ''}
+                </div>`;
+            }).join('')}</div>`;
         }
 
         function renderActiveAgents(agents) {
@@ -5927,54 +6059,90 @@
             };
         }
 
+        function newestIso(...values) {
+            let winner = '';
+            let winnerMs = 0;
+            values.flat().forEach(value => {
+                if (!value) return;
+                const ms = new Date(value).getTime();
+                if (!Number.isFinite(ms) || ms <= winnerMs) return;
+                winner = value;
+                winnerMs = ms;
+            });
+            return winner;
+        }
+
         function buildMemoryRoadmapMarkup(expanded = false) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const trackedTasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
+            const liveTasks = trackedTasks.filter(task => String(task.status || 'active') === 'active');
+            const contextPct = typeof data.contextWindow?.pct === 'number' ? Math.round(data.contextWindow.pct * 100) : null;
+            const watchdogPct = typeof data.contextWatchdog?.pct === 'number' ? Math.round(data.contextWatchdog.pct * 100) : null;
+            const updatedAt = newestIso(data.lastUpdated, data.focus?.updatedAt, data.codingVisibility?.updatedAt, window._mcLastBrainFeed?.updatedAt);
+            const isFresh = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) < 15 * 60 * 1000 : false;
+            const activeMemoryNote = [
+                'Primary recall lane is live now.',
+                contextPct !== null ? `Context ${contextPct}%.` : '',
+                watchdogPct !== null ? `Watchdog last handoff ${watchdogPct}%.` : '',
+            ].filter(Boolean).join(' ');
             const roadmap = [
                 {
                     week: 'W1',
                     title: 'Active Memory',
-                    note: 'Soak it in live chats and watch recall quality.',
-                    pill: 'Now',
+                    note: activeMemoryNote,
+                    pill: 'Live now',
                     weeks: [1],
                     tone: 'active',
                 },
                 {
                     week: 'W2',
                     title: 'Memory hygiene',
-                    note: 'Trim noise, tighten durable notes, tune recall.',
-                    pill: 'Next',
+                    note: liveTasks.length ? `Queued behind ${liveTasks.length} live tracked task${liveTasks.length === 1 ? '' : 's'}. Tighten durable notes after the live lane settles.` : 'Queued next. Trim noise, tighten durable notes, and tune recall quality.',
+                    pill: liveTasks.length ? 'Queued' : 'Next',
                     weeks: [1, 2],
                     tone: 'planned',
                 },
                 {
                     week: 'W3',
                     title: 'QMD pilot',
-                    note: 'Test stronger retrieval on current memory only.',
-                    pill: 'Pilot',
+                    note: 'Still on deck. Only promote it if current-memory retrieval clearly improves first.',
+                    pill: 'On deck',
                     weeks: [3],
                     tone: 'planned',
                 },
                 {
                     week: 'W4',
                     title: 'Session recall?',
-                    note: 'Only add transcript indexing if it clearly earns it.',
-                    pill: 'Decision',
+                    note: 'Deferred until transcript indexing proves it is worth the extra complexity.',
+                    pill: 'Deferred',
                     weeks: [4],
                     tone: 'future',
                 },
             ];
 
+            const summaryPills = [
+                `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live now' : 'Needs refresh'}</span>`,
+                contextPct !== null ? `<span class="memory-roadmap-summary-pill">Context ${contextPct}%</span>` : '',
+                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}</span>` : '',
+                updatedAt ? `<span class="memory-roadmap-summary-pill">Updated ${escapeHtml(formatRelTime(updatedAt))}</span>` : '',
+            ].filter(Boolean).join('');
+
             if (!expanded) {
                 const cards = roadmap.map(item => `
                     <div class="memory-roadmap-card ${item.tone}">
-                        <div class="memory-roadmap-card-week">${escapeHtml(item.week)}</div>
+                        <div class="memory-roadmap-card-top">
+                            <div class="memory-roadmap-card-week">${escapeHtml(item.week)}</div>
+                            <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
+                        </div>
                         <div class="memory-roadmap-card-title">${escapeHtml(item.title)}</div>
-                        <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
+                        <div class="memory-roadmap-card-note">${escapeHtml(item.note)}</div>
                     </div>
                 `).join('');
 
                 return {
-                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
-                    meta: '4-stage plan',
+                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-summary">${summaryPills}</div><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
+                    meta: isFresh ? 'live roadmap' : 'roadmap stale',
+                    live: isFresh,
                 };
             }
 
@@ -5983,7 +6151,10 @@
             const rows = roadmap.map(item => `
                 <div class="memory-roadmap-row">
                     <div class="memory-roadmap-row-head">
-                        <div class="memory-roadmap-title">${escapeHtml(item.week)} · ${escapeHtml(item.title)}</div>
+                        <div class="memory-roadmap-row-top">
+                            <div class="memory-roadmap-title">${escapeHtml(item.week)} · ${escapeHtml(item.title)}</div>
+                            <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
+                        </div>
                         <div class="memory-roadmap-note">${escapeHtml(item.note)}</div>
                     </div>
                     <div class="memory-roadmap-track">
@@ -5995,11 +6166,12 @@
                 </div>
             `).join('');
 
-            const footer = '<div class="memory-roadmap-footer">Target state: Active Memory first, then cleaner durable memory, then QMD only if it materially improves recall, then transcript indexing only if it proves worth the added complexity.</div>';
+            const footer = '<div class="memory-roadmap-footer">Current posture: keep Active Memory live, do hygiene next, pilot QMD only if it clearly improves recall, and leave transcript indexing deferred until it earns the added complexity.</div>';
 
             return {
-                html: `<div class="memory-roadmap">${scale}${rows}${footer}</div>`,
-                meta: '4-stage plan',
+                html: `<div class="memory-roadmap"><div class="memory-roadmap-summary">${summaryPills}</div>${scale}${rows}${footer}</div>`,
+                meta: isFresh ? 'live roadmap' : 'roadmap stale',
+                live: isFresh,
             };
         }
 
@@ -6012,7 +6184,7 @@
             const expanded = buildMemoryRoadmapMarkup(true);
             window._moduleModalCommsHtml = expanded.html;
 
-            if (dot) dot.classList.add('live');
+            if (dot) dot.classList.toggle('live', !!compact.live);
 
             const agentsEl = document.getElementById('agent-chat-agents');
             if (agentsEl) agentsEl.textContent = compact.meta;
@@ -6049,7 +6221,7 @@
             } else if (kind === 'comms') {
                 title = 'Memory Roadmap';
                 const roadmap = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
-                body = `<div class="module-modal-stack">${roadmap ? `<div class="module-modal-panel"><div class="module-modal-section-title">3-4 Week Rollout</div><div class="module-modal-chat">${roadmap}</div></div>` : body}</div>`;
+                body = `<div class="module-modal-stack">${roadmap ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live roadmap state</div><div class="module-modal-chat">${roadmap}</div></div>` : body}</div>`;
             }
 
             titleEl.textContent = title;
@@ -7356,14 +7528,24 @@
             return 'tool-default';
         }
 
+        function resolveBrainFeedStepLabel(bf, activeStep, steps) {
+            const rawStep = sanitizeLabel(activeStep?.label || steps[steps.length - 1]?.label || '');
+            const objective = sanitizeLabel(bf?.objective || '');
+            if (!rawStep) return objective || 'Working';
+            if (objective && /^(audit|scan|check|step|task|run|working|exec)$/i.test(rawStep)) return objective;
+            return rawStep;
+        }
+
         function getBrainFeedMetrics(bf) {
             const steps = Array.isArray(bf?.steps) ? bf.steps : [];
             const doneCount = steps.filter(step => step && step.status === 'done').length;
             const activeStep = steps.find(step => step && step.status === 'active') || null;
             const totalCount = steps.length;
-            const progressText = totalCount ? `${doneCount}/${totalCount} done` : 'Tracking live';
-            const liveStep = sanitizeLabel(activeStep?.label || steps[steps.length - 1]?.label || bf?.objective || 'Working') || 'Working';
-            const currentTool = sanitizeLabel(bf?.currentTool || activeStep?.tool || 'exec') || 'exec';
+            const progressText = !totalCount
+                ? (bf?.active ? 'Tracking live' : 'Standby')
+                : (totalCount === 1 && activeStep && doneCount === 0 ? '1 live step' : `${doneCount}/${totalCount} done`);
+            const liveStep = resolveBrainFeedStepLabel(bf, activeStep, steps) || 'Working';
+            const currentTool = prettyToolLabel(bf?.currentTool || activeStep?.tool || 'exec') || 'shell';
             return { doneCount, activeStep, totalCount, progressText, liveStep, currentTool };
         }
 
@@ -7451,7 +7633,7 @@
                         const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
                         const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
                         const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
-                        const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                        const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(prettyToolLabel(step.tool))}</span>` : '';
                         return `<div class="bf-step ${stepClass}" data-label="${escapeHtml(step.label)}">
                             <div class="bf-step-icon ${iconClass}">${iconChar}</div>
                             <div class="bf-step-body">
@@ -7531,7 +7713,7 @@
                             const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
                             const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
                             const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
-                            const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                            const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(prettyToolLabel(step.tool))}</span>` : '';
 
                             if (existingSteps[step.label]) {
                                 // Update existing step status smoothly
@@ -7805,7 +7987,7 @@
                         <div class="bf-timeline" style="max-height:100%;overflow:hidden;">
                             ${[...joshSteps].reverse().slice(0, 8).map(step => {
                                 const stepLabel = step.label || step.description || step.step || (typeof step === 'string' ? step : '');
-                                const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(step.tool)}</span>` : '';
+                                const toolHtml = step.tool ? `<span class="bf-tool-pill ${toolPillClass(step.tool)}">${escapeHtml(prettyToolLabel(step.tool))}</span>` : '';
                                 return `<div class="bf-step done-step">
                                     <div class="bf-step-icon done">✓</div>
                                     <div class="bf-step-body">
