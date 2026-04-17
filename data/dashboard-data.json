@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "heartbeat triage completed, mission control recency checked",
+    "objective": "fix J.A.I.N unresolved issues alert from Google Trends 429s",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-17T05:26:39Z",
-    "checkedAt": "2026-04-17T05:26:39Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-17T05:32:57Z",
+    "checkedAt": "2026-04-17T05:32:57Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "heartbeat triage completed, mission control recency checked",
-    "updatedAt": "2026-04-17T05:30:03Z"
+    "context": "fix J.A.I.N unresolved issues alert from Google Trends 429s",
+    "updatedAt": "2026-04-17T05:35:03Z"
   },
   "contextWindow": {
     "usedTokens": 37406,
@@ -133,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 31m",
+        "Resets in 26m",
         "Weekly: 98% left [===========-]",
         "Pace: 55% in reserve | Expected 57% used | Lasts until reset",
         "Resets in 2d 23h",
@@ -144,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "31m",
+      "sessionReset": "26m",
       "weeklyReset": "2d 23h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T05:30:05Z"
+    "updatedAt": "2026-04-17T05:35:05Z"
   },
   "modelUsage": {
     "session": 0.155693,
-    "daily": 25.879346,
+    "daily": 26.035039,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -203,7 +209,7 @@
         "outputTokens": 57471,
         "totalTokens": 1865910,
         "sessionCost": 25.435421999999996,
-        "dailyCost": 18.7600175,
+        "dailyCost": 18.91571,
         "weeklyCost": 25.435421999999996,
         "sessions": 71,
         "isGemini": false,
@@ -273,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T05:30:08Z",
+    "lastUpdated": "2026-04-17T05:35:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -302,7 +308,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 25.885173,
+      "daily": 26.040866,
       "total": 109.417507,
       "monthly": 1000.275532
     },
@@ -314,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 39.784917,
-    "total_earned": 39.784917,
-    "online_time": "397h 50m",
+    "sim_balance": 39.79325,
+    "total_earned": 39.79325,
+    "online_time": "397h 55m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,7 +333,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T05:30:09Z",
+    "updatedAt": "2026-04-17T05:35:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -342,14 +348,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.5,
-      "cpu_user": 25.0,
-      "cpu_sys": 15.47,
-      "load1": 2.78,
-      "load5": 2.79,
-      "load15": 2.77,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 37.1,
+      "cpu_user": 23.46,
+      "cpu_sys": 14.44,
+      "load1": 3.05,
+      "load5": 2.91,
+      "load15": 2.82,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -357,14 +363,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 4.0,
-      "cpu_sys": 9.6,
-      "load1": 1.92,
-      "load5": 2.1,
-      "load15": 2.11,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 12.8,
+      "cpu_user": 3.66,
+      "cpu_sys": 9.17,
+      "load1": 2.14,
+      "load5": 2.03,
+      "load15": 2.06,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -388,19 +394,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T05:30:03Z"
+      "lastChecked": "2026-04-17T05:35:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T05:30:03Z"
+      "lastChecked": "2026-04-17T05:35:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T05:30:03Z"
+      "lastChecked": "2026-04-17T05:35:03Z"
     }
   ],
   "crons": [
@@ -797,7 +803,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260417-833",
+      "title": "Fix J.A.I.N unresolved-issues alert caused by repeated Google Trends 429s",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Investigating the Google Trends rate-limit errors behind the unresolved-issues card and patching the fetch/retry behavior so the alert stops flapping on harmless 429 bursts.",
+      "requestedAt": "2026-04-17 01:32",
+      "updatedAt": "2026-04-17 01:32",
+      "owner": "J.A.I.N"
+    }
+  ],
   "activeAgents": [
     {
       "id": "context-watchdog",
@@ -812,29 +829,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T05:30:08Z",
+      "time": "2026-04-17T05:35:09Z",
       "event": "Session spend: $0.16"
     },
     {
-      "time": "2026-04-17T05:30:05Z",
+      "time": "2026-04-17T05:35:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T05:30:03Z",
+      "time": "2026-04-17T05:35:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T05:30:03Z",
+      "time": "2026-04-17T05:35:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T05:30:03Z",
+      "time": "2026-04-17T05:35:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-17T05:30:03Z",
+      "time": "2026-04-17T05:35:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T05:30:03Z"
+  "lastUpdated": "2026-04-17T05:35:03Z"
 }
