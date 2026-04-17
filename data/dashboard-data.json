@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "finished session startup re-anchor and greeting prep",
+    "objective": "deep scan Mission Control brain feed and refresh memory roadmap live state",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-17T23:24:04Z",
-    "checkedAt": "2026-04-17T23:24:04Z",
+    "steps": [
+      {
+        "label": "audit",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-17T23:29:21Z",
+    "checkedAt": "2026-04-17T23:29:21Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "finished session startup re-anchor and greeting prep",
-    "updatedAt": "2026-04-17T23:25:03Z"
+    "context": "deep scan Mission Control brain feed and refresh memory roadmap live state",
+    "updatedAt": "2026-04-17T23:30:03Z"
   },
   "contextWindow": {
     "usedTokens": 36884,
@@ -133,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 36m",
+        "Resets in 3h 31m",
         "Weekly: 98% left [===========-]",
         "Pace: 66% in reserve | Expected 68% used | Lasts until reset",
         "Resets in 2d 5h",
@@ -144,11 +150,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 36m",
+      "sessionReset": "3h 31m",
       "weeklyReset": "2d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T23:25:05Z"
+    "updatedAt": "2026-04-17T23:30:04Z"
   },
   "modelUsage": {
     "session": 0.145312,
@@ -273,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T23:25:09Z",
+    "lastUpdated": "2026-04-17T23:30:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -314,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 41.576583,
-    "total_earned": 41.576583,
-    "online_time": "415h 45m",
+    "sim_balance": 41.584889,
+    "total_earned": 41.584889,
+    "online_time": "415h 50m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,7 +333,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T23:25:09Z",
+    "updatedAt": "2026-04-17T23:30:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -342,14 +348,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 53.2,
-      "cpu_user": 26.63,
-      "cpu_sys": 26.52,
-      "load1": 2.88,
-      "load5": 2.79,
-      "load15": 2.79,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 40.3,
+      "cpu_user": 24.95,
+      "cpu_sys": 15.32,
+      "load1": 2.8,
+      "load5": 3.05,
+      "load15": 2.93,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -357,14 +363,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 3.6,
-      "cpu_sys": 8.1,
-      "load1": 2.35,
-      "load5": 2.22,
-      "load15": 2.18,
+      "cpu_pct": 11.0,
+      "cpu_user": 1.83,
+      "cpu_sys": 9.17,
+      "load1": 1.59,
+      "load5": 2.04,
+      "load15": 2.12,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -388,19 +394,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:25:03Z"
+      "lastChecked": "2026-04-17T23:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:25:03Z"
+      "lastChecked": "2026-04-17T23:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T23:25:03Z"
+      "lastChecked": "2026-04-17T23:30:03Z"
     }
   ],
   "crons": [
@@ -799,6 +805,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260417-867",
+      "title": "Deep scan Mission Control brain feed widget/module and refresh memory roadmap live state",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Auditing the full brain feed UI for spacing, truncation, and stale/live-state issues across Live, Tools, Flow, Live Step, Activity, Agent, and Memory Roadmap, then applying polish and verification in `mission-control/`.",
+      "requestedAt": "2026-04-17 19:25",
+      "updatedAt": "2026-04-17 19:25",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260417-866",
       "title": "Run the full post-upgrade cleanup and verification pass",
       "status": "active",
@@ -823,29 +839,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T23:25:09Z",
+      "time": "2026-04-17T23:30:07Z",
       "event": "Session spend: $0.15"
     },
     {
-      "time": "2026-04-17T23:25:05Z",
+      "time": "2026-04-17T23:30:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T23:25:03Z",
+      "time": "2026-04-17T23:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T23:25:03Z",
+      "time": "2026-04-17T23:30:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T23:25:03Z",
+      "time": "2026-04-17T23:30:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-17T23:25:03Z",
+      "time": "2026-04-17T23:30:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T23:25:03Z"
+  "lastUpdated": "2026-04-17T23:30:03Z"
 }
