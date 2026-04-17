@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Handle async Discord cleanup results and verify current Discord cleanup state",
+    "objective": "finished startup greeting and resumed session context",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-17T00:38:08Z",
-    "checkedAt": "2026-04-17T00:38:08Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-17T00:44:49Z",
+    "checkedAt": "2026-04-17T00:44:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Handle async Discord cleanup results and verify current Discord cleanup state",
-    "updatedAt": "2026-04-17T00:40:03Z"
+    "context": "finished startup greeting and resumed session context",
+    "updatedAt": "2026-04-17T00:45:03Z"
   },
   "contextWindow": {
-    "usedTokens": 84351,
+    "usedTokens": 37406,
     "limitTokens": 400000,
-    "pct": 0.2109,
+    "pct": 0.0935,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -139,7 +133,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 21m",
+        "Resets in 16m",
         "Weekly: 98% left [===========-]",
         "Pace: 52% in reserve | Expected 54% used | Lasts until reset",
         "Resets in 3d 4h",
@@ -150,15 +144,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "21m",
+      "sessionReset": "16m",
       "weeklyReset": "3d 4h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T00:40:05Z"
+    "updatedAt": "2026-04-17T00:45:05Z"
   },
   "modelUsage": {
-    "session": 4.504523,
-    "daily": 77.47317,
+    "session": 0.155693,
+    "daily": 73.12434,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -170,7 +164,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 27.134558499999994
+        "cost": 22.785728499999994
       },
       {
         "name": "gpt-5.4",
@@ -205,12 +199,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1960857,
-        "outputTokens": 71185,
-        "totalTokens": 2032042,
-        "sessionCost": 27.134558499999994,
-        "dailyCost": 24.723667499999994,
-        "weeklyCost": 27.134558499999994,
+        "inputTokens": 1724639,
+        "outputTokens": 57528,
+        "totalTokens": 1782167,
+        "sessionCost": 22.785728499999994,
+        "dailyCost": 20.374837499999995,
+        "weeklyCost": 22.785728499999994,
         "sessions": 71,
         "isGemini": false,
         "costEstimated": false
@@ -279,7 +273,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T00:40:08Z",
+    "lastUpdated": "2026-04-17T00:45:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -308,8 +302,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 77.47317,
-      "total": 111.110816,
+      "daily": 73.12434,
+      "total": 106.761986,
       "monthly": 1000.269705
     },
     "weeklyRunRate": {
@@ -320,9 +314,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 39.301583,
-    "total_earned": 39.301583,
-    "online_time": "393h 0m",
+    "sim_balance": 39.309917,
+    "total_earned": 39.309917,
+    "online_time": "393h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -333,7 +327,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T00:40:09Z",
+    "updatedAt": "2026-04-17T00:45:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -348,14 +342,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.6,
-      "cpu_user": 26.71,
-      "cpu_sys": 14.85,
-      "load1": 2.4,
-      "load5": 2.26,
-      "load15": 2.48,
+      "cpu_pct": 43.2,
+      "cpu_user": 27.31,
+      "cpu_sys": 15.89,
+      "load1": 2.79,
+      "load5": 2.69,
+      "load15": 2.61,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -363,14 +357,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.2,
-      "cpu_user": 1.86,
-      "cpu_sys": 9.34,
-      "load1": 1.86,
-      "load5": 2.05,
-      "load15": 2.12,
+      "cpu_pct": 13.1,
+      "cpu_user": 4.67,
+      "cpu_sys": 8.41,
+      "load1": 1.93,
+      "load5": 1.88,
+      "load15": 2.0,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -394,19 +388,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T00:40:03Z"
+      "lastChecked": "2026-04-17T00:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T00:40:03Z"
+      "lastChecked": "2026-04-17T00:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T00:40:03Z"
+      "lastChecked": "2026-04-17T00:45:03Z"
     }
   ],
   "crons": [
@@ -805,16 +799,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260416-831",
-      "title": "Clean up Josh\u2019s logged-in Discord in Chrome and identify ambiguous communities/channels",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh approved the destructive pass: remove Perplexity access, keep Panini, and clear/block flagged Discord spam. Perplexity Pro Link has been successfully deauthorized in Discord Authorized Apps while PANINI NFTS was left untouched. Spam cleanup made real progress from 34 down to roughly 14 remaining, but Discord\u2019s report modal started intermittently refusing the Submit Report click, so the last chunk is currently blocked by flaky web UI behavior rather than uncertainty about intent.",
-      "requestedAt": "2026-04-16 20:11",
-      "updatedAt": "2026-04-16 20:24",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260416-823",
       "title": "Generate short filename slug for MoltWorld v2 repair conversation",
       "status": "active",
@@ -849,29 +833,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T00:40:08Z",
-      "event": "Session spend: $4.50"
+      "time": "2026-04-17T00:45:08Z",
+      "event": "Session spend: $0.16"
     },
     {
-      "time": "2026-04-17T00:40:05Z",
+      "time": "2026-04-17T00:45:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T00:40:03Z",
+      "time": "2026-04-17T00:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T00:40:03Z",
+      "time": "2026-04-17T00:45:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T00:40:03Z",
+      "time": "2026-04-17T00:45:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-17T00:40:03Z",
+      "time": "2026-04-17T00:45:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T00:40:03Z"
+  "lastUpdated": "2026-04-17T00:45:03Z"
 }
