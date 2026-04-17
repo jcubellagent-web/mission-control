@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "finished first-pass Discord audit and surfaced cleanup questions",
+  "objective": "apply Discord cleanup decisions: clear spam, revoke Perplexity access, keep Panini",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-17T00:15:26Z",
-  "checkedAt": "2026-04-17T00:15:26Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "discord-cleanup-apply"
+    }
+  ],
+  "currentTool": "discord-cleanup-apply",
+  "updatedAt": "2026-04-17T00:17:07Z",
+  "checkedAt": "2026-04-17T00:17:07Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
