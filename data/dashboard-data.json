@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "inspect Josh's logged-in Discord session in Chrome and start cleanup",
+    "objective": "apply Discord cleanup decisions: clear spam, revoke Perplexity access, keep Panini",
     "status": "active",
     "steps": [
       {
         "label": "tool",
         "status": "active",
-        "tool": "discord-cleanup"
+        "tool": "discord-cleanup-apply"
       }
     ],
-    "currentTool": "discord-cleanup",
-    "updatedAt": "2026-04-17T00:11:36Z",
-    "checkedAt": "2026-04-17T00:11:36Z",
+    "currentTool": "discord-cleanup-apply",
+    "updatedAt": "2026-04-17T00:17:07Z",
+    "checkedAt": "2026-04-17T00:17:07Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "inspect Josh's logged-in Discord session in Chrome and start cleanup",
-    "updatedAt": "2026-04-17T00:15:03Z"
+    "context": "apply Discord cleanup decisions: clear spam, revoke Perplexity access, keep Panini",
+    "updatedAt": "2026-04-17T00:20:03Z"
   },
   "contextWindow": {
-    "usedTokens": 65980,
+    "usedTokens": 105837,
     "limitTokens": 400000,
-    "pct": 0.165,
+    "pct": 0.2646,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 46m",
+        "Resets in 41m",
         "Weekly: 98% left [===========-]",
         "Pace: 52% in reserve | Expected 54% used | Lasts until reset",
         "Resets in 3d 5h",
@@ -150,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "46m",
+      "sessionReset": "41m",
       "weeklyReset": "3d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T00:15:06Z"
+    "updatedAt": "2026-04-17T00:20:05Z"
   },
   "modelUsage": {
-    "session": 0.712236,
-    "daily": 73.680883,
+    "session": 1.694742,
+    "daily": 74.663389,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -170,7 +170,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 23.342271999999994
+        "cost": 24.324777999999995
       },
       {
         "name": "gpt-5.4",
@@ -205,12 +205,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1689320,
-        "outputTokens": 56922,
-        "totalTokens": 1746242,
-        "sessionCost": 23.342271999999994,
-        "dailyCost": 20.931380999999995,
-        "weeklyCost": 23.342271999999994,
+        "inputTokens": 1814664,
+        "outputTokens": 64785,
+        "totalTokens": 1879449,
+        "sessionCost": 24.324777999999995,
+        "dailyCost": 21.913886999999995,
+        "weeklyCost": 24.324777999999995,
         "sessions": 71,
         "isGemini": false,
         "costEstimated": false
@@ -279,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T00:15:09Z",
+    "lastUpdated": "2026-04-17T00:20:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -308,8 +308,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 73.680883,
-      "total": 107.31853,
+      "daily": 74.663389,
+      "total": 108.301036,
       "monthly": 1000.269705
     },
     "weeklyRunRate": {
@@ -320,9 +320,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 39.259917,
-    "total_earned": 39.259917,
-    "online_time": "392h 35m",
+    "sim_balance": 39.26825,
+    "total_earned": 39.26825,
+    "online_time": "392h 40m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -333,7 +333,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T00:15:09Z",
+    "updatedAt": "2026-04-17T00:20:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -348,14 +348,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.8,
-      "cpu_user": 27.51,
-      "cpu_sys": 15.26,
-      "load1": 3.06,
-      "load5": 2.89,
-      "load15": 3.41,
+      "cpu_pct": 32.0,
+      "cpu_user": 19.9,
+      "cpu_sys": 12.89,
+      "load1": 1.98,
+      "load5": 2.43,
+      "load15": 3.05,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -363,12 +363,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.7,
-      "cpu_user": 3.41,
-      "cpu_sys": 10.25,
-      "load1": 1.85,
-      "load5": 1.94,
-      "load15": 2.0,
+      "cpu_pct": 24.3,
+      "cpu_user": 10.28,
+      "cpu_sys": 14.1,
+      "load1": 2.3,
+      "load5": 2.06,
+      "load15": 2.01,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -394,19 +394,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T00:15:03Z"
+      "lastChecked": "2026-04-17T00:20:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T00:15:03Z"
+      "lastChecked": "2026-04-17T00:20:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T00:15:03Z"
+      "lastChecked": "2026-04-17T00:20:03Z"
     }
   ],
   "crons": [
@@ -695,7 +695,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-17T00:01:17.145566+00:00"
+      "lastRun": "2026-04-17T00:16:19.594983+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -809,9 +809,9 @@
       "title": "Clean up Josh\u2019s logged-in Discord in Chrome and identify ambiguous communities/channels",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh asked for a real cleanup pass on the live Discord account in Chrome: inspect server/channel clutter, tidy obvious low-risk items, surface major announcements/giveaway opportunities, and ask only on ambiguous relevance decisions.",
+      "notes": "First pass complete on the live Discord session: found 34 items in the Spam message-requests bucket, checked several visible DMs, and surfaced the main ambiguity set before taking destructive account actions. Likely-relevant Sorare/community DMs include DJKoeft-Sorare, soxxy, momo_sorare, NFTsEveryday, and JSchlade. Discord Official also shows app-added server notices for PANINI NFTS and Perplexity that may be worth revoking if no longer needed.",
       "requestedAt": "2026-04-16 20:11",
-      "updatedAt": "2026-04-16 20:11",
+      "updatedAt": "2026-04-16 20:16",
       "owner": "JOSH 2.0"
     },
     {
@@ -849,29 +849,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T00:15:09Z",
-      "event": "Session spend: $0.71"
+      "time": "2026-04-17T00:20:08Z",
+      "event": "Session spend: $1.69"
     },
     {
-      "time": "2026-04-17T00:15:06Z",
+      "time": "2026-04-17T00:20:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T00:15:03Z",
+      "time": "2026-04-17T00:20:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T00:15:03Z",
+      "time": "2026-04-17T00:20:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T00:15:03Z",
+      "time": "2026-04-17T00:20:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-17T00:15:03Z",
+      "time": "2026-04-17T00:20:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T00:15:03Z"
+  "lastUpdated": "2026-04-17T00:20:03Z"
 }
