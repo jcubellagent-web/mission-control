@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "fix J.A.I.N unresolved issues alert from Google Trends 429s",
+    "objective": "handled async exec completion internally",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-17T05:32:57Z",
-    "checkedAt": "2026-04-17T05:32:57Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-17T05:39:35Z",
+    "checkedAt": "2026-04-17T05:39:35Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "fix J.A.I.N unresolved issues alert from Google Trends 429s",
-    "updatedAt": "2026-04-17T05:35:03Z"
+    "context": "handled async exec completion internally",
+    "updatedAt": "2026-04-17T05:40:02Z"
   },
   "contextWindow": {
-    "usedTokens": 37406,
+    "usedTokens": 71593,
     "limitTokens": 400000,
-    "pct": 0.0935,
+    "pct": 0.179,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,15 +125,17 @@
   },
   "codingVisibility": {
     "workspaceDirty": 42,
-    "missionControlDirty": 6,
-    "recentFiles": [],
+    "missionControlDirty": 8,
+    "recentFiles": [
+      "scripts/intelligence_feed.py"
+    ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 26m",
+        "Resets in 21m",
         "Weekly: 98% left [===========-]",
         "Pace: 55% in reserve | Expected 57% used | Lasts until reset",
         "Resets in 2d 23h",
@@ -150,15 +146,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "26m",
+      "sessionReset": "21m",
       "weeklyReset": "2d 23h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T05:35:05Z"
+    "updatedAt": "2026-04-17T05:40:04Z"
   },
   "modelUsage": {
-    "session": 0.155693,
-    "daily": 26.035039,
+    "session": 1.335274,
+    "daily": 27.21462,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -170,7 +166,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 25.435421999999996
+        "cost": 26.615003499999993
       },
       {
         "name": "gpt-5.4",
@@ -205,12 +201,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 1808439,
-        "outputTokens": 57471,
-        "totalTokens": 1865910,
-        "sessionCost": 25.435421999999996,
-        "dailyCost": 18.91571,
-        "weeklyCost": 25.435421999999996,
+        "inputTokens": 1843221,
+        "outputTokens": 56312,
+        "totalTokens": 1899533,
+        "sessionCost": 26.615003499999993,
+        "dailyCost": 20.0952915,
+        "weeklyCost": 26.615003499999993,
         "sessions": 71,
         "isGemini": false,
         "costEstimated": false
@@ -279,7 +275,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T05:35:09Z",
+    "lastUpdated": "2026-04-17T05:40:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -308,8 +304,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 26.040866,
-      "total": 109.417507,
+      "daily": 27.220447,
+      "total": 110.597089,
       "monthly": 1000.275532
     },
     "weeklyRunRate": {
@@ -320,9 +316,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 39.79325,
-    "total_earned": 39.79325,
-    "online_time": "397h 55m",
+    "sim_balance": 39.801556,
+    "total_earned": 39.801556,
+    "online_time": "398h 0m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -333,7 +329,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T05:35:09Z",
+    "updatedAt": "2026-04-17T05:40:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -348,12 +344,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.1,
-      "cpu_user": 23.46,
-      "cpu_sys": 14.44,
-      "load1": 3.05,
-      "load5": 2.91,
-      "load15": 2.82,
+      "cpu_pct": 42.8,
+      "cpu_user": 27.3,
+      "cpu_sys": 15.52,
+      "load1": 2.77,
+      "load5": 2.74,
+      "load15": 2.76,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -363,12 +359,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 3.66,
-      "cpu_sys": 9.17,
-      "load1": 2.14,
-      "load5": 2.03,
-      "load15": 2.06,
+      "cpu_pct": 20.6,
+      "cpu_user": 5.6,
+      "cpu_sys": 14.95,
+      "load1": 2.51,
+      "load5": 2.23,
+      "load15": 2.13,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -394,19 +390,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T05:35:03Z"
+      "lastChecked": "2026-04-17T05:40:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T05:35:03Z"
+      "lastChecked": "2026-04-17T05:40:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T05:35:03Z"
+      "lastChecked": "2026-04-17T05:40:02Z"
     }
   ],
   "crons": [
@@ -803,19 +799,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260417-833",
-      "title": "Fix J.A.I.N unresolved-issues alert caused by repeated Google Trends 429s",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Investigating the Google Trends rate-limit errors behind the unresolved-issues card and patching the fetch/retry behavior so the alert stops flapping on harmless 429 bursts.",
-      "requestedAt": "2026-04-17 01:32",
-      "updatedAt": "2026-04-17 01:32",
-      "owner": "J.A.I.N"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
+    {
+      "id": "coding-visibility",
+      "label": "Editing: scripts/intelligence_feed.py",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    },
     {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 67%",
@@ -829,29 +824,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T05:35:09Z",
-      "event": "Session spend: $0.16"
+      "time": "2026-04-17T05:40:08Z",
+      "event": "Session spend: $1.34"
     },
     {
-      "time": "2026-04-17T05:35:05Z",
+      "time": "2026-04-17T05:40:04Z",
+      "event": "Coding: scripts/intelligence_feed.py"
+    },
+    {
+      "time": "2026-04-17T05:40:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T05:35:03Z",
+      "time": "2026-04-17T05:40:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T05:35:03Z",
+      "time": "2026-04-17T05:40:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T05:35:03Z",
+      "time": "2026-04-17T05:40:02Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-17T05:35:03Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T05:35:03Z"
+  "lastUpdated": "2026-04-17T05:40:02Z"
 }
