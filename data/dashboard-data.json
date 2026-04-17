@@ -5,24 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Backed up memory to J.A.I.N successfully; sync script completed without errors.",
+    "objective": "processed async post-upgrade exec completions",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-17T23:00:54Z",
-    "checkedAt": "2026-04-17T23:00:54Z",
+    "updatedAt": "2026-04-17T23:07:49Z",
+    "checkedAt": "2026-04-17T23:07:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Backed up memory to J.A.I.N successfully; sync script completed without errors.",
-    "updatedAt": "2026-04-17T23:05:02Z"
+    "context": "processed async post-upgrade exec completions",
+    "updatedAt": "2026-04-17T23:10:02Z"
   },
   "contextWindow": {
-    "usedTokens": 35585,
+    "usedTokens": 70104,
     "limitTokens": 400000,
-    "pct": 0.089,
+    "pct": 0.1753,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -133,7 +133,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 56m",
+        "Resets in 3h 51m",
         "Weekly: 98% left [===========-]",
         "Pace: 66% in reserve | Expected 68% used | Lasts until reset",
         "Resets in 2d 6h",
@@ -144,15 +144,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 56m",
+      "sessionReset": "3h 51m",
       "weeklyReset": "2d 6h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T23:05:04Z"
+    "updatedAt": "2026-04-17T23:10:04Z"
   },
   "modelUsage": {
-    "session": 0.324728,
-    "daily": 79.957347,
+    "session": 0.936338,
+    "daily": 80.568957,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -164,7 +164,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 39.014869
+        "cost": 39.626478999999996
       },
       {
         "name": "gpt-5.4",
@@ -199,12 +199,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 3411043,
-        "outputTokens": 116803,
-        "totalTokens": 3527846,
-        "sessionCost": 39.014869,
-        "dailyCost": 32.495157000000006,
-        "weeklyCost": 39.014869,
+        "inputTokens": 3441140,
+        "outputTokens": 116627,
+        "totalTokens": 3557767,
+        "sessionCost": 39.626478999999996,
+        "dailyCost": 33.106767000000005,
+        "weeklyCost": 39.626478999999996,
         "sessions": 155,
         "isGemini": false,
         "costEstimated": false
@@ -273,7 +273,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T23:05:07Z",
+    "lastUpdated": "2026-04-17T23:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -302,8 +302,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 80.020256,
-      "total": 120.680926,
+      "daily": 80.631866,
+      "total": 121.292536,
       "monthly": 1000.332613
     },
     "weeklyRunRate": {
@@ -314,9 +314,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 41.543222,
-    "total_earned": 41.543222,
-    "online_time": "415h 25m",
+    "sim_balance": 41.551556,
+    "total_earned": 41.551556,
+    "online_time": "415h 30m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -327,7 +327,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T23:05:08Z",
+    "updatedAt": "2026-04-17T23:10:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -342,14 +342,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.4,
-      "cpu_user": 25.98,
-      "cpu_sys": 15.38,
-      "load1": 2.73,
-      "load5": 2.81,
-      "load15": 2.76,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 40.6,
+      "cpu_user": 25.28,
+      "cpu_sys": 15.33,
+      "load1": 2.75,
+      "load5": 3.02,
+      "load15": 2.91,
+      "ram_used_gb": 10.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -357,12 +357,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.5,
-      "cpu_user": 2.88,
-      "cpu_sys": 8.65,
-      "load1": 1.85,
-      "load5": 2.26,
-      "load15": 2.24,
+      "cpu_pct": 12.7,
+      "cpu_user": 1.81,
+      "cpu_sys": 10.9,
+      "load1": 2.34,
+      "load5": 2.19,
+      "load15": 2.19,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -388,19 +388,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:05:02Z"
+      "lastChecked": "2026-04-17T23:10:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:05:02Z"
+      "lastChecked": "2026-04-17T23:10:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T23:05:02Z"
+      "lastChecked": "2026-04-17T23:10:02Z"
     }
   ],
   "crons": [
@@ -797,18 +797,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260417-865",
-      "title": "Upgrade the local OpenClaw install to the latest stable version",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh explicitly asked for a self-upgrade on the primary local OpenClaw box. Verified the live state is OpenClaw 2026.4.14 on the stable pnpm install path, confirmed the documented updater and dry run target 2026.4.15 cleanly, and created a timestamped rollback snapshot under `~/.openclaw/backups/openclaw-update-20260417-152248/` with config, credentials, and current dist JS files. The actual packaged `openclaw update --yes` run is now in progress and will be followed by gateway/version health checks.",
-      "requestedAt": "2026-04-17 15:19",
-      "updatedAt": "2026-04-17 15:22",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "context-watchdog",
@@ -823,29 +812,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T23:05:07Z",
-      "event": "Session spend: $0.32"
+      "time": "2026-04-17T23:10:08Z",
+      "event": "Session spend: $0.94"
     },
     {
-      "time": "2026-04-17T23:05:04Z",
+      "time": "2026-04-17T23:10:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T23:05:02Z",
+      "time": "2026-04-17T23:10:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T23:05:02Z",
+      "time": "2026-04-17T23:10:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T23:05:02Z",
+      "time": "2026-04-17T23:10:02Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-17T23:05:02Z",
+      "time": "2026-04-17T23:10:02Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-17T23:05:02Z"
+  "lastUpdated": "2026-04-17T23:10:02Z"
 }
