@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "redesign the model usage module and add model color coding into the brain feed live objective",
-    "updatedAt": "2026-04-18T02:30:03Z"
+    "updatedAt": "2026-04-18T02:35:31Z"
   },
   "contextWindow": {
     "usedTokens": 187239,
@@ -130,34 +130,17 @@
     "pct": 0.6714
   },
   "codingVisibility": {
-    "workspaceDirty": 42,
-    "missionControlDirty": 8,
+    "workspaceDirty": 0,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/screenshots/mcbrain-snapshot.json"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 98% left",
+    "codexbarStatus": "Codex auth required",
     "codexbar": {
-      "available": true,
-      "raw": [
-        "== Codex 0.120.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 31m",
-        "Weekly: 98% left [===========-]",
-        "Pace: 68% in reserve | Expected 70% used | Lasts until reset",
-        "Resets in 2d 2h",
-        "Credits: 0 left",
-        "Account: jcubell16@gmail.com"
-      ],
-      "session": "99% left",
-      "weekly": "98% left",
-      "credits": "0 left",
-      "account": "jcubell16@gmail.com",
-      "sessionReset": "31m",
-      "weeklyReset": "2d 2h",
-      "summary": "99% left \u00b7 wk 98% left"
+      "available": false
     },
-    "updatedAt": "2026-04-18T02:30:05Z"
+    "updatedAt": "2026-04-18T02:35:52Z"
   },
   "modelUsage": {
     "session": 16.093887,
@@ -282,7 +265,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T02:30:08Z",
+    "lastUpdated": "2026-04-18T02:36:01Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -323,9 +306,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 41.884889,
-    "total_earned": 41.884889,
-    "online_time": "418h 50m",
+    "sim_balance": 41.894694,
+    "total_earned": 41.894694,
+    "online_time": "418h 56m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -336,7 +319,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T02:30:08Z",
+    "updatedAt": "2026-04-18T02:36:01Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -351,14 +334,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.9,
-      "cpu_user": 24.91,
-      "cpu_sys": 14.6,
-      "load1": 3.0,
-      "load5": 3.44,
-      "load15": 3.57,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 34.7,
+      "cpu_user": 19.35,
+      "cpu_sys": 15.37,
+      "load1": 3.8,
+      "load5": 3.63,
+      "load15": 3.59,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "92Gi",
@@ -366,14 +349,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 2.63,
-      "cpu_sys": 10.52,
-      "load1": 2.18,
-      "load5": 2.01,
-      "load15": 2.03,
+      "cpu_pct": 22.0,
+      "cpu_user": 7.62,
+      "cpu_sys": 14.4,
+      "load1": 1.51,
+      "load5": 1.78,
+      "load15": 1.91,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -397,19 +380,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T02:30:03Z"
+      "lastChecked": "2026-04-18T02:35:31Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T02:30:03Z"
+      "lastChecked": "2026-04-18T02:35:31Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T02:30:03Z"
+      "lastChecked": "2026-04-18T02:35:31Z"
     }
   ],
   "crons": [
@@ -698,7 +681,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-18T02:16:19.014336+00:00"
+      "lastRun": "2026-04-18T02:31:17.189050+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -808,16 +791,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260417-870",
-      "title": "Redesign the model usage module and wire model color-coding into Brain Feed",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Doing a soup-to-nuts redesign of the model usage module so it better depicts model usage and spend, while also color-coding the live objective by active model/tool and adding a clear model key in the Brain Feed.",
-      "requestedAt": "2026-04-17 22:24",
-      "updatedAt": "2026-04-17 22:24",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260417-866",
       "title": "Run the full post-upgrade cleanup and verification pass",
       "status": "active",
@@ -852,29 +825,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T02:30:08Z",
+      "time": "2026-04-18T02:36:01Z",
       "event": "Session spend: $16.09"
     },
     {
-      "time": "2026-04-18T02:30:05Z",
+      "time": "2026-04-18T02:35:52Z",
       "event": "Coding: mission-control/index.html, mission-control/screenshots/mcbrain-snapshot.json"
     },
     {
-      "time": "2026-04-18T02:30:05Z",
-      "event": "CodexBar: 99% left \u00b7 wk 98% left"
+      "time": "2026-04-18T02:35:52Z",
+      "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-04-18T02:30:03Z",
+      "time": "2026-04-18T02:35:31Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T02:30:03Z",
+      "time": "2026-04-18T02:35:31Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T02:30:03Z",
+      "time": "2026-04-18T02:35:31Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T02:30:03Z"
+  "lastUpdated": "2026-04-18T02:35:31Z"
 }
