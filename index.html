@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1775558516 -->
+    <!-- BUILD:1776482894 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -5520,6 +5520,7 @@
         // ============================================
         // CONFIGURATION - Edit these values
         // ============================================
+        const BUILD_ID = '1776482894';
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
@@ -6621,6 +6622,10 @@
         window.closeModuleModal = closeModuleModal;
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hostname.includes('github.io') && !currentBuildQueryMatches()) {
+                hardRefreshToCurrentBuild();
+                return;
+            }
             const closeBtn = document.getElementById('module-modal-close');
             const overlay = document.getElementById('module-modal-overlay');
             if (closeBtn) closeBtn.addEventListener('click', closeModuleModal);
@@ -6662,9 +6667,28 @@
             }
         }
 
+        function currentBuildQueryMatches() {
+            try {
+                return new URL(window.location.href).searchParams.get('_build') === BUILD_ID;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function hardRefreshToCurrentBuild() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('_build', BUILD_ID);
+            url.searchParams.set('_ts', Date.now().toString());
+            window.location.replace(url.toString());
+        }
+
         async function forceUpdate() {
             const btn = document.getElementById('refresh-btn');
             if (!btn || window._forceUpdating) return;
+            if (!currentBuildQueryMatches()) {
+                hardRefreshToCurrentBuild();
+                return;
+            }
             window._forceUpdating = true;
             btn.classList.add('loading');
             try {
