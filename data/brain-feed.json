@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "JAIMES audit async completions reconciled",
+  "objective": "run JAIMES workhorse hardening and remove Anthropic/OpenRouter keys",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T05:27:08Z",
-  "checkedAt": "2026-04-18T05:27:08Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-18T05:28:54Z",
+  "checkedAt": "2026-04-18T05:28:54Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
