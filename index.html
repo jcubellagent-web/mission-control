@@ -7976,36 +7976,42 @@
         function buildBrainFeedObjectiveWindows(textEl, wrap, fullText) {
             const normalized = sanitizeLabel(fullText || '').replace(/\s+/g, ' ').trim();
             if (!normalized) return [];
-            const windows = [];
-            let cursor = 0;
             const fits = (candidate) => {
                 textEl.textContent = candidate;
                 return textEl.scrollHeight <= (wrap.clientHeight + 2);
             };
-            while (cursor < normalized.length) {
-                let lo = 1;
-                let hi = normalized.length - cursor;
-                let best = 1;
-                while (lo <= hi) {
-                    const mid = Math.floor((lo + hi) / 2);
-                    const candidate = normalized.slice(cursor, cursor + mid).trim();
+            const words = normalized.split(' ').filter(Boolean);
+            const windows = [];
+            let index = 0;
+            while (index < words.length) {
+                let bestText = '';
+                let bestEnd = index;
+                let candidate = '';
+                for (let i = index; i < words.length; i += 1) {
+                    candidate = candidate ? `${candidate} ${words[i]}` : words[i];
                     if (fits(candidate)) {
-                        best = mid;
-                        lo = mid + 1;
+                        bestText = candidate;
+                        bestEnd = i + 1;
                     } else {
-                        hi = mid - 1;
+                        break;
                     }
                 }
-                let end = cursor + best;
-                if (end < normalized.length) {
-                    const lastSpace = normalized.lastIndexOf(' ', end);
-                    if (lastSpace > cursor + Math.max(20, Math.floor(best * 0.55))) end = lastSpace;
+                if (!bestText) {
+                    const word = words[index] || '';
+                    let chunk = '';
+                    for (const ch of word) {
+                        const next = chunk + ch;
+                        if (fits(next)) chunk = next;
+                        else break;
+                    }
+                    bestText = chunk || word.slice(0, 1);
+                    const remainder = word.slice(bestText.length).trim();
+                    if (remainder) words.splice(index, 1, bestText, remainder);
+                    bestEnd = index + 1;
                 }
-                const windowText = normalized.slice(cursor, end).trim();
-                if (!windowText) break;
-                windows.push(windowText);
-                cursor = end;
-                while (normalized[cursor] === ' ') cursor += 1;
+                if (!bestText) break;
+                windows.push(bestText.trim());
+                index = bestEnd;
                 if (windows.length > 12) break;
             }
             textEl.textContent = normalized;
