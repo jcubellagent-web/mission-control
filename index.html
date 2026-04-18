@@ -8013,6 +8013,40 @@
             return compactUiLabel(parts.join(' · '), 180) || resolveBrainFeedStepLabel(bf) || 'Working through the current objective.';
         }
 
+        function fitBrainFeedObjectiveViewport(brainFeedCard, fullText) {
+            const wrap = brainFeedCard?.querySelector('.bf-objective-text-wrap');
+            const textEl = brainFeedCard?.querySelector('.bf-objective-text');
+            if (!wrap || !textEl) return { fitted: true };
+            textEl.textContent = fullText;
+            textEl.dataset.fullText = fullText;
+            textEl.style.removeProperty('font-size');
+            textEl.style.removeProperty('line-height');
+            textEl.style.removeProperty('min-height');
+            wrap.style.removeProperty('height');
+            wrap.style.removeProperty('min-height');
+            wrap.style.removeProperty('max-height');
+            const baseSize = parseFloat(getComputedStyle(textEl).fontSize) || 39.2;
+            const baseLineHeight = parseFloat(getComputedStyle(textEl).lineHeight) || (baseSize * 1.03);
+            const lineRatio = Math.max(1, baseLineHeight / baseSize);
+            const minSize = 28;
+            const applySize = (sizePx) => {
+                const linePx = sizePx * lineRatio;
+                textEl.style.fontSize = `${sizePx}px`;
+                textEl.style.lineHeight = `${linePx}px`;
+                textEl.style.minHeight = `${linePx * 2}px`;
+                wrap.style.height = `${linePx * 2 + 4}px`;
+                wrap.style.minHeight = `${linePx * 2 + 4}px`;
+                wrap.style.maxHeight = `${linePx * 2 + 4}px`;
+            };
+            let size = baseSize;
+            applySize(size);
+            while (textEl.scrollHeight > (wrap.clientHeight + 2) && size > minSize) {
+                size -= 1;
+                applySize(size);
+            }
+            return { fitted: textEl.scrollHeight <= (wrap.clientHeight + 2), size };
+        }
+
         function rebalanceBrainFeedObjectiveWindows(textEl, wrap, windows, fits) {
             if (windows.length < 2) return windows;
             const rebalanced = [...windows];
@@ -8094,11 +8128,12 @@
             const fullText = textEl.dataset.fullText || textEl.textContent || '';
             textEl.classList.remove('is-scrolling');
             textEl.style.opacity = '1';
-            textEl.textContent = fullText;
             requestAnimationFrame(() => {
-                textEl.textContent = fullText;
-                const overflow = Math.max(0, textEl.scrollHeight - wrap.clientHeight);
-                if (overflow <= 6) return;
+                const fitState = fitBrainFeedObjectiveViewport(brainFeedCard, fullText);
+                if (fitState.fitted) {
+                    textEl.textContent = fullText;
+                    return;
+                }
                 const windows = buildBrainFeedObjectiveWindows(textEl, wrap, fullText);
                 if (windows.length <= 1) {
                     textEl.textContent = fullText;
