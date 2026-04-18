@@ -562,13 +562,13 @@
         .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
         .bf-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
         .bf-model-badge {
-            font-size: 0.58rem;
+            font-size: 0.54rem;
             font-weight: 700;
-            color: rgba(255,255,255,0.78);
-            background: rgba(229,62,62,0.12);
-            border: 1px solid rgba(229,62,62,0.18);
+            color: rgba(255,255,255,0.74);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 999px;
-            padding: 3px 8px;
+            padding: 2px 7px;
             margin-left: 6px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -583,15 +583,15 @@
         .ctx-inline-bar {
             display: flex;
             align-items: center;
-            gap: 7px;
-            padding: 5px 9px;
+            gap: 6px;
+            padding: 4px 8px;
             border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.025);
         }
-        .ctx-inline-label { font-size: 0.58rem; color: rgba(255,255,255,0.48); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
-        .ctx-inline-pct { font-size: 0.72rem; font-weight: 800; }
-        .ctx-inline-track { width: 88px; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+        .ctx-inline-label { font-size: 0.54rem; color: rgba(255,255,255,0.46); text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
+        .ctx-inline-pct { font-size: 0.66rem; font-weight: 800; }
+        .ctx-inline-track { width: 72px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
         .ctx-inline-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease, background 0.4s; }
         /* Unified activity log */
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
@@ -3359,21 +3359,21 @@
         .memory-roadmap-summary {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
         }
         .memory-roadmap-summary-pill {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 8px;
+            gap: 5px;
+            padding: 3px 7px;
             border-radius: 999px;
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.72);
-            background: rgba(255,255,255,0.055);
-            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.68);
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.06);
         }
         .memory-roadmap-summary-pill.live {
             color: #6ee7b7;
@@ -3388,31 +3388,31 @@
         .memory-roadmap-compact-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            gap: 10px;
         }
         .memory-roadmap-card {
             min-width: 0;
-            min-height: 88px;
-            padding: 10px 11px;
+            min-height: 92px;
+            padding: 12px;
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.022);
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            gap: 6px;
+            box-shadow: none;
         }
         .memory-roadmap-card.active {
-            border-color: rgba(56,189,248,0.42);
-            background: linear-gradient(180deg, rgba(14,165,233,0.18), rgba(34,211,238,0.06));
+            border-color: rgba(56,189,248,0.26);
+            background: rgba(14,165,233,0.08);
         }
         .memory-roadmap-card.planned {
-            border-color: rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.045);
+            border-color: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
         }
         .memory-roadmap-card.future {
-            border-color: rgba(251,191,36,0.18);
-            background: linear-gradient(180deg, rgba(251,191,36,0.12), rgba(255,255,255,0.04));
+            border-color: rgba(251,191,36,0.16);
+            background: rgba(251,191,36,0.06);
         }
         .memory-roadmap-card-top {
             display: flex;
@@ -3435,8 +3435,8 @@
         }
         .memory-roadmap-card-note {
             font-size: 10px;
-            line-height: 1.35;
-            color: rgba(255,255,255,0.58);
+            line-height: 1.38;
+            color: rgba(255,255,255,0.64);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
@@ -3446,22 +3446,25 @@
             display: inline-flex;
             align-items: center;
             width: fit-content;
-            padding: 1px 5px;
+            padding: 2px 6px;
             border-radius: 999px;
             font-size: 7px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            background: rgba(255,255,255,0.06);
-            color: rgba(255,255,255,0.64);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.62);
+            border: 1px solid rgba(255,255,255,0.07);
         }
         .memory-roadmap-card.active .memory-roadmap-card-pill {
-            background: rgba(34,211,238,0.16);
+            background: rgba(34,211,238,0.1);
             color: #7dd3fc;
+            border-color: rgba(34,211,238,0.18);
         }
         .memory-roadmap-card.future .memory-roadmap-card-pill {
-            background: rgba(251,191,36,0.14);
+            background: rgba(251,191,36,0.1);
             color: rgba(253,224,71,0.92);
+            border-color: rgba(251,191,36,0.18);
         }
         .memory-roadmap-scale,
         .memory-roadmap-track {
@@ -4444,10 +4447,10 @@
         }
 
         .card-brain {
-            background:
-                radial-gradient(circle at top right, rgba(229,62,62,0.12), transparent 32%),
-                linear-gradient(180deg, rgba(14,17,25,0.98) 0%, rgba(8,11,18,0.98) 100%);
-            border-color: rgba(229,62,62,0.12);
+            background: linear-gradient(180deg, rgba(14,17,25,0.97) 0%, rgba(8,11,18,0.985) 100%);
+            border-color: rgba(255,255,255,0.06);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03);
+            animation: none;
         }
         #brain-feed-card,
         #jain-brain-feed-card,
@@ -4477,15 +4480,15 @@
             margin-bottom: 10px;
         }
         .bf-objective {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 14px;
-            padding: 8px 11px;
-            margin-bottom: 6px;
+            background: rgba(255,255,255,0.018);
+            border: 1px solid rgba(255,255,255,0.045);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
             min-height: 0;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -4495,9 +4498,9 @@
             letter-spacing: 0.14em;
         }
         .bf-objective-text {
-            font-size: clamp(1rem, 1.78vw, 1.5rem);
-            line-height: 1.03;
-            color: rgba(255,255,255,0.98);
+            font-size: clamp(0.98rem, 1.5vw, 1.34rem);
+            line-height: 1.12;
+            color: rgba(255,255,255,0.96);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
@@ -4514,15 +4517,15 @@
         }
         .bf-signal-row {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
         .bf-signal-chip {
-            background: rgba(255,255,255,0.022);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 10px;
+            background: rgba(255,255,255,0.014);
+            border: 1px solid rgba(255,255,255,0.045);
+            border-radius: 12px;
             min-height: 0;
-            padding: 7px 8px;
+            padding: 10px 11px;
             justify-content: flex-start;
             box-shadow: none;
         }
@@ -4560,29 +4563,29 @@
         .agent-comms-section {
             background: transparent;
             border: 0;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,255,255,0.045);
             border-radius: 0;
-            padding: 10px 0 2px;
+            padding: 12px 0 4px;
             max-height: 196px;
-            gap: 10px;
+            gap: 12px;
             overflow: hidden;
         }
         .card-brain.activity-expanded .agent-comms-section { max-height: min(320px, 38vh); }
         .agent-chat-section {
-            background: rgba(255,255,255,0.018);
-            border: 1px solid rgba(255,255,255,0.055);
-            border-radius: 14px;
-            padding: 10px 12px 14px;
-            min-height: 166px;
+            background: rgba(255,255,255,0.012);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 12px 14px 14px;
+            min-height: 172px;
         }
-        .agent-chat-header { margin-bottom: 10px; }
-        .ua-log { display: flex; flex-direction: column; gap: 8px; }
+        .agent-chat-header { margin-bottom: 12px; }
+        .ua-log { display: flex; flex-direction: column; gap: 10px; }
         .ua-item {
             gap: 8px;
-            padding: 9px 10px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.024);
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.016);
+            border: 1px solid rgba(255,255,255,0.04);
         }
         .ua-agent-tag { border-radius: 999px; padding: 3px 7px; }
         .ua-msg { color: rgba(255,255,255,0.84); }
@@ -6090,6 +6093,11 @@
                     week: 'W1',
                     title: 'Active Memory',
                     note: activeMemoryNote,
+                    compactNote: [
+                        'Recall lane live.',
+                        contextPct !== null ? `Context ${contextPct}%.` : '',
+                        watchdogPct !== null ? `Handoff ${watchdogPct}%.` : '',
+                    ].filter(Boolean).join(' '),
                     pill: 'Live now',
                     weeks: [1],
                     tone: 'active',
@@ -6098,6 +6106,7 @@
                     week: 'W2',
                     title: 'Memory hygiene',
                     note: liveTasks.length ? `Queued behind ${liveTasks.length} live tracked task${liveTasks.length === 1 ? '' : 's'}. Tighten durable notes after the live lane settles.` : 'Queued next. Trim noise, tighten durable notes, and tune recall quality.',
+                    compactNote: liveTasks.length ? `Queued after ${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}.` : 'Queued next for cleanup.',
                     pill: liveTasks.length ? 'Queued' : 'Next',
                     weeks: [1, 2],
                     tone: 'planned',
@@ -6106,6 +6115,7 @@
                     week: 'W3',
                     title: 'QMD pilot',
                     note: 'Still on deck. Only promote it if current-memory retrieval clearly improves first.',
+                    compactNote: 'On deck if recall gains are real.',
                     pill: 'On deck',
                     weeks: [3],
                     tone: 'planned',
@@ -6114,6 +6124,7 @@
                     week: 'W4',
                     title: 'Session recall?',
                     note: 'Deferred until transcript indexing proves it is worth the extra complexity.',
+                    compactNote: 'Deferred until transcript indexing earns it.',
                     pill: 'Deferred',
                     weeks: [4],
                     tone: 'future',
@@ -6126,6 +6137,11 @@
                 liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}</span>` : '',
                 updatedAt ? `<span class="memory-roadmap-summary-pill">Updated ${escapeHtml(formatRelTime(updatedAt))}</span>` : '',
             ].filter(Boolean).join('');
+            const compactSummaryPills = [
+                `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live now' : 'Needs refresh'}</span>`,
+                contextPct !== null ? `<span class="memory-roadmap-summary-pill">Context ${contextPct}%</span>` : '',
+                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}</span>` : '',
+            ].filter(Boolean).join('');
 
             if (!expanded) {
                 const cards = roadmap.map(item => `
@@ -6135,12 +6151,12 @@
                             <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
                         </div>
                         <div class="memory-roadmap-card-title">${escapeHtml(item.title)}</div>
-                        <div class="memory-roadmap-card-note">${escapeHtml(item.note)}</div>
+                        <div class="memory-roadmap-card-note">${escapeHtml(item.compactNote || item.note)}</div>
                     </div>
                 `).join('');
 
                 return {
-                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-summary">${summaryPills}</div><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
+                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-summary">${compactSummaryPills}</div><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
                     meta: isFresh ? 'live roadmap' : 'roadmap stale',
                     live: isFresh,
                 };
