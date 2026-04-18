@@ -3416,9 +3416,9 @@
         }
         .memory-roadmap-card-top {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
         }
         .memory-roadmap-card-week {
             font-size: 8px;
@@ -3430,13 +3430,13 @@
         .memory-roadmap-card-title {
             font-size: 9px;
             font-weight: 700;
-            color: rgba(255,255,255,0.9);
-            line-height: 1.22;
+            color: rgba(255,255,255,0.92);
+            line-height: 1.18;
         }
         .memory-roadmap-card-note {
             font-size: 8px;
-            line-height: 1.28;
-            color: rgba(255,255,255,0.64);
+            line-height: 1.24;
+            color: rgba(255,255,255,0.58);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 1;
@@ -4603,14 +4603,14 @@
         }
         .agent-comms-toggle,
         .agent-chat-header {
-            padding: 10px 12px 9px;
+            padding: 9px 11px 8px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             background: rgba(255,255,255,0.012);
         }
         .agent-chat-header { margin-bottom: 0; }
         #unified-activity-log,
         #agent-chat-feed {
-            padding: 10px 12px 12px;
+            padding: 9px 11px 11px;
         }
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
@@ -4621,7 +4621,7 @@
             border: 1px solid rgba(255,255,255,0.04);
         }
         .ua-agent-tag { border-radius: 999px; padding: 3px 6px; }
-        .ua-msg { font-size: 0.62rem; color: rgba(255,255,255,0.84); }
+        .ua-msg { font-size: 0.62rem; line-height: 1.24; color: rgba(255,255,255,0.84); }
         .ua-tool-pill,
         .ua-model-pill,
         .ua-stale-pill {
@@ -5968,7 +5968,7 @@
 
             const expanded = isBrainActivityExpanded();
             const items = expanded ? [...summaryItems, ...recentItems] : summaryItems;
-            const maxItems = expanded ? 8 : 4;
+            const maxItems = expanded ? 8 : 3;
 
             syncBrainActivityDrawer();
 
