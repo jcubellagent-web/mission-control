@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "answered separate OpenRouter key strategy for Josh2.0 and JAIMES",
+    "objective": "wire OpenRouter keys for Josh 2.0 and JAIMES, add openrouter auto, propose routing rules",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-18T16:21:53Z",
-    "checkedAt": "2026-04-18T16:21:53Z",
+    "steps": [
+      {
+        "label": "config",
+        "status": "active",
+        "tool": "openrouter_enable"
+      }
+    ],
+    "currentTool": "openrouter_enable",
+    "updatedAt": "2026-04-18T16:25:29Z",
+    "checkedAt": "2026-04-18T16:25:29Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "answered separate OpenRouter key strategy for Josh2.0 and JAIMES",
-    "updatedAt": "2026-04-18T16:25:03Z"
+    "context": "wire OpenRouter keys for Josh 2.0 and JAIMES, add openrouter auto, propose routing rules",
+    "updatedAt": "2026-04-18T16:30:03Z"
   },
   "contextWindow": {
     "usedTokens": 58185,
@@ -138,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 36m",
+        "Resets in 1h 31m",
         "Weekly: 98% left [===========-]",
         "Pace: 76% in reserve | Expected 78% used | Lasts until reset",
         "Resets in 1d 12h",
@@ -149,11 +155,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 36m",
+      "sessionReset": "1h 31m",
       "weeklyReset": "1d 12h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T16:25:05Z"
+    "updatedAt": "2026-04-18T16:30:05Z"
   },
   "modelUsage": {
     "session": 0.831868,
@@ -268,7 +274,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T16:25:08Z",
+    "lastUpdated": "2026-04-18T16:30:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -289,7 +295,7 @@
       "byok_daily": 0.0,
       "byok_weekly": 0.0,
       "byok_monthly": 0.0,
-      "available": false
+      "available": true
     },
     "elevenlabs": {
       "chars_used": 67624,
@@ -309,9 +315,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 43.276583,
-    "total_earned": 43.276583,
-    "online_time": "432h 45m",
+    "sim_balance": 43.284889,
+    "total_earned": 43.284889,
+    "online_time": "432h 50m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -322,7 +328,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T16:25:09Z",
+    "updatedAt": "2026-04-18T16:30:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -337,14 +343,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.1,
-      "cpu_user": 24.3,
-      "cpu_sys": 14.78,
-      "load1": 3.69,
-      "load5": 3.69,
-      "load15": 3.63,
+      "cpu_pct": 41.2,
+      "cpu_user": 25.9,
+      "cpu_sys": 15.32,
+      "load1": 4.25,
+      "load5": 3.81,
+      "load15": 3.68,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "91Gi",
@@ -352,14 +358,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 2.52,
-      "cpu_sys": 10.8,
-      "load1": 2.32,
-      "load5": 2.07,
-      "load15": 2.1,
+      "cpu_pct": 13.4,
+      "cpu_user": 3.57,
+      "cpu_sys": 9.82,
+      "load1": 1.66,
+      "load5": 1.9,
+      "load15": 2.01,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -383,19 +389,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T16:25:03Z"
+      "lastChecked": "2026-04-18T16:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T16:25:03Z"
+      "lastChecked": "2026-04-18T16:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T16:25:03Z"
+      "lastChecked": "2026-04-18T16:30:03Z"
     }
   ],
   "crons": [
@@ -770,9 +776,9 @@
       "title": "Review OpenRouter OpenClaw integration and add selected models back into inventory",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Confirmed OpenRouter needs normal API keys for model/routing calls, and separate per-agent keys are the clean way to track Josh 2.0 vs JAIMES usage. Management API keys remain only for programmatic key lifecycle admin. Routing support includes `openrouter/auto`, allowed-model filters, per-model provider controls (`sort`/`order`/`only`/`ignore`/fallbacks/privacy/perf caps), and cross-model fallback arrays; shortlist still favors GPT/Codex foundation, Gemini 2.5 Pro + Flash, Grok 4 live lane, plus one cheap bench model, with Anthropic manual-only if re-added at all.",
+      "notes": "Wired Josh 2.0 to the new OpenRouter key across current OpenClaw auth/model files, re-enabled the OpenRouter plugin/profile, restored `openrouter/auto` to the Josh inventory, and set JAIMES global `OPENROUTER_API_KEY` to the separate JAIMES key for clean usage split. Remaining step is live restart/verification plus final routing-rule recommendation.",
       "requestedAt": null,
-      "updatedAt": "2026-04-18 12:21",
+      "updatedAt": "2026-04-18 12:28",
       "owner": "JAIMES"
     },
     {
@@ -840,29 +846,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T16:25:08Z",
+      "time": "2026-04-18T16:30:08Z",
       "event": "Session spend: $0.83"
     },
     {
-      "time": "2026-04-18T16:25:05Z",
+      "time": "2026-04-18T16:30:05Z",
       "event": "Coding: scripts/run_on_jaimes.sh, scripts/delegate_to_jaimes.sh"
     },
     {
-      "time": "2026-04-18T16:25:05Z",
+      "time": "2026-04-18T16:30:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T16:25:03Z",
+      "time": "2026-04-18T16:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T16:25:03Z",
+      "time": "2026-04-18T16:30:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T16:25:03Z",
+      "time": "2026-04-18T16:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T16:25:03Z"
+  "lastUpdated": "2026-04-18T16:30:03Z"
 }
