@@ -1,18 +1,18 @@
 {
-  "session": 17.890734,
-  "daily": 104.642681,
+  "session": 18.818691,
+  "daily": 105.570639,
   "weekly": 137.95468,
   "monthly": 997.458544,
   "topModels": [
     {
+      "name": "openai/gpt-5.4",
+      "window": "session",
+      "cost": 57.5088325
+    },
+    {
       "name": "codex/gpt-5.4-mini",
       "window": "session",
       "cost": 56.95462799999999
-    },
-    {
-      "name": "openai/gpt-5.4",
-      "window": "session",
-      "cost": 56.58087499999999
     },
     {
       "name": "gpt-5.4",
@@ -32,6 +32,19 @@
   ],
   "breakdown": [
     {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 3449415,
+      "outputTokens": 116619,
+      "totalTokens": 3566034,
+      "sessionCost": 57.5088325,
+      "dailyCost": 50.9891205,
+      "weeklyCost": 57.5088325,
+      "sessions": 155,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "codex/gpt-5.4-mini",
       "source": "openclaw",
       "inputTokens": 2465166,
@@ -41,19 +54,6 @@
       "dailyCost": 54.581518499999994,
       "weeklyCost": 56.95462799999999,
       "sessions": 24,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai/gpt-5.4",
-      "source": "openclaw",
-      "inputTokens": 3444198,
-      "outputTokens": 139668,
-      "totalTokens": 3583866,
-      "sessionCost": 56.58087499999999,
-      "dailyCost": 50.061163,
-      "weeklyCost": 56.58087499999999,
-      "sessions": 155,
       "isGemini": false,
       "costEstimated": false
     },
@@ -121,7 +121,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-18T02:40:08Z",
+  "lastUpdated": "2026-04-18T02:45:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -150,8 +150,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 104.642681,
-    "total": 138.246932,
+    "daily": 105.570639,
+    "total": 139.174889,
     "monthly": 1000.332613
   },
   "weeklyRunRate": {
