@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "review Josh's Sorare GW7 lineup changes, compare against GW6 learnings, and queue ML pipeline updates",
+    "objective": "reviewed live Sorare GW7 refinements and patched the initial championship-matchup ML logic on J.A.I.N",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-18T03:47:18Z",
-    "checkedAt": "2026-04-18T03:47:18Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-18T03:55:41Z",
+    "checkedAt": "2026-04-18T03:55:41Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "review Josh's Sorare GW7 lineup changes, compare against GW6 learnings, and queue ML pipeline updates",
-    "updatedAt": "2026-04-18T03:55:03Z"
+    "context": "reviewed live Sorare GW7 refinements and patched the initial championship-matchup ML logic on J.A.I.N",
+    "updatedAt": "2026-04-18T04:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 41508,
+    "usedTokens": 113592,
     "limitTokens": 400000,
-    "pct": 0.1038,
+    "pct": 0.284,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -141,7 +135,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 6m",
+        "Resets in 4h 1m",
         "Weekly: 98% left [===========-]",
         "Pace: 69% in reserve | Expected 71% used | Lasts until reset",
         "Resets in 2d 1h",
@@ -152,15 +146,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 6m",
+      "sessionReset": "4h 1m",
       "weeklyReset": "2d 1h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T03:55:05Z"
+    "updatedAt": "2026-04-18T04:00:05Z"
   },
   "modelUsage": {
-    "session": 0.347348,
-    "daily": 89.472405,
+    "session": 2.10905,
+    "daily": 0.0,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
@@ -172,7 +166,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 39.037489
+        "cost": 40.79919100000001
       },
       {
         "name": "gpt-5.4",
@@ -198,7 +192,7 @@
         "outputTokens": 20428,
         "totalTokens": 2636353,
         "sessionCost": 56.95462799999999,
-        "dailyCost": 56.95462799999999,
+        "dailyCost": 0.0,
         "weeklyCost": 56.95462799999999,
         "sessions": 24,
         "isGemini": false,
@@ -207,12 +201,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 3416055,
-        "outputTokens": 118569,
-        "totalTokens": 3534624,
-        "sessionCost": 39.037489,
-        "dailyCost": 32.51777700000001,
-        "weeklyCost": 39.037489,
+        "inputTokens": 3479652,
+        "outputTokens": 142104,
+        "totalTokens": 3621756,
+        "sessionCost": 40.79919100000001,
+        "dailyCost": 0.0,
+        "weeklyCost": 40.79919100000001,
         "sessions": 155,
         "isGemini": false,
         "costEstimated": false
@@ -281,7 +275,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T03:55:08Z",
+    "lastUpdated": "2026-04-18T04:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -310,8 +304,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 89.47843,
-      "total": 120.709571,
+      "daily": 0.006025,
+      "total": 122.471273,
       "monthly": 1005.277234
     },
     "weeklyRunRate": {
@@ -322,9 +316,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 42.026556,
-    "total_earned": 42.026556,
-    "online_time": "420h 15m",
+    "sim_balance": 42.034917,
+    "total_earned": 42.034917,
+    "online_time": "420h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -335,7 +329,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T03:55:08Z",
+    "updatedAt": "2026-04-18T04:00:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -350,29 +344,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.5,
-      "cpu_user": 27.6,
-      "cpu_sys": 15.47,
-      "load1": 3.63,
-      "load5": 3.71,
-      "load15": 3.69,
+      "cpu_pct": 40.5,
+      "cpu_user": 25.69,
+      "cpu_sys": 14.83,
+      "load1": 4.61,
+      "load5": 3.93,
+      "load15": 3.76,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "91Gi",
+      "disk_avail": "92Gi",
       "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.4,
-      "cpu_user": 4.58,
-      "cpu_sys": 12.84,
-      "load1": 1.64,
-      "load5": 1.77,
-      "load15": 1.91,
+      "cpu_pct": 14.2,
+      "cpu_user": 4.16,
+      "cpu_sys": 10.0,
+      "load1": 2.02,
+      "load5": 1.91,
+      "load15": 1.92,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -396,19 +390,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T03:55:03Z"
+      "lastChecked": "2026-04-18T04:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T03:55:03Z"
+      "lastChecked": "2026-04-18T04:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T03:55:03Z"
+      "lastChecked": "2026-04-18T04:00:03Z"
     }
   ],
   "crons": [
@@ -461,7 +455,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "J.A.I.N Medic",
@@ -505,59 +499,31 @@
       "multiRun": {
         "runs": [
           {
-            "time": "7:15 AM",
-            "mode": "Weekday",
-            "label": "Market open brief",
-            "past": true,
-            "done": false
-          },
-          {
             "time": "10:00 AM",
-            "mode": "Weekday",
-            "label": "Mid-morning brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "12:00 PM",
-            "mode": "Weekday",
-            "label": "Midday brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "2:00 PM",
-            "mode": "Weekday",
-            "label": "Pulse brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend opener",
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
-            "mode": "Daily",
-            "label": "Close brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "mode": "Weekday",
-            "label": "Evening brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend close",
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
-            "mode": "Daily",
-            "label": "Late brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend late brief",
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
-            "mode": "Daily",
-            "label": "Wrap brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend wrap",
+            "past": false,
             "done": false
           }
         ]
@@ -592,7 +558,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -613,7 +579,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T02:00:51.438313-04:00"
     },
     {
@@ -625,7 +591,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T03:31:30.372793-04:00"
     },
     {
@@ -637,7 +603,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T07:30:02.843469+00:00"
     },
     {
@@ -649,7 +615,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T13:00:25.593436+00:00"
     },
     {
@@ -661,7 +627,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T10:00:54.156633-04:00"
     },
     {
@@ -673,7 +639,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T11:01:37.233016-04:00"
     },
     {
@@ -685,7 +651,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T15:00:09.717373+00:00"
     },
     {
@@ -759,7 +725,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -791,7 +757,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-17T05:51:09.017574-04:00"
     },
     {
@@ -805,28 +771,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260417-879",
-      "title": "Review Josh\u2019s manual Sorare GW7 lineup refinements, compare them against GW6/GW7 learnings, and update the championship-matchup ML pipeline",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Pulled the live GW7 lineups from Sorare, recovered the GW6/GW7 Champion-first lessons, and am now translating Josh\u2019s manual changes into explicit championship-matchup scoring updates so the next optimizer pass learns the right priorities.",
-      "requestedAt": "2026-04-17 23:47",
-      "updatedAt": "2026-04-17 23:52",
-      "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260417-866",
-      "title": "Run the full post-upgrade cleanup and verification pass",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh clicked the fast-lane post-upgrade action. Need to run the deeper OpenClaw verification pass and clean the stale disabled `active-memory` plugin config warning without regressing the healthy 2026.4.15 upgrade.",
-      "requestedAt": "2026-04-17 19:07",
-      "updatedAt": "2026-04-17 19:07",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -851,29 +796,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T03:55:08Z",
-      "event": "Session spend: $0.35"
+      "time": "2026-04-18T04:00:08Z",
+      "event": "Session spend: $2.11"
     },
     {
-      "time": "2026-04-18T03:55:05Z",
+      "time": "2026-04-18T04:00:05Z",
       "event": "Coding: mission-control/index.html"
     },
     {
-      "time": "2026-04-18T03:55:05Z",
+      "time": "2026-04-18T04:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T03:55:03Z",
+      "time": "2026-04-18T04:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T03:55:03Z",
+      "time": "2026-04-18T04:00:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T03:55:03Z",
+      "time": "2026-04-18T04:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T03:55:03Z"
+  "lastUpdated": "2026-04-18T04:00:03Z"
 }
