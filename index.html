@@ -3434,12 +3434,12 @@
             line-height: 1.22;
         }
         .memory-roadmap-card-note {
-            font-size: 9px;
-            line-height: 1.34;
+            font-size: 8px;
+            line-height: 1.28;
             color: rgba(255,255,255,0.64);
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             overflow: hidden;
         }
         .memory-roadmap-card-pill {
@@ -4498,8 +4498,8 @@
             letter-spacing: 0.14em;
         }
         .bf-objective-text {
-            font-size: clamp(0.92rem, 1.28vw, 1.18rem);
-            line-height: 1.08;
+            font-size: clamp(0.86rem, 1.12vw, 1.04rem);
+            line-height: 1.06;
             color: rgba(255,255,255,0.96);
             display: -webkit-box;
             -webkit-box-orient: vertical;
@@ -4581,14 +4581,14 @@
         .agent-chat-header { margin-bottom: 10px; }
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
-            gap: 7px;
-            padding: 8px 10px;
+            gap: 6px;
+            padding: 7px 9px;
             border-radius: 10px;
             background: rgba(255,255,255,0.016);
             border: 1px solid rgba(255,255,255,0.04);
         }
-        .ua-agent-tag { border-radius: 999px; padding: 3px 7px; }
-        .ua-msg { color: rgba(255,255,255,0.84); }
+        .ua-agent-tag { border-radius: 999px; padding: 3px 6px; }
+        .ua-msg { font-size: 0.62rem; color: rgba(255,255,255,0.84); }
         .ua-tool-pill,
         .ua-model-pill,
         .ua-stale-pill {
@@ -5829,6 +5829,21 @@
             return aliases[key] || raw.replace(/_/g, ' ');
         }
 
+        function compactUiLabel(text, maxLen = 78) {
+            const raw = sanitizeLabel(text || '');
+            if (!raw) return '';
+            const compact = raw
+                .replace(/\binspect the actual\b/gi, 'inspect')
+                .replace(/\band recheck mission control on the real display\b/gi, 'and recheck Mission Control')
+                .replace(/\bon the actual local safari mission control window\b/gi, 'on Safari')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (compact.length <= maxLen) return compact;
+            const sliced = compact.slice(0, maxLen);
+            const cut = sliced.lastIndexOf(' ');
+            return `${(cut > 36 ? sliced.slice(0, cut) : sliced).trim()}…`;
+        }
+
         function renderUnifiedActivity() {
             const el = document.getElementById('unified-activity-log');
             if (!el) return;
@@ -5839,11 +5854,13 @@
                 if (!bf) return;
                 const stale = isFeedStale(bf);
                 const isActive = bf.active === true && !stale;
+                const fullMsg = bf.objective || (isActive ? 'Processing…' : 'Standby');
                 summaryItems.push({
                     agentClass,
                     agentLabel,
                     dot: isActive ? 'active' : 'idle',
-                    msg: bf.objective || (isActive ? 'Processing…' : 'Standby'),
+                    msg: compactUiLabel(fullMsg, 74),
+                    fullMsg,
                     model: '',
                     tool: prettyToolLabel(bf.currentTool || ''),
                     ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
@@ -5865,11 +5882,13 @@
                 return a.agentClass || 'agent';
             };
             for (const a of running.slice(0, 2)) {
+                const fullMsg = a.label || 'Running…';
                 summaryItems.push({
                     agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
                     dot: 'active',
-                    msg: a.label || 'Running…',
+                    msg: compactUiLabel(fullMsg, 68),
+                    fullMsg,
                     model: a.model || '',
                     tool: prettyToolLabel(a.tool || ''),
                     ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'running',
@@ -5877,11 +5896,13 @@
                 });
             }
             for (const a of recentAgents) {
+                const fullMsg = a.label || 'Done';
                 recentItems.push({
                     agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
                     dot: 'done',
-                    msg: a.label || 'Done',
+                    msg: compactUiLabel(fullMsg, 68),
+                    fullMsg,
                     model: a.model || '',
                     tool: prettyToolLabel(a.tool || ''),
                     ts: a.elapsedSecs ? formatElapsed(a.elapsedSecs) + ' ago' : 'done',
@@ -5896,11 +5917,13 @@
             for (const e of filteredComms) {
                 const dir = (e.direction || '').toLowerCase();
                 const agent = (e.agent || (dir.startsWith('jaimes') ? 'jaimes' : dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
+                const fullMsg = e.message || '';
                 recentItems.push({
                     agentClass: agent === 'jaimes' ? 'jaimes' : agent === 'jain' ? 'jain' : 'josh',
                     agentLabel: agent === 'jaimes' ? 'JAIMES' : agent === 'jain' ? 'J.A.I.N' : 'JOSH 2.0',
                     dot: e.status === 'active' ? 'active' : 'done',
-                    msg: e.message || '',
+                    msg: compactUiLabel(fullMsg, 68),
+                    fullMsg,
                     model: e.model || '',
                     tool: prettyToolLabel(e.tool || ''),
                     ts: e.timestamp ? formatRelTime(e.timestamp) : '',
@@ -5930,7 +5953,7 @@
                     <div class="ua-main">
                         <span class="ua-agent-tag ${escapeHtml(item.agentClass)}">${escapeHtml(item.agentLabel)}</span>
                         <span class="ua-dot ${escapeHtml(item.dot)}"></span>
-                        <span class="ua-msg" title="${escapeHtml(item.msg)}">${escapeHtml(item.msg)}</span>
+                        <span class="ua-msg" title="${escapeHtml(item.fullMsg || item.msg)}">${escapeHtml(item.msg)}</span>
                     </div>
                     ${meta ? `<div class="ua-meta">${meta}</div>` : ''}
                 </div>`;
@@ -6138,9 +6161,8 @@
                 updatedAt ? `<span class="memory-roadmap-summary-pill">Updated ${escapeHtml(formatRelTime(updatedAt))}</span>` : '',
             ].filter(Boolean).join('');
             const compactSummaryPills = [
-                `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live now' : 'Needs refresh'}</span>`,
-                contextPct !== null ? `<span class="memory-roadmap-summary-pill">Context ${contextPct}%</span>` : '',
-                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}</span>` : '',
+                contextPct !== null ? `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">Ctx ${contextPct}%</span>` : `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live' : 'Refresh'}</span>`,
+                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live</span>` : '',
             ].filter(Boolean).join('');
 
             if (!expanded) {
@@ -7662,7 +7684,7 @@
                         <div class="bf-container">
                             <div class="bf-objective">
                                 ${objectiveMeta}
-                                <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(bf.objective || 'Processing...')}</div>
+                                <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...')}</div>
                             </div>
                             ${renderBrainFeedSignalRow(bf)}
                             <div class="bf-timeline">${stepsHtml || '<div class="bf-empty-note">Awaiting the first concrete action…</div>'}</div>
@@ -7691,7 +7713,7 @@
                             objEl.style.opacity = '0';
                             objEl.style.transform = 'translateY(4px)';
                             setTimeout(() => {
-                                objEl.textContent = bf.objective || 'Processing...';
+                                objEl.textContent = compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...';
                                 objEl.setAttribute('title', bf.objective || 'Processing...');
                                 objEl.style.opacity = '1';
                                 objEl.style.transform = 'translateY(0)';
