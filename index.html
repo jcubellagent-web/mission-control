@@ -1649,8 +1649,10 @@
             font-size: 0.92rem;
             font-weight: 500;
             color: rgba(255,255,255,0.88);
-            line-height: 1.45;
-            margin-bottom: 14px;
+            line-height: 1.35;
+        }
+        body.phone-mode .bf-objective-detail {
+            font-size: 0.58rem;
         }
 
         /* ── Today's Jobs card ───────────────────────── */
@@ -4230,8 +4232,10 @@
         }
         body.phone-mode .bf-objective-text {
             font-size: 0.88rem;
-            line-height: 1.4;
-            -webkit-line-clamp: 4;
+            line-height: 1.32;
+        }
+        body.phone-mode .bf-objective-text-wrap {
+            max-height: calc(1.32em * 2 + 0.2rem);
         }
         body.phone-mode .bf-signal-row {
             grid-template-columns: 1fr 1fr;
@@ -4649,17 +4653,30 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .bf-objective-text-wrap {
+            max-height: calc(1.03em * 2 + 0.24rem);
+            overflow: hidden;
+            position: relative;
+        }
         .bf-objective-text {
             font-size: clamp(1.9rem, 2.8vw, 2.45rem);
             line-height: 1.03;
             color: var(--bf-model-color);
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            overflow: hidden;
+            display: block;
+            overflow: visible;
             padding-right: 2px;
             padding-bottom: 1px;
             text-shadow: 0 0 18px color-mix(in srgb, var(--bf-model-color) 16%, transparent);
+            will-change: transform;
+        }
+        .bf-objective-text.is-scrolling {
+            animation: bf-objective-scroll var(--bf-scroll-duration, 18s) linear infinite;
+        }
+        .bf-objective-detail {
+            font-size: 0.64rem;
+            line-height: 1.35;
+            color: rgba(255,255,255,0.76);
+            padding-top: 2px;
         }
         #bf-last-updated {
             margin-left: auto;
@@ -4748,6 +4765,10 @@
             border-radius: 12px;
             background: rgba(255,255,255,0.022);
             border: 1px dashed rgba(255,255,255,0.08);
+        }
+        @keyframes bf-objective-scroll {
+            0%, 14% { transform: translateY(0); }
+            86%, 100% { transform: translateY(calc(-1 * var(--bf-scroll-distance, 0px))); }
         }
 
         .brain-feed-lower {
@@ -7926,6 +7947,48 @@
             </div>`;
         }
 
+        function getBrainFeedObjectiveText(bf) {
+            return sanitizeLabel(bf?.objective || 'Processing...') || 'Processing...';
+        }
+
+        function getBrainFeedObjectiveDetail(bf) {
+            const steps = Array.isArray(bf?.steps) ? bf.steps : [];
+            const activeStep = steps.find(step => step.status === 'active') || null;
+            const pendingStep = steps.find(step => step.status === 'pending') || null;
+            const recentDone = [...steps].reverse().find(step => step.status === 'done') || null;
+            const parts = [];
+            if (activeStep?.label) parts.push(`Now: ${sanitizeLabel(activeStep.label)}`);
+            else {
+                const liveStep = resolveBrainFeedStepLabel(bf);
+                if (liveStep) parts.push(`Now: ${liveStep}`);
+            }
+            if (pendingStep?.label && pendingStep.label !== activeStep?.label) {
+                parts.push(`Next: ${sanitizeLabel(pendingStep.label)}`);
+            } else if (recentDone?.label && recentDone.label !== activeStep?.label) {
+                parts.push(`Recent: ${sanitizeLabel(recentDone.label)}`);
+            }
+            return compactUiLabel(parts.join(' · '), 180) || resolveBrainFeedStepLabel(bf) || 'Working through the current objective.';
+        }
+
+        function syncBrainFeedObjectiveScroller(brainFeedCard) {
+            const wrap = brainFeedCard?.querySelector('.bf-objective-text-wrap');
+            const textEl = brainFeedCard?.querySelector('.bf-objective-text');
+            if (!wrap || !textEl) return;
+            textEl.classList.remove('is-scrolling');
+            textEl.style.removeProperty('--bf-scroll-distance');
+            textEl.style.removeProperty('--bf-scroll-duration');
+            textEl.style.transform = 'translateY(0)';
+            requestAnimationFrame(() => {
+                const overflow = Math.max(0, textEl.scrollHeight - wrap.clientHeight);
+                if (overflow > 6) {
+                    const duration = Math.max(14, Math.min(32, 12 + Math.round(overflow / 10)));
+                    textEl.style.setProperty('--bf-scroll-distance', `${overflow}px`);
+                    textEl.style.setProperty('--bf-scroll-duration', `${duration}s`);
+                    textEl.classList.add('is-scrolling');
+                }
+            });
+        }
+
         function pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf) {
             const candidates = [
                 { bf: joshBf, agentLabel: 'JOSH 2.0' },
@@ -7992,6 +8055,8 @@
                 }
             }
             const heroAgentLabel = bf?.heroAgentLabel || 'JOSH 2.0';
+            const objectiveText = getBrainFeedObjectiveText(bf);
+            const objectiveDetail = getBrainFeedObjectiveDetail(bf);
             const objectiveMeta = `<div class="bf-objective-meta" id="bf-status-bar">
                 <div class="bf-objective-live">
                     <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
@@ -8030,7 +8095,8 @@
                             <div class="bf-hero-grid">
                                 <div class="bf-objective" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                                     ${objectiveMeta}
-                                    <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...')}</div>
+                                    <div class="bf-objective-text-wrap"><div class="bf-objective-text" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</div></div>
+                                    <div class="bf-objective-detail" title="${escapeHtml(objectiveDetail)}">${escapeHtml(objectiveDetail)}</div>
                                 </div>
                                 ${renderBrainFeedSignalRow(bf)}
                             </div>
@@ -8044,6 +8110,7 @@
                         bfCont.classList.add('bf-waking');
                         bfCont.addEventListener('animationend', () => bfCont.classList.remove('bf-waking'), { once: true });
                     }
+                    syncBrainFeedObjectiveScroller(brainFeedCard);
                 } else {
                     // ── Smooth in-place diff updates ────────────────────────────
                     // 1. Update unified status bar (don't override if currently showing MSG RECEIVED)
@@ -8077,12 +8144,15 @@
                             objEl.style.opacity = '0';
                             objEl.style.transform = 'translateY(4px)';
                             setTimeout(() => {
-                                objEl.textContent = compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...';
-                                objEl.setAttribute('title', bf.objective || 'Processing...');
+                                objEl.textContent = objectiveText;
+                                objEl.setAttribute('title', objectiveText);
                                 objEl.style.opacity = '1';
                                 objEl.style.transform = 'translateY(0)';
+                                syncBrainFeedObjectiveScroller(brainFeedCard);
                             }, 200);
                         }
+                    } else {
+                        syncBrainFeedObjectiveScroller(brainFeedCard);
                     }
 
                     // 3. Update summary chips smoothly
@@ -8096,11 +8166,16 @@
                     const signalTool = brainFeedCard.querySelector('.bf-signal-tool');
                     const signalProgress = brainFeedCard.querySelector('.bf-signal-progress');
                     const signalStep = brainFeedCard.querySelector('.bf-signal-step');
+                    const detailEl = brainFeedCard.querySelector('.bf-objective-detail');
                     if (signalTool) signalTool.textContent = metrics.currentTool;
                     if (signalProgress) signalProgress.textContent = metrics.progressText;
                     if (signalStep) {
                         signalStep.textContent = metrics.liveStep;
                         signalStep.setAttribute('title', metrics.liveStep);
+                    }
+                    if (detailEl) {
+                        detailEl.textContent = objectiveDetail;
+                        detailEl.setAttribute('title', objectiveDetail);
                     }
                     const modelKey = brainFeedCard.querySelector('.bf-model-key');
                     if (modelKey) modelKey.outerHTML = renderModelKeyRow(modelVisual.key, 'bf-model-key');
