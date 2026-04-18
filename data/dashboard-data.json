@@ -17,12 +17,12 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Triggered Sorare MLB mission claim and debugged auto-claim flow. Verified missions marked complete or ineligible; some errors due to locked cards, not script bug.",
-    "updatedAt": "2026-04-18T19:20:03Z"
+    "updatedAt": "2026-04-18T19:25:03Z"
   },
   "contextWindow": {
-    "usedTokens": 21535,
+    "usedTokens": 23450,
     "limitTokens": 400000,
-    "pct": 0.0538,
+    "pct": 0.0586,
     "model": "gpt-4.1",
     "status": "green"
   },
@@ -135,10 +135,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 41m",
+        "Resets in 3h 36m",
         "Weekly: 98% left [===========-]",
         "Pace: 78% in reserve | Expected 80% used | Lasts until reset",
-        "Resets in 1d 10h",
+        "Resets in 1d 9h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -146,22 +146,22 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 41m",
-      "weeklyReset": "1d 10h",
+      "sessionReset": "3h 36m",
+      "weeklyReset": "1d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T19:20:05Z"
+    "updatedAt": "2026-04-18T19:25:04Z"
   },
   "modelUsage": {
-    "session": 0.246792,
-    "daily": 47.519945,
+    "session": 0.311188,
+    "daily": 47.584341,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
       {
         "name": "openai/gpt-4.1",
         "window": "session",
-        "cost": 30.908178499999998
+        "cost": 30.9725745
       },
       {
         "name": "gpt-5.4",
@@ -188,12 +188,12 @@
       {
         "name": "openai/gpt-4.1",
         "source": "openclaw",
-        "inputTokens": 223219,
+        "inputTokens": 208110,
         "outputTokens": 545,
-        "totalTokens": 223764,
-        "sessionCost": 30.908178499999998,
-        "dailyCost": 30.908178499999998,
-        "weeklyCost": 30.908178499999998,
+        "totalTokens": 208655,
+        "sessionCost": 30.9725745,
+        "dailyCost": 30.9725745,
+        "weeklyCost": 30.9725745,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -265,7 +265,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T19:20:08Z",
+    "lastUpdated": "2026-04-18T19:25:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -294,8 +294,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 47.519945,
-      "total": 71.347472,
+      "daily": 47.584341,
+      "total": 71.411868,
       "monthly": 1002.397139
     },
     "weeklyRunRate": {
@@ -336,12 +336,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.3,
-      "cpu_user": 26.16,
-      "cpu_sys": 15.16,
-      "load1": 3.57,
-      "load5": 3.67,
-      "load15": 3.8,
+      "cpu_pct": 41.6,
+      "cpu_user": 26.78,
+      "cpu_sys": 14.85,
+      "load1": 3.66,
+      "load5": 3.5,
+      "load15": 3.66,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -351,14 +351,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.1,
-      "cpu_user": 5.35,
-      "cpu_sys": 10.71,
-      "load1": 2.38,
-      "load5": 2.15,
-      "load15": 2.14,
+      "cpu_pct": 12.5,
+      "cpu_user": 2.88,
+      "cpu_sys": 9.61,
+      "load1": 1.93,
+      "load5": 2.19,
+      "load15": 2.18,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -382,19 +382,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:20:03Z"
+      "lastChecked": "2026-04-18T19:25:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:20:03Z"
+      "lastChecked": "2026-04-18T19:25:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T19:20:03Z"
+      "lastChecked": "2026-04-18T19:25:03Z"
     }
   ],
   "crons": [
@@ -829,29 +829,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T19:20:08Z",
-      "event": "Session spend: $0.25"
+      "time": "2026-04-18T19:25:08Z",
+      "event": "Session spend: $0.31"
     },
     {
-      "time": "2026-04-18T19:20:05Z",
+      "time": "2026-04-18T19:25:04Z",
       "event": "Coding: scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-18T19:20:05Z",
+      "time": "2026-04-18T19:25:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T19:20:03Z",
+      "time": "2026-04-18T19:25:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T19:20:03Z",
+      "time": "2026-04-18T19:25:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T19:20:03Z",
+      "time": "2026-04-18T19:25:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T19:20:03Z"
+  "lastUpdated": "2026-04-18T19:25:03Z"
 }
