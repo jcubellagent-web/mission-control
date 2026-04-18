@@ -4486,33 +4486,33 @@
         }
         .bf-hero-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(210px, 0.95fr);
-            gap: 10px;
+            grid-template-columns: 1fr;
+            gap: 8px;
             align-items: stretch;
         }
         .bf-objective {
-            background: rgba(255,255,255,0.018);
-            border: 1px solid rgba(255,255,255,0.045);
-            border-radius: 14px;
-            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.016));
+            border: 1px solid rgba(255,255,255,0.055);
+            border-radius: 16px;
+            padding: 14px 16px;
             margin-bottom: 0;
             min-height: 0;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 8px;
+            gap: 10px;
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .bf-objective-kicker {
             margin-bottom: 0;
-            font-size: 0.62rem;
-            letter-spacing: 0.14em;
+            font-size: 0.58rem;
+            letter-spacing: 0.16em;
         }
         .bf-objective-text {
-            font-size: clamp(0.86rem, 1.12vw, 1.04rem);
-            line-height: 1.06;
-            color: rgba(255,255,255,0.96);
+            font-size: clamp(1rem, 1.34vw, 1.18rem);
+            line-height: 1.12;
+            color: rgba(255,255,255,0.98);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
@@ -4535,17 +4535,17 @@
             align-content: start;
         }
         .bf-signal-chip {
-            background: rgba(255,255,255,0.014);
-            border: 1px solid rgba(255,255,255,0.045);
+            background: rgba(255,255,255,0.012);
+            border: 1px solid rgba(255,255,255,0.04);
             border-radius: 12px;
             min-height: 0;
-            padding: 10px;
+            padding: 8px 9px;
             justify-content: flex-start;
             box-shadow: none;
         }
         .bf-signal-chip-wide { grid-column: 1 / -1; }
-        .bf-signal-label { font-size: 0.44rem; letter-spacing: 0.13em; }
-        .bf-signal-value { font-size: 0.68rem; line-height: 1.16; }
+        .bf-signal-label { font-size: 0.42rem; letter-spacing: 0.14em; }
+        .bf-signal-value { font-size: 0.64rem; line-height: 1.14; }
         .bf-signal-step {
             white-space: normal;
             overflow: visible;
