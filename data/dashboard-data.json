@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Completed memory backup to J.A.I.N and verified success output.",
+    "objective": "heartbeat triage and scheduled checks",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-18T20:01:01Z",
-    "checkedAt": "2026-04-18T20:01:01Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "heartbeat"
+      }
+    ],
+    "currentTool": "heartbeat",
+    "updatedAt": "2026-04-18T20:49:17Z",
+    "checkedAt": "2026-04-18T20:49:17Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed memory backup to J.A.I.N and verified success output.",
-    "updatedAt": "2026-04-18T20:45:02Z"
+    "context": "heartbeat triage and scheduled checks",
+    "updatedAt": "2026-04-18T20:50:02Z"
   },
   "contextWindow": {
     "usedTokens": 133887,
@@ -125,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 8,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "scripts/sorare_daily_prep.sh",
@@ -137,7 +143,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 16m",
+        "Resets in 2h 11m",
         "Weekly: 98% left [===========-]",
         "Pace: 79% in reserve | Expected 81% used | Lasts until reset",
         "Resets in 1d 8h",
@@ -148,11 +154,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 16m",
+      "sessionReset": "2h 11m",
       "weeklyReset": "1d 8h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T20:45:04Z"
+    "updatedAt": "2026-04-18T20:50:04Z"
   },
   "modelUsage": {
     "session": 0.311188,
@@ -280,7 +286,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T20:45:09Z",
+    "lastUpdated": "2026-04-18T20:50:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -351,12 +357,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.5,
-      "cpu_user": 26.39,
-      "cpu_sys": 15.13,
-      "load1": 3.66,
-      "load5": 3.87,
-      "load15": 3.71,
+      "cpu_pct": 42.8,
+      "cpu_user": 27.58,
+      "cpu_sys": 15.39,
+      "load1": 4.4,
+      "load5": 3.93,
+      "load15": 3.76,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -366,12 +372,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.4,
-      "cpu_user": 1.75,
-      "cpu_sys": 9.64,
-      "load1": 1.3,
-      "load5": 1.56,
-      "load15": 1.83,
+      "cpu_pct": 14.3,
+      "cpu_user": 3.57,
+      "cpu_sys": 10.71,
+      "load1": 2.05,
+      "load5": 1.75,
+      "load15": 1.82,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.0,
       "uptime": "",
@@ -397,19 +403,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T20:45:02Z"
+      "lastChecked": "2026-04-18T20:50:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T20:45:02Z"
+      "lastChecked": "2026-04-18T20:50:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T20:45:02Z"
+      "lastChecked": "2026-04-18T20:50:02Z"
     }
   ],
   "crons": [
@@ -823,29 +829,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T20:45:09Z",
+      "time": "2026-04-18T20:50:07Z",
       "event": "Session spend: $0.31"
     },
     {
-      "time": "2026-04-18T20:45:04Z",
+      "time": "2026-04-18T20:50:04Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/sorare_daily_prep.sh"
     },
     {
-      "time": "2026-04-18T20:45:04Z",
+      "time": "2026-04-18T20:50:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T20:45:02Z",
+      "time": "2026-04-18T20:50:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T20:45:02Z",
+      "time": "2026-04-18T20:50:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T20:45:02Z",
+      "time": "2026-04-18T20:50:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T20:45:02Z"
+  "lastUpdated": "2026-04-18T20:50:02Z"
 }
