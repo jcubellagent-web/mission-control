@@ -5,24 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "brain feed polish published live to mission control main",
+    "objective": "flatten and polish mission control brain feed design from screenshot feedback",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-17T23:54:41Z",
-    "checkedAt": "2026-04-17T23:54:41Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-17T23:58:40Z",
+    "checkedAt": "2026-04-17T23:58:40Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "brain feed polish published live to mission control main",
-    "updatedAt": "2026-04-17T23:55:03Z"
+    "context": "flatten and polish mission control brain feed design from screenshot feedback",
+    "updatedAt": "2026-04-18T00:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 60349,
+    "usedTokens": 64200,
     "limitTokens": 400000,
-    "pct": 0.1509,
+    "pct": 0.1605,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -125,10 +131,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 42,
-    "missionControlDirty": 6,
+    "missionControlDirty": 7,
     "recentFiles": [
-      "mission-control/screenshots/mcbrain-snapshot.json",
-      "mission-control/index.html"
+      "mission-control/index.html",
+      "mission-control/screenshots/mcbrain-snapshot.json"
     ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
@@ -136,7 +142,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 6m",
+        "Resets in 3h 1m",
         "Weekly: 98% left [===========-]",
         "Pace: 66% in reserve | Expected 68% used | Lasts until reset",
         "Resets in 2d 5h",
@@ -147,15 +153,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 6m",
+      "sessionReset": "3h 1m",
       "weeklyReset": "2d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-17T23:55:05Z"
+    "updatedAt": "2026-04-18T00:00:05Z"
   },
   "modelUsage": {
-    "session": 3.449281,
-    "daily": 83.0819,
+    "session": 3.78414,
+    "daily": 83.416759,
     "weekly": 137.95468,
     "monthly": 997.458544,
     "topModels": [
@@ -167,7 +173,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 42.139421999999996
+        "cost": 42.474281
       },
       {
         "name": "gpt-5.4",
@@ -202,12 +208,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 3435872,
-        "outputTokens": 116777,
-        "totalTokens": 3552649,
-        "sessionCost": 42.139421999999996,
-        "dailyCost": 35.61971,
-        "weeklyCost": 42.139421999999996,
+        "inputTokens": 3379655,
+        "outputTokens": 116617,
+        "totalTokens": 3496272,
+        "sessionCost": 42.474281,
+        "dailyCost": 35.954569,
+        "weeklyCost": 42.474281,
         "sessions": 155,
         "isGemini": false,
         "costEstimated": false
@@ -269,14 +275,14 @@
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.883902,
-        "dailyCost": 0.062909,
+        "dailyCost": 0.0,
         "sessionCost": 0.883902,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-17T23:55:10Z",
+    "lastUpdated": "2026-04-18T00:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -294,7 +300,7 @@
       "daily": 0.0,
       "weekly": 0.0,
       "monthly": 0.02023585,
-      "byok_daily": 0.06290855,
+      "byok_daily": 0.0,
       "byok_weekly": 0.88390205,
       "byok_monthly": 2.87406945,
       "available": true
@@ -305,8 +311,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 83.144809,
-      "total": 123.805479,
+      "daily": 83.416759,
+      "total": 124.140338,
       "monthly": 1000.332613
     },
     "weeklyRunRate": {
@@ -317,9 +323,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 41.626639,
-    "total_earned": 41.626639,
-    "online_time": "416h 15m",
+    "sim_balance": 41.634917,
+    "total_earned": 41.634917,
+    "online_time": "416h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -330,7 +336,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-17T23:55:11Z",
+    "updatedAt": "2026-04-18T00:00:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -345,14 +351,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.3,
-      "cpu_user": 25.75,
-      "cpu_sys": 14.54,
-      "load1": 3.33,
+      "cpu_pct": 42.5,
+      "cpu_user": 26.95,
+      "cpu_sys": 15.51,
+      "load1": 3.04,
       "load5": 2.89,
       "load15": 2.88,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "94Gi",
@@ -360,12 +366,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 21.3,
-      "cpu_user": 6.48,
-      "cpu_sys": 14.81,
-      "load1": 2.42,
-      "load5": 2.22,
-      "load15": 2.12,
+      "cpu_pct": 19.2,
+      "cpu_user": 7.69,
+      "cpu_sys": 11.53,
+      "load1": 2.19,
+      "load5": 2.21,
+      "load15": 2.14,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -391,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:55:03Z"
+      "lastChecked": "2026-04-18T00:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-17T23:55:03Z"
+      "lastChecked": "2026-04-18T00:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-17T23:55:03Z"
+      "lastChecked": "2026-04-18T00:00:03Z"
     }
   ],
   "crons": [
@@ -802,6 +808,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260417-867",
+      "title": "Deep scan Mission Control brain feed widget/module and refresh memory roadmap live state",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Follow-up design pass in progress after Josh\u2019s screenshot review. Need to flatten the Brain Feed styling further, remove the overlapping/busy feel, and make the full widget/module look sleeker and more professional before republishing.",
+      "requestedAt": "2026-04-17 19:25",
+      "updatedAt": "2026-04-17 19:58",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260417-866",
       "title": "Run the full post-upgrade cleanup and verification pass",
       "status": "active",
@@ -815,7 +831,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/screenshots/mcbrain-snapshot.json, mission-control/index.html",
+      "label": "Editing: mission-control/index.html, mission-control/screenshots/mcbrain-snapshot.json",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -836,29 +852,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-17T23:55:10Z",
-      "event": "Session spend: $3.45"
+      "time": "2026-04-18T00:00:08Z",
+      "event": "Session spend: $3.78"
     },
     {
-      "time": "2026-04-17T23:55:05Z",
-      "event": "Coding: mission-control/screenshots/mcbrain-snapshot.json, mission-control/index.html"
+      "time": "2026-04-18T00:00:05Z",
+      "event": "Coding: mission-control/index.html, mission-control/screenshots/mcbrain-snapshot.json"
     },
     {
-      "time": "2026-04-17T23:55:05Z",
+      "time": "2026-04-18T00:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-17T23:55:03Z",
+      "time": "2026-04-18T00:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-17T23:55:03Z",
+      "time": "2026-04-18T00:00:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-17T23:55:03Z",
+      "time": "2026-04-18T00:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-17T23:55:03Z"
+  "lastUpdated": "2026-04-18T00:00:03Z"
 }
