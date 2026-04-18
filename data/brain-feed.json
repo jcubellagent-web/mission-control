@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "answered separate OpenRouter key strategy for Josh2.0 and JAIMES",
+  "objective": "wire OpenRouter keys for Josh 2.0 and JAIMES, add openrouter auto, propose routing rules",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T16:21:53Z",
-  "checkedAt": "2026-04-18T16:21:53Z",
+  "steps": [
+    {
+      "label": "config",
+      "status": "active",
+      "tool": "openrouter_enable"
+    }
+  ],
+  "currentTool": "openrouter_enable",
+  "updatedAt": "2026-04-18T16:25:29Z",
+  "checkedAt": "2026-04-18T16:25:29Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
