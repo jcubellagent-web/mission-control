@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "startup greeting and session re-anchor",
+    "objective": "check and update J.A.I.N and JAIMES to latest OpenClaw/Hermes",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-18T05:09:43Z",
-    "checkedAt": "2026-04-18T05:09:43Z",
+    "updatedAt": "2026-04-18T05:11:05Z",
+    "checkedAt": "2026-04-18T05:11:05Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "startup greeting and session re-anchor",
-    "updatedAt": "2026-04-18T05:10:02Z"
+    "context": "check and update J.A.I.N and JAIMES to latest OpenClaw/Hermes",
+    "updatedAt": "2026-04-18T05:15:02Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 128000,
-    "pct": 0.0,
+    "usedTokens": 21766,
+    "limitTokens": 400000,
+    "pct": 0.0544,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -142,7 +142,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 51m",
+        "Resets in 2h 46m",
         "Weekly: 98% left [===========-]",
         "Pace: 69% in reserve | Expected 71% used | Lasts until reset",
         "Resets in 2d",
@@ -153,22 +153,22 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 51m",
+      "sessionReset": "2h 46m",
       "weeklyReset": "2d",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T05:10:04Z"
+    "updatedAt": "2026-04-18T05:15:04Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 7.119329,
+    "session": 0.131375,
+    "daily": 7.250703,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 25.2897015
+        "cost": 25.421076
       },
       {
         "name": "gpt-5.4",
@@ -195,12 +195,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 125951,
-        "outputTokens": 553,
-        "totalTokens": 126504,
-        "sessionCost": 25.2897015,
-        "dailyCost": 0.0,
-        "weeklyCost": 25.2897015,
+        "inputTokens": 147122,
+        "outputTokens": 3466,
+        "totalTokens": 150588,
+        "sessionCost": 25.421076,
+        "dailyCost": 0.1313745,
+        "weeklyCost": 25.421076,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -282,7 +282,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T05:10:07Z",
+    "lastUpdated": "2026-04-18T05:15:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -311,8 +311,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 7.125354,
-      "total": 66.618922,
+      "daily": 7.256728,
+      "total": 66.750297,
       "monthly": 1005.277234
     },
     "weeklyRunRate": {
@@ -323,9 +323,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 42.151556,
-    "total_earned": 42.151556,
-    "online_time": "421h 30m",
+    "sim_balance": 42.159944,
+    "total_earned": 42.159944,
+    "online_time": "421h 35m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -336,7 +336,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T05:10:08Z",
+    "updatedAt": "2026-04-18T05:15:10Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -351,14 +351,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.5,
-      "cpu_user": 25.65,
-      "cpu_sys": 14.84,
-      "load1": 3.82,
-      "load5": 3.74,
-      "load15": 3.8,
+      "cpu_pct": 39.3,
+      "cpu_user": 25.1,
+      "cpu_sys": 14.2,
+      "load1": 3.71,
+      "load5": 3.8,
+      "load15": 3.81,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "92Gi",
@@ -366,17 +366,17 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.4,
-      "cpu_user": 3.6,
+      "cpu_pct": 11.7,
+      "cpu_user": 0.9,
       "cpu_sys": 10.81,
-      "load1": 2.04,
-      "load5": 2.06,
-      "load15": 2.07,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "load1": 2.59,
+      "load5": 2.54,
+      "load15": 2.28,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "49Gi",
+      "disk_avail": "48Gi",
       "disk_pct": 20,
       "available": true
     }
@@ -397,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T05:10:02Z"
+      "lastChecked": "2026-04-18T05:15:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T05:10:02Z"
+      "lastChecked": "2026-04-18T05:15:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T05:10:02Z"
+      "lastChecked": "2026-04-18T05:15:02Z"
     }
   ],
   "crons": [
@@ -780,6 +780,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260417-866",
+      "title": "Full post-upgrade OpenClaw cleanup and verification pass",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh asked for a full J.A.I.N + JAIMES version audit/update to the latest OpenClaw and Hermes, then restart/verify both lanes.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-18 01:10",
+      "owner": "JAIMES"
+    },
+    {
       "id": "T-20260417-879",
       "title": "Sorare GW7 championship-matchup ML weighting polish",
       "status": "active",
@@ -814,29 +824,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T05:10:07Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-18T05:15:09Z",
+      "event": "Session spend: $0.13"
     },
     {
-      "time": "2026-04-18T05:10:04Z",
+      "time": "2026-04-18T05:15:04Z",
       "event": "Coding: scripts/openclaw_self_maintain.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-18T05:10:04Z",
+      "time": "2026-04-18T05:15:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T05:10:02Z",
+      "time": "2026-04-18T05:15:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T05:10:02Z",
+      "time": "2026-04-18T05:15:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T05:10:02Z",
+      "time": "2026-04-18T05:15:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T05:10:02Z"
+  "lastUpdated": "2026-04-18T05:15:02Z"
 }
