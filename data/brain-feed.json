@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Triggered Sorare MLB mission claim and debugged auto-claim flow. Verified missions marked complete or ineligible; some errors due to locked cards, not script bug.",
+  "objective": "Audit Sorare scripts, routines, and cron jobs; fix daily mission claiming and ensure eligible missions are set",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T19:19:28Z",
-  "checkedAt": "2026-04-18T19:19:28Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "sorare_audit"
+    }
+  ],
+  "currentTool": "sorare_audit",
+  "updatedAt": "2026-04-18T19:26:47Z",
+  "checkedAt": "2026-04-18T19:26:47Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-4.1"
 }
