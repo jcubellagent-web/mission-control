@@ -562,13 +562,13 @@
         .bf-stat-val { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
         .bf-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
         .bf-model-badge {
-            font-size: 0.54rem;
+            font-size: 0.52rem;
             font-weight: 700;
-            color: rgba(255,255,255,0.74);
+            color: rgba(255,255,255,0.82);
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 999px;
-            padding: 2px 7px;
+            padding: 3px 8px;
             margin-left: 6px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -1253,14 +1253,122 @@
             color: rgba(255,255,255,0.42);
             line-height: 1.35;
         }
+        .mu-active-hero {
+            margin-bottom: 8px;
+            padding: 10px 11px;
+            border-radius: 14px;
+            border: 1px solid var(--mu-accent-border, rgba(255,255,255,0.08));
+            background: linear-gradient(180deg, color-mix(in srgb, var(--mu-accent-soft, rgba(255,255,255,0.05)) 92%, rgba(255,255,255,0.03)), rgba(255,255,255,0.02));
+        }
+        .mu-active-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .mu-active-kicker,
+        .mu-breakdown-kicker {
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.46);
+        }
+        .mu-active-main,
+        .mu-breakdown-main {
+            margin-top: 3px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: #fff;
+        }
+        .mu-active-sub {
+            margin-top: 3px;
+            font-size: 0.58rem;
+            color: var(--mu-accent, #fff);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .mu-active-spend {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            text-align: right;
+        }
+        .mu-active-spend-label {
+            font-size: 0.48rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.42);
+        }
+        .mu-active-spend-val {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-active-chip-row,
+        .mu-model-key {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .mu-active-chip,
+        .mu-model-key-chip,
+        .mu-breakdown-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.68);
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .mu-model-key-chip.active {
+            border-color: color-mix(in srgb, var(--model-chip) 28%, rgba(255,255,255,0.08));
+            background: color-mix(in srgb, var(--model-chip) 12%, rgba(255,255,255,0.02));
+            color: #fff;
+        }
+        .mu-model-key-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--model-chip);
+        }
+        .mu-breakdown-panel {
+            margin-top: 8px;
+            padding: 9px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.02);
+        }
+        .mu-breakdown-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
         .mu-compact-list { display: flex; flex-direction: column; gap: 2px; }
-        .mu-compact-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; min-width: 0; }
+        .mu-compact-row { display: flex; align-items: center; gap: 4px; padding: 4px 6px; min-width: 0; border-radius: 10px; }
+        .mu-compact-row.is-active {
+            background: var(--mu-row-accent-soft, rgba(255,255,255,0.03));
+            border: 1px solid var(--mu-row-accent-border, rgba(255,255,255,0.08));
+        }
         .mu-compact-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
         .mu-compact-name { font-size: 0.6rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
-        .mu-compact-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .mu-compact-bar-wrap { width: 42px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin-left: 4px; flex-shrink: 0; }
         .mu-compact-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
         .mu-compact-cost { font-size: 0.58rem; color: #fff; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; min-width: 36px; }
-        .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: right; }
+        .mu-compact-legend { font-size: 0.58rem; color: rgba(255,255,255,0.32); margin-top: 6px; text-align: right; }
         .mu-el-row { display: flex; align-items: center; gap: 6px; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.05); }
         .mu-el-bar-wrap { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
         .mu-el-bar-fill { height: 100%; border-radius: 3px; }
@@ -4498,8 +4606,11 @@
             align-items: stretch;
         }
         .bf-objective {
-            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.016));
-            border: 1px solid rgba(255,255,255,0.055);
+            --bf-model-color: rgba(255,255,255,0.9);
+            --bf-model-border: rgba(255,255,255,0.08);
+            --bf-model-bg: rgba(255,255,255,0.04);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--bf-model-bg) 92%, rgba(255,255,255,0.02)), rgba(255,255,255,0.014));
+            border: 1px solid var(--bf-model-border);
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 0;
@@ -4508,24 +4619,47 @@
             flex-direction: column;
             justify-content: space-between;
             gap: 10px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
-        .bf-objective-meta { display: flex; align-items: center; gap: 10px; }
+        .bf-objective-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .bf-objective-kicker {
             margin-bottom: 0;
             font-size: 0.58rem;
             letter-spacing: 0.16em;
+            color: var(--bf-model-color);
+        }
+        .bf-objective-provider {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--bf-model-border);
+            background: var(--bf-model-bg);
+            color: var(--bf-model-color);
+            font-size: 0.52rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            max-width: 100%;
+        }
+        .bf-objective-provider span:last-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .bf-objective-text {
             font-size: clamp(1.9rem, 2.8vw, 2.45rem);
             line-height: 1.03;
-            color: rgba(255,255,255,0.99);
+            color: var(--bf-model-color);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             overflow: hidden;
             padding-right: 2px;
             padding-bottom: 1px;
+            text-shadow: 0 0 18px color-mix(in srgb, var(--bf-model-color) 16%, transparent);
         }
         #bf-last-updated {
             margin-left: auto;
@@ -4540,6 +4674,39 @@
             gap: 8px;
             margin-bottom: 0;
             align-content: start;
+        }
+        .bf-model-key {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .bf-model-key-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.02);
+            color: rgba(255,255,255,0.52);
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .bf-model-key-chip.active {
+            border-color: color-mix(in srgb, var(--model-chip) 28%, rgba(255,255,255,0.08));
+            background: color-mix(in srgb, var(--model-chip) 12%, rgba(255,255,255,0.02));
+            color: #fff;
+        }
+        .bf-model-key-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--model-chip);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--model-chip) 40%, transparent);
         }
         .bf-signal-chip {
             background: rgba(255,255,255,0.012);
@@ -5156,7 +5323,7 @@
                         <div class="card-header">
                             <div class="card-header-main">
                                 <span class="icon"><img src="assets/icons/usage.png" alt="" class="section-icon-image"></span>
-                                <h2>Model Usage Health &amp; Architecture</h2>
+                                <h2>Model Usage &amp; Spend</h2>
                             </div>
                             <div class="card-header-actions">
                                 <span class="mu-updated mu-header-ts"></span>
@@ -5926,6 +6093,54 @@
             const sliced = compact.slice(0, maxLen);
             const cut = sliced.lastIndexOf(' ');
             return `${(cut > 36 ? sliced.slice(0, cut) : sliced).trim()}…`;
+        }
+
+        function formatModelLabel(raw) {
+            const n = (raw || '')
+                .replace(/^(anthropic|openai|google|openrouter|x-ai|xai|local|jain)\//i, '')
+                .replace(/\s*\(BYOK\)/i, '')
+                .trim();
+            const map = {
+                'claude-sonnet-4-6': 'Sonnet 4.6',
+                'claude-sonnet-4-5': 'Sonnet 4.5',
+                'claude-haiku-3-5': 'Haiku 3.5',
+                'gpt-5.4': 'GPT-5.4',
+                'gpt-5.4-mini': 'GPT-5.4 mini',
+                'gpt-5.1-codex': 'GPT-5.1 Codex',
+                'gpt-4.1': 'GPT-4.1',
+                'gpt-4o': 'GPT-4o',
+                'gpt-4o-mini': 'GPT-4o mini',
+                'gemini-2.5-flash': 'Gemini 2.5 Flash',
+                'gemini-2.5-pro': 'Gemini 2.5 Pro',
+                'grok-3': 'Grok 3',
+                'grok-3-fast': 'Grok 3 Fast',
+                'grok-4.20-non-reasoning': 'Grok 4',
+            };
+            return map[n.toLowerCase()] || n;
+        }
+
+        function getModelVisual(rawModel = '', tool = '') {
+            const model = `${rawModel || ''}`.toLowerCase();
+            const toolName = `${tool || ''}`.toLowerCase();
+            if (model.includes('codex') || toolName.includes('codex')) {
+                return { key: 'openai_codex', label: 'OpenAI OAuth / Codex', color: '#a78bfa', text: '#d8b4fe', border: 'rgba(167,139,250,0.28)', bg: 'rgba(167,139,250,0.08)' };
+            }
+            if (model.includes('gpt') || model.startsWith('openai/')) {
+                return { key: 'openai_api', label: 'OpenAI API', color: '#4ade80', text: '#86efac', border: 'rgba(74,222,128,0.28)', bg: 'rgba(74,222,128,0.08)' };
+            }
+            if (model.includes('gemini') || model.startsWith('google/')) {
+                return { key: 'gemini', label: 'Gemini', color: '#60a5fa', text: '#93c5fd', border: 'rgba(96,165,250,0.28)', bg: 'rgba(96,165,250,0.08)' };
+            }
+            if (model.includes('grok') || model.startsWith('xai/') || model.startsWith('openrouter/')) {
+                return { key: 'grok', label: 'Grok / OpenRouter', color: '#f59e0b', text: '#fbbf24', border: 'rgba(245,158,11,0.28)', bg: 'rgba(245,158,11,0.08)' };
+            }
+            if (model.includes('claude') || model.startsWith('anthropic/')) {
+                return { key: 'anthropic', label: 'Anthropic', color: '#fb7185', text: '#fda4af', border: 'rgba(251,113,133,0.28)', bg: 'rgba(251,113,133,0.08)' };
+            }
+            if (model.startsWith('local/') || model.includes('ollama')) {
+                return { key: 'local', label: 'Local', color: '#94a3b8', text: '#cbd5e1', border: 'rgba(148,163,184,0.28)', bg: 'rgba(148,163,184,0.08)' };
+            }
+            return { key: 'default', label: 'Mixed', color: '#e2e8f0', text: '#f8fafc', border: 'rgba(226,232,240,0.22)', bg: 'rgba(226,232,240,0.06)' };
         }
 
         function renderUnifiedActivity() {
@@ -7671,8 +7886,29 @@
             return { doneCount, activeStep, totalCount, progressText, liveStep, currentTool };
         }
 
+        function getModelLegendEntries() {
+            return [
+                { key: 'openai_api', label: 'OpenAI API', color: '#4ade80' },
+                { key: 'openai_codex', label: 'OpenAI OAuth / Codex', color: '#a78bfa' },
+                { key: 'gemini', label: 'Gemini', color: '#60a5fa' },
+                { key: 'grok', label: 'Grok / OpenRouter', color: '#f59e0b' },
+                { key: 'anthropic', label: 'Anthropic', color: '#fb7185' },
+                { key: 'local', label: 'Local', color: '#94a3b8' },
+            ];
+        }
+
+        function renderModelKeyRow(activeKey, className = 'bf-model-key') {
+            const entries = getModelLegendEntries();
+            return `<div class="${className}">${entries.map(entry => `
+                <span class="${className}-chip ${entry.key === activeKey ? 'active' : ''}" style="--model-chip:${entry.color}">
+                    <span class="${className}-dot"></span>
+                    <span>${escapeHtml(entry.label)}</span>
+                </span>`).join('')}</div>`;
+        }
+
         function renderBrainFeedSignalRow(bf) {
             const metrics = getBrainFeedMetrics(bf);
+            const modelVisual = getModelVisual(bf?.model || '', metrics.currentTool || '');
             return `<div class="bf-signal-row">
                 <div class="bf-signal-chip">
                     <span class="bf-signal-label">Tool</span>
@@ -7686,6 +7922,7 @@
                     <span class="bf-signal-label">Live step</span>
                     <span class="bf-signal-value bf-signal-step" title="${escapeHtml(metrics.liveStep)}">${escapeHtml(metrics.liveStep)}</span>
                 </div>
+                ${renderModelKeyRow(modelVisual.key, 'bf-model-key')}
             </div>`;
         }
 
@@ -7738,12 +7975,21 @@
             const isActiveBf = bf && bf.active;
             const statusLabel = isActiveBf ? 'ACTIVE · MSG RECEIVED' : stateLabel;
             const statusDotColor = isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)';
-            // Update header model badge
-            const modelLabel = (bf && bf.active && bf.model) ? bf.model : '';
+            const modelLabel = (bf && bf.model) ? formatModelLabel(bf.model) : '';
+            const toolLabel = prettyToolLabel(bf?.currentTool || '');
+            const modelVisual = getModelVisual(bf?.model || '', toolLabel || '');
+            const providerLabel = modelLabel ? `${modelVisual.label} · ${modelLabel}` : modelVisual.label;
             const modelBadgeEl = document.getElementById('bf-active-model-badge');
             if (modelBadgeEl) {
-                if (modelLabel) { modelBadgeEl.textContent = modelLabel; modelBadgeEl.style.display = ''; }
-                else { modelBadgeEl.style.display = 'none'; }
+                if (providerLabel && bf?.active) {
+                    modelBadgeEl.textContent = providerLabel;
+                    modelBadgeEl.style.display = '';
+                    modelBadgeEl.style.color = modelVisual.text;
+                    modelBadgeEl.style.borderColor = modelVisual.border;
+                    modelBadgeEl.style.background = modelVisual.bg;
+                } else {
+                    modelBadgeEl.style.display = 'none';
+                }
             }
             const heroAgentLabel = bf?.heroAgentLabel || 'JOSH 2.0';
             const objectiveMeta = `<div class="bf-objective-meta" id="bf-status-bar">
@@ -7751,6 +7997,7 @@
                     <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
                     <span class="bf-objective-kicker" id="bf-freshness-label-text">${isActiveBf ? `LIVE OBJECTIVE · ${heroAgentLabel}` : `LATEST · ${heroAgentLabel}`}</span>
                 </div>
+                ${providerLabel ? `<span class="bf-objective-provider"><span>Model</span><span>${escapeHtml(providerLabel)}</span></span>` : ''}
                 <span id="bf-last-updated">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
             </div>`;
 
@@ -7781,7 +8028,7 @@
                     brainFeedCard.innerHTML = `
                         <div class="bf-container bf-shell">
                             <div class="bf-hero-grid">
-                                <div class="bf-objective">
+                                <div class="bf-objective" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                                     ${objectiveMeta}
                                     <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...')}</div>
                                 </div>
@@ -7802,8 +8049,25 @@
                     // 1. Update unified status bar (don't override if currently showing MSG RECEIVED)
                     const lbl = brainFeedCard.querySelector('#bf-freshness-label-text');
                     const ts = brainFeedCard.querySelector('#bf-last-updated');
+                    const objectiveEl = brainFeedCard.querySelector('.bf-objective');
+                    const statusBar = brainFeedCard.querySelector('#bf-status-bar');
+                    let providerEl = brainFeedCard.querySelector('.bf-objective-provider');
                     if (lbl && lbl.textContent !== 'MSG RECEIVED') lbl.textContent = `LIVE OBJECTIVE · ${heroAgentLabel}`;
                     if (ts) ts.textContent = bf.updatedAt ? formatRelTime(bf.updatedAt) : '-';
+                    if (objectiveEl) {
+                        objectiveEl.style.setProperty('--bf-model-color', modelVisual.text);
+                        objectiveEl.style.setProperty('--bf-model-border', modelVisual.border);
+                        objectiveEl.style.setProperty('--bf-model-bg', modelVisual.bg);
+                    }
+                    if (providerLabel) {
+                        if (!providerEl && statusBar) {
+                            ts?.insertAdjacentHTML('beforebegin', `<span class="bf-objective-provider"><span>Model</span><span>${escapeHtml(providerLabel)}</span></span>`);
+                            providerEl = brainFeedCard.querySelector('.bf-objective-provider');
+                        }
+                        if (providerEl) providerEl.innerHTML = `<span>Model</span><span>${escapeHtml(providerLabel)}</span>`;
+                    } else if (providerEl) {
+                        providerEl.remove();
+                    }
 
                     // 2. Crossfade objective text if changed
                     if (objectiveChanged) {
@@ -7838,6 +8102,8 @@
                         signalStep.textContent = metrics.liveStep;
                         signalStep.setAttribute('title', metrics.liveStep);
                     }
+                    const modelKey = brainFeedCard.querySelector('.bf-model-key');
+                    if (modelKey) modelKey.outerHTML = renderModelKeyRow(modelVisual.key, 'bf-model-key');
 
                     // 4. Diff-update steps — animate step status changes, slide in new steps
                     const timeline = brainFeedCard.querySelector('.bf-timeline');
@@ -8274,27 +8540,7 @@
                     muTsEl.textContent = updatedStr || '';
                 }
 
-                // Helper: clean model name → display label
-                function modelDisplayName(raw) {
-                    const n = (raw || '').replace(/^(anthropic|openai|google|openrouter|x-ai|local|jain)\//, '')
-                        .replace(/\s*\(BYOK\)/i, '').replace(/-codex\b/i, '').trim();
-                    const MAP = {
-                        'claude-sonnet-4-6': 'Sonnet 4.6',
-                        'claude-sonnet-4-5': 'Sonnet 4.5',
-                        'claude-haiku-3-5': 'Haiku 3.5',
-                        'gpt-5.4': 'GPT-5.4',
-                        'gpt-5.3': 'GPT-5.3',
-                        'gpt-4.1': 'GPT-4.1',
-                        'gpt-4o': 'GPT-4o',
-                        'gpt-4o-mini': 'GPT-4o mini',
-                        'o1': 'o1', 'o3': 'o3', 'o4-mini': 'o4-mini',
-                        'gemini-2.5-flash': 'Gemini 2.5 Flash',
-                        'gemini-2.5-pro': 'Gemini 2.5 Pro',
-                        'gemini-2.0-flash': 'Gemini 2.0 Flash',
-                        'auto (byok)': 'OpenRouter BYOK',
-                    };
-                    return MAP[n.toLowerCase()] || n;
-                }
+                const modelDisplayName = formatModelLabel;
 
                 // ── Summary totals ──
                 const dailyV   = (mu.daily   == null || isNaN(mu.daily))   ? null : mu.daily;
@@ -8320,8 +8566,12 @@
                 const totalWeekly  = Math.max(rawWeekly, totalDaily);
                 const totalMonthly = Math.max(rawMonthly, totalWeekly);
 
-                const activeModelRaw = data.contextWindow?.model || '';
+                const activeBf = window._mcLastRenderedBrainFeed || null;
+                const activeModelRaw = activeBf?.model || data.contextWindow?.model || '';
+                const activeToolRaw = activeBf?.currentTool || '';
                 const activeModelDisp = activeModelRaw ? modelDisplayName(activeModelRaw) : '';
+                const activeToolLabel = prettyToolLabel(activeToolRaw || '');
+                const activeModelVisual = getModelVisual(activeModelRaw, activeToolRaw);
                 // Keep pill model name in sync
                 if (activeModelRaw) updatePmPillModel(activeModelRaw);
 
@@ -8498,20 +8748,20 @@
                         models: breakdownModels.filter(isOpenAiApiModel),
                     },
                     {
-                        key: 'openai_pro',
-                        name: 'OpenAI Pro',
+                        key: 'openai_codex',
+                        name: 'OpenAI OAuth / Codex',
                         color: '#a78bfa',
                         models: breakdownModels.filter(isCodexModel),
                     },
                     {
-                        key: 'gemini_api',
-                        name: 'Gemini API',
+                        key: 'gemini',
+                        name: 'Gemini',
                         color: '#60a5fa',
                         models: breakdownModels.filter(isGeminiModel),
                     },
                     {
-                        key: 'grok_api',
-                        name: 'Grok API',
+                        key: 'grok',
+                        name: 'Grok / OpenRouter',
                         color: '#f59e0b',
                         models: breakdownModels.filter(isGrokModel),
                     },
@@ -8538,15 +8788,15 @@
                         const lead = topModels[0] || 'No active OpenAI model';
                         main = models.length ? `${fmtCost(projected)}/mo · ${lead}` : 'Idle';
                         meta = models.length ? `Sess ${fmtCost(session)} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No direct OpenAI API calls tracked in this window.';
-                    } else if (lane.key === 'openai_pro') {
+                    } else if (lane.key === 'openai_codex') {
                         main = codexbar?.available ? `Allowance ${codexbar.session || 'available'}` : (models.length ? `${fmtCost(projected)}/mo metered` : 'Idle');
                         meta = codexbar?.available
                             ? `CodexBar ${codexbar.summary || 'ready'} · tracked wk ${fmtCost(weekly)}`
                             : (models.length ? `Sess ${fmtCost(session)} · Wk ${fmtCost(weekly)} · ${topModels.join(', ')}` : 'No OpenAI Pro / Codex activity tracked.');
-                    } else if (lane.key === 'gemini_api') {
+                    } else if (lane.key === 'gemini') {
                         main = models.length ? `${fmtCost(projected)}/mo pace` : 'Idle';
                         meta = models.length ? `${topModels.join(', ')} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No Gemini API calls tracked right now.';
-                    } else if (lane.key === 'grok_api') {
+                    } else if (lane.key === 'grok') {
                         const grokMonthly = Math.max(projected, orData?.byok_monthly || 0, orData?.monthly || 0);
                         main = grokMonthly > 0 ? `${fmtCost(grokMonthly)}/mo pace` : 'Idle';
                         meta = grokMonthly > 0
@@ -8565,7 +8815,7 @@
                         session,
                         daily,
                         weekly,
-                        projected: lane.key === 'grok_api' ? Math.max(projected, orData?.byok_monthly || 0, orData?.monthly || 0) : projected,
+                        projected: lane.key === 'grok' ? Math.max(projected, orData?.byok_monthly || 0, orData?.monthly || 0) : projected,
                         capPct,
                         impact,
                         main,
@@ -8594,9 +8844,28 @@
                 const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Bars show each lane’s projected monthly burn against the $${budgetFloor} floor, $${budgetTarget} target, and $${budgetCap} cap. Local stays at zero because it is on-device.</div>`;
                 const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">Run rate</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${budgetLabel} against floor $${budgetFloor}, target $${budgetTarget}, cap $${budgetCap}</span></div>`;
 
+                const activeUsageHeroHtml = `<div class="mu-active-hero" style="--mu-accent:${activeModelVisual.color};--mu-accent-soft:${activeModelVisual.bg};--mu-accent-border:${activeModelVisual.border};">
+                    <div class="mu-active-head">
+                        <div>
+                            <div class="mu-active-kicker">Live model</div>
+                            <div class="mu-active-main">${escapeHtml(activeModelDisp || 'Waiting for first tagged model')}</div>
+                            <div class="mu-active-sub">${escapeHtml(activeModelDisp ? activeModelVisual.label : 'No live provider tagged yet')}</div>
+                        </div>
+                        <div class="mu-active-spend">
+                            <span class="mu-active-spend-label">Projected</span>
+                            <span class="mu-active-spend-val">${fmtCost(budgetProjected)}/mo</span>
+                        </div>
+                    </div>
+                    <div class="mu-active-chip-row">
+                        ${activeToolLabel ? `<span class="mu-active-chip">Tool · ${escapeHtml(activeToolLabel)}</span>` : '<span class="mu-active-chip">Tool · Waiting</span>'}
+                        <span class="mu-active-chip">Session · ${fmtCost(totalSession)}</span>
+                        <span class="mu-active-chip">Week · ${fmtCost(totalWeekly)}</span>
+                    </div>
+                </div>`;
+
                 const summaryHtml = `
                 <div class="mu-totals-section">
-                    ${activeModelDisp ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"><span style="font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.45);">Active chat</span><span style="font-size:0.72rem;font-weight:600;color:#fff;">${escapeHtml(activeModelDisp)}</span></div>` : ''}
+                    ${activeUsageHeroHtml}
                     <div class="mu-totals-row">
                         <div class="mu-total-cell">
                             <span class="mu-total-label">Sess</span>
@@ -8615,6 +8884,7 @@
                             <span class="mu-total-val">${fmtCost(totalMonthly)}</span>
                         </div>
                     </div>
+                    ${renderModelKeyRow(activeModelVisual.key, 'mu-model-key')}
                 </div>`;
 
                 // Provider section removed — per-model breakdown below covers this
@@ -8642,33 +8912,34 @@
                     breakdownCount = sorted.length;
                     if (sorted.length) topModelLabel = modelDisplayName(sorted[0].name || activeModelDisp || '—');
                     const maxCost = sorted.reduce((m, x) => Math.max(m, x.weeklyCost || 0), 0) || 1;
-                    const palette = ['#e53e3e','#63b3ed','#9a75f5','#f97316','#4ade80','#fbbf24','#22d3ee','#fb7185'];
                     const colHdr = `<div class="mu-compact-row mu-compact-hdr" style="opacity:0.4;font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:2px;">
                         <span style="flex:1">Model</span>
                         <span style="width:34px;text-align:right">Sess</span>
                         <span style="width:34px;text-align:right">Day</span>
                         <span style="width:34px;text-align:right">Wk</span>
                     </div>`;
-                    const rows = sorted.slice(0, 4).map((model, i) => {
+                    const rows = sorted.slice(0, 5).map((model) => {
                         const sessC = model.sessionCost || model.costUsd || 0;
                         const dayC  = model.dailyCost || 0;
                         const wkC   = model.weeklyCost || 0;
-                        const pct   = Math.max(2, (wkC / maxCost) * 100).toFixed(1);
-                        const color = palette[i % palette.length];
+                        const pct   = Math.max(4, (wkC / maxCost) * 100).toFixed(1);
                         const est   = model.costEstimated ? '~' : '';
                         const disp  = modelDisplayName(model.name);
                         const ag    = agentTag(model);
-                        return `<div class="mu-compact-row">
-                            <span class="mu-compact-dot" style="background:${color}"></span>
+                        const modelVisual = getModelVisual(model.name || '', model.source || '');
+                        const isActiveModel = !!(activeModelRaw && (model.name || '').toLowerCase() === activeModelRaw.toLowerCase());
+                        return `<div class="mu-compact-row ${isActiveModel ? 'is-active' : ''}" style="--mu-row-accent:${modelVisual.color};--mu-row-accent-soft:${modelVisual.bg};--mu-row-accent-border:${modelVisual.border};">
+                            <span class="mu-compact-dot" style="background:${modelVisual.color}"></span>
                             <span class="mu-compact-name" title="${escapeHtml(model.name)}" style="flex:1">${escapeHtml(disp)}</span>
                             <span class="mu-agent-tag" style="font-size:0.5rem;color:${ag.color};margin-right:4px;white-space:nowrap;">${ag.label}</span>
                             <span class="mu-compact-cost" style="width:34px;text-align:right">${est}${fmtCost(sessC)}</span>
                             <span class="mu-compact-cost" style="width:34px;text-align:right;opacity:0.7">${est}${fmtCost(dayC)}</span>
                             <span class="mu-compact-cost" style="width:34px;text-align:right;opacity:0.5">${est}${fmtCost(wkC)}</span>
+                            <span class="mu-compact-bar-wrap"><span class="mu-compact-bar-fill" style="width:${pct}%;background:linear-gradient(90deg, ${modelVisual.color}55, ${modelVisual.color})"></span></span>
                         </div>`;
                     }).join('');
-                    const moreNote = sorted.length > 4 ? `<div class="mu-compact-legend">+${sorted.length - 4} more models in details</div>` : '';
-                    breakdownHtml = `<div class="mu-compact-list">${colHdr}${rows}${moreNote}</div>`;
+                    const moreNote = sorted.length > 5 ? `<div class="mu-compact-legend">+${sorted.length - 5} more models in details</div>` : '';
+                    breakdownHtml = `<div class="mu-breakdown-panel"><div class="mu-breakdown-head"><div><div class="mu-breakdown-kicker">Tracked model mix</div><div class="mu-breakdown-main">${escapeHtml(topModelLabel || 'No tracked model yet')}</div></div><span class="mu-breakdown-pill">${breakdownCount} model${breakdownCount === 1 ? '' : 's'}</span></div><div class="mu-compact-list">${colHdr}${rows}${moreNote}</div></div>`;
                 }
 
                 // ── ElevenLabs usage chip ──
@@ -8798,7 +9069,7 @@
                 window._moduleHealthHtml = healthDetailHtml;
                 window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
 
-                modelUsageCard.innerHTML = budgetStripHtml + (phoneMode ? laneGridHtml : overviewDrillHtml);
+                modelUsageCard.innerHTML = summaryHtml + runRateHtml + budgetStripHtml + laneGridHtml + breakdownHtml + elHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');
