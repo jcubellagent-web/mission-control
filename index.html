@@ -5869,9 +5869,14 @@
             const raw = sanitizeLabel(text || '');
             if (!raw) return '';
             const compact = raw
+                .replace(/\bplease\b/gi, '')
                 .replace(/\binspect the actual\b/gi, 'inspect')
                 .replace(/\band recheck mission control on the real display\b/gi, 'and recheck Mission Control')
                 .replace(/\bon the actual local safari mission control window\b/gi, 'on Safari')
+                .replace(/\breal-time source of truth\b/gi, 'source of truth')
+                .replace(/\bmake the live objective larger and turn it into the source of truth across\b/gi, 'source of truth across')
+                .replace(/\bmake the live objective larger and turn it into the real-time source of truth across\b/gi, 'source of truth across')
+                .replace(/\bJosh JAIN and JAIMES\b/gi, 'Josh, J.A.I.N, and JAIMES')
                 .replace(/\s+/g, ' ')
                 .trim();
             if (compact.length <= maxLen) return compact;
