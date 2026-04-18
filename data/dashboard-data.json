@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "async full-width hero confirmation handled",
+    "objective": "make the live objective larger and turn it into the real-time source of truth across Josh JAIN and JAIMES",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-18T01:38:43Z",
-    "checkedAt": "2026-04-18T01:38:43Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-18T01:57:26Z",
+    "checkedAt": "2026-04-18T01:57:26Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "async full-width hero confirmation handled",
-    "updatedAt": "2026-04-18T01:55:03Z"
+    "context": "make the live objective larger and turn it into the real-time source of truth across Josh JAIN and JAIMES",
+    "updatedAt": "2026-04-18T02:00:02Z"
   },
   "contextWindow": {
     "usedTokens": 148610,
@@ -136,7 +142,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 1h 6m",
+        "Resets in 1h 1m",
         "Weekly: 98% left [===========-]",
         "Pace: 67% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 3h",
@@ -147,11 +153,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 6m",
+      "sessionReset": "1h 1m",
       "weeklyReset": "2d 3h",
       "summary": "99% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T01:55:05Z"
+    "updatedAt": "2026-04-18T02:00:04Z"
   },
   "modelUsage": {
     "session": 12.399901,
@@ -276,7 +282,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T01:55:08Z",
+    "lastUpdated": "2026-04-18T02:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -317,9 +323,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 41.826583,
-    "total_earned": 41.826583,
-    "online_time": "418h 15m",
+    "sim_balance": 41.834889,
+    "total_earned": 41.834889,
+    "online_time": "418h 20m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -330,7 +336,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T01:55:09Z",
+    "updatedAt": "2026-04-18T02:00:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -345,13 +351,13 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.6,
-      "cpu_user": 25.79,
-      "cpu_sys": 14.75,
-      "load1": 3.6,
-      "load5": 3.66,
-      "load15": 3.61,
-      "ram_used_gb": 13.0,
+      "cpu_pct": 43.9,
+      "cpu_user": 31.18,
+      "cpu_sys": 12.66,
+      "load1": 3.32,
+      "load5": 3.34,
+      "load15": 3.47,
+      "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
@@ -360,12 +366,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.8,
-      "cpu_user": 4.9,
-      "cpu_sys": 10.65,
-      "load1": 1.99,
-      "load5": 2.0,
-      "load15": 2.06,
+      "cpu_pct": 12.6,
+      "cpu_user": 2.52,
+      "cpu_sys": 10.8,
+      "load1": 3.38,
+      "load5": 2.48,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -391,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T01:55:03Z"
+      "lastChecked": "2026-04-18T02:00:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T01:55:03Z"
+      "lastChecked": "2026-04-18T02:00:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T01:55:03Z"
+      "lastChecked": "2026-04-18T02:00:02Z"
     }
   ],
   "crons": [
@@ -802,6 +808,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260417-867",
+      "title": "Deep scan Mission Control brain feed widget/module and refresh memory roadmap live state",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh wants the live objective doubled in size and treated as the real-time source of truth for what JOSH 2.0, J.A.I.N, or JAIMES are doing at any given moment. I\u2019m now tightening the Brain Feed routing/display logic so the hero objective reflects the right active agent feed in real time, then I\u2019ll republish and recheck it on the actual monitor.",
+      "requestedAt": "2026-04-17 19:25",
+      "updatedAt": "2026-04-17 21:57",
+      "owner": "JAIMES"
+    },
+    {
       "id": "T-20260417-866",
       "title": "Run the full post-upgrade cleanup and verification pass",
       "status": "active",
@@ -836,29 +852,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T01:55:08Z",
+      "time": "2026-04-18T02:00:08Z",
       "event": "Session spend: $12.40"
     },
     {
-      "time": "2026-04-18T01:55:05Z",
+      "time": "2026-04-18T02:00:04Z",
       "event": "Coding: mission-control/index.html, mission-control/screenshots/mcbrain-snapshot.json"
     },
     {
-      "time": "2026-04-18T01:55:05Z",
+      "time": "2026-04-18T02:00:04Z",
       "event": "CodexBar: 99% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T01:55:03Z",
+      "time": "2026-04-18T02:00:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T01:55:03Z",
+      "time": "2026-04-18T02:00:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T01:55:03Z",
+      "time": "2026-04-18T02:00:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T01:55:03Z"
+  "lastUpdated": "2026-04-18T02:00:02Z"
 }
