@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "replace the still-cached old top-left icon with an explicit Josh headshot asset",
+    "objective": "fix the Brain Feed objective pager so it rotates whole readable chunks instead of one-letter slices",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-18T02:57:53Z",
-    "checkedAt": "2026-04-18T02:57:53Z",
+    "updatedAt": "2026-04-18T03:03:13Z",
+    "checkedAt": "2026-04-18T03:03:13Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "replace the still-cached old top-left icon with an explicit Josh headshot asset",
-    "updatedAt": "2026-04-18T03:00:03Z"
+    "context": "fix the Brain Feed objective pager so it rotates whole readable chunks instead of one-letter slices",
+    "updatedAt": "2026-04-18T03:05:34Z"
   },
   "contextWindow": {
-    "usedTokens": 108377,
+    "usedTokens": 112862,
     "limitTokens": 400000,
-    "pct": 0.2709,
+    "pct": 0.2822,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -130,44 +130,27 @@
     "pct": 0.6714
   },
   "codingVisibility": {
-    "workspaceDirty": 42,
+    "workspaceDirty": 0,
     "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/index.html"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 98% left",
+    "codexbarStatus": "Codex auth required",
     "codexbar": {
-      "available": true,
-      "raw": [
-        "== Codex 0.120.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 1m",
-        "Weekly: 98% left [===========-]",
-        "Pace: 68% in reserve | Expected 70% used | Lasts until reset",
-        "Resets in 2d 2h",
-        "Credits: 0 left",
-        "Account: jcubell16@gmail.com"
-      ],
-      "session": "99% left",
-      "weekly": "98% left",
-      "credits": "0 left",
-      "account": "jcubell16@gmail.com",
-      "sessionReset": "1m",
-      "weeklyReset": "2d 2h",
-      "summary": "99% left \u00b7 wk 98% left"
+      "available": false
     },
-    "updatedAt": "2026-04-18T03:00:05Z"
+    "updatedAt": "2026-04-18T03:05:56Z"
   },
   "modelUsage": {
-    "session": 21.013975,
-    "daily": 107.765922,
-    "weekly": 139.559661,
-    "monthly": 999.063525,
+    "session": 21.744947,
+    "daily": 110.870004,
+    "weekly": 140.290633,
+    "monthly": 999.794497,
     "topModels": [
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 59.70411599999999
+        "cost": 60.43508799999999
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -194,12 +177,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 3393657,
-        "outputTokens": 116616,
-        "totalTokens": 3510273,
-        "sessionCost": 59.70411599999999,
-        "dailyCost": 53.184403999999994,
-        "weeklyCost": 59.70411599999999,
+        "inputTokens": 3397974,
+        "outputTokens": 116640,
+        "totalTokens": 3514614,
+        "sessionCost": 60.43508799999999,
+        "dailyCost": 53.915375999999995,
+        "weeklyCost": 60.43508799999999,
         "sessions": 155,
         "isGemini": false,
         "costEstimated": false
@@ -207,11 +190,11 @@
       {
         "name": "codex/gpt-5.4-mini",
         "source": "openclaw",
-        "inputTokens": 2465166,
-        "outputTokens": 19238,
-        "totalTokens": 2484404,
+        "inputTokens": 2615925,
+        "outputTokens": 20428,
+        "totalTokens": 2636353,
         "sessionCost": 56.95462799999999,
-        "dailyCost": 54.581518499999994,
+        "dailyCost": 56.95462799999999,
         "weeklyCost": 56.95462799999999,
         "sessions": 24,
         "isGemini": false,
@@ -281,7 +264,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T03:00:08Z",
+    "lastUpdated": "2026-04-18T03:06:05Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -310,21 +293,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 107.765922,
-      "total": 141.370173,
-      "monthly": 1001.937594
+      "daily": 110.870004,
+      "total": 142.101145,
+      "monthly": 1002.668566
     },
     "weeklyRunRate": {
-      "total": 141.370173,
+      "total": 142.101145,
       "automation": 1.810512,
-      "interactive": 137.749149,
-      "projectedMonthly": 605.87
+      "interactive": 138.480121,
+      "projectedMonthly": 609.0
     }
   },
   "moltWorld": {
-    "sim_balance": 41.934917,
-    "total_earned": 41.934917,
-    "online_time": "419h 20m",
+    "sim_balance": 41.944806,
+    "total_earned": 41.944806,
+    "online_time": "419h 26m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -335,7 +318,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T03:00:09Z",
+    "updatedAt": "2026-04-18T03:06:05Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -350,14 +333,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.2,
-      "cpu_user": 25.42,
-      "cpu_sys": 14.75,
-      "load1": 4.23,
-      "load5": 3.73,
-      "load15": 3.69,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 34.0,
+      "cpu_user": 18.82,
+      "cpu_sys": 15.17,
+      "load1": 3.22,
+      "load5": 3.82,
+      "load15": 3.77,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "92Gi",
@@ -365,14 +348,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.3,
-      "cpu_user": 3.53,
-      "cpu_sys": 9.73,
-      "load1": 1.78,
-      "load5": 1.87,
-      "load15": 1.91,
+      "cpu_pct": 11.5,
+      "cpu_user": 2.65,
+      "cpu_sys": 8.84,
+      "load1": 2.29,
+      "load5": 2.05,
+      "load15": 1.96,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "49Gi",
@@ -396,19 +379,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T03:00:03Z"
+      "lastChecked": "2026-04-18T03:05:34Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T03:00:03Z"
+      "lastChecked": "2026-04-18T03:05:34Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T03:00:03Z"
+      "lastChecked": "2026-04-18T03:05:34Z"
     }
   ],
   "crons": [
@@ -841,29 +824,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T03:00:08Z",
-      "event": "Session spend: $21.01"
+      "time": "2026-04-18T03:06:05Z",
+      "event": "Session spend: $21.74"
     },
     {
-      "time": "2026-04-18T03:00:05Z",
+      "time": "2026-04-18T03:05:56Z",
       "event": "Coding: mission-control/index.html"
     },
     {
-      "time": "2026-04-18T03:00:05Z",
-      "event": "CodexBar: 99% left \u00b7 wk 98% left"
+      "time": "2026-04-18T03:05:56Z",
+      "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-04-18T03:00:03Z",
+      "time": "2026-04-18T03:05:34Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T03:00:03Z",
+      "time": "2026-04-18T03:05:34Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T03:00:03Z",
+      "time": "2026-04-18T03:05:34Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T03:00:03Z"
+  "lastUpdated": "2026-04-18T03:05:34Z"
 }
