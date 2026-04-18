@@ -4510,9 +4510,9 @@
             letter-spacing: 0.16em;
         }
         .bf-objective-text {
-            font-size: clamp(1rem, 1.34vw, 1.18rem);
-            line-height: 1.12;
-            color: rgba(255,255,255,0.98);
+            font-size: clamp(1.9rem, 2.8vw, 2.45rem);
+            line-height: 1.03;
+            color: rgba(255,255,255,0.99);
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
@@ -5606,7 +5606,7 @@
             window._mcLastBrainFeed = bf;
             bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
             _uaJoshBf = bf;
-            renderBrainFeed(bf);
+            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             updateBfFreshness(bf);
             renderUnifiedActivity();
             // Update jobs + health panels when brain feed changes
@@ -5695,7 +5695,7 @@
         function renderJainBrainFeed(bf) {
             _jainBrainFeed = bf || null;
             _uaJainBf = bf || null;
-            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed);
+            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             renderUnifiedActivity();
         }
 
@@ -5712,6 +5712,7 @@
             if (h === lastJaimesBrainFeedHash) return;
             lastJaimesBrainFeedHash = h;
             _uaJaimesBf = bf || null;
+            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             renderUnifiedActivity();
             if (window._mcLastDashData) {
                 renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
@@ -7640,26 +7641,39 @@
             </div>`;
         }
 
-        function renderCombinedBrainFeed(joshBf, jainBf) {
-            // J.A.I.N status is now in the unified Activity & Agents log — not here.
-            // Only keep brainCard active-state logic for laser/glow effects.
+        function pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf) {
+            const candidates = [
+                { bf: joshBf, agentLabel: 'JOSH 2.0' },
+                { bf: jainBf, agentLabel: 'J.A.I.N' },
+                { bf: jaimesBf, agentLabel: 'JAIMES' },
+            ].filter(entry => entry.bf);
+            if (!candidates.length) return null;
+            const score = (entry) => {
+                const ts = entry.bf?.updatedAt ? new Date(entry.bf.updatedAt).getTime() : 0;
+                const activeBoost = entry.bf?.active ? 1_000_000_000_000 : 0;
+                return activeBoost + ts;
+            };
+            return candidates.sort((a, b) => score(b) - score(a))[0];
+        }
+
+        function renderCombinedBrainFeed(joshBf, jainBf, jaimesBf = _uaJaimesBf) {
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
             const brainCard = card.closest('.card-brain');
-            const jainActive = !!(jainBf && jainBf.active);
-            const joshActive = !!(joshBf && joshBf.active);
-            if (brainCard && jainActive && !joshActive) {
-                brainCard.classList.add('brain-active');
-            }
-            // Remove old jain-status-bar if it exists
+            const primary = pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf);
+            const anyActive = !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
+            if (brainCard) brainCard.classList.toggle('brain-active', anyActive);
             const old = document.getElementById('jain-status-bar');
             if (old) old.remove();
+            if (primary?.bf) {
+                renderBrainFeed({ ...primary.bf, heroAgentLabel: primary.agentLabel });
+            }
         }
 
         function renderBrainFeed(bf) {
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard) return;
-            window._mcLastBrainFeed = bf || null;
+            window._mcLastRenderedBrainFeed = bf || null;
             // State transition detection
             const newState = (bf && bf.active) ? 'active' : (bf && bf.status === 'done') ? 'done' : 'idle';
             const isWakingUp = (_prevBfState === 'idle' || _prevBfState === 'done') && newState === 'active';
@@ -7683,10 +7697,11 @@
                 if (modelLabel) { modelBadgeEl.textContent = modelLabel; modelBadgeEl.style.display = ''; }
                 else { modelBadgeEl.style.display = 'none'; }
             }
+            const heroAgentLabel = bf?.heroAgentLabel || 'JOSH 2.0';
             const objectiveMeta = `<div class="bf-objective-meta" id="bf-status-bar">
                 <div class="bf-objective-live">
                     <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
-                    <span class="bf-objective-kicker" id="bf-freshness-label-text">${isActiveBf ? 'LIVE OBJECTIVE' : stateLabel}</span>
+                    <span class="bf-objective-kicker" id="bf-freshness-label-text">${isActiveBf ? `LIVE OBJECTIVE · ${heroAgentLabel}` : `LATEST · ${heroAgentLabel}`}</span>
                 </div>
                 <span id="bf-last-updated">${bf && bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
             </div>`;
@@ -7739,7 +7754,7 @@
                     // 1. Update unified status bar (don't override if currently showing MSG RECEIVED)
                     const lbl = brainFeedCard.querySelector('#bf-freshness-label-text');
                     const ts = brainFeedCard.querySelector('#bf-last-updated');
-                    if (lbl && lbl.textContent !== 'MSG RECEIVED') lbl.textContent = 'LIVE OBJECTIVE';
+                    if (lbl && lbl.textContent !== 'MSG RECEIVED') lbl.textContent = `LIVE OBJECTIVE · ${heroAgentLabel}`;
                     if (ts) ts.textContent = bf.updatedAt ? formatRelTime(bf.updatedAt) : '-';
 
                     // 2. Crossfade objective text if changed
@@ -7858,7 +7873,7 @@
                         statusLabel.style.color = '#e53e3e';
                         // Fade back to LIVE OBJECTIVE after 3s
                         setTimeout(() => {
-                            statusLabel.textContent = 'LIVE OBJECTIVE';
+                            statusLabel.textContent = `LIVE OBJECTIVE · ${heroAgentLabel}`;
                             statusLabel.style.color = '';
                         }, 3000);
                     }
