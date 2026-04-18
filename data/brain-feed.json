@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Diagnosed the Sorare Champion weighting root cause: learned predictions are suppressing strong 2026 MI cards, and the broad floor fix was tested but not shipped live",
+  "objective": "Add DeepSeek via OpenRouter as a selectable model option in Josh 2.0",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T23:39:13Z",
-  "checkedAt": "2026-04-18T23:39:13Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "add_deepseek_openrouter"
+    }
+  ],
+  "currentTool": "add_deepseek_openrouter",
+  "updatedAt": "2026-04-18T23:39:30Z",
+  "checkedAt": "2026-04-18T23:39:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
