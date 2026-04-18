@@ -4615,6 +4615,7 @@
             --bf-model-bg: rgba(255,255,255,0.04);
             background: linear-gradient(180deg, color-mix(in srgb, var(--bf-model-bg) 92%, rgba(255,255,255,0.02)), rgba(255,255,255,0.014));
             border: 1px solid var(--bf-model-border);
+            border-left: 4px solid var(--bf-model-color);
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 0;
@@ -4666,7 +4667,8 @@
             overflow: visible;
             padding-right: 2px;
             padding-bottom: 1px;
-            text-shadow: 0 0 18px color-mix(in srgb, var(--bf-model-color) 16%, transparent);
+            font-weight: 800;
+            text-shadow: 0 0 22px color-mix(in srgb, var(--bf-model-color) 38%, transparent);
             will-change: transform;
         }
         .bf-objective-text.is-scrolling {
@@ -4675,7 +4677,7 @@
         .bf-objective-detail {
             font-size: 0.64rem;
             line-height: 1.35;
-            color: rgba(255,255,255,0.76);
+            color: color-mix(in srgb, var(--bf-model-color) 72%, rgba(255,255,255,0.76));
             padding-top: 2px;
         }
         #bf-last-updated {
@@ -6144,22 +6146,22 @@
             const model = `${rawModel || ''}`.toLowerCase();
             const toolName = `${tool || ''}`.toLowerCase();
             if (model.includes('codex') || toolName.includes('codex')) {
-                return { key: 'openai_codex', label: 'OpenAI OAuth / Codex', color: '#a78bfa', text: '#d8b4fe', border: 'rgba(167,139,250,0.28)', bg: 'rgba(167,139,250,0.08)' };
+                return { key: 'openai_codex', label: 'OpenAI OAuth / Codex', color: '#c084fc', text: '#c084fc', border: 'rgba(192,132,252,0.36)', bg: 'rgba(192,132,252,0.12)' };
             }
             if (model.includes('gpt') || model.startsWith('openai/')) {
-                return { key: 'openai_api', label: 'OpenAI API', color: '#4ade80', text: '#86efac', border: 'rgba(74,222,128,0.28)', bg: 'rgba(74,222,128,0.08)' };
+                return { key: 'openai_api', label: 'OpenAI API', color: '#4ade80', text: '#4ade80', border: 'rgba(74,222,128,0.36)', bg: 'rgba(74,222,128,0.12)' };
             }
             if (model.includes('gemini') || model.startsWith('google/')) {
-                return { key: 'gemini', label: 'Gemini', color: '#60a5fa', text: '#93c5fd', border: 'rgba(96,165,250,0.28)', bg: 'rgba(96,165,250,0.08)' };
+                return { key: 'gemini', label: 'Gemini', color: '#60a5fa', text: '#60a5fa', border: 'rgba(96,165,250,0.36)', bg: 'rgba(96,165,250,0.12)' };
             }
             if (model.includes('grok') || model.startsWith('xai/') || model.startsWith('openrouter/')) {
-                return { key: 'grok', label: 'Grok / OpenRouter', color: '#f59e0b', text: '#fbbf24', border: 'rgba(245,158,11,0.28)', bg: 'rgba(245,158,11,0.08)' };
+                return { key: 'grok', label: 'Grok / OpenRouter', color: '#f59e0b', text: '#f59e0b', border: 'rgba(245,158,11,0.36)', bg: 'rgba(245,158,11,0.12)' };
             }
             if (model.includes('claude') || model.startsWith('anthropic/')) {
-                return { key: 'anthropic', label: 'Anthropic', color: '#fb7185', text: '#fda4af', border: 'rgba(251,113,133,0.28)', bg: 'rgba(251,113,133,0.08)' };
+                return { key: 'anthropic', label: 'Anthropic', color: '#fb7185', text: '#fb7185', border: 'rgba(251,113,133,0.36)', bg: 'rgba(251,113,133,0.12)' };
             }
             if (model.startsWith('local/') || model.includes('ollama')) {
-                return { key: 'local', label: 'Local', color: '#94a3b8', text: '#cbd5e1', border: 'rgba(148,163,184,0.28)', bg: 'rgba(148,163,184,0.08)' };
+                return { key: 'local', label: 'Local', color: '#94a3b8', text: '#94a3b8', border: 'rgba(148,163,184,0.36)', bg: 'rgba(148,163,184,0.12)' };
             }
             return { key: 'default', label: 'Mixed', color: '#e2e8f0', text: '#f8fafc', border: 'rgba(226,232,240,0.22)', bg: 'rgba(226,232,240,0.06)' };
         }
