@@ -1,6 +1,6 @@
 {
-  "session": 3.185436,
-  "daily": 48.980675,
+  "session": 0.03465,
+  "daily": 45.829889,
   "weekly": 142.893275,
   "monthly": 1002.397139,
   "topModels": [
@@ -20,14 +20,14 @@
       "cost": 16.6117665
     },
     {
-      "name": "openai/gpt-4.1",
-      "window": "session",
-      "cost": 3.1854359999999993
-    },
-    {
       "name": "gpt-5.3-codex",
       "window": "session",
       "cost": 0.43344559999999993
+    },
+    {
+      "name": "openai/gpt-4.1",
+      "window": "session",
+      "cost": 0.03465
     }
   ],
   "breakdown": [
@@ -67,25 +67,25 @@
       "costEstimated": false
     },
     {
-      "name": "openai/gpt-4.1",
-      "source": "openclaw",
-      "inputTokens": 1192,
-      "outputTokens": 206,
-      "totalTokens": 1398,
-      "sessionCost": 3.1854359999999993,
-      "dailyCost": 3.1854359999999993,
-      "weeklyCost": 3.1854359999999993,
-      "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
       "name": "gpt-5.3-codex",
       "source": "codex",
       "weeklyCost": 0.43344559999999993,
       "dailyCost": 0.0,
       "sessionCost": 0.43344559999999993,
       "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-4.1",
+      "source": "openclaw",
+      "inputTokens": 16725,
+      "outputTokens": 150,
+      "totalTokens": 16875,
+      "sessionCost": 0.03465,
+      "dailyCost": 0.03465,
+      "weeklyCost": 0.03465,
+      "sessions": 1,
+      "isGemini": false,
       "costEstimated": false
     },
     {
@@ -124,7 +124,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-18T17:40:09Z",
+  "lastUpdated": "2026-04-18T17:45:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -153,8 +153,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 48.980675,
-    "total": 72.808202,
+    "daily": 45.829889,
+    "total": 69.657416,
     "monthly": 1002.397139
   },
   "weeklyRunRate": {
