@@ -8013,6 +8013,30 @@
             return compactUiLabel(parts.join(' · '), 180) || resolveBrainFeedStepLabel(bf) || 'Working through the current objective.';
         }
 
+        function rebalanceBrainFeedObjectiveWindows(textEl, wrap, windows, fits) {
+            if (windows.length < 2) return windows;
+            const rebalanced = [...windows];
+            const last = rebalanced[rebalanced.length - 1] || '';
+            const prev = rebalanced[rebalanced.length - 2] || '';
+            const lastWords = last.split(' ').filter(Boolean).length;
+            if (last.length >= 22 && lastWords >= 3) return rebalanced;
+            const combinedWords = `${prev} ${last}`.trim().split(' ').filter(Boolean);
+            let bestPair = null;
+            for (let i = 1; i < combinedWords.length; i += 1) {
+                const first = combinedWords.slice(0, i).join(' ');
+                const second = combinedWords.slice(i).join(' ');
+                if (!first || !second) continue;
+                if (!fits(first) || !fits(second)) continue;
+                const score = Math.min(first.length, second.length);
+                if (!bestPair || score > bestPair.score) bestPair = { first, second, score };
+            }
+            if (bestPair) {
+                rebalanced[rebalanced.length - 2] = bestPair.first;
+                rebalanced[rebalanced.length - 1] = bestPair.second;
+            }
+            return rebalanced;
+        }
+
         function buildBrainFeedObjectiveWindows(textEl, wrap, fullText) {
             const normalized = sanitizeLabel(fullText || '').replace(/\s+/g, ' ').trim();
             if (!normalized) return [];
@@ -8054,8 +8078,9 @@
                 index = bestEnd;
                 if (windows.length > 12) break;
             }
+            const finalWindows = rebalanceBrainFeedObjectiveWindows(textEl, wrap, windows, fits);
             textEl.textContent = normalized;
-            return windows;
+            return finalWindows;
         }
 
         function syncBrainFeedObjectiveScroller(brainFeedCard) {
