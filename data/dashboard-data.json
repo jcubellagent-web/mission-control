@@ -5,25 +5,31 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Triggered Sorare MLB mission claim and debugged auto-claim flow. Verified missions marked complete or ineligible; some errors due to locked cards, not script bug.",
+    "objective": "Audit Sorare scripts, routines, and cron jobs; fix daily mission claiming and ensure eligible missions are set",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-18T19:19:28Z",
-    "checkedAt": "2026-04-18T19:19:28Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "sorare_audit"
+      }
+    ],
+    "currentTool": "sorare_audit",
+    "updatedAt": "2026-04-18T19:26:47Z",
+    "checkedAt": "2026-04-18T19:26:47Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-4.1"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Triggered Sorare MLB mission claim and debugged auto-claim flow. Verified missions marked complete or ineligible; some errors due to locked cards, not script bug.",
-    "updatedAt": "2026-04-18T19:25:03Z"
+    "context": "Audit Sorare scripts, routines, and cron jobs; fix daily mission claiming and ensure eligible missions are set",
+    "updatedAt": "2026-04-18T19:30:03Z"
   },
   "contextWindow": {
     "usedTokens": 23450,
-    "limitTokens": 400000,
-    "pct": 0.0586,
-    "model": "gpt-4.1",
+    "limitTokens": 128000,
+    "pct": 0.1832,
+    "model": "gpt-5.4",
     "status": "green"
   },
   "agentBus": [
@@ -125,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "scripts/send_josh_reply.py"
     ],
@@ -135,7 +141,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 36m",
+        "Resets in 3h 31m",
         "Weekly: 98% left [===========-]",
         "Pace: 78% in reserve | Expected 80% used | Lasts until reset",
         "Resets in 1d 9h",
@@ -146,11 +152,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 36m",
+      "sessionReset": "3h 31m",
       "weeklyReset": "1d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T19:25:04Z"
+    "updatedAt": "2026-04-18T19:30:04Z"
   },
   "modelUsage": {
     "session": 0.311188,
@@ -161,7 +167,7 @@
       {
         "name": "openai/gpt-4.1",
         "window": "session",
-        "cost": 30.9725745
+        "cost": 30.6613865
       },
       {
         "name": "gpt-5.4",
@@ -179,22 +185,22 @@
         "cost": 0.43344559999999993
       },
       {
-        "name": "gpt-5.4-mini",
+        "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.0
+        "cost": 0.311188
       }
     ],
     "breakdown": [
       {
         "name": "openai/gpt-4.1",
         "source": "openclaw",
-        "inputTokens": 208110,
-        "outputTokens": 545,
-        "totalTokens": 208655,
-        "sessionCost": 30.9725745,
-        "dailyCost": 30.9725745,
-        "weeklyCost": 30.9725745,
-        "sessions": 2,
+        "inputTokens": 201684,
+        "outputTokens": 541,
+        "totalTokens": 202225,
+        "sessionCost": 30.6613865,
+        "dailyCost": 30.6613865,
+        "weeklyCost": 30.6613865,
+        "sessions": 1,
         "isGemini": false,
         "costEstimated": false
       },
@@ -227,6 +233,19 @@
         "dailyCost": 0.0,
         "sessionCost": 0.43344559999999993,
         "totalTokens": 0,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-5.4",
+        "source": "openclaw",
+        "inputTokens": 6426,
+        "outputTokens": 4,
+        "totalTokens": 6430,
+        "sessionCost": 0.311188,
+        "dailyCost": 0.311188,
+        "weeklyCost": 0.311188,
+        "sessions": 1,
+        "isGemini": false,
         "costEstimated": false
       },
       {
@@ -265,7 +284,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T19:25:08Z",
+    "lastUpdated": "2026-04-18T19:30:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -336,14 +355,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.6,
-      "cpu_user": 26.78,
-      "cpu_sys": 14.85,
-      "load1": 3.66,
-      "load5": 3.5,
-      "load15": 3.66,
+      "cpu_pct": 42.4,
+      "cpu_user": 27.18,
+      "cpu_sys": 15.17,
+      "load1": 3.35,
+      "load5": 3.36,
+      "load15": 3.55,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "91Gi",
@@ -351,14 +370,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.5,
-      "cpu_user": 2.88,
-      "cpu_sys": 9.61,
-      "load1": 1.93,
-      "load5": 2.19,
-      "load15": 2.18,
+      "cpu_pct": 11.1,
+      "cpu_user": 0.92,
+      "cpu_sys": 10.18,
+      "load1": 1.89,
+      "load5": 1.95,
+      "load15": 2.08,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -382,19 +401,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:25:03Z"
+      "lastChecked": "2026-04-18T19:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:25:03Z"
+      "lastChecked": "2026-04-18T19:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T19:25:03Z"
+      "lastChecked": "2026-04-18T19:30:03Z"
     }
   ],
   "crons": [
@@ -765,6 +784,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260418-886",
+      "title": "Open items + Sorare routine hardening pass",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh asked for a full audit of Sorare scripts/routines/crons, with priority on claiming available daily mission rewards and ensuring all eligible missions are set; actively verifying local + J.A.I.N wiring and patching gaps.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-18 15:26",
+      "owner": "J.A.I.N"
+    },
+    {
       "id": "T-20260415-772",
       "title": "JAIMES-owned true mission-ML build",
       "status": "active",
@@ -773,16 +802,6 @@
       "requestedAt": null,
       "updatedAt": "2026-04-18 11:58",
       "owner": "JAIMES"
-    },
-    {
-      "id": "T-20260418-886",
-      "title": "Open items + Sorare routine hardening pass",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Finish the lingering open items, ensure prior-day Sorare rewards get claimed when available, verify today\u2019s daily missions are part of the normal routine, and notify Josh as soon as the pass is done.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-18 11:25",
-      "owner": "JOSH 2.0"
     },
     {
       "id": "T-20260417-866",
@@ -829,29 +848,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T19:25:08Z",
+      "time": "2026-04-18T19:30:07Z",
       "event": "Session spend: $0.31"
     },
     {
-      "time": "2026-04-18T19:25:04Z",
+      "time": "2026-04-18T19:30:04Z",
       "event": "Coding: scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-18T19:25:04Z",
+      "time": "2026-04-18T19:30:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T19:25:03Z",
+      "time": "2026-04-18T19:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T19:25:03Z",
+      "time": "2026-04-18T19:30:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T19:25:03Z",
+      "time": "2026-04-18T19:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T19:25:03Z"
+  "lastUpdated": "2026-04-18T19:30:03Z"
 }
