@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "handled async confirmation of cost-policy reply",
+  "objective": "switch default model to GPT-4.1 after user callback",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T16:48:12Z",
-  "checkedAt": "2026-04-18T16:48:12Z",
+  "steps": [
+    {
+      "label": "callback",
+      "status": "active",
+      "tool": "switch_default_gpt41"
+    }
+  ],
+  "currentTool": "switch_default_gpt41",
+  "updatedAt": "2026-04-18T16:48:48Z",
+  "checkedAt": "2026-04-18T16:48:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
