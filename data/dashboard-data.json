@@ -17,12 +17,12 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Ran sync_memory_to_jain.sh successfully; SSH verification was blocked by network policy, but the script completed with the expected success message and remote checks were attempted.",
-    "updatedAt": "2026-04-18T17:05:03Z"
+    "updatedAt": "2026-04-18T17:10:03Z"
   },
   "contextWindow": {
-    "usedTokens": 29175,
+    "usedTokens": 31881,
     "limitTokens": 400000,
-    "pct": 0.0729,
+    "pct": 0.0797,
     "model": "gpt-4.1",
     "status": "green"
   },
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "scripts/send_josh_reply.py",
       "scripts/run_on_jaimes.sh",
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 56m",
+        "Resets in 51m",
         "Weekly: 98% left [===========-]",
         "Pace: 76% in reserve | Expected 78% used | Lasts until reset",
         "Resets in 1d 12h",
@@ -150,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "56m",
+      "sessionReset": "51m",
       "weeklyReset": "1d 12h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T17:05:05Z"
+    "updatedAt": "2026-04-18T17:10:05Z"
   },
   "modelUsage": {
-    "session": 0.586824,
-    "daily": 46.382063,
+    "session": 0.958764,
+    "daily": 46.754003,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
@@ -180,7 +180,7 @@
       {
         "name": "openai/gpt-4.1",
         "window": "session",
-        "cost": 0.586824
+        "cost": 0.9587640000000001
       },
       {
         "name": "gpt-5.3-codex",
@@ -227,12 +227,12 @@
       {
         "name": "openai/gpt-4.1",
         "source": "openclaw",
-        "inputTokens": 11309,
-        "outputTokens": 417,
-        "totalTokens": 11726,
-        "sessionCost": 0.586824,
-        "dailyCost": 0.586824,
-        "weeklyCost": 0.586824,
+        "inputTokens": 14857,
+        "outputTokens": 210,
+        "totalTokens": 15067,
+        "sessionCost": 0.9587640000000001,
+        "dailyCost": 0.9587640000000001,
+        "weeklyCost": 0.9587640000000001,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -282,7 +282,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T17:05:08Z",
+    "lastUpdated": "2026-04-18T17:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -311,8 +311,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 46.382063,
-      "total": 70.20959,
+      "daily": 46.754003,
+      "total": 70.58153,
       "monthly": 1002.397139
     },
     "weeklyRunRate": {
@@ -323,9 +323,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 43.34325,
-    "total_earned": 43.34325,
-    "online_time": "433h 25m",
+    "sim_balance": 43.351583,
+    "total_earned": 43.351583,
+    "online_time": "433h 30m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -336,7 +336,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T17:05:09Z",
+    "updatedAt": "2026-04-18T17:10:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -351,14 +351,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.3,
-      "cpu_user": 24.97,
-      "cpu_sys": 14.33,
-      "load1": 3.97,
-      "load5": 3.83,
-      "load15": 3.76,
+      "cpu_pct": 38.7,
+      "cpu_user": 24.31,
+      "cpu_sys": 14.64,
+      "load1": 2.73,
+      "load5": 3.45,
+      "load15": 3.62,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "91Gi",
@@ -366,12 +366,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 2.63,
-      "cpu_sys": 10.52,
-      "load1": 2.26,
-      "load5": 2.09,
-      "load15": 2.25,
+      "cpu_pct": 13.4,
+      "cpu_user": 3.57,
+      "cpu_sys": 9.82,
+      "load1": 1.75,
+      "load5": 1.93,
+      "load15": 2.13,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -397,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T17:05:03Z"
+      "lastChecked": "2026-04-18T17:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T17:05:03Z"
+      "lastChecked": "2026-04-18T17:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T17:05:03Z"
+      "lastChecked": "2026-04-18T17:10:03Z"
     }
   ],
   "crons": [
@@ -462,7 +462,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "J.A.I.N Medic",
@@ -732,7 +732,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -844,29 +844,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T17:05:08Z",
-      "event": "Session spend: $0.59"
+      "time": "2026-04-18T17:10:08Z",
+      "event": "Session spend: $0.96"
     },
     {
-      "time": "2026-04-18T17:05:05Z",
+      "time": "2026-04-18T17:10:05Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/run_on_jaimes.sh"
     },
     {
-      "time": "2026-04-18T17:05:05Z",
+      "time": "2026-04-18T17:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T17:05:03Z",
+      "time": "2026-04-18T17:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T17:05:03Z",
+      "time": "2026-04-18T17:10:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T17:05:03Z",
+      "time": "2026-04-18T17:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T17:05:03Z"
+  "lastUpdated": "2026-04-18T17:10:03Z"
 }
