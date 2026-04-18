@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Completed memory sync to J.A.I.N; script reported success and remote verification was blocked by sandbox network policy",
+  "objective": "fix the Brain Feed objective pager so it rotates whole readable chunks instead of one-letter slices",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T03:01:05Z",
-  "checkedAt": "2026-04-18T03:01:05Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-18T03:03:13Z",
+  "checkedAt": "2026-04-18T03:03:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
