@@ -4236,6 +4236,8 @@
             line-height: 1.32;
         }
         body.phone-mode .bf-objective-text-wrap {
+            height: calc(1.32em * 2 + 0.2rem);
+            min-height: calc(1.32em * 2 + 0.2rem);
             max-height: calc(1.32em * 2 + 0.2rem);
         }
         body.phone-mode .bf-signal-row {
@@ -4656,15 +4658,19 @@
             white-space: nowrap;
         }
         .bf-objective-text-wrap {
+            height: calc(1.03em * 2 + 0.24rem);
+            min-height: calc(1.03em * 2 + 0.24rem);
             max-height: calc(1.03em * 2 + 0.24rem);
             overflow: hidden;
             position: relative;
+            display: block;
         }
         .bf-objective-text {
             font-size: clamp(1.9rem, 2.8vw, 2.45rem);
             line-height: 1.03;
             color: var(--bf-model-color);
             display: block;
+            min-height: calc(1.03em * 2);
             overflow: visible;
             padding-right: 2px;
             padding-bottom: 1px;
