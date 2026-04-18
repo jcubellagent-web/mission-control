@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "handled async confirmation for the live objective pager bugfix reply",
+  "objective": "force a fixed two-line objective viewport so Brain Feed always reserves space for two lines before paging",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T03:08:46Z",
-  "checkedAt": "2026-04-18T03:08:46Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-18T03:09:40Z",
+  "checkedAt": "2026-04-18T03:09:40Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
