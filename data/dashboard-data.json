@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Audit Sorare scripts, routines, and cron jobs; fix daily mission claiming and ensure eligible missions are set",
+    "objective": "Sorare daily claim + mission routines audited, patched, synced to J.A.I.N, and verified end to end",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "sorare_audit"
-      }
-    ],
-    "currentTool": "sorare_audit",
-    "updatedAt": "2026-04-18T19:26:47Z",
-    "checkedAt": "2026-04-18T19:26:47Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-18T19:39:12Z",
+    "checkedAt": "2026-04-18T19:39:12Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-4.1"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Audit Sorare scripts, routines, and cron jobs; fix daily mission claiming and ensure eligible missions are set",
-    "updatedAt": "2026-04-18T19:35:02Z"
+    "context": "Sorare daily claim + mission routines audited, patched, synced to J.A.I.N, and verified end to end",
+    "updatedAt": "2026-04-18T19:40:03Z"
   },
   "contextWindow": {
-    "usedTokens": 23450,
-    "limitTokens": 128000,
-    "pct": 0.1832,
+    "usedTokens": 106581,
+    "limitTokens": 400000,
+    "pct": 0.2665,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,11 +125,11 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 8,
+    "missionControlDirty": 12,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "scripts/sorare_daily_prep.sh",
-      "scripts/sorare_missions.py",
-      "scripts/send_josh_reply.py"
+      "scripts/sorare_missions.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
@@ -143,7 +137,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 26m",
+        "Resets in 3h 21m",
         "Weekly: 98% left [===========-]",
         "Pace: 78% in reserve | Expected 80% used | Lasts until reset",
         "Resets in 1d 9h",
@@ -154,11 +148,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 26m",
+      "sessionReset": "3h 21m",
       "weeklyReset": "1d 9h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T19:35:05Z"
+    "updatedAt": "2026-04-18T19:40:04Z"
   },
   "modelUsage": {
     "session": 0.311188,
@@ -240,9 +234,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 6426,
-        "outputTokens": 4,
-        "totalTokens": 6430,
+        "inputTokens": 106581,
+        "outputTokens": 6,
+        "totalTokens": 106587,
         "sessionCost": 0.311188,
         "dailyCost": 0.311188,
         "weeklyCost": 0.311188,
@@ -286,7 +280,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T19:35:10Z",
+    "lastUpdated": "2026-04-18T19:40:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -357,14 +351,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.7,
-      "cpu_user": 26.65,
-      "cpu_sys": 15.5,
-      "load1": 3.22,
-      "load5": 3.24,
-      "load15": 3.42,
+      "cpu_pct": 40.1,
+      "cpu_user": 25.61,
+      "cpu_sys": 14.44,
+      "load1": 3.45,
+      "load5": 3.27,
+      "load15": 3.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "91Gi",
@@ -372,14 +366,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 23.2,
-      "cpu_user": 8.3,
-      "cpu_sys": 15.17,
-      "load1": 2.17,
-      "load5": 2.05,
-      "load15": 2.07,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 15.3,
+      "cpu_user": 5.4,
+      "cpu_sys": 9.9,
+      "load1": 1.51,
+      "load5": 1.89,
+      "load15": 2.0,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -403,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:35:02Z"
+      "lastChecked": "2026-04-18T19:40:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T19:35:02Z"
+      "lastChecked": "2026-04-18T19:40:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T19:35:02Z"
+      "lastChecked": "2026-04-18T19:40:03Z"
     }
   ],
   "crons": [
@@ -597,15 +591,14 @@
     },
     {
       "name": "Sorare Nightly Claim",
-      "schedule": "Daily 3:30 AM ET",
-      "description": "Hermes claim job for overnight Sorare rewards",
+      "schedule": "Daily 3:35 AM ET",
+      "description": "LaunchAgent claim sweep for overnight Sorare rewards",
       "category": "Sorare MLB",
-      "agent": "JAIMES",
-      "status": "ok",
+      "agent": "J.A.I.N",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-18T03:30:01.791570-04:00"
+      "runStatus": "due"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -629,7 +622,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-18T19:34:57.192750+00:00"
+      "lastRun": "2026-04-18T19:37:08.660723+00:00"
     },
     {
       "name": "Sorare ML Missions",
@@ -790,10 +783,10 @@
       "title": "Open items + Sorare routine hardening pass",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh asked for a full audit of Sorare scripts/routines/crons, with priority on claiming available daily mission rewards and ensuring all eligible missions are set; actively verifying local + J.A.I.N wiring and patching gaps.",
+      "notes": "Sorare hardening landed: `sorare_missions.py` now auto-claims completed rewards, J.A.I.N daily prep was rewritten to claim + set eligible missions cleanly, a new J.A.I.N LaunchAgent `ai.jaimes.sorare-claim-sweep` verifies the 3:35am claim sweep, and live verification passed; remaining umbrella-task leftovers are outside the Sorare claim/set path.",
       "requestedAt": null,
-      "updatedAt": "2026-04-18 15:26",
-      "owner": "J.A.I.N"
+      "updatedAt": "2026-04-18 15:38",
+      "owner": "JAIMES"
     },
     {
       "id": "T-20260415-772",
@@ -829,7 +822,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_daily_prep.sh, scripts/sorare_missions.py",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, scripts/sorare_daily_prep.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -850,29 +843,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T19:35:10Z",
+      "time": "2026-04-18T19:40:08Z",
       "event": "Session spend: $0.31"
     },
     {
-      "time": "2026-04-18T19:35:05Z",
-      "event": "Coding: scripts/sorare_daily_prep.sh, scripts/sorare_missions.py"
+      "time": "2026-04-18T19:40:04Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/sorare_daily_prep.sh"
     },
     {
-      "time": "2026-04-18T19:35:05Z",
+      "time": "2026-04-18T19:40:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T19:35:02Z",
+      "time": "2026-04-18T19:40:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T19:35:02Z",
+      "time": "2026-04-18T19:40:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T19:35:02Z",
+      "time": "2026-04-18T19:40:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T19:35:02Z"
+  "lastUpdated": "2026-04-18T19:40:03Z"
 }
