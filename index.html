@@ -1646,11 +1646,15 @@
             50%      { box-shadow: 0 1px 0 rgba(99,179,237,0.12) inset, 0 0 48px rgba(99,179,237,0.14), 0 4px 24px rgba(0,0,0,0.5); }
         }
 
+        body.phone-mode .bf-objective {
+            --bf-objective-font-size: 0.92rem;
+            --bf-objective-line-height: 1.35;
+        }
         body.phone-mode .bf-objective-text {
-            font-size: 0.92rem;
+            font-size: var(--bf-objective-font-size);
             font-weight: 500;
             color: rgba(255,255,255,0.88);
-            line-height: 1.35;
+            line-height: var(--bf-objective-line-height);
         }
         body.phone-mode .bf-objective-detail {
             font-size: 0.58rem;
@@ -4231,14 +4235,18 @@
         body.phone-mode .card-brain.brain-active #agent-chat-feed {
             max-height: none !important;
         }
+        body.phone-mode .bf-objective {
+            --bf-objective-font-size: 0.88rem;
+            --bf-objective-line-height: 1.32;
+        }
         body.phone-mode .bf-objective-text {
-            font-size: 0.88rem;
-            line-height: 1.32;
+            font-size: var(--bf-objective-font-size);
+            line-height: var(--bf-objective-line-height);
         }
         body.phone-mode .bf-objective-text-wrap {
-            height: calc(1.32em * 2 + 0.2rem);
-            min-height: calc(1.32em * 2 + 0.2rem);
-            max-height: calc(1.32em * 2 + 0.2rem);
+            height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.2rem);
+            min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.2rem);
+            max-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.2rem);
         }
         body.phone-mode .bf-signal-row {
             grid-template-columns: 1fr 1fr;
@@ -4616,6 +4624,8 @@
             --bf-model-color: rgba(255,255,255,0.9);
             --bf-model-border: rgba(255,255,255,0.08);
             --bf-model-bg: rgba(255,255,255,0.04);
+            --bf-objective-font-size: clamp(1.9rem, 2.8vw, 2.45rem);
+            --bf-objective-line-height: 1.03;
             background: linear-gradient(180deg, color-mix(in srgb, var(--bf-model-bg) 92%, rgba(255,255,255,0.02)), rgba(255,255,255,0.014));
             border: 1px solid var(--bf-model-border);
             border-left: 4px solid var(--bf-model-color);
@@ -4658,19 +4668,19 @@
             white-space: nowrap;
         }
         .bf-objective-text-wrap {
-            height: calc(1.03em * 2 + 0.24rem);
-            min-height: calc(1.03em * 2 + 0.24rem);
-            max-height: calc(1.03em * 2 + 0.24rem);
+            height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem);
+            min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem);
+            max-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem);
             overflow: hidden;
             position: relative;
             display: block;
         }
         .bf-objective-text {
-            font-size: clamp(1.9rem, 2.8vw, 2.45rem);
-            line-height: 1.03;
+            font-size: var(--bf-objective-font-size);
+            line-height: var(--bf-objective-line-height);
             color: var(--bf-model-color);
             display: block;
-            min-height: calc(1.03em * 2);
+            min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2);
             overflow: visible;
             padding-right: 2px;
             padding-bottom: 1px;
