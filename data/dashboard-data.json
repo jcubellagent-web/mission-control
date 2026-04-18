@@ -5,32 +5,32 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Explain JAIMES healthcheck OPENROUTER_API_KEY warning and verify whether it is expected or a real issue",
+    "objective": "Add DeepSeek via OpenRouter as a selectable model option in Josh 2.0",
     "status": "active",
     "steps": [
       {
         "label": "exec",
         "status": "active",
-        "tool": "explain_jaimes_healthcheck_warning"
+        "tool": "add_deepseek_openrouter"
       }
     ],
-    "currentTool": "explain_jaimes_healthcheck_warning",
-    "updatedAt": "2026-04-18T23:34:29Z",
-    "checkedAt": "2026-04-18T23:34:29Z",
+    "currentTool": "add_deepseek_openrouter",
+    "updatedAt": "2026-04-18T23:39:30Z",
+    "checkedAt": "2026-04-18T23:39:30Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Explain JAIMES healthcheck OPENROUTER_API_KEY warning and verify whether it is expected or a real issue",
-    "updatedAt": "2026-04-18T23:35:03Z"
+    "context": "Add DeepSeek via OpenRouter as a selectable model option in Josh 2.0",
+    "updatedAt": "2026-04-18T23:40:03Z"
   },
   "contextWindow": {
-    "usedTokens": 158090,
+    "usedTokens": 171415,
     "limitTokens": 400000,
-    "pct": 0.3952,
+    "pct": 0.4285,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 26m",
+        "Resets in 4h 21m",
         "Weekly: 98% left [===========-]",
         "Pace: 80% in reserve | Expected 82% used | Lasts until reset",
         "Resets in 1d 5h",
@@ -150,11 +150,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 26m",
+      "sessionReset": "4h 21m",
       "weeklyReset": "1d 5h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T23:35:05Z"
+    "updatedAt": "2026-04-18T23:40:05Z"
   },
   "modelUsage": {
     "session": 0.311188,
@@ -236,9 +236,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 158090,
-        "outputTokens": 6,
-        "totalTokens": 158096,
+        "inputTokens": 3387,
+        "outputTokens": 4713,
+        "totalTokens": 8100,
         "sessionCost": 0.311188,
         "dailyCost": 0.311188,
         "weeklyCost": 0.311188,
@@ -282,7 +282,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T23:35:08Z",
+    "lastUpdated": "2026-04-18T23:40:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -353,12 +353,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 50.6,
-      "cpu_user": 31.27,
-      "cpu_sys": 19.31,
-      "load1": 3.73,
-      "load5": 3.77,
-      "load15": 3.72,
+      "cpu_pct": 42.6,
+      "cpu_user": 27.31,
+      "cpu_sys": 15.28,
+      "load1": 3.28,
+      "load5": 3.54,
+      "load15": 3.64,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -368,12 +368,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.3,
-      "cpu_user": 2.85,
-      "cpu_sys": 10.47,
-      "load1": 1.73,
-      "load5": 1.95,
-      "load15": 1.97,
+      "cpu_pct": 12.5,
+      "cpu_user": 2.67,
+      "cpu_sys": 9.82,
+      "load1": 2.71,
+      "load5": 2.4,
+      "load15": 2.17,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -399,19 +399,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T23:35:03Z"
+      "lastChecked": "2026-04-18T23:40:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T23:35:03Z"
+      "lastChecked": "2026-04-18T23:40:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T23:35:03Z"
+      "lastChecked": "2026-04-18T23:40:03Z"
     }
   ],
   "crons": [
@@ -785,10 +785,10 @@
       "title": "Sorare GW7 championship-matchup ML weighting polish",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Re-tightened the live J.A.I.N Champion profile toward the earlier prediction-heavier weights and re-ran dry-run lineups; the suggested Champion build moved back toward the tighter Champion-first shape (Buxton / Ke'Bryan / Bello returned), but the MI slot still prefers classic Bobby Witt, so one more polish pass may still be warranted.",
+      "notes": "Root cause is clearer now: learned predictions are dragging strong 2026 MI options like Trevor Story far below classic Bobby Witt in Champion scoring. A broad in-season score floor fixes MI, but it also creates new Champion tradeoffs at RP/FLEX, so I have not shipped a second live patch yet.",
       "requestedAt": null,
-      "updatedAt": "2026-04-18 16:02",
-      "owner": "J.A.I.N"
+      "updatedAt": "2026-04-18 19:38",
+      "owner": "JOSH 2.0"
     },
     {
       "id": "T-20260415-772",
@@ -815,29 +815,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T23:35:08Z",
+      "time": "2026-04-18T23:40:08Z",
       "event": "Session spend: $0.31"
     },
     {
-      "time": "2026-04-18T23:35:05Z",
+      "time": "2026-04-18T23:40:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T23:35:03Z",
+      "time": "2026-04-18T23:40:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T23:35:03Z",
+      "time": "2026-04-18T23:40:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T23:35:03Z",
+      "time": "2026-04-18T23:40:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-18T23:35:03Z",
+      "time": "2026-04-18T23:40:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-18T23:35:03Z"
+  "lastUpdated": "2026-04-18T23:40:03Z"
 }
