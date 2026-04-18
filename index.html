@@ -4479,16 +4479,28 @@
             padding: 8px 10px;
             margin-bottom: 10px;
         }
+        .bf-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bf-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(210px, 0.95fr);
+            gap: 10px;
+            align-items: stretch;
+        }
         .bf-objective {
             background: rgba(255,255,255,0.018);
             border: 1px solid rgba(255,255,255,0.045);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin-bottom: 8px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 0;
             min-height: 0;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            justify-content: space-between;
+            gap: 8px;
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -4516,16 +4528,18 @@
             flex-shrink: 0;
         }
         .bf-signal-row {
+            display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
+            align-content: start;
         }
         .bf-signal-chip {
             background: rgba(255,255,255,0.014);
             border: 1px solid rgba(255,255,255,0.045);
             border-radius: 12px;
             min-height: 0;
-            padding: 8px 9px;
+            padding: 10px;
             justify-content: flex-start;
             box-shadow: none;
         }
@@ -4540,7 +4554,12 @@
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 3;
         }
-        .bf-timeline { gap: 8px; }
+        .bf-timeline {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .bf-timeline .bf-step { min-height: 0; }
         .bf-step {
             background: rgba(255,255,255,0.026);
             border: 1px solid rgba(255,255,255,0.055);
@@ -4548,7 +4567,8 @@
             padding: 9px 10px;
         }
         .bf-empty-note {
-            font-size: 0.72rem;
+            grid-column: 1 / -1;
+            font-size: 0.68rem;
             color: rgba(255,255,255,0.48);
             padding: 10px 12px;
             border-radius: 12px;
@@ -4556,29 +4576,42 @@
             border: 1px dashed rgba(255,255,255,0.08);
         }
 
+        .brain-feed-lower {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+            gap: 10px;
+            align-items: start;
+        }
         .agent-comms-section,
         .agent-chat-section {
-            margin-top: 8px;
+            margin-top: 0;
+            background: rgba(255,255,255,0.014);
+            border: 1px solid rgba(255,255,255,0.045);
+            border-radius: 14px;
+            overflow: hidden;
+            min-height: 0;
         }
         .agent-comms-section {
-            background: transparent;
-            border: 0;
-            border-top: 1px solid rgba(255,255,255,0.045);
-            border-radius: 0;
-            padding: 10px 0 2px;
-            max-height: 196px;
-            gap: 10px;
-            overflow: hidden;
+            padding: 0;
+            max-height: none;
+            gap: 0;
         }
-        .card-brain.activity-expanded .agent-comms-section { max-height: min(320px, 38vh); }
+        .card-brain.activity-expanded .agent-comms-section { max-height: none; }
         .agent-chat-section {
-            background: rgba(255,255,255,0.012);
-            border: 1px solid rgba(255,255,255,0.04);
-            border-radius: 12px;
-            padding: 8px 10px 10px;
-            min-height: 138px;
+            padding: 0;
+            min-height: 0;
         }
-        .agent-chat-header { margin-bottom: 10px; }
+        .agent-comms-toggle,
+        .agent-chat-header {
+            padding: 10px 12px 9px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.012);
+        }
+        .agent-chat-header { margin-bottom: 0; }
+        #unified-activity-log,
+        #agent-chat-feed {
+            padding: 10px 12px 12px;
+        }
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
             gap: 6px;
@@ -5028,29 +5061,31 @@
                     </div>
                     <!-- JOSH 2.0 — hero brain feed -->
                     <div id="brain-feed-card"></div>
-                    <!-- Activity & Agents — unified log -->
-                    <div class="agent-comms-section">
-                        <button class="agent-comms-toggle" id="agent-comms-toggle" type="button" onclick="toggleBrainActivityDrawer()" aria-expanded="false">
-                            <span class="agent-comms-header">Activity &amp; Agents</span>
-                            <span class="agent-comms-toggle-meta" id="agent-comms-toggle-meta">expand</span>
-                            <span class="agent-comms-chevron">⌃</span>
-                        </button>
-                        <div id="unified-activity-log"></div>
-                    </div>
-                    <!-- Memory roadmap -->
-                    <div class="agent-chat-section">
-                    <div class="agent-chat-header">
-                        <div class="agent-chat-heading">
-                            <span class="agent-chat-icon">🗺️</span>
-                            <span class="agent-chat-title">MEMORY ROADMAP</span>
-                            <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
+                    <div class="brain-feed-lower">
+                        <!-- Activity & Agents — unified log -->
+                        <div class="agent-comms-section">
+                            <button class="agent-comms-toggle" id="agent-comms-toggle" type="button" onclick="toggleBrainActivityDrawer()" aria-expanded="false">
+                                <span class="agent-comms-header">Activity &amp; Agents</span>
+                                <span class="agent-comms-toggle-meta" id="agent-comms-toggle-meta">expand</span>
+                                <span class="agent-comms-chevron">⌃</span>
+                            </button>
+                            <div id="unified-activity-log"></div>
                         </div>
-                        <div class="agent-chat-tools">
-                            <span id="agent-chat-agents" class="agent-chat-agents"></span>
-                            <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand memory roadmap">↗</button>
+                        <!-- Memory roadmap -->
+                        <div class="agent-chat-section">
+                        <div class="agent-chat-header">
+                            <div class="agent-chat-heading">
+                                <span class="agent-chat-icon">🗺️</span>
+                                <span class="agent-chat-title">MEMORY ROADMAP</span>
+                                <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
+                            </div>
+                            <div class="agent-chat-tools">
+                                <span id="agent-chat-agents" class="agent-chat-agents"></span>
+                                <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand memory roadmap">↗</button>
+                            </div>
                         </div>
-                    </div>
-                        <div id="agent-chat-feed"><div class="agent-chat-empty">Loading roadmap…</div></div>
+                            <div id="agent-chat-feed"><div class="agent-chat-empty">Loading roadmap…</div></div>
+                        </div>
                     </div>
                 </div>
                 <!-- Bottom-left: Condensed Intel Highlights + Model -->
@@ -7667,7 +7702,7 @@
 
                 if (!bfCont || isWakingUp) {
                     // Full render only on wake-up or first render
-                    const stepsHtml = [...(bf.steps || [])].reverse().map(step => {
+                    const stepsHtml = [...(bf.steps || [])].reverse().slice(0, 2).map(step => {
                         const stepClass = step.status === 'done' ? 'done-step' : step.status === 'active' ? 'active-step' : 'pending-step';
                         const iconClass = step.status === 'done' ? 'done' : step.status === 'active' ? 'active' : 'pending';
                         const iconChar = step.status === 'done' ? '✓' : step.status === 'active' ? '●' : '○';
@@ -7681,12 +7716,14 @@
                         </div>`;
                     }).join('');
                     brainFeedCard.innerHTML = `
-                        <div class="bf-container">
-                            <div class="bf-objective">
-                                ${objectiveMeta}
-                                <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...')}</div>
+                        <div class="bf-container bf-shell">
+                            <div class="bf-hero-grid">
+                                <div class="bf-objective">
+                                    ${objectiveMeta}
+                                    <div class="bf-objective-text" title="${escapeHtml(bf.objective || 'Processing...')}">${escapeHtml(compactUiLabel(bf.objective || 'Processing...', 88) || 'Processing...')}</div>
+                                </div>
+                                ${renderBrainFeedSignalRow(bf)}
                             </div>
-                            ${renderBrainFeedSignalRow(bf)}
                             <div class="bf-timeline">${stepsHtml || '<div class="bf-empty-note">Awaiting the first concrete action…</div>'}</div>
                         </div>
                     `;
