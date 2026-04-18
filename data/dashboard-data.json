@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "answered JAIMES and J.A.I.N routing readiness question",
+    "objective": "audit and harden JAIMES/J.A.I.N delegation path end-to-end",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-18T15:42:59Z",
-    "checkedAt": "2026-04-18T15:42:59Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-18T15:45:11Z",
+    "checkedAt": "2026-04-18T15:45:11Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "answered JAIMES and J.A.I.N routing readiness question",
-    "updatedAt": "2026-04-18T15:45:03Z"
+    "context": "audit and harden JAIMES/J.A.I.N delegation path end-to-end",
+    "updatedAt": "2026-04-18T15:50:03Z"
   },
   "contextWindow": {
     "usedTokens": 25804,
@@ -126,14 +132,17 @@
   "codingVisibility": {
     "workspaceDirty": 45,
     "missionControlDirty": 7,
-    "recentFiles": [],
+    "recentFiles": [
+      "scripts/run_on_jain.sh",
+      "scripts/deliver_to_jaimes.py"
+    ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 16m",
+        "Resets in 2h 11m",
         "Weekly: 98% left [===========-]",
         "Pace: 76% in reserve | Expected 78% used | Lasts until reset",
         "Resets in 1d 13h",
@@ -144,11 +153,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 16m",
+      "sessionReset": "2h 11m",
       "weeklyReset": "1d 13h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T15:45:05Z"
+    "updatedAt": "2026-04-18T15:50:05Z"
   },
   "modelUsage": {
     "session": 0.1848,
@@ -263,7 +272,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-18T15:45:08Z",
+    "lastUpdated": "2026-04-18T15:50:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -304,9 +313,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 43.209889,
-    "total_earned": 43.209889,
-    "online_time": "432h 5m",
+    "sim_balance": 43.21825,
+    "total_earned": 43.21825,
+    "online_time": "432h 10m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -317,7 +326,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T15:45:08Z",
+    "updatedAt": "2026-04-18T15:50:09Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -332,14 +341,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.2,
-      "cpu_user": 25.4,
-      "cpu_sys": 14.77,
-      "load1": 4.32,
-      "load5": 3.62,
-      "load15": 3.56,
+      "cpu_pct": 41.3,
+      "cpu_user": 26.77,
+      "cpu_sys": 15.15,
+      "load1": 3.49,
+      "load5": 3.63,
+      "load15": 3.59,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "91Gi",
@@ -347,12 +356,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 22.8,
-      "cpu_user": 7.89,
-      "cpu_sys": 14.91,
-      "load1": 2.55,
-      "load5": 2.42,
-      "load15": 2.32,
+      "cpu_pct": 23.4,
+      "cpu_user": 11.11,
+      "cpu_sys": 12.82,
+      "load1": 1.94,
+      "load5": 2.09,
+      "load15": 2.18,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -378,19 +387,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T15:45:03Z"
+      "lastChecked": "2026-04-18T15:50:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T15:45:03Z"
+      "lastChecked": "2026-04-18T15:50:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T15:45:03Z"
+      "lastChecked": "2026-04-18T15:50:03Z"
     }
   ],
   "crons": [
@@ -651,7 +660,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-18T15:31:21.833080+00:00"
+      "lastRun": "2026-04-18T15:46:18.018418+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -761,6 +770,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260418-888",
+      "title": "Audit and harden JAIMES/J.A.I.N delegation path end-to-end",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh asked for a full audit of the delegation path and immediate hardening so JOSH 2.0 can keep the foreground while long-running work routes cleanly to J.A.I.N or JAIMES.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-18 11:44",
+      "owner": "JAIMES"
+    },
+    {
       "id": "T-20260418-887",
       "title": "Review OpenRouter OpenClaw integration and add selected models back into inventory",
       "status": "active",
@@ -803,6 +822,16 @@
   ],
   "activeAgents": [
     {
+      "id": "coding-visibility",
+      "label": "Editing: scripts/run_on_jain.sh, scripts/deliver_to_jaimes.py",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    },
+    {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 67%",
       "status": "done",
@@ -815,29 +844,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T15:45:08Z",
+      "time": "2026-04-18T15:50:08Z",
       "event": "Session spend: $0.18"
     },
     {
-      "time": "2026-04-18T15:45:05Z",
+      "time": "2026-04-18T15:50:05Z",
+      "event": "Coding: scripts/run_on_jain.sh, scripts/deliver_to_jaimes.py"
+    },
+    {
+      "time": "2026-04-18T15:50:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T15:45:03Z",
+      "time": "2026-04-18T15:50:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T15:45:03Z",
+      "time": "2026-04-18T15:50:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T15:45:03Z",
+      "time": "2026-04-18T15:50:03Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-18T15:45:03Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-18T15:45:03Z"
+  "lastUpdated": "2026-04-18T15:50:03Z"
 }
