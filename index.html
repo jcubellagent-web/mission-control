@@ -161,9 +161,10 @@
         }
         .logo-icon img {
             width: 100%; height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
-            background: rgba(255,255,255,0.06);
+            background: transparent;
+            border-radius: 50%;
         }
         .logo h1 { font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.75); }
         .header-status { display: flex; align-items: center; gap: 12px; }
@@ -5210,7 +5211,7 @@
     <div class="container" id="main-content">
         <header>
             <div class="logo">
-                <div class="logo-icon"><img src="assets/logo-192.png?v=headshot" alt="Josh 2.0 headshot" /></div>
+                <div class="logo-icon"><img src="assets/josh-headshot.jpg?v=2" alt="Josh 2.0 headshot" /></div>
                 <h1>Mission Control</h1>
                 <div class="mc-clock-wrap">
                     <span class="mc-clock-time" id="mc-clock-time">00:00:00</span>
