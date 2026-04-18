@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "wire the matchup-aware ML layer into the legacy Sorare live submitter",
-    "updatedAt": "2026-04-18T04:40:03Z"
+    "updatedAt": "2026-04-18T04:45:02Z"
   },
   "contextWindow": {
     "usedTokens": 159555,
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 42,
-    "missionControlDirty": 6,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/index.html"
     ],
@@ -141,7 +141,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 21m",
+        "Resets in 3h 16m",
         "Weekly: 98% left [===========-]",
         "Pace: 69% in reserve | Expected 71% used | Lasts until reset",
         "Resets in 2d",
@@ -152,11 +152,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 21m",
+      "sessionReset": "3h 16m",
       "weeklyReset": "2d",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-18T04:40:05Z"
+    "updatedAt": "2026-04-18T04:45:04Z"
   },
   "modelUsage": {
     "session": 5.173876,
@@ -281,7 +281,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-18T04:40:08Z",
+    "lastUpdated": "2026-04-18T04:45:07Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -322,9 +322,9 @@
     }
   },
   "moltWorld": {
-    "sim_balance": 42.101583,
-    "total_earned": 42.101583,
-    "online_time": "421h 0m",
+    "sim_balance": 42.109889,
+    "total_earned": 42.109889,
+    "online_time": "421h 5m",
     "is_online": true,
     "status": "online",
     "earning_rate": "0.1 SIM/hour",
@@ -335,7 +335,7 @@
     "last_thought": "Watching the terrain and adjusting course",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-04-18T04:40:09Z",
+    "updatedAt": "2026-04-18T04:45:08Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk northeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "plains",
@@ -350,12 +350,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 45.7,
-      "cpu_user": 31.64,
-      "cpu_sys": 14.3,
-      "load1": 3.75,
-      "load5": 3.85,
-      "load15": 3.78,
+      "cpu_pct": 42.1,
+      "cpu_user": 25.82,
+      "cpu_sys": 16.28,
+      "load1": 3.73,
+      "load5": 3.63,
+      "load15": 3.69,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -365,12 +365,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.1,
-      "cpu_user": 3.73,
-      "cpu_sys": 9.34,
-      "load1": 1.84,
-      "load5": 2.12,
-      "load15": 2.11,
+      "cpu_pct": 10.4,
+      "cpu_user": 1.88,
+      "cpu_sys": 8.49,
+      "load1": 2.57,
+      "load5": 2.23,
+      "load15": 2.14,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -396,19 +396,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T04:40:03Z"
+      "lastChecked": "2026-04-18T04:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-18T04:40:03Z"
+      "lastChecked": "2026-04-18T04:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-18T04:40:03Z"
+      "lastChecked": "2026-04-18T04:45:02Z"
     }
   ],
   "crons": [
@@ -783,9 +783,9 @@
       "title": "Review Josh\u2019s manual Sorare GW7 lineup refinements, compare them against GW6/GW7 learnings, and update the championship-matchup ML pipeline",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Extended the J.A.I.N ML lane beyond simple form scores. It now pulls public MLB context on demand for top slot candidates, including 2025/2026 player season + advanced stats, next-game schedule/probable-start context, and opponent team pitching/hitting strength from MLB Stats API. Championship reranking is now matchup-aware on top of the learned model and rule layer. Fresh dry-run stayed fast enough (~43s) and improved toward Josh\u2019s intended shape: Nathan Eovaldi, Aroldis Chapman, Nick Kurtz, Bobby Witt Jr. (classic), Roman Anthony, Willson Contreras, Trevor Story. Still worth propagating the same public-context layer into the full multi-lineup optimizer path next.",
+      "notes": "The upgraded matchup-aware scorer is now wired into both J.A.I.N lanes: `~/sorare_ml/ml_bot.py` and the older live submitter `~/scripts/sorare_mlb_bot.py`. The legacy submitter now imports the ML bundle/context layer for Champion/Hot/Challenger slot decisions instead of relying only on static slug priorities. Validation: full submitter dry-run still passes, and a forced Champion build through the legacy path now produces a non-duplicate 6+1 lineup (`Eovaldi, Chapman, Kurtz, CJ Abrams, Daulton Varsho, Willson Contreras, Kyle Schwarber`) instead of the old duplicate-player shape. Remaining refinement is weighting polish, not missing plumbing.",
       "requestedAt": "2026-04-17 23:47",
-      "updatedAt": "2026-04-18 00:19",
+      "updatedAt": "2026-04-18 00:44",
       "owner": "J.A.I.N"
     }
   ],
@@ -813,29 +813,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-18T04:40:08Z",
+      "time": "2026-04-18T04:45:07Z",
       "event": "Session spend: $5.17"
     },
     {
-      "time": "2026-04-18T04:40:05Z",
+      "time": "2026-04-18T04:45:04Z",
       "event": "Coding: mission-control/index.html"
     },
     {
-      "time": "2026-04-18T04:40:05Z",
+      "time": "2026-04-18T04:45:04Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-18T04:40:03Z",
+      "time": "2026-04-18T04:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-18T04:40:03Z",
+      "time": "2026-04-18T04:45:02Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-18T04:40:03Z",
+      "time": "2026-04-18T04:45:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-18T04:40:03Z"
+  "lastUpdated": "2026-04-18T04:45:02Z"
 }
