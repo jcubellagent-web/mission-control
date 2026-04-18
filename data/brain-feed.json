@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "updated the Brain Feed live objective to loop long text and show richer step detail",
+  "objective": "handle async Telegram delivery confirmations for Brain Feed updates",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-18T02:41:37Z",
-  "checkedAt": "2026-04-18T02:41:37Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-18T02:44:04Z",
+  "checkedAt": "2026-04-18T02:44:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
