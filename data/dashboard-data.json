@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Addressing daily mission pitcher scheduling issue - ensure starters pitch same day",
+    "objective": "Completed comprehensive Sorare ML bulletproofing - critical starting pitcher fix implemented, competitive edge secured",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "diagnostic"
-      }
-    ],
-    "currentTool": "diagnostic",
-    "updatedAt": "2026-04-19T15:22:42Z",
-    "checkedAt": "2026-04-19T15:22:42Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-19T15:32:42Z",
+    "checkedAt": "2026-04-19T15:32:42Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "deepseek/deepseek-v3.2"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Addressing daily mission pitcher scheduling issue - ensure starters pitch same day",
-    "updatedAt": "2026-04-19T15:30:04Z"
+    "context": "Completed comprehensive Sorare ML bulletproofing - critical starting pitcher fix implemented, competitive edge secured",
+    "updatedAt": "2026-04-19T15:35:03Z"
   },
   "contextWindow": {
-    "usedTokens": 38910,
+    "usedTokens": 57512,
     "limitTokens": 400000,
-    "pct": 0.0973,
+    "pct": 0.1438,
     "model": "deepseek/deepseek-v3.2",
     "status": "green"
   },
@@ -133,6 +127,7 @@
     "workspaceDirty": 48,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/fix_starting_pitcher_verification.py",
       "scripts/sorare_ml_edge_enhancer.sh",
       "scripts/sorare_mission_verifier.py",
       "scripts/sorare_mission_ranker.py",
@@ -144,10 +139,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 31m",
+        "Resets in 3h 26m",
         "Weekly: 98% left [===========-]",
         "Pace: 90% in reserve | Expected 92% used | Lasts until reset",
-        "Resets in 13h 54m",
+        "Resets in 13h 49m",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -155,22 +150,22 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 31m",
-      "weeklyReset": "13h 54m",
+      "sessionReset": "3h 26m",
+      "weeklyReset": "13h 49m",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T15:30:06Z"
+    "updatedAt": "2026-04-19T15:35:06Z"
   },
   "modelUsage": {
-    "session": 0.214451,
-    "daily": 51.126845,
+    "session": 0.648847,
+    "daily": 51.561241,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
       {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 34.51507801100001
+        "cost": 34.94947442400001
       },
       {
         "name": "gpt-5.4",
@@ -197,12 +192,12 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 41063,
+        "inputTokens": 59601,
         "outputTokens": 804,
-        "totalTokens": 41867,
-        "sessionCost": 34.51507801100001,
-        "dailyCost": 34.51507801100001,
-        "weeklyCost": 34.51507801100001,
+        "totalTokens": 60405,
+        "sessionCost": 34.94947442400001,
+        "dailyCost": 34.94947442400001,
+        "weeklyCost": 34.94947442400001,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -284,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T15:30:09Z",
+    "lastUpdated": "2026-04-19T15:35:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -299,9 +294,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 20.132768427,
-      "weekly": 20.132768427,
-      "monthly": 20.132768427,
+      "daily": 20.295918187,
+      "weekly": 20.295918187,
+      "monthly": 20.295918187,
       "byok_daily": 0.0024925,
       "byok_weekly": 0.0024925,
       "byok_monthly": 0.0024925,
@@ -313,8 +308,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 51.129338,
-      "total": 74.956864,
+      "daily": 51.563734,
+      "total": 75.39126,
       "monthly": 1002.399632
     },
     "weeklyRunRate": {
@@ -355,12 +350,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 49.1,
-      "cpu_user": 28.13,
-      "cpu_sys": 21.0,
-      "load1": 3.43,
-      "load5": 3.71,
-      "load15": 3.72,
+      "cpu_pct": 43.3,
+      "cpu_user": 27.64,
+      "cpu_sys": 15.62,
+      "load1": 3.68,
+      "load5": 3.7,
+      "load15": 3.7,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -370,12 +365,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.5,
-      "cpu_user": 1.8,
-      "cpu_sys": 11.71,
-      "load1": 2.0,
-      "load5": 2.05,
-      "load15": 1.98,
+      "cpu_pct": 12.2,
+      "cpu_user": 1.73,
+      "cpu_sys": 10.43,
+      "load1": 2.3,
+      "load5": 2.23,
+      "load15": 2.08,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -401,19 +396,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:30:04Z"
+      "lastChecked": "2026-04-19T15:35:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:30:04Z"
+      "lastChecked": "2026-04-19T15:35:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T15:30:04Z"
+      "lastChecked": "2026-04-19T15:35:03Z"
     }
   ],
   "crons": [
@@ -784,12 +779,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 35984,
+      "elapsedSecs": 36284,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_ml_edge_enhancer.sh, scripts/sorare_mission_verifier.py",
+      "label": "Editing: scripts/fix_starting_pitcher_verification.py, scripts/sorare_ml_edge_enhancer.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -810,29 +805,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T15:30:09Z",
-      "event": "Session spend: $0.21"
+      "time": "2026-04-19T15:35:09Z",
+      "event": "Session spend: $0.65"
     },
     {
-      "time": "2026-04-19T15:30:06Z",
-      "event": "Coding: scripts/sorare_ml_edge_enhancer.sh, scripts/sorare_mission_verifier.py"
+      "time": "2026-04-19T15:35:06Z",
+      "event": "Coding: scripts/fix_starting_pitcher_verification.py, scripts/sorare_ml_edge_enhancer.sh"
     },
     {
-      "time": "2026-04-19T15:30:06Z",
+      "time": "2026-04-19T15:35:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T15:30:04Z",
+      "time": "2026-04-19T15:35:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T15:30:04Z",
+      "time": "2026-04-19T15:35:03Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-19T15:30:04Z",
+      "time": "2026-04-19T15:35:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T15:30:04Z"
+  "lastUpdated": "2026-04-19T15:35:03Z"
 }
