@@ -5566,6 +5566,72 @@
             padding: 2px 6px;
             letter-spacing: 0.14em;
         }
+
+        /* ── PHASE: memory-roadmap ──────────────────────────────── */
+        /* Move off cyan/amber palette, use neutral + red accent for active week */
+        .card-brain .agent-chat-section {
+            padding: 12px;
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            background: var(--rv-surface-1);
+        }
+        .card-brain .agent-chat-header {
+            border-bottom: 1px solid var(--rv-line-soft);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .card-brain .agent-chat-title {
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            color: var(--rv-text-dim);
+        }
+        .card-brain .agent-chat-icon { opacity: 0.55; font-size: 11px; }
+        .card-brain .agent-chat-live-dot.live {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.15);
+        }
+        /* Roadmap cards: unify all to a single dark surface, use red accent for active */
+        .memory-roadmap-card {
+            background: var(--rv-surface-2) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            border-radius: 8px !important;
+        }
+        .memory-roadmap-card.active {
+            border-color: rgba(229,62,62,0.26) !important;
+            background: rgba(229,62,62,0.05) !important;
+        }
+        .memory-roadmap-card.future {
+            border-color: var(--rv-line) !important;
+            background: var(--rv-surface-2) !important;
+        }
+        .memory-roadmap-card.active .memory-roadmap-card-pill {
+            background: rgba(229,62,62,0.12) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(229,62,62,0.22) !important;
+        }
+        .memory-roadmap-card.future .memory-roadmap-card-pill {
+            background: rgba(255,255,255,0.04) !important;
+            color: var(--rv-text-muted) !important;
+            border-color: var(--rv-line-soft) !important;
+        }
+        /* Flatten pill radii */
+        .memory-roadmap-summary-pill,
+        .memory-roadmap-card-pill { border-radius: 3px !important; padding: 2px 6px; }
+        /* Week scale: current week highlight uses accent red */
+        .memory-roadmap-week.current {
+            color: #fca5a5 !important;
+            border-bottom-color: rgba(229,62,62,0.35) !important;
+        }
+        .memory-roadmap-summary-pill.live {
+            color: var(--rv-ok) !important;
+            background: rgba(74,222,128,0.10) !important;
+            border-color: rgba(74,222,128,0.22) !important;
+        }
+        .memory-roadmap-summary-pill.warn {
+            color: #fbbf24 !important;
+            background: rgba(245,158,11,0.08) !important;
+            border-color: rgba(245,158,11,0.20) !important;
+        }
     </style>
 </head>
 <body>
