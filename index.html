@@ -5709,6 +5709,132 @@
             color: var(--rv-text-muted);
             letter-spacing: 0.08em;
         }
+
+        /* ── PHASE: final-polish ─────────────────────────────────────── */
+        /* Stats row pills: flatten to rectangular chips consistent w/ card radius */
+        .stats-row { gap: 6px; margin-bottom: 12px; }
+        .stat-pill {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.64rem;
+            letter-spacing: 0.04em;
+        }
+        .stat-pill .num { font-size: 0.72rem; }
+        .stat-pill .label {
+            color: var(--rv-text-dim);
+            font-size: 0.54rem;
+            letter-spacing: 0.12em;
+        }
+
+        /* Connection status chip (online): smaller, flatter, tabular nums */
+        .connection-status {
+            padding: 4px 9px;
+            font-size: 0.64rem;
+            letter-spacing: 0.04em;
+            border-radius: 4px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .status-dot { width: 6px; height: 6px; }
+        .last-updated {
+            font-size: 0.68rem;
+            color: var(--rv-text-dim);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+
+        /* Alert banner tighten */
+        .alert-banner {
+            background: rgba(229,62,62,0.04);
+            border: 1px solid rgba(229,62,62,0.14);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .alert-item {
+            border-radius: 6px;
+        }
+
+        /* Module action button (↗): flatten */
+        .module-action-btn {
+            border-radius: 4px !important;
+            color: var(--rv-text-muted) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+        }
+        .module-action-btn:hover {
+            color: var(--rv-text) !important;
+            border-color: var(--rv-line-strong) !important;
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+        /* Brain feed freshness row: tighter, no pill-like large radius */
+        .bf-freshness-row {
+            border-radius: 8px !important;
+            padding: 8px 11px;
+            font-size: 0.66rem;
+        }
+        .card-brain.brain-active .bf-freshness-row {
+            background: rgba(229,62,62,0.06) !important;
+            border-color: rgba(229,62,62,0.18) !important;
+        }
+        .bf-freshness-label {
+            font-size: 0.58rem !important;
+            letter-spacing: 0.14em !important;
+            color: var(--rv-text-dim);
+        }
+        #bf-last-updated {
+            font-size: 0.64rem;
+            color: var(--rv-text-dim);
+        }
+
+        /* Brain stream + jobs-shell: unified surface */
+        .brain-stream, .jobs-shell {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .section-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.16em;
+            color: var(--rv-text-label);
+            font-weight: 700;
+        }
+
+        /* Night-mode overlay: ensure it still reads flat and minimal */
+        #night-mode-overlay {
+            background: var(--rv-surface-0) !important;
+        }
+        #night-clock {
+            font-weight: 200;
+            letter-spacing: -0.04em;
+        }
+        #night-hint {
+            color: var(--rv-text-muted);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            font-size: 0.66rem;
+        }
+
+        /* Card hover: single subtle border accent, no shadow */
+        .card { transition: border-color 0.2s ease; }
+        .card:hover { border-color: var(--rv-line-strong) !important; box-shadow: none !important; }
+
+        /* Mobile refinements: ensure unified tokens extend to phone-mode */
+        body.phone-mode .card { border-radius: 10px; }
+        body.phone-mode .card-header h2 {
+            font-size: 0.60rem;
+            letter-spacing: 0.14em;
+        }
+        body.phone-mode .stat-pill {
+            padding: 4px 9px;
+            font-size: 0.60rem;
+        }
+        body.phone-mode .jobs-agents-row { padding: 6px 0 8px; }
+
+        /* Header corner radius: already handled, just unify */
+        header { border-radius: 10px 10px 10px 10px !important; }
     </style>
 </head>
 <body>
