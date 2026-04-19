@@ -5498,6 +5498,74 @@
             color: var(--rv-text);
             font-variant-numeric: tabular-nums;
         }
+
+        /* ── PHASE: intel-highlights ────────────────────────────── */
+        /* Desaturate category chips: only SIGNAL (red) keeps its accent.
+           All other chip backgrounds get overridden to a neutral chip. */
+        .card-intel-highlights .intel-hi-cat {
+            background: rgba(255,255,255,0.06) !important;
+            color: var(--rv-text-dim) !important;
+            border: 1px solid var(--rv-line-soft);
+            letter-spacing: 0.10em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.52rem;
+        }
+        /* Restore the accent only for the SIGNAL / BREAKING label (contains red bg) */
+        .card-intel-highlights .intel-hi-cat[style*="239,68,68"],
+        .card-intel-highlights .intel-hi-cat[style*="229,62,62"] {
+            background: rgba(229,62,62,0.12) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(229,62,62,0.22);
+        }
+        /* Tighten overall item rhythm */
+        .card-intel-highlights .intel-hi-item {
+            padding: 7px 0;
+            border-bottom: 1px solid var(--rv-line-soft);
+            gap: 8px;
+        }
+        .card-intel-highlights .intel-hi-text {
+            font-size: 0.72rem;
+            color: var(--rv-text);
+            line-height: 1.35;
+        }
+        .card-intel-highlights .intel-hi-time {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+        .card-intel-highlights .intel-hi-source {
+            font-size: 0.56rem;
+            color: var(--rv-text-muted);
+        }
+        .card-intel-highlights .intel-hi-reason {
+            font-size: 0.60rem;
+            color: var(--rv-text-dim);
+            border-left: 2px solid rgba(229,62,62,0.25);
+            padding-left: 8px;
+            font-style: normal;
+        }
+        /* Desaturate skeleton placeholder dots to match unified palette */
+        .card-intel-highlights .ns-cat-blue,
+        .card-intel-highlights .ns-cat-green,
+        .card-intel-highlights .ns-cat-orange,
+        .card-intel-highlights .ns-cat-purple {
+            background: rgba(255,255,255,0.12) !important;
+        }
+        .card-intel-highlights .ns-cat-red { background: var(--rv-accent) !important; }
+        .card-intel-highlights .ns-line { background: rgba(255,255,255,0.06); }
+
+        /* Live badge: tighten and use accent consistently */
+        .card-intel-highlights .live-badge,
+        .card-brain .live-badge {
+            border: 1px solid rgba(229,62,62,0.22);
+            background: rgba(229,62,62,0.08);
+            color: #fca5a5;
+            font-size: 8px;
+            padding: 2px 6px;
+            letter-spacing: 0.14em;
+        }
     </style>
 </head>
 <body>
