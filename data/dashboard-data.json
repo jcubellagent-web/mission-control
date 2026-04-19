@@ -23,12 +23,12 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Fixing JAIMES Telegram unresponsiveness - Codex model parameter issue",
-    "updatedAt": "2026-04-19T04:50:04Z"
+    "updatedAt": "2026-04-19T04:55:03Z"
   },
   "contextWindow": {
-    "usedTokens": 99180,
+    "usedTokens": 103870,
     "limitTokens": 400000,
-    "pct": 0.248,
+    "pct": 0.2597,
     "model": "deepseek/deepseek-v3.2",
     "status": "green"
   },
@@ -141,7 +141,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 11m",
+        "Resets in 4h 6m",
         "Weekly: 98% left [===========-]",
         "Pace: 83% in reserve | Expected 85% used | Lasts until reset",
         "Resets in 1d",
@@ -152,22 +152,22 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 11m",
+      "sessionReset": "4h 6m",
       "weeklyReset": "1d",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T04:50:05Z"
+    "updatedAt": "2026-04-19T04:55:05Z"
   },
   "modelUsage": {
-    "session": 1.762803,
-    "daily": 6.509022,
+    "session": 1.929771,
+    "daily": 6.67599,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
       {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 35.236313393
+        "cost": 35.403281795000005
       },
       {
         "name": "gpt-5.4",
@@ -194,12 +194,12 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 126304,
-        "outputTokens": 153,
-        "totalTokens": 126457,
-        "sessionCost": 35.236313393,
-        "dailyCost": 1.762802893,
-        "weeklyCost": 35.236313393,
+        "inputTokens": 132506,
+        "outputTokens": 2989,
+        "totalTokens": 135495,
+        "sessionCost": 35.403281795000005,
+        "dailyCost": 1.9297712949999999,
+        "weeklyCost": 35.403281795000005,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -281,7 +281,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T04:50:09Z",
+    "lastUpdated": "2026-04-19T04:55:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -296,9 +296,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 4.138539834,
-      "weekly": 4.138539834,
-      "monthly": 4.138539834,
+      "daily": 4.207282181,
+      "weekly": 4.207282181,
+      "monthly": 4.207282181,
       "byok_daily": 0.0005264,
       "byok_weekly": 0.0005264,
       "byok_monthly": 0.0005264,
@@ -310,8 +310,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 6.509548,
-      "total": 75.676133,
+      "daily": 6.676516,
+      "total": 75.843102,
       "monthly": 1002.397665
     },
     "weeklyRunRate": {
@@ -352,14 +352,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.5,
-      "cpu_user": 26.18,
-      "cpu_sys": 14.35,
-      "load1": 3.9,
-      "load5": 3.79,
-      "load15": 3.7,
+      "cpu_pct": 38.3,
+      "cpu_user": 24.7,
+      "cpu_sys": 14.19,
+      "load1": 3.97,
+      "load5": 4.01,
+      "load15": 3.82,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "90Gi",
@@ -367,14 +367,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.5,
-      "cpu_user": 1.76,
-      "cpu_sys": 9.73,
-      "load1": 2.06,
-      "load5": 2.1,
-      "load15": 2.1,
+      "cpu_pct": 10.1,
+      "cpu_user": 0.91,
+      "cpu_sys": 9.17,
+      "load1": 2.12,
+      "load5": 2.04,
+      "load15": 2.07,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -398,19 +398,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T04:50:04Z"
+      "lastChecked": "2026-04-19T04:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T04:50:04Z"
+      "lastChecked": "2026-04-19T04:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T04:50:04Z"
+      "lastChecked": "2026-04-19T04:55:03Z"
     }
   ],
   "crons": [
@@ -803,29 +803,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T04:50:09Z",
-      "event": "Session spend: $1.76"
+      "time": "2026-04-19T04:55:08Z",
+      "event": "Session spend: $1.93"
     },
     {
-      "time": "2026-04-19T04:50:05Z",
+      "time": "2026-04-19T04:55:05Z",
       "event": "Coding: scripts/run_on_jaimes.sh"
     },
     {
-      "time": "2026-04-19T04:50:05Z",
+      "time": "2026-04-19T04:55:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T04:50:04Z",
+      "time": "2026-04-19T04:55:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T04:50:04Z",
+      "time": "2026-04-19T04:55:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-19T04:50:04Z",
+      "time": "2026-04-19T04:55:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T04:50:04Z"
+  "lastUpdated": "2026-04-19T04:55:03Z"
 }
