@@ -5365,6 +5365,139 @@
             text-transform: uppercase;
             font-variant-numeric: tabular-nums;
         }
+
+        /* ── PHASE: model-usage ───────────────────────────────────── */
+        /* Kill all gradients; use flat fills only. Unify radii to 8px inner. */
+        .card-model .mu-budget-section,
+        .card-model .mu-codexbar-section {
+            border-radius: 8px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-totals-row {
+            border-radius: 8px;
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-total-val { color: #fff; }
+        .card-model .mu-budget-fill.good,
+        .card-model .mu-budget-fill.ok,
+        .card-model .mu-budget-fill.watch,
+        .card-model .mu-budget-fill.bad {
+            background: rgba(255,255,255,0.14) !important;
+        }
+        .card-model .mu-budget-fill.bad { background: rgba(229,62,62,0.55) !important; }
+        .card-model .mu-budget-fill.watch { background: rgba(245,158,11,0.55) !important; }
+        .card-model .mu-budget-fill.good { background: rgba(74,222,128,0.45) !important; }
+        .card-model .mu-budget-fill.ok { background: rgba(255,255,255,0.22) !important; }
+        .card-model .mu-budget-bar { height: 6px; background: rgba(255,255,255,0.05); }
+        .card-model .mu-budget-score {
+            border-radius: 6px;
+            border: 1px solid var(--rv-line-soft);
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Codexbar: neutralize the purple pill */
+        .card-model .mu-codexbar-pill {
+            color: var(--rv-text-dim);
+            border: 1px solid var(--rv-line);
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            letter-spacing: 0.12em;
+        }
+
+        /* Active hero: flatten its gradient */
+        .card-model .mu-active-hero {
+            background: var(--rv-surface-2) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            border-radius: 10px;
+        }
+
+        /* Lane cards: unify radius and surface */
+        .card-model .mu-lane-card {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            padding: 10px 11px;
+        }
+        .card-model .mu-lane-budget-strip {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .card-model .mu-lane-bar { height: 4px; }
+        /* Lane impact chips: flatten */
+        .card-model .mu-lane-impact {
+            border-radius: 4px;
+            padding: 2px 6px;
+            letter-spacing: 0.12em;
+        }
+        /* Provider section */
+        .card-model .mu-provider-section {
+            border-bottom: 1px solid var(--rv-line-soft);
+            gap: 3px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .card-model .mu-prov-name { font-size: 0.64rem; color: var(--rv-text-dim); font-weight: 500; }
+        .card-model .mu-prov-d, .card-model .mu-prov-w {
+            font-size: 0.62rem;
+            color: var(--rv-text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── System Health divider + rows: consistent dark surface ── */
+        .card-model .mu-health-divider {
+            margin: 10px 0 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-health-divider-label {
+            font-size: 0.54rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--rv-text-label);
+            font-weight: 700;
+        }
+        .card-model .sh-agent-row {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            transition: border-color 0.2s ease;
+        }
+        .card-model .sh-agent-row:last-child { margin-bottom: 0; }
+        .card-model .sh-agent-row:hover { border-color: var(--rv-line-strong); }
+        .card-model .sh-agent-name {
+            font-size: 0.60rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text);
+        }
+        .card-model .sh-agent-tag {
+            font-size: 0.48rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text-muted);
+        }
+        .card-model .sh-dot { width: 5px; height: 5px; box-shadow: none !important; }
+        /* All healthy agents use the same green dot — consistency */
+        .card-model .sh-dot.active,
+        .card-model .sh-dot.jain.active,
+        .card-model .sh-dot.jaimes.active {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.12) !important;
+        }
+        .card-model .sh-ml {
+            font-size: 0.50rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .card-model .sh-mv {
+            font-size: 0.62rem;
+            color: var(--rv-text);
+            font-variant-numeric: tabular-nums;
+        }
     </style>
 </head>
 <body>
