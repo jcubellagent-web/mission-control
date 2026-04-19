@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-13T03:11:49Z",
-    "objective": "Completed comprehensive Sorare ML bulletproofing - critical starting pitcher fix implemented, competitive edge secured",
+    "objective": "Executing ALL next steps for Sorare ML bulletproofing",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-19T15:32:42Z",
-    "checkedAt": "2026-04-19T15:32:42Z",
+    "steps": [
+      {
+        "label": "action",
+        "status": "active",
+        "tool": "do_all"
+      }
+    ],
+    "currentTool": "do_all",
+    "updatedAt": "2026-04-19T15:54:33Z",
+    "checkedAt": "2026-04-19T15:54:33Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "deepseek/deepseek-v3.2"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed comprehensive Sorare ML bulletproofing - critical starting pitcher fix implemented, competitive edge secured",
-    "updatedAt": "2026-04-19T15:50:03Z"
+    "context": "Executing ALL next steps for Sorare ML bulletproofing",
+    "updatedAt": "2026-04-19T15:55:03Z"
   },
   "contextWindow": {
     "usedTokens": 57512,
@@ -125,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 8,
+    "missionControlDirty": 9,
     "recentFiles": [
       "scripts/fix_starting_pitcher_verification.py",
       "scripts/sorare_ml_edge_enhancer.sh",
@@ -139,10 +145,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 11m",
+        "Resets in 3h 6m",
         "Weekly: 98% left [===========-]",
         "Pace: 90% in reserve | Expected 92% used | Lasts until reset",
-        "Resets in 13h 34m",
+        "Resets in 13h 29m",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -150,11 +156,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 11m",
-      "weeklyReset": "13h 34m",
+      "sessionReset": "3h 6m",
+      "weeklyReset": "13h 29m",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T15:50:05Z"
+    "updatedAt": "2026-04-19T15:55:05Z"
   },
   "modelUsage": {
     "session": 0.648847,
@@ -279,7 +285,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T15:50:08Z",
+    "lastUpdated": "2026-04-19T15:55:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -350,12 +356,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.7,
-      "cpu_user": 26.72,
-      "cpu_sys": 14.93,
-      "load1": 3.3,
-      "load5": 3.32,
-      "load15": 3.4,
+      "cpu_pct": 42.5,
+      "cpu_user": 27.16,
+      "cpu_sys": 15.3,
+      "load1": 3.7,
+      "load5": 4.03,
+      "load15": 3.73,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -365,12 +371,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.5,
-      "cpu_user": 4.5,
-      "cpu_sys": 9.0,
-      "load1": 2.09,
-      "load5": 2.31,
-      "load15": 2.19,
+      "cpu_pct": 12.6,
+      "cpu_user": 1.8,
+      "cpu_sys": 10.81,
+      "load1": 1.64,
+      "load5": 1.95,
+      "load15": 2.07,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -396,19 +402,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:50:03Z"
+      "lastChecked": "2026-04-19T15:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:50:03Z"
+      "lastChecked": "2026-04-19T15:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T15:50:03Z"
+      "lastChecked": "2026-04-19T15:55:03Z"
     }
   ],
   "crons": [
@@ -779,7 +785,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 37183,
+      "elapsedSecs": 37483,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -805,29 +811,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T15:50:08Z",
+      "time": "2026-04-19T15:55:08Z",
       "event": "Session spend: $0.65"
     },
     {
-      "time": "2026-04-19T15:50:05Z",
+      "time": "2026-04-19T15:55:05Z",
       "event": "Coding: scripts/fix_starting_pitcher_verification.py, scripts/sorare_ml_edge_enhancer.sh"
     },
     {
-      "time": "2026-04-19T15:50:05Z",
+      "time": "2026-04-19T15:55:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T15:50:03Z",
+      "time": "2026-04-19T15:55:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T15:50:03Z",
+      "time": "2026-04-19T15:55:03Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-19T15:50:03Z",
+      "time": "2026-04-19T15:55:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T15:50:03Z"
+  "lastUpdated": "2026-04-19T15:55:03Z"
 }
