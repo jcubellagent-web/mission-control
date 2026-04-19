@@ -5186,6 +5186,185 @@
             margin-bottom: 10px;
         }
         .module-modal-chat { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           REVAMP LAYER — ui-revamp-2026-04-19
+           Unified flat-dark polish. Rides on top of existing rules with
+           higher specificity. No JS/ID changes. Accent = #e53e3e only.
+           ══════════════════════════════════════════════════════════════════ */
+
+        /* ── shared tokens for the revamp layer ── */
+        :root {
+            --rv-surface-0: #0b0b0b;
+            --rv-surface-1: #101010;
+            --rv-surface-2: #141414;
+            --rv-line: rgba(255,255,255,0.07);
+            --rv-line-soft: rgba(255,255,255,0.045);
+            --rv-line-strong: rgba(255,255,255,0.12);
+            --rv-text: rgba(255,255,255,0.88);
+            --rv-text-dim: rgba(255,255,255,0.60);
+            --rv-text-muted: rgba(255,255,255,0.38);
+            --rv-text-label: rgba(255,255,255,0.44);
+            --rv-accent: #e53e3e;
+            --rv-accent-dim: rgba(229,62,62,0.14);
+            --rv-ok: #4ade80;
+            --rv-ok-dim: rgba(74,222,128,0.10);
+        }
+
+        /* ── PHASE: jobs-panel ───────────────────────────────────────── */
+        /* Agent chips: unify tonal system — state-driven, not color-coded */
+        .card-jobs-full .jobs-agents-row {
+            gap: 6px;
+            padding: 6px 0 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .jobs-agent-chip {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line);
+            border-radius: 8px;
+            padding: 6px 9px;
+            gap: 6px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .card-jobs-full .jobs-agent-chip:hover { border-color: var(--rv-line-strong); }
+        .card-jobs-full .jobs-agent-dot { width: 6px; height: 6px; box-shadow: none !important; animation: none !important; }
+        /* Collapse agent-color variants → all active dots turn green (healthy) */
+        .card-jobs-full .jobs-agent-dot.active,
+        .card-jobs-full .jobs-agent-dot.jain.active,
+        .card-jobs-full .jobs-agent-dot.jaimes.active {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.15) !important;
+        }
+        .card-jobs-full .jobs-agent-name {
+            font-size: 0.58rem; font-weight: 700; letter-spacing: 0.10em;
+            color: rgba(255,255,255,0.82);
+        }
+        .card-jobs-full .jobs-agent-status {
+            font-size: 0.58rem; color: var(--rv-text-muted); letter-spacing: 0.02em;
+        }
+
+        /* Category headers: neutral text, accent only for count badge when loaded */
+        .card-jobs-full .tjob-category { margin-bottom: 12px; }
+        .card-jobs-full .tjob-cat-header {
+            padding: 4px 6px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            gap: 7px;
+        }
+        .card-jobs-full .tjob-cat-header:hover { background: rgba(255,255,255,0.035); }
+        .card-jobs-full .tjob-cat-emoji { font-size: 0.72rem; opacity: 0.7; }
+        /* Override inline colors from HTML (blue, purple, green) with neutral */
+        .card-jobs-full .tjob-cat-name {
+            font-size: 0.60rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.14em !important;
+            color: rgba(255,255,255,0.78) !important;
+        }
+        .card-jobs-full .tjob-cat-count {
+            font-size: 0.54rem;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--rv-line-soft);
+            color: rgba(255,255,255,0.58);
+            border-radius: 4px;
+            padding: 1px 6px;
+            margin-left: auto;
+            letter-spacing: 0.04em;
+        }
+        .card-jobs-full .tjob-cat-chevron {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.35);
+            margin-left: 2px;
+        }
+
+        /* Job rows: calmer, shorter */
+        .card-jobs-full .tjob-row {
+            padding: 6px 8px;
+            border-radius: 6px;
+            margin-bottom: 1px;
+            gap: 8px;
+        }
+        .card-jobs-full .tjob-row:hover { background: rgba(255,255,255,0.035); }
+        .card-jobs-full .tjob-row.tjob-error  { background: rgba(229,62,62,0.06); }
+        .card-jobs-full .tjob-row.tjob-done   { background: transparent; }
+        .card-jobs-full .tjob-row.tjob-missed { background: rgba(245,158,11,0.05); }
+        .card-jobs-full .tjob-status-dot { width: 4px; height: 4px; }
+        .card-jobs-full .tjob-name {
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: var(--rv-text);
+        }
+        .card-jobs-full .tjob-subline {
+            font-size: 0.58rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.02em;
+        }
+        .card-jobs-full .tjob-schedule {
+            font-size: 0.58rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+        }
+        /* Run badges: flatten — remove borders on upcoming/paused, keep accent only on next */
+        .card-jobs-full .tjob-run-badge {
+            font-size: 0.52rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.08em;
+        }
+        .card-jobs-full .tjob-run-upcoming {
+            background: rgba(255,255,255,0.04);
+            color: var(--rv-text-muted);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .tjob-run-paused {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.42);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .tjob-run-done {
+            background: rgba(74,222,128,0.10);
+            color: var(--rv-ok);
+            border: 1px solid rgba(74,222,128,0.18);
+        }
+        .card-jobs-full .tjob-run-due {
+            background: rgba(229,62,62,0.12);
+            color: #fca5a5;
+            border: 1px solid rgba(229,62,62,0.22);
+        }
+        .card-jobs-full .tjob-run-missed {
+            background: rgba(245,158,11,0.10);
+            color: #f59e0b;
+            border: 1px solid rgba(245,158,11,0.22);
+        }
+        /* Collapsed preview: flatten */
+        .card-jobs-full .tjob-collapsed-preview {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 6px;
+            padding: 5px 8px;
+        }
+        .card-jobs-full .preview-next-label {
+            font-size: 0.54rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text-muted);
+        }
+        .card-jobs-full .preview-next-name { font-weight: 500; font-size: 0.68rem; }
+        .card-jobs-full .preview-next-time {
+            font-size: 0.60rem;
+            font-variant-numeric: tabular-nums;
+            color: var(--rv-text-dim);
+            letter-spacing: 0.02em;
+        }
+        /* jobs-updated timestamp */
+        #jobs-updated {
+            font-size: 0.56rem !important;
+            color: var(--rv-text-muted) !important;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-variant-numeric: tabular-nums;
+        }
     </style>
 </head>
 <body>
