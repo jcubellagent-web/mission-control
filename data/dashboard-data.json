@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Executing ALL next steps for Sorare ML bulletproofing",
-    "updatedAt": "2026-04-19T15:55:03Z"
+    "updatedAt": "2026-04-19T16:00:03Z"
   },
   "contextWindow": {
     "usedTokens": 57512,
@@ -131,8 +131,9 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 9,
+    "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/mlb_schedule_fetcher.py",
       "scripts/fix_starting_pitcher_verification.py",
       "scripts/sorare_ml_edge_enhancer.sh",
       "scripts/sorare_mission_verifier.py",
@@ -145,10 +146,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 6m",
+        "Resets in 3h 1m",
         "Weekly: 98% left [===========-]",
         "Pace: 90% in reserve | Expected 92% used | Lasts until reset",
-        "Resets in 13h 29m",
+        "Resets in 13h 24m",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -156,11 +157,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 6m",
-      "weeklyReset": "13h 29m",
+      "sessionReset": "3h 1m",
+      "weeklyReset": "13h 24m",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T15:55:05Z"
+    "updatedAt": "2026-04-19T16:00:05Z"
   },
   "modelUsage": {
     "session": 0.648847,
@@ -285,7 +286,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T15:55:08Z",
+    "lastUpdated": "2026-04-19T16:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -300,9 +301,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 20.295918187,
-      "weekly": 20.295918187,
-      "monthly": 20.295918187,
+      "daily": 20.373600077,
+      "weekly": 20.373600077,
+      "monthly": 20.373600077,
       "byok_daily": 0.0024925,
       "byok_weekly": 0.0024925,
       "byok_monthly": 0.0024925,
@@ -356,11 +357,11 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.5,
-      "cpu_user": 27.16,
-      "cpu_sys": 15.3,
+      "cpu_pct": 43.4,
+      "cpu_user": 28.22,
+      "cpu_sys": 15.2,
       "load1": 3.7,
-      "load5": 4.03,
+      "load5": 3.84,
       "load15": 3.73,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
@@ -371,12 +372,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 1.8,
-      "cpu_sys": 10.81,
-      "load1": 1.64,
-      "load5": 1.95,
-      "load15": 2.07,
+      "cpu_pct": 14.0,
+      "cpu_user": 4.67,
+      "cpu_sys": 9.34,
+      "load1": 1.86,
+      "load5": 1.87,
+      "load15": 1.99,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,19 +403,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:55:03Z"
+      "lastChecked": "2026-04-19T16:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T15:55:03Z"
+      "lastChecked": "2026-04-19T16:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T15:55:03Z"
+      "lastChecked": "2026-04-19T16:00:03Z"
     }
   ],
   "crons": [
@@ -671,7 +672,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-19T15:45:04.134053+00:00"
+      "lastRun": "2026-04-19T16:00:04.764367+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -785,12 +786,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 37483,
+      "elapsedSecs": 37784,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/fix_starting_pitcher_verification.py, scripts/sorare_ml_edge_enhancer.sh",
+      "label": "Editing: scripts/mlb_schedule_fetcher.py, scripts/fix_starting_pitcher_verification.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -811,29 +812,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T15:55:08Z",
+      "time": "2026-04-19T16:00:08Z",
       "event": "Session spend: $0.65"
     },
     {
-      "time": "2026-04-19T15:55:05Z",
-      "event": "Coding: scripts/fix_starting_pitcher_verification.py, scripts/sorare_ml_edge_enhancer.sh"
+      "time": "2026-04-19T16:00:05Z",
+      "event": "Coding: scripts/mlb_schedule_fetcher.py, scripts/fix_starting_pitcher_verification.py"
     },
     {
-      "time": "2026-04-19T15:55:05Z",
+      "time": "2026-04-19T16:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T15:55:03Z",
+      "time": "2026-04-19T16:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T15:55:03Z",
+      "time": "2026-04-19T16:00:03Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-19T15:55:03Z",
+      "time": "2026-04-19T16:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T15:55:03Z"
+  "lastUpdated": "2026-04-19T16:00:03Z"
 }
