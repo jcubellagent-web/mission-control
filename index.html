@@ -5632,6 +5632,83 @@
             background: rgba(245,158,11,0.08) !important;
             border-color: rgba(245,158,11,0.20) !important;
         }
+
+        /* ── PHASE: agent-chat / Activity & Agents ──────────────────── */
+        /* Unify the 4 agent tag colors into ONE neutral system.
+           Differentiation stays via text label only, not color. */
+        .card-brain .ua-agent-tag {
+            background: var(--rv-surface-2) !important;
+            color: var(--rv-text-dim) !important;
+            border: 1px solid var(--rv-line) !important;
+            border-radius: 3px !important;
+            font-size: 0.52rem;
+            letter-spacing: 0.12em;
+            padding: 2px 6px;
+            font-weight: 700;
+        }
+        /* Keep only the active status dot — single red pulse */
+        .card-brain .ua-dot.active {
+            background: var(--rv-accent) !important;
+            box-shadow: 0 0 0 2px rgba(229,62,62,0.2) !important;
+        }
+        .card-brain .ua-dot.done { background: var(--rv-ok) !important; }
+        .card-brain .ua-dot.idle { background: rgba(255,255,255,0.18) !important; }
+
+        /* Pills inside activity rows: neutralize the blue model pill / yellow stale */
+        .card-brain .ua-tool-pill,
+        .card-brain .ua-model-pill,
+        .card-brain .ua-stale-pill {
+            border-radius: 3px !important;
+            font-size: 0.54rem;
+            letter-spacing: 0.06em;
+            padding: 2px 6px;
+        }
+        .card-brain .ua-model-pill {
+            color: var(--rv-text-dim) !important;
+            background: rgba(255,255,255,0.04) !important;
+            border-color: var(--rv-line) !important;
+        }
+        .card-brain .ua-stale-pill {
+            color: #fbbf24 !important;
+            background: rgba(245,158,11,0.08) !important;
+            border-color: rgba(245,158,11,0.22) !important;
+        }
+        .card-brain .ua-item {
+            padding: 8px 10px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+        }
+        .card-brain .ua-item.stale { opacity: 0.55; }
+        .card-brain .ua-ts {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+
+        /* Activity & Agents toggle button */
+        .card-brain .agent-comms-toggle {
+            background: transparent;
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .card-brain .agent-comms-toggle:hover {
+            background: rgba(255,255,255,0.02);
+            border-color: var(--rv-line-strong);
+        }
+        .card-brain .agent-comms-header {
+            font-size: 0.60rem;
+            letter-spacing: 0.14em;
+            color: var(--rv-text-dim);
+        }
+        .card-brain .agent-comms-toggle-meta {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.08em;
+        }
     </style>
 </head>
 <body>
