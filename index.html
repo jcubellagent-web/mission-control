@@ -27,10 +27,10 @@
             --bg-hover: rgba(255,255,255,0.04);
             --border: rgba(255, 255, 255, 0.07);
             --border-inner: rgba(255, 255, 255, 0.05);
-            --text-primary: rgba(255,255,255,0.82);
-            --text-secondary: rgba(255,255,255,0.55);
-            --text-muted: rgba(255,255,255,0.35);
-            --text-label: rgba(255,255,255,0.4);
+            --text-primary: rgba(255,255,255,0.86);
+            --text-secondary: rgba(255,255,255,0.62);
+            --text-muted: rgba(255,255,255,0.38);
+            --text-label: rgba(255,255,255,0.44);
             --accent: #e53e3e;
             --accent-focus: #e53e3e;
             --accent-model: #e53e3e;
@@ -98,15 +98,15 @@
             z-index: 1;
             width: min(100%, 1560px);
             margin: 0 auto;
-            padding: clamp(14px, 2vw, 24px);
+            padding: clamp(12px, 1.8vw, 22px);
         }
         header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
             position: relative;
-            padding: 10px 14px;
-            margin: -14px -14px 16px -14px;
-            border-radius: 12px 12px 0 0;
+            padding: 12px 14px;
+            margin: -12px -12px 16px -12px;
+            border-radius: 12px 12px 10px 10px;
             background-image: url('assets/logo-pattern.jpg');
             background-size: 220px auto;
             background-repeat: repeat;
@@ -171,10 +171,10 @@
         .connection-status {
             display: flex; align-items: center; gap: 6px;
             padding: 5px 10px;
-            background: rgba(255,255,255,0.035);
+            background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 999px;
-            font-size: 0.76rem; font-weight: 600;
+            font-size: 0.72rem; font-weight: 600;
             color: rgba(255,255,255,0.62);
             transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
         }
@@ -254,10 +254,10 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .alert-banner {
-            background: rgba(229,62,62,0.06);
-            border: 1px solid rgba(229,62,62,0.18);
+            background: rgba(229,62,62,0.05);
+            border: 1px solid rgba(229,62,62,0.16);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 12px 14px;
             margin-bottom: 14px;
         }
         .alert-banner.empty { display: none; }
@@ -311,8 +311,8 @@
             position: relative;
             background: #111111;
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            padding: 14px;
+            border-radius: 12px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -322,10 +322,7 @@
             -webkit-backdrop-filter: none;
             transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
-        .card:hover {
-            border-color: rgba(255,255,255,0.14);
-            box-shadow: 0 0 0 1px rgba(229,62,62,0.08), 0 4px 20px rgba(0,0,0,0.6);
-        }
+        .card:hover { border-color: rgba(255,255,255,0.12); }
         .card::after { display: none; }
         .card-focus,
         .card-brain,
@@ -340,16 +337,16 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .card-header h2 {
-            font-size: 0.68rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-size: 0.64rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.58);
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.14em;
         }
         .card-header .icon { display: inline-flex; }
         .section-icon-image {
@@ -524,8 +521,8 @@
             border-radius: 999px;
             font-size: 0.7rem;
         }
-        .stat-pill .num { font-weight: 700; color: #fff; }
-        .stat-pill .label { color: rgba(255,255,255,0.7); }
+        .stat-pill .num { font-weight: 750; color: #fff; font-variant-numeric: tabular-nums; }
+        .stat-pill .label { color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.06em; }
 
 
         .focus-status { font-weight: 600; font-size: 1.1rem; }
@@ -662,35 +659,15 @@
         .ua-ts { margin-left: auto; font-size: 0.58rem; color: rgba(255,255,255,0.36); white-space: nowrap; flex-shrink: 0; }
         .ua-empty { font-size: 0.68rem; color: rgba(255,255,255,0.18); padding: 4px 0; }
         .focus-updated { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
-        .brain-feed { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+        .brain-feed { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
         .brain-hero {
             position: relative;
             overflow: hidden;
-            background:
-                radial-gradient(circle at top right, rgba(229,62,62,0.18), transparent 34%),
-                linear-gradient(180deg, rgba(25,18,22,0.96), rgba(12,12,14,0.98));
-            border: 1px solid rgba(229,62,62,0.14);
-            border-radius: 18px;
-            padding: 18px 18px 16px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 36px rgba(0,0,0,0.24);
-        }
-        .brain-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent 42%);
-            pointer-events: none;
-        }
-        .brain-hero::after {
-            content: '';
-            position: absolute;
-            top: -42px;
-            right: -18px;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(229,62,62,0.18), transparent 68%);
-            pointer-events: none;
+            background: #101010;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 14px 14px 12px;
+            box-shadow: none;
         }
         .brain-kicker {
             display: inline-flex; align-items: center; gap: 6px;
@@ -701,20 +678,20 @@
             color: #fca5a5;
             font-size: 0.62rem;
             font-weight: 800;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
         }
         .brain-title {
-            font-size: clamp(1.28rem, 2.6vw, 2.1rem);
-            line-height: 1.02;
-            font-weight: 750;
+            font-size: clamp(1.22rem, 2.2vw, 1.9rem);
+            line-height: 1.04;
+            font-weight: 780;
             color: rgba(255,255,255,0.98);
             margin-bottom: 0;
             max-width: 92%;
-            letter-spacing: -0.04em;
+            letter-spacing: -0.03em;
             position: relative;
             z-index: 1;
         }
@@ -736,9 +713,8 @@
             background: rgba(255,255,255,0.045);
             color: rgba(255,255,255,0.78);
             font-size: 0.7rem;
-            font-weight: 600;
+            font-weight: 650;
             letter-spacing: 0.02em;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
         .brain-meta {
             display: flex;
@@ -764,8 +740,8 @@
         .brain-stream, .jobs-shell {
             background: #0d0d0d;
             border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 14px;
+            border-radius: 12px;
+            padding: 12px;
         }
         .section-label {
             font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.4);
@@ -774,7 +750,7 @@
         .feed-list { display: flex; flex-direction: column; gap: 10px; }
         .feed-item {
             display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: start;
-            padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.03);
+            padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.035);
         }
         .feed-time { color: rgba(255,255,255,0.65); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
         .feed-text { color: rgba(255,255,255,0.65); font-size: 0.82rem; }
@@ -783,7 +759,7 @@
             padding: 6px 10px; border-radius: 6px; background: #2a2a2a;
             border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); font-size: 0.75rem;
         }
-        .jobs-shell { display: flex; flex-direction: column; gap: 14px; }
+        .jobs-shell { display: flex; flex-direction: column; gap: 12px; }
         .job-group { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
         .job-group:first-child { border-top: 0; padding-top: 0; }
         .job-group-title { color: rgba(255,255,255,0.4); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
@@ -793,7 +769,7 @@
         }
         .job-row:last-child { border-bottom: 0; }
         .job-name { font-size: 0.92rem; color: var(--text-primary); }
-        .job-detail { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .job-detail { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
         .job-chip {
             padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
             border: 1px solid rgba(255,255,255,0.06); background: #2a2a2a; color: rgba(255,255,255,0.5);
@@ -802,13 +778,13 @@
         .job-chip.paused { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.05); background: #1e1e1e; }
         .job-chip.error { color: #e53e3e; border-color: rgba(229,62,62,0.18); background: rgba(229,62,62,0.08); }
 
-        .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px; }
         /* Compact model usage */
         /* ── Weekly Run Rate Callout ── */
         /* ── Run Rate Banner — compact single-row pill ── */
         .mu-run-rate-banner {
-            background: linear-gradient(90deg, rgba(74,222,128,0.06) 0%, rgba(96,165,250,0.04) 100%);
-            border: 1px solid rgba(74,222,128,0.18);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(74,222,128,0.16);
             border-radius: 8px;
             padding: 5px 10px;
             margin-bottom: 8px;
@@ -1594,16 +1570,13 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         body.phone-mode .card {
-            background: rgba(16, 18, 28, 0.97);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 18px;
-            margin: 0 14px 14px;
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.06) inset,
-                0 4px 20px rgba(0,0,0,0.5);
+            background: rgba(17, 17, 17, 0.98);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 0 12px 12px;
+            box-shadow: none;
             animation: pm-fadein 0.4s cubic-bezier(0.16,1,0.3,1) both;
-            backdrop-filter: blur(20px);
         }
         body.phone-mode .card:nth-child(1) { animation-delay: 0.04s; }
         body.phone-mode .card:nth-child(2) { animation-delay: 0.10s; }
@@ -1614,14 +1587,16 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         body.phone-mode .card-header h2 {
-            font-size: 0.8rem;
+            font-size: 0.64rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.45);
+            color: rgba(255,255,255,0.55);
         }
         body.phone-mode .card-header .card-icon {
             filter: drop-shadow(0 0 6px currentColor);
@@ -1630,8 +1605,8 @@
 
         /* ── Brain Feed card ─────────────────────────── */
         body.phone-mode .card-brain {
-            border-color: rgba(229,62,62,0.12);
-            background: rgba(10, 12, 22, 0.98);
+            border-color: rgba(229,62,62,0.10);
+            background: rgba(14, 14, 14, 0.98);
         }
         body.phone-mode .card-brain.brain-active {
             border-color: rgba(99,179,237,0.25);
@@ -1662,8 +1637,8 @@
 
         /* ── Today's Jobs card ───────────────────────── */
         body.phone-mode .card-jobs {
-            background: rgba(10, 12, 21, 0.97);
-            border-color: rgba(96,165,250,0.1);
+            background: rgba(14, 14, 14, 0.98);
+            border-color: rgba(255,255,255,0.08);
         }
 
         body.phone-mode .job-group { margin-bottom: 16px; }
@@ -1671,13 +1646,13 @@
 
         body.phone-mode .job-group-title,
         body.phone-mode .cron-category-header {
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: 800;
-            letter-spacing: 0.14em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.18);
-            margin-bottom: 8px;
-            padding-bottom: 6px;
+            color: rgba(255,255,255,0.22);
+            margin-bottom: 7px;
+            padding-bottom: 5px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -1887,7 +1862,7 @@
             background: linear-gradient(180deg, rgba(11,16,32,0.96) 0%, rgba(11,16,32,0.88) 100%);
             backdrop-filter: blur(8px);
         }
-        .jobs-agent-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; flex: 1; min-width: 0; }
+        .jobs-agent-chip { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 5px 9px; flex: 1; min-width: 0; }
         .jobs-agent-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; transition: background 0.3s; }
         .jobs-agent-dot.active { background: #4ade80; box-shadow: 0 0 5px rgba(74,222,128,0.6); animation: pulse 1.5s infinite; }
         .jobs-agent-dot.jaimes { }
@@ -1899,8 +1874,8 @@
         .jobs-section { border-top: 1px solid rgba(255,255,255,0.06); padding: 8px 0 6px; }
         .jobs-section-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
         .jobs-section-icon { font-size: 0.75rem; }
-        .jobs-section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; color: rgba(255,255,255,0.75); flex: 1; }
-        .jobs-section-badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); }
+        .jobs-section-title { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.72); flex: 1; }
+        .jobs-section-badge { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 999px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.48); }
         .jobs-section-badge.green { background: rgba(74,222,128,0.12); color: #4ade80; }
         .jobs-section-badge.amber { background: rgba(251,191,36,0.12); color: #fbbf24; }
         .jobs-section-badge.red { background: rgba(239,68,68,0.12); color: #f87171; }
@@ -1959,8 +1934,8 @@
         .mu-health-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0 6px; flex-shrink: 0; }
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
-        .system-health-body { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; overflow-y: auto; max-height: 200px; }
-        .sh-agent-row { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px 10px; }
+        .system-health-body { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; overflow-y: auto; max-height: 200px; }
+        .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
         .sh-dot.active { background: #4ade80; box-shadow: 0 0 4px rgba(74,222,128,0.5); }
@@ -1968,12 +1943,12 @@
         .sh-dot.jain.active { background: #60a5fa; box-shadow: 0 0 4px rgba(96,165,250,0.5); }
         .sh-dot.jaimes { }
         .sh-dot.jaimes.active { background: #a78bfa; box-shadow: 0 0 4px rgba(167,139,250,0.5); }
-        .sh-agent-name { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; color: rgba(255,255,255,0.75); flex: 1; }
-        .sh-agent-tag { font-size: 0.52rem; color: rgba(255,255,255,0.25); }
+        .sh-agent-name { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.75); flex: 1; }
+        .sh-agent-tag { font-size: 0.5rem; color: rgba(255,255,255,0.28); letter-spacing: 0.08em; text-transform: uppercase; }
         .sh-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; overflow: hidden; }
         .sh-metric { display: flex; flex-direction: column; gap: 1px; align-items: flex-start; min-width: 0; overflow: hidden; }
         .sh-ml { font-size: 0.52rem; color: rgba(255,255,255,0.3); }
-        .sh-mv { font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.18; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sh-mv { font-size: 0.6rem; color: rgba(255,255,255,0.76); line-height: 1.18; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
         .sh-mv.ok { color: #4ade80; }
         .sh-mv.warn { color: #fbbf24; }
         .sh-mv.err { color: #f87171; }
@@ -1983,14 +1958,14 @@
 
         /* ── Intel Highlights (condensed left panel) ── */
         .card-intel-highlights { display: flex; flex-direction: column; }
-        .intel-highlights-body { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1; }
+        .intel-highlights-body { display: flex; flex-direction: column; gap: 6px; overflow: hidden; flex: 1; }
         .intel-hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .intel-hi-item:last-child { border-bottom: none; }
         .intel-hi-item.breaking-fresh { animation: breaking-highlight-in 900ms cubic-bezier(.16,1,.3,1); }
         .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; white-space: nowrap; }
         .intel-hi-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .intel-hi-text { font-size: 0.68rem; color: rgba(255,255,255,0.85); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .intel-hi-reason { font-size: 0.63rem; color: rgba(255,255,255,0.55); line-height: 1.45; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
+        .intel-hi-text { font-size: 0.7rem; color: rgba(255,255,255,0.88); line-height: 1.34; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .intel-hi-reason { font-size: 0.62rem; color: rgba(255,255,255,0.56); line-height: 1.4; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
         .intel-hi-source { font-size: 0.58rem; color: rgba(255,255,255,0.32); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
         #newsfeed-live-badge.breaking-pulse { animation: breaking-badge-pulse 1200ms ease; }
@@ -2757,13 +2732,13 @@
             left: -50%;
             background: conic-gradient(from 0deg,
                 transparent 0deg,
-                transparent 330deg,
-                rgba(229,62,62,0.10) 344deg,
-                rgba(229,62,62,0.18) 351deg,
-                rgba(255,100,100,0.14) 355deg,
-                rgba(229,62,62,0.10) 360deg
+                transparent 328deg,
+                rgba(229,62,62,0.08) 342deg,
+                rgba(229,62,62,0.16) 351deg,
+                rgba(255,100,100,0.12) 355deg,
+                rgba(229,62,62,0.08) 360deg
             );
-            animation: bf-laser-spin 5.5s linear infinite, brain-idle-breathe 3.5s ease-in-out infinite;
+            animation: bf-laser-spin 5.5s linear infinite;
             z-index: 0;
             pointer-events: none;
         }
@@ -2772,9 +2747,9 @@
             content: '';
             position: absolute;
             inset: 2px;
-            background: linear-gradient(180deg, rgba(19,19,24,0.96), rgba(10,10,12,0.98));
+            background: linear-gradient(180deg, rgba(17,17,17,0.98), rgba(10,10,10,0.99));
             border-radius: 12px;
-            backdrop-filter: blur(20px) saturate(125%);
+            backdrop-filter: none;
             z-index: 1;
             pointer-events: none;
         }
@@ -2819,9 +2794,9 @@
             content: '';
             position: absolute;
             inset: 2px;
-            background: linear-gradient(180deg, rgba(22,16,18,0.97), rgba(10,10,12,0.99));
+            background: linear-gradient(180deg, rgba(17,17,17,0.99), rgba(10,10,10,0.99));
             border-radius: 12px;
-            backdrop-filter: blur(22px) saturate(128%);
+            backdrop-filter: none;
             z-index: 1;
             pointer-events: none;
         }
@@ -2982,12 +2957,10 @@
             position: relative;
             overflow: hidden;
             padding: 14px 14px 12px;
-            background:
-                radial-gradient(circle at top right, rgba(229,62,62,0.16), transparent 32%),
-                linear-gradient(180deg, rgba(20,14,17,0.98), rgba(11,11,13,0.98));
-            border: 1px solid rgba(229,62,62,0.16);
-            border-radius: 18px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 18px 36px rgba(0,0,0,0.2);
+            background: #111111;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            box-shadow: none;
             min-height: 128px;
             display: flex;
             flex-direction: column;
@@ -3007,17 +2980,17 @@
         .bf-objective-kicker {
             font-size: 0.68rem;
             font-weight: 800;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: #fca5a5;
             margin-bottom: 0;
         }
         .bf-objective-text {
-            font-size: clamp(1.44rem, 2.7vw, 2.2rem);
-            font-weight: 760;
+            font-size: clamp(1.34rem, 2.4vw, 2rem);
+            font-weight: 780;
             color: rgba(255,255,255,0.99);
-            line-height: 1.04;
-            letter-spacing: -0.045em;
+            line-height: 1.03;
+            letter-spacing: -0.035em;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -3037,11 +3010,11 @@
             flex-direction: column;
             gap: 4px;
             min-width: 0;
-            padding: 11px 12px;
+            padding: 10px 11px;
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.07);
-            background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.022));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            background: rgba(255,255,255,0.035);
+            box-shadow: none;
             justify-content: flex-start;
         }
         .bf-signal-chip-wide { grid-column: 1 / -1; }
@@ -3053,7 +3026,7 @@
             color: rgba(255,255,255,0.42);
         }
         .bf-signal-value {
-            font-size: 0.84rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: rgba(255,255,255,0.96);
             min-width: 0;
@@ -3399,9 +3372,9 @@
             margin-bottom: 2px;
             padding: 12px;
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            background: linear-gradient(180deg, rgba(18,18,24,0.96), rgba(11,11,15,0.96));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            border-radius: 12px;
+            background: rgba(17,17,17,0.98);
+            box-shadow: none;
             flex-shrink: 0;
             min-height: 166px;
         }
@@ -4047,26 +4020,22 @@
         .bf-freshness-row {
             display: flex; align-items: center; gap: 8px;
             padding: 10px 13px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.07);
             border-radius: 14px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+            box-shadow: none;
             font-size: 0.72rem;
             margin-bottom: 12px;
             flex-shrink: 0;
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .card-brain.brain-active .bf-freshness-row {
-            background: linear-gradient(180deg, rgba(229,62,62,0.14), rgba(229,62,62,0.06));
-            border-color: rgba(229,62,62,0.24);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 28px rgba(229,62,62,0.12);
-        }
+        .card-brain.brain-active .bf-freshness-row { background: rgba(229,62,62,0.08); border-color: rgba(229,62,62,0.2); box-shadow: none; }
         .bf-fresh-dot {
             width: 7px; height: 7px; border-radius: 50%;
             flex-shrink: 0;
             transition: background 0.5s ease;
         }
-        .bf-freshness-label { color: rgba(255,255,255,0.78); letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.68rem; font-weight: 800; }
+        .bf-freshness-label { color: rgba(255,255,255,0.78); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.64rem; font-weight: 800; }
         #bf-last-updated { color: rgba(255,255,255,0.62); margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.72rem; }
 
         /* ===== Offline/degraded banner improvements ===== */
@@ -5217,6 +5186,655 @@
             margin-bottom: 10px;
         }
         .module-modal-chat { display: flex; flex-direction: column; gap: 8px; }
+
+        /* ══════════════════════════════════════════════════════════════════
+           REVAMP LAYER — ui-revamp-2026-04-19
+           Unified flat-dark polish. Rides on top of existing rules with
+           higher specificity. No JS/ID changes. Accent = #e53e3e only.
+           ══════════════════════════════════════════════════════════════════ */
+
+        /* ── shared tokens for the revamp layer ── */
+        :root {
+            --rv-surface-0: #0b0b0b;
+            --rv-surface-1: #101010;
+            --rv-surface-2: #141414;
+            --rv-line: rgba(255,255,255,0.07);
+            --rv-line-soft: rgba(255,255,255,0.045);
+            --rv-line-strong: rgba(255,255,255,0.12);
+            --rv-text: rgba(255,255,255,0.88);
+            --rv-text-dim: rgba(255,255,255,0.60);
+            --rv-text-muted: rgba(255,255,255,0.38);
+            --rv-text-label: rgba(255,255,255,0.44);
+            --rv-accent: #e53e3e;
+            --rv-accent-dim: rgba(229,62,62,0.14);
+            --rv-ok: #4ade80;
+            --rv-ok-dim: rgba(74,222,128,0.10);
+        }
+
+        /* ── PHASE: jobs-panel ───────────────────────────────────────── */
+        /* Agent chips: unify tonal system — state-driven, not color-coded */
+        .card-jobs-full .jobs-agents-row {
+            gap: 6px;
+            padding: 6px 0 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .jobs-agent-chip {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line);
+            border-radius: 8px;
+            padding: 6px 9px;
+            gap: 6px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .card-jobs-full .jobs-agent-chip:hover { border-color: var(--rv-line-strong); }
+        .card-jobs-full .jobs-agent-dot { width: 6px; height: 6px; box-shadow: none !important; animation: none !important; }
+        /* Collapse agent-color variants → all active dots turn green (healthy) */
+        .card-jobs-full .jobs-agent-dot.active,
+        .card-jobs-full .jobs-agent-dot.jain.active,
+        .card-jobs-full .jobs-agent-dot.jaimes.active {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.15) !important;
+        }
+        .card-jobs-full .jobs-agent-name {
+            font-size: 0.58rem; font-weight: 700; letter-spacing: 0.10em;
+            color: rgba(255,255,255,0.82);
+        }
+        .card-jobs-full .jobs-agent-status {
+            font-size: 0.58rem; color: var(--rv-text-muted); letter-spacing: 0.02em;
+        }
+
+        /* Category headers: neutral text, accent only for count badge when loaded */
+        .card-jobs-full .tjob-category { margin-bottom: 12px; }
+        .card-jobs-full .tjob-cat-header {
+            padding: 4px 6px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            gap: 7px;
+        }
+        .card-jobs-full .tjob-cat-header:hover { background: rgba(255,255,255,0.035); }
+        .card-jobs-full .tjob-cat-emoji { font-size: 0.72rem; opacity: 0.7; }
+        /* Override inline colors from HTML (blue, purple, green) with neutral */
+        .card-jobs-full .tjob-cat-name {
+            font-size: 0.60rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.14em !important;
+            color: rgba(255,255,255,0.78) !important;
+        }
+        .card-jobs-full .tjob-cat-count {
+            font-size: 0.54rem;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--rv-line-soft);
+            color: rgba(255,255,255,0.58);
+            border-radius: 4px;
+            padding: 1px 6px;
+            margin-left: auto;
+            letter-spacing: 0.04em;
+        }
+        .card-jobs-full .tjob-cat-chevron {
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.35);
+            margin-left: 2px;
+        }
+
+        /* Job rows: calmer, shorter */
+        .card-jobs-full .tjob-row {
+            padding: 6px 8px;
+            border-radius: 6px;
+            margin-bottom: 1px;
+            gap: 8px;
+        }
+        .card-jobs-full .tjob-row:hover { background: rgba(255,255,255,0.035); }
+        .card-jobs-full .tjob-row.tjob-error  { background: rgba(229,62,62,0.06); }
+        .card-jobs-full .tjob-row.tjob-done   { background: transparent; }
+        .card-jobs-full .tjob-row.tjob-missed { background: rgba(245,158,11,0.05); }
+        .card-jobs-full .tjob-status-dot { width: 4px; height: 4px; }
+        .card-jobs-full .tjob-name {
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: var(--rv-text);
+        }
+        .card-jobs-full .tjob-subline {
+            font-size: 0.58rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.02em;
+        }
+        .card-jobs-full .tjob-schedule {
+            font-size: 0.58rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+        }
+        /* Run badges: flatten — remove borders on upcoming/paused, keep accent only on next */
+        .card-jobs-full .tjob-run-badge {
+            font-size: 0.52rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.08em;
+        }
+        .card-jobs-full .tjob-run-upcoming {
+            background: rgba(255,255,255,0.04);
+            color: var(--rv-text-muted);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .tjob-run-paused {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.42);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-jobs-full .tjob-run-done {
+            background: rgba(74,222,128,0.10);
+            color: var(--rv-ok);
+            border: 1px solid rgba(74,222,128,0.18);
+        }
+        .card-jobs-full .tjob-run-due {
+            background: rgba(229,62,62,0.12);
+            color: #fca5a5;
+            border: 1px solid rgba(229,62,62,0.22);
+        }
+        .card-jobs-full .tjob-run-missed {
+            background: rgba(245,158,11,0.10);
+            color: #f59e0b;
+            border: 1px solid rgba(245,158,11,0.22);
+        }
+        /* Collapsed preview: flatten */
+        .card-jobs-full .tjob-collapsed-preview {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 6px;
+            padding: 5px 8px;
+        }
+        .card-jobs-full .preview-next-label {
+            font-size: 0.54rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text-muted);
+        }
+        .card-jobs-full .preview-next-name { font-weight: 500; font-size: 0.68rem; }
+        .card-jobs-full .preview-next-time {
+            font-size: 0.60rem;
+            font-variant-numeric: tabular-nums;
+            color: var(--rv-text-dim);
+            letter-spacing: 0.02em;
+        }
+        /* jobs-updated timestamp */
+        #jobs-updated {
+            font-size: 0.56rem !important;
+            color: var(--rv-text-muted) !important;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── PHASE: model-usage ───────────────────────────────────── */
+        /* Kill all gradients; use flat fills only. Unify radii to 8px inner. */
+        .card-model .mu-budget-section,
+        .card-model .mu-codexbar-section {
+            border-radius: 8px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-totals-row {
+            border-radius: 8px;
+            border: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-total-val { color: #fff; }
+        .card-model .mu-budget-fill.good,
+        .card-model .mu-budget-fill.ok,
+        .card-model .mu-budget-fill.watch,
+        .card-model .mu-budget-fill.bad {
+            background: rgba(255,255,255,0.14) !important;
+        }
+        .card-model .mu-budget-fill.bad { background: rgba(229,62,62,0.55) !important; }
+        .card-model .mu-budget-fill.watch { background: rgba(245,158,11,0.55) !important; }
+        .card-model .mu-budget-fill.good { background: rgba(74,222,128,0.45) !important; }
+        .card-model .mu-budget-fill.ok { background: rgba(255,255,255,0.22) !important; }
+        .card-model .mu-budget-bar { height: 6px; background: rgba(255,255,255,0.05); }
+        .card-model .mu-budget-score {
+            border-radius: 6px;
+            border: 1px solid var(--rv-line-soft);
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Codexbar: neutralize the purple pill */
+        .card-model .mu-codexbar-pill {
+            color: var(--rv-text-dim);
+            border: 1px solid var(--rv-line);
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            letter-spacing: 0.12em;
+        }
+
+        /* Active hero: flatten its gradient */
+        .card-model .mu-active-hero {
+            background: var(--rv-surface-2) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            border-radius: 10px;
+        }
+
+        /* Lane cards: unify radius and surface */
+        .card-model .mu-lane-card {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            padding: 10px 11px;
+        }
+        .card-model .mu-lane-budget-strip {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .card-model .mu-lane-bar { height: 4px; }
+        /* Lane impact chips: flatten */
+        .card-model .mu-lane-impact {
+            border-radius: 4px;
+            padding: 2px 6px;
+            letter-spacing: 0.12em;
+        }
+        /* Provider section */
+        .card-model .mu-provider-section {
+            border-bottom: 1px solid var(--rv-line-soft);
+            gap: 3px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .card-model .mu-prov-name { font-size: 0.64rem; color: var(--rv-text-dim); font-weight: 500; }
+        .card-model .mu-prov-d, .card-model .mu-prov-w {
+            font-size: 0.62rem;
+            color: var(--rv-text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── System Health divider + rows: consistent dark surface ── */
+        .card-model .mu-health-divider {
+            margin: 10px 0 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--rv-line-soft);
+        }
+        .card-model .mu-health-divider-label {
+            font-size: 0.54rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--rv-text-label);
+            font-weight: 700;
+        }
+        .card-model .sh-agent-row {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            transition: border-color 0.2s ease;
+        }
+        .card-model .sh-agent-row:last-child { margin-bottom: 0; }
+        .card-model .sh-agent-row:hover { border-color: var(--rv-line-strong); }
+        .card-model .sh-agent-name {
+            font-size: 0.60rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text);
+        }
+        .card-model .sh-agent-tag {
+            font-size: 0.48rem;
+            letter-spacing: 0.12em;
+            color: var(--rv-text-muted);
+        }
+        .card-model .sh-dot { width: 5px; height: 5px; box-shadow: none !important; }
+        /* All healthy agents use the same green dot — consistency */
+        .card-model .sh-dot.active,
+        .card-model .sh-dot.jain.active,
+        .card-model .sh-dot.jaimes.active {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.12) !important;
+        }
+        .card-model .sh-ml {
+            font-size: 0.50rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .card-model .sh-mv {
+            font-size: 0.62rem;
+            color: var(--rv-text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── PHASE: intel-highlights ────────────────────────────── */
+        /* Desaturate category chips: only SIGNAL (red) keeps its accent.
+           All other chip backgrounds get overridden to a neutral chip. */
+        .card-intel-highlights .intel-hi-cat {
+            background: rgba(255,255,255,0.06) !important;
+            color: var(--rv-text-dim) !important;
+            border: 1px solid var(--rv-line-soft);
+            letter-spacing: 0.10em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.52rem;
+        }
+        /* Restore the accent only for the SIGNAL / BREAKING label (contains red bg) */
+        .card-intel-highlights .intel-hi-cat[style*="239,68,68"],
+        .card-intel-highlights .intel-hi-cat[style*="229,62,62"] {
+            background: rgba(229,62,62,0.12) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(229,62,62,0.22);
+        }
+        /* Tighten overall item rhythm */
+        .card-intel-highlights .intel-hi-item {
+            padding: 7px 0;
+            border-bottom: 1px solid var(--rv-line-soft);
+            gap: 8px;
+        }
+        .card-intel-highlights .intel-hi-text {
+            font-size: 0.72rem;
+            color: var(--rv-text);
+            line-height: 1.35;
+        }
+        .card-intel-highlights .intel-hi-time {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+        .card-intel-highlights .intel-hi-source {
+            font-size: 0.56rem;
+            color: var(--rv-text-muted);
+        }
+        .card-intel-highlights .intel-hi-reason {
+            font-size: 0.60rem;
+            color: var(--rv-text-dim);
+            border-left: 2px solid rgba(229,62,62,0.25);
+            padding-left: 8px;
+            font-style: normal;
+        }
+        /* Desaturate skeleton placeholder dots to match unified palette */
+        .card-intel-highlights .ns-cat-blue,
+        .card-intel-highlights .ns-cat-green,
+        .card-intel-highlights .ns-cat-orange,
+        .card-intel-highlights .ns-cat-purple {
+            background: rgba(255,255,255,0.12) !important;
+        }
+        .card-intel-highlights .ns-cat-red { background: var(--rv-accent) !important; }
+        .card-intel-highlights .ns-line { background: rgba(255,255,255,0.06); }
+
+        /* Live badge: tighten and use accent consistently */
+        .card-intel-highlights .live-badge,
+        .card-brain .live-badge {
+            border: 1px solid rgba(229,62,62,0.22);
+            background: rgba(229,62,62,0.08);
+            color: #fca5a5;
+            font-size: 8px;
+            padding: 2px 6px;
+            letter-spacing: 0.14em;
+        }
+
+        /* ── PHASE: memory-roadmap ──────────────────────────────── */
+        /* Move off cyan/amber palette, use neutral + red accent for active week */
+        .card-brain .agent-chat-section {
+            padding: 12px;
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            background: var(--rv-surface-1);
+        }
+        .card-brain .agent-chat-header {
+            border-bottom: 1px solid var(--rv-line-soft);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .card-brain .agent-chat-title {
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            color: var(--rv-text-dim);
+        }
+        .card-brain .agent-chat-icon { opacity: 0.55; font-size: 11px; }
+        .card-brain .agent-chat-live-dot.live {
+            background: var(--rv-ok);
+            box-shadow: 0 0 0 2px rgba(74,222,128,0.15);
+        }
+        /* Roadmap cards: unify all to a single dark surface, use red accent for active */
+        .memory-roadmap-card {
+            background: var(--rv-surface-2) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            border-radius: 8px !important;
+        }
+        .memory-roadmap-card.active {
+            border-color: rgba(229,62,62,0.26) !important;
+            background: rgba(229,62,62,0.05) !important;
+        }
+        .memory-roadmap-card.future {
+            border-color: var(--rv-line) !important;
+            background: var(--rv-surface-2) !important;
+        }
+        .memory-roadmap-card.active .memory-roadmap-card-pill {
+            background: rgba(229,62,62,0.12) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(229,62,62,0.22) !important;
+        }
+        .memory-roadmap-card.future .memory-roadmap-card-pill {
+            background: rgba(255,255,255,0.04) !important;
+            color: var(--rv-text-muted) !important;
+            border-color: var(--rv-line-soft) !important;
+        }
+        /* Flatten pill radii */
+        .memory-roadmap-summary-pill,
+        .memory-roadmap-card-pill { border-radius: 3px !important; padding: 2px 6px; }
+        /* Week scale: current week highlight uses accent red */
+        .memory-roadmap-week.current {
+            color: #fca5a5 !important;
+            border-bottom-color: rgba(229,62,62,0.35) !important;
+        }
+        .memory-roadmap-summary-pill.live {
+            color: var(--rv-ok) !important;
+            background: rgba(74,222,128,0.10) !important;
+            border-color: rgba(74,222,128,0.22) !important;
+        }
+        .memory-roadmap-summary-pill.warn {
+            color: #fbbf24 !important;
+            background: rgba(245,158,11,0.08) !important;
+            border-color: rgba(245,158,11,0.20) !important;
+        }
+
+        /* ── PHASE: agent-chat / Activity & Agents ──────────────────── */
+        /* Unify the 4 agent tag colors into ONE neutral system.
+           Differentiation stays via text label only, not color. */
+        .card-brain .ua-agent-tag {
+            background: var(--rv-surface-2) !important;
+            color: var(--rv-text-dim) !important;
+            border: 1px solid var(--rv-line) !important;
+            border-radius: 3px !important;
+            font-size: 0.52rem;
+            letter-spacing: 0.12em;
+            padding: 2px 6px;
+            font-weight: 700;
+        }
+        /* Keep only the active status dot — single red pulse */
+        .card-brain .ua-dot.active {
+            background: var(--rv-accent) !important;
+            box-shadow: 0 0 0 2px rgba(229,62,62,0.2) !important;
+        }
+        .card-brain .ua-dot.done { background: var(--rv-ok) !important; }
+        .card-brain .ua-dot.idle { background: rgba(255,255,255,0.18) !important; }
+
+        /* Pills inside activity rows: neutralize the blue model pill / yellow stale */
+        .card-brain .ua-tool-pill,
+        .card-brain .ua-model-pill,
+        .card-brain .ua-stale-pill {
+            border-radius: 3px !important;
+            font-size: 0.54rem;
+            letter-spacing: 0.06em;
+            padding: 2px 6px;
+        }
+        .card-brain .ua-model-pill {
+            color: var(--rv-text-dim) !important;
+            background: rgba(255,255,255,0.04) !important;
+            border-color: var(--rv-line) !important;
+        }
+        .card-brain .ua-stale-pill {
+            color: #fbbf24 !important;
+            background: rgba(245,158,11,0.08) !important;
+            border-color: rgba(245,158,11,0.22) !important;
+        }
+        .card-brain .ua-item {
+            padding: 8px 10px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+        }
+        .card-brain .ua-item.stale { opacity: 0.55; }
+        .card-brain .ua-ts {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+
+        /* Activity & Agents toggle button */
+        .card-brain .agent-comms-toggle {
+            background: transparent;
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 8px;
+            padding: 8px 10px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .card-brain .agent-comms-toggle:hover {
+            background: rgba(255,255,255,0.02);
+            border-color: var(--rv-line-strong);
+        }
+        .card-brain .agent-comms-header {
+            font-size: 0.60rem;
+            letter-spacing: 0.14em;
+            color: var(--rv-text-dim);
+        }
+        .card-brain .agent-comms-toggle-meta {
+            font-size: 0.54rem;
+            color: var(--rv-text-muted);
+            letter-spacing: 0.08em;
+        }
+
+        /* ── PHASE: final-polish ─────────────────────────────────────── */
+        /* Stats row pills: flatten to rectangular chips consistent w/ card radius */
+        .stats-row { gap: 6px; margin-bottom: 12px; }
+        .stat-pill {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.64rem;
+            letter-spacing: 0.04em;
+        }
+        .stat-pill .num { font-size: 0.72rem; }
+        .stat-pill .label {
+            color: var(--rv-text-dim);
+            font-size: 0.54rem;
+            letter-spacing: 0.12em;
+        }
+
+        /* Connection status chip (online): smaller, flatter, tabular nums */
+        .connection-status {
+            padding: 4px 9px;
+            font-size: 0.64rem;
+            letter-spacing: 0.04em;
+            border-radius: 4px;
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+        }
+        .status-dot { width: 6px; height: 6px; }
+        .last-updated {
+            font-size: 0.68rem;
+            color: var(--rv-text-dim);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.04em;
+        }
+
+        /* Alert banner tighten */
+        .alert-banner {
+            background: rgba(229,62,62,0.04);
+            border: 1px solid rgba(229,62,62,0.14);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .alert-item {
+            border-radius: 6px;
+        }
+
+        /* Module action button (↗): flatten */
+        .module-action-btn {
+            border-radius: 4px !important;
+            color: var(--rv-text-muted) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+        }
+        .module-action-btn:hover {
+            color: var(--rv-text) !important;
+            border-color: var(--rv-line-strong) !important;
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+        /* Brain feed freshness row: tighter, no pill-like large radius */
+        .bf-freshness-row {
+            border-radius: 8px !important;
+            padding: 8px 11px;
+            font-size: 0.66rem;
+        }
+        .card-brain.brain-active .bf-freshness-row {
+            background: rgba(229,62,62,0.06) !important;
+            border-color: rgba(229,62,62,0.18) !important;
+        }
+        .bf-freshness-label {
+            font-size: 0.58rem !important;
+            letter-spacing: 0.14em !important;
+            color: var(--rv-text-dim);
+        }
+        #bf-last-updated {
+            font-size: 0.64rem;
+            color: var(--rv-text-dim);
+        }
+
+        /* Brain stream + jobs-shell: unified surface */
+        .brain-stream, .jobs-shell {
+            background: var(--rv-surface-2);
+            border: 1px solid var(--rv-line-soft);
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .section-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.16em;
+            color: var(--rv-text-label);
+            font-weight: 700;
+        }
+
+        /* Night-mode overlay: ensure it still reads flat and minimal */
+        #night-mode-overlay {
+            background: var(--rv-surface-0) !important;
+        }
+        #night-clock {
+            font-weight: 200;
+            letter-spacing: -0.04em;
+        }
+        #night-hint {
+            color: var(--rv-text-muted);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            font-size: 0.66rem;
+        }
+
+        /* Card hover: single subtle border accent, no shadow */
+        .card { transition: border-color 0.2s ease; }
+        .card:hover { border-color: var(--rv-line-strong) !important; box-shadow: none !important; }
+
+        /* Mobile refinements: ensure unified tokens extend to phone-mode */
+        body.phone-mode .card { border-radius: 10px; }
+        body.phone-mode .card-header h2 {
+            font-size: 0.60rem;
+            letter-spacing: 0.14em;
+        }
+        body.phone-mode .stat-pill {
+            padding: 4px 9px;
+            font-size: 0.60rem;
+        }
+        body.phone-mode .jobs-agents-row { padding: 6px 0 8px; }
+
+        /* Header corner radius: already handled, just unify */
+        header { border-radius: 10px 10px 10px 10px !important; }
     </style>
 </head>
 <body>
