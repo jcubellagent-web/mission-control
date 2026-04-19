@@ -414,6 +414,21 @@
         .tjob-run-missed   { background:rgba(245,158,11,0.15);  color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
         .tjob-run-upcoming { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.08); }
         .tjob-run-paused   { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.10); }
+        .tjob-run-started  { background:rgba(96,165,250,0.18); color:#93c5fd; border:1px solid rgba(96,165,250,0.35); animation: tjfade 1.2s ease-in-out infinite; }
+        @keyframes tjfade { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+        .tjob-name-missed { text-decoration: line-through; opacity: 0.55; color: rgba(245,158,11,0.85); }
+        .tjob-name-paused { opacity: 0.45; color: rgba(255,255,255,0.55); }
+        .tjob-name-started { color: #93c5fd; }
+        .tjob-agent-chip { font-size: 0.5rem; font-weight: 800; letter-spacing: 0.04em; padding: 1px 5px; border-radius: 3px; flex-shrink: 0; line-height: 1.25; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
+        .tjob-agent-chip.jain   { background: rgba(96,165,250,0.16); color: #93c5fd; }
+        .tjob-agent-chip.jaimes { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+        .tjob-agent-chip.josh   { background: rgba(74,222,128,0.16); color: #86efac; }
+        .tjob-miniprog { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .tjob-miniprog-bar { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; position: relative; }
+        .tjob-miniprog-fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #60a5fa, #4ade80); border-radius: 2px; transition: width 0.4s ease; }
+        .tjob-miniprog-label { font-size: 0.52rem; color: rgba(255,255,255,0.5); font-variant-numeric: tabular-nums; }
+        .tjob-status-dot.started { animation: tjdotpulse 1.2s ease-in-out infinite; box-shadow: 0 0 4px currentColor; }
+        @keyframes tjdotpulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.55; } }
         .tjob-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
         .tjob-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
         .tjob-header-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
@@ -1891,8 +1906,29 @@
         .jobs-cron-dot.ok { background: #4ade80; }
         .jobs-cron-dot.warn { background: #fbbf24; }
         .jobs-cron-dot.err { background: #f87171; }
-        .jobs-cron-name { font-size: 0.62rem; color: rgba(255,255,255,0.6); flex: 1; }
-        .jobs-cron-ts { font-size: 0.58rem; color: rgba(255,255,255,0.28); }
+        .jobs-cron-dot.started { background: #60a5fa; animation: jcpulse 1.2s ease-in-out infinite; box-shadow: 0 0 4px #60a5fa; }
+        @keyframes jcpulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(1.35); } }
+        .jobs-cron-name { font-size: 0.62rem; color: rgba(255,255,255,0.6); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .jobs-cron-name.missed { text-decoration: line-through; color: rgba(255,255,255,0.4); }
+        .jobs-cron-name.paused { color: rgba(255,255,255,0.32); }
+        .jobs-cron-ts { font-size: 0.58rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
+        .jobs-cron-ts.done { color: #4ade80; }
+        .jobs-cron-ts.missed { color: #fbbf24; }
+        .jobs-cron-ts.started { color: #60a5fa; }
+        .jobs-cron-agent { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; line-height: 1.2; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
+        .jobs-cron-agent.jag-j { background: rgba(96,165,250,0.14); color: #93c5fd; }
+        .jobs-cron-agent.jag-m { background: rgba(244,114,182,0.14); color: #f9a8d4; }
+        .jobs-cron-agent.jag-2 { background: rgba(74,222,128,0.14); color: #86efac; }
+        .jobs-cron-icon { font-size: 0.58rem; flex-shrink: 0; width: 9px; text-align: center; line-height: 1; }
+        .jobs-cron-icon.done { color: #4ade80; }
+        .jobs-cron-icon.missed { color: #fbbf24; }
+        .jobs-cron-icon.paused { color: rgba(255,255,255,0.35); }
+        .jobs-cron-icon.started { color: #60a5fa; animation: jcfade 1.2s ease-in-out infinite; }
+        @keyframes jcfade { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .jobs-cron-progress { flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
+        .jobs-cron-progress-bar { width: 36px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; position: relative; }
+        .jobs-cron-progress-fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #60a5fa, #4ade80); border-radius: 2px; transition: width 0.4s ease; }
+        .jobs-cron-progress-label { font-size: 0.52rem; color: rgba(255,255,255,0.42); font-variant-numeric: tabular-nums; }
 
         /* ── System Health ── */
         .card-model-health { display: flex; flex-direction: column; }
@@ -7678,23 +7714,108 @@
                 const SHOW = ['Intelligence Feed','Breaking News','X Watchlist','X Posts','Sorare','Mission Control','Fantasy','Sorare Daily','Sorare Competition'];
                 const shown = crons.filter(c => SHOW.some(n => (c.name||'').includes(n) || (c.category||'').includes(n))).slice(0, 8);
                 let ok = 0, warn = 0, err = 0;
+
+                // Helper: compute ET decimal hour now (for 'started' heuristic)
+                const etHourNow = (() => {
+                    try { return parseInt(new Date().toLocaleString('en-US', {timeZone: 'America/New_York', hour: 'numeric', hour12: false}), 10) || 0; }
+                    catch(e) { return new Date().getHours(); }
+                })();
+                const etMinNow = (() => {
+                    try { return parseInt(new Date().toLocaleString('en-US', {timeZone: 'America/New_York', minute: 'numeric'}), 10) || 0; }
+                    catch(e) { return new Date().getMinutes(); }
+                })();
+                const etDecimalNow = etHourNow + etMinNow / 60;
+                // Heuristic: true if a daily-time job's scheduled time fell within the last 15 minutes
+                // and it hasn't completed or been marked missed yet.
+                const parseSchedDecimal = (sched) => {
+                    if (!sched) return null;
+                    const m = sched.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+                    if (!m) return null;
+                    let h = parseInt(m[1], 10);
+                    const mm = m[2] ? parseInt(m[2], 10) : 0;
+                    const ap = m[3].toUpperCase();
+                    if (ap === 'PM' && h !== 12) h += 12;
+                    if (ap === 'AM' && h === 12) h = 0;
+                    return h + mm / 60;
+                };
+                const agentBadgeFor = (ag) => {
+                    const a = (ag || '').toUpperCase();
+                    if (a.includes('JAIMES')) return { cls: 'jag-m', label: 'M' };
+                    if (a.includes('J.A.I.N') || a === 'JAIN') return { cls: 'jag-j', label: 'J' };
+                    if (a.includes('JOSH')) return { cls: 'jag-2', label: '2' };
+                    return { cls: '', label: '·' };
+                };
+
                 const rows = shown.map(c => {
                     const runSt = c.runStatus || '';
                     const st = c.status || 'unknown';
-                    const cls = st === 'ok' && runSt !== 'missed' ? 'ok' : runSt === 'missed' || st === 'paused' ? 'warn' : st === 'error' ? 'err' : 'ok';
-                    if (cls === 'ok') ok++; else if (cls === 'warn') warn++; else err++;
-                    // For Intel, show how many runs done today
-                    let detail = c.schedule || '';
-                    if (c.multiRun) {
-                        const done = (c.multiRun.runs||[]).filter(r=>r.done).length;
-                        const total = (c.multiRun.runs||[]).length;
-                        detail = `${done}/${total} runs today`;
-                    } else if (runSt === 'missed') {
-                        detail = 'missed';
-                    } else if (runSt === 'done') {
-                        detail = 'ran ✓';
+
+                    // Started heuristic: only for single-schedule daily jobs, not multiRun
+                    let started = false;
+                    if (!c.multiRun && st !== 'paused' && runSt !== 'done' && runSt !== 'missed') {
+                        const sd = parseSchedDecimal(c.schedule || '');
+                        if (sd !== null) {
+                            const deltaMin = (etDecimalNow - sd) * 60;
+                            if (deltaMin >= 0 && deltaMin <= 15) started = true;
+                        }
                     }
-                    return `<div class="jobs-cron-row"><span class="jobs-cron-dot ${cls}"></span><span class="jobs-cron-name">${escapeHtml(c.name||'?')}</span><span class="jobs-cron-ts">${escapeHtml(detail)}</span></div>`;
+
+                    // Dot class (preserves existing health semantics for the badge tally)
+                    let cls;
+                    if (started) cls = 'started';
+                    else if (st === 'ok' && runSt !== 'missed') cls = 'ok';
+                    else if (runSt === 'missed' || st === 'paused') cls = 'warn';
+                    else if (st === 'error') cls = 'err';
+                    else cls = 'ok';
+                    // Tally uses underlying health (not the 'started' overlay)
+                    const healthCls = st === 'ok' && runSt !== 'missed' ? 'ok' : runSt === 'missed' || st === 'paused' ? 'warn' : st === 'error' ? 'err' : 'ok';
+                    if (healthCls === 'ok') ok++; else if (healthCls === 'warn') warn++; else err++;
+
+                    // Agent badge
+                    const ab = agentBadgeFor(c.agent);
+                    const agentHtml = `<span class="jobs-cron-agent ${ab.cls}" title="${escapeHtml(c.agent||'')}">${escapeHtml(ab.label)}</span>`;
+
+                    // State icon + name/detail
+                    let iconHtml = '';
+                    let nameCls = '';
+                    let detailHtml = '';
+                    if (c.multiRun) {
+                        // Mini progress bar replaces text
+                        const total = (c.multiRun.runs||[]).length;
+                        const done = (c.multiRun.runs||[]).filter(r=>r.done).length;
+                        const pct = total > 0 ? Math.round((done/total)*100) : 0;
+                        if (done === total && total > 0) iconHtml = `<span class="jobs-cron-icon done" title="all runs done">✓</span>`;
+                        else iconHtml = `<span class="jobs-cron-icon" style="color:rgba(255,255,255,0.35)" title="multi-run">↻</span>`;
+                        detailHtml = `<span class="jobs-cron-progress" title="${done}/${total} runs today">`+
+                            `<span class="jobs-cron-progress-bar"><span class="jobs-cron-progress-fill" style="width:${pct}%"></span></span>`+
+                            `<span class="jobs-cron-progress-label">${done}/${total}</span>`+
+                        `</span>`;
+                    } else if (started) {
+                        iconHtml = `<span class="jobs-cron-icon started" title="started recently">⚡</span>`;
+                        detailHtml = `<span class="jobs-cron-ts started">started</span>`;
+                    } else if (runSt === 'done') {
+                        iconHtml = `<span class="jobs-cron-icon done" title="completed">✓</span>`;
+                        detailHtml = `<span class="jobs-cron-ts done">done</span>`;
+                    } else if (runSt === 'missed') {
+                        iconHtml = `<span class="jobs-cron-icon missed" title="missed">⚠</span>`;
+                        nameCls = 'missed';
+                        detailHtml = `<span class="jobs-cron-ts missed">missed</span>`;
+                    } else if (st === 'paused') {
+                        iconHtml = `<span class="jobs-cron-icon paused" title="paused">⏸</span>`;
+                        nameCls = 'paused';
+                        detailHtml = `<span class="jobs-cron-ts">paused</span>`;
+                    } else {
+                        iconHtml = `<span class="jobs-cron-icon" style="color:rgba(255,255,255,0.22)">·</span>`;
+                        detailHtml = `<span class="jobs-cron-ts">${escapeHtml(c.schedule || '')}</span>`;
+                    }
+
+                    return `<div class="jobs-cron-row">`+
+                        `<span class="jobs-cron-dot ${cls}"></span>`+
+                        agentHtml+
+                        iconHtml+
+                        `<span class="jobs-cron-name ${nameCls}" title="${escapeHtml(c.name||'')}">${escapeHtml(c.name||'?')}</span>`+
+                        detailHtml+
+                    `</div>`;
                 });
                 cronsEl.innerHTML = rows.join('') || '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.3)">No cron data</span></div>';
                 if (healthBadge) {
@@ -10031,6 +10152,33 @@
                 grouped[cat].push(cron);
             });
 
+            // Helpers for enhanced per-row visuals
+            const tjAgentChip = (name) => {
+                const n = String(name || '').toUpperCase();
+                if (n.includes('JAIMES')) return `<span class="tjob-agent-chip jaimes" title="${escapeHtml(name)}">M</span>`;
+                if (n.includes('J.A.I.N') || n === 'JAIN') return `<span class="tjob-agent-chip jain" title="${escapeHtml(name)}">J</span>`;
+                if (n.includes('JOSH')) return `<span class="tjob-agent-chip josh" title="${escapeHtml(name)}">2</span>`;
+                return `<span class="tjob-agent-chip" title="${escapeHtml(name||'')}">·</span>`;
+            };
+            const tjNowEtDecimal = (() => {
+                try {
+                    const h = parseInt(new Date().toLocaleString('en-US', {timeZone: 'America/New_York', hour: 'numeric', hour12: false}), 10) || 0;
+                    const m = parseInt(new Date().toLocaleString('en-US', {timeZone: 'America/New_York', minute: 'numeric'}), 10) || 0;
+                    return h + m / 60;
+                } catch(e) { return new Date().getHours() + new Date().getMinutes()/60; }
+            })();
+            const tjParseSchedDecimal = (sched) => {
+                if (!sched) return null;
+                const m = sched.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+                if (!m) return null;
+                let h = parseInt(m[1], 10);
+                const mm = m[2] ? parseInt(m[2], 10) : 0;
+                const ap = m[3].toUpperCase();
+                if (ap === 'PM' && h !== 12) h += 12;
+                if (ap === 'AM' && h === 12) h = 0;
+                return h + mm / 60;
+            };
+
             const cronHtml = categoryOrder.filter(cat => grouped[cat]).map(cat => {
                 const cfg = CAT_CONFIG[cat] || CAT_CONFIG['Other'];
                 const rows = grouped[cat].map(cron => {
@@ -10043,6 +10191,7 @@
                     const agentIsJain   = agentName === 'J.A.I.N';
                     const agentIsJaimes = agentName === 'JAIMES';
                     const agentColor    = agentIsJain ? '#60a5fa' : agentIsJaimes ? '#a78bfa' : '#4ade80';
+                    const agentChip     = tjAgentChip(agentName);
 
                     // Multi-run (Intelligence Feed style)
                     if (cron.multiRun && cron.multiRun.runs) {
@@ -10074,11 +10223,20 @@
                             }
                             return `<span class="${cls}${r.mode === 'Lite' ? ' lite' : ''}" title="${escapeHtml(r.label)} — ${r.mode}">${label}</span>`;
                         }).join('');
+                            const mrTotal = cron.multiRun.runs.length;
+                            const mrDone = cron.multiRun.runs.filter(r => r.done).length;
+                            const mrPct = mrTotal > 0 ? Math.round((mrDone/mrTotal)*100) : 0;
+                            const miniProg = `<span class="tjob-miniprog" title="${mrDone}/${mrTotal} runs today">`+
+                                `<span class="tjob-miniprog-bar"><span class="tjob-miniprog-fill" style="width:${mrPct}%"></span></span>`+
+                                `<span class="tjob-miniprog-label">${mrDone}/${mrTotal}</span>`+
+                            `</span>`;
                             return `<div class="tjob-row tjob-multirun">
                             <div class="tjob-status-dot" style="background:${statusColor}"></div>
                             <div class="tjob-body" style="flex-direction:column;align-items:flex-start;gap:3px;">
                                 <div class="tjob-header-row">
+                                    ${agentChip}
                                     <span class="tjob-name">${escapeHtml(cron.name)}</span>
+                                    ${miniProg}
                                     <span class="tjob-agent" style="color:${agentColor}">${escapeHtml(agentName)}</span>
                                     <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
                                 </div>
@@ -10094,13 +10252,25 @@
                     const isDue     = rs === 'due';
                     const isMissed  = rs === 'missed';
                     const isUpcoming = rs === 'upcoming';
+                    // Started heuristic: scheduled time was within last 15 minutes, not done/missed/paused
+                    let isStarted = false;
+                    if (!isDone && !isMissed && !isPaused) {
+                        const sd = tjParseSchedDecimal(cron.schedule || '');
+                        if (sd !== null) {
+                            const deltaMin = (tjNowEtDecimal - sd) * 60;
+                            if (deltaMin >= 0 && deltaMin <= 15) isStarted = true;
+                        }
+                    }
                     const desc = (cron.description || '').trim();
                     const lastRunText = cron.lastRun ? `last ${formatRelTime(cron.lastRun)}` : '';
                     const subline = [desc, lastRunText].filter(Boolean).join(' · ');
                     const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
-                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isDue ? '#60a5fa' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isStarted ? '#60a5fa' : isDue ? '#60a5fa' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const dotExtraCls = isStarted ? ' started' : '';
                     const statusBadge = isDone
                         ? `<span class="tjob-run-badge tjob-run-done">✓ done</span>`
+                        : isStarted
+                        ? `<span class="tjob-run-badge tjob-run-started">⚡ started</span>`
                         : isDue
                         ? `<span class="tjob-run-badge tjob-run-due">due</span>`
                         : isMissed
@@ -10108,14 +10278,16 @@
                         : isUpcoming
                         ? `<span class="tjob-run-badge tjob-run-upcoming">upcoming</span>`
                         : isPaused
-                        ? `<span class="tjob-run-badge tjob-run-paused">paused</span>`
+                        ? `<span class="tjob-run-badge tjob-run-paused">⏸ paused</span>`
                         : '';
+                    const nameModCls = isDone ? ' tjob-name-done' : isMissed ? ' tjob-name-missed' : isPaused ? ' tjob-name-paused' : isStarted ? ' tjob-name-started' : '';
 
                     return `<div class="tjob-row${hasErr ? ' tjob-error' : ''}${rowExtra}">
-                        <div class="tjob-status-dot" style="background:${dotColor}${isDone ? ';box-shadow:0 0 4px #4ade8070' : !hasErr && !isMissed && isOk ? ';box-shadow:0 0 4px '+dotColor+'70' : ''}"></div>
+                        <div class="tjob-status-dot${dotExtraCls}" style="background:${dotColor};color:${dotColor}${isDone ? ';box-shadow:0 0 4px #4ade8070' : isStarted ? '' : !hasErr && !isMissed && isOk ? ';box-shadow:0 0 4px '+dotColor+'70' : ''}"></div>
                         <div class="tjob-body" style="flex-direction:column;align-items:flex-start;gap:2px;">
                             <div class="tjob-header-row">
-                                <span class="tjob-name${isDone ? ' tjob-name-done' : ''}">${escapeHtml(cron.name)}</span>
+                                ${agentChip}
+                                <span class="tjob-name${nameModCls}">${escapeHtml(cron.name)}</span>
                                 <span class="tjob-schedule">${escapeHtml(cron.schedule || '')}</span>
                                 ${statusBadge}
                                 ${hasErr ? `<span class="tjob-err-badge">${cron.errors} err</span>` : ''}
