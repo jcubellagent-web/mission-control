@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Completed memory sync backup to J.A.I.N successfully; script reported sync at Sun Apr 19 02:00:56 EDT 2026",
-    "updatedAt": "2026-04-19T06:05:04Z"
+    "updatedAt": "2026-04-19T06:10:03Z"
   },
   "contextWindow": {
     "usedTokens": 91730,
@@ -139,10 +139,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 56m",
+        "Resets in 2h 51m",
         "Weekly: 98% left [===========-]",
         "Pace: 84% in reserve | Expected 86% used | Lasts until reset",
-        "Resets in 23h 19m",
+        "Resets in 23h 14m",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -150,11 +150,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 56m",
-      "weeklyReset": "23h 19m",
+      "sessionReset": "2h 51m",
+      "weeklyReset": "23h 14m",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T06:05:05Z"
+    "updatedAt": "2026-04-19T06:10:05Z"
   },
   "modelUsage": {
     "session": 0.46235,
@@ -279,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T06:05:08Z",
+    "lastUpdated": "2026-04-19T06:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -350,12 +350,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 41.2,
-      "cpu_user": 25.92,
-      "cpu_sys": 15.26,
-      "load1": 4.42,
-      "load5": 3.98,
-      "load15": 3.87,
+      "cpu_pct": 41.3,
+      "cpu_user": 26.7,
+      "cpu_sys": 15.18,
+      "load1": 4.05,
+      "load5": 3.8,
+      "load15": 3.79,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -365,14 +365,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.7,
-      "cpu_user": 2.72,
-      "cpu_sys": 10.0,
-      "load1": 1.93,
-      "load5": 2.07,
-      "load15": 2.11,
+      "cpu_pct": 12.0,
+      "cpu_user": 2.77,
+      "cpu_sys": 9.25,
+      "load1": 1.54,
+      "load5": 1.8,
+      "load15": 1.97,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -396,19 +396,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T06:05:04Z"
+      "lastChecked": "2026-04-19T06:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T06:05:04Z"
+      "lastChecked": "2026-04-19T06:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T06:05:04Z"
+      "lastChecked": "2026-04-19T06:10:03Z"
     }
   ],
   "crons": [
@@ -585,7 +585,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "upcoming"
+      "runStatus": "missed"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -782,16 +782,8 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 2084,
+      "elapsedSecs": 2384,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
-    },
-    {
-      "id": "fe2235b5-8b9c-401b-aeb2-fa2472af14cc",
-      "label": "jobs-panel-enhance",
-      "status": "done",
-      "startedAt": "2026-04-19T05:51:11.361000+00:00",
-      "elapsedSecs": 842,
-      "updatedAt": "2026-04-19T05:59:40.430000+00:00"
     },
     {
       "id": "coding-visibility",
@@ -816,29 +808,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T06:05:08Z",
+      "time": "2026-04-19T06:10:08Z",
       "event": "Session spend: $0.46"
     },
     {
-      "time": "2026-04-19T06:05:05Z",
+      "time": "2026-04-19T06:10:05Z",
       "event": "Coding: mission-control/index.html, mission-control/screenshots/mcbrain-snapshot.json"
     },
     {
-      "time": "2026-04-19T06:05:05Z",
+      "time": "2026-04-19T06:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T06:05:04Z",
+      "time": "2026-04-19T06:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T06:05:04Z",
+      "time": "2026-04-19T06:10:03Z",
       "event": "1 cron job need attention"
     },
     {
-      "time": "2026-04-19T06:05:04Z",
+      "time": "2026-04-19T06:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T06:05:04Z"
+  "lastUpdated": "2026-04-19T06:10:03Z"
 }
