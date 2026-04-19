@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Responding to Josh's check-in",
-    "updatedAt": "2026-04-19T03:55:03Z"
+    "updatedAt": "2026-04-19T04:00:03Z"
   },
   "contextWindow": {
     "usedTokens": 43943,
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 6m",
+        "Resets in 1m",
         "Weekly: 98% left [===========-]",
         "Pace: 83% in reserve | Expected 85% used | Lasts until reset",
         "Resets in 1d 1h",
@@ -150,15 +150,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "6m",
+      "sessionReset": "1m",
       "weeklyReset": "1d 1h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T03:55:05Z"
+    "updatedAt": "2026-04-19T04:00:05Z"
   },
   "modelUsage": {
     "session": 0.405284,
-    "daily": 50.490561,
+    "daily": 0.0,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
@@ -196,7 +196,7 @@
         "outputTokens": 469,
         "totalTokens": 128948,
         "sessionCost": 33.878794341,
-        "dailyCost": 33.878794341,
+        "dailyCost": 0.0,
         "weeklyCost": 33.878794341,
         "sessions": 2,
         "isGemini": false,
@@ -218,7 +218,7 @@
         "outputTokens": 5511,
         "totalTokens": 1070673,
         "sessionCost": 16.6117665,
-        "dailyCost": 16.6117665,
+        "dailyCost": 0.0,
         "weeklyCost": 16.6117665,
         "sessions": 7,
         "isGemini": false,
@@ -279,7 +279,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T03:55:08Z",
+    "lastUpdated": "2026-04-19T04:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -308,7 +308,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 53.180727,
+      "daily": 2.690166,
       "total": 77.008254,
       "monthly": 1005.087305
     },
@@ -350,14 +350,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.6,
-      "cpu_user": 26.0,
-      "cpu_sys": 14.61,
-      "load1": 3.01,
-      "load5": 3.68,
-      "load15": 3.78,
+      "cpu_pct": 40.2,
+      "cpu_user": 25.88,
+      "cpu_sys": 14.32,
+      "load1": 3.39,
+      "load5": 3.66,
+      "load15": 3.75,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "90Gi",
@@ -365,12 +365,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 2.67,
-      "cpu_sys": 12.5,
-      "load1": 2.26,
-      "load5": 2.05,
-      "load15": 2.09,
+      "cpu_pct": 13.5,
+      "cpu_user": 2.7,
+      "cpu_sys": 10.81,
+      "load1": 2.12,
+      "load5": 2.09,
+      "load15": 2.08,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -396,19 +396,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T03:55:03Z"
+      "lastChecked": "2026-04-19T04:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T03:55:03Z"
+      "lastChecked": "2026-04-19T04:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T03:55:03Z"
+      "lastChecked": "2026-04-19T04:00:03Z"
     }
   ],
   "crons": [
@@ -461,7 +461,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "J.A.I.N Medic",
@@ -508,28 +508,28 @@
             "time": "10:00 AM",
             "mode": "Weekend",
             "label": "Weekend opener",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Weekend",
             "label": "Weekend close",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Weekend",
             "label": "Weekend late brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Weekend",
             "label": "Weekend wrap",
-            "past": true,
+            "past": false,
             "done": false
           }
         ]
@@ -564,7 +564,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -585,7 +585,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T02:00:56.293087-04:00"
     },
     {
@@ -597,7 +597,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -608,7 +608,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T07:30:03.393918+00:00"
     },
     {
@@ -620,7 +620,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T19:59:14.253506+00:00"
     },
     {
@@ -632,7 +632,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T10:00:29.091493-04:00"
     },
     {
@@ -644,7 +644,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T11:00:33.076666-04:00"
     },
     {
@@ -656,7 +656,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T15:00:08.346258+00:00"
     },
     {
@@ -730,7 +730,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -762,7 +762,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-18T05:50:11.524322-04:00"
     },
     {
@@ -776,28 +776,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260417-879",
-      "title": "Sorare GW7 championship-matchup ML weighting polish",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Root cause is clearer now: learned predictions are dragging strong 2026 MI options like Trevor Story far below classic Bobby Witt in Champion scoring. A broad in-season score floor fixes MI, but it also creates new Champion tradeoffs at RP/FLEX, so I have not shipped a second live patch yet.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-18 19:38",
-      "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260415-772",
-      "title": "JAIMES-owned true mission-ML build",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "The live JAIMES route has already produced `mission_outcomes_latest.json`, `mission_feedback.json`, and `mission_labels.db` at 12:14 ET today, but the Hermes log still looks like an implementation diff/review stream rather than a clean completion marker, so verification is still in progress.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-18 15:56",
-      "owner": "JAIMES"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "context-watchdog",
@@ -812,29 +791,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T03:55:08Z",
+      "time": "2026-04-19T04:00:09Z",
       "event": "Session spend: $0.41"
     },
     {
-      "time": "2026-04-19T03:55:05Z",
+      "time": "2026-04-19T04:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T03:55:03Z",
+      "time": "2026-04-19T04:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T03:55:03Z",
+      "time": "2026-04-19T04:00:03Z",
       "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-19T03:55:03Z",
+      "time": "2026-04-19T04:00:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-19T03:55:03Z",
+      "time": "2026-04-19T04:00:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-19T03:55:03Z"
+  "lastUpdated": "2026-04-19T04:00:03Z"
 }
