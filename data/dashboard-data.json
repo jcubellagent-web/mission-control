@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "memory backup to J.A.I.N completed successfully",
-    "updatedAt": "2026-04-19T16:05:04Z"
+    "updatedAt": "2026-04-19T16:10:03Z"
   },
   "contextWindow": {
     "usedTokens": 57512,
@@ -127,12 +127,12 @@
     "workspaceDirty": 48,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/ml_model_enhancer.py",
       "scripts/emergency_pitcher_fix.py",
       "scripts/mlb_schedule_fetcher.py",
       "scripts/fix_starting_pitcher_verification.py",
       "scripts/sorare_ml_edge_enhancer.sh",
-      "scripts/sorare_mission_verifier.py",
-      "scripts/sorare_mission_ranker.py"
+      "scripts/sorare_mission_verifier.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
@@ -140,10 +140,10 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 56m",
+        "Resets in 2h 51m",
         "Weekly: 98% left [===========-]",
         "Pace: 90% in reserve | Expected 92% used | Lasts until reset",
-        "Resets in 13h 19m",
+        "Resets in 13h 14m",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -151,15 +151,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 56m",
-      "weeklyReset": "13h 19m",
+      "sessionReset": "2h 51m",
+      "weeklyReset": "13h 14m",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-19T16:05:06Z"
+    "updatedAt": "2026-04-19T16:10:05Z"
   },
   "modelUsage": {
     "session": 0.648847,
-    "daily": 53.93435,
+    "daily": 51.561241,
     "weekly": 142.893275,
     "monthly": 1002.397139,
     "topModels": [
@@ -176,7 +176,7 @@
       {
         "name": "codex/gpt-5.4-mini",
         "window": "session",
-        "cost": 18.984876000000003
+        "cost": 16.6117665
       },
       {
         "name": "gpt-5.3-codex",
@@ -215,13 +215,13 @@
       {
         "name": "codex/gpt-5.4-mini",
         "source": "openclaw",
-        "inputTokens": 5514934,
-        "outputTokens": 29876,
-        "totalTokens": 5544810,
-        "sessionCost": 18.984876000000003,
-        "dailyCost": 18.984876000000003,
-        "weeklyCost": 18.984876000000003,
-        "sessions": 9,
+        "inputTokens": 5358264,
+        "outputTokens": 29223,
+        "totalTokens": 5387487,
+        "sessionCost": 16.6117665,
+        "dailyCost": 16.6117665,
+        "weeklyCost": 16.6117665,
+        "sessions": 8,
         "isGemini": false,
         "costEstimated": false
       },
@@ -280,7 +280,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-19T16:05:09Z",
+    "lastUpdated": "2026-04-19T16:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.92661,
@@ -295,9 +295,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 20.429232984,
-      "weekly": 20.429232984,
-      "monthly": 20.429232984,
+      "daily": 20.467857369,
+      "weekly": 20.467857369,
+      "monthly": 20.467857369,
       "byok_daily": 0.0024925,
       "byok_weekly": 0.0024925,
       "byok_monthly": 0.0024925,
@@ -309,8 +309,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 53.936843,
-      "total": 77.76437,
+      "daily": 51.563734,
+      "total": 75.39126,
       "monthly": 1002.399632
     },
     "weeklyRunRate": {
@@ -351,12 +351,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.2,
-      "cpu_user": 26.75,
-      "cpu_sys": 15.5,
-      "load1": 3.5,
-      "load5": 3.72,
-      "load15": 3.69,
+      "cpu_pct": 42.5,
+      "cpu_user": 27.13,
+      "cpu_sys": 15.36,
+      "load1": 3.7,
+      "load5": 3.74,
+      "load15": 3.71,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -366,14 +366,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.2,
-      "cpu_user": 5.26,
-      "cpu_sys": 9.64,
-      "load1": 2.2,
-      "load5": 2.07,
-      "load15": 2.05,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 15.5,
+      "cpu_user": 5.14,
+      "cpu_sys": 10.29,
+      "load1": 3.27,
+      "load5": 3.01,
+      "load15": 2.48,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -397,19 +397,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T16:05:04Z"
+      "lastChecked": "2026-04-19T16:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-19T16:05:04Z"
+      "lastChecked": "2026-04-19T16:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-19T16:05:04Z"
+      "lastChecked": "2026-04-19T16:10:03Z"
     }
   ],
   "crons": [
@@ -780,12 +780,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 38085,
+      "elapsedSecs": 38384,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/emergency_pitcher_fix.py, scripts/mlb_schedule_fetcher.py",
+      "label": "Editing: scripts/ml_model_enhancer.py, scripts/emergency_pitcher_fix.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -806,29 +806,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-19T16:05:09Z",
+      "time": "2026-04-19T16:10:09Z",
       "event": "Session spend: $0.65"
     },
     {
-      "time": "2026-04-19T16:05:06Z",
-      "event": "Coding: scripts/emergency_pitcher_fix.py, scripts/mlb_schedule_fetcher.py"
+      "time": "2026-04-19T16:10:05Z",
+      "event": "Coding: scripts/ml_model_enhancer.py, scripts/emergency_pitcher_fix.py"
     },
     {
-      "time": "2026-04-19T16:05:06Z",
+      "time": "2026-04-19T16:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-19T16:05:04Z",
+      "time": "2026-04-19T16:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-19T16:05:04Z",
+      "time": "2026-04-19T16:10:03Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-19T16:05:04Z",
+      "time": "2026-04-19T16:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-19T16:05:04Z"
+  "lastUpdated": "2026-04-19T16:10:03Z"
 }
