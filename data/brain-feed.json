@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "Refresh completed + Telegram message sent with correct button format (callback_data). Mission Control now shows DeepSeek royal blue (#4169E1) and specific objectives live.",
+  "objective": "Josh approved all changes via 'Approve all' button",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-20T02:33:32Z",
-  "checkedAt": "2026-04-20T02:33:32Z",
+  "steps": [
+    {
+      "label": "callback",
+      "status": "active",
+      "tool": "approve_all"
+    }
+  ],
+  "currentTool": "approve_all",
+  "updatedAt": "2026-04-20T02:55:10Z",
+  "checkedAt": "2026-04-20T02:55:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
