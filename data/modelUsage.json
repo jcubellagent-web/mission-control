@@ -1,8 +1,8 @@
 {
   "session": 0.412973,
-  "daily": 52.125486,
-  "weekly": 77.063364,
-  "monthly": 1079.460503,
+  "daily": 52.376899,
+  "weekly": 80.786367,
+  "monthly": 1083.183506,
   "topModels": [
     {
       "name": "deepseek/deepseek-v3.2",
@@ -20,14 +20,14 @@
       "cost": 16.6117665
     },
     {
+      "name": "gpt-5.4-mini",
+      "window": "session",
+      "cost": 5.34699105
+    },
+    {
       "name": "gpt-5.3-codex",
       "window": "session",
       "cost": 0.43344559999999993
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "window": "session",
-      "cost": 0.0
     }
   ],
   "breakdown": [
@@ -67,20 +67,20 @@
       "costEstimated": false
     },
     {
+      "name": "gpt-5.4-mini",
+      "source": "codex",
+      "weeklyCost": 5.34699105,
+      "dailyCost": 0.25141275,
+      "sessionCost": 5.34699105,
+      "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
       "name": "gpt-5.3-codex",
       "source": "codex",
       "weeklyCost": 0.43344559999999993,
       "dailyCost": 0.0,
       "sessionCost": 0.43344559999999993,
-      "totalTokens": 0,
-      "costEstimated": false
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "source": "codex",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
       "totalTokens": 0,
       "costEstimated": false
     },
@@ -121,7 +121,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-20T11:45:09Z",
+  "lastUpdated": "2026-04-20T11:50:13Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -145,19 +145,19 @@
     "available": true
   },
   "elevenlabs": {
-    "chars_used": 67624,
-    "chars_limit": 246062,
+    "chars_used": 33812,
+    "chars_limit": 123031,
     "available": true
   },
   "aggregate": {
-    "daily": 52.12593,
-    "total": 76.366429,
-    "monthly": 1079.463439
+    "daily": 52.377343,
+    "total": 81.71342,
+    "monthly": 1083.186442
   },
   "weeklyRunRate": {
-    "total": 77.990418,
+    "total": 81.71342,
     "automation": 0.927054,
-    "interactive": 76.13631,
-    "projectedMonthly": 334.24
+    "interactive": 79.859313,
+    "projectedMonthly": 350.2
   }
 }
