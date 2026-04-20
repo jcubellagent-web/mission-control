@@ -1,18 +1,18 @@
 {
-  "active": true,
+  "active": false,
   "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
-  "status": "active",
+  "objective": "Session complete - all Brain Feed/Mission Control updates approved \u00b7 Awaiting further instruction",
+  "status": "idle",
   "steps": [
     {
-      "label": "exec",
-      "status": "active",
-      "tool": "bf_step"
+      "label": "status",
+      "status": "done",
+      "tool": "complete"
     }
   ],
-  "currentTool": "bf_step",
-  "updatedAt": "2026-04-13T05:13:44Z",
-  "checkedAt": "2026-04-13T05:13:44Z",
+  "currentTool": "complete",
+  "updatedAt": "2026-04-20T02:56:53Z",
+  "checkedAt": "2026-04-20T02:56:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.4"
+  "model": "deepseek/deepseek-v3.2"
 }
