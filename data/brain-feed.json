@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-20T20:41:22Z",
-  "objective": "backed up workspace memory to J.A.I.N and confirmed sync success",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-21T21:01:05Z",
-  "checkedAt": "2026-04-21T21:01:05Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-21T21:16:15Z",
+  "checkedAt": "2026-04-21T21:16:15Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
