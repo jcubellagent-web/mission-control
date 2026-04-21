@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-20T20:41:22Z",
-  "objective": "Ran /Users/josh2.0/.openclaw/workspace/scripts/sync_memory_to_jain.sh successfully; memory synced to J.A.I.N at Tue Apr 21 12:00:59 EDT 2026",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-21T16:01:05Z",
-  "checkedAt": "2026-04-21T16:01:05Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-21T16:41:13Z",
+  "checkedAt": "2026-04-21T16:41:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
