@@ -1,13 +1,13 @@
 {
   "session": 0.631885,
-  "daily": 54.779213,
+  "daily": 54.885607,
   "weekly": 83.823967,
   "monthly": 1086.221106,
   "topModels": [
     {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 39.82415000800001
+      "cost": 39.93054401000001
     },
     {
       "name": "gpt-5.4",
@@ -34,12 +34,12 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 64092,
+      "inputTokens": 64400,
       "outputTokens": 7354,
-      "totalTokens": 71446,
-      "sessionCost": 39.82415000800001,
-      "dailyCost": 39.82415000800001,
-      "weeklyCost": 39.82415000800001,
+      "totalTokens": 71754,
+      "sessionCost": 39.93054401000001,
+      "dailyCost": 39.93054401000001,
+      "weeklyCost": 39.93054401000001,
       "sessions": 3,
       "isGemini": false,
       "costEstimated": false
@@ -114,14 +114,14 @@
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
       "weeklyCost": 0.000575,
-      "dailyCost": 0.0,
+      "dailyCost": 0.091338,
       "sessionCost": 0.000575,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-21T00:10:08Z",
+  "lastUpdated": "2026-04-21T00:15:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.92661,
@@ -136,9 +136,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 0.0,
-    "weekly": 5.415845478,
-    "monthly": 27.563669192,
+    "daily": 0.091337857,
+    "weekly": 5.507183335,
+    "monthly": 27.655007049,
     "byok_daily": 0.0,
     "byok_weekly": 0.0005749,
     "byok_monthly": 0.0030674,
@@ -150,8 +150,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 54.779213,
-    "total": 83.702893,
+    "daily": 54.976945,
+    "total": 83.809287,
     "monthly": 1086.224173
   },
   "weeklyRunRate": {
