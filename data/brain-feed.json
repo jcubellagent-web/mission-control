@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-22T02:22:26Z",
-  "objective": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-22T07:22:07Z",
-  "checkedAt": "2026-04-22T07:22:07Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-22T08:16:13Z",
+  "checkedAt": "2026-04-22T08:16:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
