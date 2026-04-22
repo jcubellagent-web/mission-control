@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-20T20:41:22Z",
-  "objective": "Found OpenClaw v2026.4.20 available (current: v2026.4.15). Preparing careful update with backups and rollback plan.",
+  "objective": "Preparing careful OpenClaw update from v2026.4.15 to v2026.4.20 with full backups and rollback plan",
   "status": "active",
   "steps": [
     {
       "label": "update",
       "status": "active",
-      "tool": "preparing"
+      "tool": "backup"
     }
   ],
-  "currentTool": "preparing",
-  "updatedAt": "2026-04-22T00:08:49Z",
-  "checkedAt": "2026-04-22T00:08:49Z",
+  "currentTool": "backup",
+  "updatedAt": "2026-04-22T00:09:45Z",
+  "checkedAt": "2026-04-22T00:09:45Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
