@@ -1,18 +1,18 @@
 {
   "active": true,
-  "messageReceived": "2026-04-13T03:11:49Z",
-  "objective": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
+  "messageReceived": "2026-04-22T02:22:26Z",
+  "objective": "Root cause found: Sorare script skips 3 missions due to unknown action types. Need to update script to handle hitting_strikeouts, hitting_doubles, hitting_runs_batted_in.",
   "status": "active",
   "steps": [
     {
-      "label": "exec",
+      "label": "sorare",
       "status": "active",
-      "tool": "bf_step"
+      "tool": "root_cause"
     }
   ],
-  "currentTool": "bf_step",
-  "updatedAt": "2026-04-13T05:13:44Z",
-  "checkedAt": "2026-04-13T05:13:44Z",
+  "currentTool": "root_cause",
+  "updatedAt": "2026-04-22T13:54:26Z",
+  "checkedAt": "2026-04-22T13:54:26Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.4"
+  "model": "moonshotai/kimi-k2.6"
 }
