@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-22T02:22:26Z",
-  "objective": "Starting browser automation to manually set 3 missing Sorare missions via web interface",
+  "objective": "Browser automation attempted but Sorare requires login. Cannot proceed without credentials.",
   "status": "active",
   "steps": [
     {
       "label": "sorare",
       "status": "active",
-      "tool": "browser_start"
+      "tool": "login_required"
     }
   ],
-  "currentTool": "browser_start",
-  "updatedAt": "2026-04-22T14:17:04Z",
-  "checkedAt": "2026-04-22T14:17:04Z",
+  "currentTool": "login_required",
+  "updatedAt": "2026-04-22T14:19:03Z",
+  "checkedAt": "2026-04-22T14:19:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
