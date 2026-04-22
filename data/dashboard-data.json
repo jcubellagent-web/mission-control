@@ -3,26 +3,32 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
+    "active": false,
     "messageReceived": "2026-04-22T02:10:58Z",
-    "objective": "Recommended Kimi K2.6 as primary orchestrator with intelligent model routing. Proposed delegation: DeepSeek for simple tasks, GPT-5.4 for complex reasoning, Codex for coding, Gemini for research, Grok for live content.",
-    "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-22T02:12:23Z",
-    "checkedAt": "2026-04-22T02:12:23Z",
+    "objective": "Model routing system fully implemented and tested. All 6 routing categories working. Ready for production use. \u00b7 Awaiting further instruction",
+    "status": "idle",
+    "steps": [
+      {
+        "label": "status",
+        "status": "done",
+        "tool": "complete"
+      }
+    ],
+    "currentTool": "complete",
+    "updatedAt": "2026-04-22T02:19:01Z",
+    "checkedAt": "2026-04-22T02:18:32Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Recommended Kimi K2.6 as primary orchestrator with intelligent model routing. Proposed delegation: DeepSeek for simple tasks, GPT-5.4 for complex reasoning, Codex for coding, Gemini for research, Grok for live content.",
-    "updatedAt": "2026-04-22T02:15:03Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: Model routing system fully implemented and tested. All 6 routing categories working. Ready for production use. \u00b7 Awaiting further instruction",
+    "updatedAt": "2026-04-22T02:20:04Z"
   },
   "contextWindow": {
-    "usedTokens": 69897,
+    "usedTokens": 75279,
     "limitTokens": 400000,
-    "pct": 0.1747,
+    "pct": 0.1882,
     "model": "moonshotai/kimi-k2.6",
     "status": "green"
   },
@@ -133,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 46m",
+        "Resets in 2h 41m",
         "Weekly: 100% left [============]",
         "Pace: 4% in reserve | Expected 4% used | Lasts until reset",
         "Resets in 6d 16h",
@@ -144,11 +150,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 46m",
+      "sessionReset": "2h 41m",
       "weeklyReset": "6d 16h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-22T02:15:06Z"
+    "updatedAt": "2026-04-22T02:20:06Z"
   },
   "modelUsage": {
     "session": 0.025783,
@@ -239,9 +245,9 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 65289,
-        "outputTokens": 241,
-        "totalTokens": 65530,
+        "inputTokens": 70671,
+        "outputTokens": 248,
+        "totalTokens": 70919,
         "sessionCost": 0.0257826996,
         "dailyCost": 0.0257826996,
         "weeklyCost": 0.0257826996,
@@ -279,14 +285,14 @@
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.000575,
-        "dailyCost": 2.160676,
+        "dailyCost": 2.449311,
         "sessionCost": 0.000575,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-22T02:15:09Z",
+    "lastUpdated": "2026-04-22T02:20:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -301,9 +307,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 2.160675519,
-      "weekly": 10.609563159,
-      "monthly": 32.757386873,
+      "daily": 2.449310989,
+      "weekly": 10.898198629,
+      "monthly": 33.046022343,
       "byok_daily": 0.0,
       "byok_weekly": 0.0005749,
       "byok_monthly": 0.0030674,
@@ -315,7 +321,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 15.03075,
+      "daily": 15.319385,
       "total": 42.349266,
       "monthly": 1089.324455
     },
@@ -357,27 +363,27 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 58.8,
-      "cpu_user": 42.8,
-      "cpu_sys": 16.74,
-      "load1": 6.69,
-      "load5": 4.46,
-      "load15": 3.63,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.6,
+      "cpu_pct": 42.5,
+      "cpu_user": 17.7,
+      "cpu_sys": 25.45,
+      "load1": 3.83,
+      "load5": 3.91,
+      "load15": 3.6,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "88Gi",
+      "disk_avail": "89Gi",
       "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 3.5,
-      "cpu_sys": 9.92,
-      "load1": 1.77,
-      "load5": 1.8,
-      "load15": 1.87,
+      "cpu_pct": 13.6,
+      "cpu_user": 3.63,
+      "cpu_sys": 10.0,
+      "load1": 1.87,
+      "load5": 1.96,
+      "load15": 1.92,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -403,19 +409,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-22T02:15:03Z"
+      "lastChecked": "2026-04-22T02:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-22T02:15:03Z"
+      "lastChecked": "2026-04-22T02:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-22T02:15:03Z"
+      "lastChecked": "2026-04-22T02:20:04Z"
     }
   ],
   "crons": [
@@ -814,7 +820,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 247485,
+      "elapsedSecs": 247785,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -830,29 +836,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-22T02:15:09Z",
+      "time": "2026-04-22T02:20:09Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-22T02:15:06Z",
+      "time": "2026-04-22T02:20:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-22T02:15:03Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-04-22T02:20:04Z",
+      "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-22T02:15:03Z",
+      "time": "2026-04-22T02:20:04Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-22T02:15:03Z",
+      "time": "2026-04-22T02:20:04Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-22T02:15:03Z",
+      "time": "2026-04-22T02:20:04Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-22T02:15:03Z"
+  "lastUpdated": "2026-04-22T02:20:04Z"
 }
