@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-22T02:22:26Z",
-  "objective": "First sub-agent completed: DeepSeek simple task test successful",
+  "objective": "DeepSeek sub-agent completed successfully. 2 more sub-agents running: Codex (coding), Gemini (research)",
   "status": "active",
   "steps": [
     {
       "label": "subagent",
       "status": "active",
-      "tool": "complete_1"
+      "tool": "1_of_3"
     }
   ],
-  "currentTool": "complete_1",
-  "updatedAt": "2026-04-22T02:26:20Z",
-  "checkedAt": "2026-04-22T02:26:20Z",
+  "currentTool": "1_of_3",
+  "updatedAt": "2026-04-22T02:26:53Z",
+  "checkedAt": "2026-04-22T02:26:53Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
