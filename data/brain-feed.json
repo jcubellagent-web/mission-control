@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-22T00:26:17Z",
-  "objective": "Provided detailed Moonshot Kimi K2.6 vs DeepSeek comparison: Kimi has native OpenClaw advantages (thinking mode, bundled), 256K context, multimodal, swarm capable. DeepSeek more efficient/cost-effective. OpenAI/Codex routing fixes apply to our ChatGPT Pro subscription.",
+  "objective": "Adding Moonshot Kimi K2.6 through OpenRouter key per Josh's request",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-22T01:03:54Z",
-  "checkedAt": "2026-04-22T01:03:54Z",
+  "steps": [
+    {
+      "label": "model",
+      "status": "active",
+      "tool": "add_kimi"
+    }
+  ],
+  "currentTool": "add_kimi",
+  "updatedAt": "2026-04-22T01:04:44Z",
+  "checkedAt": "2026-04-22T01:04:44Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
