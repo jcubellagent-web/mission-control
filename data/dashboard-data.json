@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "heartbeat triage completed, self\u2011maintenance and calendar check ran, mission control recency checked",
-    "updatedAt": "2026-04-23T19:00:03Z"
+    "updatedAt": "2026-04-23T19:05:03Z"
   },
   "contextWindow": {
     "usedTokens": 50203,
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 9,
+    "missionControlDirty": 8,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -136,7 +136,7 @@
         "Resets in 5h",
         "Weekly: 100% left [============]",
         "Pace: 29% in reserve | Expected 29% used | Lasts until reset",
-        "Resets in 5d",
+        "Resets in 4d 23h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -145,14 +145,14 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "sessionReset": "5h",
-      "weeklyReset": "5d",
+      "weeklyReset": "4d 23h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-23T19:00:05Z"
+    "updatedAt": "2026-04-23T19:05:05Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 0.094959,
+    "daily": 0.063527,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -174,7 +174,7 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 0.1018775772
+        "cost": 0.0704462724
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -213,12 +213,12 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 331244,
-        "outputTokens": 4575,
-        "totalTokens": 335819,
-        "sessionCost": 0.1018775772,
-        "dailyCost": 0.0949585896,
-        "weeklyCost": 0.1018775772,
+        "inputTokens": 199627,
+        "outputTokens": 4159,
+        "totalTokens": 203786,
+        "sessionCost": 0.0704462724,
+        "dailyCost": 0.0635272848,
+        "weeklyCost": 0.0704462724,
         "sessions": 9,
         "isGemini": false,
         "costEstimated": false
@@ -305,14 +305,14 @@
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.000683,
-        "dailyCost": 4.216614,
+        "dailyCost": 4.223906,
         "sessionCost": 0.000683,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-23T19:00:09Z",
+    "lastUpdated": "2026-04-23T19:05:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -327,9 +327,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 4.21661371,
-      "weekly": 21.944277698,
-      "monthly": 44.092101412,
+      "daily": 4.223905525,
+      "weekly": 21.951569513,
+      "monthly": 44.099393227,
       "byok_daily": 0.0,
       "byok_weekly": 0.0006827,
       "byok_monthly": 0.0031752,
@@ -341,8 +341,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 4.311573,
-      "total": 30.348292,
+      "daily": 4.287433,
+      "total": 30.316861,
       "monthly": 1089.324563
     },
     "weeklyRunRate": {
@@ -383,12 +383,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.8,
-      "cpu_user": 18.43,
-      "cpu_sys": 15.4,
-      "load1": 3.4,
-      "load5": 3.34,
-      "load15": 3.43,
+      "cpu_pct": 39.6,
+      "cpu_user": 22.56,
+      "cpu_sys": 17.4,
+      "load1": 3.2,
+      "load5": 3.35,
+      "load15": 3.4,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -398,14 +398,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 1.7,
-      "cpu_sys": 10.25,
-      "load1": 2.28,
-      "load5": 2.18,
-      "load15": 2.05,
+      "cpu_pct": 10.0,
+      "cpu_user": 0.9,
+      "cpu_sys": 9.9,
+      "load1": 1.8,
+      "load5": 1.88,
+      "load15": 1.94,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -429,19 +429,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-23T19:00:03Z"
+      "lastChecked": "2026-04-23T19:05:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-23T19:00:03Z"
+      "lastChecked": "2026-04-23T19:05:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-23T19:00:03Z"
+      "lastChecked": "2026-04-23T19:05:03Z"
     }
   ],
   "crons": [
@@ -839,7 +839,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 394185,
+      "elapsedSecs": 394483,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -855,29 +855,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-23T19:00:09Z",
+      "time": "2026-04-23T19:05:08Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-23T19:00:05Z",
+      "time": "2026-04-23T19:05:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-23T19:00:03Z",
+      "time": "2026-04-23T19:05:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-23T19:00:03Z",
+      "time": "2026-04-23T19:05:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-23T19:00:03Z",
+      "time": "2026-04-23T19:05:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-23T19:00:03Z",
+      "time": "2026-04-23T19:05:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-23T19:00:03Z"
+  "lastUpdated": "2026-04-23T19:05:03Z"
 }
