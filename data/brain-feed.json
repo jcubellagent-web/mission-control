@@ -1,18 +1,18 @@
 {
-  "active": false,
-  "messageReceived": "2026-04-22T02:22:26Z",
-  "objective": "Analyzed J.A.I.N alert: FRED API 500 errors - external issue, no action needed \u00b7 Awaiting further instruction",
-  "status": "idle",
+  "active": true,
+  "messageReceived": "2026-04-23T04:25:02Z",
+  "objective": "Checking Sorare daily results and missed missions for today",
+  "status": "active",
   "steps": [
     {
-      "label": "analysis",
-      "status": "done",
-      "tool": "complete"
+      "label": "sorare",
+      "status": "active",
+      "tool": "daily_check"
     }
   ],
-  "currentTool": "complete",
-  "updatedAt": "2026-04-23T04:23:59Z",
-  "checkedAt": "2026-04-23T04:23:08Z",
+  "currentTool": "daily_check",
+  "updatedAt": "2026-04-23T04:25:02Z",
+  "checkedAt": "2026-04-23T04:25:02Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
