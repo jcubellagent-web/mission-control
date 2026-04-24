@@ -9,15 +9,15 @@
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-24T16:12:10Z",
-    "checkedAt": "2026-04-24T16:12:10Z",
+    "updatedAt": "2026-04-24T17:07:29Z",
+    "checkedAt": "2026-04-24T17:07:29Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "deepseek/deepseek-v3.2"
   },
   "focus": {
     "status": "Brain Feed live",
     "context": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
-    "updatedAt": "2026-04-24T17:05:03Z"
+    "updatedAt": "2026-04-24T17:10:03Z"
   },
   "contextWindow": {
     "usedTokens": 83404,
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -148,11 +148,11 @@
       "weeklyReset": "4d 1h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-24T17:05:06Z"
+    "updatedAt": "2026-04-24T17:10:05Z"
   },
   "modelUsage": {
     "session": 0.041018,
-    "daily": 0.172474,
+    "daily": 0.130068,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -174,7 +174,7 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 0.179392626
+        "cost": 0.1369872
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -213,12 +213,12 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 609923,
-        "outputTokens": 6763,
-        "totalTokens": 616686,
-        "sessionCost": 0.179392626,
-        "dailyCost": 0.17247363840000002,
-        "weeklyCost": 0.179392626,
+        "inputTokens": 421431,
+        "outputTokens": 6758,
+        "totalTokens": 428189,
+        "sessionCost": 0.1369872,
+        "dailyCost": 0.1300682124,
+        "weeklyCost": 0.1369872,
         "sessions": 10,
         "isGemini": false,
         "costEstimated": false
@@ -299,7 +299,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-24T17:05:09Z",
+    "lastUpdated": "2026-04-24T17:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -314,9 +314,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 2.514711677,
-      "weekly": 24.950096006,
-      "monthly": 47.09791972,
+      "daily": 2.585528819,
+      "weekly": 25.020913148,
+      "monthly": 47.168736862,
       "byok_daily": 0.0002005,
       "byok_weekly": 0.0008832,
       "byok_monthly": 0.0033757,
@@ -328,8 +328,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.172674,
-      "total": 30.426008,
+      "daily": 0.130268,
+      "total": 30.383603,
       "monthly": 1089.324764
     },
     "weeklyRunRate": {
@@ -370,12 +370,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 79.5,
-      "cpu_user": 59.34,
-      "cpu_sys": 20.15,
-      "load1": 10.38,
-      "load5": 8.88,
-      "load15": 7.92,
+      "cpu_pct": 42.1,
+      "cpu_user": 25.91,
+      "cpu_sys": 16.98,
+      "load1": 7.97,
+      "load5": 8.47,
+      "load15": 8.01,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -385,12 +385,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 2.41,
-      "cpu_sys": 10.48,
-      "load1": 2.28,
-      "load5": 2.23,
-      "load15": 2.04,
+      "cpu_pct": 14.3,
+      "cpu_user": 2.52,
+      "cpu_sys": 11.76,
+      "load1": 1.91,
+      "load5": 2.16,
+      "load15": 2.06,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -416,19 +416,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-24T17:05:03Z"
+      "lastChecked": "2026-04-24T17:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-24T17:05:03Z"
+      "lastChecked": "2026-04-24T17:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-24T17:05:03Z"
+      "lastChecked": "2026-04-24T17:10:03Z"
     }
   ],
   "crons": [
@@ -481,7 +481,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "J.A.I.N Medic",
@@ -775,7 +775,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -826,7 +826,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 473684,
+      "elapsedSecs": 473985,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -842,29 +842,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-24T17:05:09Z",
+      "time": "2026-04-24T17:10:09Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-24T17:05:06Z",
+      "time": "2026-04-24T17:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-24T17:05:03Z",
+      "time": "2026-04-24T17:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-24T17:05:03Z",
+      "time": "2026-04-24T17:10:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-24T17:05:03Z",
+      "time": "2026-04-24T17:10:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-24T17:05:03Z",
+      "time": "2026-04-24T17:10:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-24T17:05:03Z"
+  "lastUpdated": "2026-04-24T17:10:03Z"
 }
