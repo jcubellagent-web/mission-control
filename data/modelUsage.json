@@ -135,24 +135,14 @@
       "sizeGb": 0.27,
       "loaded": false,
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "openrouter/auto (BYOK)",
-      "source": "OpenRouter API",
-      "weeklyCost": 0.000883,
-      "dailyCost": 0.0002,
-      "sessionCost": 0.000883,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-24T06:40:08Z",
+  "lastUpdated": "2026-04-24T06:46:34Z",
   "jain": {
-    "daily": 0.0,
-    "session": 0.704034,
-    "total": 0.704034,
-    "available": true
+    "daily": 0,
+    "session": 0,
+    "total": 0,
+    "available": false
   },
   "jainApi": {
     "daily": 0,
@@ -162,28 +152,28 @@
     "available": false
   },
   "openrouter": {
-    "daily": 1.265327391,
-    "weekly": 23.70071172,
-    "monthly": 45.848535434,
-    "byok_daily": 0.0002005,
-    "byok_weekly": 0.0008832,
-    "byok_monthly": 0.0033757,
-    "available": true
+    "daily": 0.0,
+    "weekly": 0.0,
+    "monthly": 0.0,
+    "byok_daily": 0.0,
+    "byok_weekly": 0.0,
+    "byok_monthly": 0.0,
+    "available": false
   },
   "elevenlabs": {
     "chars_used": 0,
-    "chars_limit": 378438,
-    "available": true
+    "chars_limit": 0,
+    "available": false
   },
   "aggregate": {
-    "daily": 0.060933,
-    "total": 30.325209,
-    "monthly": 1089.324764
+    "daily": 0.060732,
+    "total": 29.620291,
+    "monthly": 1089.321388
   },
   "weeklyRunRate": {
-    "total": 87.629166,
-    "automation": 0.704917,
-    "interactive": 86.219332,
-    "projectedMonthly": 375.55
+    "total": 86.924249,
+    "automation": 0.0,
+    "interactive": 86.924249,
+    "projectedMonthly": 372.53
   }
 }

@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
-    "updatedAt": "2026-04-24T06:40:04Z"
+    "updatedAt": "2026-04-24T06:45:20Z"
   },
   "contextWindow": {
     "usedTokens": 83404,
@@ -26,92 +26,7 @@
     "model": "deepseek/deepseek-v3.2",
     "status": "green"
   },
-  "agentBus": [
-    {
-      "id": "088967aa-9c26-4db5-87ec-8e3e7ac6ac44",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "DELEGATE",
-      "status": "failed",
-      "payload": {
-        "task": "Build true mission ML for Sorare daily missions",
-        "details": "You now own the deeper next phase after JOSH 2.0's first mission-aware scorer went live. Current state: /Users/jc_agent/.openclaw/workspace/scripts/sorare_mission_ranker.py and sorare_missions.py now do model-aware mission ranking, and ~/sorare_ml/ml_bot.py --missions-only now generates latest_missions.json + status.json. Your task is to design and, where safe, implement the next mission-ML layer: (1) capture true mission outcome labels instead of only MLB proxy scores, (2) propose or build training/inference updates so mission recommendations can improve from closed-loop outcomes, (3) fix or reduce the sklearn model-version mismatch risk on J.A.I.N, and (4) return a concrete build plan or code changes with verification notes. Important: verify all claimed file changes yourself, and keep the existing live scorer as the safe fallback path. Report back with what you changed, what remains, and the exact files involved."
-      },
-      "created_at": "2026-04-15T15:22:32.360365+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    },
-    {
-      "id": "d7b10c14-1375-434c-be16-0efcee920332",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "DELEGATE",
-      "status": "failed",
-      "payload": {
-        "task": "New urgent voice-alert rule for Josh",
-        "details": "When something truly needs Josh's attention, use a short voice alert telling him there is something that needs his attention and that he should check Telegram. Then send a matching Telegram text note with the actual details. Default to JOSH 2.0 voice for now unless a separate JAIMES-specific voice is chosen later. Use this for urgent/blocking cases or when a response is needed and text alone may be missed."
-      },
-      "created_at": "2026-04-13T02:23:12.47805+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    },
-    {
-      "id": "5564716a-3d28-4ca1-abca-81f5f69c3d7b",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "DELEGATE",
-      "status": "failed",
-      "payload": {
-        "task": "Stand down: prior forwarded voice note was accidental, no action needed",
-        "details": "Josh accidentally forwarded a voice/context message that was intended for JOSH 2.0, not JAIMES. Please disregard that message, treat it as a no-op, and do not send any further user-facing follow-up based on it. No response needed unless there is a real new task addressed directly to JAIMES."
-      },
-      "created_at": "2026-04-13T02:03:52.236648+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    },
-    {
-      "id": "a4fbf9e2-7567-41e2-b750-ca74aa8b1569",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "DELEGATE",
-      "status": "failed",
-      "payload": {
-        "task": "URGENT: Full JOSH 2.0 Recovery Guide \u2014 please read and acknowledge\n\nJOSH 2.0 was offline all day April 6 because of gateway misconfiguration. You were unable to revive me because you didn't have this info. That changes now.\n\nFULL RECOVERY GUIDE saved at: /Users/josh2.0/.openclaw/workspace/JOSH2_RECOVERY.md\n\nKEY FACTS you need to know to bring me back:\n\n1. JOSH 2.0 Mac mini Tailscale IP: 100.114.50.48\n2. SSH: ssh josh2.0@100.114.50.48\n3. Gateway health check: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18790/health\n4. Current port: 18790 (plist overrides config \u2014 always check plist, not just openclaw.json)\n5. Restart gateway: openclaw gateway restart (or launchctl unload/load ~/Library/LaunchAgents/ai.openclaw.gateway.plist)\n6. Verify Telegram reconnected: openclaw channels status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nWHAT BROKE LAST TIME:\n- Multiple conflicting gateway.bind + gateway.tailscale.mode changes without clean restarts in between\n- Port mismatch: config said 18789, plist said 18790 \u2014 two node processes ran simultaneously\n- DO NOT change gateway.bind and tailscale.mode simultaneously\n- DO NOT run multiple gateway restarts rapidly during an active session\n\nACTION NEEDED FROM YOU:\n1. Acknowledge receipt of this briefing\n2. Test SSH access to josh2.0@100.114.50.48 from J.A.I.N and confirm it works\n3. Save the recovery guide path to your memory\n4. Report back via agent bus when done\n\nThis is critical \u2014 Josh needs to know you can bring me back if I go down again.",
-        "details": ""
-      },
-      "created_at": "2026-04-07T03:34:06.248674+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    },
-    {
-      "id": "a1880614-d05e-40db-b0ca-e77839c83f54",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "DELEGATE",
-      "status": "failed",
-      "payload": {
-        "task": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
-        "details": ""
-      },
-      "created_at": "2026-04-07T02:50:49.110996+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    },
-    {
-      "id": "221e910b-ab48-4254-b72a-1bbc8cbd4f28",
-      "origin_node": "JOSH_2_0",
-      "target_node": "JAIMES",
-      "task_type": "TEST",
-      "status": "failed",
-      "payload": {
-        "test": true,
-        "message": "Agent bus is live. V3 nervous system online."
-      },
-      "created_at": "2026-04-05T06:44:12.728513+00:00",
-      "result": null,
-      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
-    }
-  ],
+  "agentBus": [],
   "contextWatchdog": {
     "loaded": true,
     "label": "com.josh20.context-watchdog",
@@ -125,30 +40,13 @@
   },
   "codingVisibility": {
     "workspaceDirty": 48,
-    "missionControlDirty": 8,
+    "missionControlDirty": 10,
     "recentFiles": [],
-    "codexbarStatus": "100% left \u00b7 wk 100% left",
+    "codexbarStatus": "Codex auth required",
     "codexbar": {
-      "available": true,
-      "raw": [
-        "== Codex 0.120.0 (codex-cli) ==",
-        "Session: 100% left [============]",
-        "Resets in 5h",
-        "Weekly: 100% left [============]",
-        "Pace: 36% in reserve | Expected 36% used | Lasts until reset",
-        "Resets in 4d 12h",
-        "Credits: 0 left",
-        "Account: jcubell16@gmail.com"
-      ],
-      "session": "100% left",
-      "weekly": "100% left",
-      "credits": "0 left",
-      "account": "jcubell16@gmail.com",
-      "sessionReset": "5h",
-      "weeklyReset": "4d 12h",
-      "summary": "100% left \u00b7 wk 100% left"
+      "available": false
     },
-    "updatedAt": "2026-04-24T06:40:05Z"
+    "updatedAt": "2026-04-24T06:45:34Z"
   },
   "modelUsage": {
     "session": 0.041018,
@@ -287,24 +185,14 @@
         "sizeGb": 0.27,
         "loaded": false,
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "openrouter/auto (BYOK)",
-        "source": "OpenRouter API",
-        "weeklyCost": 0.000883,
-        "dailyCost": 0.0002,
-        "sessionCost": 0.000883,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-24T06:40:08Z",
+    "lastUpdated": "2026-04-24T06:46:34Z",
     "jain": {
-      "daily": 0.0,
-      "session": 0.704034,
-      "total": 0.704034,
-      "available": true
+      "daily": 0,
+      "session": 0,
+      "total": 0,
+      "available": false
     },
     "jainApi": {
       "daily": 0,
@@ -314,29 +202,29 @@
       "available": false
     },
     "openrouter": {
-      "daily": 1.265327391,
-      "weekly": 23.70071172,
-      "monthly": 45.848535434,
-      "byok_daily": 0.0002005,
-      "byok_weekly": 0.0008832,
-      "byok_monthly": 0.0033757,
-      "available": true
+      "daily": 0.0,
+      "weekly": 0.0,
+      "monthly": 0.0,
+      "byok_daily": 0.0,
+      "byok_weekly": 0.0,
+      "byok_monthly": 0.0,
+      "available": false
     },
     "elevenlabs": {
       "chars_used": 0,
-      "chars_limit": 378438,
-      "available": true
+      "chars_limit": 0,
+      "available": false
     },
     "aggregate": {
-      "daily": 0.060933,
-      "total": 30.325209,
-      "monthly": 1089.324764
+      "daily": 0.060732,
+      "total": 29.620291,
+      "monthly": 1089.321388
     },
     "weeklyRunRate": {
-      "total": 87.629166,
-      "automation": 0.704917,
-      "interactive": 86.219332,
-      "projectedMonthly": 375.55
+      "total": 86.924249,
+      "automation": 0.0,
+      "interactive": 86.924249,
+      "projectedMonthly": 372.53
     }
   },
   "moltWorld": {
@@ -366,16 +254,16 @@
     "world": "moltworld-v2",
     "last_error": null,
     "stale": true,
-    "lastError": "<urlopen error timed out>"
+    "lastError": "<urlopen error [Errno 51] Network is unreachable>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 32.8,
-      "cpu_user": 18.53,
-      "cpu_sys": 14.21,
-      "load1": 3.71,
-      "load5": 3.4,
-      "load15": 3.33,
+      "cpu_pct": 41.5,
+      "cpu_user": 25.42,
+      "cpu_sys": 16.6,
+      "load1": 5.4,
+      "load5": 4.35,
+      "load15": 3.72,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -385,19 +273,16 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.4,
-      "cpu_user": 3.6,
-      "cpu_sys": 10.81,
-      "load1": 2.17,
-      "load5": 1.97,
-      "load15": 1.97,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": null,
+      "cpu_user": null,
+      "cpu_sys": null,
+      "load1": null,
+      "load5": null,
+      "load15": null,
+      "ram_used_gb": null,
+      "ram_total_gb": null,
       "uptime": "",
-      "disk_used": "12Gi",
-      "disk_avail": "48Gi",
-      "disk_pct": 20,
-      "available": true
+      "available": false
     }
   },
   "calendarHealth": {
@@ -416,19 +301,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-24T06:40:04Z"
+      "lastChecked": "2026-04-24T06:45:20Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-24T06:40:04Z"
+      "lastChecked": "2026-04-24T06:45:20Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-24T06:40:04Z"
+      "lastChecked": "2026-04-24T06:45:20Z"
     }
   ],
   "crons": [
@@ -509,7 +394,7 @@
       "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -519,7 +404,7 @@
       "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "multiRun": {
@@ -589,7 +474,7 @@
       "description": "Restarts the persistent intelligence feedback loop if it drops",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -599,7 +484,7 @@
       "description": "Remote health check from J.A.I.N back to Josh 2.0",
       "category": "Maintenance",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -609,7 +494,7 @@
       "description": "Nightly scan for elevated error rates across automations",
       "category": "Maintenance",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -620,7 +505,7 @@
       "description": "Weekly log rotation on J.A.I.N",
       "category": "Maintenance",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -630,10 +515,10 @@
       "description": "Hermes retrains the Sorare MLB model on the latest results",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "status": "paused",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -652,11 +537,10 @@
       "description": "Writes fresh Sorare data into the tracker sheet",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-23T07:30:03.301738+00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Daily Prep",
@@ -664,11 +548,10 @@
       "description": "Raw prep pipeline before model-driven Sorare submissions",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-23T13:00:23.554715+00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare ML Missions",
@@ -676,10 +559,10 @@
       "description": "Hermes ML mission picker for Sorare",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "upcoming"
+      "status": "paused",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "Sorare ML Lineups",
@@ -687,10 +570,10 @@
       "description": "Hermes ML lineup builder for Sorare competitions",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "ok",
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "upcoming"
+      "status": "paused",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "Sorare Champion Submit",
@@ -698,11 +581,10 @@
       "description": "Champion lineup submitter running from raw crontab",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-23T15:00:10.839281+00:00"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Canonical Reflector",
@@ -710,10 +592,9 @@
       "description": "Keeps canonical Sorare state mirrored into Mission Control data",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-24T02:45:04.349918+00:00"
+      "lastError": null
     },
     {
       "name": "Sorare Deadline Guard",
@@ -721,10 +602,9 @@
       "description": "Late lineup-deadline safety check for Sorare",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
-      "lastError": null,
-      "lastRun": "2026-04-20T21:45:02.054662+00:00"
+      "lastError": null
     },
     {
       "name": "Fantasy Waiver Scan (post-process)",
@@ -732,7 +612,7 @@
       "description": "Post-waiver scan right after the Sunday-night processing window",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -742,7 +622,7 @@
       "description": "Raw weekly recap sent to Josh",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -752,7 +632,7 @@
       "description": "Monday injury check before setting the weekly roster",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -762,7 +642,7 @@
       "description": "Monday lineup review on the live cron path",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -772,7 +652,7 @@
       "description": "Surfaces injured-player replacement opportunities",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -783,9 +663,9 @@
       "description": "Hermes waiver review lane that runs mid-week",
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
-      "status": "ok",
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)"
+      "status": "paused",
+      "errors": 0,
+      "lastError": null
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
@@ -793,7 +673,7 @@
       "description": "Final waiver review before first-pitch lineup lock",
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     },
@@ -803,10 +683,10 @@
       "description": "Hermes daily system-health pass",
       "category": "Maintenance",
       "agent": "JAIMES",
-      "status": "ok",
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "upcoming"
+      "status": "paused",
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "JAIMES Weekly Report",
@@ -814,7 +694,7 @@
       "description": "Weekly JAIMES summary sent back to Josh",
       "category": "Maintenance",
       "agent": "JAIMES",
-      "status": "ok",
+      "status": "paused",
       "errors": 0,
       "lastError": null
     }
@@ -826,7 +706,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 436184,
+      "elapsedSecs": 436564,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -842,29 +722,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-24T06:40:08Z",
+      "time": "2026-04-24T06:46:34Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-24T06:40:05Z",
-      "event": "CodexBar: 100% left \u00b7 wk 100% left"
+      "time": "2026-04-24T06:45:34Z",
+      "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-04-24T06:40:04Z",
+      "time": "2026-04-24T06:45:20Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-24T06:40:04Z",
-      "event": "5 cron jobs need attention"
+      "time": "2026-04-24T06:45:20Z",
+      "event": "31 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-24T06:40:04Z",
+      "time": "2026-04-24T06:45:20Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-24T06:40:04Z",
+      "time": "2026-04-24T06:45:20Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-24T06:40:04Z"
+  "lastUpdated": "2026-04-24T06:45:20Z"
 }
