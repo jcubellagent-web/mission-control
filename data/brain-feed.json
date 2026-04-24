@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
+  "objective": "Check OpenClaw updates \u2014 version, pending, breaking changes",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-24T18:57:19Z",
-  "checkedAt": "2026-04-24T18:57:19Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "openclaw"
+    }
+  ],
+  "currentTool": "openclaw",
+  "updatedAt": "2026-04-24T19:20:00Z",
+  "checkedAt": "2026-04-24T19:20:00Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
