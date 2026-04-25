@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Full rebuild of Sorare lineup system using GW10",
+    "objective": "Continuing Sorare lineup v2 rebuild - iterating on player distribution logic",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "build",
-    "updatedAt": "2026-04-25T02:52:49Z",
-    "checkedAt": "2026-04-25T02:52:49Z",
+    "updatedAt": "2026-04-25T02:59:57Z",
+    "checkedAt": "2026-04-25T02:59:57Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Full rebuild of Sorare lineup system using GW10",
-    "updatedAt": "2026-04-25T02:55:04Z"
+    "context": "Continuing Sorare lineup v2 rebuild - iterating on player distribution logic",
+    "updatedAt": "2026-04-25T03:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 83333,
+    "usedTokens": 105854,
     "limitTokens": 400000,
-    "pct": 0.2083,
+    "pct": 0.2646,
     "model": "moonshotai/kimi-k2.6",
     "status": "green"
   },
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 3h 40m",
+        "Resets in 3h 35m",
         "Weekly: 100% left [============]",
         "Pace: 48% in reserve | Expected 48% used | Lasts until reset",
         "Resets in 3d 16h",
@@ -157,11 +157,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 40m",
+      "sessionReset": "3h 35m",
       "weeklyReset": "3d 16h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T02:55:06Z"
+    "updatedAt": "2026-04-25T03:00:06Z"
   },
   "modelUsage": {
     "session": 0.004093,
@@ -239,9 +239,9 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 62154,
-        "outputTokens": 13529,
-        "totalTokens": 75683,
+        "inputTokens": 1918,
+        "outputTokens": 118,
+        "totalTokens": 2036,
         "sessionCost": 0.0040926564,
         "dailyCost": 0.0040926564,
         "weeklyCost": 0.0040926564,
@@ -325,7 +325,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T02:55:09Z",
+    "lastUpdated": "2026-04-25T03:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -340,9 +340,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 3.797430245,
-      "weekly": 29.567766635,
-      "monthly": 51.715590349,
+      "daily": 4.021404895,
+      "weekly": 29.791741285,
+      "monthly": 51.939564999,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -396,14 +396,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 74.0,
-      "cpu_user": 56.34,
-      "cpu_sys": 17.66,
-      "load1": 7.79,
-      "load5": 8.43,
-      "load15": 8.36,
+      "cpu_pct": 73.1,
+      "cpu_user": 55.73,
+      "cpu_sys": 17.39,
+      "load1": 9.45,
+      "load5": 8.84,
+      "load15": 8.54,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "86Gi",
@@ -411,14 +411,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.5,
-      "cpu_user": 4.34,
-      "cpu_sys": 12.17,
-      "load1": 1.71,
-      "load5": 2.07,
-      "load15": 2.15,
+      "cpu_pct": 18.3,
+      "cpu_user": 8.65,
+      "cpu_sys": 9.61,
+      "load1": 2.65,
+      "load5": 2.37,
+      "load15": 2.26,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -442,19 +442,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T02:55:04Z"
+      "lastChecked": "2026-04-25T03:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T02:55:04Z"
+      "lastChecked": "2026-04-25T03:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T02:55:04Z"
+      "lastChecked": "2026-04-25T03:00:03Z"
     }
   ],
   "crons": [
@@ -603,7 +603,7 @@
             "time": "11:00 PM",
             "mode": "Daily",
             "label": "Wrap brief",
-            "past": false,
+            "past": true,
             "done": false
           }
         ]
@@ -852,7 +852,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 509085,
+      "elapsedSecs": 509385,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -878,29 +878,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T02:55:09Z",
+      "time": "2026-04-25T03:00:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-25T02:55:06Z",
+      "time": "2026-04-25T03:00:06Z",
       "event": "Coding: scripts/debug_sorare_slots.py, scripts/sorare_lineup_v2.py"
     },
     {
-      "time": "2026-04-25T02:55:06Z",
+      "time": "2026-04-25T03:00:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T02:55:04Z",
+      "time": "2026-04-25T03:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T02:55:04Z",
+      "time": "2026-04-25T03:00:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T02:55:04Z",
+      "time": "2026-04-25T03:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T02:55:04Z"
+  "lastUpdated": "2026-04-25T03:00:03Z"
 }
