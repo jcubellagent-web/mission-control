@@ -1,6 +1,6 @@
 {
-  "session": 0.012026,
-  "daily": 0.06376,
+  "session": 0.0,
+  "daily": 0.042466,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -22,12 +22,12 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.058653252
+      "cost": 0.04938489360000001
     },
     {
       "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 0.012025692000000001
+      "cost": 0.0
     }
   ],
   "breakdown": [
@@ -61,12 +61,12 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 148026,
-      "outputTokens": 4174,
-      "totalTokens": 152200,
-      "sessionCost": 0.058653252,
-      "dailyCost": 0.05173426440000001,
-      "weeklyCost": 0.058653252,
+      "inputTokens": 110371,
+      "outputTokens": 3960,
+      "totalTokens": 114331,
+      "sessionCost": 0.04938489360000001,
+      "dailyCost": 0.042465906000000005,
+      "weeklyCost": 0.04938489360000001,
       "sessions": 9,
       "isGemini": false,
       "costEstimated": false
@@ -74,12 +74,12 @@
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 6402,
-      "outputTokens": 6,
-      "totalTokens": 6408,
-      "sessionCost": 0.012025692000000001,
-      "dailyCost": 0.012025692000000001,
-      "weeklyCost": 0.012025692000000001,
+      "inputTokens": 20444,
+      "outputTokens": 224,
+      "totalTokens": 20668,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
       "sessions": 1,
       "isGemini": false,
       "costEstimated": false
@@ -153,14 +153,14 @@
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
       "weeklyCost": 0.000883,
-      "dailyCost": 0.006615,
+      "dailyCost": 0.010145,
       "sessionCost": 0.000883,
       "totalTokens": 0,
       "costEstimated": false,
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T01:00:09Z",
+  "lastUpdated": "2026-04-25T01:05:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -175,9 +175,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 0.006614955,
-    "weekly": 25.776951345,
-    "monthly": 47.924775059,
+    "daily": 0.010145475,
+    "weekly": 25.780481865,
+    "monthly": 47.928305579,
     "byok_daily": 0.0,
     "byok_weekly": 0.0008832,
     "byok_monthly": 0.0033757,
@@ -189,8 +189,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.070375,
-    "total": 30.317294,
+    "daily": 0.052611,
+    "total": 30.296,
     "monthly": 1089.324764
   },
   "weeklyRunRate": {
