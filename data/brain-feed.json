@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Using browser automation to fix GW10 lineups",
+  "objective": "Browser login failed \u2014 retrying with provided credentials",
   "status": "active",
   "steps": [
     {
       "label": "browser",
       "status": "active",
-      "tool": "sorare_fix"
+      "tool": "login_retry"
     }
   ],
-  "currentTool": "sorare_fix",
-  "updatedAt": "2026-04-25T06:59:03Z",
-  "checkedAt": "2026-04-25T06:59:03Z",
+  "currentTool": "login_retry",
+  "updatedAt": "2026-04-25T07:04:22Z",
+  "checkedAt": "2026-04-25T07:04:22Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
