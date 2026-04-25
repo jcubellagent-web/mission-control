@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "soup to nuts setup on workflows and supporting infrastructure",
+    "objective": "delegate workflow/infrastructure setup to sub-agents while staying responsive",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T21:42:57Z",
-    "checkedAt": "2026-04-25T21:42:57Z",
+    "updatedAt": "2026-04-25T21:54:59Z",
+    "checkedAt": "2026-04-25T21:54:59Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "soup to nuts setup on workflows and supporting infrastructure",
-    "updatedAt": "2026-04-25T21:50:03Z"
+    "context": "delegate workflow/infrastructure setup to sub-agents while staying responsive",
+    "updatedAt": "2026-04-25T21:55:04Z"
   },
   "contextWindow": {
-    "usedTokens": 27734,
+    "usedTokens": 59545,
     "limitTokens": 272000,
-    "pct": 0.102,
+    "pct": 0.2189,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 52,
-    "missionControlDirty": 8,
+    "missionControlDirty": 7,
     "recentFiles": [
       "scripts/send_josh_reply.py",
       "scripts/answer_callback.py",
@@ -143,7 +143,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 1h 1m",
+        "Resets in 56m",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 21h",
@@ -154,15 +154,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 1m",
+      "sessionReset": "56m",
       "weeklyReset": "2d 21h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T21:50:05Z"
+    "updatedAt": "2026-04-25T21:55:06Z"
   },
   "modelUsage": {
-    "session": 0.058958,
-    "daily": 0.821421,
+    "session": 0.178054,
+    "daily": 0.940516,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -179,7 +179,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.6204949999999999
+        "cost": 0.7395904999999999
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -214,12 +214,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 120656,
-        "outputTokens": 1993,
-        "totalTokens": 122649,
-        "sessionCost": 0.6204949999999999,
-        "dailyCost": 0.6204949999999999,
-        "weeklyCost": 0.6204949999999999,
+        "inputTokens": 130417,
+        "outputTokens": 3028,
+        "totalTokens": 133445,
+        "sessionCost": 0.7395904999999999,
+        "dailyCost": 0.7395904999999999,
+        "weeklyCost": 0.7395904999999999,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -326,7 +326,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T21:50:09Z",
+    "lastUpdated": "2026-04-25T21:55:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -355,8 +355,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.826965,
-      "total": 30.701969,
+      "daily": 0.94606,
+      "total": 30.821065,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -397,12 +397,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 71.8,
-      "cpu_user": 54.63,
-      "cpu_sys": 17.1,
-      "load1": 7.19,
-      "load5": 8.0,
-      "load15": 8.48,
+      "cpu_pct": 95.4,
+      "cpu_user": 67.82,
+      "cpu_sys": 27.52,
+      "load1": 11.63,
+      "load5": 9.17,
+      "load15": 8.8,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -412,14 +412,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.7,
-      "cpu_user": 4.31,
-      "cpu_sys": 10.34,
-      "load1": 1.77,
-      "load5": 2.04,
-      "load15": 2.06,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 16.1,
+      "cpu_user": 4.46,
+      "cpu_sys": 11.6,
+      "load1": 2.06,
+      "load5": 1.99,
+      "load15": 2.02,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -443,19 +443,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T21:50:03Z"
+      "lastChecked": "2026-04-25T21:55:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T21:50:03Z"
+      "lastChecked": "2026-04-25T21:55:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T21:50:03Z"
+      "lastChecked": "2026-04-25T21:55:04Z"
     }
   ],
   "crons": [
@@ -824,9 +824,9 @@
       "title": "Soup-to-nuts workflow + infrastructure setup",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Starting a full audit/setup pass across workflows, automation, and supporting OpenClaw/J.A.I.N infrastructure; baseline checks in progress.",
+      "notes": "Reframed to orchestrator mode per Josh: delegating local antfarm repair/verification and J.A.I.N infrastructure cleanup to sub-agents while staying available in the foreground.",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 17:43",
+      "updatedAt": "2026-04-25 17:55",
       "owner": "J.A.I.N"
     }
   ],
@@ -836,7 +836,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 577185,
+      "elapsedSecs": 577485,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -862,29 +862,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T21:50:09Z",
-      "event": "Session spend: $0.06"
+      "time": "2026-04-25T21:55:10Z",
+      "event": "Session spend: $0.18"
     },
     {
-      "time": "2026-04-25T21:50:05Z",
+      "time": "2026-04-25T21:55:06Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-25T21:50:05Z",
+      "time": "2026-04-25T21:55:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T21:50:03Z",
+      "time": "2026-04-25T21:55:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T21:50:03Z",
+      "time": "2026-04-25T21:55:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T21:50:03Z",
+      "time": "2026-04-25T21:55:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T21:50:03Z"
+  "lastUpdated": "2026-04-25T21:55:04Z"
 }
