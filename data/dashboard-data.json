@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fixing GW10 lineups \u2014 trying alternative API approaches",
+    "objective": "Using browser automation to fix GW10 lineups",
     "status": "active",
     "steps": [
       {
-        "label": "deploy",
+        "label": "browser",
         "status": "active",
-        "tool": "gw10_fix_v2"
+        "tool": "sorare_fix"
       }
     ],
-    "currentTool": "gw10_fix_v2",
-    "updatedAt": "2026-04-25T06:54:15Z",
-    "checkedAt": "2026-04-25T06:54:15Z",
+    "currentTool": "sorare_fix",
+    "updatedAt": "2026-04-25T06:59:03Z",
+    "checkedAt": "2026-04-25T06:59:03Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixing GW10 lineups \u2014 trying alternative API approaches",
-    "updatedAt": "2026-04-25T06:55:03Z"
+    "context": "Using browser automation to fix GW10 lineups",
+    "updatedAt": "2026-04-25T07:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 155496,
+    "usedTokens": 158088,
     "limitTokens": 400000,
-    "pct": 0.3887,
+    "pct": 0.3952,
     "model": "moonshotai/kimi-k2.6",
     "status": "green"
   },
@@ -161,11 +161,11 @@
       "weeklyReset": "3d 12h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T06:55:05Z"
+    "updatedAt": "2026-04-25T07:00:05Z"
   },
   "modelUsage": {
-    "session": 1.185361,
-    "daily": 1.281571,
+    "session": 0.525233,
+    "daily": 0.961043,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -182,7 +182,7 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "window": "session",
-        "cost": 1.2752215826000002
+        "cost": 0.9546945351999998
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -217,12 +217,12 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 1473352,
-        "outputTokens": 9291,
-        "totalTokens": 1482643,
-        "sessionCost": 1.2752215826000002,
-        "dailyCost": 1.2752215826000002,
-        "weeklyCost": 1.2752215826000002,
+        "inputTokens": 1150452,
+        "outputTokens": 7500,
+        "totalTokens": 1157952,
+        "sessionCost": 0.9546945351999998,
+        "dailyCost": 0.9546945351999998,
+        "weeklyCost": 0.9546945351999998,
         "sessions": 5,
         "isGemini": false,
         "costEstimated": false
@@ -316,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T06:55:08Z",
+    "lastUpdated": "2026-04-25T07:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 11.875374587,
-      "weekly": 37.645710977,
-      "monthly": 59.793534691,
+      "daily": 12.668512228,
+      "weekly": 38.438848618,
+      "monthly": 60.586672332,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -345,8 +345,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.283489,
-      "total": 31.167537,
+      "daily": 0.962961,
+      "total": 30.84701,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -387,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 85.8,
-      "cpu_user": 64.8,
-      "cpu_sys": 20.94,
-      "load1": 7.19,
-      "load5": 8.42,
-      "load15": 8.37,
+      "cpu_pct": 73.6,
+      "cpu_user": 55.92,
+      "cpu_sys": 17.66,
+      "load1": 8.48,
+      "load5": 8.46,
+      "load15": 8.39,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,14 +402,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 1.72,
-      "cpu_sys": 10.34,
-      "load1": 1.86,
-      "load5": 1.96,
-      "load15": 2.0,
+      "cpu_pct": 12.4,
+      "cpu_user": 1.76,
+      "cpu_sys": 10.61,
+      "load1": 2.55,
+      "load5": 2.24,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -433,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T06:55:03Z"
+      "lastChecked": "2026-04-25T07:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T06:55:03Z"
+      "lastChecked": "2026-04-25T07:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T06:55:03Z"
+      "lastChecked": "2026-04-25T07:00:03Z"
     }
   ],
   "crons": [
@@ -815,7 +815,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 523484,
+      "elapsedSecs": 523783,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -841,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T06:55:08Z",
-      "event": "Session spend: $1.19"
+      "time": "2026-04-25T07:00:08Z",
+      "event": "Session spend: $0.53"
     },
     {
-      "time": "2026-04-25T06:55:05Z",
+      "time": "2026-04-25T07:00:05Z",
       "event": "Coding: scripts/recreate_gw10_championship.py, scripts/optimize_gw10_lineups.py"
     },
     {
-      "time": "2026-04-25T06:55:05Z",
+      "time": "2026-04-25T07:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T06:55:03Z",
+      "time": "2026-04-25T07:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T06:55:03Z",
+      "time": "2026-04-25T07:00:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T06:55:03Z",
+      "time": "2026-04-25T07:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T06:55:03Z"
+  "lastUpdated": "2026-04-25T07:00:03Z"
 }
