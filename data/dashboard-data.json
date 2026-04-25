@@ -5,25 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Browser login failed \u2014 retrying with provided credentials",
+    "objective": "Responding to user after error recovery",
     "status": "active",
     "steps": [
       {
-        "label": "browser",
+        "label": "telegram",
         "status": "active",
-        "tool": "login_retry"
+        "tool": "10513"
       }
     ],
-    "currentTool": "login_retry",
-    "updatedAt": "2026-04-25T07:04:22Z",
-    "checkedAt": "2026-04-25T07:04:22Z",
+    "currentTool": "10513",
+    "updatedAt": "2026-04-25T07:10:00Z",
+    "checkedAt": "2026-04-25T07:10:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Browser login failed \u2014 retrying with provided credentials",
-    "updatedAt": "2026-04-25T07:05:04Z"
+    "context": "Responding to user after error recovery",
+    "updatedAt": "2026-04-25T07:10:03Z"
   },
   "contextWindow": {
     "usedTokens": 174067,
@@ -161,7 +161,7 @@
       "weeklyReset": "3d 11h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T07:05:06Z"
+    "updatedAt": "2026-04-25T07:10:05Z"
   },
   "modelUsage": {
     "session": 0.129601,
@@ -316,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T07:05:09Z",
+    "lastUpdated": "2026-04-25T07:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 13.492829639,
-      "weekly": 39.263166029,
-      "monthly": 61.410989743,
+      "daily": 14.018154319,
+      "weekly": 39.788490709,
+      "monthly": 61.936314423,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -387,11 +387,11 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.7,
-      "cpu_user": 56.17,
-      "cpu_sys": 17.54,
-      "load1": 7.05,
-      "load5": 7.77,
+      "cpu_pct": 74.2,
+      "cpu_user": 56.46,
+      "cpu_sys": 17.77,
+      "load1": 8.21,
+      "load5": 8.02,
       "load15": 8.1,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
@@ -402,14 +402,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.3,
-      "cpu_user": 3.53,
-      "cpu_sys": 9.73,
-      "load1": 1.96,
-      "load5": 2.16,
-      "load15": 2.11,
+      "cpu_pct": 10.4,
+      "cpu_user": 1.73,
+      "cpu_sys": 8.69,
+      "load1": 2.23,
+      "load5": 2.1,
+      "load15": 2.08,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -433,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T07:05:04Z"
+      "lastChecked": "2026-04-25T07:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T07:05:04Z"
+      "lastChecked": "2026-04-25T07:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T07:05:04Z"
+      "lastChecked": "2026-04-25T07:10:03Z"
     }
   ],
   "crons": [
@@ -633,7 +633,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -644,7 +644,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
+      "runStatus": "missed",
       "lastRun": "2026-04-24T07:30:03.144647+00:00"
     },
     {
@@ -815,7 +815,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 524085,
+      "elapsedSecs": 524383,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -841,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T07:05:09Z",
+      "time": "2026-04-25T07:10:08Z",
       "event": "Session spend: $0.13"
     },
     {
-      "time": "2026-04-25T07:05:06Z",
+      "time": "2026-04-25T07:10:05Z",
       "event": "Coding: scripts/recreate_gw10_championship.py, scripts/optimize_gw10_lineups.py"
     },
     {
-      "time": "2026-04-25T07:05:06Z",
+      "time": "2026-04-25T07:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T07:05:04Z",
+      "time": "2026-04-25T07:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T07:05:04Z",
+      "time": "2026-04-25T07:10:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T07:05:04Z",
+      "time": "2026-04-25T07:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T07:05:04Z"
+  "lastUpdated": "2026-04-25T07:10:03Z"
 }
