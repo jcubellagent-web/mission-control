@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Optimizing GW10 lineups with hitter-flex strategy",
-    "updatedAt": "2026-04-25T06:40:03Z"
+    "updatedAt": "2026-04-25T06:45:03Z"
   },
   "contextWindow": {
     "usedTokens": 144530,
@@ -133,12 +133,12 @@
     "workspaceDirty": 52,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/optimize_gw10_lineups.py",
       "scripts/deploy_gw10_championship.py",
       "scripts/validate_gw10_lineups.sh",
       "scripts/sorare_lineup_v5.py",
       "scripts/fetch_advanced_mlb_stats.py",
-      "scripts/fetch_live_mlb_stats.py",
-      "scripts/sorare_gw10_clear_and_rebuild.sh"
+      "scripts/fetch_live_mlb_stats.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -161,7 +161,7 @@
       "weeklyReset": "3d 12h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T06:40:05Z"
+    "updatedAt": "2026-04-25T06:45:05Z"
   },
   "modelUsage": {
     "session": 0.17851,
@@ -316,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T06:40:08Z",
+    "lastUpdated": "2026-04-25T06:45:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 10.430368191,
-      "weekly": 36.200704581,
-      "monthly": 58.348528295,
+      "daily": 10.822959426,
+      "weekly": 36.593295816,
+      "monthly": 58.74111953,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -387,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.4,
-      "cpu_user": 55.54,
-      "cpu_sys": 17.83,
-      "load1": 7.77,
-      "load5": 7.77,
-      "load15": 7.97,
+      "cpu_pct": 73.6,
+      "cpu_user": 55.58,
+      "cpu_sys": 18.2,
+      "load1": 7.56,
+      "load5": 7.85,
+      "load15": 7.96,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,12 +402,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.6,
-      "cpu_user": 2.67,
-      "cpu_sys": 8.92,
-      "load1": 2.07,
-      "load5": 2.01,
-      "load15": 1.95,
+      "cpu_pct": 11.3,
+      "cpu_user": 2.75,
+      "cpu_sys": 9.17,
+      "load1": 1.99,
+      "load5": 2.21,
+      "load15": 2.07,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -433,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T06:40:03Z"
+      "lastChecked": "2026-04-25T06:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T06:40:03Z"
+      "lastChecked": "2026-04-25T06:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T06:40:03Z"
+      "lastChecked": "2026-04-25T06:45:03Z"
     }
   ],
   "crons": [
@@ -815,12 +815,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 522584,
+      "elapsedSecs": 522884,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/deploy_gw10_championship.py, scripts/validate_gw10_lineups.sh",
+      "label": "Editing: scripts/optimize_gw10_lineups.py, scripts/deploy_gw10_championship.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -841,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T06:40:08Z",
+      "time": "2026-04-25T06:45:09Z",
       "event": "Session spend: $0.18"
     },
     {
-      "time": "2026-04-25T06:40:05Z",
-      "event": "Coding: scripts/deploy_gw10_championship.py, scripts/validate_gw10_lineups.sh"
+      "time": "2026-04-25T06:45:05Z",
+      "event": "Coding: scripts/optimize_gw10_lineups.py, scripts/deploy_gw10_championship.py"
     },
     {
-      "time": "2026-04-25T06:40:05Z",
+      "time": "2026-04-25T06:45:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T06:40:03Z",
+      "time": "2026-04-25T06:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T06:40:03Z",
+      "time": "2026-04-25T06:45:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T06:40:03Z",
+      "time": "2026-04-25T06:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T06:40:03Z"
+  "lastUpdated": "2026-04-25T06:45:03Z"
 }
