@@ -5,25 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Responding to user after error recovery",
+    "objective": "Switching to API approach for GW10 lineup fixes",
     "status": "active",
     "steps": [
       {
-        "label": "telegram",
+        "label": "api",
         "status": "active",
-        "tool": "10513"
+        "tool": "lineup_fix"
       }
     ],
-    "currentTool": "10513",
-    "updatedAt": "2026-04-25T07:10:00Z",
-    "checkedAt": "2026-04-25T07:10:00Z",
+    "currentTool": "lineup_fix",
+    "updatedAt": "2026-04-25T07:31:39Z",
+    "checkedAt": "2026-04-25T07:31:39Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Responding to user after error recovery",
-    "updatedAt": "2026-04-25T07:30:03Z"
+    "context": "Switching to API approach for GW10 lineup fixes",
+    "updatedAt": "2026-04-25T07:35:03Z"
   },
   "contextWindow": {
     "usedTokens": 174067,
@@ -161,7 +161,7 @@
       "weeklyReset": "3d 11h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T07:30:05Z"
+    "updatedAt": "2026-04-25T07:35:05Z"
   },
   "modelUsage": {
     "session": 0.129601,
@@ -316,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T07:30:09Z",
+    "lastUpdated": "2026-04-25T07:35:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 15.966903271,
-      "weekly": 41.737239661,
-      "monthly": 63.885063375,
+      "daily": 16.389718741,
+      "weekly": 42.160055131,
+      "monthly": 64.307878845,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -387,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 74.8,
-      "cpu_user": 57.1,
-      "cpu_sys": 17.74,
-      "load1": 7.34,
+      "cpu_pct": 73.3,
+      "cpu_user": 55.88,
+      "cpu_sys": 17.45,
+      "load1": 7.42,
       "load5": 7.91,
-      "load15": 7.91,
+      "load15": 7.9,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,12 +402,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 3.47,
-      "cpu_sys": 8.69,
-      "load1": 1.87,
-      "load5": 1.89,
-      "load15": 1.89,
+      "cpu_pct": 9.5,
+      "cpu_user": 0.86,
+      "cpu_sys": 8.62,
+      "load1": 2.68,
+      "load5": 2.09,
+      "load15": 1.94,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -433,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T07:30:03Z"
+      "lastChecked": "2026-04-25T07:35:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T07:30:03Z"
+      "lastChecked": "2026-04-25T07:35:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T07:30:03Z"
+      "lastChecked": "2026-04-25T07:35:03Z"
     }
   ],
   "crons": [
@@ -815,7 +815,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 525584,
+      "elapsedSecs": 525884,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -841,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T07:30:09Z",
+      "time": "2026-04-25T07:35:08Z",
       "event": "Session spend: $0.13"
     },
     {
-      "time": "2026-04-25T07:30:05Z",
+      "time": "2026-04-25T07:35:05Z",
       "event": "Coding: scripts/recreate_gw10_championship.py, scripts/optimize_gw10_lineups.py"
     },
     {
-      "time": "2026-04-25T07:30:05Z",
+      "time": "2026-04-25T07:35:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T07:30:03Z",
+      "time": "2026-04-25T07:35:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T07:30:03Z",
+      "time": "2026-04-25T07:35:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T07:30:03Z",
+      "time": "2026-04-25T07:35:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T07:30:03Z"
+  "lastUpdated": "2026-04-25T07:35:03Z"
 }
