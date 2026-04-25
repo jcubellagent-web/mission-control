@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Workflow audit fix-all first pass completed and update sent",
+  "objective": "Start cleanup pass two \u2014 routing config, stale tasks, old Sorare sprawl",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T00:11:01Z",
-  "checkedAt": "2026-04-25T00:11:01Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "cleanup2"
+    }
+  ],
+  "currentTool": "cleanup2",
+  "updatedAt": "2026-04-25T00:11:54Z",
+  "checkedAt": "2026-04-25T00:11:54Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
