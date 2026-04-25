@@ -1,6 +1,6 @@
 {
-  "session": 0.212317,
-  "daily": 0.624785,
+  "session": 0.417834,
+  "daily": 0.830302,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -17,7 +17,7 @@
     {
       "name": "moonshotai/kimi-k2.6",
       "window": "session",
-      "cost": 0.6247854018000001
+      "cost": 0.8303022154
     },
     {
       "name": "deepseek/deepseek-v3.2",
@@ -52,12 +52,12 @@
     {
       "name": "moonshotai/kimi-k2.6",
       "source": "openclaw",
-      "inputTokens": 557277,
-      "outputTokens": 6367,
-      "totalTokens": 563644,
-      "sessionCost": 0.6247854018000001,
-      "dailyCost": 0.6247854018000001,
-      "weeklyCost": 0.6247854018000001,
+      "inputTokens": 705327,
+      "outputTokens": 13507,
+      "totalTokens": 718834,
+      "sessionCost": 0.8303022154,
+      "dailyCost": 0.8303022154,
+      "weeklyCost": 0.8303022154,
       "sessions": 9,
       "isGemini": false,
       "costEstimated": false
@@ -115,6 +115,32 @@
       "costEstimated": false
     },
     {
+      "name": "local/qwen2.5-coder:7b",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 4.68,
+      "loaded": false,
+      "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
+    },
+    {
+      "name": "local/nomic-embed-text:latest",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 0.27,
+      "loaded": false,
+      "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
+    },
+    {
       "name": "openrouter/auto (BYOK)",
       "source": "OpenRouter API",
       "weeklyCost": 0.002802,
@@ -125,7 +151,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T15:55:55Z",
+  "lastUpdated": "2026-04-25T16:00:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -140,9 +166,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 22.087086462,
-    "weekly": 47.857422852,
-    "monthly": 70.005246566,
+    "daily": 22.276614032,
+    "weekly": 48.046950422,
+    "monthly": 70.194774136,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
@@ -154,8 +180,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.626703,
-    "total": 30.501709,
+    "daily": 0.83222,
+    "total": 30.707226,
     "monthly": 1089.326682
   },
   "weeklyRunRate": {
