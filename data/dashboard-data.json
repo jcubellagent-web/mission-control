@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fixing lineup script: empty slots + injured player detection",
+    "objective": "Testing v3 with dry-run force mode on GW10",
     "status": "active",
     "steps": [
       {
         "label": "tool",
         "status": "active",
-        "tool": "build"
+        "tool": "test"
       }
     ],
-    "currentTool": "build",
-    "updatedAt": "2026-04-25T03:49:14Z",
-    "checkedAt": "2026-04-25T03:49:14Z",
+    "currentTool": "test",
+    "updatedAt": "2026-04-25T03:58:32Z",
+    "checkedAt": "2026-04-25T03:58:32Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "deepseek/deepseek-v3.2"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixing lineup script: empty slots + injured player detection",
-    "updatedAt": "2026-04-25T03:55:04Z"
+    "context": "Testing v3 with dry-run force mode on GW10",
+    "updatedAt": "2026-04-25T04:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 55701,
+    "usedTokens": 70081,
     "limitTokens": 400000,
-    "pct": 0.1393,
+    "pct": 0.1752,
     "model": "deepseek/deepseek-v3.2",
     "status": "green"
   },
@@ -133,12 +133,12 @@
     "workspaceDirty": 52,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/sorare_lineup_v3.py",
       "scripts/check_injuries.py",
       "scripts/fix_lineup_v2.py",
       "scripts/sorare_lineup_v2_enhanced.py",
       "scripts/sorare_lineup_v2.py",
-      "scripts/debug_lineup_logic.py",
-      "scripts/debug_sorare_slots.py"
+      "scripts/debug_lineup_logic.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 40m",
+        "Resets in 2h 35m",
         "Weekly: 100% left [============]",
         "Pace: 48% in reserve | Expected 48% used | Lasts until reset",
         "Resets in 3d 15h",
@@ -157,15 +157,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 40m",
+      "sessionReset": "2h 35m",
       "weeklyReset": "3d 15h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T03:55:07Z"
+    "updatedAt": "2026-04-25T04:00:05Z"
   },
   "modelUsage": {
-    "session": 0.028218,
-    "daily": 0.067578,
+    "session": 0.037376,
+    "daily": 0.0,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -180,17 +180,17 @@
         "cost": 6.695697749999999
       },
       {
-        "name": "gpt-5.3-codex",
-        "window": "session",
-        "cost": 0.37852919999999995
-      },
-      {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 0.0744970968
+        "cost": 0.08365530600000001
       },
       {
         "name": "google/gemini-2.5-pro",
+        "window": "session",
+        "cost": 0.0
+      },
+      {
+        "name": "openai/gpt-5.1-codex",
         "window": "session",
         "cost": 0.0
       }
@@ -215,23 +215,14 @@
         "costEstimated": false
       },
       {
-        "name": "gpt-5.3-codex",
-        "source": "codex",
-        "weeklyCost": 0.37852919999999995,
-        "dailyCost": 0.0,
-        "sessionCost": 0.37852919999999995,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 188006,
-        "outputTokens": 5650,
-        "totalTokens": 193656,
-        "sessionCost": 0.0744970968,
-        "dailyCost": 0.0675781092,
-        "weeklyCost": 0.0744970968,
+        "inputTokens": 128324,
+        "outputTokens": 16401,
+        "totalTokens": 144725,
+        "sessionCost": 0.08365530600000001,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.08365530600000001,
         "sessions": 10,
         "isGemini": false,
         "costEstimated": false
@@ -312,7 +303,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T03:55:10Z",
+    "lastUpdated": "2026-04-25T04:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -327,9 +318,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 4.75186291,
-      "weekly": 30.5221993,
-      "monthly": 52.670023014,
+      "daily": 4.852634148,
+      "weekly": 30.622970538,
+      "monthly": 52.770794252,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -341,8 +332,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.069496,
-      "total": 30.323031,
+      "daily": 0.001918,
+      "total": 29.95366,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -383,12 +374,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.3,
-      "cpu_user": 55.78,
-      "cpu_sys": 17.53,
-      "load1": 8.97,
-      "load5": 8.09,
-      "load15": 7.83,
+      "cpu_pct": 73.4,
+      "cpu_user": 55.95,
+      "cpu_sys": 17.44,
+      "load1": 8.03,
+      "load5": 7.88,
+      "load15": 7.8,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -398,14 +389,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.3,
-      "cpu_user": 1.76,
-      "cpu_sys": 11.5,
-      "load1": 1.79,
+      "cpu_pct": 12.4,
+      "cpu_user": 2.65,
+      "cpu_sys": 9.73,
+      "load1": 2.04,
       "load5": 1.82,
-      "load15": 1.92,
+      "load15": 1.88,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -429,19 +420,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T03:55:04Z"
+      "lastChecked": "2026-04-25T04:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T03:55:04Z"
+      "lastChecked": "2026-04-25T04:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T03:55:04Z"
+      "lastChecked": "2026-04-25T04:00:03Z"
     }
   ],
   "crons": [
@@ -494,7 +485,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "J.A.I.N Medic",
@@ -538,59 +529,31 @@
       "multiRun": {
         "runs": [
           {
-            "time": "7:15 AM",
-            "mode": "Weekday",
-            "label": "Market open brief",
-            "past": true,
-            "done": false
-          },
-          {
             "time": "10:00 AM",
-            "mode": "Weekday",
-            "label": "Mid-morning brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "12:00 PM",
-            "mode": "Weekday",
-            "label": "Midday brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "2:00 PM",
-            "mode": "Weekday",
-            "label": "Pulse brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend opener",
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
-            "mode": "Daily",
-            "label": "Close brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "mode": "Weekday",
-            "label": "Evening brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend close",
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
-            "mode": "Daily",
-            "label": "Late brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend late brief",
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
-            "mode": "Daily",
-            "label": "Wrap brief",
-            "past": true,
+            "mode": "Weekend",
+            "label": "Weekend wrap",
+            "past": false,
             "done": false
           }
         ]
@@ -625,7 +588,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -646,7 +609,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -657,7 +620,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -668,7 +631,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-24T07:30:03.144647+00:00"
     },
     {
@@ -680,7 +643,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-24T13:00:24.161109+00:00"
     },
     {
@@ -692,7 +655,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare ML Lineups",
@@ -703,7 +666,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Champion Submit",
@@ -714,7 +677,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-24T15:00:09.954269+00:00"
     },
     {
@@ -788,7 +751,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -819,7 +782,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "JAIMES Weekly Report",
@@ -839,12 +802,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 512686,
+      "elapsedSecs": 512984,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/check_injuries.py, scripts/fix_lineup_v2.py",
+      "label": "Editing: scripts/sorare_lineup_v3.py, scripts/check_injuries.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -865,29 +828,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T03:55:10Z",
-      "event": "Session spend: $0.03"
+      "time": "2026-04-25T04:00:08Z",
+      "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-25T03:55:07Z",
-      "event": "Coding: scripts/check_injuries.py, scripts/fix_lineup_v2.py"
+      "time": "2026-04-25T04:00:05Z",
+      "event": "Coding: scripts/sorare_lineup_v3.py, scripts/check_injuries.py"
     },
     {
-      "time": "2026-04-25T03:55:07Z",
+      "time": "2026-04-25T04:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T03:55:04Z",
+      "time": "2026-04-25T04:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T03:55:04Z",
+      "time": "2026-04-25T04:00:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T03:55:04Z",
+      "time": "2026-04-25T04:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T03:55:04Z"
+  "lastUpdated": "2026-04-25T04:00:03Z"
 }

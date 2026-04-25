@@ -1,6 +1,6 @@
 {
-  "session": 0.028218,
-  "daily": 0.067578,
+  "session": 0.037376,
+  "daily": 0.0,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -15,17 +15,17 @@
       "cost": 6.695697749999999
     },
     {
-      "name": "gpt-5.3-codex",
-      "window": "session",
-      "cost": 0.37852919999999995
-    },
-    {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.0744970968
+      "cost": 0.08365530600000001
     },
     {
       "name": "google/gemini-2.5-pro",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "openai/gpt-5.1-codex",
       "window": "session",
       "cost": 0.0
     }
@@ -50,23 +50,14 @@
       "costEstimated": false
     },
     {
-      "name": "gpt-5.3-codex",
-      "source": "codex",
-      "weeklyCost": 0.37852919999999995,
-      "dailyCost": 0.0,
-      "sessionCost": 0.37852919999999995,
-      "totalTokens": 0,
-      "costEstimated": false
-    },
-    {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 188006,
-      "outputTokens": 5650,
-      "totalTokens": 193656,
-      "sessionCost": 0.0744970968,
-      "dailyCost": 0.0675781092,
-      "weeklyCost": 0.0744970968,
+      "inputTokens": 128324,
+      "outputTokens": 16401,
+      "totalTokens": 144725,
+      "sessionCost": 0.08365530600000001,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.08365530600000001,
       "sessions": 10,
       "isGemini": false,
       "costEstimated": false
@@ -147,7 +138,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T03:55:10Z",
+  "lastUpdated": "2026-04-25T04:00:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -162,9 +153,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 4.75186291,
-    "weekly": 30.5221993,
-    "monthly": 52.670023014,
+    "daily": 4.852634148,
+    "weekly": 30.622970538,
+    "monthly": 52.770794252,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
@@ -176,8 +167,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.069496,
-    "total": 30.323031,
+    "daily": 0.001918,
+    "total": 29.95366,
     "monthly": 1089.326682
   },
   "weeklyRunRate": {
