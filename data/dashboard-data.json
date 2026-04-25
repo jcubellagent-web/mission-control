@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Audit workflow cleanliness and resilience across routines and model usage",
+    "objective": "Start workflow-audit fix-all implementation",
     "status": "active",
     "steps": [
       {
         "label": "tool",
         "status": "active",
-        "tool": "audit"
+        "tool": "fixall"
       }
     ],
-    "currentTool": "audit",
-    "updatedAt": "2026-04-25T00:04:14Z",
-    "checkedAt": "2026-04-25T00:04:14Z",
+    "currentTool": "fixall",
+    "updatedAt": "2026-04-25T00:06:50Z",
+    "checkedAt": "2026-04-25T00:06:50Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "deepseek/deepseek-v3.2"
+    "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Audit workflow cleanliness and resilience across routines and model usage",
-    "updatedAt": "2026-04-25T00:05:04Z"
+    "context": "Start workflow-audit fix-all implementation",
+    "updatedAt": "2026-04-25T00:10:03Z"
   },
   "contextWindow": {
-    "usedTokens": 47703,
-    "limitTokens": 128000,
-    "pct": 0.3727,
+    "usedTokens": 65898,
+    "limitTokens": 400000,
+    "pct": 0.1647,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -130,9 +130,16 @@
     "pct": 0.6714
   },
   "codingVisibility": {
-    "workspaceDirty": 48,
+    "workspaceDirty": 50,
     "missionControlDirty": 8,
-    "recentFiles": [],
+    "recentFiles": [
+      "scripts/sorare_canonical_reflector.py",
+      "scripts/sorare_player_ranker.py",
+      "scripts/sorare_auth_watchdog.py",
+      "scripts/sorare_cookie_autorefresh.py",
+      "scripts/sorare_gw5_audit.py",
+      "scripts/sorare_add_champion3.py"
+    ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
       "available": true,
@@ -154,7 +161,7 @@
       "weeklyReset": "3d 18h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T00:05:06Z"
+    "updatedAt": "2026-04-25T00:10:05Z"
   },
   "modelUsage": {
     "session": 0.012026,
@@ -232,9 +239,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 47703,
-        "outputTokens": 12,
-        "totalTokens": 47715,
+        "inputTokens": 65898,
+        "outputTokens": 6,
+        "totalTokens": 65904,
         "sessionCost": 0.012025692000000001,
         "dailyCost": 0.012025692000000001,
         "weeklyCost": 0.012025692000000001,
@@ -318,7 +325,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T00:05:10Z",
+    "lastUpdated": "2026-04-25T00:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -389,12 +396,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 95.8,
-      "cpu_user": 52.39,
-      "cpu_sys": 43.39,
-      "load1": 12.48,
-      "load5": 9.97,
-      "load15": 9.08,
+      "cpu_pct": 75.5,
+      "cpu_user": 57.13,
+      "cpu_sys": 18.32,
+      "load1": 10.59,
+      "load5": 10.42,
+      "load15": 9.53,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -404,12 +411,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 30.5,
-      "cpu_user": 15.62,
-      "cpu_sys": 14.84,
-      "load1": 2.45,
-      "load5": 2.1,
-      "load15": 2.02,
+      "cpu_pct": 9.7,
+      "cpu_user": 0.88,
+      "cpu_sys": 8.84,
+      "load1": 2.12,
+      "load5": 2.02,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -435,19 +442,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T00:05:04Z"
+      "lastChecked": "2026-04-25T00:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T00:05:04Z"
+      "lastChecked": "2026-04-25T00:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T00:05:04Z"
+      "lastChecked": "2026-04-25T00:10:03Z"
     }
   ],
   "crons": [
@@ -856,8 +863,18 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 498885,
+      "elapsedSecs": 499184,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
+    },
+    {
+      "id": "coding-visibility",
+      "label": "Editing: scripts/sorare_canonical_reflector.py, scripts/sorare_player_ranker.py",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
     },
     {
       "id": "context-watchdog",
@@ -872,29 +889,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T00:05:10Z",
+      "time": "2026-04-25T00:10:09Z",
       "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-04-25T00:05:06Z",
+      "time": "2026-04-25T00:10:05Z",
+      "event": "Coding: scripts/sorare_canonical_reflector.py, scripts/sorare_player_ranker.py"
+    },
+    {
+      "time": "2026-04-25T00:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T00:05:04Z",
+      "time": "2026-04-25T00:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T00:05:04Z",
+      "time": "2026-04-25T00:10:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T00:05:04Z",
+      "time": "2026-04-25T00:10:03Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-25T00:05:04Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-25T00:05:04Z"
+  "lastUpdated": "2026-04-25T00:10:03Z"
 }
