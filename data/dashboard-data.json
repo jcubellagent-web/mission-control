@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "replace Chris Sale DNP in Sorare GW10 Champion lineups",
+    "objective": "replaced Chris Sale DNP with best legal fresh-data option in GW10 Champion lineup 2",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T23:19:43Z",
-    "checkedAt": "2026-04-25T23:19:43Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T23:21:18Z",
+    "checkedAt": "2026-04-25T23:21:18Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "replace Chris Sale DNP in Sorare GW10 Champion lineups",
-    "updatedAt": "2026-04-25T23:20:04Z"
+    "context": "replaced Chris Sale DNP with best legal fresh-data option in GW10 Champion lineup 2",
+    "updatedAt": "2026-04-25T23:25:04Z"
   },
   "contextWindow": {
-    "usedTokens": 136794,
+    "usedTokens": 149013,
     "limitTokens": 272000,
-    "pct": 0.5029,
+    "pct": 0.5478,
     "model": "gpt-5.4",
     "status": "red"
   },
@@ -136,8 +130,7 @@
       "scripts/send_josh_reply.py",
       "scripts/sync_memory_to_jain.sh",
       "scripts/llm_router.py",
-      "scripts/answer_callback.py",
-      "mission-control/index.html"
+      "scripts/answer_callback.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -145,7 +138,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 41m",
+        "Resets in 4h 36m",
         "Weekly: 100% left [============]",
         "Pace: 60% in reserve | Expected 60% used | Lasts until reset",
         "Resets in 2d 19h",
@@ -156,15 +149,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 41m",
+      "sessionReset": "4h 36m",
       "weeklyReset": "2d 19h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T23:20:06Z"
+    "updatedAt": "2026-04-25T23:25:06Z"
   },
   "modelUsage": {
-    "session": 0.108264,
-    "daily": 0.951428,
+    "session": 0.201019,
+    "daily": 1.044183,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -181,7 +174,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.6574735
+        "cost": 0.750229
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -216,12 +209,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 133471,
+        "inputTokens": 173338,
         "outputTokens": 1772,
-        "totalTokens": 135243,
-        "sessionCost": 0.6574735,
-        "dailyCost": 0.6574735,
-        "weeklyCost": 0.6574735,
+        "totalTokens": 175110,
+        "sessionCost": 0.750229,
+        "dailyCost": 0.750229,
+        "weeklyCost": 0.750229,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -341,7 +334,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T23:20:10Z",
+    "lastUpdated": "2026-04-25T23:25:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -370,8 +363,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.956972,
-      "total": 30.831977,
+      "daily": 1.049727,
+      "total": 30.924732,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -412,12 +405,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 91.4,
-      "cpu_user": 48.94,
-      "cpu_sys": 42.41,
-      "load1": 9.84,
-      "load5": 8.73,
-      "load15": 8.48,
+      "cpu_pct": 97.1,
+      "cpu_user": 55.63,
+      "cpu_sys": 41.47,
+      "load1": 8.49,
+      "load5": 8.39,
+      "load15": 8.38,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -427,14 +420,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 3.47,
-      "cpu_sys": 8.69,
-      "load1": 1.38,
-      "load5": 1.85,
-      "load15": 1.99,
+      "cpu_pct": 10.3,
+      "cpu_user": 1.7,
+      "cpu_sys": 8.54,
+      "load1": 2.26,
+      "load5": 1.92,
+      "load15": 1.95,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -458,19 +451,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:20:04Z"
+      "lastChecked": "2026-04-25T23:25:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:20:04Z"
+      "lastChecked": "2026-04-25T23:25:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T23:20:04Z"
+      "lastChecked": "2026-04-25T23:25:04Z"
     }
   ],
   "crons": [
@@ -835,16 +828,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260425-916",
-      "title": "Replace Chris Sale DNP in GW10 Champion",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh reported Chris Sale shows DNP in the live Champion set. Need identify the best legal replacement from the patched fresh-data lane, update the affected Champion lineup, and verify live state.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 19:19",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260425-906",
       "title": "Deep infrastructure/resiliency/workflow audit",
       "status": "active",
@@ -871,7 +854,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 582585,
+      "elapsedSecs": 582884,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -897,29 +880,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T23:20:10Z",
-      "event": "Session spend: $0.11"
+      "time": "2026-04-25T23:25:09Z",
+      "event": "Session spend: $0.20"
     },
     {
-      "time": "2026-04-25T23:20:06Z",
+      "time": "2026-04-25T23:25:06Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/sync_memory_to_jain.sh"
     },
     {
-      "time": "2026-04-25T23:20:06Z",
+      "time": "2026-04-25T23:25:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T23:20:04Z",
+      "time": "2026-04-25T23:25:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T23:20:04Z",
+      "time": "2026-04-25T23:25:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T23:20:04Z",
+      "time": "2026-04-25T23:25:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T23:20:04Z"
+  "lastUpdated": "2026-04-25T23:25:04Z"
 }
