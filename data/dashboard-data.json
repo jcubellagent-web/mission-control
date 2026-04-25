@@ -5,31 +5,31 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "deep infrastructure resiliency and workflow audit with capability gap analysis",
+    "objective": "Audit infrastructure components for capability, resilience, and major flaws",
     "status": "active",
     "steps": [
       {
-        "label": "exec",
+        "label": "tool",
         "status": "active",
         "tool": "bf_step"
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T22:03:09Z",
-    "checkedAt": "2026-04-25T22:03:09Z",
+    "updatedAt": "2026-04-25T22:09:15Z",
+    "checkedAt": "2026-04-25T22:09:15Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "deep infrastructure resiliency and workflow audit with capability gap analysis",
-    "updatedAt": "2026-04-25T22:05:04Z"
+    "context": "Audit infrastructure components for capability, resilience, and major flaws",
+    "updatedAt": "2026-04-25T22:10:03Z"
   },
   "contextWindow": {
-    "usedTokens": 64453,
-    "limitTokens": 400000,
-    "pct": 0.1611,
-    "model": "gpt-5.4-mini",
+    "usedTokens": 22301,
+    "limitTokens": 272000,
+    "pct": 0.082,
+    "model": "gpt-5.4",
     "status": "green"
   },
   "agentBus": [
@@ -144,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 46m",
+        "Resets in 41m",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 20h",
@@ -155,15 +155,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "46m",
+      "sessionReset": "41m",
       "weeklyReset": "2d 20h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T22:05:07Z"
+    "updatedAt": "2026-04-25T22:10:05Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.812986,
+    "session": 0.134412,
+    "daily": 0.947398,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -180,7 +180,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.5492095
+        "cost": 0.683622
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -215,13 +215,13 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 100613,
-        "outputTokens": 1763,
-        "totalTokens": 102376,
-        "sessionCost": 0.5492095,
-        "dailyCost": 0.5492095,
-        "weeklyCost": 0.5492095,
-        "sessions": 1,
+        "inputTokens": 124022,
+        "outputTokens": 3921,
+        "totalTokens": 127943,
+        "sessionCost": 0.683622,
+        "dailyCost": 0.683622,
+        "weeklyCost": 0.683622,
+        "sessions": 2,
         "isGemini": false,
         "costEstimated": false
       },
@@ -340,7 +340,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T22:05:10Z",
+    "lastUpdated": "2026-04-25T22:10:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -369,8 +369,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.81853,
-      "total": 30.693535,
+      "daily": 0.952942,
+      "total": 30.827947,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -411,13 +411,13 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 93.3,
-      "cpu_user": 66.61,
-      "cpu_sys": 26.69,
-      "load1": 13.09,
-      "load5": 10.78,
-      "load15": 9.83,
-      "ram_used_gb": 15.0,
+      "cpu_pct": 72.5,
+      "cpu_user": 55.39,
+      "cpu_sys": 17.7,
+      "load1": 8.57,
+      "load5": 9.34,
+      "load15": 9.42,
+      "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
@@ -426,12 +426,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.1,
-      "cpu_user": 4.46,
-      "cpu_sys": 11.6,
-      "load1": 1.85,
-      "load5": 2.08,
-      "load15": 2.07,
+      "cpu_pct": 13.7,
+      "cpu_user": 4.27,
+      "cpu_sys": 9.4,
+      "load1": 2.44,
+      "load5": 2.21,
+      "load15": 2.1,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.0,
       "uptime": "",
@@ -457,19 +457,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:05:04Z"
+      "lastChecked": "2026-04-25T22:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:05:04Z"
+      "lastChecked": "2026-04-25T22:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T22:05:04Z"
+      "lastChecked": "2026-04-25T22:10:03Z"
     }
   ],
   "crons": [
@@ -834,6 +834,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260425-908",
+      "title": "Full infrastructure capability/resilience audit",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Running broad read-only checks across local host health, OpenClaw/gateway, tasks/workflows, session bloat, and J.A.I.N connectivity to identify major flaws and remediation priorities.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-25 18:09",
+      "owner": "J.A.I.N"
+    },
+    {
       "id": "T-20260425-906",
       "title": "Deep infrastructure/resiliency/workflow audit",
       "status": "active",
@@ -860,24 +870,8 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 578085,
+      "elapsedSecs": 578384,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
-    },
-    {
-      "id": "ff65285a-b0ef-4591-87c8-0bcf344c8257",
-      "label": "jain-infra-fix-retry",
-      "status": "done",
-      "startedAt": "2026-04-25T21:56:55.842000+00:00",
-      "elapsedSecs": 499,
-      "updatedAt": "2026-04-25T21:59:56.250000+00:00"
-    },
-    {
-      "id": "76a92191-a3fa-420b-9a1d-2fa009131261",
-      "label": "antfarm-local-fix-retry",
-      "status": "done",
-      "startedAt": "2026-04-25T21:57:34.740000+00:00",
-      "elapsedSecs": 460,
-      "updatedAt": "2026-04-25T21:59:22.007000+00:00"
     },
     {
       "id": "coding-visibility",
@@ -902,29 +896,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T22:05:10Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-25T22:10:08Z",
+      "event": "Session spend: $0.13"
     },
     {
-      "time": "2026-04-25T22:05:07Z",
+      "time": "2026-04-25T22:10:05Z",
       "event": "Coding: scripts/llm_router.py, scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-25T22:05:07Z",
+      "time": "2026-04-25T22:10:05Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T22:05:04Z",
+      "time": "2026-04-25T22:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T22:05:04Z",
+      "time": "2026-04-25T22:10:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T22:05:04Z",
+      "time": "2026-04-25T22:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T22:05:04Z"
+  "lastUpdated": "2026-04-25T22:10:03Z"
 }
