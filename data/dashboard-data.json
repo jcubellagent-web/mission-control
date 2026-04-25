@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "MLB StatsAPI integrated \u2014 live 2026 stats now available for lineup optimization",
-    "updatedAt": "2026-04-25T05:35:03Z"
+    "updatedAt": "2026-04-25T05:40:04Z"
   },
   "contextWindow": {
     "usedTokens": 65287,
@@ -127,12 +127,12 @@
     "workspaceDirty": 52,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/fetch_live_mlb_stats.py",
       "scripts/sorare_lineup_v5.py",
       "scripts/sorare_gw10_clear_and_rebuild.sh",
       "scripts/sorare_gw10_deploy.sh",
       "scripts/sorare_gw11_auto.sh",
-      "scripts/deploy_main_comps.py",
-      "scripts/sorare_lineup_v4.py"
+      "scripts/deploy_main_comps.py"
     ],
     "codexbarStatus": "99% left \u00b7 wk 100% left",
     "codexbar": {
@@ -140,7 +140,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 1h",
+        "Resets in 55m",
         "Weekly: 100% left [============]",
         "Pace: 49% in reserve | Expected 49% used | Lasts until reset",
         "Resets in 3d 13h",
@@ -151,11 +151,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h",
+      "sessionReset": "55m",
       "weeklyReset": "3d 13h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T05:35:05Z"
+    "updatedAt": "2026-04-25T05:40:06Z"
   },
   "modelUsage": {
     "session": 0.056004,
@@ -310,7 +310,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T05:35:08Z",
+    "lastUpdated": "2026-04-25T05:40:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -325,9 +325,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 7.124604101,
-      "weekly": 32.894940491,
-      "monthly": 55.042764205,
+      "daily": 7.460817552,
+      "weekly": 33.231153942,
+      "monthly": 55.378977656,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -381,12 +381,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 77.4,
-      "cpu_user": 58.45,
-      "cpu_sys": 18.92,
-      "load1": 6.62,
-      "load5": 7.36,
-      "load15": 7.85,
+      "cpu_pct": 77.2,
+      "cpu_user": 58.39,
+      "cpu_sys": 18.75,
+      "load1": 9.55,
+      "load5": 8.26,
+      "load15": 8.06,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -396,14 +396,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 2.58,
-      "cpu_sys": 9.48,
-      "load1": 1.47,
-      "load5": 1.95,
-      "load15": 2.04,
+      "cpu_pct": 10.7,
+      "cpu_user": 0.81,
+      "cpu_sys": 9.83,
+      "load1": 2.97,
+      "load5": 2.32,
+      "load15": 2.16,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -427,19 +427,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T05:35:03Z"
+      "lastChecked": "2026-04-25T05:40:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T05:35:03Z"
+      "lastChecked": "2026-04-25T05:40:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T05:35:03Z"
+      "lastChecked": "2026-04-25T05:40:04Z"
     }
   ],
   "crons": [
@@ -809,12 +809,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 518684,
+      "elapsedSecs": 518985,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_lineup_v5.py, scripts/sorare_gw10_clear_and_rebuild.sh",
+      "label": "Editing: scripts/fetch_live_mlb_stats.py, scripts/sorare_lineup_v5.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -835,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T05:35:08Z",
+      "time": "2026-04-25T05:40:09Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-25T05:35:05Z",
-      "event": "Coding: scripts/sorare_lineup_v5.py, scripts/sorare_gw10_clear_and_rebuild.sh"
+      "time": "2026-04-25T05:40:06Z",
+      "event": "Coding: scripts/fetch_live_mlb_stats.py, scripts/sorare_lineup_v5.py"
     },
     {
-      "time": "2026-04-25T05:35:05Z",
+      "time": "2026-04-25T05:40:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T05:35:03Z",
+      "time": "2026-04-25T05:40:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T05:35:03Z",
+      "time": "2026-04-25T05:40:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T05:35:03Z",
+      "time": "2026-04-25T05:40:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T05:35:03Z"
+  "lastUpdated": "2026-04-25T05:40:04Z"
 }
