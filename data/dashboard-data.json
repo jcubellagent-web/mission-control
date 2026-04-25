@@ -5,24 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "patched Telegram button helper and sent live inline-button verification",
+    "objective": "audit Sorare GW10 and set best three championship lineups",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-25T22:49:53Z",
-    "checkedAt": "2026-04-25T22:49:53Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-25T22:54:09Z",
+    "checkedAt": "2026-04-25T22:54:09Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "patched Telegram button helper and sent live inline-button verification",
-    "updatedAt": "2026-04-25T22:50:03Z"
+    "context": "audit Sorare GW10 and set best three championship lineups",
+    "updatedAt": "2026-04-25T22:55:04Z"
   },
   "contextWindow": {
-    "usedTokens": 29376,
+    "usedTokens": 29708,
     "limitTokens": 272000,
-    "pct": 0.108,
+    "pct": 0.1092,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -133,32 +139,32 @@
       "scripts/answer_callback.py",
       "mission-control/index.html"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 100% left",
+    "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 1m",
+        "Session: 100% left [============]",
+        "Resets in 5h",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 20h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "99% left",
+      "session": "100% left",
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1m",
+      "sessionReset": "5h",
       "weeklyReset": "2d 20h",
-      "summary": "99% left \u00b7 wk 100% left"
+      "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T22:50:05Z"
+    "updatedAt": "2026-04-25T22:55:07Z"
   },
   "modelUsage": {
-    "session": 0.181372,
-    "daily": 0.994358,
+    "session": 0.081753,
+    "daily": 0.894738,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -175,7 +181,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.7305815
+        "cost": 0.630962
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -210,12 +216,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 128807,
-        "outputTokens": 4716,
-        "totalTokens": 133523,
-        "sessionCost": 0.7305815,
-        "dailyCost": 0.7305815,
-        "weeklyCost": 0.7305815,
+        "inputTokens": 108798,
+        "outputTokens": 3097,
+        "totalTokens": 111895,
+        "sessionCost": 0.630962,
+        "dailyCost": 0.630962,
+        "weeklyCost": 0.630962,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -335,7 +341,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T22:50:08Z",
+    "lastUpdated": "2026-04-25T22:55:11Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -364,8 +370,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.999902,
-      "total": 30.874907,
+      "daily": 0.900282,
+      "total": 30.775287,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -406,12 +412,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.6,
-      "cpu_user": 56.9,
-      "cpu_sys": 18.66,
-      "load1": 12.01,
-      "load5": 9.73,
-      "load15": 9.04,
+      "cpu_pct": 97.2,
+      "cpu_user": 44.9,
+      "cpu_sys": 53.7,
+      "load1": 7.12,
+      "load5": 8.19,
+      "load15": 8.53,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -421,14 +427,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.4,
-      "cpu_user": 5.17,
-      "cpu_sys": 11.2,
-      "load1": 1.89,
-      "load5": 2.09,
-      "load15": 2.15,
+      "cpu_pct": 11.9,
+      "cpu_user": 3.38,
+      "cpu_sys": 8.47,
+      "load1": 1.96,
+      "load5": 2.16,
+      "load15": 2.16,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -452,19 +458,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:50:03Z"
+      "lastChecked": "2026-04-25T22:55:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:50:03Z"
+      "lastChecked": "2026-04-25T22:55:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T22:50:03Z"
+      "lastChecked": "2026-04-25T22:55:04Z"
     }
   ],
   "crons": [
@@ -829,14 +835,14 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260425-912",
-      "title": "Telegram inline button fix",
+      "id": "T-20260425-913",
+      "title": "Sorare GW10 championship deep audit + deploy",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Root cause found: helper sent a flat button array instead of Telegram's row-array shape. Patched `send_josh_reply.py` to normalize buttons and log HTTP error bodies, then sent a live verification message with real inline buttons; awaiting Josh tap.",
+      "notes": "Josh cleared GW10 lineups and asked for a deep Champion-first audit plus deployment of the best three Championship lineups. Need verify whether JAIMES/J.A.I.N is the right execution lane, inspect current Sorare optimizer/data, run the audit, and submit three best Champion lineups.",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 18:50",
-      "owner": "JOSH 2.0"
+      "updatedAt": "2026-04-25 18:53",
+      "owner": "JAIMES"
     },
     {
       "id": "T-20260425-906",
@@ -865,7 +871,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 580784,
+      "elapsedSecs": 581086,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -891,29 +897,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T22:50:08Z",
-      "event": "Session spend: $0.18"
+      "time": "2026-04-25T22:55:11Z",
+      "event": "Session spend: $0.08"
     },
     {
-      "time": "2026-04-25T22:50:05Z",
+      "time": "2026-04-25T22:55:07Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/sync_memory_to_jain.sh"
     },
     {
-      "time": "2026-04-25T22:50:05Z",
-      "event": "CodexBar: 99% left \u00b7 wk 100% left"
+      "time": "2026-04-25T22:55:07Z",
+      "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T22:50:03Z",
+      "time": "2026-04-25T22:55:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T22:50:03Z",
+      "time": "2026-04-25T22:55:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T22:50:03Z",
+      "time": "2026-04-25T22:55:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T22:50:03Z"
+  "lastUpdated": "2026-04-25T22:55:04Z"
 }
