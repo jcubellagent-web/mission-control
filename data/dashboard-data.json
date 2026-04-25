@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "audit Sorare GW10 and set best three championship lineups",
+    "objective": "audited and deployed three GW10 Sorare Champion lineups with live verification",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T22:54:09Z",
-    "checkedAt": "2026-04-25T22:54:09Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T22:59:03Z",
+    "checkedAt": "2026-04-25T22:59:03Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "audit Sorare GW10 and set best three championship lineups",
-    "updatedAt": "2026-04-25T22:55:04Z"
+    "context": "audited and deployed three GW10 Sorare Champion lineups with live verification",
+    "updatedAt": "2026-04-25T23:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 29708,
+    "usedTokens": 83376,
     "limitTokens": 272000,
-    "pct": 0.1092,
+    "pct": 0.3065,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -147,7 +141,7 @@
         "Session: 100% left [============]",
         "Resets in 5h",
         "Weekly: 100% left [============]",
-        "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
+        "Pace: 60% in reserve | Expected 60% used | Lasts until reset",
         "Resets in 2d 20h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
@@ -160,11 +154,11 @@
       "weeklyReset": "2d 20h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T22:55:07Z"
+    "updatedAt": "2026-04-25T23:00:05Z"
   },
   "modelUsage": {
-    "session": 0.081753,
-    "daily": 0.894738,
+    "session": 0.764803,
+    "daily": 1.577788,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -181,7 +175,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.630962
+        "cost": 1.314012
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -216,12 +210,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 108798,
-        "outputTokens": 3097,
-        "totalTokens": 111895,
-        "sessionCost": 0.630962,
-        "dailyCost": 0.630962,
-        "weeklyCost": 0.630962,
+        "inputTokens": 146034,
+        "outputTokens": 17681,
+        "totalTokens": 163715,
+        "sessionCost": 1.314012,
+        "dailyCost": 1.314012,
+        "weeklyCost": 1.314012,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -341,7 +335,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T22:55:11Z",
+    "lastUpdated": "2026-04-25T23:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -370,8 +364,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.900282,
-      "total": 30.775287,
+      "daily": 1.583332,
+      "total": 31.458337,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -412,12 +406,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 97.2,
-      "cpu_user": 44.9,
-      "cpu_sys": 53.7,
-      "load1": 7.12,
-      "load5": 8.19,
-      "load15": 8.53,
+      "cpu_pct": 75.3,
+      "cpu_user": 56.19,
+      "cpu_sys": 19.8,
+      "load1": 6.95,
+      "load5": 7.7,
+      "load15": 8.22,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -427,14 +421,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.9,
-      "cpu_user": 3.38,
-      "cpu_sys": 8.47,
-      "load1": 1.96,
-      "load5": 2.16,
+      "cpu_pct": 13.5,
+      "cpu_user": 4.5,
+      "cpu_sys": 9.0,
+      "load1": 2.36,
+      "load5": 2.18,
       "load15": 2.16,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -458,19 +452,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:55:04Z"
+      "lastChecked": "2026-04-25T23:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:55:04Z"
+      "lastChecked": "2026-04-25T23:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T22:55:04Z"
+      "lastChecked": "2026-04-25T23:00:03Z"
     }
   ],
   "crons": [
@@ -727,7 +721,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T22:45:04.274902+00:00"
+      "lastRun": "2026-04-25T23:00:03.883869+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -835,16 +829,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260425-913",
-      "title": "Sorare GW10 championship deep audit + deploy",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh cleared GW10 lineups and asked for a deep Champion-first audit plus deployment of the best three Championship lineups. Need verify whether JAIMES/J.A.I.N is the right execution lane, inspect current Sorare optimizer/data, run the audit, and submit three best Champion lineups.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 18:53",
-      "owner": "JAIMES"
-    },
-    {
       "id": "T-20260425-906",
       "title": "Deep infrastructure/resiliency/workflow audit",
       "status": "active",
@@ -871,7 +855,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 581086,
+      "elapsedSecs": 581384,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -897,29 +881,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T22:55:11Z",
-      "event": "Session spend: $0.08"
+      "time": "2026-04-25T23:00:08Z",
+      "event": "Session spend: $0.76"
     },
     {
-      "time": "2026-04-25T22:55:07Z",
+      "time": "2026-04-25T23:00:05Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/sync_memory_to_jain.sh"
     },
     {
-      "time": "2026-04-25T22:55:07Z",
+      "time": "2026-04-25T23:00:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T22:55:04Z",
+      "time": "2026-04-25T23:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T22:55:04Z",
+      "time": "2026-04-25T23:00:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T22:55:04Z",
+      "time": "2026-04-25T23:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T22:55:04Z"
+  "lastUpdated": "2026-04-25T23:00:03Z"
 }
