@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "delegate workflow/infrastructure setup to sub-agents while staying responsive",
+    "objective": "delivered antfarm patch verification result to Josh",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T21:54:59Z",
-    "checkedAt": "2026-04-25T21:54:59Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T21:59:53Z",
+    "checkedAt": "2026-04-25T21:59:53Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "delegate workflow/infrastructure setup to sub-agents while staying responsive",
-    "updatedAt": "2026-04-25T21:55:04Z"
+    "context": "delivered antfarm patch verification result to Josh",
+    "updatedAt": "2026-04-25T22:00:04Z"
   },
   "contextWindow": {
-    "usedTokens": 59545,
+    "usedTokens": 30050,
     "limitTokens": 272000,
-    "pct": 0.2189,
+    "pct": 0.1105,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,8 +125,9 @@
   },
   "codingVisibility": {
     "workspaceDirty": 52,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/llm_router.py",
       "scripts/send_josh_reply.py",
       "scripts/answer_callback.py",
       "mission-control/index.html"
@@ -143,7 +138,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 56m",
+        "Resets in 51m",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 21h",
@@ -154,15 +149,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "56m",
+      "sessionReset": "51m",
       "weeklyReset": "2d 21h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T21:55:06Z"
+    "updatedAt": "2026-04-25T22:00:06Z"
   },
   "modelUsage": {
-    "session": 0.178054,
-    "daily": 0.940516,
+    "session": 0.20307,
+    "daily": 0.965533,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -179,7 +174,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.7395904999999999
+        "cost": 0.7646074999999999
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -214,12 +209,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 130417,
-        "outputTokens": 3028,
-        "totalTokens": 133445,
-        "sessionCost": 0.7395904999999999,
-        "dailyCost": 0.7395904999999999,
-        "weeklyCost": 0.7395904999999999,
+        "inputTokens": 122617,
+        "outputTokens": 5439,
+        "totalTokens": 128056,
+        "sessionCost": 0.7646074999999999,
+        "dailyCost": 0.7646074999999999,
+        "weeklyCost": 0.7646074999999999,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -259,7 +254,7 @@
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
-        "sessions": 5,
+        "sessions": 7,
         "isGemini": false,
         "costEstimated": false
       },
@@ -286,6 +281,19 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
         "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-4.1",
+        "source": "openclaw",
+        "inputTokens": 167469,
+        "outputTokens": 2296,
+        "totalTokens": 169765,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 2,
         "isGemini": false,
         "costEstimated": false
       },
@@ -326,7 +334,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T21:55:10Z",
+    "lastUpdated": "2026-04-25T22:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -355,8 +363,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.94606,
-      "total": 30.821065,
+      "daily": 0.971077,
+      "total": 30.846082,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -397,12 +405,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 95.4,
-      "cpu_user": 67.82,
-      "cpu_sys": 27.52,
-      "load1": 11.63,
-      "load5": 9.17,
-      "load15": 8.8,
+      "cpu_pct": 74.6,
+      "cpu_user": 56.81,
+      "cpu_sys": 18.14,
+      "load1": 9.97,
+      "load5": 10.33,
+      "load15": 9.42,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -412,14 +420,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.1,
-      "cpu_user": 4.46,
-      "cpu_sys": 11.6,
-      "load1": 2.06,
-      "load5": 1.99,
-      "load15": 2.02,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "cpu_pct": 11.9,
+      "cpu_user": 3.38,
+      "cpu_sys": 8.47,
+      "load1": 2.67,
+      "load5": 2.33,
+      "load15": 2.15,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -443,19 +451,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T21:55:04Z"
+      "lastChecked": "2026-04-25T22:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T21:55:04Z"
+      "lastChecked": "2026-04-25T22:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T21:55:04Z"
+      "lastChecked": "2026-04-25T22:00:04Z"
     }
   ],
   "crons": [
@@ -712,7 +720,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T21:45:04.500929+00:00"
+      "lastRun": "2026-04-25T22:00:04.571719+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -824,9 +832,9 @@
       "title": "Soup-to-nuts workflow + infrastructure setup",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Reframed to orchestrator mode per Josh: delegating local antfarm repair/verification and J.A.I.N infrastructure cleanup to sub-agents while staying available in the foreground.",
+      "notes": "Orchestrator mode active. J.A.I.N plugin allowlist warning is fixed, and the Antfarm single-step `verify_feedback` patch is now verified/build-clean. Old failed run advances past fix correctly; only remaining blocker is unrelated repo state for one historical verify step (missing `bugfix-sw-cache-sync` branch).",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 17:55",
+      "updatedAt": "2026-04-25 18:01",
       "owner": "J.A.I.N"
     }
   ],
@@ -836,12 +844,28 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 577485,
+      "elapsedSecs": 577785,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
+      "id": "ff65285a-b0ef-4591-87c8-0bcf344c8257",
+      "label": "jain-infra-fix-retry",
+      "status": "done",
+      "startedAt": "2026-04-25T21:56:55.842000+00:00",
+      "elapsedSecs": 199,
+      "updatedAt": "2026-04-25T21:59:56.250000+00:00"
+    },
+    {
+      "id": "76a92191-a3fa-420b-9a1d-2fa009131261",
+      "label": "antfarm-local-fix-retry",
+      "status": "done",
+      "startedAt": "2026-04-25T21:57:34.740000+00:00",
+      "elapsedSecs": 160,
+      "updatedAt": "2026-04-25T21:59:22.007000+00:00"
+    },
+    {
       "id": "coding-visibility",
-      "label": "Editing: scripts/send_josh_reply.py, scripts/answer_callback.py",
+      "label": "Editing: scripts/llm_router.py, scripts/send_josh_reply.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -862,29 +886,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T21:55:10Z",
-      "event": "Session spend: $0.18"
+      "time": "2026-04-25T22:00:09Z",
+      "event": "Session spend: $0.20"
     },
     {
-      "time": "2026-04-25T21:55:06Z",
-      "event": "Coding: scripts/send_josh_reply.py, scripts/answer_callback.py"
+      "time": "2026-04-25T22:00:06Z",
+      "event": "Coding: scripts/llm_router.py, scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-25T21:55:06Z",
+      "time": "2026-04-25T22:00:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T21:55:04Z",
+      "time": "2026-04-25T22:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T21:55:04Z",
+      "time": "2026-04-25T22:00:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T21:55:04Z",
+      "time": "2026-04-25T22:00:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T21:55:04Z"
+  "lastUpdated": "2026-04-25T22:00:04Z"
 }
