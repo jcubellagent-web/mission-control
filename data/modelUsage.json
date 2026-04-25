@@ -1,6 +1,6 @@
 {
-  "session": 0.525233,
-  "daily": 0.961043,
+  "session": 0.129601,
+  "daily": 0.579978,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -17,12 +17,12 @@
     {
       "name": "moonshotai/kimi-k2.6",
       "window": "session",
-      "cost": 0.9546945351999998
+      "cost": 0.5736288935999999
     },
     {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.0223112736
+      "cost": 0.021545243999999998
     },
     {
       "name": "google/gemini-2.5-pro",
@@ -52,26 +52,26 @@
     {
       "name": "moonshotai/kimi-k2.6",
       "source": "openclaw",
-      "inputTokens": 1150452,
-      "outputTokens": 7500,
-      "totalTokens": 1157952,
-      "sessionCost": 0.9546945351999998,
-      "dailyCost": 0.9546945351999998,
-      "weeklyCost": 0.9546945351999998,
-      "sessions": 5,
+      "inputTokens": 725413,
+      "outputTokens": 3824,
+      "totalTokens": 729237,
+      "sessionCost": 0.5736288935999999,
+      "dailyCost": 0.5736288935999999,
+      "weeklyCost": 0.5736288935999999,
+      "sessions": 6,
       "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 67991,
-      "outputTokens": 2126,
-      "totalTokens": 70117,
-      "sessionCost": 0.0223112736,
+      "inputTokens": 67751,
+      "outputTokens": 1932,
+      "totalTokens": 69683,
+      "sessionCost": 0.021545243999999998,
       "dailyCost": 0.0063489636,
-      "weeklyCost": 0.0223112736,
-      "sessions": 5,
+      "weeklyCost": 0.021545243999999998,
+      "sessions": 4,
       "isGemini": false,
       "costEstimated": false
     },
@@ -151,7 +151,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T07:00:08Z",
+  "lastUpdated": "2026-04-25T07:05:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -166,9 +166,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 12.668512228,
-    "weekly": 38.438848618,
-    "monthly": 60.586672332,
+    "daily": 13.492829639,
+    "weekly": 39.263166029,
+    "monthly": 61.410989743,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
@@ -180,8 +180,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.962961,
-    "total": 30.84701,
+    "daily": 0.581896,
+    "total": 30.465179,
     "monthly": 1089.326682
   },
   "weeklyRunRate": {
