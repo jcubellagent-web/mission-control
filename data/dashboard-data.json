@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Completed infrastructure audit across local host, OpenClaw, task state, Mission Control, and J.A.I.N; identified main flaws and priorities",
+    "objective": "Execute priority hardening pass after Josh approved option 1",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-25T22:11:42Z",
-    "checkedAt": "2026-04-25T22:11:42Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-25T22:17:55Z",
+    "checkedAt": "2026-04-25T22:17:55Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed infrastructure audit across local host, OpenClaw, task state, Mission Control, and J.A.I.N; identified main flaws and priorities",
-    "updatedAt": "2026-04-25T22:15:03Z"
+    "context": "Execute priority hardening pass after Josh approved option 1",
+    "updatedAt": "2026-04-25T22:20:04Z"
   },
   "contextWindow": {
     "usedTokens": 46555,
@@ -138,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 36m",
+        "Resets in 31m",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 20h",
@@ -149,11 +155,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "36m",
+      "sessionReset": "31m",
       "weeklyReset": "2d 20h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T22:15:05Z"
+    "updatedAt": "2026-04-25T22:20:07Z"
   },
   "modelUsage": {
     "session": 0.104646,
@@ -334,7 +340,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T22:15:09Z",
+    "lastUpdated": "2026-04-25T22:20:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -405,14 +411,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 76.0,
-      "cpu_user": 56.84,
-      "cpu_sys": 19.17,
-      "load1": 8.05,
-      "load5": 8.38,
-      "load15": 8.9,
+      "cpu_pct": 88.6,
+      "cpu_user": 66.66,
+      "cpu_sys": 21.91,
+      "load1": 14.85,
+      "load5": 10.21,
+      "load15": 9.39,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "81Gi",
@@ -420,17 +426,17 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 2.6,
-      "cpu_sys": 9.56,
-      "load1": 1.44,
-      "load5": 2.0,
-      "load15": 2.06,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 20.0,
+      "cpu_user": 9.56,
+      "cpu_sys": 10.43,
+      "load1": 2.74,
+      "load5": 2.24,
+      "load15": 2.13,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "48Gi",
+      "disk_avail": "46Gi",
       "disk_pct": 20,
       "available": true
     }
@@ -451,19 +457,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:15:03Z"
+      "lastChecked": "2026-04-25T22:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:15:03Z"
+      "lastChecked": "2026-04-25T22:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T22:15:03Z"
+      "lastChecked": "2026-04-25T22:20:04Z"
     }
   ],
   "crons": [
@@ -828,6 +834,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260425-909",
+      "title": "Priority hardening pass",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh approved execution. Applying safe maintenance first: local task/session cleanup, cron routing inspection, J.A.I.N config hygiene, and staging firewall changes for explicit review before any network-policy edits.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-25 18:18",
+      "owner": "J.A.I.N"
+    },
+    {
       "id": "T-20260425-906",
       "title": "Deep infrastructure/resiliency/workflow audit",
       "status": "active",
@@ -854,7 +870,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 578684,
+      "elapsedSecs": 578986,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -880,29 +896,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T22:15:09Z",
+      "time": "2026-04-25T22:20:10Z",
       "event": "Session spend: $0.10"
     },
     {
-      "time": "2026-04-25T22:15:05Z",
+      "time": "2026-04-25T22:20:07Z",
       "event": "Coding: scripts/llm_router.py, scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-25T22:15:05Z",
+      "time": "2026-04-25T22:20:07Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T22:15:03Z",
+      "time": "2026-04-25T22:20:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T22:15:03Z",
+      "time": "2026-04-25T22:20:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T22:15:03Z",
+      "time": "2026-04-25T22:20:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T22:15:03Z"
+  "lastUpdated": "2026-04-25T22:20:04Z"
 }
