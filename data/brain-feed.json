@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "OpenClaw updated to 2026.4.22, not 2026.4.23 yet - Homebrew cask lags behind GitHub release",
+  "objective": "Manually downloading OpenClaw 2026.4.23 from GitHub releases",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T02:16:47Z",
-  "checkedAt": "2026-04-25T02:16:47Z",
+  "steps": [
+    {
+      "label": "system",
+      "status": "active",
+      "tool": "update"
+    }
+  ],
+  "currentTool": "update",
+  "updatedAt": "2026-04-25T02:18:30Z",
+  "checkedAt": "2026-04-25T02:18:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
