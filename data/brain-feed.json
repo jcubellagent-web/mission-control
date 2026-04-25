@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Validating GW10 lineups post-deployment",
+  "objective": "Full end-to-end GW10 Championship deployment - all 3 lineups",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T06:19:38Z",
-  "checkedAt": "2026-04-25T06:19:38Z",
+  "steps": [
+    {
+      "label": "deploy",
+      "status": "active",
+      "tool": "gw10_full"
+    }
+  ],
+  "currentTool": "gw10_full",
+  "updatedAt": "2026-04-25T06:21:43Z",
+  "checkedAt": "2026-04-25T06:21:43Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
