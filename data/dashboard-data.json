@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
+    "objective": "Fixed DNP Chris Sale - replaced with Sandy Alcantara in Champion lineup",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-25T16:03:41Z",
-    "checkedAt": "2026-04-25T16:03:41Z",
+    "updatedAt": "2026-04-25T16:05:39Z",
+    "checkedAt": "2026-04-25T16:05:39Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
-    "updatedAt": "2026-04-25T16:05:04Z"
+    "context": "Fixed DNP Chris Sale - replaced with Sandy Alcantara in Champion lineup",
+    "updatedAt": "2026-04-25T16:10:04Z"
   },
   "contextWindow": {
     "usedTokens": 149445,
@@ -127,12 +127,12 @@
     "workspaceDirty": 52,
     "missionControlDirty": 9,
     "recentFiles": [
+      "scripts/fix_lineup3.py",
+      "scripts/check_all_dnp.py",
+      "scripts/fix_dnp.py",
       "scripts/check_gw10_matchups.py",
       "scripts/optimize_champion_lineups.py",
-      "scripts/full_card_metadata.py",
-      "scripts/build_champion_lineups.py",
-      "scripts/full_inventory_paginated.py",
-      "scripts/full_inventory.py"
+      "scripts/full_card_metadata.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -155,7 +155,7 @@
       "weeklyReset": "3d 2h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T16:05:06Z"
+    "updatedAt": "2026-04-25T16:10:06Z"
   },
   "modelUsage": {
     "session": 0.275675,
@@ -310,7 +310,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T16:05:09Z",
+    "lastUpdated": "2026-04-25T16:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -325,9 +325,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 22.867816192,
-      "weekly": 48.638152582,
-      "monthly": 70.785976296,
+      "daily": 23.071111312,
+      "weekly": 48.841447702,
+      "monthly": 70.989271416,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -381,27 +381,27 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.5,
-      "cpu_user": 57.15,
-      "cpu_sys": 18.36,
-      "load1": 8.47,
-      "load5": 8.51,
-      "load15": 8.22,
+      "cpu_pct": 75.1,
+      "cpu_user": 57.31,
+      "cpu_sys": 18.58,
+      "load1": 8.59,
+      "load5": 8.45,
+      "load15": 8.25,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "81Gi",
+      "disk_avail": "82Gi",
       "disk_pct": 13,
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.9,
-      "cpu_user": 3.38,
-      "cpu_sys": 8.47,
-      "load1": 1.81,
-      "load5": 1.79,
-      "load15": 1.81,
+      "cpu_pct": 13.7,
+      "cpu_user": 2.56,
+      "cpu_sys": 11.11,
+      "load1": 2.15,
+      "load5": 2.0,
+      "load15": 1.9,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -427,19 +427,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:05:04Z"
+      "lastChecked": "2026-04-25T16:10:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:05:04Z"
+      "lastChecked": "2026-04-25T16:10:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T16:05:04Z"
+      "lastChecked": "2026-04-25T16:10:04Z"
     }
   ],
   "crons": [
@@ -809,12 +809,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 556485,
+      "elapsedSecs": 556784,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/check_gw10_matchups.py, scripts/optimize_champion_lineups.py",
+      "label": "Editing: scripts/fix_lineup3.py, scripts/check_all_dnp.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -835,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T16:05:09Z",
+      "time": "2026-04-25T16:10:09Z",
       "event": "Session spend: $0.28"
     },
     {
-      "time": "2026-04-25T16:05:06Z",
-      "event": "Coding: scripts/check_gw10_matchups.py, scripts/optimize_champion_lineups.py"
+      "time": "2026-04-25T16:10:06Z",
+      "event": "Coding: scripts/fix_lineup3.py, scripts/check_all_dnp.py"
     },
     {
-      "time": "2026-04-25T16:05:06Z",
+      "time": "2026-04-25T16:10:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T16:05:04Z",
+      "time": "2026-04-25T16:10:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T16:05:04Z",
+      "time": "2026-04-25T16:10:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T16:05:04Z",
+      "time": "2026-04-25T16:10:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T16:05:04Z"
+  "lastUpdated": "2026-04-25T16:10:04Z"
 }
