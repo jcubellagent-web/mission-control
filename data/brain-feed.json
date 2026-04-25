@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "All 3 Champion lineups successfully filled for GW10",
+  "objective": "Fetching full card metadata including positions, seasons, and types",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T15:56:56Z",
-  "checkedAt": "2026-04-25T15:56:56Z",
+  "steps": [
+    {
+      "label": "api",
+      "status": "active",
+      "tool": "full_metadata"
+    }
+  ],
+  "currentTool": "full_metadata",
+  "updatedAt": "2026-04-25T15:58:27Z",
+  "checkedAt": "2026-04-25T15:58:27Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
