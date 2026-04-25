@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "session startup + greet user",
-    "updatedAt": "2026-04-25T01:25:04Z"
+    "updatedAt": "2026-04-25T01:30:03Z"
   },
   "contextWindow": {
     "usedTokens": 22604,
@@ -134,11 +134,11 @@
     "missionControlDirty": 9,
     "recentFiles": [
       "scripts/sorare_lineup_orchestrator.py",
+      "scripts/sorare_daily_prep.sh",
+      "scripts/sorare_player_ranker.py",
       "scripts/legacy/general/README.md",
       "scripts/legacy/sorare/README.md",
-      "scripts/sorare_canonical_reflector.py",
-      "scripts/sorare_player_ranker.py",
-      "scripts/sorare_auth_watchdog.py"
+      "scripts/sorare_canonical_reflector.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -161,7 +161,7 @@
       "weeklyReset": "3d 17h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T01:25:06Z"
+    "updatedAt": "2026-04-25T01:30:06Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -325,7 +325,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T01:25:09Z",
+    "lastUpdated": "2026-04-25T01:30:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -340,9 +340,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 0.326813008,
-      "weekly": 26.097149398,
-      "monthly": 48.244973112,
+      "daily": 0.636663098,
+      "weekly": 26.406999488,
+      "monthly": 48.554823202,
       "byok_daily": 0.000584,
       "byok_weekly": 0.0014672,
       "byok_monthly": 0.0039597,
@@ -396,12 +396,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.8,
-      "cpu_user": 56.96,
-      "cpu_sys": 18.78,
-      "load1": 10.37,
-      "load5": 9.08,
-      "load15": 8.67,
+      "cpu_pct": 89.6,
+      "cpu_user": 50.31,
+      "cpu_sys": 39.24,
+      "load1": 8.44,
+      "load5": 8.15,
+      "load15": 8.35,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -411,14 +411,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.1,
-      "cpu_user": 2.56,
-      "cpu_sys": 8.54,
-      "load1": 1.85,
-      "load5": 1.75,
-      "load15": 1.76,
+      "cpu_pct": 16.8,
+      "cpu_user": 5.88,
+      "cpu_sys": 10.92,
+      "load1": 2.45,
+      "load5": 1.96,
+      "load15": 1.83,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -442,19 +442,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T01:25:04Z"
+      "lastChecked": "2026-04-25T01:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T01:25:04Z"
+      "lastChecked": "2026-04-25T01:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T01:25:04Z"
+      "lastChecked": "2026-04-25T01:30:03Z"
     }
   ],
   "crons": [
@@ -739,7 +739,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T01:15:04.111925+00:00"
+      "lastRun": "2026-04-25T01:30:04.470940+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -852,12 +852,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 503685,
+      "elapsedSecs": 503985,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_lineup_orchestrator.py, scripts/legacy/general/README.md",
+      "label": "Editing: scripts/sorare_lineup_orchestrator.py, scripts/sorare_daily_prep.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -878,29 +878,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T01:25:09Z",
+      "time": "2026-04-25T01:30:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-25T01:25:06Z",
-      "event": "Coding: scripts/sorare_lineup_orchestrator.py, scripts/legacy/general/README.md"
+      "time": "2026-04-25T01:30:06Z",
+      "event": "Coding: scripts/sorare_lineup_orchestrator.py, scripts/sorare_daily_prep.sh"
     },
     {
-      "time": "2026-04-25T01:25:06Z",
+      "time": "2026-04-25T01:30:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T01:25:04Z",
+      "time": "2026-04-25T01:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T01:25:04Z",
+      "time": "2026-04-25T01:30:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T01:25:04Z",
+      "time": "2026-04-25T01:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T01:25:04Z"
+  "lastUpdated": "2026-04-25T01:30:03Z"
 }
