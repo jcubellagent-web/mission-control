@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "replaced Chris Sale DNP with best legal fresh-data option in GW10 Champion lineup 2",
+  "objective": "scan all three GW10 Champion lineups for DNP/no-game risks and re-fix button delivery",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T23:21:18Z",
-  "checkedAt": "2026-04-25T23:21:18Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-25T23:32:56Z",
+  "checkedAt": "2026-04-25T23:32:56Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
