@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "ML weighting issue identified \u2014 static scores don't reflect 2026 performance",
+  "objective": "Integrating live MLB 2026 stats API into Sorare lineup builder",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T05:22:54Z",
-  "checkedAt": "2026-04-25T05:22:54Z",
+  "steps": [
+    {
+      "label": "api",
+      "status": "active",
+      "tool": "mlb_stats_integration"
+    }
+  ],
+  "currentTool": "mlb_stats_integration",
+  "updatedAt": "2026-04-25T05:30:42Z",
+  "checkedAt": "2026-04-25T05:30:42Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
