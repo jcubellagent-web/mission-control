@@ -5,26 +5,26 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Confirmed GPT-5.4 session is back and responsive",
+    "objective": "Kimi audit complete - 5 findings + god-mode recommendations",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-25T20:13:07Z",
-    "checkedAt": "2026-04-25T20:13:07Z",
+    "updatedAt": "2026-04-25T20:19:36Z",
+    "checkedAt": "2026-04-25T20:19:36Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "GPT-5.4"
+    "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Confirmed GPT-5.4 session is back and responsive",
-    "updatedAt": "2026-04-25T20:15:04Z"
+    "context": "Kimi audit complete - 5 findings + god-mode recommendations",
+    "updatedAt": "2026-04-25T20:20:04Z"
   },
   "contextWindow": {
-    "usedTokens": 109858,
-    "limitTokens": 200000,
-    "pct": 0.5493,
+    "usedTokens": 112049,
+    "limitTokens": 256000,
+    "pct": 0.4377,
     "model": "moonshotai/kimi-k2.6",
-    "status": "red"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -140,7 +140,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 36m",
+        "Resets in 2h 31m",
         "Weekly: 100% left [============]",
         "Pace: 58% in reserve | Expected 58% used | Lasts until reset",
         "Resets in 2d 22h",
@@ -151,11 +151,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 36m",
+      "sessionReset": "2h 31m",
       "weeklyReset": "2d 22h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T20:15:06Z"
+    "updatedAt": "2026-04-25T20:20:06Z"
   },
   "modelUsage": {
     "session": 0.091732,
@@ -211,9 +211,9 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 221291,
-        "outputTokens": 2589,
-        "totalTokens": 223880,
+        "inputTokens": 229212,
+        "outputTokens": 5357,
+        "totalTokens": 234569,
         "sessionCost": 0.36278814919999997,
         "dailyCost": 0.36278814919999997,
         "weeklyCost": 0.36278814919999997,
@@ -310,7 +310,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T20:15:09Z",
+    "lastUpdated": "2026-04-25T20:20:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -325,9 +325,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 29.643295652,
-      "weekly": 55.413632042,
-      "monthly": 77.561455756,
+      "daily": 30.068829142,
+      "weekly": 55.839165532,
+      "monthly": 77.986989246,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -381,12 +381,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.2,
-      "cpu_user": 56.58,
-      "cpu_sys": 18.55,
-      "load1": 7.7,
-      "load5": 7.92,
-      "load15": 8.17,
+      "cpu_pct": 85.7,
+      "cpu_user": 62.13,
+      "cpu_sys": 23.57,
+      "load1": 7.91,
+      "load5": 7.83,
+      "load15": 8.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -396,14 +396,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.2,
-      "cpu_user": 3.33,
-      "cpu_sys": 10.83,
-      "load1": 2.51,
-      "load5": 2.12,
-      "load15": 2.07,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "cpu_pct": 17.6,
+      "cpu_user": 6.4,
+      "cpu_sys": 11.2,
+      "load1": 2.87,
+      "load5": 2.08,
+      "load15": 2.01,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -427,19 +427,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T20:15:04Z"
+      "lastChecked": "2026-04-25T20:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T20:15:04Z"
+      "lastChecked": "2026-04-25T20:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T20:15:04Z"
+      "lastChecked": "2026-04-25T20:20:04Z"
     }
   ],
   "crons": [
@@ -802,25 +802,14 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260425-903",
-      "title": "OpenClaw workflow/settings/architecture repair",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Main box model pin changed back to GPT-5.4 pending gateway restart; JAIMES updated to OpenClaw 2026.4.24; button delivery path still broken and phantom fallback still reproducing during tests.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 16:08",
-      "owner": "JAIMES"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "5c232cd8-ba85-402d-b77e-e43c19211895",
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 571484,
+      "elapsedSecs": 571785,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -846,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T20:15:09Z",
+      "time": "2026-04-25T20:20:09Z",
       "event": "Session spend: $0.09"
     },
     {
-      "time": "2026-04-25T20:15:06Z",
+      "time": "2026-04-25T20:20:06Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/check_lock_times.py"
     },
     {
-      "time": "2026-04-25T20:15:06Z",
+      "time": "2026-04-25T20:20:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T20:15:04Z",
+      "time": "2026-04-25T20:20:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T20:15:04Z",
+      "time": "2026-04-25T20:20:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T20:15:04Z",
+      "time": "2026-04-25T20:20:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T20:15:04Z"
+  "lastUpdated": "2026-04-25T20:20:04Z"
 }
