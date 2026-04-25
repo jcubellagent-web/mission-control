@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Test response sent - no 'No extra answer' leak",
+  "objective": "Checking reply format compliance",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T19:11:01Z",
-  "checkedAt": "2026-04-25T19:11:01Z",
+  "steps": [
+    {
+      "label": "format-check",
+      "status": "active",
+      "tool": "active"
+    }
+  ],
+  "currentTool": "active",
+  "updatedAt": "2026-04-25T19:12:09Z",
+  "checkedAt": "2026-04-25T19:12:09Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
