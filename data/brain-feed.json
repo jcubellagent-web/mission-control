@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "GW10 lineups deployed successfully",
+  "objective": "Fixing GW10 \u2014 clearing all lineups, prioritizing Championship",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T05:07:17Z",
-  "checkedAt": "2026-04-25T05:07:17Z",
+  "steps": [
+    {
+      "label": "api",
+      "status": "active",
+      "tool": "sorare_gw10_fix"
+    }
+  ],
+  "currentTool": "sorare_gw10_fix",
+  "updatedAt": "2026-04-25T05:09:39Z",
+  "checkedAt": "2026-04-25T05:09:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
