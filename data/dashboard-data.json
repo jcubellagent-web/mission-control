@@ -5,24 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Investigated 'No extra answer' \u2014 OpenClaw silent-reply fallback leaking to chat",
+    "objective": "Starting full Sorare MLB lineup reliability audit",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-25T01:58:09Z",
-    "checkedAt": "2026-04-25T01:58:09Z",
+    "steps": [
+      {
+        "label": "sorare",
+        "status": "active",
+        "tool": "audit"
+      }
+    ],
+    "currentTool": "audit",
+    "updatedAt": "2026-04-25T02:06:24Z",
+    "checkedAt": "2026-04-25T02:06:24Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "deepseek-v3.2"
+    "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Investigated 'No extra answer' \u2014 OpenClaw silent-reply fallback leaking to chat",
-    "updatedAt": "2026-04-25T02:05:03Z"
+    "context": "Starting full Sorare MLB lineup reliability audit",
+    "updatedAt": "2026-04-25T02:10:04Z"
   },
   "contextWindow": {
-    "usedTokens": 18246,
+    "usedTokens": 28814,
     "limitTokens": 400000,
-    "pct": 0.0456,
+    "pct": 0.072,
     "model": "deepseek/deepseek-v3.2",
     "status": "green"
   },
@@ -140,7 +146,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 30m",
+        "Resets in 4h 25m",
         "Weekly: 100% left [============]",
         "Pace: 47% in reserve | Expected 47% used | Lasts until reset",
         "Resets in 3d 16h",
@@ -151,15 +157,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 30m",
+      "sessionReset": "4h 25m",
       "weeklyReset": "3d 16h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T02:05:05Z"
+    "updatedAt": "2026-04-25T02:10:06Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.048933,
+    "session": 0.019176,
+    "daily": 0.05779,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -181,7 +187,7 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 0.055852221599999995
+        "cost": 0.0647089632
       },
       {
         "name": "google/gemini-2.5-pro",
@@ -220,13 +226,13 @@
       {
         "name": "deepseek/deepseek-v3.2",
         "source": "openclaw",
-        "inputTokens": 153963,
-        "outputTokens": 4313,
-        "totalTokens": 158276,
-        "sessionCost": 0.055852221599999995,
-        "dailyCost": 0.048933234,
-        "weeklyCost": 0.055852221599999995,
-        "sessions": 11,
+        "inputTokens": 126630,
+        "outputTokens": 5620,
+        "totalTokens": 132250,
+        "sessionCost": 0.0647089632,
+        "dailyCost": 0.0577899756,
+        "weeklyCost": 0.0647089632,
+        "sessions": 10,
         "isGemini": false,
         "costEstimated": false
       },
@@ -306,7 +312,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T02:05:08Z",
+    "lastUpdated": "2026-04-25T02:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -321,9 +327,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 2.229926847,
-      "weekly": 28.000263237,
-      "monthly": 50.148086951,
+      "daily": 2.296939325,
+      "weekly": 28.067275715,
+      "monthly": 50.215099429,
       "byok_daily": 0.0006567,
       "byok_weekly": 0.0015399,
       "byok_monthly": 0.0040324,
@@ -335,8 +341,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.04959,
-      "total": 30.303124,
+      "daily": 0.058447,
+      "total": 30.311981,
       "monthly": 1089.32542
     },
     "weeklyRunRate": {
@@ -377,12 +383,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 78.2,
-      "cpu_user": 59.2,
-      "cpu_sys": 18.99,
-      "load1": 8.38,
-      "load5": 9.25,
-      "load15": 9.16,
+      "cpu_pct": 88.4,
+      "cpu_user": 66.22,
+      "cpu_sys": 22.17,
+      "load1": 8.64,
+      "load5": 9.52,
+      "load15": 9.34,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -392,12 +398,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.8,
-      "cpu_user": 4.68,
-      "cpu_sys": 10.15,
-      "load1": 2.19,
-      "load5": 1.92,
-      "load15": 1.92,
+      "cpu_pct": 12.1,
+      "cpu_user": 0.86,
+      "cpu_sys": 11.2,
+      "load1": 2.17,
+      "load5": 2.03,
+      "load15": 1.96,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.6,
       "uptime": "",
@@ -423,19 +429,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T02:05:03Z"
+      "lastChecked": "2026-04-25T02:10:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T02:05:03Z"
+      "lastChecked": "2026-04-25T02:10:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T02:05:03Z"
+      "lastChecked": "2026-04-25T02:10:04Z"
     }
   ],
   "crons": [
@@ -833,7 +839,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 506084,
+      "elapsedSecs": 506385,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -859,29 +865,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T02:05:08Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-25T02:10:09Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-25T02:05:05Z",
+      "time": "2026-04-25T02:10:06Z",
       "event": "Coding: scripts/sorare_missions.py, scripts/sorare_lineup_orchestrator.py"
     },
     {
-      "time": "2026-04-25T02:05:05Z",
+      "time": "2026-04-25T02:10:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T02:05:03Z",
+      "time": "2026-04-25T02:10:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T02:05:03Z",
+      "time": "2026-04-25T02:10:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T02:05:03Z",
+      "time": "2026-04-25T02:10:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T02:05:03Z"
+  "lastUpdated": "2026-04-25T02:10:04Z"
 }
