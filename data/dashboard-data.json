@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Fixing GW10 \u2014 clearing all lineups, prioritizing Championship",
-    "updatedAt": "2026-04-25T05:10:03Z"
+    "updatedAt": "2026-04-25T05:15:03Z"
   },
   "contextWindow": {
     "usedTokens": 27463,
@@ -133,12 +133,12 @@
     "workspaceDirty": 52,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/sorare_gw10_clear_and_rebuild.sh",
       "scripts/sorare_gw10_deploy.sh",
       "scripts/sorare_gw11_auto.sh",
       "scripts/deploy_main_comps.py",
       "scripts/sorare_lineup_v5.py",
-      "scripts/sorare_lineup_v4.py",
-      "scripts/sorare_lineup_v3.py"
+      "scripts/sorare_lineup_v4.py"
     ],
     "codexbarStatus": "99% left \u00b7 wk 100% left",
     "codexbar": {
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 1h 25m",
+        "Resets in 1h 20m",
         "Weekly: 100% left [============]",
         "Pace: 49% in reserve | Expected 49% used | Lasts until reset",
         "Resets in 3d 13h",
@@ -157,11 +157,11 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 25m",
+      "sessionReset": "1h 20m",
       "weeklyReset": "3d 13h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T05:10:06Z"
+    "updatedAt": "2026-04-25T05:15:06Z"
   },
   "modelUsage": {
     "session": 0.162233,
@@ -316,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T05:10:09Z",
+    "lastUpdated": "2026-04-25T05:15:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 6.139658966,
-      "weekly": 31.909995356,
-      "monthly": 54.05781907,
+      "daily": 6.323305186,
+      "weekly": 32.093641576,
+      "monthly": 54.24146529,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -387,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 74.7,
-      "cpu_user": 56.94,
-      "cpu_sys": 17.79,
-      "load1": 8.08,
-      "load5": 8.09,
-      "load15": 8.07,
+      "cpu_pct": 77.7,
+      "cpu_user": 57.22,
+      "cpu_sys": 20.48,
+      "load1": 8.35,
+      "load5": 8.06,
+      "load15": 8.02,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,12 +402,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.4,
-      "cpu_user": 3.57,
+      "cpu_pct": 10.7,
+      "cpu_user": 0.89,
       "cpu_sys": 9.82,
-      "load1": 2.14,
-      "load5": 2.19,
-      "load15": 2.17,
+      "load1": 1.78,
+      "load5": 2.08,
+      "load15": 2.13,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -433,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T05:10:03Z"
+      "lastChecked": "2026-04-25T05:15:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T05:10:03Z"
+      "lastChecked": "2026-04-25T05:15:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T05:10:03Z"
+      "lastChecked": "2026-04-25T05:15:03Z"
     }
   ],
   "crons": [
@@ -815,12 +815,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 517184,
+      "elapsedSecs": 517484,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_gw10_deploy.sh, scripts/sorare_gw11_auto.sh",
+      "label": "Editing: scripts/sorare_gw10_clear_and_rebuild.sh, scripts/sorare_gw10_deploy.sh",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -841,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T05:10:09Z",
+      "time": "2026-04-25T05:15:09Z",
       "event": "Session spend: $0.16"
     },
     {
-      "time": "2026-04-25T05:10:06Z",
-      "event": "Coding: scripts/sorare_gw10_deploy.sh, scripts/sorare_gw11_auto.sh"
+      "time": "2026-04-25T05:15:06Z",
+      "event": "Coding: scripts/sorare_gw10_clear_and_rebuild.sh, scripts/sorare_gw10_deploy.sh"
     },
     {
-      "time": "2026-04-25T05:10:06Z",
+      "time": "2026-04-25T05:15:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T05:10:03Z",
+      "time": "2026-04-25T05:15:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T05:10:03Z",
+      "time": "2026-04-25T05:15:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T05:10:03Z",
+      "time": "2026-04-25T05:15:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T05:10:03Z"
+  "lastUpdated": "2026-04-25T05:15:03Z"
 }
