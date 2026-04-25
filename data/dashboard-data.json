@@ -5,26 +5,32 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fixed DNP Chris Sale - replaced with Sandy Alcantara in Champion lineup",
+    "objective": "Optimizing all lineups - analyzing 2026 vs classic card strategy",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-25T16:05:39Z",
-    "checkedAt": "2026-04-25T16:05:39Z",
+    "steps": [
+      {
+        "label": "api",
+        "status": "active",
+        "tool": "optimize_all"
+      }
+    ],
+    "currentTool": "optimize_all",
+    "updatedAt": "2026-04-25T16:12:37Z",
+    "checkedAt": "2026-04-25T16:12:37Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixed DNP Chris Sale - replaced with Sandy Alcantara in Champion lineup",
-    "updatedAt": "2026-04-25T16:10:04Z"
+    "context": "Optimizing all lineups - analyzing 2026 vs classic card strategy",
+    "updatedAt": "2026-04-25T16:15:04Z"
   },
   "contextWindow": {
-    "usedTokens": 149445,
+    "usedTokens": 166970,
     "limitTokens": 400000,
-    "pct": 0.3736,
+    "pct": 0.4174,
     "model": "moonshotai/kimi-k2.6",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -125,14 +131,14 @@
   },
   "codingVisibility": {
     "workspaceDirty": 52,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
+      "scripts/optimize_strategy.py",
+      "scripts/maximize_all_lineups.py",
       "scripts/fix_lineup3.py",
       "scripts/check_all_dnp.py",
       "scripts/fix_dnp.py",
-      "scripts/check_gw10_matchups.py",
-      "scripts/optimize_champion_lineups.py",
-      "scripts/full_card_metadata.py"
+      "scripts/check_gw10_matchups.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -155,11 +161,11 @@
       "weeklyReset": "3d 2h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T16:10:06Z"
+    "updatedAt": "2026-04-25T16:15:06Z"
   },
   "modelUsage": {
-    "session": 0.275675,
-    "daily": 0.502881,
+    "session": 0.592092,
+    "daily": 0.819297,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -176,7 +182,7 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "window": "session",
-        "cost": 0.5028806076000001
+        "cost": 0.8192974629
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -211,12 +217,12 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 185837,
-        "outputTokens": 10574,
-        "totalTokens": 196411,
-        "sessionCost": 0.5028806076000001,
-        "dailyCost": 0.5028806076000001,
-        "weeklyCost": 0.5028806076000001,
+        "inputTokens": 189902,
+        "outputTokens": 17993,
+        "totalTokens": 207895,
+        "sessionCost": 0.8192974629,
+        "dailyCost": 0.8192974629,
+        "weeklyCost": 0.8192974629,
         "sessions": 9,
         "isGemini": false,
         "costEstimated": false
@@ -310,7 +316,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T16:10:09Z",
+    "lastUpdated": "2026-04-25T16:15:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -325,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 23.071111312,
-      "weekly": 48.841447702,
-      "monthly": 70.989271416,
+      "daily": 23.413630952,
+      "weekly": 49.183967342,
+      "monthly": 71.331791056,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -339,8 +345,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.504799,
-      "total": 30.379804,
+      "daily": 0.821215,
+      "total": 30.696221,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -381,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.1,
-      "cpu_user": 57.31,
-      "cpu_sys": 18.58,
-      "load1": 8.59,
-      "load5": 8.45,
-      "load15": 8.25,
+      "cpu_pct": 72.0,
+      "cpu_user": 55.4,
+      "cpu_sys": 16.97,
+      "load1": 7.28,
+      "load5": 7.94,
+      "load15": 8.09,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -396,14 +402,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.7,
-      "cpu_user": 2.56,
-      "cpu_sys": 11.11,
-      "load1": 2.15,
-      "load5": 2.0,
-      "load15": 1.9,
+      "cpu_pct": 11.9,
+      "cpu_user": 3.38,
+      "cpu_sys": 8.47,
+      "load1": 2.0,
+      "load5": 1.98,
+      "load15": 1.91,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -427,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:10:04Z"
+      "lastChecked": "2026-04-25T16:15:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:10:04Z"
+      "lastChecked": "2026-04-25T16:15:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T16:10:04Z"
+      "lastChecked": "2026-04-25T16:15:04Z"
     }
   ],
   "crons": [
@@ -696,7 +702,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T16:00:04.660120+00:00"
+      "lastRun": "2026-04-25T16:15:05.041577+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -809,12 +815,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 556784,
+      "elapsedSecs": 557084,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/fix_lineup3.py, scripts/check_all_dnp.py",
+      "label": "Editing: scripts/optimize_strategy.py, scripts/maximize_all_lineups.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -835,29 +841,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T16:10:09Z",
-      "event": "Session spend: $0.28"
+      "time": "2026-04-25T16:15:09Z",
+      "event": "Session spend: $0.59"
     },
     {
-      "time": "2026-04-25T16:10:06Z",
-      "event": "Coding: scripts/fix_lineup3.py, scripts/check_all_dnp.py"
+      "time": "2026-04-25T16:15:06Z",
+      "event": "Coding: scripts/optimize_strategy.py, scripts/maximize_all_lineups.py"
     },
     {
-      "time": "2026-04-25T16:10:06Z",
+      "time": "2026-04-25T16:15:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T16:10:04Z",
+      "time": "2026-04-25T16:15:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T16:10:04Z",
+      "time": "2026-04-25T16:15:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T16:10:04Z",
+      "time": "2026-04-25T16:15:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T16:10:04Z"
+  "lastUpdated": "2026-04-25T16:15:04Z"
 }
