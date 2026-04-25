@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "All Sorare GW10 lineups fixed and verified - 8 lineups, all 7/7, 100% 2026 cards",
+  "objective": "Check Sorare GW10 lock times",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T17:44:35Z",
-  "checkedAt": "2026-04-25T17:44:35Z",
+  "steps": [
+    {
+      "label": "sorare",
+      "status": "active",
+      "tool": "lock_times"
+    }
+  ],
+  "currentTool": "lock_times",
+  "updatedAt": "2026-04-25T17:46:05Z",
+  "checkedAt": "2026-04-25T17:46:05Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
