@@ -5,30 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Executing Option B - reallocate cards to Champion lineups",
+    "objective": "Investigating full card inventory - user reports more than 12 limited cards",
     "status": "active",
     "steps": [
       {
         "label": "api",
         "status": "active",
-        "tool": "reallocate"
+        "tool": "inventory_check"
       }
     ],
-    "currentTool": "reallocate",
-    "updatedAt": "2026-04-25T15:23:39Z",
-    "checkedAt": "2026-04-25T15:23:39Z",
+    "currentTool": "inventory_check",
+    "updatedAt": "2026-04-25T15:42:58Z",
+    "checkedAt": "2026-04-25T15:42:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Executing Option B - reallocate cards to Champion lineups",
-    "updatedAt": "2026-04-25T15:40:03Z"
+    "context": "Investigating full card inventory - user reports more than 12 limited cards",
+    "updatedAt": "2026-04-25T15:45:03Z"
   },
   "contextWindow": {
-    "usedTokens": 112331,
+    "usedTokens": 116131,
     "limitTokens": 400000,
-    "pct": 0.2808,
+    "pct": 0.2903,
     "model": "moonshotai/kimi-k2.6",
     "status": "green"
   },
@@ -133,6 +133,7 @@
     "workspaceDirty": 52,
     "missionControlDirty": 9,
     "recentFiles": [
+      "scripts/full_inventory.py",
       "scripts/verify_allocation.py",
       "scripts/card_inventory.py",
       "scripts/reallocate_to_champion.py"
@@ -158,11 +159,11 @@
       "weeklyReset": "3d 3h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T15:40:05Z"
+    "updatedAt": "2026-04-25T15:45:05Z"
   },
   "modelUsage": {
-    "session": 0.427331,
-    "daily": 0.839799,
+    "session": 0.212317,
+    "daily": 0.624785,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -179,7 +180,7 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "window": "session",
-        "cost": 0.8397993464000001
+        "cost": 0.6247854018000001
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -214,12 +215,12 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 652425,
-        "outputTokens": 15032,
-        "totalTokens": 667457,
-        "sessionCost": 0.8397993464000001,
-        "dailyCost": 0.8397993464000001,
-        "weeklyCost": 0.8397993464000001,
+        "inputTokens": 557277,
+        "outputTokens": 6367,
+        "totalTokens": 563644,
+        "sessionCost": 0.6247854018000001,
+        "dailyCost": 0.6247854018000001,
+        "weeklyCost": 0.6247854018000001,
         "sessions": 9,
         "isGemini": false,
         "costEstimated": false
@@ -313,7 +314,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T15:40:08Z",
+    "lastUpdated": "2026-04-25T15:45:08Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -328,9 +329,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 21.526390578,
-      "weekly": 47.296726968,
-      "monthly": 69.444550682,
+      "daily": 21.771771378,
+      "weekly": 47.542107768,
+      "monthly": 69.689931482,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -342,8 +343,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.841717,
-      "total": 30.716723,
+      "daily": 0.626703,
+      "total": 30.501709,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -384,12 +385,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 72.1,
-      "cpu_user": 55.23,
-      "cpu_sys": 16.89,
-      "load1": 7.62,
-      "load5": 8.09,
-      "load15": 8.0,
+      "cpu_pct": 73.9,
+      "cpu_user": 56.1,
+      "cpu_sys": 17.79,
+      "load1": 7.17,
+      "load5": 7.86,
+      "load15": 7.92,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -399,12 +400,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 4.0,
-      "cpu_sys": 9.6,
-      "load1": 1.94,
-      "load5": 2.12,
-      "load15": 2.07,
+      "cpu_pct": 11.7,
+      "cpu_user": 1.66,
+      "cpu_sys": 10.0,
+      "load1": 1.67,
+      "load5": 1.91,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -430,19 +431,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T15:40:03Z"
+      "lastChecked": "2026-04-25T15:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T15:40:03Z"
+      "lastChecked": "2026-04-25T15:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T15:40:03Z"
+      "lastChecked": "2026-04-25T15:45:03Z"
     }
   ],
   "crons": [
@@ -699,7 +700,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T15:30:04.517910+00:00"
+      "lastRun": "2026-04-25T15:45:03.892947+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -812,12 +813,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 554984,
+      "elapsedSecs": 555284,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/verify_allocation.py, scripts/card_inventory.py",
+      "label": "Editing: scripts/full_inventory.py, scripts/verify_allocation.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -838,29 +839,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T15:40:08Z",
-      "event": "Session spend: $0.43"
+      "time": "2026-04-25T15:45:08Z",
+      "event": "Session spend: $0.21"
     },
     {
-      "time": "2026-04-25T15:40:05Z",
-      "event": "Coding: scripts/verify_allocation.py, scripts/card_inventory.py"
+      "time": "2026-04-25T15:45:05Z",
+      "event": "Coding: scripts/full_inventory.py, scripts/verify_allocation.py"
     },
     {
-      "time": "2026-04-25T15:40:05Z",
+      "time": "2026-04-25T15:45:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T15:40:03Z",
+      "time": "2026-04-25T15:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T15:40:03Z",
+      "time": "2026-04-25T15:45:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T15:40:03Z",
+      "time": "2026-04-25T15:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T15:40:03Z"
+  "lastUpdated": "2026-04-25T15:45:03Z"
 }
