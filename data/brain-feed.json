@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "GW10 deploy script ready \u2014 awaiting Josh approval",
+  "objective": "GW10 full deploy \u2014 dry-run + live",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T04:56:04Z",
-  "checkedAt": "2026-04-25T04:56:04Z",
+  "steps": [
+    {
+      "label": "api",
+      "status": "active",
+      "tool": "sorare_gw10"
+    }
+  ],
+  "currentTool": "sorare_gw10",
+  "updatedAt": "2026-04-25T05:04:53Z",
+  "checkedAt": "2026-04-25T05:04:53Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
