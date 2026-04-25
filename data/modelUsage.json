@@ -1,6 +1,6 @@
 {
   "session": 0.025938,
-  "daily": 0.038636,
+  "daily": 0.046793,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -17,12 +17,12 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.0506730672
+      "cost": 0.044324103600000005
     },
     {
       "name": "moonshotai/kimi-k2.6",
       "window": "session",
-      "cost": 0.025938112200000002
+      "cost": 0.0404439434
     },
     {
       "name": "google/gemini-2.5-pro",
@@ -52,26 +52,26 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 120468,
-      "outputTokens": 3572,
-      "totalTokens": 124040,
-      "sessionCost": 0.0506730672,
-      "dailyCost": 0.0126979272,
-      "weeklyCost": 0.0506730672,
-      "sessions": 9,
+      "inputTokens": 95543,
+      "outputTokens": 3401,
+      "totalTokens": 98944,
+      "sessionCost": 0.044324103600000005,
+      "dailyCost": 0.0063489636,
+      "weeklyCost": 0.044324103600000005,
+      "sessions": 8,
       "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "moonshotai/kimi-k2.6",
       "source": "openclaw",
-      "inputTokens": 2256,
-      "outputTokens": 963,
-      "totalTokens": 3219,
-      "sessionCost": 0.025938112200000002,
-      "dailyCost": 0.025938112200000002,
-      "weeklyCost": 0.025938112200000002,
-      "sessions": 1,
+      "inputTokens": 15178,
+      "outputTokens": 1191,
+      "totalTokens": 16369,
+      "sessionCost": 0.0404439434,
+      "dailyCost": 0.0404439434,
+      "weeklyCost": 0.0404439434,
+      "sessions": 3,
       "isGemini": false,
       "costEstimated": false
     },
@@ -151,7 +151,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T05:00:09Z",
+  "lastUpdated": "2026-04-25T05:05:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -166,9 +166,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 5.919555656,
-    "weekly": 31.689892046,
-    "monthly": 53.83771576,
+    "daily": 5.928238566,
+    "weekly": 31.698574956,
+    "monthly": 53.84639867,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
@@ -180,8 +180,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.040554,
-    "total": 29.946616,
+    "daily": 0.048711,
+    "total": 29.954773,
     "monthly": 1089.326682
   },
   "weeklyRunRate": {
