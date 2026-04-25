@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Execute priority hardening pass after Josh approved option 1",
+    "objective": "Execute approved firewall enable and task-metadata deep dive; answer whether button click registered",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T22:17:55Z",
-    "checkedAt": "2026-04-25T22:17:55Z",
+    "updatedAt": "2026-04-25T22:24:11Z",
+    "checkedAt": "2026-04-25T22:24:11Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Execute priority hardening pass after Josh approved option 1",
-    "updatedAt": "2026-04-25T22:20:04Z"
+    "context": "Execute approved firewall enable and task-metadata deep dive; answer whether button click registered",
+    "updatedAt": "2026-04-25T22:25:04Z"
   },
   "contextWindow": {
-    "usedTokens": 46555,
+    "usedTokens": 85051,
     "limitTokens": 272000,
-    "pct": 0.1712,
+    "pct": 0.3127,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -144,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 31m",
+        "Resets in 26m",
         "Weekly: 100% left [============]",
         "Pace: 59% in reserve | Expected 59% used | Lasts until reset",
         "Resets in 2d 20h",
@@ -155,15 +155,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "31m",
+      "sessionReset": "26m",
       "weeklyReset": "2d 20h",
       "summary": "99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T22:20:07Z"
+    "updatedAt": "2026-04-25T22:25:06Z"
   },
   "modelUsage": {
-    "session": 0.104646,
-    "daily": 0.917631,
+    "session": 0.200091,
+    "daily": 1.013076,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -180,7 +180,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.6538550000000001
+        "cost": 0.7493000000000001
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -215,12 +215,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 141536,
-        "outputTokens": 1825,
-        "totalTokens": 143361,
-        "sessionCost": 0.6538550000000001,
-        "dailyCost": 0.6538550000000001,
-        "weeklyCost": 0.6538550000000001,
+        "inputTokens": 180032,
+        "outputTokens": 1772,
+        "totalTokens": 181804,
+        "sessionCost": 0.7493000000000001,
+        "dailyCost": 0.7493000000000001,
+        "weeklyCost": 0.7493000000000001,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -340,7 +340,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T22:20:10Z",
+    "lastUpdated": "2026-04-25T22:25:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -369,8 +369,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.923175,
-      "total": 30.79818,
+      "daily": 1.01862,
+      "total": 30.893625,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -411,14 +411,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 88.6,
-      "cpu_user": 66.66,
-      "cpu_sys": 21.91,
-      "load1": 14.85,
-      "load5": 10.21,
-      "load15": 9.39,
+      "cpu_pct": 73.7,
+      "cpu_user": 56.6,
+      "cpu_sys": 17.65,
+      "load1": 13.63,
+      "load5": 10.63,
+      "load15": 9.72,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "81Gi",
@@ -426,18 +426,18 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.0,
-      "cpu_user": 9.56,
-      "cpu_sys": 10.43,
-      "load1": 2.74,
-      "load5": 2.24,
-      "load15": 2.13,
-      "ram_used_gb": 15.0,
+      "cpu_pct": 12.1,
+      "cpu_user": 3.22,
+      "cpu_sys": 9.67,
+      "load1": 2.23,
+      "load5": 2.23,
+      "load15": 2.16,
+      "ram_used_gb": 14.0,
       "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
-      "disk_pct": 20,
+      "disk_pct": 21,
       "available": true
     }
   },
@@ -457,19 +457,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:20:04Z"
+      "lastChecked": "2026-04-25T22:25:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T22:20:04Z"
+      "lastChecked": "2026-04-25T22:25:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T22:20:04Z"
+      "lastChecked": "2026-04-25T22:25:04Z"
     }
   ],
   "crons": [
@@ -838,10 +838,10 @@
       "title": "Priority hardening pass",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh approved execution. Applying safe maintenance first: local task/session cleanup, cron routing inspection, J.A.I.N config hygiene, and staging firewall changes for explicit review before any network-policy edits.",
+      "notes": "Josh approved both remaining steps. Executing local firewall enable plus a deeper root-cause check on task metadata/audit noise; also confirming whether the prior button callback registered or the approval came through as plain text.",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 18:18",
-      "owner": "J.A.I.N"
+      "updatedAt": "2026-04-25 18:24",
+      "owner": "JOSH 2.0"
     },
     {
       "id": "T-20260425-906",
@@ -870,7 +870,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 578986,
+      "elapsedSecs": 579285,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -896,29 +896,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T22:20:10Z",
-      "event": "Session spend: $0.10"
+      "time": "2026-04-25T22:25:10Z",
+      "event": "Session spend: $0.20"
     },
     {
-      "time": "2026-04-25T22:20:07Z",
+      "time": "2026-04-25T22:25:06Z",
       "event": "Coding: scripts/llm_router.py, scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-25T22:20:07Z",
+      "time": "2026-04-25T22:25:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T22:20:04Z",
+      "time": "2026-04-25T22:25:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T22:20:04Z",
+      "time": "2026-04-25T22:25:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T22:20:04Z",
+      "time": "2026-04-25T22:25:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T22:20:04Z"
+  "lastUpdated": "2026-04-25T22:25:04Z"
 }
