@@ -1,6 +1,6 @@
 {
-  "session": 0.025938,
-  "daily": 0.046793,
+  "session": 0.162233,
+  "daily": 0.183088,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 6.695697749999999
     },
     {
-      "name": "deepseek/deepseek-v3.2",
-      "window": "session",
-      "cost": 0.044324103600000005
-    },
-    {
       "name": "moonshotai/kimi-k2.6",
       "window": "session",
-      "cost": 0.0404439434
+      "cost": 0.1767391514
+    },
+    {
+      "name": "deepseek/deepseek-v3.2",
+      "window": "session",
+      "cost": 0.043530228
     },
     {
       "name": "google/gemini-2.5-pro",
@@ -50,28 +50,28 @@
       "costEstimated": false
     },
     {
-      "name": "deepseek/deepseek-v3.2",
+      "name": "moonshotai/kimi-k2.6",
       "source": "openclaw",
-      "inputTokens": 95543,
-      "outputTokens": 3401,
-      "totalTokens": 98944,
-      "sessionCost": 0.044324103600000005,
-      "dailyCost": 0.0063489636,
-      "weeklyCost": 0.044324103600000005,
-      "sessions": 8,
+      "inputTokens": 162747,
+      "outputTokens": 1531,
+      "totalTokens": 164278,
+      "sessionCost": 0.1767391514,
+      "dailyCost": 0.1767391514,
+      "weeklyCost": 0.1767391514,
+      "sessions": 3,
       "isGemini": false,
       "costEstimated": false
     },
     {
-      "name": "moonshotai/kimi-k2.6",
+      "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 15178,
-      "outputTokens": 1191,
-      "totalTokens": 16369,
-      "sessionCost": 0.0404439434,
-      "dailyCost": 0.0404439434,
-      "weeklyCost": 0.0404439434,
-      "sessions": 3,
+      "inputTokens": 95293,
+      "outputTokens": 3140,
+      "totalTokens": 98433,
+      "sessionCost": 0.043530228,
+      "dailyCost": 0.0063489636,
+      "weeklyCost": 0.043530228,
+      "sessions": 7,
       "isGemini": false,
       "costEstimated": false
     },
@@ -151,7 +151,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T05:05:09Z",
+  "lastUpdated": "2026-04-25T05:10:09Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -166,9 +166,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 5.928238566,
-    "weekly": 31.698574956,
-    "monthly": 53.84639867,
+    "daily": 6.139658966,
+    "weekly": 31.909995356,
+    "monthly": 54.05781907,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
@@ -180,8 +180,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.048711,
-    "total": 29.954773,
+    "daily": 0.185006,
+    "total": 30.090274,
     "monthly": 1089.326682
   },
   "weeklyRunRate": {
