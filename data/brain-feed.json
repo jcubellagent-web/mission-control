@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
+  "objective": "Audit workflow cleanliness and resilience across routines and model usage",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-24T23:32:19Z",
-  "checkedAt": "2026-04-24T23:32:19Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "audit"
+    }
+  ],
+  "currentTool": "audit",
+  "updatedAt": "2026-04-25T00:04:14Z",
+  "checkedAt": "2026-04-25T00:04:14Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
