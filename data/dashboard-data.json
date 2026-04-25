@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Cleanup pass two completed and summary sent",
+    "objective": "Archive legacy Sorare one-off scripts safely",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-25T00:13:40Z",
-    "checkedAt": "2026-04-25T00:13:40Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "sorare-archive"
+      }
+    ],
+    "currentTool": "sorare-archive",
+    "updatedAt": "2026-04-25T00:18:05Z",
+    "checkedAt": "2026-04-25T00:18:05Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Cleanup pass two completed and summary sent",
-    "updatedAt": "2026-04-25T00:15:04Z"
+    "context": "Archive legacy Sorare one-off scripts safely",
+    "updatedAt": "2026-04-25T00:20:04Z"
   },
   "contextWindow": {
     "usedTokens": 95066,
@@ -124,15 +130,15 @@
     "pct": 0.6714
   },
   "codingVisibility": {
-    "workspaceDirty": 50,
+    "workspaceDirty": 51,
     "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/legacy/sorare/README.md",
       "scripts/sorare_canonical_reflector.py",
       "scripts/sorare_player_ranker.py",
       "scripts/sorare_auth_watchdog.py",
       "scripts/sorare_cookie_autorefresh.py",
-      "scripts/sorare_gw5_audit.py",
-      "scripts/sorare_add_champion3.py"
+      "scripts/legacy/sorare/sorare_gw5_audit.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -155,7 +161,7 @@
       "weeklyReset": "3d 18h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T00:15:06Z"
+    "updatedAt": "2026-04-25T00:20:07Z"
   },
   "modelUsage": {
     "session": 0.012026,
@@ -319,7 +325,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T00:15:09Z",
+    "lastUpdated": "2026-04-25T00:20:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -390,12 +396,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 78.4,
-      "cpu_user": 59.1,
-      "cpu_sys": 19.39,
-      "load1": 8.64,
-      "load5": 9.34,
-      "load15": 9.26,
+      "cpu_pct": 97.7,
+      "cpu_user": 78.74,
+      "cpu_sys": 18.97,
+      "load1": 10.25,
+      "load5": 9.27,
+      "load15": 9.18,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -405,12 +411,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.6,
-      "cpu_user": 0.82,
-      "cpu_sys": 10.74,
-      "load1": 1.65,
-      "load5": 1.91,
-      "load15": 1.95,
+      "cpu_pct": 12.7,
+      "cpu_user": 3.38,
+      "cpu_sys": 9.32,
+      "load1": 2.17,
+      "load5": 1.93,
+      "load15": 1.93,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -436,19 +442,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T00:15:04Z"
+      "lastChecked": "2026-04-25T00:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T00:15:04Z"
+      "lastChecked": "2026-04-25T00:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T00:15:04Z"
+      "lastChecked": "2026-04-25T00:20:04Z"
     }
   ],
   "crons": [
@@ -846,12 +852,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 499484,
+      "elapsedSecs": 499786,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/sorare_canonical_reflector.py, scripts/sorare_player_ranker.py",
+      "label": "Editing: scripts/legacy/sorare/README.md, scripts/sorare_canonical_reflector.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -872,29 +878,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T00:15:09Z",
+      "time": "2026-04-25T00:20:10Z",
       "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-04-25T00:15:06Z",
-      "event": "Coding: scripts/sorare_canonical_reflector.py, scripts/sorare_player_ranker.py"
+      "time": "2026-04-25T00:20:07Z",
+      "event": "Coding: scripts/legacy/sorare/README.md, scripts/sorare_canonical_reflector.py"
     },
     {
-      "time": "2026-04-25T00:15:06Z",
+      "time": "2026-04-25T00:20:07Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T00:15:04Z",
+      "time": "2026-04-25T00:20:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T00:15:04Z",
+      "time": "2026-04-25T00:20:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T00:15:04Z",
+      "time": "2026-04-25T00:20:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T00:15:04Z"
+  "lastUpdated": "2026-04-25T00:20:04Z"
 }
