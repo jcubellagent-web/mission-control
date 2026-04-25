@@ -17,15 +17,15 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.0662584356
+      "cost": 0.0506730672
+    },
+    {
+      "name": "moonshotai/kimi-k2.6",
+      "window": "session",
+      "cost": 0.015585368399999999
     },
     {
       "name": "google/gemini-2.5-pro",
-      "window": "session",
-      "cost": 0.0
-    },
-    {
-      "name": "openai/gpt-5.1-codex",
       "window": "session",
       "cost": 0.0
     }
@@ -52,13 +52,26 @@
     {
       "name": "deepseek/deepseek-v3.2",
       "source": "openclaw",
-      "inputTokens": 171379,
-      "outputTokens": 3831,
-      "totalTokens": 175210,
-      "sessionCost": 0.0662584356,
-      "dailyCost": 0.0282832956,
-      "weeklyCost": 0.0662584356,
-      "sessions": 10,
+      "inputTokens": 120468,
+      "outputTokens": 3572,
+      "totalTokens": 124040,
+      "sessionCost": 0.0506730672,
+      "dailyCost": 0.0126979272,
+      "weeklyCost": 0.0506730672,
+      "sessions": 9,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "moonshotai/kimi-k2.6",
+      "source": "openclaw",
+      "inputTokens": 50911,
+      "outputTokens": 259,
+      "totalTokens": 51170,
+      "sessionCost": 0.015585368399999999,
+      "dailyCost": 0.015585368399999999,
+      "weeklyCost": 0.015585368399999999,
+      "sessions": 1,
       "isGemini": false,
       "costEstimated": false
     },
@@ -138,7 +151,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-25T04:15:08Z",
+  "lastUpdated": "2026-04-25T04:20:08Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -153,9 +166,9 @@
     "available": false
   },
   "openrouter": {
-    "daily": 5.055912743,
-    "weekly": 30.826249133,
-    "monthly": 52.974072847,
+    "daily": 5.152622744,
+    "weekly": 30.922959134,
+    "monthly": 53.070782848,
     "byok_daily": 0.0019183,
     "byok_weekly": 0.0028015,
     "byok_monthly": 0.005294,
