@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "re-audit Sorare GW10 champion lineups against full ML and matchup pipeline",
+    "objective": "re-audited GW10 Champion lineups against JAIMES ML lane and replaced live lineups",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T23:03:42Z",
-    "checkedAt": "2026-04-25T23:03:42Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T23:09:14Z",
+    "checkedAt": "2026-04-25T23:09:14Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "re-audit Sorare GW10 champion lineups against full ML and matchup pipeline",
-    "updatedAt": "2026-04-25T23:05:03Z"
+    "context": "re-audited GW10 Champion lineups against JAIMES ML lane and replaced live lineups",
+    "updatedAt": "2026-04-25T23:10:03Z"
   },
   "contextWindow": {
-    "usedTokens": 83376,
+    "usedTokens": 105339,
     "limitTokens": 272000,
-    "pct": 0.3065,
+    "pct": 0.3873,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -145,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 56m",
+        "Resets in 4h 51m",
         "Weekly: 100% left [============]",
         "Pace: 60% in reserve | Expected 60% used | Lasts until reset",
         "Resets in 2d 19h",
@@ -156,15 +150,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 56m",
+      "sessionReset": "4h 51m",
       "weeklyReset": "2d 19h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T23:05:06Z"
+    "updatedAt": "2026-04-25T23:10:05Z"
   },
   "modelUsage": {
-    "session": 0.764803,
-    "daily": 1.607966,
+    "session": 0.264143,
+    "daily": 1.107306,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -181,7 +175,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 1.314012
+        "cost": 0.8133520000000001
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -216,12 +210,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 146034,
-        "outputTokens": 17681,
-        "totalTokens": 163715,
-        "sessionCost": 1.314012,
-        "dailyCost": 1.314012,
-        "weeklyCost": 1.314012,
+        "inputTokens": 205952,
+        "outputTokens": 1816,
+        "totalTokens": 207768,
+        "sessionCost": 0.8133520000000001,
+        "dailyCost": 0.8133520000000001,
+        "weeklyCost": 0.8133520000000001,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -341,7 +335,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T23:05:08Z",
+    "lastUpdated": "2026-04-25T23:10:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -370,8 +364,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.61351,
-      "total": 31.488515,
+      "daily": 1.11285,
+      "total": 30.987855,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -412,11 +406,11 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.4,
-      "cpu_user": 56.22,
-      "cpu_sys": 17.71,
-      "load1": 7.64,
-      "load5": 8.34,
+      "cpu_pct": 82.6,
+      "cpu_user": 54.9,
+      "cpu_sys": 27.71,
+      "load1": 8.36,
+      "load5": 8.42,
       "load15": 8.41,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
@@ -427,12 +421,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.8,
+      "cpu_pct": 13.6,
       "cpu_user": 2.72,
-      "cpu_sys": 9.9,
-      "load1": 2.0,
-      "load5": 2.06,
-      "load15": 2.1,
+      "cpu_sys": 10.9,
+      "load1": 1.76,
+      "load5": 2.01,
+      "load15": 2.08,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -458,19 +452,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:05:03Z"
+      "lastChecked": "2026-04-25T23:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:05:03Z"
+      "lastChecked": "2026-04-25T23:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T23:05:03Z"
+      "lastChecked": "2026-04-25T23:10:03Z"
     }
   ],
   "crons": [
@@ -835,16 +829,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260425-914",
-      "title": "Sorare GW10 re-audit against full ML lane",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh correctly challenged the prior Champion deployment. Need verify against the real matchup-aware ML pipeline on JAIMES/J.A.I.N, compare outputs to the live Champion lineups, and replace them if the deeper model disagrees.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 19:04",
-      "owner": "JAIMES"
-    },
-    {
       "id": "T-20260425-906",
       "title": "Deep infrastructure/resiliency/workflow audit",
       "status": "active",
@@ -871,7 +855,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 581684,
+      "elapsedSecs": 581984,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -897,29 +881,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T23:05:08Z",
-      "event": "Session spend: $0.76"
+      "time": "2026-04-25T23:10:09Z",
+      "event": "Session spend: $0.26"
     },
     {
-      "time": "2026-04-25T23:05:06Z",
+      "time": "2026-04-25T23:10:05Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/sync_memory_to_jain.sh"
     },
     {
-      "time": "2026-04-25T23:05:06Z",
+      "time": "2026-04-25T23:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T23:05:03Z",
+      "time": "2026-04-25T23:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T23:05:03Z",
+      "time": "2026-04-25T23:10:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T23:05:03Z",
+      "time": "2026-04-25T23:10:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T23:05:03Z"
+  "lastUpdated": "2026-04-25T23:10:03Z"
 }
