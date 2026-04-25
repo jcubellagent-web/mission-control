@@ -5,32 +5,26 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Rebuilding all lineups with optimized 6+1 strategy",
+    "objective": "Successfully rebuilt most lineups - 1 Hot Streak lineup needs attention",
     "status": "active",
-    "steps": [
-      {
-        "label": "api",
-        "status": "active",
-        "tool": "optimize_rebuild"
-      }
-    ],
-    "currentTool": "optimize_rebuild",
-    "updatedAt": "2026-04-25T16:17:16Z",
-    "checkedAt": "2026-04-25T16:17:16Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T16:26:58Z",
+    "checkedAt": "2026-04-25T16:26:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Rebuilding all lineups with optimized 6+1 strategy",
-    "updatedAt": "2026-04-25T16:25:04Z"
+    "context": "Successfully rebuilt most lineups - 1 Hot Streak lineup needs attention",
+    "updatedAt": "2026-04-25T16:30:03Z"
   },
   "contextWindow": {
-    "usedTokens": 174903,
+    "usedTokens": 0,
     "limitTokens": 400000,
-    "pct": 0.4373,
+    "pct": 0.0,
     "model": "moonshotai/kimi-k2.6",
-    "status": "amber"
+    "status": "green"
   },
   "agentBus": [
     {
@@ -131,14 +125,14 @@
   },
   "codingVisibility": {
     "workspaceDirty": 52,
-    "missionControlDirty": 10,
+    "missionControlDirty": 9,
     "recentFiles": [
+      "scripts/rebuild_optimal_v5.py",
+      "scripts/rebuild_optimal_v4.py",
       "scripts/check_lineup_order.py",
       "scripts/rebuild_optimal_v3.py",
       "scripts/get_player_positions.py",
-      "scripts/rebuild_optimal_v2.py",
-      "scripts/rebuild_optimal.py",
-      "scripts/optimize_strategy.py"
+      "scripts/rebuild_optimal_v2.py"
     ],
     "codexbarStatus": "100% left \u00b7 wk 100% left",
     "codexbar": {
@@ -161,11 +155,11 @@
       "weeklyReset": "3d 2h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T16:25:06Z"
+    "updatedAt": "2026-04-25T16:30:06Z"
   },
   "modelUsage": {
-    "session": 0.179066,
-    "daily": 0.406271,
+    "session": 0.789944,
+    "daily": 1.01715,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -182,7 +176,7 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "window": "session",
-        "cost": 0.4062712164
+        "cost": 1.017149686
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -217,12 +211,12 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 171285,
-        "outputTokens": 7210,
-        "totalTokens": 178495,
-        "sessionCost": 0.4062712164,
-        "dailyCost": 0.4062712164,
-        "weeklyCost": 0.4062712164,
+        "inputTokens": 251953,
+        "outputTokens": 22798,
+        "totalTokens": 274751,
+        "sessionCost": 1.017149686,
+        "dailyCost": 1.017149686,
+        "weeklyCost": 1.017149686,
         "sessions": 9,
         "isGemini": false,
         "costEstimated": false
@@ -316,7 +310,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T16:25:09Z",
+    "lastUpdated": "2026-04-25T16:30:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +325,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 24.129686492,
-      "weekly": 49.900022882,
-      "monthly": 72.047846596,
+      "daily": 24.493053452,
+      "weekly": 50.263389842,
+      "monthly": 72.411213556,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -345,8 +339,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.408189,
-      "total": 30.283195,
+      "daily": 1.019068,
+      "total": 30.894073,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -387,12 +381,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 74.3,
-      "cpu_user": 56.31,
-      "cpu_sys": 17.94,
-      "load1": 8.72,
-      "load5": 7.92,
-      "load15": 7.91,
+      "cpu_pct": 76.2,
+      "cpu_user": 57.94,
+      "cpu_sys": 18.23,
+      "load1": 7.97,
+      "load5": 7.96,
+      "load15": 7.92,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -402,12 +396,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.0,
-      "cpu_user": 2.36,
-      "cpu_sys": 8.66,
-      "load1": 1.96,
-      "load5": 2.01,
-      "load15": 1.95,
+      "cpu_pct": 13.7,
+      "cpu_user": 3.41,
+      "cpu_sys": 10.25,
+      "load1": 1.38,
+      "load5": 1.58,
+      "load15": 1.76,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -433,19 +427,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:25:04Z"
+      "lastChecked": "2026-04-25T16:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T16:25:04Z"
+      "lastChecked": "2026-04-25T16:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T16:25:04Z"
+      "lastChecked": "2026-04-25T16:30:03Z"
     }
   ],
   "crons": [
@@ -702,7 +696,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T16:15:05.041577+00:00"
+      "lastRun": "2026-04-25T16:30:04.941759+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -815,12 +809,12 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 557685,
+      "elapsedSecs": 557984,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/check_lineup_order.py, scripts/rebuild_optimal_v3.py",
+      "label": "Editing: scripts/rebuild_optimal_v5.py, scripts/rebuild_optimal_v4.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -841,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T16:25:09Z",
-      "event": "Session spend: $0.18"
+      "time": "2026-04-25T16:30:09Z",
+      "event": "Session spend: $0.79"
     },
     {
-      "time": "2026-04-25T16:25:06Z",
-      "event": "Coding: scripts/check_lineup_order.py, scripts/rebuild_optimal_v3.py"
+      "time": "2026-04-25T16:30:06Z",
+      "event": "Coding: scripts/rebuild_optimal_v5.py, scripts/rebuild_optimal_v4.py"
     },
     {
-      "time": "2026-04-25T16:25:06Z",
+      "time": "2026-04-25T16:30:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T16:25:04Z",
+      "time": "2026-04-25T16:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T16:25:04Z",
+      "time": "2026-04-25T16:30:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T16:25:04Z",
+      "time": "2026-04-25T16:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T16:25:04Z"
+  "lastUpdated": "2026-04-25T16:30:03Z"
 }
