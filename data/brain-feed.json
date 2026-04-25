@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "re-audited GW10 Champion lineups against JAIMES ML lane and replaced live lineups",
+  "objective": "patch Sorare ML lane to remove stale matchup bias and use recent data better",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T23:09:14Z",
-  "checkedAt": "2026-04-25T23:09:14Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-25T23:10:46Z",
+  "checkedAt": "2026-04-25T23:10:46Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
