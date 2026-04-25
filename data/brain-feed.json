@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "All 3 Champion lineups verified full with complete inventory data",
+  "objective": "Investigating DNP status for Chris Sale - checking GW10 matchups",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-25T16:02:22Z",
-  "checkedAt": "2026-04-25T16:02:22Z",
+  "steps": [
+    {
+      "label": "api",
+      "status": "active",
+      "tool": "matchup_check"
+    }
+  ],
+  "currentTool": "matchup_check",
+  "updatedAt": "2026-04-25T16:02:57Z",
+  "checkedAt": "2026-04-25T16:02:57Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "moonshotai/kimi-k2.6"
 }
