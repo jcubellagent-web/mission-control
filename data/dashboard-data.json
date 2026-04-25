@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fixing button compliance + starting workflow audit",
+    "objective": "Completed workflow/architecture audit - 4 issues found",
     "status": "active",
-    "steps": [
-      {
-        "label": "audit",
-        "status": "active",
-        "tool": "active"
-      }
-    ],
-    "currentTool": "active",
-    "updatedAt": "2026-04-25T19:54:54Z",
-    "checkedAt": "2026-04-25T19:54:54Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-25T19:58:08Z",
+    "checkedAt": "2026-04-25T19:58:08Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "moonshotai/kimi-k2.6"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fixing button compliance + starting workflow audit",
-    "updatedAt": "2026-04-25T19:55:04Z"
+    "context": "Completed workflow/architecture audit - 4 issues found",
+    "updatedAt": "2026-04-25T20:00:04Z"
   },
   "contextWindow": {
-    "usedTokens": 89433,
+    "usedTokens": 96610,
     "limitTokens": 256000,
-    "pct": 0.3493,
+    "pct": 0.3774,
     "model": "moonshotai/kimi-k2.6",
     "status": "green"
   },
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 52,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "scripts/check_lock_times.py",
       "scripts/fix_lineups_manual_positions.py",
@@ -146,7 +140,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 56m",
+        "Resets in 2h 51m",
         "Weekly: 100% left [============]",
         "Pace: 58% in reserve | Expected 58% used | Lasts until reset",
         "Resets in 2d 23h",
@@ -157,15 +151,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 56m",
+      "sessionReset": "2h 51m",
       "weeklyReset": "2d 23h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T19:55:06Z"
+    "updatedAt": "2026-04-25T20:00:06Z"
   },
   "modelUsage": {
-    "session": 0.083996,
-    "daily": 0.443573,
+    "session": 0.069654,
+    "daily": 0.429231,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -182,7 +176,7 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "window": "session",
-        "cost": 0.369310676
+        "cost": 0.3549686476
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -217,12 +211,12 @@
       {
         "name": "moonshotai/kimi-k2.6",
         "source": "openclaw",
-        "inputTokens": 245298,
-        "outputTokens": 3276,
-        "totalTokens": 248574,
-        "sessionCost": 0.369310676,
-        "dailyCost": 0.369310676,
-        "weeklyCost": 0.369310676,
+        "inputTokens": 328412,
+        "outputTokens": 2602,
+        "totalTokens": 331014,
+        "sessionCost": 0.3549686476,
+        "dailyCost": 0.3549686476,
+        "weeklyCost": 0.3549686476,
         "sessions": 7,
         "isGemini": false,
         "costEstimated": false
@@ -316,7 +310,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T19:55:09Z",
+    "lastUpdated": "2026-04-25T20:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -331,9 +325,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 28.760731142,
-      "weekly": 54.531067532,
-      "monthly": 76.678891246,
+      "daily": 29.231118362,
+      "weekly": 55.001454752,
+      "monthly": 77.149278466,
       "byok_daily": 0.0019183,
       "byok_weekly": 0.0028015,
       "byok_monthly": 0.005294,
@@ -345,8 +339,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.445491,
-      "total": 30.320496,
+      "daily": 0.431149,
+      "total": 30.306154,
       "monthly": 1089.326682
     },
     "weeklyRunRate": {
@@ -387,29 +381,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 72.6,
-      "cpu_user": 55.23,
-      "cpu_sys": 17.32,
-      "load1": 7.41,
-      "load5": 7.92,
-      "load15": 7.98,
+      "cpu_pct": 75.2,
+      "cpu_user": 57.32,
+      "cpu_sys": 17.88,
+      "load1": 8.1,
+      "load5": 8.64,
+      "load15": 8.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "82Gi",
+      "disk_avail": "81Gi",
       "disk_pct": 13,
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.8,
-      "cpu_user": 0.83,
-      "cpu_sys": 10.0,
-      "load1": 1.81,
-      "load5": 1.96,
-      "load15": 1.97,
+      "cpu_pct": 13.2,
+      "cpu_user": 2.6,
+      "cpu_sys": 11.3,
+      "load1": 2.48,
+      "load5": 2.12,
+      "load15": 2.02,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -433,19 +427,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T19:55:04Z"
+      "lastChecked": "2026-04-25T20:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T19:55:04Z"
+      "lastChecked": "2026-04-25T20:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T19:55:04Z"
+      "lastChecked": "2026-04-25T20:00:04Z"
     }
   ],
   "crons": [
@@ -702,7 +696,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T19:45:04.346619+00:00"
+      "lastRun": "2026-04-25T20:00:04.412183+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -815,7 +809,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 570284,
+      "elapsedSecs": 570584,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -841,29 +835,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T19:55:09Z",
-      "event": "Session spend: $0.08"
+      "time": "2026-04-25T20:00:09Z",
+      "event": "Session spend: $0.07"
     },
     {
-      "time": "2026-04-25T19:55:06Z",
+      "time": "2026-04-25T20:00:06Z",
       "event": "Coding: scripts/check_lock_times.py, scripts/fix_lineups_manual_positions.py"
     },
     {
-      "time": "2026-04-25T19:55:06Z",
+      "time": "2026-04-25T20:00:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T19:55:04Z",
+      "time": "2026-04-25T20:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T19:55:04Z",
+      "time": "2026-04-25T20:00:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T19:55:04Z",
+      "time": "2026-04-25T20:00:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T19:55:04Z"
+  "lastUpdated": "2026-04-25T20:00:04Z"
 }
