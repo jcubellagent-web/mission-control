@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Answered Josh's catch-up on the overnight approval state and identified the only remaining FRED monitor decision",
+  "objective": "handle async completion heartbeat internally",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T14:12:28Z",
-  "checkedAt": "2026-04-26T14:12:28Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T14:12:56Z",
+  "checkedAt": "2026-04-26T14:12:56Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
