@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Memory sync to J.A.I.N finished successfully: backup script completed, remote manifest verified at 2026-04-26T04:01:16-04:00 with 13 files, and task/daily memory were updated.",
+  "objective": "heartbeat triage and scheduled checks",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T08:02:22Z",
-  "checkedAt": "2026-04-26T08:02:22Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-26T08:31:33Z",
+  "checkedAt": "2026-04-26T08:31:33Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
