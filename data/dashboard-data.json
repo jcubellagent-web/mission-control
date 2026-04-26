@@ -5,32 +5,26 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "deep Mission Control audit polish and Codex delegation",
+    "objective": "Handled async completion batch internally",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-26T14:21:41Z",
-    "checkedAt": "2026-04-26T14:21:41Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-26T14:39:42Z",
+    "checkedAt": "2026-04-26T14:39:42Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "deep Mission Control audit polish and Codex delegation",
-    "updatedAt": "2026-04-26T14:35:05Z"
+    "context": "Handled async completion batch internally",
+    "updatedAt": "2026-04-26T14:40:12Z"
   },
   "contextWindow": {
-    "usedTokens": 66841,
+    "usedTokens": 112931,
     "limitTokens": 272000,
-    "pct": 0.2457,
+    "pct": 0.4152,
     "model": "gpt-5.5",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 2,
+    "missionControlDirty": 4,
     "recentFiles": [
       "mission-control/service-worker.js",
       "mission-control/index.html",
@@ -143,7 +137,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 27m",
+        "Resets in 4h 21m",
         "Weekly: 97% left [===========-]",
         "Pace: 66% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
@@ -154,17 +148,17 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 27m",
+      "sessionReset": "4h 21m",
       "weeklyReset": "2d 4h",
       "summary": "98% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T14:35:08Z"
+    "updatedAt": "2026-04-26T14:40:18Z"
   },
   "modelUsage": {
-    "session": 0.414372,
-    "daily": 11.261754,
-    "weekly": 40.941781,
-    "monthly": 947.3192,
+    "session": 0.424343,
+    "daily": 11.271725,
+    "weekly": 40.951752,
+    "monthly": 947.329171,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -179,7 +173,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 5.418224
+        "cost": 5.4281950000000005
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -214,12 +208,12 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 1013292,
-        "outputTokens": 2006,
-        "totalTokens": 1015298,
-        "sessionCost": 5.418224,
-        "dailyCost": 5.418224,
-        "weeklyCost": 5.418224,
+        "inputTokens": 999987,
+        "outputTokens": 2030,
+        "totalTokens": 1002017,
+        "sessionCost": 5.4281950000000005,
+        "dailyCost": 5.4281950000000005,
+        "weeklyCost": 5.4281950000000005,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -348,7 +342,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:35:11Z",
+    "lastUpdated": "2026-04-26T14:40:22Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -377,15 +371,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 18.582395,
-      "total": 41.652242,
-      "monthly": 947.328119
+      "daily": 18.592366,
+      "total": 41.662213,
+      "monthly": 947.33809
     },
     "weeklyRunRate": {
-      "total": 41.652242,
+      "total": 41.662213,
       "automation": 0.710461,
-      "interactive": 40.23132,
-      "projectedMonthly": 178.51
+      "interactive": 40.241291,
+      "projectedMonthly": 178.55
     }
   },
   "moltWorld": {
@@ -419,29 +413,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 93.7,
-      "cpu_user": 51.49,
-      "cpu_sys": 42.2,
-      "load1": 11.97,
-      "load5": 8.93,
-      "load15": 8.41,
+      "cpu_pct": 81.6,
+      "cpu_user": 52.49,
+      "cpu_sys": 29.6,
+      "load1": 9.87,
+      "load5": 9.6,
+      "load15": 8.87,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "79Gi",
-      "disk_pct": 13,
+      "disk_avail": "88Gi",
+      "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.8,
-      "cpu_user": 4.34,
-      "cpu_sys": 10.43,
-      "load1": 2.16,
-      "load5": 2.09,
-      "load15": 2.08,
+      "cpu_pct": 23.4,
+      "cpu_user": 13.67,
+      "cpu_sys": 10.25,
+      "load1": 2.08,
+      "load5": 2.3,
+      "load15": 2.19,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -465,19 +459,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:35:05Z"
+      "lastChecked": "2026-04-26T14:40:12Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:35:05Z"
+      "lastChecked": "2026-04-26T14:40:12Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:35:05Z"
+      "lastChecked": "2026-04-26T14:40:12Z"
     }
   ],
   "crons": [
@@ -1226,20 +1220,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "deep Mission Control audit polish and Codex delegation",
+      "objective": "Handled async completion batch internally",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-26T14:21:41Z",
+      "updatedAt": "2026-04-26T14:39:42Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1267,18 +1255,13 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T14:25:24Z",
-      "messageReceived": "2026-04-26T14:25:24Z",
+      "updatedAt": "2026-04-26T14:35:30Z",
+      "messageReceived": "2026-04-26T14:35:30Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
         {
           "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-          "status": "error",
-          "tool": "exec"
-        },
-        {
-          "label": "Sorare Daily Prep \u2014 Sun Apr 26 09:00:21 EDT 2026: Sorare daily prep complete",
           "status": "error",
           "tool": "exec"
         },
@@ -1313,20 +1296,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "deep Mission Control audit polish and Codex delegation",
+        "objective": "Handled async completion batch internally",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-26T14:21:41Z",
+        "updatedAt": "2026-04-26T14:39:42Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
@@ -1335,18 +1312,13 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T14:25:24Z",
-        "messageReceived": "2026-04-26T14:25:24Z",
+        "updatedAt": "2026-04-26T14:35:30Z",
+        "messageReceived": "2026-04-26T14:35:30Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
           {
             "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-            "status": "error",
-            "tool": "exec"
-          },
-          {
-            "label": "Sorare Daily Prep \u2014 Sun Apr 26 09:00:21 EDT 2026: Sorare daily prep complete",
             "status": "error",
             "tool": "exec"
           },
@@ -1390,29 +1362,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:35:11Z",
-      "event": "Session spend: $0.41"
+      "time": "2026-04-26T14:40:22Z",
+      "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-26T14:35:08Z",
+      "time": "2026-04-26T14:40:18Z",
       "event": "Coding: mission-control/service-worker.js, mission-control/index.html"
     },
     {
-      "time": "2026-04-26T14:35:08Z",
+      "time": "2026-04-26T14:40:18Z",
       "event": "CodexBar: 98% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T14:35:05Z",
+      "time": "2026-04-26T14:40:12Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:35:05Z",
+      "time": "2026-04-26T14:40:12Z",
       "event": "2 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T14:35:05Z",
+      "time": "2026-04-26T14:40:12Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T14:35:05Z"
+  "lastUpdated": "2026-04-26T14:40:12Z"
 }
