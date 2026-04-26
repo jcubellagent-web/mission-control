@@ -5,25 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "heartbeat triage and scheduled checks",
+    "objective": "heartbeat triage completed, self-maintenance and system health ran, mission control recency checked",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "heartbeat"
-      }
-    ],
-    "currentTool": "heartbeat",
-    "updatedAt": "2026-04-26T07:38:57Z",
-    "checkedAt": "2026-04-26T07:38:57Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-26T07:40:11Z",
+    "checkedAt": "2026-04-26T07:40:11Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "heartbeat triage and scheduled checks",
-    "updatedAt": "2026-04-26T07:40:05Z"
+    "context": "heartbeat triage completed, self-maintenance and system health ran, mission control recency checked",
+    "updatedAt": "2026-04-26T07:45:03Z"
   },
   "contextWindow": {
     "usedTokens": 106955,
@@ -142,7 +136,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 94% left [===========-]",
-        "Resets in 1h 22m",
+        "Resets in 1h 17m",
         "Weekly: 98% left [===========-]",
         "Pace: 63% in reserve | Expected 65% used | Lasts until reset",
         "Resets in 2d 11h",
@@ -153,15 +147,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 22m",
+      "sessionReset": "1h 17m",
       "weeklyReset": "2d 11h",
       "summary": "94% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-26T07:40:07Z"
+    "updatedAt": "2026-04-26T07:45:05Z"
   },
   "modelUsage": {
     "session": 0.417683,
-    "daily": 5.304606,
+    "daily": 5.812679,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -178,7 +172,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 1.337101
+        "cost": 1.845174
       },
       {
         "name": "openai/gpt-5.4-mini",
@@ -213,12 +207,12 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 181957,
-        "outputTokens": 966,
-        "totalTokens": 182923,
-        "sessionCost": 1.337101,
-        "dailyCost": 1.337101,
-        "weeklyCost": 1.337101,
+        "inputTokens": 189400,
+        "outputTokens": 1873,
+        "totalTokens": 191273,
+        "sessionCost": 1.845174,
+        "dailyCost": 1.845174,
+        "weeklyCost": 1.845174,
         "sessions": 3,
         "isGemini": false,
         "costEstimated": false
@@ -360,7 +354,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T07:40:10Z",
+    "lastUpdated": "2026-04-26T07:45:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -389,8 +383,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 12.625247,
-      "total": 35.695094,
+      "daily": 13.13332,
+      "total": 36.203167,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -431,12 +425,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 95.6,
-      "cpu_user": 46.37,
-      "cpu_sys": 49.2,
-      "load1": 9.34,
-      "load5": 8.04,
-      "load15": 7.95,
+      "cpu_pct": 74.8,
+      "cpu_user": 56.35,
+      "cpu_sys": 18.39,
+      "load1": 7.5,
+      "load5": 7.91,
+      "load15": 7.91,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -446,12 +440,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.0,
-      "cpu_user": 1.6,
-      "cpu_sys": 10.4,
-      "load1": 1.36,
-      "load5": 1.96,
-      "load15": 1.99,
+      "cpu_pct": 13.5,
+      "cpu_user": 3.36,
+      "cpu_sys": 10.8,
+      "load1": 2.2,
+      "load5": 1.87,
+      "load15": 1.92,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -477,19 +471,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T07:40:05Z"
+      "lastChecked": "2026-04-26T07:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T07:40:05Z"
+      "lastChecked": "2026-04-26T07:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T07:40:05Z"
+      "lastChecked": "2026-04-26T07:45:03Z"
     }
   ],
   "crons": [
@@ -734,7 +728,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -987,19 +981,13 @@
     "josh": {
       "agent": "JOSH 2.0",
       "active": true,
-      "objective": "heartbeat triage and scheduled checks",
+      "objective": "heartbeat triage completed, self-maintenance and system health ran, mission control recency checked",
       "status": "active",
-      "updatedAt": "2026-04-26T07:38:57Z",
+      "updatedAt": "2026-04-26T07:40:11Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "heartbeat",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "tool",
-          "status": "active",
-          "tool": "heartbeat"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1023,8 +1011,8 @@
       "active": false,
       "objective": "X Growth Tracker",
       "status": "idle",
-      "updatedAt": "2026-04-26T07:37:00Z",
-      "messageReceived": "2026-04-26T07:37:00Z",
+      "updatedAt": "2026-04-26T07:42:03Z",
+      "messageReceived": "2026-04-26T07:42:03Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1053,27 +1041,21 @@
       {
         "agent": "JOSH 2.0",
         "active": true,
-        "objective": "heartbeat triage and scheduled checks",
+        "objective": "heartbeat triage completed, self-maintenance and system health ran, mission control recency checked",
         "status": "active",
-        "updatedAt": "2026-04-26T07:38:57Z",
+        "updatedAt": "2026-04-26T07:40:11Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "heartbeat",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
-            "tool": "heartbeat"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
         "active": false,
         "objective": "X Growth Tracker",
         "status": "idle",
-        "updatedAt": "2026-04-26T07:37:00Z",
-        "messageReceived": "2026-04-26T07:37:00Z",
+        "updatedAt": "2026-04-26T07:42:03Z",
+        "messageReceived": "2026-04-26T07:42:03Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1110,29 +1092,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T07:40:10Z",
+      "time": "2026-04-26T07:45:09Z",
       "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-26T07:40:07Z",
+      "time": "2026-04-26T07:45:05Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-26T07:40:07Z",
+      "time": "2026-04-26T07:45:05Z",
       "event": "CodexBar: 94% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-26T07:40:05Z",
+      "time": "2026-04-26T07:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T07:40:05Z",
+      "time": "2026-04-26T07:45:03Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T07:40:05Z",
+      "time": "2026-04-26T07:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T07:40:05Z"
+  "lastUpdated": "2026-04-26T07:45:03Z"
 }
