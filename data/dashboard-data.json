@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "mission control deep audit polish with Codex",
-    "updatedAt": "2026-04-26T06:20:03Z"
+    "updatedAt": "2026-04-26T06:25:35Z"
   },
   "contextWindow": {
     "usedTokens": 30685,
@@ -130,48 +130,23 @@
     "pct": 0.6651
   },
   "codingVisibility": {
-    "workspaceDirty": 53,
-    "missionControlDirty": 7,
-    "recentFiles": [],
-    "codexbarStatus": "96% left \u00b7 wk 98% left",
+    "workspaceDirty": 0,
+    "missionControlDirty": 8,
+    "recentFiles": [
+      "mission-control/scripts/update_mission_control.py"
+    ],
+    "codexbarStatus": "Codex auth required",
     "codexbar": {
-      "available": true,
-      "raw": [
-        "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 96% left [===========-]",
-        "Resets in 2h 42m",
-        "Weekly: 98% left [===========-]",
-        "Pace: 62% in reserve | Expected 64% used | Lasts until reset",
-        "Resets in 2d 12h",
-        "Credits: 0 left",
-        "Account: jcubell16@gmail.com"
-      ],
-      "session": "96% left",
-      "weekly": "98% left",
-      "credits": "0 left",
-      "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 42m",
-      "weeklyReset": "2d 12h",
-      "summary": "96% left \u00b7 wk 98% left"
+      "available": false
     },
-    "updatedAt": "2026-04-26T06:20:05Z"
+    "updatedAt": "2026-04-26T06:26:57Z"
   },
   "modelUsage": {
     "session": 0.120308,
-    "daily": 2.756841,
+    "daily": 1.10154,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
-      {
-        "name": "gpt-5.4",
-        "window": "session",
-        "cost": 24.00221825
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "window": "session",
-        "cost": 7.326190049999999
-      },
       {
         "name": "openai/gpt-5.5",
         "window": "session",
@@ -186,27 +161,19 @@
         "name": "deepseek/deepseek-v3.2",
         "window": "session",
         "cost": 0.006918987599999999
+      },
+      {
+        "name": "google/gemini-2.5-pro",
+        "window": "session",
+        "cost": 0.0
+      },
+      {
+        "name": "codex/gpt-5.4-mini",
+        "window": "session",
+        "cost": 0.0
       }
     ],
     "breakdown": [
-      {
-        "name": "gpt-5.4",
-        "source": "codex",
-        "weeklyCost": 24.00221825,
-        "dailyCost": 1.534747,
-        "sessionCost": 24.00221825,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "source": "codex",
-        "weeklyCost": 7.326190049999999,
-        "dailyCost": 0.12055350000000001,
-        "sessionCost": 7.326190049999999,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
@@ -335,7 +302,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T06:20:08Z",
+    "lastUpdated": "2026-04-26T06:27:12Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -364,8 +331,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 10.077482,
-      "total": 33.147328,
+      "daily": 8.422181,
+      "total": 1.81892,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -406,14 +373,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 91.2,
-      "cpu_user": 50.0,
-      "cpu_sys": 41.15,
-      "load1": 6.83,
-      "load5": 7.08,
-      "load15": 7.6,
+      "cpu_pct": 68.3,
+      "cpu_user": 48.6,
+      "cpu_sys": 19.7,
+      "load1": 7.0,
+      "load5": 7.59,
+      "load15": 7.72,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "81Gi",
@@ -421,12 +388,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 21.0,
-      "cpu_user": 12.0,
-      "cpu_sys": 9.0,
-      "load1": 2.51,
-      "load5": 2.58,
-      "load15": 2.35,
+      "cpu_pct": 19.7,
+      "cpu_user": 6.29,
+      "cpu_sys": 13.38,
+      "load1": 1.6,
+      "load5": 2.18,
+      "load15": 2.26,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -452,19 +419,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T06:20:03Z"
+      "lastChecked": "2026-04-26T06:25:35Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T06:20:03Z"
+      "lastChecked": "2026-04-26T06:25:35Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T06:20:03Z"
+      "lastChecked": "2026-04-26T06:25:35Z"
     }
   ],
   "crons": [
@@ -475,8 +442,12 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Brain Feed Server",
@@ -485,8 +456,12 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Chiro Invite Sync",
@@ -495,8 +470,12 @@
       "category": "Appointments",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "J.A.I.N Silence Detector",
@@ -505,8 +484,12 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -515,6 +498,9 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -526,8 +512,12 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -536,8 +526,12 @@
       "category": "Maintenance",
       "agent": "JOSH 2.0",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "Josh Local Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "Breaking News Scanner",
@@ -546,8 +540,12 @@
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Intelligence Feed",
@@ -556,8 +554,12 @@
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
+      "runStatus": "active",
       "multiRun": {
         "runs": [
           {
@@ -598,8 +600,12 @@
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "JOSH Health Check",
@@ -608,8 +614,12 @@
       "category": "Maintenance",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "active"
     },
     {
       "name": "Error Rate Monitor",
@@ -618,6 +628,9 @@
       "category": "Maintenance",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -629,8 +642,12 @@
       "category": "Maintenance",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare ML Training",
@@ -639,6 +656,9 @@
       "category": "Sorare MLB",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "hermes",
+      "sourceLabel": "Hermes",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
@@ -651,6 +671,9 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "paused",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -662,6 +685,9 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
@@ -674,6 +700,9 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
@@ -686,6 +715,9 @@
       "category": "Sorare MLB",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "hermes",
+      "sourceLabel": "Hermes",
+      "todayRelevant": true,
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
       "runStatus": "upcoming"
@@ -697,6 +729,9 @@
       "category": "Sorare MLB",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "hermes",
+      "sourceLabel": "Hermes",
+      "todayRelevant": true,
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
       "runStatus": "upcoming"
@@ -708,6 +743,9 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
@@ -720,8 +758,12 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
+      "runStatus": "active",
       "lastRun": "2026-04-26T02:45:04.199054+00:00"
     },
     {
@@ -731,6 +773,9 @@
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null,
       "lastRun": "2026-04-20T21:45:02.054662+00:00"
@@ -742,8 +787,12 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Weekly Recap",
@@ -752,8 +801,12 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Injury Monitor",
@@ -762,6 +815,9 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null
     },
@@ -772,6 +828,9 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null
     },
@@ -782,6 +841,9 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming"
@@ -793,6 +855,9 @@
       "category": "Fantasy Baseball",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "hermes",
+      "sourceLabel": "Hermes",
+      "todayRelevant": false,
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)"
     },
@@ -803,6 +868,9 @@
       "category": "Fantasy Baseball",
       "agent": "J.A.I.N",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null
     },
@@ -813,6 +881,9 @@
       "category": "Maintenance",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "hermes",
+      "sourceLabel": "Hermes",
+      "todayRelevant": true,
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
       "runStatus": "upcoming"
@@ -824,6 +895,9 @@
       "category": "Maintenance",
       "agent": "JAIMES",
       "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null
     }
@@ -834,13 +908,23 @@
       "title": "Mission Control deep audit + Cron/Brain Feed polish",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh requested Codex-backed soup-to-nuts Mission Control audit, data integrity check, UI/UX polish, cron visibility across JOSH 2.0 + JAIMES/J.A.I.N/Hermes, and dual-agent Brain Feed live-objective layout. Codex lane running: exec session `dawn-willow` (PID 9378) on local Mission Control via `codex exec --full-auto`; Codex session id `019dc871-3c68-7600-b71e-ba87e14e4565`. Preserve existing uncommitted dashboard/data/screenshot changes.",
+      "notes": "Josh requested Codex-backed soup-to-nuts Mission Control audit, data integrity check, UI/UX polish, cron visibility across JOSH 2.0 + JAIMES/J.A.I.N/Hermes, and dual-agent Brain Feed live-objective layout. Codex lane running: exec session `dawn-willow` (PID 9378) on local Mission Control via `codex exec --full-auto`; Codex session id `019dc871-3c68-7600-b71e-ba87e14e4565`. Preserve existing uncommitted dashboard/data/screenshot changes. Local + J.A.I.N cron inventory captured to `mission-control/data/cron-inventory-audit.txt`; Codex is editing generator/UI in smaller hunks after one patch-context miss.",
       "requestedAt": null,
       "updatedAt": "2026-04-26 02:20",
       "owner": "JAIMES"
     }
   ],
   "activeAgents": [
+    {
+      "id": "coding-visibility",
+      "label": "Editing: mission-control/scripts/update_mission_control.py",
+      "status": "running",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "live",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    },
     {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 67%",
@@ -852,31 +936,160 @@
       "agentClass": "agent"
     }
   ],
+  "agentBrainFeeds": {
+    "josh": {
+      "agent": "JOSH 2.0",
+      "active": true,
+      "objective": "mission control deep audit polish with Codex",
+      "status": "active",
+      "updatedAt": "2026-04-26T06:18:38Z",
+      "messageReceived": "2026-04-23T04:25:02Z",
+      "currentTool": "bf_step",
+      "model": "GPT-5.5",
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
+    },
+    "jain": {
+      "agent": "J.A.I.N",
+      "active": true,
+      "objective": "heartbeat triage and scheduled checks",
+      "status": "active",
+      "updatedAt": "2026-04-26T03:01:34Z",
+      "messageReceived": "2026-04-23T04:25:02Z",
+      "currentTool": "heartbeat",
+      "model": "GPT-5.4",
+      "steps": [
+        {
+          "label": "tool",
+          "status": "active",
+          "tool": "heartbeat"
+        }
+      ]
+    },
+    "jaimes": {
+      "agent": "JAIMES",
+      "active": false,
+      "objective": "X Growth Tracker",
+      "status": "idle",
+      "updatedAt": "2026-04-26T06:26:24Z",
+      "messageReceived": "2026-04-26T06:26:24Z",
+      "currentTool": "",
+      "model": "gpt-4.1",
+      "steps": [
+        {
+          "label": "X Feedback ML \u2014 X automation retired",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "X Growth Tracker \u2014 X automation retired",
+          "status": "done",
+          "tool": "exec"
+        }
+      ]
+    }
+  },
+  "liveObjectives": {
+    "activeAgents": [
+      "JOSH 2.0",
+      "J.A.I.N"
+    ],
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "J.A.I.N"
+    ],
+    "agents": [
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "objective": "mission control deep audit polish with Codex",
+        "status": "active",
+        "updatedAt": "2026-04-26T06:18:38Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "objective": "heartbeat triage and scheduled checks",
+        "status": "active",
+        "updatedAt": "2026-04-26T03:01:34Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "heartbeat",
+        "model": "GPT-5.4",
+        "steps": [
+          {
+            "label": "tool",
+            "status": "active",
+            "tool": "heartbeat"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "objective": "X Growth Tracker",
+        "status": "idle",
+        "updatedAt": "2026-04-26T06:26:24Z",
+        "messageReceived": "2026-04-26T06:26:24Z",
+        "currentTool": "",
+        "model": "gpt-4.1",
+        "steps": [
+          {
+            "label": "X Feedback ML \u2014 X automation retired",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "X Growth Tracker \u2014 X automation retired",
+            "status": "done",
+            "tool": "exec"
+          }
+        ]
+      }
+    ]
+  },
   "recentActivity": [
     {
-      "time": "2026-04-26T06:20:08Z",
+      "time": "2026-04-26T06:27:12Z",
       "event": "Session spend: $0.12"
     },
     {
-      "time": "2026-04-26T06:20:05Z",
-      "event": "CodexBar: 96% left \u00b7 wk 98% left"
+      "time": "2026-04-26T06:26:57Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-26T06:20:03Z",
+      "time": "2026-04-26T06:26:57Z",
+      "event": "CodexBar: Codex auth required"
+    },
+    {
+      "time": "2026-04-26T06:25:35Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T06:20:03Z",
+      "time": "2026-04-26T06:25:35Z",
       "event": "4 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T06:20:03Z",
+      "time": "2026-04-26T06:25:35Z",
       "event": "Device layer nominal"
-    },
-    {
-      "time": "2026-04-26T06:20:03Z",
-      "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-26T06:20:03Z"
+  "lastUpdated": "2026-04-26T06:25:35Z"
 }
