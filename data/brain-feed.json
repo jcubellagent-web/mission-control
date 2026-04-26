@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Confirmed no gateway restart is needed now and that GPT-5.5 will be escalation-only",
+  "objective": "reduce Telegram context cost",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T15:44:13Z",
-  "checkedAt": "2026-04-26T15:44:13Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T15:44:28Z",
+  "checkedAt": "2026-04-26T15:44:28Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
