@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Sent Josh a cost-aware JAIMES model-selection question list",
-    "updatedAt": "2026-04-26T14:55:04Z"
+    "updatedAt": "2026-04-26T15:00:04Z"
   },
   "contextWindow": {
     "usedTokens": 145226,
@@ -137,7 +137,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 7m",
+        "Resets in 4h 2m",
         "Weekly: 97% left [===========-]",
         "Pace: 66% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
@@ -148,11 +148,11 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 7m",
+      "sessionReset": "4h 2m",
       "weeklyReset": "2d 4h",
       "summary": "98% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T14:55:06Z"
+    "updatedAt": "2026-04-26T15:00:06Z"
   },
   "modelUsage": {
     "session": 0.535611,
@@ -342,7 +342,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:55:09Z",
+    "lastUpdated": "2026-04-26T15:00:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -413,29 +413,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 74.7,
-      "cpu_user": 55.71,
-      "cpu_sys": 18.92,
-      "load1": 7.59,
-      "load5": 8.65,
-      "load15": 8.89,
+      "cpu_pct": 74.3,
+      "cpu_user": 56.9,
+      "cpu_sys": 18.16,
+      "load1": 9.28,
+      "load5": 8.98,
+      "load15": 8.95,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "91Gi",
+      "disk_avail": "90Gi",
       "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.6,
-      "cpu_user": 1.8,
-      "cpu_sys": 10.81,
-      "load1": 1.85,
-      "load5": 1.88,
-      "load15": 1.92,
+      "cpu_pct": 12.7,
+      "cpu_user": 2.54,
+      "cpu_sys": 10.16,
+      "load1": 2.1,
+      "load5": 2.08,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -459,19 +459,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:55:04Z"
+      "lastChecked": "2026-04-26T15:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:55:04Z"
+      "lastChecked": "2026-04-26T15:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:55:04Z"
+      "lastChecked": "2026-04-26T15:00:04Z"
     }
   ],
   "crons": [
@@ -758,7 +758,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-26T11:00:00"
     },
     {
       "name": "X Hot Take",
@@ -871,7 +872,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-26T10:00:00",
+      "lastRun": "2026-04-26T11:00:00",
       "multiRun": {
         "runs": [
           {
@@ -887,7 +888,7 @@
           {
             "time": "11:00 AM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "1:00 PM",
@@ -1039,8 +1040,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-25T15:00:08.607995+00:00"
+      "runStatus": "done",
+      "lastRun": "2026-04-26T15:00:11.886652+00:00"
     },
     {
       "name": "Sorare Canonical Reflector",
@@ -1055,7 +1056,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-26T14:45:04.606679+00:00"
+      "lastRun": "2026-04-26T15:00:04.293014+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1259,8 +1260,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T14:50:38Z",
-      "messageReceived": "2026-04-26T14:50:38Z",
+      "updatedAt": "2026-04-26T14:55:40Z",
+      "messageReceived": "2026-04-26T14:55:40Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1316,8 +1317,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T14:50:38Z",
-        "messageReceived": "2026-04-26T14:50:38Z",
+        "updatedAt": "2026-04-26T14:55:40Z",
+        "messageReceived": "2026-04-26T14:55:40Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1366,29 +1367,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:55:09Z",
+      "time": "2026-04-26T15:00:10Z",
       "event": "Session spend: $0.54"
     },
     {
-      "time": "2026-04-26T14:55:06Z",
+      "time": "2026-04-26T15:00:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T14:55:06Z",
+      "time": "2026-04-26T15:00:06Z",
       "event": "CodexBar: 98% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T14:55:04Z",
+      "time": "2026-04-26T15:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:55:04Z",
+      "time": "2026-04-26T15:00:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T14:55:04Z",
+      "time": "2026-04-26T15:00:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T14:55:04Z"
+  "lastUpdated": "2026-04-26T15:00:04Z"
 }
