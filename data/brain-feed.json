@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Replied to Josh's test ping with status + next-step buttons",
+  "objective": "fix duplicate NO_REPLY fallback after external send",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T04:48:15Z",
-  "checkedAt": "2026-04-26T04:48:15Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T04:48:58Z",
+  "checkedAt": "2026-04-26T04:48:58Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.4"
+  "model": "Opus 4.7"
 }
