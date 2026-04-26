@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Completed Codex-backed Mission Control audit, pushed commit 0420695fa, verified live build, and refreshed Safari",
+  "objective": "handle async completion batch internally",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T14:35:57Z",
-  "checkedAt": "2026-04-26T14:35:57Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T14:39:35Z",
+  "checkedAt": "2026-04-26T14:39:35Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
