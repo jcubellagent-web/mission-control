@@ -5,24 +5,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Explained that local crons still use API while JAIMES/Hermes crons use subscription, and why GPT-5.5 subscription still shouldn't power every routine task",
+    "objective": "delete chiro invite sync and audit Sorare/local/JAIMES cron placement",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-26T16:09:22Z",
-    "checkedAt": "2026-04-26T16:09:22Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-26T16:12:14Z",
+    "checkedAt": "2026-04-26T16:12:14Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Explained that local crons still use API while JAIMES/Hermes crons use subscription, and why GPT-5.5 subscription still shouldn't power every routine task",
-    "updatedAt": "2026-04-26T16:10:03Z"
+    "context": "delete chiro invite sync and audit Sorare/local/JAIMES cron placement",
+    "updatedAt": "2026-04-26T16:15:04Z"
   },
   "contextWindow": {
-    "usedTokens": 136486,
+    "usedTokens": 139098,
     "limitTokens": 272000,
-    "pct": 0.5018,
+    "pct": 0.5114,
     "model": "gpt-5.4",
     "status": "red"
   },
@@ -137,7 +143,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 2h 52m",
+        "Resets in 2h 47m",
         "Weekly: 97% left [===========-]",
         "Pace: 67% in reserve | Expected 70% used | Lasts until reset",
         "Resets in 2d 2h",
@@ -148,15 +154,15 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 52m",
+      "sessionReset": "2h 47m",
       "weeklyReset": "2d 2h",
       "summary": "95% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T16:10:05Z"
+    "updatedAt": "2026-04-26T16:15:06Z"
   },
   "modelUsage": {
-    "session": 0.04759,
-    "daily": 10.835168,
+    "session": 0.0426,
+    "daily": 10.830178,
     "weekly": 41.13868,
     "monthly": 947.516099,
     "topModels": [
@@ -178,7 +184,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.04759
+        "cost": 0.0426
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -221,12 +227,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 5926,
+        "inputTokens": 3418,
         "outputTokens": 9,
-        "totalTokens": 5935,
-        "sessionCost": 0.04759,
-        "dailyCost": 0.04759,
-        "weeklyCost": 0.04759,
+        "totalTokens": 3427,
+        "sessionCost": 0.0426,
+        "dailyCost": 0.0426,
+        "weeklyCost": 0.0426,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -368,7 +374,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T16:10:08Z",
+    "lastUpdated": "2026-04-26T16:15:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -397,8 +403,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 18.155809,
-      "total": 41.225656,
+      "daily": 18.150819,
+      "total": 41.220666,
       "monthly": 947.525018
     },
     "weeklyRunRate": {
@@ -439,12 +445,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 71.6,
-      "cpu_user": 53.62,
-      "cpu_sys": 17.98,
-      "load1": 8.75,
-      "load5": 9.23,
-      "load15": 8.88,
+      "cpu_pct": 71.5,
+      "cpu_user": 54.4,
+      "cpu_sys": 17.6,
+      "load1": 8.83,
+      "load5": 8.7,
+      "load15": 8.7,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -454,12 +460,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.3,
-      "cpu_user": 2.75,
-      "cpu_sys": 9.17,
-      "load1": 1.75,
-      "load5": 2.01,
-      "load15": 2.06,
+      "cpu_pct": 12.4,
+      "cpu_user": 2.65,
+      "cpu_sys": 9.73,
+      "load1": 1.58,
+      "load5": 1.87,
+      "load15": 1.98,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -485,19 +491,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:10:03Z"
+      "lastChecked": "2026-04-26T16:15:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:10:03Z"
+      "lastChecked": "2026-04-26T16:15:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T16:10:03Z"
+      "lastChecked": "2026-04-26T16:15:04Z"
     }
   ],
   "crons": [
@@ -535,13 +541,13 @@
       "description": "Syncs chiropractic client invites into calendar",
       "category": "Appointments",
       "agent": "JOSH 2.0",
-      "status": "ok",
+      "status": "paused",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "active"
+      "runStatus": "due"
     },
     {
       "name": "J.A.I.N Silence Detector",
@@ -1082,7 +1088,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-26T16:00:03.764117+00:00"
+      "lastRun": "2026-04-26T16:15:05.071064+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1223,7 +1229,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260426-947",
+      "title": "Delete Chiro cron + audit Sorare cron placement",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh approved removing the Chiro invite sync and asked for a full audit of local/JAIMES crons, especially whether all Sorare jobs that can live on JAIMES already do. Removing the local Chiro cron, then auditing each cron with next-step recommendations.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-26 12:12",
+      "owner": "JAIMES"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1251,14 +1268,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Explained that local crons still use API while JAIMES/Hermes crons use subscription, and why GPT-5.5 subscription still shouldn't power every routine task",
+      "objective": "delete chiro invite sync and audit Sorare/local/JAIMES cron placement",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-26T16:09:22Z",
+      "updatedAt": "2026-04-26T16:12:14Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.4",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1286,8 +1309,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T16:06:20Z",
-      "messageReceived": "2026-04-26T16:06:20Z",
+      "updatedAt": "2026-04-26T16:11:23Z",
+      "messageReceived": "2026-04-26T16:11:23Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1327,14 +1350,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Explained that local crons still use API while JAIMES/Hermes crons use subscription, and why GPT-5.5 subscription still shouldn't power every routine task",
+        "objective": "delete chiro invite sync and audit Sorare/local/JAIMES cron placement",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-26T16:09:22Z",
+        "updatedAt": "2026-04-26T16:12:14Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.4",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
@@ -1343,8 +1372,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T16:06:20Z",
-        "messageReceived": "2026-04-26T16:06:20Z",
+        "updatedAt": "2026-04-26T16:11:23Z",
+        "messageReceived": "2026-04-26T16:11:23Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1393,29 +1422,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T16:10:08Z",
-      "event": "Session spend: $0.05"
+      "time": "2026-04-26T16:15:10Z",
+      "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-26T16:10:05Z",
+      "time": "2026-04-26T16:15:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T16:10:05Z",
+      "time": "2026-04-26T16:15:06Z",
       "event": "CodexBar: 95% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T16:10:03Z",
+      "time": "2026-04-26T16:15:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T16:10:03Z",
+      "time": "2026-04-26T16:15:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T16:10:03Z",
+      "time": "2026-04-26T16:15:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T16:10:03Z"
+  "lastUpdated": "2026-04-26T16:15:04Z"
 }
