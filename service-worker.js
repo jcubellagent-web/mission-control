@@ -1,15 +1,14 @@
-const CACHE_NAME = "mission-control-pwa-v1775558516
+const CACHE_NAME = "mission-control-pwa-v1777213760";
 const FILES_TO_CACHE = [
   "./manifest.webmanifest",
   "./assets/logo.jpg",
   "./assets/logo-192.png",
-  "./assets/logo-512.png"
-  // index.html intentionally excluded — always fetched fresh (network-first)
+  "./assets/logo-512.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE)),
   );
   self.skipWaiting();
 });
@@ -17,8 +16,10 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => caches.delete(key)))
-    )
+      Promise.all(
+        keys.map((key) => (key === CACHE_NAME ? Promise.resolve() : caches.delete(key))),
+      ),
+    ),
   );
   self.clients.claim();
 });
@@ -29,10 +30,6 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(event.request.url);
-
-  // Always network-first for: index.html, root, and all data JSON files
-  // This ensures the dashboard always loads the latest code and data
-  // Never serve stale: all HTML, all data JSON, all JS files
   const alwaysFresh = (
     url.pathname.endsWith(".html") ||
     url.pathname.endsWith(".js") ||
@@ -43,7 +40,6 @@ self.addEventListener("fetch", (event) => {
   );
 
   if (alwaysFresh) {
-    // Network-first: always try network, only fall back to cache if offline
     event.respondWith(
       fetch(event.request)
         .then((response) => {
@@ -55,12 +51,11 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request)),
     );
     return;
   }
 
-  // Cache-first for static assets (images, fonts, icons)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -78,13 +73,12 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => null);
-    })
+    }),
   );
 });
 
-// Allow the dashboard to force-update the SW
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });

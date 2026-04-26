@@ -46,6 +46,7 @@ CRON_TARGETS = [
 
     # ── J.A.I.N intelligence + maintenance ──────────────────────────────────
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "weekdayRuns": [
@@ -69,6 +70,42 @@ CRON_TARGETS = [
     {"name": "JOSH Health Check", "pattern": "check_josh_health.sh", "schedule": "Every 30 min", "description": "Remote health check from J.A.I.N back to Josh 2.0", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "Error Rate Monitor", "pattern": "error_rate_monitor.py", "schedule": "Daily 11:00 PM ET", "description": "Nightly scan for elevated error rates across automations", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
+    {"name": "XMCP Boot", "pattern": "xmcp", "schedule": "On boot", "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
+
+    # ── X account engine ─────────────────────────────────────────────────────
+    {"name": "X Pre-Market", "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET", "description": "[Original] Futures and overnight setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Market Open", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "[Original] Market-open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Mover", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Hot Take", "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Contrarian take built to spark replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Quote Tweets", "pattern": "x_post_agent.py", "schedule": "Daily 1p/3p/6p/8p ET", "description": "[QT] Quotes breaking or viral posts with our angle", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+     "multiRun": {
+         "runs": [
+             {"time": "1:00 PM", "label": "Quote Tweet"},
+             {"time": "3:00 PM", "label": "Quote Tweet"},
+             {"time": "6:00 PM", "label": "Quote Tweet"},
+             {"time": "8:00 PM", "label": "Quote Tweet"},
+         ]
+     }},
+    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "[Original] Close wrap and next-day setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Prime Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "[Original] Prime-time flagship take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Nightcap", "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] Last sharp insight of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Strategic Replies", "pattern": "x_strategic_reply", "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)", "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+     "multiRun": {
+         "runs": [
+             {"time": "9:00 AM",  "label": "Strategic Reply"},
+             {"time": "10:00 AM", "label": "Strategic Reply"},
+             {"time": "11:00 AM", "label": "Strategic Reply"},
+             {"time": "1:00 PM",  "label": "Strategic Reply"},
+             {"time": "2:00 PM",  "label": "Strategic Reply"},
+             {"time": "3:00 PM",  "label": "Strategic Reply"},
+             {"time": "4:00 PM",  "label": "Strategic Reply"},
+             {"time": "5:00 PM",  "label": "Strategic Reply"},
+             {"time": "6:00 PM",  "label": "Strategic Reply"},
+             {"time": "7:00 PM",  "label": "Strategic Reply"},
+             {"time": "9:00 PM",  "label": "Strategic Reply"},
+             {"time": "11:00 PM", "label": "Strategic Reply"},
+         ]
+     }},
 
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
@@ -525,12 +562,17 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
 
 def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
     raw = feed if isinstance(feed, dict) else {}
+    updated_at = raw.get("updatedAt")
+    reported_active = bool(raw.get("active"))
+    stale = bool(updated_at) and not is_recent_ts(updated_at, hours=2)
     return {
         "agent": str(raw.get("agent") or fallback_agent),
-        "active": bool(raw.get("active")),
+        "active": reported_active and not stale,
+        "reportedActive": reported_active,
         "objective": str(raw.get("objective") or "").strip(),
-        "status": str(raw.get("status") or "idle"),
-        "updatedAt": raw.get("updatedAt"),
+        "status": "stale" if stale and reported_active else str(raw.get("status") or "idle"),
+        "stale": stale,
+        "updatedAt": updated_at,
         "messageReceived": raw.get("messageReceived"),
         "currentTool": raw.get("currentTool"),
         "model": raw.get("model"),

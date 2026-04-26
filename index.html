@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1776483510 -->
+    <!-- BUILD:1777213760 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -6610,6 +6610,19 @@
             return clean.length > max ? clean.slice(0, max - 1) + '…' : clean;
         }
 
+        function normalizeRemoteAgentFeed(feed, maxAgeMs = 2 * 60 * 60 * 1000) {
+            if (!feed || typeof feed !== 'object') return null;
+            const stale = isFeedStale(feed, maxAgeMs);
+            const reportedActive = !!feed.active;
+            return {
+                ...feed,
+                reportedActive,
+                stale,
+                active: reportedActive && !stale,
+                status: stale && reportedActive ? 'stale' : (feed.status || 'idle'),
+            };
+        }
+
         // ===== J.A.I.N Brain Feed =====
         let _jainLocalOk = true;
         let lastJainBrainFeedHash = null;
@@ -6633,8 +6646,9 @@
         }
 
         function renderJainBrainFeed(bf) {
-            _jainBrainFeed = bf || null;
-            _uaJainBf = bf || null;
+            const normalized = normalizeRemoteAgentFeed(bf);
+            _jainBrainFeed = normalized;
+            _uaJainBf = normalized;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             renderUnifiedActivity();
         }
@@ -6651,7 +6665,7 @@
             const h = JSON.stringify(bf);
             if (h === lastJaimesBrainFeedHash) return;
             lastJaimesBrainFeedHash = h;
-            _uaJaimesBf = bf || null;
+            _uaJaimesBf = normalizeRemoteAgentFeed(bf);
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             renderUnifiedActivity();
             if (window._mcLastDashData) {
@@ -7692,8 +7706,9 @@
         function renderJobsPanel(data, brainFeed, jainBf, jaimesBf) {
             // Agent status dots
             const crons = data && Array.isArray(data.crons) ? data.crons : [];
+            const todayCrons = crons.filter(cron => cron && cron.todayRelevant !== false);
             const trackedTasks = data && Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
-            const ownedCounts = crons.reduce((acc, cron) => {
+            const ownedCounts = todayCrons.reduce((acc, cron) => {
                 const owner = cron && cron.agent ? cron.agent : 'JOSH 2.0';
                 acc[owner] = (acc[owner] || 0) + 1;
                 return acc;
@@ -7737,14 +7752,14 @@
                 const dot = document.getElementById(a.dot);
                 const statusEl = document.getElementById(a.status);
                 if (!dot || !statusEl) continue;
-                const isActive = a.bf && a.bf.active;
+                const isActive = !!(a.bf && a.bf.active);
                 const ageMs = a.bf && a.bf.updatedAt ? (Date.now() - new Date(a.bf.updatedAt).getTime()) : null;
                 const isStale = ageMs !== null && ageMs > 120 * 60 * 1000;
                 const owned = ownedCounts[a.owner] || 0;
                 const liveLabel = truncateStatus(a.live, 26);
-                dot.classList.toggle('active', !!(isActive || (liveLabel && !isStale)));
-                statusEl.textContent = isStale && !isActive
-                    ? `${a.role} · ${owned} jobs · standby`
+                dot.classList.toggle('active', !!(isActive || (!!liveLabel && !isStale)));
+                statusEl.textContent = isStale
+                    ? `${a.role} · ${owned} jobs · stale feed`
                     : `${a.role} · ${owned} jobs${liveLabel ? ' · ' + liveLabel : ''}`;
             }
 
@@ -7755,8 +7770,24 @@
                 cronsEl.innerHTML = '<div class="jobs-cron-row"><span class="jobs-cron-name" style="color:rgba(255,255,255,0.2)">Loading…</span></div>';
             }
             if (cronsEl && data && data.crons) {
-                const SHOW = ['Intelligence Feed','Breaking News','X Watchlist','X Posts','Sorare','Mission Control','Fantasy','Sorare Daily','Sorare Competition'];
-                const shown = crons.filter(c => SHOW.some(n => (c.name||'').includes(n) || (c.category||'').includes(n))).slice(0, 8);
+                const priorityWeight = (cron) => {
+                    const runStatus = cron.runStatus || '';
+                    if (cron.status === 'error' || (cron.errors || 0) > 0) return 0;
+                    if (runStatus === 'missed' || runStatus === 'due') return 1;
+                    if (runStatus === 'active') return 2;
+                    if (runStatus === 'upcoming') return 3;
+                    if (runStatus === 'done') return 4;
+                    if (cron.status === 'paused') return 6;
+                    return 5;
+                };
+                const shown = todayCrons
+                    .slice()
+                    .sort((a, b) => {
+                        const byPriority = priorityWeight(a) - priorityWeight(b);
+                        if (byPriority !== 0) return byPriority;
+                        return String(a.name || '').localeCompare(String(b.name || ''));
+                    })
+                    .slice(0, 10);
                 let ok = 0, warn = 0, err = 0;
 
                 // Helper: compute ET decimal hour now (for 'started' heuristic)
@@ -7948,7 +7979,10 @@
 
             // Updated timestamp
             const upd = document.getElementById('jobs-updated');
-            if (upd) upd.textContent = 'updated ' + formatRelTime(new Date().toISOString());
+            if (upd) {
+                const activeOwners = new Set(todayCrons.map(cron => cron.agent || 'JOSH 2.0')).size;
+                upd.textContent = `${todayCrons.length} today · ${activeOwners} nodes · updated ${formatRelTime(new Date().toISOString())}`;
+            }
         }
 
         // Shared English-only guard (>80% ASCII chars)
