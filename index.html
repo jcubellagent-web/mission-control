@@ -413,6 +413,7 @@
         .tjob-run-due      { background:rgba(96,165,250,0.12); color:#93c5fd; border:1px solid rgba(96,165,250,0.22); }
         .tjob-run-missed   { background:rgba(245,158,11,0.15);  color:#f59e0b; border:1px solid rgba(245,158,11,0.25); }
         .tjob-run-upcoming { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); border:1px solid rgba(255,255,255,0.08); }
+        .tjob-run-active   { background:rgba(74,222,128,0.14); color:#86efac; border:1px solid rgba(74,222,128,0.24); }
         .tjob-run-paused   { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); border:1px solid rgba(255,255,255,0.10); }
         .tjob-run-started  { background:rgba(96,165,250,0.18); color:#93c5fd; border:1px solid rgba(96,165,250,0.35); animation: tjfade 1.2s ease-in-out infinite; }
         @keyframes tjfade { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
@@ -434,14 +435,17 @@
         .tjob-header-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
         .tjob-name { font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
         .tjob-subline { font-size: 0.58rem; color: rgba(255,255,255,0.42); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-        .tjob-agent { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; opacity: 0.8; }
+        .tjob-agent { font-size: 0.55rem; font-weight: 800; letter-spacing: 0.07em; white-space: nowrap; flex-shrink: 0; opacity: 0.92; padding: 1px 6px; border-radius: 999px; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.07); text-transform: uppercase; }
         .tjob-meta-row { display: flex; align-items: center; gap: 5px; }
         .tjob-schedule { font-size: 0.6rem; color: rgba(255,255,255,0.6); white-space: nowrap; }
         .tjob-status-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; margin-left: auto; }
         .tjob-err-badge { font-size: 0.58rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 4px; padding: 0 4px; }
-        .tjob-multirun .tjob-body { display: flex; flex-direction: column; gap: 3px; }
-        .tjob-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
-        .tjob-badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+        .tjob-multirun { align-items: flex-start; }
+        .tjob-multirun .tjob-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; width: 100%; }
+        .tjob-multirun .tjob-header-row { width: 100%; }
+        .tjob-multirun .tjob-schedule { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+        .tjob-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 4px; margin-top: 3px; width: 100%; line-height: 1.45; }
+        .tjob-badge { display: inline-flex; align-items: center; min-height: 16px; font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
         .tjob-badge.done   { background: rgba(74,222,128,0.08); color: #4ade80; border-color: rgba(74,222,128,0.2); }
         .tjob-badge.past   { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.10); }
         .tjob-badge.next   { background: rgba(229,62,62,0.15); color: #fca5a5; border-color: rgba(229,62,62,0.3); font-weight: 600; }
@@ -4072,7 +4076,7 @@
             transition: background 0.5s ease;
         }
         .bf-freshness-label { color: rgba(255,255,255,0.78); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.64rem; font-weight: 800; }
-        #bf-last-updated { color: rgba(255,255,255,0.62); margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.72rem; }
+        #bf-last-updated, .bf-last-updated { color: rgba(255,255,255,0.62); margin-left: auto; font-variant-numeric: tabular-nums; font-size: 0.72rem; }
 
         /* ===== Offline/degraded banner improvements ===== */
         .connection-status.offline {
@@ -4255,6 +4259,9 @@
         }
         body.phone-mode .bf-signal-row {
             grid-template-columns: 1fr 1fr;
+        }
+        body.phone-mode .bf-hero-grid.dual-live {
+            grid-template-columns: 1fr;
         }
         body.phone-mode .bf-signal-chip-wide {
             grid-column: 1 / -1;
@@ -4625,6 +4632,9 @@
             gap: 8px;
             align-items: stretch;
         }
+        .bf-hero-grid.dual-live {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
         .bf-objective {
             --bf-model-color: rgba(255,255,255,0.9);
             --bf-model-border: rgba(255,255,255,0.08);
@@ -4640,8 +4650,8 @@
             min-height: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 10px;
+            justify-content: flex-start;
+            gap: 11px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -4702,7 +4712,32 @@
             color: color-mix(in srgb, var(--bf-model-color) 72%, rgba(255,255,255,0.76));
             padding-top: 2px;
         }
-        #bf-last-updated {
+        .bf-objective.bf-objective-compact {
+            --bf-objective-font-size: clamp(1.05rem, 1.65vw, 1.34rem);
+            --bf-objective-line-height: 1.16;
+        }
+        .bf-objective-submeta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            padding-top: 2px;
+            font-size: 0.56rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.44);
+        }
+        .bf-objective-submeta span {
+            padding: 4px 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.03);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #bf-last-updated, .bf-last-updated {
             margin-left: auto;
             font-size: 0.68rem;
             color: rgba(255,255,255,0.62);
@@ -5819,7 +5854,7 @@
             letter-spacing: 0.14em !important;
             color: var(--rv-text-dim);
         }
-        #bf-last-updated {
+        #bf-last-updated, .bf-last-updated {
             font-size: 0.64rem;
             color: var(--rv-text-dim);
         }
@@ -8865,38 +8900,44 @@
             return finalWindows;
         }
 
-        function syncBrainFeedObjectiveScroller(brainFeedCard) {
-            const wrap = brainFeedCard?.querySelector('.bf-objective-text-wrap');
-            const textEl = brainFeedCard?.querySelector('.bf-objective-text');
-            if (!wrap || !textEl) return;
-            if (brainFeedCard._objectiveTicker) {
-                clearInterval(brainFeedCard._objectiveTicker);
-                brainFeedCard._objectiveTicker = null;
-            }
-            const fullText = textEl.dataset.fullText || textEl.textContent || '';
-            textEl.classList.remove('is-scrolling');
-            textEl.style.opacity = '1';
-            requestAnimationFrame(() => {
-                const fitState = fitBrainFeedObjectiveViewport(brainFeedCard, fullText);
-                if (fitState.fitted) {
-                    textEl.textContent = fullText;
-                    return;
+        function syncBrainFeedObjectiveScroller(rootEl) {
+            if (!rootEl) return;
+            const scopes = rootEl.matches?.('.bf-objective')
+                ? [rootEl]
+                : Array.from(rootEl.querySelectorAll('.bf-objective'));
+            scopes.forEach(scope => {
+                const wrap = scope.querySelector('.bf-objective-text-wrap');
+                const textEl = scope.querySelector('.bf-objective-text');
+                if (!wrap || !textEl) return;
+                if (scope._objectiveTicker) {
+                    clearInterval(scope._objectiveTicker);
+                    scope._objectiveTicker = null;
                 }
-                const windows = buildBrainFeedObjectiveWindows(textEl, wrap, fullText);
-                if (windows.length <= 1) {
-                    textEl.textContent = fullText;
-                    return;
-                }
-                let index = 0;
-                textEl.textContent = windows[0];
-                brainFeedCard._objectiveTicker = setInterval(() => {
-                    index = (index + 1) % windows.length;
-                    textEl.style.opacity = '0';
-                    setTimeout(() => {
-                        textEl.textContent = windows[index];
-                        textEl.style.opacity = '1';
-                    }, 160);
-                }, 4200);
+                const fullText = textEl.dataset.fullText || textEl.textContent || '';
+                textEl.classList.remove('is-scrolling');
+                textEl.style.opacity = '1';
+                requestAnimationFrame(() => {
+                    const fitState = fitBrainFeedObjectiveViewport(scope, fullText);
+                    if (fitState.fitted) {
+                        textEl.textContent = fullText;
+                        return;
+                    }
+                    const windows = buildBrainFeedObjectiveWindows(textEl, wrap, fullText);
+                    if (windows.length <= 1) {
+                        textEl.textContent = fullText;
+                        return;
+                    }
+                    let index = 0;
+                    textEl.textContent = windows[0];
+                    scope._objectiveTicker = setInterval(() => {
+                        index = (index + 1) % windows.length;
+                        textEl.style.opacity = '0';
+                        setTimeout(() => {
+                            textEl.textContent = windows[index];
+                            textEl.style.opacity = '1';
+                        }, 160);
+                    }, 4200);
+                });
             });
         }
 
@@ -8915,15 +8956,83 @@
             return candidates.sort((a, b) => score(b) - score(a))[0];
         }
 
+        function isRenderableLiveObjective(entry) {
+            return !!(entry?.bf && entry.bf.active && !isFeedStale(entry.bf, 2 * 60 * 60 * 1000));
+        }
+
+        function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
+            const local = { bf: joshBf, agentLabel: 'JOSH 2.0' };
+            const remoteCandidates = [
+                { bf: jaimesBf, agentLabel: 'JAIMES' },
+                { bf: jainBf, agentLabel: 'J.A.I.N' },
+            ].filter(isRenderableLiveObjective);
+            if (!isRenderableLiveObjective(local) || !remoteCandidates.length) return [];
+            remoteCandidates.sort((a, b) => {
+                const aScore = (a.agentLabel === 'JAIMES' ? 1_000_000_000_000 : 0) + new Date(a.bf?.updatedAt || 0).getTime();
+                const bScore = (b.agentLabel === 'JAIMES' ? 1_000_000_000_000 : 0) + new Date(b.bf?.updatedAt || 0).getTime();
+                return bScore - aScore;
+            });
+            return [local, remoteCandidates[0]];
+        }
+
+        function renderBrainFeedObjectiveCard(entry, compact = false) {
+            const bf = entry?.bf || {};
+            const heroAgentLabel = entry?.agentLabel || 'AGENT';
+            const isActiveBf = !!bf.active;
+            const modelLabel = bf.model ? formatModelLabel(bf.model) : '';
+            const toolLabel = prettyToolLabel(bf?.currentTool || '');
+            const modelVisual = getModelVisual(bf?.model || '', toolLabel || '');
+            const providerLabel = modelLabel ? `${modelVisual.label} · ${modelLabel}` : modelVisual.label;
+            const objectiveText = getBrainFeedObjectiveText(bf);
+            const objectiveDetail = getBrainFeedObjectiveDetail(bf);
+            const metrics = getBrainFeedMetrics(bf);
+            return `<div class="bf-objective${compact ? ' bf-objective-compact' : ''}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
+                <div class="bf-objective-meta">
+                    <div class="bf-objective-live">
+                        <span class="bf-fresh-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
+                        <span class="bf-objective-kicker">${isActiveBf ? `LIVE OBJECTIVE · ${heroAgentLabel}` : `LATEST · ${heroAgentLabel}`}</span>
+                    </div>
+                    ${providerLabel ? `<span class="bf-objective-provider"><span>Model</span><span>${escapeHtml(providerLabel)}</span></span>` : ''}
+                    <span class="bf-last-updated">${bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
+                </div>
+                <div class="bf-objective-text-wrap"><div class="bf-objective-text" data-full-text="${escapeHtml(objectiveText)}" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</div></div>
+                <div class="bf-objective-detail" title="${escapeHtml(objectiveDetail)}">${escapeHtml(objectiveDetail)}</div>
+                <div class="bf-objective-submeta">
+                    <span>Tool · ${escapeHtml(metrics.currentTool)}</span>
+                    <span>Flow · ${escapeHtml(metrics.progressText)}</span>
+                </div>
+            </div>`;
+        }
+
+        function renderDualBrainFeed(entries) {
+            const brainFeedCard = document.getElementById('brain-feed-card');
+            if (!brainFeedCard || !entries.length) return;
+            const primary = entries[0]?.bf || null;
+            window._mcLastRenderedBrainFeed = primary;
+            brainFeedCard.innerHTML = `
+                <div class="bf-container bf-shell">
+                    <div class="bf-hero-grid dual-live">
+                        ${entries.map(entry => renderBrainFeedObjectiveCard(entry, true)).join('')}
+                    </div>
+                </div>
+            `;
+            syncBrainFeedObjectiveScroller(brainFeedCard);
+        }
+
         function renderCombinedBrainFeed(joshBf, jainBf, jaimesBf = _uaJaimesBf) {
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
             const brainCard = card.closest('.card-brain');
             const primary = pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf);
+            const dualEntries = pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf);
             const anyActive = !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
             if (brainCard) brainCard.classList.toggle('brain-active', anyActive);
             const old = document.getElementById('jain-status-bar');
             if (old) old.remove();
+            if (dualEntries.length === 2) {
+                renderDualBrainFeed(dualEntries);
+                return;
+            }
             if (primary?.bf) {
                 renderBrainFeed({ ...primary.bf, heroAgentLabel: primary.agentLabel });
             }
@@ -10109,8 +10218,9 @@
             } // end devices diff guard
 
             // Today's Jobs (diff-guarded) — reskinned
+            const todayCrons = (Array.isArray(data.crons) ? data.crons : []).filter(cron => cron.todayRelevant !== false);
             const todayJobsPayload = {
-                crons: Array.isArray(data.crons) ? data.crons : [],
+                crons: todayCrons,
                 trackedTasks: Array.isArray(data.trackedTasks) ? data.trackedTasks : [],
             };
             if (sectionChanged('todayJobs', todayJobsPayload)) {
@@ -10155,7 +10265,7 @@
             </div>` : '';
 
             const grouped = {};
-            (data.crons || []).forEach(cron => {
+            todayCrons.forEach(cron => {
                 const cat = cron.category || 'Other';
                 if (!grouped[cat]) grouped[cat] = [];
                 grouped[cat].push(cron);
@@ -10223,7 +10333,7 @@
                             if (r.done) {
                                 cls = 'tjob-badge done'; label = '✓ ' + shortTime;
                             } else if (r.past) {
-                                cls = 'tjob-badge past'; label = '• ' + shortTime;
+                                cls = 'tjob-badge past'; label = shortTime;
                             } else if (!foundNext) {
                                 foundNext = true;
                                 cls = 'tjob-badge next'; label = '▶ ' + shortTime;
@@ -10258,12 +10368,13 @@
                     // done / missed / upcoming state
                     const rs = cron.runStatus;
                     const isDone    = rs === 'done';
+                    const isActive  = rs === 'active';
                     const isDue     = rs === 'due';
                     const isMissed  = rs === 'missed';
                     const isUpcoming = rs === 'upcoming';
                     // Started heuristic: scheduled time was within last 15 minutes, not done/missed/paused
                     let isStarted = false;
-                    if (!isDone && !isMissed && !isPaused) {
+                    if (!isDone && !isActive && !isMissed && !isPaused) {
                         const sd = tjParseSchedDecimal(cron.schedule || '');
                         if (sd !== null) {
                             const deltaMin = (tjNowEtDecimal - sd) * 60;
@@ -10272,12 +10383,15 @@
                     }
                     const desc = (cron.description || '').trim();
                     const lastRunText = cron.lastRun ? `last ${formatRelTime(cron.lastRun)}` : '';
-                    const subline = [desc, lastRunText].filter(Boolean).join(' · ');
+                    const sourceText = cron.sourceLabel || '';
+                    const subline = [desc, sourceText, lastRunText].filter(Boolean).join(' · ');
                     const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
-                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isStarted ? '#60a5fa' : isDue ? '#60a5fa' : isDone ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isStarted ? '#60a5fa' : isDue ? '#60a5fa' : isDone || isActive ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const dotExtraCls = isStarted ? ' started' : '';
                     const statusBadge = isDone
                         ? `<span class="tjob-run-badge tjob-run-done">✓ done</span>`
+                        : isActive
+                        ? `<span class="tjob-run-badge tjob-run-active">live</span>`
                         : isStarted
                         ? `<span class="tjob-run-badge tjob-run-started">⚡ started</span>`
                         : isDue

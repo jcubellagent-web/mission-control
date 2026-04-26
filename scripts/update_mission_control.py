@@ -72,7 +72,7 @@ CRON_TARGETS = [
 
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
-    {"name": "Sorare Nightly Claim", "pattern": "sorare_claim_bot.py", "schedule": "Daily 3:30 AM ET", "description": "Hermes claim job for overnight Sorare rewards", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-nightly-claim"},
+    {"name": "Sorare Nightly Claim", "pattern": "sorare_missions.py --claim-only --rarity limited", "schedule": "Daily 3:35 AM ET", "description": "LaunchAgent claim sweep for overnight Sorare rewards", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Sorare Sheet Updater", "pattern": "sorare_sheet_updater_v2.py", "schedule": "Daily 3:30 AM ET", "description": "Writes fresh Sorare data into the tracker sheet", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Sorare Daily Prep", "pattern": "sorare_daily_prep.sh", "schedule": "Daily 9:00 AM ET", "description": "Raw prep pipeline before model-driven Sorare submissions", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
     {"name": "Sorare ML Missions", "pattern": "ml_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "Hermes ML mission picker for Sorare", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-missions"},
@@ -94,6 +94,26 @@ CRON_TARGETS = [
     {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Hermes daily system-health pass", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
     {"name": "JAIMES Weekly Report", "pattern": "jaimes_weekly_report.py", "schedule": "Sat 9:00 AM ET", "description": "Weekly JAIMES summary sent back to Josh", "category": "Maintenance", "agent": "JAIMES", "jain": True},
 ]
+
+DAY_NAME_TO_INDEX = {
+    "mon": 0,
+    "monday": 0,
+    "tue": 1,
+    "tues": 1,
+    "tuesday": 1,
+    "wed": 2,
+    "wednesday": 2,
+    "thu": 3,
+    "thur": 3,
+    "thurs": 3,
+    "thursday": 3,
+    "fri": 4,
+    "friday": 4,
+    "sat": 5,
+    "saturday": 5,
+    "sun": 6,
+    "sunday": 6,
+}
 
 
 def fetch_next(endpoint: str) -> Dict[str, Any] | None:
@@ -500,6 +520,48 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
         "status": "System nominal",
         "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
         "updatedAt": updated_at,
+    }
+
+
+def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
+    raw = feed if isinstance(feed, dict) else {}
+    return {
+        "agent": str(raw.get("agent") or fallback_agent),
+        "active": bool(raw.get("active")),
+        "objective": str(raw.get("objective") or "").strip(),
+        "status": str(raw.get("status") or "idle"),
+        "updatedAt": raw.get("updatedAt"),
+        "messageReceived": raw.get("messageReceived"),
+        "currentTool": raw.get("currentTool"),
+        "model": raw.get("model"),
+        "steps": raw.get("steps") if isinstance(raw.get("steps"), list) else [],
+    }
+
+
+def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    def is_live(feed: Dict[str, Any]) -> bool:
+        return bool(feed.get("active") and is_recent_ts(feed.get("updatedAt"), hours=2))
+
+    def score(feed: Dict[str, Any]) -> tuple[int, float]:
+        ts = iso_to_dt(feed.get("updatedAt"))
+        return (1 if is_live(feed) else 0, ts.timestamp() if ts else 0.0)
+
+    ordered = sorted(agent_feeds.values(), key=score, reverse=True)
+    active_agents = [feed["agent"] for feed in ordered if is_live(feed)]
+    dual_pair: List[str] = []
+    if len(active_agents) >= 2:
+        remote = next((agent for agent in ["JAIMES", "J.A.I.N"] if agent in active_agents and agent != "JOSH 2.0"), None)
+        if "JOSH 2.0" in active_agents and remote:
+            dual_pair = ["JOSH 2.0", remote]
+        else:
+            dual_pair = active_agents[:2]
+    return {
+        "activeAgents": active_agents,
+        "activeCount": len(active_agents),
+        "primaryAgent": ordered[0]["agent"] if ordered else None,
+        "dualMode": bool(dual_pair),
+        "dualAgents": dual_pair,
+        "agents": ordered,
     }
 
 
@@ -1354,7 +1416,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
     try:
         result = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True)
         josh_listing = result.stdout
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, OSError, PermissionError):
         josh_listing = ""
     # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
     import datetime as _dt
@@ -1593,20 +1655,45 @@ PY"""
 
 
 
-    def parse_daily_hour(schedule_str: str):
-        """Extract scheduled ET hour from a 'Daily H:MM AM/PM ET' string. Returns int or None."""
-        m = _re.search(r'(\d{1,2}):(\d{2})\s*(AM|PM)', schedule_str, _re.IGNORECASE)
+    def parse_schedule_time(schedule_str: str) -> tuple[int, int] | None:
+        m = _re.search(r'(\d{1,2})(?::(\d{2}))?\s*(AM|PM)', schedule_str, _re.IGNORECASE)
         if not m:
-            m = _re.search(r'(\d{1,2}):?(\d{0,2})\s*(AM|PM)', schedule_str, _re.IGNORECASE)
-        if m:
-            h = int(m.group(1))
-            ap = m.group(3).upper()
-            if ap == 'PM' and h != 12:
-                h += 12
-            elif ap == 'AM' and h == 12:
-                h = 0
-            return h
-        return None
+            return None
+        hour = int(m.group(1))
+        minute = int(m.group(2) or 0)
+        ap = m.group(3).upper()
+        if ap == 'PM' and hour != 12:
+            hour += 12
+        elif ap == 'AM' and hour == 12:
+            hour = 0
+        return hour, minute
+
+    def schedule_today_meta(schedule_str: str) -> dict[str, Any]:
+        raw = str(schedule_str or "").strip()
+        text = raw.lower()
+        if not text:
+            return {"todayRelevant": True, "kind": "unknown"}
+        if text.startswith("every ") or text.startswith("hourly"):
+            return {"todayRelevant": True, "kind": "recurring"}
+        if text.startswith("daily"):
+            return {"todayRelevant": True, "kind": "daily"}
+        if "weekdays" in text and "weekends" in text:
+            return {"todayRelevant": True, "kind": "calendar_split"}
+        if "weekdays" in text:
+            return {"todayRelevant": now_et.weekday() < 5, "kind": "weekday"}
+        if "weekends" in text:
+            return {"todayRelevant": now_et.weekday() >= 5, "kind": "weekend"}
+        matched_days = sorted({
+            idx for token, idx in DAY_NAME_TO_INDEX.items()
+            if _re.search(rf"\b{_re.escape(token)}\b", text)
+        })
+        if matched_days:
+            return {
+                "todayRelevant": now_et.weekday() in matched_days,
+                "kind": "weekly",
+                "days": matched_days,
+            }
+        return {"todayRelevant": True, "kind": "unknown"}
 
     rows = []
     for target in CRON_TARGETS:
@@ -1616,6 +1703,9 @@ PY"""
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
         jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
         present = bool(hermes_job) if source == 'hermes' else target['pattern'] in listing
+        sched_meta = schedule_today_meta(target.get('schedule', ''))
+        today_relevant = bool(sched_meta.get('todayRelevant', True))
+        source_label = 'Hermes' if source == 'hermes' else 'J.A.I.N Cron' if is_jain else 'Josh Local Cron'
 
         # Compute runStatus for daily jobs
         sched = target.get('schedule', '')
@@ -1638,9 +1728,10 @@ PY"""
 
         is_jaimes_agent = target.get('agent') == 'JAIMES'
         can_verify_run = bool(last_run) or hermes_job is not None or bool(jain_verified)
-        if sched.startswith('Daily'):
-            sched_hour = parse_daily_hour(sched)
-            if sched_hour is not None:
+        schedule_time = parse_schedule_time(sched)
+        if today_relevant and sched_meta.get('kind') in {'daily', 'weekly', 'weekday', 'weekend'}:
+            if schedule_time is not None:
+                sched_hour, sched_min = schedule_time
                 now_hour = now_et.hour
                 now_min = now_et.minute
                 if last_run_today or verified_today:
@@ -1648,10 +1739,12 @@ PY"""
                 elif is_jaimes_agent and not present:
                     # JAIMES jobs run via Hermes — show paused if no last_run confirmed today
                     run_status = 'paused'
-                elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= 10):
+                elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= sched_min + 10):
                     run_status = 'missed' if can_verify_run else 'due'
                 else:
                     run_status = 'upcoming'
+        elif today_relevant and sched_meta.get('kind') in {'recurring', 'calendar_split'}:
+            run_status = 'active' if present or last_run else 'due'
         elif target['name'] == 'X Strategic Replies':
             if last_run_today:
                 run_status = 'done'
@@ -1669,6 +1762,9 @@ PY"""
             'category': target.get('category', 'Other'),
             'agent': target.get('agent', 'JOSH 2.0'),
             'status': row_status,
+            'source': source,
+            'sourceLabel': source_label,
+            'todayRelevant': today_relevant,
             'errors': 1 if (hermes_job and hermes_job.get('last_status') not in {None, '', 'ok'}) else 0,
             'lastError': hermes_job.get('last_error') if hermes_job else None,
         }
@@ -2429,13 +2525,20 @@ def main() -> None:
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
-    jain_brain_feed = load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {})
-    jaimes_brain_feed = load_json_file(ROOT.parent / "data" / "jaimes-brain-feed.json", {})
+    josh_brain_feed = normalize_agent_brain_feed(dashboard["brainFeed"], "JOSH 2.0")
+    jain_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {}), "J.A.I.N")
+    jaimes_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jaimes-brain-feed.json", {}), "JAIMES")
+    dashboard["agentBrainFeeds"] = {
+        "josh": josh_brain_feed,
+        "jain": jain_brain_feed,
+        "jaimes": jaimes_brain_feed,
+    }
+    dashboard["liveObjectives"] = build_live_objectives(dashboard["agentBrainFeeds"])
     agent_comms = build_agent_comms(
         load_json_file(AGENT_COMMS_PATH, []),
         agent_bus_tasks,
-        jain_brain_feed if isinstance(jain_brain_feed, dict) else {},
-        jaimes_brain_feed if isinstance(jaimes_brain_feed, dict) else {},
+        jain_brain_feed,
+        jaimes_brain_feed,
     )
 
     # Wait for Eight Sleep subprocess
