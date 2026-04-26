@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat triage completed, self-maintenance ran, mission control recency checked",
+  "objective": "memory-sync-to-jain: backup workspace memory to J.A.I.N and verify success",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T01:12:56Z",
-  "checkedAt": "2026-04-26T01:12:56Z",
+  "steps": [
+    {
+      "label": "active",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-26T02:01:03Z",
+  "checkedAt": "2026-04-26T02:01:03Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
