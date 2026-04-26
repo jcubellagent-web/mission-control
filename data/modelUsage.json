@@ -1,6 +1,6 @@
 {
   "session": 0.049933,
-  "daily": 11.072971,
+  "daily": 11.102192,
   "weekly": 41.13868,
   "monthly": 947.516099,
   "topModels": [
@@ -12,22 +12,22 @@
     {
       "name": "gpt-5.4-mini",
       "window": "session",
-      "cost": 7.326190049999999
+      "cost": 7.355411849999999
+    },
+    {
+      "name": "codex/gpt-5.4-mini",
+      "window": "session",
+      "cost": 4.738324
     },
     {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 4.8606370000000005
+      "cost": 0.122313
     },
     {
       "name": "openai/gpt-5.4",
       "window": "session",
       "cost": 0.0499335
-    },
-    {
-      "name": "deepseek/deepseek-v3.2",
-      "window": "session",
-      "cost": 0.006918987599999999
     }
   ],
   "breakdown": [
@@ -43,22 +43,35 @@
     {
       "name": "gpt-5.4-mini",
       "source": "codex",
-      "weeklyCost": 7.326190049999999,
-      "dailyCost": 0.12055350000000001,
-      "sessionCost": 7.326190049999999,
+      "weeklyCost": 7.355411849999999,
+      "dailyCost": 0.1497753,
+      "sessionCost": 7.355411849999999,
       "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "codex/gpt-5.4-mini",
+      "source": "openclaw",
+      "inputTokens": 905524,
+      "outputTokens": 1016,
+      "totalTokens": 906540,
+      "sessionCost": 4.738324,
+      "dailyCost": 4.738324,
+      "weeklyCost": 4.738324,
+      "sessions": 4,
+      "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 924363,
-      "outputTokens": 1373,
-      "totalTokens": 925736,
-      "sessionCost": 4.8606370000000005,
-      "dailyCost": 4.8606370000000005,
-      "weeklyCost": 4.8606370000000005,
-      "sessions": 2,
+      "inputTokens": 18839,
+      "outputTokens": 357,
+      "totalTokens": 19196,
+      "sessionCost": 0.122313,
+      "dailyCost": 0.122313,
+      "weeklyCost": 0.122313,
+      "sessions": 1,
       "isGemini": false,
       "costEstimated": false
     },
@@ -112,19 +125,6 @@
       "weeklyCost": 0.0,
       "sessions": 1,
       "isGemini": true,
-      "costEstimated": false
-    },
-    {
-      "name": "codex/gpt-5.4-mini",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 3,
-      "isGemini": false,
       "costEstimated": false
     },
     {
@@ -212,7 +212,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-26T17:25:10Z",
+  "lastUpdated": "2026-04-26T17:30:09Z",
   "jain": {
     "daily": 0.760808,
     "session": 1.464842,
@@ -241,8 +241,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 19.15442,
-    "total": 42.224266,
+    "daily": 19.183641,
+    "total": 42.253488,
     "monthly": 947.525018
   },
   "weeklyRunRate": {
