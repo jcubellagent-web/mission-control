@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Removed duplicate Sorare Hermes jobs, verified JAIMES subscription-backed Codex 5.5, and clarified remaining Sorare ownership",
+  "objective": "handle queued compare_sorare_lineup_crons callback after completion",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T16:19:58Z",
-  "checkedAt": "2026-04-26T16:19:58Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T16:20:51Z",
+  "checkedAt": "2026-04-26T16:20:51Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
