@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "session startup sequence and greeting sent",
+  "objective": "respond to test message",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T05:22:01Z",
-  "checkedAt": "2026-04-26T05:22:01Z",
+  "steps": [
+    {
+      "label": "tool",
+      "status": "active",
+      "tool": "bootstrap"
+    }
+  ],
+  "currentTool": "bootstrap",
+  "updatedAt": "2026-04-26T05:43:01Z",
+  "checkedAt": "2026-04-26T05:43:01Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
