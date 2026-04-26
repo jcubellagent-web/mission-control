@@ -5,26 +5,32 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Removed duplicate Sorare Hermes jobs, verified JAIMES subscription-backed Codex 5.5, and clarified remaining Sorare ownership",
+    "objective": "move Sorare submit path to JAIMES",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-26T16:19:58Z",
-    "checkedAt": "2026-04-26T16:19:58Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-26T16:21:59Z",
+    "checkedAt": "2026-04-26T16:21:59Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Removed duplicate Sorare Hermes jobs, verified JAIMES subscription-backed Codex 5.5, and clarified remaining Sorare ownership",
-    "updatedAt": "2026-04-26T16:20:04Z"
+    "context": "move Sorare submit path to JAIMES",
+    "updatedAt": "2026-04-26T16:25:03Z"
   },
   "contextWindow": {
-    "usedTokens": 150969,
-    "limitTokens": 272000,
-    "pct": 0.555,
+    "usedTokens": 161304,
+    "limitTokens": 400000,
+    "pct": 0.4033,
     "model": "gpt-5.4",
-    "status": "red"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -137,7 +143,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 2h 42m",
+        "Resets in 2h 37m",
         "Weekly: 97% left [===========-]",
         "Pace: 67% in reserve | Expected 70% used | Lasts until reset",
         "Resets in 2d 2h",
@@ -148,15 +154,15 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 42m",
+      "sessionReset": "2h 37m",
       "weeklyReset": "2d 2h",
       "summary": "95% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T16:20:06Z"
+    "updatedAt": "2026-04-26T16:25:05Z"
   },
   "modelUsage": {
-    "session": 0.600759,
-    "daily": 11.388337,
+    "session": 0.235897,
+    "daily": 11.023475,
     "weekly": 41.13868,
     "monthly": 947.516099,
     "topModels": [
@@ -178,7 +184,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.600759
+        "cost": 0.2358965
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -221,12 +227,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 19528,
-        "outputTokens": 5453,
-        "totalTokens": 24981,
-        "sessionCost": 0.600759,
-        "dailyCost": 0.600759,
-        "weeklyCost": 0.600759,
+        "inputTokens": 11257,
+        "outputTokens": 630,
+        "totalTokens": 11887,
+        "sessionCost": 0.2358965,
+        "dailyCost": 0.2358965,
+        "weeklyCost": 0.2358965,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -368,7 +374,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T16:20:10Z",
+    "lastUpdated": "2026-04-26T16:25:09Z",
     "jain": {
       "daily": 0.07704,
       "session": 0.781074,
@@ -397,8 +403,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 18.786018,
-      "total": 41.855865,
+      "daily": 18.421156,
+      "total": 41.491002,
       "monthly": 947.525018
     },
     "weeklyRunRate": {
@@ -439,12 +445,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 97.2,
-      "cpu_user": 50.19,
-      "cpu_sys": 46.97,
-      "load1": 9.62,
-      "load5": 8.29,
-      "load15": 8.42,
+      "cpu_pct": 70.4,
+      "cpu_user": 54.4,
+      "cpu_sys": 16.34,
+      "load1": 8.0,
+      "load5": 8.36,
+      "load15": 8.45,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -454,14 +460,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.8,
-      "cpu_user": 2.72,
-      "cpu_sys": 9.9,
-      "load1": 1.85,
-      "load5": 1.92,
-      "load15": 1.97,
+      "cpu_pct": 15.7,
+      "cpu_user": 4.34,
+      "cpu_sys": 11.3,
+      "load1": 2.45,
+      "load5": 2.2,
+      "load15": 2.08,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -485,19 +491,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:20:04Z"
+      "lastChecked": "2026-04-26T16:25:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:20:04Z"
+      "lastChecked": "2026-04-26T16:25:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T16:20:04Z"
+      "lastChecked": "2026-04-26T16:25:03Z"
     }
   ],
   "crons": [
@@ -1223,7 +1229,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260426-949",
+      "title": "Move Sorare submit path to JAIMES",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh approved moving the remaining live Sorare submit owner off raw J.A.I.N and onto JAIMES. Inspecting the current raw submit cron and JAIMES Sorare jobs before patching.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-26 12:22",
+      "owner": "JAIMES"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1251,14 +1268,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Removed duplicate Sorare Hermes jobs, verified JAIMES subscription-backed Codex 5.5, and clarified remaining Sorare ownership",
+      "objective": "move Sorare submit path to JAIMES",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-26T16:19:58Z",
+      "updatedAt": "2026-04-26T16:21:59Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.4",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1286,8 +1309,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T16:16:26Z",
-      "messageReceived": "2026-04-26T16:16:26Z",
+      "updatedAt": "2026-04-26T16:21:28Z",
+      "messageReceived": "2026-04-26T16:21:28Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1327,14 +1350,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Removed duplicate Sorare Hermes jobs, verified JAIMES subscription-backed Codex 5.5, and clarified remaining Sorare ownership",
+        "objective": "move Sorare submit path to JAIMES",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-26T16:19:58Z",
+        "updatedAt": "2026-04-26T16:21:59Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.4",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
@@ -1343,8 +1372,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T16:16:26Z",
-        "messageReceived": "2026-04-26T16:16:26Z",
+        "updatedAt": "2026-04-26T16:21:28Z",
+        "messageReceived": "2026-04-26T16:21:28Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1393,29 +1422,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T16:20:10Z",
-      "event": "Session spend: $0.60"
+      "time": "2026-04-26T16:25:09Z",
+      "event": "Session spend: $0.24"
     },
     {
-      "time": "2026-04-26T16:20:06Z",
+      "time": "2026-04-26T16:25:05Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T16:20:06Z",
+      "time": "2026-04-26T16:25:05Z",
       "event": "CodexBar: 95% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T16:20:04Z",
+      "time": "2026-04-26T16:25:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T16:20:04Z",
+      "time": "2026-04-26T16:25:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T16:20:04Z",
+      "time": "2026-04-26T16:25:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T16:20:04Z"
+  "lastUpdated": "2026-04-26T16:25:03Z"
 }
