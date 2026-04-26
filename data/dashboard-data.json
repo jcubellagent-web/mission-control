@@ -5,19 +5,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Handled async completion batch internally",
+    "objective": "handle queued Mission Control approval and fix cron errors",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-26T14:39:42Z",
-    "checkedAt": "2026-04-26T14:39:42Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-26T14:41:22Z",
+    "checkedAt": "2026-04-26T14:41:22Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Handled async completion batch internally",
-    "updatedAt": "2026-04-26T14:40:12Z"
+    "context": "handle queued Mission Control approval and fix cron errors",
+    "updatedAt": "2026-04-26T14:42:47Z"
   },
   "contextWindow": {
     "usedTokens": 112931,
@@ -125,11 +131,11 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 4,
+    "missionControlDirty": 6,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/service-worker.js",
-      "mission-control/index.html",
-      "mission-control/scripts/update_mission_control.py"
+      "mission-control/index.html"
     ],
     "codexbarStatus": "98% left \u00b7 wk 97% left",
     "codexbar": {
@@ -137,7 +143,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 21m",
+        "Resets in 4h 19m",
         "Weekly: 97% left [===========-]",
         "Pace: 66% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
@@ -148,11 +154,11 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 21m",
+      "sessionReset": "4h 19m",
       "weeklyReset": "2d 4h",
       "summary": "98% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T14:40:18Z"
+    "updatedAt": "2026-04-26T14:42:50Z"
   },
   "modelUsage": {
     "session": 0.424343,
@@ -342,7 +348,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:40:22Z",
+    "lastUpdated": "2026-04-26T14:42:53Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -413,29 +419,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 81.6,
-      "cpu_user": 52.49,
-      "cpu_sys": 29.6,
-      "load1": 9.87,
-      "load5": 9.6,
-      "load15": 8.87,
+      "cpu_pct": 87.2,
+      "cpu_user": 50.57,
+      "cpu_sys": 36.61,
+      "load1": 9.51,
+      "load5": 9.85,
+      "load15": 9.1,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "88Gi",
+      "disk_avail": "91Gi",
       "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 23.4,
-      "cpu_user": 13.67,
-      "cpu_sys": 10.25,
-      "load1": 2.08,
-      "load5": 2.3,
-      "load15": 2.19,
+      "cpu_pct": 14.5,
+      "cpu_user": 4.54,
+      "cpu_sys": 10.0,
+      "load1": 1.89,
+      "load5": 2.1,
+      "load15": 2.12,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -444,8 +450,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "auth_expired",
+    "message": "Re-auth required"
   },
   "devices": [
     {
@@ -459,19 +465,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:40:12Z"
+      "lastChecked": "2026-04-26T14:42:47Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:40:12Z"
+      "lastChecked": "2026-04-26T14:42:47Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:40:12Z"
+      "lastChecked": "2026-04-26T14:42:47Z"
     }
   ],
   "crons": [
@@ -1021,8 +1027,10 @@
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": true,
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
+      "errors": 0,
+      "lastError": null,
+      "lastHistoricalError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
+      "lastHistoricalErrorAt": "2026-04-25T11:00:37.337672-04:00",
       "runStatus": "upcoming"
     },
     {
@@ -1147,8 +1155,10 @@
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": false,
-      "errors": 1,
-      "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)"
+      "errors": 0,
+      "lastError": null,
+      "lastHistoricalError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
+      "lastHistoricalErrorAt": "2026-04-24T13:00:56.665646-04:00"
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
@@ -1192,11 +1202,22 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260426-939",
+      "title": "Mission Control cron error cleanup",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh pressed `next:fix_cron_errors` after Mission Control audit. Current dashboard shows 2 cron error badges: JAIMES Sorare ML Lineups and Fantasy Waiver Review (Hermes), both with `Agent completed but produced empty response`. Investigating Hermes/J.A.I.N source and whether these are stale completion records vs real active failures.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-26 10:37",
+      "owner": "JAIMES"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/service-worker.js, mission-control/index.html",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1220,14 +1241,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Handled async completion batch internally",
+      "objective": "handle queued Mission Control approval and fix cron errors",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-26T14:39:42Z",
+      "updatedAt": "2026-04-26T14:41:22Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1255,8 +1282,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T14:35:30Z",
-      "messageReceived": "2026-04-26T14:35:30Z",
+      "updatedAt": "2026-04-26T14:40:33Z",
+      "messageReceived": "2026-04-26T14:40:33Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1296,14 +1323,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Handled async completion batch internally",
+        "objective": "handle queued Mission Control approval and fix cron errors",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-26T14:39:42Z",
+        "updatedAt": "2026-04-26T14:41:22Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
@@ -1312,8 +1345,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T14:35:30Z",
-        "messageReceived": "2026-04-26T14:35:30Z",
+        "updatedAt": "2026-04-26T14:40:33Z",
+        "messageReceived": "2026-04-26T14:40:33Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1362,29 +1395,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:40:22Z",
+      "time": "2026-04-26T14:42:53Z",
       "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-26T14:40:18Z",
-      "event": "Coding: mission-control/service-worker.js, mission-control/index.html"
+      "time": "2026-04-26T14:42:50Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T14:40:18Z",
+      "time": "2026-04-26T14:42:50Z",
       "event": "CodexBar: 98% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T14:40:12Z",
+      "time": "2026-04-26T14:42:47Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:40:12Z",
-      "event": "2 cron jobs need attention"
+      "time": "2026-04-26T14:42:47Z",
+      "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T14:40:12Z",
+      "time": "2026-04-26T14:42:47Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T14:40:12Z"
+  "lastUpdated": "2026-04-26T14:42:47Z"
 }

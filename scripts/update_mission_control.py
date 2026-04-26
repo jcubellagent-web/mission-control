@@ -1797,6 +1797,19 @@ PY"""
             row_status = 'paused'
         else:
             row_status = 'ok' if (present or last_run) else 'paused'
+
+        # Hermes persists the last job result until the next scheduled run. Treat
+        # old failures as historical context, not active Mission Control cron
+        # errors, otherwise a Friday/Saturday empty-response can keep Sunday
+        # dashboard health red even when the next run is still upcoming.
+        hermes_last_failed = bool(
+            hermes_job and hermes_job.get('last_status') not in {None, '', 'ok'}
+        )
+        hermes_error_is_current = bool(
+            hermes_last_failed
+            and today_relevant
+            and last_run_today
+        )
         row = {
             'name': target['name'],
             'schedule': target['schedule'],
@@ -1807,9 +1820,12 @@ PY"""
             'source': source,
             'sourceLabel': source_label,
             'todayRelevant': today_relevant,
-            'errors': 1 if (hermes_job and hermes_job.get('last_status') not in {None, '', 'ok'}) else 0,
-            'lastError': hermes_job.get('last_error') if hermes_job else None,
+            'errors': 1 if hermes_error_is_current else 0,
+            'lastError': hermes_job.get('last_error') if hermes_error_is_current and hermes_job else None,
         }
+        if hermes_last_failed and not hermes_error_is_current and hermes_job:
+            row['lastHistoricalError'] = hermes_job.get('last_error')
+            row['lastHistoricalErrorAt'] = hermes_job.get('last_run_at')
         if run_status:
             row['runStatus'] = run_status
         if last_run:
