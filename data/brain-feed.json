@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Explained that local crons still use API while JAIMES/Hermes crons use subscription, and why GPT-5.5 subscription still shouldn't power every routine task",
+  "objective": "list local crons on Josh 2.0",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T16:09:22Z",
-  "checkedAt": "2026-04-26T16:09:22Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-26T16:10:06Z",
+  "checkedAt": "2026-04-26T16:10:06Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
