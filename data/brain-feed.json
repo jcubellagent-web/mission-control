@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat triage completed, self-maintenance and system health ran, mission control recency checked",
+  "objective": "backup memory to J.A.I.N and confirm sync",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T07:40:11Z",
-  "checkedAt": "2026-04-26T07:40:11Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "memory-sync"
+    }
+  ],
+  "currentTool": "memory-sync",
+  "updatedAt": "2026-04-26T08:01:04Z",
+  "checkedAt": "2026-04-26T08:01:04Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
