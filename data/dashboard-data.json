@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Execute Session Startup and greet user",
-    "updatedAt": "2026-04-26T03:55:04Z"
+    "updatedAt": "2026-04-26T04:00:04Z"
   },
   "contextWindow": {
     "usedTokens": 25890,
@@ -139,7 +139,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 6m",
+        "Resets in 1m",
         "Weekly: 99% left [===========-]",
         "Pace: 61% in reserve | Expected 62% used | Lasts until reset",
         "Resets in 2d 15h",
@@ -150,15 +150,15 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "6m",
+      "sessionReset": "1m",
       "weeklyReset": "2d 15h",
       "summary": "98% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-26T03:55:07Z"
+    "updatedAt": "2026-04-26T04:00:06Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 1.033564,
+    "daily": 0.0,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -202,7 +202,7 @@
         "name": "gpt-5.4-mini",
         "source": "codex",
         "weeklyCost": 7.2056365499999995,
-        "dailyCost": 0.5099388,
+        "dailyCost": 0.0,
         "sessionCost": 7.2056365499999995,
         "totalTokens": 0,
         "costEstimated": false
@@ -214,7 +214,7 @@
         "outputTokens": 899,
         "totalTokens": 122408,
         "sessionCost": 0.5236255,
-        "dailyCost": 0.5236255,
+        "dailyCost": 0.0,
         "weeklyCost": 0.5236255,
         "sessions": 1,
         "isGemini": false,
@@ -322,7 +322,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T03:55:10Z",
+    "lastUpdated": "2026-04-26T04:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -351,7 +351,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.722718,
+      "daily": 0.689154,
       "total": 30.914113,
       "monthly": 1089.330307
     },
@@ -393,12 +393,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 88.8,
-      "cpu_user": 50.3,
-      "cpu_sys": 38.75,
-      "load1": 9.02,
-      "load5": 8.0,
-      "load15": 8.21,
+      "cpu_pct": 81.8,
+      "cpu_user": 55.6,
+      "cpu_sys": 26.21,
+      "load1": 9.42,
+      "load5": 7.98,
+      "load15": 8.07,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -408,12 +408,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.6,
-      "cpu_user": 1.62,
-      "cpu_sys": 8.94,
-      "load1": 2.23,
-      "load5": 2.12,
-      "load15": 2.05,
+      "cpu_pct": 14.2,
+      "cpu_user": 2.63,
+      "cpu_sys": 12.28,
+      "load1": 2.12,
+      "load5": 1.98,
+      "load15": 1.99,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.6,
       "uptime": "",
@@ -439,19 +439,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T03:55:04Z"
+      "lastChecked": "2026-04-26T04:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T03:55:04Z"
+      "lastChecked": "2026-04-26T04:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T03:55:04Z"
+      "lastChecked": "2026-04-26T04:00:04Z"
     }
   ],
   "crons": [
@@ -504,7 +504,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "J.A.I.N Medic",
@@ -551,28 +551,28 @@
             "time": "10:00 AM",
             "mode": "Weekend",
             "label": "Weekend opener",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Weekend",
             "label": "Weekend close",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Weekend",
             "label": "Weekend late brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Weekend",
             "label": "Weekend wrap",
-            "past": true,
+            "past": false,
             "done": false
           }
         ]
@@ -607,7 +607,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -628,7 +628,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -639,7 +639,7 @@
       "status": "paused",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -650,7 +650,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-25T07:30:02.383840+00:00"
     },
     {
@@ -662,7 +662,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-25T13:00:19.741032+00:00"
     },
     {
@@ -674,7 +674,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare ML Lineups",
@@ -685,7 +685,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Champion Submit",
@@ -696,7 +696,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-25T15:00:08.607995+00:00"
     },
     {
@@ -770,7 +770,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -801,7 +801,7 @@
       "status": "ok",
       "errors": 1,
       "lastError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "runStatus": "missed"
+      "runStatus": "upcoming"
     },
     {
       "name": "JAIMES Weekly Report",
@@ -814,55 +814,14 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260425-925",
-      "title": "J.A.I.N intelligence_feed.log FRED API 500 errors",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Analyzed log: FRED API currently returns HTTP 200 for all three series (FEDFUNDS, CPIAUCSL, T10Y2Y), suggesting earlier 500 errors were transient server-side blips. Alert is from error_rate_monitor.py flagging those lines as unresolved. Decision needed: ignore transient errors, patch monitor to treat 500s as temporary, or manually clear the alert.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 23:19",
-      "owner": "J.A.I.N"
-    },
-    {
-      "id": "T-20260425-919",
-      "title": "Sorare deep analytics upgrade research",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Confirmed the saved XGBoost bundle is shallow and pushed a first concrete upgrade into `~/sorare_ml/ml_bot.py` on J.A.I.N (backup: `ml_bot.py.bak-20260425-advanced-context-pass`). Added recent rolling game-log context, hitter power/speed/discipline signals, pitcher K-BB/strike/recent-form signals, slot-aware hitter weighting (CI/MI/OF/FLEX), and widened public-context reranking from 24 to 36. Next step is validating impact on actual lineup rankings and backtesting against recent GWs.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 19:57",
-      "owner": "J.A.I.N"
-    },
-    {
-      "id": "T-20260425-906",
-      "title": "Deep infrastructure/resiliency/workflow audit",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Running read-only host, OpenClaw, and workflow-orchestration checks to identify gaps, failure modes, and remediation opportunities.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 18:03",
-      "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260425-905",
-      "title": "Soup-to-nuts workflow + infrastructure setup",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Orchestrator mode active. J.A.I.N plugin allowlist warning is fixed, and the Antfarm single-step `verify_feedback` patch is now verified/build-clean. Old failed run advances past fix correctly; only remaining blocker is unrelated repo state for one historical verify step (missing `bugfix-sw-cache-sync` branch).",
-      "requestedAt": null,
-      "updatedAt": "2026-04-25 18:01",
-      "owner": "J.A.I.N"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "5c232cd8-ba85-402d-b77e-e43c19211895",
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 599086,
+      "elapsedSecs": 599385,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -878,29 +837,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-26T03:55:10Z",
+      "time": "2026-04-26T04:00:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-26T03:55:07Z",
+      "time": "2026-04-26T04:00:06Z",
       "event": "CodexBar: 98% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-26T03:55:04Z",
+      "time": "2026-04-26T04:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T03:55:04Z",
+      "time": "2026-04-26T04:00:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T03:55:04Z",
+      "time": "2026-04-26T04:00:04Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-26T03:55:04Z",
+      "time": "2026-04-26T04:00:04Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-26T03:55:04Z"
+  "lastUpdated": "2026-04-26T04:00:04Z"
 }
