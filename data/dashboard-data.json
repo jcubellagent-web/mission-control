@@ -5,25 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Examine screenshot of system message from alert named J.A.I.N",
+    "objective": "Analyzed J.A.I.N intelligence_feed.log FRED 500 errors; determined FRED API currently healthy, errors likely transient",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-26T03:05:55Z",
-    "checkedAt": "2026-04-26T03:05:55Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-26T03:13:52Z",
+    "checkedAt": "2026-04-26T03:13:52Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "deepseek/deepseek-v3.2"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Examine screenshot of system message from alert named J.A.I.N",
-    "updatedAt": "2026-04-26T03:10:03Z"
+    "context": "Analyzed J.A.I.N intelligence_feed.log FRED 500 errors; determined FRED API currently healthy, errors likely transient",
+    "updatedAt": "2026-04-26T03:15:04Z"
   },
   "contextWindow": {
     "usedTokens": 60005,
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [],
     "codexbarStatus": "99% left \u00b7 wk 99% left",
     "codexbar": {
@@ -139,7 +133,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 51m",
+        "Resets in 46m",
         "Weekly: 99% left [===========-]",
         "Pace: 61% in reserve | Expected 62% used | Lasts until reset",
         "Resets in 2d 15h",
@@ -150,11 +144,11 @@
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "51m",
+      "sessionReset": "46m",
       "weeklyReset": "2d 15h",
       "summary": "99% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-26T03:10:06Z"
+    "updatedAt": "2026-04-26T03:15:06Z"
   },
   "modelUsage": {
     "session": 0.171098,
@@ -315,14 +309,14 @@
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.006427,
-        "dailyCost": 0.217462,
+        "dailyCost": 0.351733,
         "sessionCost": 0.006427,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T03:10:09Z",
+    "lastUpdated": "2026-04-26T03:15:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -337,9 +331,9 @@
       "available": false
     },
     "openrouter": {
-      "daily": 0.217461652,
-      "weekly": 57.844587447,
-      "monthly": 79.992411161,
+      "daily": 0.351732952,
+      "weekly": 57.978858747,
+      "monthly": 80.126682461,
       "byok_daily": 0.0,
       "byok_weekly": 0.0064269,
       "byok_monthly": 0.0089194,
@@ -351,7 +345,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.422124,
+      "daily": 1.556395,
       "total": 31.085211,
       "monthly": 1089.330307
     },
@@ -393,12 +387,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.0,
-      "cpu_user": 56.22,
-      "cpu_sys": 18.79,
-      "load1": 7.54,
-      "load5": 7.53,
-      "load15": 8.04,
+      "cpu_pct": 74.4,
+      "cpu_user": 56.3,
+      "cpu_sys": 18.8,
+      "load1": 7.36,
+      "load5": 7.85,
+      "load15": 8.1,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -408,14 +402,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.4,
-      "cpu_user": 3.44,
-      "cpu_sys": 9.48,
-      "load1": 2.32,
-      "load5": 2.21,
-      "load15": 2.1,
+      "cpu_pct": 11.8,
+      "cpu_user": 1.81,
+      "cpu_sys": 10.0,
+      "load1": 2.43,
+      "load5": 2.2,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -439,19 +433,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T03:10:03Z"
+      "lastChecked": "2026-04-26T03:15:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T03:10:03Z"
+      "lastChecked": "2026-04-26T03:15:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T03:10:03Z"
+      "lastChecked": "2026-04-26T03:15:04Z"
     }
   ],
   "crons": [
@@ -820,9 +814,9 @@
       "title": "J.A.I.N intelligence_feed.log FRED API 500 errors",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "J.A.I.N alert shows `intelligence_feed.log` has >3 unresolved issues: FRED FEDFUNDS and CPIAUCSL endpoints returning 500 Internal Server Error. Need to diagnose if FRED API down, auth issue, or feed script bug.",
+      "notes": "Analyzed log: FRED API currently returns HTTP 200 for all three series (FEDFUNDS, CPIAUCSL, T10Y2Y), suggesting earlier 500 errors were transient server-side blips. Alert is from error_rate_monitor.py flagging those lines as unresolved. Decision needed: ignore transient errors, patch monitor to treat 500s as temporary, or manually clear the alert.",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 23:05",
+      "updatedAt": "2026-04-25 23:19",
       "owner": "J.A.I.N"
     },
     {
@@ -862,7 +856,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 596384,
+      "elapsedSecs": 596684,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -878,29 +872,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-26T03:10:09Z",
+      "time": "2026-04-26T03:15:09Z",
       "event": "Session spend: $0.17"
     },
     {
-      "time": "2026-04-26T03:10:06Z",
+      "time": "2026-04-26T03:15:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-26T03:10:03Z",
+      "time": "2026-04-26T03:15:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T03:10:03Z",
+      "time": "2026-04-26T03:15:04Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T03:10:03Z",
+      "time": "2026-04-26T03:15:04Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-26T03:10:03Z",
+      "time": "2026-04-26T03:15:04Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-26T03:10:03Z"
+  "lastUpdated": "2026-04-26T03:15:04Z"
 }
