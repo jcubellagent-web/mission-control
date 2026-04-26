@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "continue deeper Sorare analytics audit and start concrete model upgrade work",
+    "objective": "session startup and greet Josh after reset",
     "status": "active",
     "steps": [
       {
@@ -15,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-25T23:49:56Z",
-    "checkedAt": "2026-04-25T23:49:56Z",
+    "updatedAt": "2026-04-25T23:59:25Z",
+    "checkedAt": "2026-04-25T23:59:25Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "continue deeper Sorare analytics audit and start concrete model upgrade work",
-    "updatedAt": "2026-04-25T23:55:04Z"
+    "context": "session startup and greet Josh after reset",
+    "updatedAt": "2026-04-26T00:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 37318,
+    "usedTokens": 107787,
     "limitTokens": 272000,
-    "pct": 0.1372,
+    "pct": 0.3963,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -144,7 +144,7 @@
       "raw": [
         "== Codex 0.120.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 6m",
+        "Resets in 4h 1m",
         "Weekly: 100% left [============]",
         "Pace: 60% in reserve | Expected 60% used | Lasts until reset",
         "Resets in 2d 19h",
@@ -155,15 +155,15 @@
       "weekly": "100% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 6m",
+      "sessionReset": "4h 1m",
       "weeklyReset": "2d 19h",
       "summary": "100% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-25T23:55:06Z"
+    "updatedAt": "2026-04-26T00:00:06Z"
   },
   "modelUsage": {
-    "session": 0.615105,
-    "daily": 1.458269,
+    "session": 0.237899,
+    "daily": 1.081062,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -180,7 +180,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 1.1643145000000001
+        "cost": 0.787108
       },
       {
         "name": "moonshotai/kimi-k2.6",
@@ -215,12 +215,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 286967,
-        "outputTokens": 3999,
-        "totalTokens": 290966,
-        "sessionCost": 1.1643145000000001,
-        "dailyCost": 1.1643145000000001,
-        "weeklyCost": 1.1643145000000001,
+        "inputTokens": 193296,
+        "outputTokens": 1924,
+        "totalTokens": 195220,
+        "sessionCost": 0.787108,
+        "dailyCost": 0.787108,
+        "weeklyCost": 0.787108,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -333,14 +333,14 @@
         "name": "openrouter/auto (BYOK)",
         "source": "OpenRouter API",
         "weeklyCost": 0.006427,
-        "dailyCost": 0.005544,
+        "dailyCost": 0.0,
         "sessionCost": 0.006427,
         "totalTokens": 0,
         "costEstimated": false,
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-25T23:55:09Z",
+    "lastUpdated": "2026-04-26T00:00:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -355,10 +355,10 @@
       "available": false
     },
     "openrouter": {
-      "daily": 31.856789405,
+      "daily": 0.0,
       "weekly": 57.627125795,
       "monthly": 79.774949509,
-      "byok_daily": 0.0055437,
+      "byok_daily": 0.0,
       "byok_weekly": 0.0064269,
       "byok_monthly": 0.0089194,
       "available": true
@@ -369,8 +369,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.463813,
-      "total": 31.338818,
+      "daily": 1.081062,
+      "total": 30.961611,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -411,12 +411,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 75.7,
-      "cpu_user": 56.34,
-      "cpu_sys": 19.32,
-      "load1": 7.83,
-      "load5": 7.96,
-      "load15": 8.15,
+      "cpu_pct": 75.4,
+      "cpu_user": 56.38,
+      "cpu_sys": 19.0,
+      "load1": 8.73,
+      "load5": 8.27,
+      "load15": 8.2,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -426,12 +426,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 2.4,
-      "cpu_sys": 10.4,
-      "load1": 2.44,
-      "load5": 2.21,
-      "load15": 2.08,
+      "cpu_pct": 17.4,
+      "cpu_user": 6.8,
+      "cpu_sys": 11.3,
+      "load1": 3.0,
+      "load5": 2.41,
+      "load15": 2.19,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -457,19 +457,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:55:04Z"
+      "lastChecked": "2026-04-26T00:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-25T23:55:04Z"
+      "lastChecked": "2026-04-26T00:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-25T23:55:04Z"
+      "lastChecked": "2026-04-26T00:00:03Z"
     }
   ],
   "crons": [
@@ -726,7 +726,7 @@
       "status": "ok",
       "errors": 0,
       "lastError": null,
-      "lastRun": "2026-04-25T23:45:04.474706+00:00"
+      "lastRun": "2026-04-26T00:00:04.361418+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -838,10 +838,10 @@
       "title": "Sorare deep analytics upgrade research",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Continuing locally after the delegated run failed. Initial audit confirms the current Sorare model is still shallow: the saved XGBoost bundle mainly uses trailing Sorare-like box-score averages and role flags, so the next pass is identifying and wiring deeper position-aware hitter/pitcher analytics and matchup features.",
+      "notes": "Confirmed the saved XGBoost bundle is shallow and pushed a first concrete upgrade into `~/sorare_ml/ml_bot.py` on J.A.I.N (backup: `ml_bot.py.bak-20260425-advanced-context-pass`). Added recent rolling game-log context, hitter power/speed/discipline signals, pitcher K-BB/strike/recent-form signals, slot-aware hitter weighting (CI/MI/OF/FLEX), and widened public-context reranking from 24 to 36. Next step is validating impact on actual lineup rankings and backtesting against recent GWs.",
       "requestedAt": null,
-      "updatedAt": "2026-04-25 19:49",
-      "owner": "JOSH 2.0"
+      "updatedAt": "2026-04-25 19:57",
+      "owner": "J.A.I.N"
     },
     {
       "id": "T-20260425-906",
@@ -870,7 +870,7 @@
       "label": "mc-ui-revamp-opus",
       "status": "running",
       "startedAt": "2026-04-19T05:30:29.529000+00:00",
-      "elapsedSecs": 584684,
+      "elapsedSecs": 584985,
       "updatedAt": "2026-04-19T05:38:34.783000+00:00"
     },
     {
@@ -896,29 +896,29 @@
   ],
   "recentActivity": [
     {
-      "time": "2026-04-25T23:55:09Z",
-      "event": "Session spend: $0.62"
+      "time": "2026-04-26T00:00:09Z",
+      "event": "Session spend: $0.24"
     },
     {
-      "time": "2026-04-25T23:55:06Z",
+      "time": "2026-04-26T00:00:06Z",
       "event": "Coding: scripts/send_josh_reply.py, scripts/sync_memory_to_jain.sh"
     },
     {
-      "time": "2026-04-25T23:55:06Z",
+      "time": "2026-04-26T00:00:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-25T23:55:04Z",
+      "time": "2026-04-26T00:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-25T23:55:04Z",
+      "time": "2026-04-26T00:00:03Z",
       "event": "5 cron jobs need attention"
     },
     {
-      "time": "2026-04-25T23:55:04Z",
+      "time": "2026-04-26T00:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-25T23:55:04Z"
+  "lastUpdated": "2026-04-26T00:00:03Z"
 }
