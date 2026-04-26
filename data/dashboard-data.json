@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "patch FRED monitor stale transient alert",
+    "objective": "Refreshed Mission Control on screen and confirmed last night's update",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-26T14:14:55Z",
-    "checkedAt": "2026-04-26T14:14:55Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-26T14:19:54Z",
+    "checkedAt": "2026-04-26T14:19:54Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "patch FRED monitor stale transient alert",
-    "updatedAt": "2026-04-26T14:15:05Z"
+    "context": "Refreshed Mission Control on screen and confirmed last night's update",
+    "updatedAt": "2026-04-26T14:20:03Z"
   },
   "contextWindow": {
-    "usedTokens": 41329,
+    "usedTokens": 66974,
     "limitTokens": 272000,
-    "pct": 0.1519,
+    "pct": 0.2462,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 6,
     "recentFiles": [],
     "codexbarStatus": "99% left \u00b7 wk 98% left",
     "codexbar": {
@@ -139,7 +133,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 4h 47m",
+        "Resets in 4h 42m",
         "Weekly: 98% left [===========-]",
         "Pace: 67% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
@@ -150,15 +144,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 47m",
+      "sessionReset": "4h 42m",
       "weeklyReset": "2d 4h",
       "summary": "99% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-26T14:15:07Z"
+    "updatedAt": "2026-04-26T14:20:06Z"
   },
   "modelUsage": {
-    "session": 0.23393,
-    "daily": 9.17438,
+    "session": 1.033612,
+    "daily": 9.974062,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -175,7 +169,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 5.237782
+        "cost": 6.037464
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -210,12 +204,12 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 981232,
-        "outputTokens": 2077,
-        "totalTokens": 983309,
-        "sessionCost": 5.237782,
-        "dailyCost": 5.237782,
-        "weeklyCost": 5.237782,
+        "inputTokens": 1039586,
+        "outputTokens": 3545,
+        "totalTokens": 1043131,
+        "sessionCost": 6.037464,
+        "dailyCost": 6.037464,
+        "weeklyCost": 6.037464,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -344,7 +338,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:15:10Z",
+    "lastUpdated": "2026-04-26T14:20:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -373,8 +367,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 16.495021,
-      "total": 39.564868,
+      "daily": 17.294703,
+      "total": 40.36455,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -415,12 +409,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 72.7,
-      "cpu_user": 54.24,
-      "cpu_sys": 18.48,
-      "load1": 9.94,
-      "load5": 8.99,
-      "load15": 8.44,
+      "cpu_pct": 87.3,
+      "cpu_user": 60.46,
+      "cpu_sys": 26.81,
+      "load1": 8.11,
+      "load5": 8.26,
+      "load15": 8.24,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -430,14 +424,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 5.35,
-      "cpu_sys": 9.82,
-      "load1": 2.19,
-      "load5": 2.07,
-      "load15": 2.08,
+      "cpu_pct": 13.3,
+      "cpu_user": 2.65,
+      "cpu_sys": 10.61,
+      "load1": 2.06,
+      "load5": 2.1,
+      "load15": 2.09,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -461,19 +455,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:15:05Z"
+      "lastChecked": "2026-04-26T14:20:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:15:05Z"
+      "lastChecked": "2026-04-26T14:20:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:15:05Z"
+      "lastChecked": "2026-04-26T14:20:03Z"
     }
   ],
   "crons": [
@@ -963,19 +957,13 @@
     "josh": {
       "agent": "JOSH 2.0",
       "active": true,
-      "objective": "patch FRED monitor stale transient alert",
+      "objective": "Refreshed Mission Control on screen and confirmed last night's update",
       "status": "active",
-      "updatedAt": "2026-04-26T14:14:55Z",
+      "updatedAt": "2026-04-26T14:19:54Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -999,8 +987,8 @@
       "active": false,
       "objective": "X Growth Tracker",
       "status": "idle",
-      "updatedAt": "2026-04-26T14:10:17Z",
-      "messageReceived": "2026-04-26T14:10:17Z",
+      "updatedAt": "2026-04-26T14:15:19Z",
+      "messageReceived": "2026-04-26T14:15:19Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1044,27 +1032,21 @@
       {
         "agent": "JOSH 2.0",
         "active": true,
-        "objective": "patch FRED monitor stale transient alert",
+        "objective": "Refreshed Mission Control on screen and confirmed last night's update",
         "status": "active",
-        "updatedAt": "2026-04-26T14:14:55Z",
+        "updatedAt": "2026-04-26T14:19:54Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
         "active": false,
         "objective": "X Growth Tracker",
         "status": "idle",
-        "updatedAt": "2026-04-26T14:10:17Z",
-        "messageReceived": "2026-04-26T14:10:17Z",
+        "updatedAt": "2026-04-26T14:15:19Z",
+        "messageReceived": "2026-04-26T14:15:19Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1116,29 +1098,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:15:10Z",
-      "event": "Session spend: $0.23"
+      "time": "2026-04-26T14:20:09Z",
+      "event": "Session spend: $1.03"
     },
     {
-      "time": "2026-04-26T14:15:07Z",
+      "time": "2026-04-26T14:20:06Z",
       "event": "CodexBar: 99% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-26T14:15:05Z",
+      "time": "2026-04-26T14:20:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:15:05Z",
+      "time": "2026-04-26T14:20:03Z",
       "event": "2 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T14:15:05Z",
+      "time": "2026-04-26T14:20:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-26T14:15:05Z",
+      "time": "2026-04-26T14:20:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-26T14:15:05Z"
+  "lastUpdated": "2026-04-26T14:20:03Z"
 }
