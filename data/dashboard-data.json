@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Completed 08:00 memory sync to J.A.I.N and verified remote manifest",
+    "objective": "heartbeat triage completed, self-maintenance and calendar check ran, mission control recency checked",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-26T12:02:16Z",
-    "checkedAt": "2026-04-26T12:02:16Z",
+    "updatedAt": "2026-04-26T12:13:02Z",
+    "checkedAt": "2026-04-26T12:13:02Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed 08:00 memory sync to J.A.I.N and verified remote manifest",
-    "updatedAt": "2026-04-26T12:10:03Z"
+    "context": "heartbeat triage completed, self-maintenance and calendar check ran, mission control recency checked",
+    "updatedAt": "2026-04-26T12:15:03Z"
   },
   "contextWindow": {
     "usedTokens": 106955,
@@ -133,7 +133,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 52m",
+        "Resets in 1h 47m",
         "Weekly: 98% left [===========-]",
         "Pace: 65% in reserve | Expected 67% used | Lasts until reset",
         "Resets in 2d 6h",
@@ -144,15 +144,15 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 52m",
+      "sessionReset": "1h 47m",
       "weeklyReset": "2d 6h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-26T12:10:05Z"
+    "updatedAt": "2026-04-26T12:15:05Z"
   },
   "modelUsage": {
     "session": 0.417683,
-    "daily": 9.68017,
+    "daily": 9.062168,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
@@ -169,7 +169,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 5.743572
+        "cost": 5.125570000000001
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -204,12 +204,12 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 1038626,
-        "outputTokens": 1947,
-        "totalTokens": 1040573,
-        "sessionCost": 5.743572,
-        "dailyCost": 5.743572,
-        "weeklyCost": 5.743572,
+        "inputTokens": 895394,
+        "outputTokens": 2164,
+        "totalTokens": 897558,
+        "sessionCost": 5.125570000000001,
+        "dailyCost": 5.125570000000001,
+        "weeklyCost": 5.125570000000001,
         "sessions": 3,
         "isGemini": false,
         "costEstimated": false
@@ -338,7 +338,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T12:10:08Z",
+    "lastUpdated": "2026-04-26T12:15:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -367,8 +367,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 17.000811,
-      "total": 40.070658,
+      "daily": 16.382809,
+      "total": 39.452656,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -409,12 +409,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.6,
-      "cpu_user": 55.5,
-      "cpu_sys": 18.7,
-      "load1": 7.09,
-      "load5": 7.48,
-      "load15": 7.87,
+      "cpu_pct": 74.3,
+      "cpu_user": 55.59,
+      "cpu_sys": 18.66,
+      "load1": 7.4,
+      "load5": 7.91,
+      "load15": 7.99,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -424,14 +424,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.1,
-      "cpu_user": 0.92,
-      "cpu_sys": 10.18,
-      "load1": 1.96,
-      "load5": 2.1,
-      "load15": 2.11,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 10.2,
+      "cpu_user": 1.85,
+      "cpu_sys": 8.33,
+      "load1": 2.62,
+      "load5": 2.5,
+      "load15": 2.29,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -455,19 +455,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T12:10:03Z"
+      "lastChecked": "2026-04-26T12:15:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T12:10:03Z"
+      "lastChecked": "2026-04-26T12:15:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T12:10:03Z"
+      "lastChecked": "2026-04-26T12:15:03Z"
     }
   ],
   "crons": [
@@ -800,7 +800,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-26T12:00:05.670281+00:00"
+      "lastRun": "2026-04-26T12:15:03.798584+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -956,9 +956,9 @@
     "josh": {
       "agent": "JOSH 2.0",
       "active": true,
-      "objective": "Completed 08:00 memory sync to J.A.I.N and verified remote manifest",
+      "objective": "heartbeat triage completed, self-maintenance and calendar check ran, mission control recency checked",
       "status": "active",
-      "updatedAt": "2026-04-26T12:02:16Z",
+      "updatedAt": "2026-04-26T12:13:02Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.5",
@@ -986,8 +986,8 @@
       "active": false,
       "objective": "X Growth Tracker",
       "status": "idle",
-      "updatedAt": "2026-04-26T12:09:16Z",
-      "messageReceived": "2026-04-26T12:09:16Z",
+      "updatedAt": "2026-04-26T12:14:19Z",
+      "messageReceived": "2026-04-26T12:14:19Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1026,9 +1026,9 @@
       {
         "agent": "JOSH 2.0",
         "active": true,
-        "objective": "Completed 08:00 memory sync to J.A.I.N and verified remote manifest",
+        "objective": "heartbeat triage completed, self-maintenance and calendar check ran, mission control recency checked",
         "status": "active",
-        "updatedAt": "2026-04-26T12:02:16Z",
+        "updatedAt": "2026-04-26T12:13:02Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.5",
@@ -1039,8 +1039,8 @@
         "active": false,
         "objective": "X Growth Tracker",
         "status": "idle",
-        "updatedAt": "2026-04-26T12:09:16Z",
-        "messageReceived": "2026-04-26T12:09:16Z",
+        "updatedAt": "2026-04-26T12:14:19Z",
+        "messageReceived": "2026-04-26T12:14:19Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1087,29 +1087,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T12:10:08Z",
+      "time": "2026-04-26T12:15:09Z",
       "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-26T12:10:05Z",
+      "time": "2026-04-26T12:15:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-26T12:10:03Z",
+      "time": "2026-04-26T12:15:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T12:10:03Z",
+      "time": "2026-04-26T12:15:03Z",
       "event": "3 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T12:10:03Z",
+      "time": "2026-04-26T12:15:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-26T12:10:03Z",
+      "time": "2026-04-26T12:15:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-26T12:10:03Z"
+  "lastUpdated": "2026-04-26T12:15:03Z"
 }
