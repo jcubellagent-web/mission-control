@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "answer Josh's GPT-5.5 subscription-vs-API preference and align routing policy",
+    "objective": "lock subscription-first policy, audit API escapes, and add model/auth labels to Josh 2.0 + JAIMES replies",
     "status": "active",
     "steps": [
       {
@@ -15,22 +15,22 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-26T15:59:53Z",
-    "checkedAt": "2026-04-26T15:59:53Z",
+    "updatedAt": "2026-04-26T16:02:58Z",
+    "checkedAt": "2026-04-26T16:02:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "answer Josh's GPT-5.5 subscription-vs-API preference and align routing policy",
-    "updatedAt": "2026-04-26T16:00:04Z"
+    "context": "lock subscription-first policy, audit API escapes, and add model/auth labels to Josh 2.0 + JAIMES replies",
+    "updatedAt": "2026-04-26T16:05:04Z"
   },
   "contextWindow": {
-    "usedTokens": 106394,
+    "usedTokens": 109970,
     "limitTokens": 272000,
-    "pct": 0.3912,
+    "pct": 0.4043,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 6,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/service-worker.js",
@@ -143,10 +143,10 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 3h 2m",
+        "Resets in 2h 57m",
         "Weekly: 97% left [===========-]",
         "Pace: 67% in reserve | Expected 70% used | Lasts until reset",
-        "Resets in 2d 3h",
+        "Resets in 2d 2h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -154,22 +154,22 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 2m",
-      "weeklyReset": "2d 3h",
+      "sessionReset": "2h 57m",
+      "weeklyReset": "2d 2h",
       "summary": "95% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T16:00:06Z"
+    "updatedAt": "2026-04-26T16:05:06Z"
   },
   "modelUsage": {
-    "session": 0.452541,
-    "daily": 11.156707,
+    "session": 0.27506,
+    "daily": 11.062638,
     "weekly": 41.13868,
     "monthly": 947.516099,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 28.190447749999997
+        "cost": 28.27385875
       },
       {
         "name": "gpt-5.4-mini",
@@ -184,7 +184,7 @@
       {
         "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.4525405
+        "cost": 0.27506
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -196,9 +196,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 28.190447749999997,
-        "dailyCost": 5.7229765,
-        "sessionCost": 28.190447749999997,
+        "weeklyCost": 28.27385875,
+        "dailyCost": 5.8063875000000005,
+        "sessionCost": 28.27385875,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -227,12 +227,12 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 107017,
-        "outputTokens": 1946,
-        "totalTokens": 108963,
-        "sessionCost": 0.4525405,
-        "dailyCost": 0.4525405,
-        "weeklyCost": 0.4525405,
+        "inputTokens": 109970,
+        "outputTokens": 9,
+        "totalTokens": 109979,
+        "sessionCost": 0.27506,
+        "dailyCost": 0.27506,
+        "weeklyCost": 0.27506,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -251,15 +251,15 @@
         "costEstimated": false
       },
       {
-        "name": "codex/gpt-5.5",
+        "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 254087,
-        "outputTokens": 1213,
-        "totalTokens": 255300,
+        "inputTokens": 44318,
+        "outputTokens": 116,
+        "totalTokens": 44434,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
-        "sessions": 7,
+        "sessions": 2,
         "isGemini": false,
         "costEstimated": false
       },
@@ -316,6 +316,19 @@
         "costEstimated": false
       },
       {
+        "name": "codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 184153,
+        "outputTokens": 583,
+        "totalTokens": 184736,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 5,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
         "name": "gpt-5.5",
         "source": "codex",
         "weeklyCost": 0.0,
@@ -361,7 +374,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T16:00:10Z",
+    "lastUpdated": "2026-04-26T16:05:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -390,8 +403,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 18.477348,
-      "total": 41.547195,
+      "daily": 18.383279,
+      "total": 41.453126,
       "monthly": 947.525018
     },
     "weeklyRunRate": {
@@ -432,14 +445,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 98.7,
-      "cpu_user": 32.18,
-      "cpu_sys": 66.45,
-      "load1": 10.2,
-      "load5": 8.64,
-      "load15": 8.42,
+      "cpu_pct": 71.4,
+      "cpu_user": 53.75,
+      "cpu_sys": 17.65,
+      "load1": 7.46,
+      "load5": 8.49,
+      "load15": 8.48,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "89Gi",
@@ -447,14 +460,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.5,
-      "cpu_user": 3.57,
-      "cpu_sys": 8.92,
-      "load1": 1.94,
+      "cpu_pct": 11.1,
+      "cpu_user": 1.7,
+      "cpu_sys": 9.4,
+      "load1": 2.12,
       "load5": 2.09,
-      "load15": 2.09,
+      "load15": 2.1,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "46Gi",
@@ -478,19 +491,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:00:04Z"
+      "lastChecked": "2026-04-26T16:05:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T16:00:04Z"
+      "lastChecked": "2026-04-26T16:05:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T16:00:04Z"
+      "lastChecked": "2026-04-26T16:05:04Z"
     }
   ],
   "crons": [
@@ -1216,7 +1229,18 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260426-946",
+      "title": "Lock subscription-first policy + add model/auth labels",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh wants the subscription-first routing policy locked, an audit of current API escapes, and every Josh 2.0 + JAIMES reply to show active model plus (subscription)/(API). Inspecting local/J.A.I.N response formatting and routing config before patching.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-26 12:03",
+      "owner": "JAIMES"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1244,10 +1268,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "answer Josh's GPT-5.5 subscription-vs-API preference and align routing policy",
+      "objective": "lock subscription-first policy, audit API escapes, and add model/auth labels to Josh 2.0 + JAIMES replies",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-26T15:59:53Z",
+      "updatedAt": "2026-04-26T16:02:58Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.4",
@@ -1285,8 +1309,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T15:56:16Z",
-      "messageReceived": "2026-04-26T15:56:16Z",
+      "updatedAt": "2026-04-26T16:01:18Z",
+      "messageReceived": "2026-04-26T16:01:18Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1326,10 +1350,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "answer Josh's GPT-5.5 subscription-vs-API preference and align routing policy",
+        "objective": "lock subscription-first policy, audit API escapes, and add model/auth labels to Josh 2.0 + JAIMES replies",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-26T15:59:53Z",
+        "updatedAt": "2026-04-26T16:02:58Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.4",
@@ -1348,8 +1372,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T15:56:16Z",
-        "messageReceived": "2026-04-26T15:56:16Z",
+        "updatedAt": "2026-04-26T16:01:18Z",
+        "messageReceived": "2026-04-26T16:01:18Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1398,29 +1422,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T16:00:10Z",
-      "event": "Session spend: $0.45"
+      "time": "2026-04-26T16:05:09Z",
+      "event": "Session spend: $0.28"
     },
     {
-      "time": "2026-04-26T16:00:06Z",
+      "time": "2026-04-26T16:05:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T16:00:06Z",
+      "time": "2026-04-26T16:05:06Z",
       "event": "CodexBar: 95% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T16:00:04Z",
+      "time": "2026-04-26T16:05:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T16:00:04Z",
+      "time": "2026-04-26T16:05:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T16:00:04Z",
+      "time": "2026-04-26T16:05:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T16:00:04Z"
+  "lastUpdated": "2026-04-26T16:05:04Z"
 }
