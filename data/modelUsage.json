@@ -1,23 +1,13 @@
 {
-  "session": 0.0,
-  "daily": 2.496267,
+  "session": 0.389135,
+  "daily": 1.370367,
   "weekly": 86.924249,
   "monthly": 1089.321388,
   "topModels": [
     {
-      "name": "gpt-5.4",
-      "window": "session",
-      "cost": 23.861952249999998
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "window": "session",
-      "cost": 7.326190049999999
-    },
-    {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 0.919418
+      "cost": 1.3085529999999999
     },
     {
       "name": "openai/gpt-5.4-mini",
@@ -28,37 +18,29 @@
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
       "cost": 0.006918987599999999
+    },
+    {
+      "name": "google/gemini-2.5-pro",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "codex/gpt-5.4-mini",
+      "window": "session",
+      "cost": 0.0
     }
   ],
   "breakdown": [
     {
-      "name": "gpt-5.4",
-      "source": "codex",
-      "weeklyCost": 23.861952249999998,
-      "dailyCost": 1.3944809999999999,
-      "sessionCost": 23.861952249999998,
-      "totalTokens": 0,
-      "costEstimated": false
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "source": "codex",
-      "weeklyCost": 7.326190049999999,
-      "dailyCost": 0.12055350000000001,
-      "sessionCost": 7.326190049999999,
-      "totalTokens": 0,
-      "costEstimated": false
-    },
-    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 163012,
-      "outputTokens": 509,
-      "totalTokens": 163521,
-      "sessionCost": 0.919418,
-      "dailyCost": 0.919418,
-      "weeklyCost": 0.919418,
-      "sessions": 2,
+      "inputTokens": 193231,
+      "outputTokens": 2897,
+      "totalTokens": 196128,
+      "sessionCost": 1.3085529999999999,
+      "dailyCost": 1.3085529999999999,
+      "weeklyCost": 1.3085529999999999,
+      "sessions": 3,
       "isGemini": false,
       "costEstimated": false
     },
@@ -177,7 +159,7 @@
       "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
     }
   ],
-  "lastUpdated": "2026-04-26T06:05:10Z",
+  "lastUpdated": "2026-04-26T06:12:14Z",
   "jain": {
     "daily": 0.0,
     "session": 0.704034,
@@ -206,8 +188,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 9.816908,
-    "total": 32.886754,
+    "daily": 8.691008,
+    "total": 2.087747,
     "monthly": 1089.330307
   },
   "weeklyRunRate": {
