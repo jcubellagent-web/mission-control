@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "handle queued Mission Control approval and fix cron errors",
-    "updatedAt": "2026-04-26T14:42:47Z"
+    "updatedAt": "2026-04-26T14:45:04Z"
   },
   "contextWindow": {
     "usedTokens": 112931,
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 6,
+    "missionControlDirty": 2,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/service-worker.js",
@@ -143,7 +143,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 19m",
+        "Resets in 4h 17m",
         "Weekly: 97% left [===========-]",
         "Pace: 66% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
@@ -154,11 +154,11 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 19m",
+      "sessionReset": "4h 17m",
       "weeklyReset": "2d 4h",
       "summary": "98% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T14:42:50Z"
+    "updatedAt": "2026-04-26T14:45:06Z"
   },
   "modelUsage": {
     "session": 0.424343,
@@ -348,7 +348,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:42:53Z",
+    "lastUpdated": "2026-04-26T14:45:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -419,12 +419,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 87.2,
-      "cpu_user": 50.57,
-      "cpu_sys": 36.61,
-      "load1": 9.51,
-      "load5": 9.85,
-      "load15": 9.1,
+      "cpu_pct": 91.0,
+      "cpu_user": 48.73,
+      "cpu_sys": 42.28,
+      "load1": 8.22,
+      "load5": 9.2,
+      "load15": 8.95,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -434,12 +434,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.5,
-      "cpu_user": 4.54,
-      "cpu_sys": 10.0,
-      "load1": 1.89,
-      "load5": 2.1,
-      "load15": 2.12,
+      "cpu_pct": 13.8,
+      "cpu_user": 3.5,
+      "cpu_sys": 10.68,
+      "load1": 1.45,
+      "load5": 1.92,
+      "load15": 2.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -450,8 +450,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Re-auth required"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
@@ -465,19 +465,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:42:47Z"
+      "lastChecked": "2026-04-26T14:45:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:42:47Z"
+      "lastChecked": "2026-04-26T14:45:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:42:47Z"
+      "lastChecked": "2026-04-26T14:45:04Z"
     }
   ],
   "crons": [
@@ -1061,7 +1061,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-26T14:30:05.204153+00:00"
+      "lastRun": "2026-04-26T14:45:04.606679+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1202,18 +1202,7 @@
       "lastError": null
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260426-939",
-      "title": "Mission Control cron error cleanup",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh pressed `next:fix_cron_errors` after Mission Control audit. Current dashboard shows 2 cron error badges: JAIMES Sorare ML Lineups and Fantasy Waiver Review (Hermes), both with `Agent completed but produced empty response`. Investigating Hermes/J.A.I.N source and whether these are stale completion records vs real active failures.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-26 10:37",
-      "owner": "JAIMES"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1282,8 +1271,8 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-26T14:40:33Z",
-      "messageReceived": "2026-04-26T14:40:33Z",
+      "updatedAt": "2026-04-26T14:35:30Z",
+      "messageReceived": "2026-04-26T14:35:30Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1345,8 +1334,8 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-26T14:40:33Z",
-        "messageReceived": "2026-04-26T14:40:33Z",
+        "updatedAt": "2026-04-26T14:35:30Z",
+        "messageReceived": "2026-04-26T14:35:30Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1395,29 +1384,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:42:53Z",
+      "time": "2026-04-26T14:45:09Z",
       "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-26T14:42:50Z",
+      "time": "2026-04-26T14:45:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-26T14:42:50Z",
+      "time": "2026-04-26T14:45:06Z",
       "event": "CodexBar: 98% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T14:42:47Z",
+      "time": "2026-04-26T14:45:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:42:47Z",
+      "time": "2026-04-26T14:45:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-26T14:42:47Z",
+      "time": "2026-04-26T14:45:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T14:42:47Z"
+  "lastUpdated": "2026-04-26T14:45:04Z"
 }
