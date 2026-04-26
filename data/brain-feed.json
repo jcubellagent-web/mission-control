@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat triage completed, self-maintenance and overdue memory consolidation ran, mission control recency checked",
+  "objective": "Assess GPT-5.5 quality via our subscription",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-26T04:16:43Z",
-  "checkedAt": "2026-04-26T04:16:43Z",
+  "steps": [
+    {
+      "label": "gpt_5_5_quality",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "currentTool": "exec",
+  "updatedAt": "2026-04-26T04:21:44Z",
+  "checkedAt": "2026-04-26T04:21:44Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "deepseek/deepseek-v3.2"
 }
