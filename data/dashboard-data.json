@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "deep Mission Control audit polish and Codex delegation",
-    "updatedAt": "2026-04-26T14:25:03Z"
+    "updatedAt": "2026-04-26T14:30:03Z"
   },
   "contextWindow": {
     "usedTokens": 66841,
@@ -131,43 +131,46 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 6,
+    "missionControlDirty": 11,
     "recentFiles": [
+      "mission-control/service-worker.js",
+      "mission-control/index.html",
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/.codex-mission-control-audit-prompt.md"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 98% left",
+    "codexbarStatus": "98% left \u00b7 wk 97% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 4h 37m",
-        "Weekly: 98% left [===========-]",
-        "Pace: 67% in reserve | Expected 69% used | Lasts until reset",
+        "Session: 98% left [===========-]",
+        "Resets in 4h 32m",
+        "Weekly: 97% left [===========-]",
+        "Pace: 66% in reserve | Expected 69% used | Lasts until reset",
         "Resets in 2d 4h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "99% left",
-      "weekly": "98% left",
+      "session": "98% left",
+      "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 37m",
+      "sessionReset": "4h 32m",
       "weeklyReset": "2d 4h",
-      "summary": "99% left \u00b7 wk 98% left"
+      "summary": "98% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-26T14:25:05Z"
+    "updatedAt": "2026-04-26T14:30:06Z"
   },
   "modelUsage": {
     "session": 0.414372,
-    "daily": 10.065226,
+    "daily": 10.972711,
     "weekly": 86.924249,
     "monthly": 1089.321388,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 26.99391975
+        "cost": 27.901404749999998
       },
       {
         "name": "gpt-5.4-mini",
@@ -194,9 +197,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 26.99391975,
-        "dailyCost": 4.5264485,
-        "sessionCost": 26.99391975,
+        "weeklyCost": 27.901404749999998,
+        "dailyCost": 5.4339335,
+        "sessionCost": 27.901404749999998,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -346,7 +349,7 @@
         "_note": "BYOK charges: Grok/Claude calls routed via OpenRouter. Weekly = rolling 7d."
       }
     ],
-    "lastUpdated": "2026-04-26T14:25:08Z",
+    "lastUpdated": "2026-04-26T14:30:09Z",
     "jain": {
       "daily": 0.0,
       "session": 0.704034,
@@ -375,8 +378,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 17.385867,
-      "total": 40.455714,
+      "daily": 18.293352,
+      "total": 41.363199,
       "monthly": 1089.330307
     },
     "weeklyRunRate": {
@@ -417,12 +420,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 73.6,
-      "cpu_user": 56.2,
-      "cpu_sys": 17.59,
-      "load1": 8.95,
-      "load5": 8.26,
-      "load15": 8.21,
+      "cpu_pct": 71.1,
+      "cpu_user": 53.69,
+      "cpu_sys": 17.41,
+      "load1": 6.54,
+      "load5": 7.74,
+      "load15": 8.06,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -432,12 +435,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.3,
-      "cpu_user": 6.77,
-      "cpu_sys": 13.55,
-      "load1": 2.43,
-      "load5": 2.02,
-      "load15": 2.03,
+      "cpu_pct": 15.5,
+      "cpu_user": 4.31,
+      "cpu_sys": 11.2,
+      "load1": 2.04,
+      "load5": 2.15,
+      "load15": 2.09,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -463,19 +466,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:25:03Z"
+      "lastChecked": "2026-04-26T14:30:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-26T14:25:03Z"
+      "lastChecked": "2026-04-26T14:30:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-26T14:25:03Z"
+      "lastChecked": "2026-04-26T14:30:03Z"
     }
   ],
   "crons": [
@@ -592,6 +595,20 @@
       "runStatus": "active"
     },
     {
+      "name": "X Watchlist Monitor",
+      "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
+      "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane",
+      "category": "Intelligence Feed",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "active"
+    },
+    {
       "name": "Intelligence Feed",
       "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p \u00b7 Weekends 10a/4:15p/9p/11p ET",
       "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence",
@@ -692,6 +709,240 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "due"
+    },
+    {
+      "name": "XMCP Boot",
+      "schedule": "On boot",
+      "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart",
+      "category": "Maintenance",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null
+    },
+    {
+      "name": "X Pre-Market",
+      "schedule": "Daily 7:00 AM ET",
+      "description": "[Original] Futures and overnight setup",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-26T07:00:00"
+    },
+    {
+      "name": "X Market Open",
+      "schedule": "Daily 8:00 AM ET",
+      "description": "[Original] Market-open macro take",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-26T08:00:00"
+    },
+    {
+      "name": "X Mover",
+      "schedule": "Daily 11:00 AM ET",
+      "description": "[Original] Mid-morning mover or stat",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Hot Take",
+      "schedule": "Daily 12:00 PM ET",
+      "description": "[Original] Contrarian take built to spark replies",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Quote Tweets",
+      "schedule": "Daily 1p/3p/6p/8p ET",
+      "description": "[QT] Quotes breaking or viral posts with our angle",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming",
+      "multiRun": {
+        "runs": [
+          {
+            "time": "1:00 PM",
+            "label": "Quote Tweet",
+            "past": false,
+            "done": false
+          },
+          {
+            "time": "3:00 PM",
+            "label": "Quote Tweet",
+            "past": false,
+            "done": false
+          },
+          {
+            "time": "6:00 PM",
+            "label": "Quote Tweet",
+            "past": false,
+            "done": false
+          },
+          {
+            "time": "8:00 PM",
+            "label": "Quote Tweet",
+            "past": false,
+            "done": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "X Market Close",
+      "schedule": "Daily 5:00 PM ET",
+      "description": "[Original] Close wrap and next-day setup",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Prime Take",
+      "schedule": "Daily 9:00 PM ET",
+      "description": "[Original] Prime-time flagship take",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Nightcap",
+      "schedule": "Daily 10:00 PM ET",
+      "description": "[Original] Last sharp insight of the day",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "upcoming"
+    },
+    {
+      "name": "X Strategic Replies",
+      "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)",
+      "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies",
+      "category": "X Account",
+      "agent": "J.A.I.N",
+      "status": "ok",
+      "source": "cron",
+      "sourceLabel": "J.A.I.N Cron",
+      "todayRelevant": true,
+      "errors": 0,
+      "lastError": null,
+      "runStatus": "done",
+      "lastRun": "2026-04-26T10:00:00",
+      "multiRun": {
+        "runs": [
+          {
+            "time": "9:00 AM",
+            "label": "Strategic Reply",
+            "done": true
+          },
+          {
+            "time": "10:00 AM",
+            "label": "Strategic Reply",
+            "done": true
+          },
+          {
+            "time": "11:00 AM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "1:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "2:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "3:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "4:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "5:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "6:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "7:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "9:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          },
+          {
+            "time": "11:00 PM",
+            "label": "Strategic Reply",
+            "done": false
+          }
+        ]
+      }
     },
     {
       "name": "Sorare ML Training",
@@ -809,7 +1060,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-26T14:15:04.367554+00:00"
+      "lastRun": "2026-04-26T14:30:05.204153+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -963,7 +1214,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/.codex-mission-control-audit-prompt.md",
+      "label": "Editing: mission-control/service-worker.js, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -986,8 +1237,10 @@
     "josh": {
       "agent": "JOSH 2.0",
       "active": true,
+      "reportedActive": true,
       "objective": "deep Mission Control audit polish and Codex delegation",
       "status": "active",
+      "stale": false,
       "updatedAt": "2026-04-26T14:21:41Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
@@ -1002,9 +1255,11 @@
     },
     "jain": {
       "agent": "J.A.I.N",
-      "active": true,
+      "active": false,
+      "reportedActive": true,
       "objective": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
-      "status": "active",
+      "status": "stale",
+      "stale": true,
       "updatedAt": "2026-04-13T05:13:44Z",
       "messageReceived": "2026-04-13T03:11:49Z",
       "currentTool": "bf_step",
@@ -1020,10 +1275,12 @@
     "jaimes": {
       "agent": "JAIMES",
       "active": false,
+      "reportedActive": false,
       "objective": "X Growth Tracker",
       "status": "idle",
-      "updatedAt": "2026-04-26T14:20:22Z",
-      "messageReceived": "2026-04-26T14:20:22Z",
+      "stale": false,
+      "updatedAt": "2026-04-26T14:25:24Z",
+      "messageReceived": "2026-04-26T14:25:24Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1067,8 +1324,10 @@
       {
         "agent": "JOSH 2.0",
         "active": true,
+        "reportedActive": true,
         "objective": "deep Mission Control audit polish and Codex delegation",
         "status": "active",
+        "stale": false,
         "updatedAt": "2026-04-26T14:21:41Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
@@ -1084,10 +1343,12 @@
       {
         "agent": "JAIMES",
         "active": false,
+        "reportedActive": false,
         "objective": "X Growth Tracker",
         "status": "idle",
-        "updatedAt": "2026-04-26T14:20:22Z",
-        "messageReceived": "2026-04-26T14:20:22Z",
+        "stale": false,
+        "updatedAt": "2026-04-26T14:25:24Z",
+        "messageReceived": "2026-04-26T14:25:24Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1120,9 +1381,11 @@
       },
       {
         "agent": "J.A.I.N",
-        "active": true,
+        "active": false,
+        "reportedActive": true,
         "objective": "transcribe Josh follow-up voice note and finish Mission Control cleanup before live push",
-        "status": "active",
+        "status": "stale",
+        "stale": true,
         "updatedAt": "2026-04-13T05:13:44Z",
         "messageReceived": "2026-04-13T03:11:49Z",
         "currentTool": "bf_step",
@@ -1139,29 +1402,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-26T14:25:08Z",
+      "time": "2026-04-26T14:30:09Z",
       "event": "Session spend: $0.41"
     },
     {
-      "time": "2026-04-26T14:25:05Z",
-      "event": "Coding: mission-control/.codex-mission-control-audit-prompt.md"
+      "time": "2026-04-26T14:30:06Z",
+      "event": "Coding: mission-control/service-worker.js, mission-control/index.html"
     },
     {
-      "time": "2026-04-26T14:25:05Z",
-      "event": "CodexBar: 99% left \u00b7 wk 98% left"
+      "time": "2026-04-26T14:30:06Z",
+      "event": "CodexBar: 98% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-26T14:25:03Z",
+      "time": "2026-04-26T14:30:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-26T14:25:03Z",
+      "time": "2026-04-26T14:30:03Z",
       "event": "2 cron jobs need attention"
     },
     {
-      "time": "2026-04-26T14:25:03Z",
+      "time": "2026-04-26T14:30:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-26T14:25:03Z"
+  "lastUpdated": "2026-04-26T14:30:03Z"
 }
