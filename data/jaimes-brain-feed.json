@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Hermes upgraded and Mission Control live verified",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:08:18Z",
-  "checkedAt": "2026-04-27T04:08:17Z",
-  "messageReceived": "2026-04-27T04:08:17Z",
+  "active": true,
+  "objective": "Check-in: JAIMES back online",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:09:37Z",
+  "checkedAt": "2026-04-27T04:09:37Z",
+  "messageReceived": "2026-04-27T04:09:37Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -48,6 +48,11 @@
     {
       "label": "Hermes/Mission Control: final verification",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Check-in: JAIMES back online",
+      "status": "active",
       "tool": "exec"
     }
   ],
