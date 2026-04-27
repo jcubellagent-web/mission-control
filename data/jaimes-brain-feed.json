@@ -1,29 +1,24 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: rechecked Hot Streak API shows no Suarez",
-  "status": "idle",
-  "updatedAt": "2026-04-27T16:31:01Z",
-  "checkedAt": "2026-04-27T16:30:21Z",
-  "messageReceived": "2026-04-27T16:30:21Z",
+  "active": true,
+  "objective": "Task: ops drift audit on J.A.I.N",
+  "status": "active",
+  "updatedAt": "2026-04-27T22:15:25Z",
+  "checkedAt": "2026-04-27T22:15:25Z",
+  "messageReceived": "2026-04-27T22:15:25Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-ops-drift-check",
+      "label": "jaimes-model-efficiency-guard",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Task: re-verify Suarez still visible in Hot Streak",
-      "status": "done",
+      "label": "Task: ops drift audit on J.A.I.N",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "Step: refetch live Sorare Hot Streak state",
-      "status": "done",
-      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
