@@ -1,39 +1,19 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Hermes: approved upgrade path starting",
-  "status": "active",
-  "updatedAt": "2026-04-27T04:05:01Z",
-  "checkedAt": "2026-04-27T04:05:01Z",
-  "messageReceived": "2026-04-27T04:05:01Z",
+  "active": false,
+  "objective": "Done: Hermes upgraded and approved skills installed",
+  "status": "idle",
+  "updatedAt": "2026-04-27T04:05:18Z",
+  "checkedAt": "2026-04-27T04:05:03Z",
+  "messageReceived": "2026-04-27T04:01:52Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
+      "label": "Sorare MLB pre-lock monitor",
       "status": "done",
       "tool": "hermes"
-    },
-    {
-      "label": "Cron: Sorare pre-lock monitor",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Hermes: auditing upgradeable skills",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Hermes: checking upgrade options",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Hermes: approved upgrade path starting",
-      "status": "active",
-      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
