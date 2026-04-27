@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Hermes upgraded and approved skills installed",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:05:18Z",
-  "checkedAt": "2026-04-27T04:05:03Z",
-  "messageReceived": "2026-04-27T04:01:52Z",
+  "active": true,
+  "objective": "Hermes: installing approved optional skills",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:05:24Z",
+  "checkedAt": "2026-04-27T04:05:24Z",
+  "messageReceived": "2026-04-27T04:05:24Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -14,6 +14,11 @@
       "label": "Sorare MLB pre-lock monitor",
       "status": "done",
       "tool": "hermes"
+    },
+    {
+      "label": "Hermes: installing approved optional skills",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
