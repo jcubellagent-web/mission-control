@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: updated reusable skill guidance",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:15:44Z",
-  "checkedAt": "2026-04-27T04:15:38Z",
-  "messageReceived": "2026-04-27T04:15:38Z",
+  "active": true,
+  "objective": "Step: running ops drift audit script",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:15:57Z",
+  "checkedAt": "2026-04-27T04:15:57Z",
+  "messageReceived": "2026-04-27T04:15:57Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -28,6 +28,11 @@
     {
       "label": "Task: ops drift audit on J.A.I.N",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: running ops drift audit script",
+      "status": "active",
       "tool": "exec"
     }
   ],
