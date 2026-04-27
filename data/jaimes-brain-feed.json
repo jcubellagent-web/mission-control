@@ -1,24 +1,24 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: ops drift audit found no alerts",
-  "status": "idle",
-  "updatedAt": "2026-04-27T10:15:29Z",
-  "checkedAt": "2026-04-27T10:15:19Z",
-  "messageReceived": "2026-04-27T10:15:19Z",
-  "currentTool": "exec",
+  "active": true,
+  "objective": "Cron: Sorare GW draft report",
+  "status": "active",
+  "updatedAt": "2026-04-27T12:00:55Z",
+  "checkedAt": "2026-04-27T12:00:55Z",
+  "messageReceived": "2026-04-27T12:00:55Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
+      "label": "jaimes-ops-drift-check",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Task: ops drift audit on J.A.I.N",
-      "status": "done",
-      "tool": "exec"
+      "label": "Cron: Sorare GW draft report",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
