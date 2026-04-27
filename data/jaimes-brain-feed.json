@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Hermes upgrade health check complete",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:05:36Z",
-  "checkedAt": "2026-04-27T04:05:35Z",
-  "messageReceived": "2026-04-27T04:05:35Z",
+  "active": true,
+  "objective": "Hermes: applying approved config cleanup",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:06:47Z",
+  "checkedAt": "2026-04-27T04:06:47Z",
+  "messageReceived": "2026-04-27T04:06:47Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -23,6 +23,11 @@
     {
       "label": "Hermes: post-upgrade health check",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes: applying approved config cleanup",
+      "status": "active",
       "tool": "exec"
     }
   ],
