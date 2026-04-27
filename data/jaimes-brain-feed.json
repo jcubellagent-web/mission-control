@@ -1,58 +1,23 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: skill updated for quiet ops alerts",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:19:03Z",
-  "checkedAt": "2026-04-27T04:18:51Z",
-  "messageReceived": "2026-04-27T04:18:51Z",
+  "active": true,
+  "objective": "Task: quiet normal cron updates",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:21:15Z",
+  "checkedAt": "2026-04-27T04:21:15Z",
+  "messageReceived": "2026-04-27T04:21:15Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
+      "label": "jaimes-ops-drift-check",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: patch Mission Control skill",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: ops drift audit on J.A.I.N",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: running ops drift audit script",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: inspect cron update screenshot",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify ops drift quiet mode",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: save reusable ops-drift quieting insight",
-      "status": "done",
+      "label": "Task: quiet normal cron updates",
+      "status": "active",
       "tool": "exec"
     }
   ],
