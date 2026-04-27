@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Sorare GW10: fetching live submitted lineups",
+  "objective": "Sorare GW10: dry-run current submit lane",
   "status": "active",
-  "updatedAt": "2026-04-27T14:20:34Z",
-  "checkedAt": "2026-04-27T14:20:34Z",
-  "messageReceived": "2026-04-27T14:20:34Z",
-  "currentTool": "web",
+  "updatedAt": "2026-04-27T14:24:27Z",
+  "checkedAt": "2026-04-27T14:24:27Z",
+  "messageReceived": "2026-04-27T14:24:27Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -17,8 +17,13 @@
     },
     {
       "label": "Sorare GW10: fetching live submitted lineups",
-      "status": "active",
+      "status": "done",
       "tool": "web"
+    },
+    {
+      "label": "Sorare GW10: dry-run current submit lane",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
