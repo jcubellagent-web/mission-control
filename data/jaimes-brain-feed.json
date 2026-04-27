@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Cron: Sorare pre-lock monitor",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:01:44Z",
-  "checkedAt": "2026-04-27T04:00:56Z",
-  "messageReceived": "2026-04-27T04:00:56Z",
-  "currentTool": "code",
+  "active": true,
+  "objective": "Hermes: auditing upgradeable skills",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:02:55Z",
+  "checkedAt": "2026-04-27T04:02:55Z",
+  "messageReceived": "2026-04-27T04:02:55Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -19,6 +19,11 @@
       "label": "Cron: Sorare pre-lock monitor",
       "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Hermes: auditing upgradeable skills",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
