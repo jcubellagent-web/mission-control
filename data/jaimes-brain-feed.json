@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Validating auto-repair script syntax",
+  "objective": "Testing failures-only auto-repair behavior",
   "status": "active",
-  "updatedAt": "2026-04-27T14:08:12Z",
-  "checkedAt": "2026-04-27T14:08:12Z",
-  "messageReceived": "2026-04-27T14:08:12Z",
+  "updatedAt": "2026-04-27T14:10:02Z",
+  "checkedAt": "2026-04-27T14:10:02Z",
+  "messageReceived": "2026-04-27T14:10:02Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -16,32 +16,7 @@
       "tool": "hermes"
     },
     {
-      "label": "Patching JOSH health alert throttle",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Validating health script changes",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Class: notification throttling runbook review",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: make JOSH failures auto-repair before alert",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Validating auto-repair script syntax",
+      "label": "Testing failures-only auto-repair behavior",
       "status": "active",
       "tool": "exec"
     }
