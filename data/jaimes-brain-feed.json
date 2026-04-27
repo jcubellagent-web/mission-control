@@ -1,27 +1,22 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Inspecting screenshot text locally",
+  "objective": "Patching JOSH health alert throttle",
   "status": "active",
-  "updatedAt": "2026-04-27T14:03:55Z",
-  "checkedAt": "2026-04-27T14:03:55Z",
-  "messageReceived": "2026-04-27T14:03:55Z",
+  "updatedAt": "2026-04-27T14:05:27Z",
+  "checkedAt": "2026-04-27T14:05:27Z",
+  "messageReceived": "2026-04-27T14:05:27Z",
   "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
+      "label": "sorare-ml-missions",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Task: reduce Josh 2.0 update forwarding",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Inspecting screenshot text locally",
+      "label": "Patching JOSH health alert throttle",
       "status": "active",
       "tool": "code"
     }
