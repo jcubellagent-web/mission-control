@@ -1370,6 +1370,10 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
             check=True,
         )
         fetch_upcoming_events._status = {"status": "ok", "message": "Connected"}  # type: ignore[attr-defined]
+    except FileNotFoundError:
+        fetch_upcoming_events._status = {"status": "unavailable", "message": "gog CLI missing"}  # type: ignore[attr-defined]
+        print("[warn] gog CLI missing; skipping calendar fetch", file=sys.stderr)
+        return []
     except subprocess.CalledProcessError as exc:
         err = (exc.stderr or '').strip()
         if 'invalid_grant' in err or 'expired or revoked' in err:
@@ -1379,7 +1383,12 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
         fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
         print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)
         return []
-    raw = json.loads(result.stdout or "[]")
+    try:
+        raw = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        fetch_upcoming_events._status = {"status": "error", "message": "Calendar JSON invalid"}  # type: ignore[attr-defined]
+        print(f"[warn] gog calendar JSON parse failed: {exc}", file=sys.stderr)
+        return []
     # gog --results-only returns array directly; fallback to items envelope
     items_list = raw if isinstance(raw, list) else raw.get("items", [])
     events = []
@@ -1408,8 +1417,12 @@ def airpoint_status() -> Dict[str, str]:
         data = json.loads(result.stdout or "{}")
         version = data.get("version", "?")
         return {"name": "Airpoint", "status": "ok", "detail": f"v{version}"}
+    except FileNotFoundError:
+        return {"name": "Airpoint", "status": "unknown", "detail": "airpoint CLI missing"}
     except subprocess.CalledProcessError as exc:
         return {"name": "Airpoint", "status": "attention", "detail": f"Status check failed ({exc.returncode})"}
+    except json.JSONDecodeError:
+        return {"name": "Airpoint", "status": "attention", "detail": "Status JSON invalid"}
 
 
 def fetch_active_subagents() -> List[Dict[str, Any]]:

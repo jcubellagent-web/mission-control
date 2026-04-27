@@ -4713,8 +4713,8 @@
             padding-top: 2px;
         }
         .bf-objective.bf-objective-compact {
-            --bf-objective-font-size: clamp(1.05rem, 1.65vw, 1.34rem);
-            --bf-objective-line-height: 1.16;
+            --bf-objective-font-size: clamp(2.1rem, 3.3vw, 2.68rem);
+            --bf-objective-line-height: 1.05;
         }
         .bf-objective-submeta {
             display: flex;
@@ -8995,18 +8995,14 @@
         }
 
         function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
-            const local = { bf: joshBf, agentLabel: 'JOSH 2.0' };
-            const remoteCandidates = [
-                { bf: jaimesBf, agentLabel: 'JAIMES' },
-                { bf: jainBf, agentLabel: 'J.A.I.N' },
-            ].filter(isRenderableLiveObjective);
-            if (!isRenderableLiveObjective(local) || !remoteCandidates.length) return [];
-            remoteCandidates.sort((a, b) => {
-                const aScore = (a.agentLabel === 'JAIMES' ? 1_000_000_000_000 : 0) + new Date(a.bf?.updatedAt || 0).getTime();
-                const bScore = (b.agentLabel === 'JAIMES' ? 1_000_000_000_000 : 0) + new Date(b.bf?.updatedAt || 0).getTime();
-                return bScore - aScore;
-            });
-            return [local, remoteCandidates[0]];
+            // The two hero panels are intentionally pinned:
+            // left = JOSH 2.0, right = JAIMES. J.A.I.N belongs in health/jobs.
+            // This prevents a stale J.A.I.N feed from taking the JAIMES slot
+            // and makes the two panels stable even when one side is idle/stale.
+            const entries = [];
+            if (joshBf) entries.push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
+            if (jaimesBf) entries.push({ bf: jaimesBf, agentLabel: 'JAIMES' });
+            return entries.length === 2 ? entries : [];
         }
 
         function renderBrainFeedObjectiveCard(entry, compact = false) {
