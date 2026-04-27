@@ -1,24 +1,24 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Cron: Sorare GW draft report",
-  "status": "idle",
-  "updatedAt": "2026-04-27T12:02:54Z",
-  "checkedAt": "2026-04-27T12:00:55Z",
-  "messageReceived": "2026-04-27T12:00:55Z",
-  "currentTool": "code",
+  "active": true,
+  "objective": "Task: reduce Josh 2.0 update forwarding",
+  "status": "active",
+  "updatedAt": "2026-04-27T14:03:39Z",
+  "checkedAt": "2026-04-27T14:03:39Z",
+  "messageReceived": "2026-04-27T14:03:39Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-ops-drift-check",
+      "label": "jaimes-model-efficiency-guard",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Cron: Sorare GW draft report",
-      "status": "done",
-      "tool": "code"
+      "label": "Task: reduce Josh 2.0 update forwarding",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
