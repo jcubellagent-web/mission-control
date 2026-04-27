@@ -6663,7 +6663,9 @@
             bf = await fetchBrainFeedFromUrl('./data/jaimes-brain-feed.json', 5000);
             if (!bf) return;
             const h = JSON.stringify(bf);
-            if (h === lastJaimesBrainFeedHash) return;
+            const brainFeedCard = document.getElementById('brain-feed-card');
+            const hasRenderedHero = !!brainFeedCard?.querySelector('.bf-objective');
+            if (h === lastJaimesBrainFeedHash && hasRenderedHero) return;
             lastJaimesBrainFeedHash = h;
             _uaJaimesBf = normalizeRemoteAgentFeed(bf);
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
@@ -8746,8 +8748,9 @@
             return 'tool-default';
         }
 
-        function resolveBrainFeedStepLabel(bf, activeStep, steps) {
-            const rawStep = sanitizeLabel(activeStep?.label || steps[steps.length - 1]?.label || '');
+        function resolveBrainFeedStepLabel(bf, activeStep = null, steps = null) {
+            const safeSteps = Array.isArray(steps) ? steps : (Array.isArray(bf?.steps) ? bf.steps : []);
+            const rawStep = sanitizeLabel(activeStep?.label || safeSteps[safeSteps.length - 1]?.label || '');
             const objective = sanitizeLabel(bf?.objective || '');
             if (!rawStep) return objective || 'Working';
             if (objective && /^(audit|scan|check|step|task|run|working|exec)$/i.test(rawStep)) return objective;
@@ -9562,8 +9565,10 @@
             }
             // After DOM update, reapply freshness dot state
             if (bfLastUpdatedTs) updateBfFreshness(bf);
-            // Always update J.A.I.N status bar after JOSH renders
-            renderCombinedBrainFeed(bf, _jainBrainFeed);
+            // State is tracked on the lower Activity & Agents panel separately.
+            // Do not recursively call renderCombinedBrainFeed() from inside
+            // renderBrainFeed(); on GitHub Pages that can erase the hero panel
+            // when one remote feed has not loaded yet.
             // Track state for next transition
             _prevBfState = newState;
         }
