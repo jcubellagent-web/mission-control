@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Class: notification throttling runbook review",
+  "objective": "Task: make JOSH failures auto-repair before alert",
   "status": "active",
-  "updatedAt": "2026-04-27T14:07:18Z",
-  "checkedAt": "2026-04-27T14:07:18Z",
-  "messageReceived": "2026-04-27T14:07:18Z",
+  "updatedAt": "2026-04-27T14:07:39Z",
+  "checkedAt": "2026-04-27T14:07:39Z",
+  "messageReceived": "2026-04-27T14:07:39Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -32,6 +32,11 @@
     },
     {
       "label": "Class: notification throttling runbook review",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: make JOSH failures auto-repair before alert",
       "status": "active",
       "tool": "exec"
     }
