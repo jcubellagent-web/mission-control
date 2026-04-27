@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: optional Hermes skills installed",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:05:25Z",
-  "checkedAt": "2026-04-27T04:05:24Z",
-  "messageReceived": "2026-04-27T04:05:24Z",
+  "active": true,
+  "objective": "Hermes: post-upgrade health check",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:05:35Z",
+  "checkedAt": "2026-04-27T04:05:35Z",
+  "messageReceived": "2026-04-27T04:05:35Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -18,6 +18,11 @@
     {
       "label": "Hermes: installing approved optional skills",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes: post-upgrade health check",
+      "status": "active",
       "tool": "exec"
     }
   ],
