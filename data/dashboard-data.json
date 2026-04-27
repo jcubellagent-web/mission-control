@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Memory sync to J.A.I.N completed and verified",
-    "updatedAt": "2026-04-27T03:05:04Z"
+    "updatedAt": "2026-04-27T03:10:03Z"
   },
   "contextWindow": {
     "usedTokens": 76025,
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 5,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 96% left",
     "codexbar": {
@@ -133,7 +133,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 1h 57m",
+        "Resets in 1h 52m",
         "Weekly: 96% left [===========-]",
         "Pace: 72% in reserve | Expected 76% used | Lasts until reset",
         "Resets in 1d 15h",
@@ -144,11 +144,11 @@
       "weekly": "96% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 57m",
+      "sessionReset": "1h 52m",
       "weeklyReset": "1d 15h",
       "summary": "100% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-27T03:05:07Z"
+    "updatedAt": "2026-04-27T03:10:05Z"
   },
   "modelUsage": {
     "session": 0.136292,
@@ -243,13 +243,13 @@
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 281127,
-        "outputTokens": 1647,
-        "totalTokens": 282774,
+        "inputTokens": 243179,
+        "outputTokens": 1286,
+        "totalTokens": 244465,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
-        "sessions": 8,
+        "sessions": 7,
         "isGemini": false,
         "costEstimated": false
       },
@@ -341,7 +341,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-27T03:05:10Z",
+    "lastUpdated": "2026-04-27T03:10:08Z",
     "jain": {
       "daily": 1.942774,
       "session": 2.646808,
@@ -412,12 +412,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 88.6,
-      "cpu_user": 49.96,
-      "cpu_sys": 38.59,
-      "load1": 9.92,
-      "load5": 8.27,
-      "load15": 7.82,
+      "cpu_pct": 72.3,
+      "cpu_user": 54.54,
+      "cpu_sys": 17.71,
+      "load1": 7.74,
+      "load5": 7.97,
+      "load15": 7.8,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -427,12 +427,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 4.38,
-      "cpu_sys": 8.77,
-      "load1": 1.83,
-      "load5": 2.04,
-      "load15": 2.03,
+      "cpu_pct": 15.3,
+      "cpu_user": 4.42,
+      "cpu_sys": 11.5,
+      "load1": 2.32,
+      "load5": 2.09,
+      "load15": 2.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -458,19 +458,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-27T03:05:04Z"
+      "lastChecked": "2026-04-27T03:10:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-27T03:05:04Z"
+      "lastChecked": "2026-04-27T03:10:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-27T03:05:04Z"
+      "lastChecked": "2026-04-27T03:10:03Z"
     }
   ],
   "crons": [
@@ -686,7 +686,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Log Rotation",
@@ -1253,16 +1253,11 @@
       "objective": "X Growth Tracker",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-27T03:01:56Z",
-      "messageReceived": "2026-04-27T03:01:56Z",
+      "updatedAt": "2026-04-27T03:06:59Z",
+      "messageReceived": "2026-04-27T03:06:59Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
-        {
-          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-          "status": "error",
-          "tool": "exec"
-        },
         {
           "label": "Fantasy Waiver Scan \u2014 _Waivers process Sunday 8am \u2014 submit by Saturday morning._",
           "status": "done",
@@ -1333,16 +1328,11 @@
         "objective": "X Growth Tracker",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-27T03:01:56Z",
-        "messageReceived": "2026-04-27T03:01:56Z",
+        "updatedAt": "2026-04-27T03:06:59Z",
+        "messageReceived": "2026-04-27T03:06:59Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
-          {
-            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-            "status": "error",
-            "tool": "exec"
-          },
           {
             "label": "Fantasy Waiver Scan \u2014 _Waivers process Sunday 8am \u2014 submit by Saturday morning._",
             "status": "done",
@@ -1364,29 +1354,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-27T03:05:10Z",
+      "time": "2026-04-27T03:10:08Z",
       "event": "Session spend: $0.14"
     },
     {
-      "time": "2026-04-27T03:05:07Z",
+      "time": "2026-04-27T03:10:05Z",
       "event": "CodexBar: 100% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-27T03:05:04Z",
+      "time": "2026-04-27T03:10:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-27T03:05:04Z",
+      "time": "2026-04-27T03:10:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-27T03:05:04Z",
+      "time": "2026-04-27T03:10:03Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-27T03:05:04Z",
+      "time": "2026-04-27T03:10:03Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-27T03:05:04Z"
+  "lastUpdated": "2026-04-27T03:10:03Z"
 }
