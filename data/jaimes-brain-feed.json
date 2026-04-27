@@ -1,35 +1,25 @@
 {
-  "active": false,
-  "objective": "Done: updated Mission Control cleanse skill",
-  "status": "idle",
-  "updatedAt": "2026-04-27T03:58:47Z",
+  "agent": "JAIMES",
+  "active": true,
+  "objective": "Cron: Sorare pre-lock monitor",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:00:56Z",
+  "checkedAt": "2026-04-27T04:00:56Z",
+  "messageReceived": "2026-04-27T04:00:56Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
-  "messageReceived": "2026-04-27T03:58:25Z",
+  "auth": "subscription",
   "steps": [
     {
-      "label": "Fantasy Waiver Scan \u2014 _Waivers process Sunday 8am \u2014 submit by Saturday morning._",
+      "label": "jaimes-model-efficiency-guard",
       "status": "done",
-      "tool": "exec"
+      "tool": "hermes"
     },
     {
-      "label": "X Feedback ML \u2014 X automation retired",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "X Growth Tracker \u2014 X automation retired",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: Mission Control cleanse learnings",
-      "status": "done",
-      "tool": "exec"
+      "label": "Cron: Sorare pre-lock monitor",
+      "status": "active",
+      "tool": "code"
     }
   ],
-  "currentTool": "exec",
-  "checkedAt": "2026-04-27T03:58:25Z",
-  "agent": "JAIMES",
-  "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)"
 }
