@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Hermes skill upgrade audit complete",
-  "status": "idle",
-  "updatedAt": "2026-04-27T04:03:08Z",
-  "checkedAt": "2026-04-27T04:03:06Z",
-  "messageReceived": "2026-04-27T04:03:06Z",
+  "active": true,
+  "objective": "Hermes: approved upgrade path starting",
+  "status": "active",
+  "updatedAt": "2026-04-27T04:05:01Z",
+  "checkedAt": "2026-04-27T04:05:01Z",
+  "messageReceived": "2026-04-27T04:05:01Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -28,6 +28,11 @@
     {
       "label": "Hermes: checking upgrade options",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes: approved upgrade path starting",
+      "status": "active",
       "tool": "exec"
     }
   ],
