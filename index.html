@@ -5750,7 +5750,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        body.kiosk-mode:not(.phone-mode) .card-intel-highlights .intel-hi-item:nth-child(n+6) {
+        .card-intel-highlights .intel-hi-item:nth-child(n+6) {
             display: none;
         }
         /* Desaturate skeleton placeholder dots to match unified palette */
@@ -8129,7 +8129,7 @@
                         const idx = seenTexts.get(norm);
                         if (!items[idx].keys.includes(key)) items[idx].keys.push(key);
                     } else {
-                        if (items.length >= 6) continue;
+                        if (items.length >= 5) continue;
                         // Filter out URLs from insight field (sometimes populated incorrectly)
                         let reason = (e.reason || '').trim();
                         if (!reason) {
@@ -10629,8 +10629,8 @@
                         <div class="mu-lane-meta">${escapeHtml(lane.meta)}</div>
                     </div>`;
                 }).join('');
-                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Bars show each lane’s projected monthly burn against the $${budgetFloor} floor, $${budgetTarget} target, and $${budgetCap} cap. Local stays at zero because it is on-device.</div>`;
-                const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">Run rate</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${budgetLabel} against floor $${budgetFloor}, target $${budgetTarget}, cap $${budgetCap}</span></div>`;
+                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Projected monthly by lane. Guardrails: floor $${budgetFloor}, target $${budgetTarget}, cap $${budgetCap}. Local stays $0.</div>`;
+                const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">Run rate</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${budgetLabel} · floor $${budgetFloor} · target $${budgetTarget} · cap $${budgetCap}</span></div>`;
 
                 const activeUsageHeroHtml = `<div class="mu-active-hero" style="--mu-accent:${activeModelVisual.color};--mu-accent-soft:${activeModelVisual.bg};--mu-accent-border:${activeModelVisual.border};">
                     <div class="mu-active-head">
