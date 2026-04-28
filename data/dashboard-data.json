@@ -1,5 +1,11 @@
 {
-  "actionRequired": [],
+  "actionRequired": [
+    {
+      "priority": "high",
+      "title": "Calendar issue: Calendar fetch failed",
+      "url": "#calendar"
+    }
+  ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
@@ -23,7 +29,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "fix Mission Control dual objective display",
-    "updatedAt": "2026-04-28T15:54:48Z"
+    "updatedAt": "2026-04-28T15:55:03Z"
   },
   "contextWindow": {
     "usedTokens": 36115,
@@ -131,7 +137,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -143,7 +149,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 4h 48m",
+        "Resets in 4h 47m",
         "Weekly: 95% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 13h",
@@ -154,11 +160,11 @@
       "weekly": "95% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 48m",
+      "sessionReset": "4h 47m",
       "weeklyReset": "6d 13h",
       "summary": "99% left \u00b7 wk 95% left"
     },
-    "updatedAt": "2026-04-28T15:54:50Z"
+    "updatedAt": "2026-04-28T15:55:05Z"
   },
   "modelUsage": {
     "session": 0.022355,
@@ -351,7 +357,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:54:53Z",
+    "lastUpdated": "2026-04-28T15:55:08Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -409,7 +415,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:54:58Z",
+    "updatedAt": "2026-04-28T15:55:13Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -426,12 +432,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.5,
-      "cpu_user": 21.7,
-      "cpu_sys": 19.42,
-      "load1": 2.6,
-      "load5": 2.23,
-      "load15": 2.03,
+      "cpu_pct": 39.1,
+      "cpu_user": 19.96,
+      "cpu_sys": 19.18,
+      "load1": 2.61,
+      "load5": 2.25,
+      "load15": 2.04,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -441,14 +447,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 19.2,
-      "cpu_user": 5.6,
-      "cpu_sys": 13.6,
-      "load1": 2.4,
-      "load5": 2.01,
-      "load15": 2.05,
+      "cpu_pct": 13.6,
+      "cpu_user": 3.63,
+      "cpu_sys": 10.0,
+      "load1": 2.51,
+      "load5": 2.06,
+      "load15": 2.06,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -457,8 +463,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
@@ -472,19 +478,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:54:48Z"
+      "lastChecked": "2026-04-28T15:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:54:48Z"
+      "lastChecked": "2026-04-28T15:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:54:48Z"
+      "lastChecked": "2026-04-28T15:55:03Z"
     }
   ],
   "crons": [
@@ -501,7 +507,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:50:18.494971+00:00"
+      "lastRun": "2026-04-28T15:55:13.651481+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1326,8 +1332,8 @@
       "objective": "Sorare deep analytics upgrade research",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:54:48Z",
-      "messageReceived": "2026-04-28T15:54:46Z",
+      "updatedAt": "2026-04-28T15:55:03Z",
+      "messageReceived": "2026-04-28T15:55:01Z",
       "currentTool": "tracked task",
       "model": "Unknown",
       "steps": [
@@ -1362,8 +1368,8 @@
         "objective": "Sorare deep analytics upgrade research",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:54:48Z",
-        "messageReceived": "2026-04-28T15:54:46Z",
+        "updatedAt": "2026-04-28T15:55:03Z",
+        "messageReceived": "2026-04-28T15:55:01Z",
         "currentTool": "tracked task",
         "model": "Unknown",
         "steps": [
@@ -1412,29 +1418,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:54:53Z",
+      "time": "2026-04-28T15:55:08Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T15:54:50Z",
+      "time": "2026-04-28T15:55:05Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:54:50Z",
+      "time": "2026-04-28T15:55:05Z",
       "event": "CodexBar: 99% left \u00b7 wk 95% left"
     },
     {
-      "time": "2026-04-28T15:54:48Z",
+      "time": "2026-04-28T15:55:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:54:48Z",
+      "time": "2026-04-28T15:55:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:54:48Z",
+      "time": "2026-04-28T15:55:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:54:48Z"
+  "lastUpdated": "2026-04-28T15:55:03Z"
 }
