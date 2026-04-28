@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: adding CI artifacts cleanup",
+  "objective": "Mission Control: validating CI artifacts",
   "status": "active",
-  "updatedAt": "2026-04-28T05:16:13Z",
-  "checkedAt": "2026-04-28T05:16:13Z",
-  "messageReceived": "2026-04-28T05:16:13Z",
-  "currentTool": "exec",
+  "updatedAt": "2026-04-28T05:17:00Z",
+  "checkedAt": "2026-04-28T05:17:00Z",
+  "messageReceived": "2026-04-28T05:17:00Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -22,8 +22,13 @@
     },
     {
       "label": "Mission Control: adding CI artifacts cleanup",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: validating CI artifacts",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
