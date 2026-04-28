@@ -2,11 +2,6 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Mission Control canary issue: 3 canary issue(s)",
-      "url": "#canaries"
-    },
-    {
-      "priority": "high",
       "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
     },
@@ -33,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
-    "updatedAt": "2026-04-28T17:25:15Z"
+    "updatedAt": "2026-04-28T17:27:29Z"
   },
   "contextWindow": {
     "usedTokens": 207207,
@@ -141,37 +136,37 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 12,
     "recentFiles": [
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
-      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/telegram_voice_task_router.py",
       "mission-control/scripts/update_and_push.sh"
     ],
-    "codexbarStatus": "92% left \u00b7 wk 93% left",
+    "codexbarStatus": "91% left \u00b7 wk 93% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 92% left [===========-]",
-        "Resets in 3h 24m",
+        "Session: 91% left [==========--]",
+        "Resets in 3h 22m",
         "Weekly: 93% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "92% left",
+      "session": "91% left",
       "weekly": "93% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 24m",
+      "sessionReset": "3h 22m",
       "weeklyReset": "6d 12h",
-      "summary": "92% left \u00b7 wk 93% left"
+      "summary": "91% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:25:17Z"
+    "updatedAt": "2026-04-28T17:27:31Z"
   },
   "modelUsage": {
     "session": 0.189009,
@@ -364,7 +359,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:25:20Z",
+    "lastUpdated": "2026-04-28T17:27:34Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -422,7 +417,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:25:25Z",
+    "updatedAt": "2026-04-28T17:27:39Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -439,14 +434,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.2,
-      "cpu_user": 21.31,
-      "cpu_sys": 18.85,
-      "load1": 2.84,
-      "load5": 2.55,
-      "load15": 2.48,
+      "cpu_pct": 39.8,
+      "cpu_user": 20.35,
+      "cpu_sys": 19.46,
+      "load1": 2.87,
+      "load5": 2.58,
+      "load15": 2.5,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -454,14 +449,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.5,
-      "cpu_user": 5.64,
-      "cpu_sys": 12.9,
-      "load1": 2.12,
-      "load5": 2.11,
-      "load15": 2.03,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 15.8,
+      "cpu_user": 4.72,
+      "cpu_sys": 11.2,
+      "load1": 1.73,
+      "load5": 2.03,
+      "load15": 2.01,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -485,19 +480,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:25:15Z"
+      "lastChecked": "2026-04-28T17:27:29Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:25:15Z"
+      "lastChecked": "2026-04-28T17:27:29Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:25:15Z"
+      "lastChecked": "2026-04-28T17:27:29Z"
     }
   ],
   "crons": [
@@ -514,7 +509,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:25:15.375416+00:00"
+      "lastRun": "2026-04-28T17:25:28.287567+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1256,22 +1251,22 @@
     }
   ],
   "visualCanaries": {
-    "ok": false,
-    "status": "attention",
-    "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-28T17:25:15.682905Z",
+    "ok": true,
+    "status": "ok",
+    "summary": "All canaries passed",
+    "checkedAt": "2026-04-28T17:27:29.871720Z",
     "checks": [
       {
-        "name": "Dual objectives",
-        "ok": false,
-        "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
-        "severity": "high"
+        "name": "Live objectives",
+        "ok": true,
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "severity": "ok"
       },
       {
         "name": "Calendar tile",
-        "ok": false,
+        "ok": true,
         "detail": "Calendar fetch failed",
-        "severity": "high"
+        "severity": "ok"
       },
       {
         "name": "Today Jobs",
@@ -1281,9 +1276,9 @@
       },
       {
         "name": "Action Required",
-        "ok": false,
+        "ok": true,
         "detail": "1 visible alert(s)",
-        "severity": "medium"
+        "severity": "ok"
       },
       {
         "name": "Renderer wiring",
@@ -1332,9 +1327,9 @@
     {
       "id": "visual-canaries",
       "name": "Visual Canaries",
-      "status": "attention",
-      "summary": "3 canary issue(s)",
-      "detail": "2/5 checks passing"
+      "status": "ok",
+      "summary": "All canaries passed",
+      "detail": "5/5 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1374,7 +1369,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_regression_check.py",
+      "label": "Recently edited: mission-control/scripts/mission_control_visual_canaries.py, mission-control/scripts/update_mission_control.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1411,20 +1406,14 @@
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
-      "objective": "tighten fantasy baseball alert rule",
+      "objective": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T17:18:48Z",
+      "updatedAt": "2026-04-28T17:24:28Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "exec",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "tool",
-          "status": "active",
-          "tool": "exec"
-        }
-      ]
+      "steps": []
     },
     "jaimes": {
       "agent": "JAIMES",
@@ -1433,8 +1422,8 @@
       "objective": "Done: approved Mission Control polish deployed",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T17:25:00Z",
-      "messageReceived": "2026-04-28T17:24:23Z",
+      "updatedAt": "2026-04-28T17:27:13Z",
+      "messageReceived": "2026-04-28T17:28:00Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
@@ -1454,17 +1443,12 @@
           "tool": "code"
         },
         {
-          "label": "JAIMES cockpit noise fix",
+          "label": "Canary noise reduced",
           "status": "done",
           "tool": "code"
         },
         {
-          "label": "Mission Control: validating no cockpit auto-promote",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Mission Control: JOSH deploying final polish",
+          "label": "Final JOSH deploy",
           "status": "done",
           "tool": "exec"
         }
@@ -1501,20 +1485,14 @@
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "tighten fantasy baseball alert rule",
+        "objective": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:18:48Z",
+        "updatedAt": "2026-04-28T17:24:28Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "exec",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
@@ -1523,8 +1501,8 @@
         "objective": "Done: approved Mission Control polish deployed",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T17:25:00Z",
-        "messageReceived": "2026-04-28T17:24:23Z",
+        "updatedAt": "2026-04-28T17:27:13Z",
+        "messageReceived": "2026-04-28T17:28:00Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
@@ -1544,17 +1522,12 @@
             "tool": "code"
           },
           {
-            "label": "JAIMES cockpit noise fix",
+            "label": "Canary noise reduced",
             "status": "done",
             "tool": "code"
           },
           {
-            "label": "Mission Control: validating no cockpit auto-promote",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Mission Control: JOSH deploying final polish",
+            "label": "Final JOSH deploy",
             "status": "done",
             "tool": "exec"
           }
@@ -1564,29 +1537,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:25:20Z",
+      "time": "2026-04-28T17:27:34Z",
       "event": "Session spend: $0.19"
     },
     {
-      "time": "2026-04-28T17:25:17Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_regression_check.py"
+      "time": "2026-04-28T17:27:31Z",
+      "event": "Coding: mission-control/scripts/mission_control_visual_canaries.py, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T17:25:17Z",
-      "event": "CodexBar: 92% left \u00b7 wk 93% left"
+      "time": "2026-04-28T17:27:31Z",
+      "event": "CodexBar: 91% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:25:15Z",
+      "time": "2026-04-28T17:27:29Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:25:15Z",
+      "time": "2026-04-28T17:27:29Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:25:15Z",
+      "time": "2026-04-28T17:27:29Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:25:15Z"
+  "lastUpdated": "2026-04-28T17:27:29Z"
 }

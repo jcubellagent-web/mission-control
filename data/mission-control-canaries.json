@@ -1,20 +1,20 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "3 canary issue(s)",
-  "checkedAt": "2026-04-28T17:25:15.682905Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-04-28T17:27:29.871720Z",
   "checks": [
     {
-      "name": "Dual objectives",
-      "ok": false,
-      "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
-      "severity": "high"
+      "name": "Live objectives",
+      "ok": true,
+      "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+      "severity": "ok"
     },
     {
       "name": "Calendar tile",
-      "ok": false,
+      "ok": true,
       "detail": "Calendar fetch failed",
-      "severity": "high"
+      "severity": "ok"
     },
     {
       "name": "Today Jobs",
@@ -24,9 +24,9 @@
     },
     {
       "name": "Action Required",
-      "ok": false,
+      "ok": true,
       "detail": "1 visible alert(s)",
-      "severity": "medium"
+      "severity": "ok"
     },
     {
       "name": "Renderer wiring",
