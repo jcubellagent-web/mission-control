@@ -11,24 +11,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Checked JAIMES Sorare validation: process finished, gate verified, model edge unproven, outcome check blocked until GW11 resolves",
+    "objective": "Audited Sorare baseline: season_avg_score is clean and stronger than current RF; recommend conservative blend/baseline until resolved outcomes prove model edge",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T15:14:15Z",
-    "checkedAt": "2026-04-28T15:14:15Z",
+    "updatedAt": "2026-04-28T15:18:21Z",
+    "checkedAt": "2026-04-28T15:18:21Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Checked JAIMES Sorare validation: process finished, gate verified, model edge unproven, outcome check blocked until GW11 resolves",
-    "updatedAt": "2026-04-28T15:15:14Z"
+    "context": "Audited Sorare baseline: season_avg_score is clean and stronger than current RF; recommend conservative blend/baseline until resolved outcomes prove model edge",
+    "updatedAt": "2026-04-28T15:20:04Z"
   },
   "contextWindow": {
-    "usedTokens": 42934,
+    "usedTokens": 86516,
     "limitTokens": 272000,
-    "pct": 0.1578,
+    "pct": 0.3181,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 3,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -143,7 +143,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 90% left [==========--]",
-        "Resets in 28m",
+        "Resets in 23m",
         "Weekly: 96% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
@@ -154,17 +154,17 @@
       "weekly": "96% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "28m",
+      "sessionReset": "23m",
       "weeklyReset": "6d 14h",
       "summary": "90% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-28T15:15:16Z"
+    "updatedAt": "2026-04-28T15:20:06Z"
   },
   "modelUsage": {
-    "session": 0.024194,
-    "daily": 2.896108,
-    "weekly": 44.825875,
-    "monthly": 951.203294,
+    "session": 0.242194,
+    "daily": 3.114108,
+    "weekly": 45.043875,
+    "monthly": 951.421294,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -182,14 +182,14 @@
         "cost": 0.29702
       },
       {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.263148
+      },
+      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
-      },
-      {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.045148
       }
     ],
     "breakdown": [
@@ -225,6 +225,19 @@
         "costEstimated": false
       },
       {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 44834,
+        "outputTokens": 15,
+        "totalTokens": 44849,
+        "sessionCost": 0.263148,
+        "dailyCost": 0.263148,
+        "weeklyCost": 0.263148,
+        "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 19438,
@@ -233,19 +246,6 @@
         "sessionCost": 0.122313,
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
-        "sessions": 2,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 1252,
-        "outputTokens": 12,
-        "totalTokens": 1264,
-        "sessionCost": 0.045148,
-        "dailyCost": 0.045148,
-        "weeklyCost": 0.045148,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -351,7 +351,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:15:19Z",
+    "lastUpdated": "2026-04-28T15:20:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -384,15 +384,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.896108,
-      "total": 46.768649,
-      "monthly": 951.203294
+      "daily": 3.114108,
+      "total": 46.986649,
+      "monthly": 951.421294
     },
     "weeklyRunRate": {
-      "total": 46.768649,
+      "total": 46.986649,
       "automation": 1.942774,
-      "interactive": 42.883101,
-      "projectedMonthly": 200.44
+      "interactive": 43.101101,
+      "projectedMonthly": 201.37
     }
   },
   "moltWorld": {
@@ -409,7 +409,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:15:24Z",
+    "updatedAt": "2026-04-28T15:20:15Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -426,14 +426,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.5,
-      "cpu_user": 20.88,
-      "cpu_sys": 19.55,
-      "load1": 2.58,
-      "load5": 2.32,
-      "load15": 2.27,
+      "cpu_pct": 41.2,
+      "cpu_user": 24.14,
+      "cpu_sys": 17.7,
+      "load1": 1.97,
+      "load5": 2.13,
+      "load15": 2.2,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -441,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.7,
-      "cpu_user": 6.89,
-      "cpu_sys": 12.6,
-      "load1": 2.33,
-      "load5": 2.4,
-      "load15": 2.33,
+      "cpu_pct": 20.2,
+      "cpu_user": 8.4,
+      "cpu_sys": 11.76,
+      "load1": 2.88,
+      "load5": 2.77,
+      "load15": 2.5,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -472,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:15:14Z"
+      "lastChecked": "2026-04-28T15:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:15:14Z"
+      "lastChecked": "2026-04-28T15:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:15:14Z"
+      "lastChecked": "2026-04-28T15:20:04Z"
     }
   ],
   "crons": [
@@ -501,7 +501,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:15:20.809868+00:00"
+      "lastRun": "2026-04-28T15:20:15.193969+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1256,7 +1256,7 @@
       "title": "Sorare deep analytics upgrade research",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "(updated 2026-04-28 11:15) JAIMES validation process PID `66490` finished. Artifacts: `/Users/jc_agent/sorare_ml/artifacts/gw11_validation_summary_v3.{md,json}` and `gw11_outcome_backtest_validation_v2.{md,json}`. Findings: autosubmit gate verified holding invalid GW11 proposal (`hold_invalid_proposal`, 5 `min_inseason_violations` across champion_1/champion_2/champion_3/hot_1/hot_2); RF holdout MAE 7.186/R\u00b2 0.167 beats avg_score_5/prev_score but not best simple baseline `season_avg_score` MAE 6.824/R\u00b2 0.190; true GW11 realized outcome validation blocked because local results max date is 2026-04-25 and GW11 starts 2026-05-01. Next: treat ML edge as unproven until resolved scores land and/or model beats season baseline.",
+      "notes": "(updated 2026-04-28 11:24) JAIMES validation finished and JOSH baseline audit completed. Artifacts: `/Users/jc_agent/sorare_ml/artifacts/gw11_validation_summary_v3.{md,json}` and `gw11_outcome_backtest_validation_v2.{md,json}`. Findings: autosubmit gate verified holding invalid GW11 proposal (`hold_invalid_proposal`, 5 `min_inseason_violations`); true GW11 realized outcome blocked until after 2026-05-01. Baseline audit: `season_avg_score` has no target leakage (built from prior history only) and beats current RF overall MAE 6.824 vs 7.186; regularized RF/Ridge/HGB nearly match but do not beat it (best HGB MAE 6.833). RF only helps SP and low-history players; it hurts hitters/high-history players. Recommendation: keep gate, make lineup prediction conservative (`season_avg_score` or role/history-aware blend) until model beats baseline on resolved outcomes.",
       "requestedAt": null,
       "updatedAt": null,
       "owner": "J.A.I.N"
@@ -1289,10 +1289,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Checked JAIMES Sorare validation: process finished, gate verified, model edge unproven, outcome check blocked until GW11 resolves",
+      "objective": "Audited Sorare baseline: season_avg_score is clean and stronger than current RF; recommend conservative blend/baseline until resolved outcomes prove model edge",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:14:15Z",
+      "updatedAt": "2026-04-28T15:18:21Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.5",
@@ -1318,8 +1318,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T15:15:12Z",
-      "messageReceived": "2026-04-28T15:15:12Z",
+      "updatedAt": "2026-04-28T15:20:01Z",
+      "messageReceived": "2026-04-28T15:20:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1342,10 +1342,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Checked JAIMES Sorare validation: process finished, gate verified, model edge unproven, outcome check blocked until GW11 resolves",
+        "objective": "Audited Sorare baseline: season_avg_score is clean and stronger than current RF; recommend conservative blend/baseline until resolved outcomes prove model edge",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:14:15Z",
+        "updatedAt": "2026-04-28T15:18:21Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.5",
@@ -1371,8 +1371,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T15:15:12Z",
-        "messageReceived": "2026-04-28T15:15:12Z",
+        "updatedAt": "2026-04-28T15:20:01Z",
+        "messageReceived": "2026-04-28T15:20:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1381,29 +1381,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:15:19Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-28T15:20:10Z",
+      "event": "Session spend: $0.24"
     },
     {
-      "time": "2026-04-28T15:15:16Z",
+      "time": "2026-04-28T15:20:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:15:16Z",
+      "time": "2026-04-28T15:20:06Z",
       "event": "CodexBar: 90% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-28T15:15:14Z",
+      "time": "2026-04-28T15:20:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:15:14Z",
+      "time": "2026-04-28T15:20:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:15:14Z",
+      "time": "2026-04-28T15:20:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:15:14Z"
+  "lastUpdated": "2026-04-28T15:20:04Z"
 }
