@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Mission Control brain feed/roadmap audit deployed",
-  "status": "idle",
-  "updatedAt": "2026-04-28T04:48:51Z",
-  "checkedAt": "2026-04-28T04:48:11Z",
-  "messageReceived": "2026-04-28T04:48:11Z",
+  "active": true,
+  "objective": "Mission Control: closing local verification server",
+  "status": "active",
+  "updatedAt": "2026-04-28T04:49:19Z",
+  "checkedAt": "2026-04-28T04:49:19Z",
+  "messageReceived": "2026-04-28T04:49:19Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -33,6 +33,11 @@
     {
       "label": "Mission Control: committing UI wiring fixes",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: closing local verification server",
+      "status": "active",
       "tool": "exec"
     }
   ],
