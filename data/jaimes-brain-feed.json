@@ -1,13 +1,20 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Standby",
-  "status": "idle",
-  "updatedAt": "2026-04-28T14:25:02Z",
-  "checkedAt": "2026-04-28T14:25:02Z",
-  "messageReceived": "2026-04-28T14:25:02Z",
-  "currentTool": "",
-  "model": "Unknown",
-  "auth": "api",
-  "steps": []
+  "active": true,
+  "objective": "Mission Control: attempting Calendar auth repair",
+  "status": "active",
+  "updatedAt": "2026-04-28T14:25:38Z",
+  "checkedAt": "2026-04-28T14:25:38Z",
+  "messageReceived": "2026-04-28T14:25:38Z",
+  "currentTool": "exec",
+  "model": "gpt-5.5",
+  "auth": "subscription",
+  "steps": [
+    {
+      "label": "Mission Control: attempting Calendar auth repair",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "modelAuth": "gpt-5.5 (subscription)"
 }
