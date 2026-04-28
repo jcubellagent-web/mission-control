@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Mission Control watchdog clean",
-  "status": "idle",
-  "updatedAt": "2026-04-28T05:11:50Z",
-  "checkedAt": "2026-04-28T05:03:19Z",
-  "messageReceived": "2026-04-28T05:03:19Z",
+  "active": true,
+  "objective": "Skill review: Mission Control watchdog learnings",
+  "status": "active",
+  "updatedAt": "2026-04-28T05:12:36Z",
+  "checkedAt": "2026-04-28T05:12:36Z",
+  "messageReceived": "2026-04-28T05:12:36Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -19,6 +19,11 @@
       "label": "Mission Control: running final validation for watchdog",
       "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Skill review: Mission Control watchdog learnings",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
