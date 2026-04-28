@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "check whether patched Telegram spinner test worked and answer Josh",
+    "objective": "continue deeper OpenClaw Telegram spinner patching",
     "status": "active",
     "steps": [
       {
@@ -15,22 +15,22 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T06:50:21Z",
-    "checkedAt": "2026-04-28T06:50:21Z",
+    "updatedAt": "2026-04-28T06:57:15Z",
+    "checkedAt": "2026-04-28T06:57:15Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "check whether patched Telegram spinner test worked and answer Josh",
-    "updatedAt": "2026-04-28T06:55:03Z"
+    "context": "continue deeper OpenClaw Telegram spinner patching",
+    "updatedAt": "2026-04-28T07:00:03Z"
   },
   "contextWindow": {
-    "usedTokens": 104692,
+    "usedTokens": 126052,
     "limitTokens": 272000,
-    "pct": 0.3849,
+    "pct": 0.4634,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 3h 35m",
+        "Resets in 3h 30m",
         "Weekly: 98% left [===========-]",
         "Resets in 6d 22h",
         "Credits: 0 left",
@@ -158,17 +158,17 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "3h 35m",
+      "sessionReset": "3h 30m",
       "weeklyReset": "6d 22h",
       "summary": "Pro \u00b7 92% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T06:55:06Z"
+    "updatedAt": "2026-04-28T07:00:05Z"
   },
   "modelUsage": {
-    "session": 0.11498,
-    "daily": 0.676721,
-    "weekly": 42.606488,
-    "monthly": 948.983907,
+    "session": 0.300958,
+    "daily": 0.862699,
+    "weekly": 42.792465,
+    "monthly": 949.169884,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -181,6 +181,11 @@
         "cost": 7.387107749999999
       },
       {
+        "name": "openai/gpt-5.4",
+        "window": "session",
+        "cost": 0.300958
+      },
+      {
         "name": "codex/gpt-5.4",
         "window": "session",
         "cost": 0.29702
@@ -189,11 +194,6 @@
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
-      },
-      {
-        "name": "openai/gpt-5.4",
-        "window": "session",
-        "cost": 0.1149805
       }
     ],
     "breakdown": [
@@ -213,6 +213,19 @@
         "dailyCost": 0.0,
         "sessionCost": 7.387107749999999,
         "totalTokens": 0,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-5.4",
+        "source": "openclaw",
+        "inputTokens": 69833,
+        "outputTokens": 5449,
+        "totalTokens": 75282,
+        "sessionCost": 0.300958,
+        "dailyCost": 0.300958,
+        "weeklyCost": 0.300958,
+        "sessions": 3,
+        "isGemini": false,
         "costEstimated": false
       },
       {
@@ -238,19 +251,6 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
         "sessions": 1,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
-        "name": "openai/gpt-5.4",
-        "source": "openclaw",
-        "inputTokens": 69210,
-        "outputTokens": 4653,
-        "totalTokens": 73863,
-        "sessionCost": 0.1149805,
-        "dailyCost": 0.1149805,
-        "weeklyCost": 0.1149805,
-        "sessions": 3,
         "isGemini": false,
         "costEstimated": false
       },
@@ -368,7 +368,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T06:55:09Z",
+    "lastUpdated": "2026-04-28T07:00:08Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -401,15 +401,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.676721,
-      "total": 44.549262,
-      "monthly": 948.983907
+      "daily": 0.862699,
+      "total": 44.735239,
+      "monthly": 949.169884
     },
     "weeklyRunRate": {
-      "total": 44.549262,
+      "total": 44.735239,
       "automation": 1.942774,
-      "interactive": 40.663714,
-      "projectedMonthly": 190.93
+      "interactive": 40.849691,
+      "projectedMonthly": 191.72
     }
   },
   "moltWorld": {
@@ -426,19 +426,19 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T06:55:14Z",
+    "updatedAt": "2026-04-28T07:00:13Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.6,
-      "cpu_user": 23.19,
-      "cpu_sys": 14.44,
-      "load1": 2.04,
-      "load5": 4.23,
-      "load15": 6.29,
-      "ram_used_gb": 11.0,
+      "cpu_pct": 38.5,
+      "cpu_user": 17.62,
+      "cpu_sys": 20.86,
+      "load1": 2.05,
+      "load5": 2.67,
+      "load15": 4.93,
+      "ram_used_gb": 12.0,
       "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
@@ -447,14 +447,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.0,
-      "cpu_user": 6.66,
-      "cpu_sys": 13.33,
-      "load1": 2.24,
+      "cpu_pct": 18.8,
+      "cpu_user": 7.69,
+      "cpu_sys": 11.11,
+      "load1": 2.11,
       "load5": 2.23,
-      "load15": 2.16,
+      "load15": 2.18,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +478,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:55:03Z"
+      "lastChecked": "2026-04-28T07:00:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:55:03Z"
+      "lastChecked": "2026-04-28T07:00:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T06:55:03Z"
+      "lastChecked": "2026-04-28T07:00:03Z"
     }
   ],
   "crons": [
@@ -1240,9 +1240,9 @@
       "title": "Patch OpenClaw Telegram callback spinner lane",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Patched `/opt/homebrew/lib/node_modules/openclaw/dist/extensions/telegram/bot-msflwCEW.js`, documented it in `docs/openclaw-local-patch-reapply.md`, and verified the gateway is back up/listening after restart. `openclaw status` is still hanging locally, so the remaining proof point is a fresh button tap to confirm the spinner now clears under the new callback lane.",
+      "notes": "The first callback-lane patch was not enough, so I added a second deeper patch in `/opt/homebrew/lib/node_modules/openclaw/dist/extensions/telegram/bot-msflwCEW.js`: `answerCallbackQuery` now uses a direct unthrottled fetch path instead of the general Telegram bot API throttler. Next step is restart + one fresh tap canary.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 02:46",
+      "updatedAt": "2026-04-28 02:56",
       "owner": "JOSH 2.0"
     },
     {
@@ -1323,10 +1323,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "check whether patched Telegram spinner test worked and answer Josh",
+      "objective": "continue deeper OpenClaw Telegram spinner patching",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T06:50:21Z",
+      "updatedAt": "2026-04-28T06:57:15Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.4",
@@ -1358,8 +1358,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T06:55:01Z",
-      "messageReceived": "2026-04-28T06:55:01Z",
+      "updatedAt": "2026-04-28T07:00:01Z",
+      "messageReceived": "2026-04-28T07:00:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1382,10 +1382,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "check whether patched Telegram spinner test worked and answer Josh",
+        "objective": "continue deeper OpenClaw Telegram spinner patching",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T06:50:21Z",
+        "updatedAt": "2026-04-28T06:57:15Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.4",
@@ -1417,8 +1417,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T06:55:01Z",
-        "messageReceived": "2026-04-28T06:55:01Z",
+        "updatedAt": "2026-04-28T07:00:01Z",
+        "messageReceived": "2026-04-28T07:00:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1427,29 +1427,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T06:55:09Z",
-      "event": "Session spend: $0.11"
+      "time": "2026-04-28T07:00:08Z",
+      "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T06:55:06Z",
+      "time": "2026-04-28T07:00:05Z",
       "event": "Coding: scripts/handle_josh_callback.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-28T06:55:06Z",
+      "time": "2026-04-28T07:00:05Z",
       "event": "CodexBar: Pro \u00b7 92% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T06:55:03Z",
+      "time": "2026-04-28T07:00:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T06:55:03Z",
+      "time": "2026-04-28T07:00:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T06:55:03Z",
+      "time": "2026-04-28T07:00:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T06:55:03Z"
+  "lastUpdated": "2026-04-28T07:00:03Z"
 }
