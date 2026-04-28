@@ -185,6 +185,25 @@
         .connection-status.degraded {
             color: rgba(255,255,255,0.45);
         }
+        .build-sha-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.025);
+            color: rgba(255,255,255,0.54);
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+        .build-sha-badge strong {
+            color: rgba(255,255,255,0.78);
+            font-weight: 800;
+        }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
         .last-updated { color: rgba(255,255,255,0.56); font-size: 0.8rem; }
         .pull-indicator {
@@ -6155,6 +6174,7 @@
             </div>
             <div class="header-status">
                 <span class="god-mode-badge" id="god-mode-badge" style="display:none">⚡ God Mode</span>
+                <span class="build-sha-badge" id="build-sha-badge" title="Mission Control deployed build"><span>SHA</span> <strong id="build-sha-text">loading</strong></span>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
                 <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
                 <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙<span class="nm-text"> Night</span></button>
@@ -7626,6 +7646,28 @@
             window.location.replace(url.toString());
         }
 
+        async function hydrateBuildShaBadge() {
+            const textEl = document.getElementById('build-sha-text');
+            const badge = document.getElementById('build-sha-badge');
+            if (!textEl) return;
+            try {
+                const response = await fetch('https://api.github.com/repos/jcubellagent-web/mission-control/commits/main', {
+                    headers: { 'Accept': 'application/vnd.github+json' },
+                    cache: 'no-store',
+                    signal: AbortSignal.timeout(2500)
+                });
+                if (!response.ok) throw new Error(`GitHub ${response.status}`);
+                const payload = await response.json();
+                const sha = String(payload.sha || '').slice(0, 9);
+                if (!sha) throw new Error('missing sha');
+                textEl.textContent = sha;
+                if (badge) badge.title = `Mission Control deployed build ${sha}`;
+            } catch (error) {
+                textEl.textContent = BUILD_ID ? `b${String(BUILD_ID).slice(-6)}` : 'unknown';
+                if (badge) badge.title = 'Mission Control build SHA unavailable; showing build id fallback';
+            }
+        }
+
         async function forceUpdate() {
             const btn = document.getElementById('refresh-btn');
             if (!btn || window._forceUpdating) return;
@@ -8904,6 +8946,7 @@
 
         function initDashboard() {
             initAirpointState();
+            hydrateBuildShaBadge();
             restoreBrainActivityDrawer();
             fetchData();
             // ── Brain feed: SUPABASE IS THE SINGLE SOURCE OF TRUTH ──

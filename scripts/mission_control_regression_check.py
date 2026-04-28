@@ -115,6 +115,14 @@ def check_index_wiring() -> None:
     )
     require("window.openEightSleep && window.openEightSleep()" not in html, "stale Eight Sleep handler still present")
 
+    require('id="build-sha-badge"' in html, "Mission Control header must expose a visible build SHA badge")
+    require('id="build-sha-text"' in html, "Mission Control build SHA badge must include a target text node")
+    require("function hydrateBuildShaBadge" in html, "Mission Control must hydrate the visible build SHA")
+    require(
+        "api.github.com/repos/jcubellagent-web/mission-control/commits/main" in html,
+        "Mission Control build SHA must resolve against origin/main",
+    )
+
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
     print("script_chunks", len(scripts))
