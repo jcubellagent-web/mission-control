@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
-    "updatedAt": "2026-04-28T13:44:05Z"
+    "updatedAt": "2026-04-28T13:45:02Z"
   },
   "contextWindow": {
     "usedTokens": 21460,
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 4,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html"
@@ -136,7 +136,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 1h 59m",
+        "Resets in 1h 58m",
         "Weekly: 98% left [===========-]",
         "Pace: 3% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 15h",
@@ -147,11 +147,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 59m",
+      "sessionReset": "1h 58m",
       "weeklyReset": "6d 15h",
       "summary": "99% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T13:44:08Z"
+    "updatedAt": "2026-04-28T13:45:04Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -357,7 +357,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T13:44:11Z",
+    "lastUpdated": "2026-04-28T13:45:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -415,20 +415,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T13:44:16Z",
+    "updatedAt": "2026-04-28T13:45:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 56.7,
-      "cpu_user": 37.45,
-      "cpu_sys": 19.27,
-      "load1": 2.74,
-      "load5": 2.42,
-      "load15": 2.26,
+      "cpu_pct": 34.3,
+      "cpu_user": 16.93,
+      "cpu_sys": 17.34,
+      "load1": 3.42,
+      "load5": 2.66,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -436,14 +436,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.8,
-      "cpu_user": 6.83,
-      "cpu_sys": 11.96,
-      "load1": 2.27,
-      "load5": 2.26,
-      "load15": 2.14,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 13.4,
+      "cpu_user": 4.2,
+      "cpu_sys": 9.39,
+      "load1": 1.98,
+      "load5": 2.19,
+      "load15": 2.12,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -467,19 +467,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T13:44:05Z"
+      "lastChecked": "2026-04-28T13:45:02Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T13:44:05Z"
+      "lastChecked": "2026-04-28T13:45:02Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T13:44:05Z"
+      "lastChecked": "2026-04-28T13:45:02Z"
     }
   ],
   "crons": [
@@ -1088,7 +1088,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T13:30:05.001394+00:00"
+      "lastRun": "2026-04-28T13:45:04.792679+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1345,11 +1345,22 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T13:44:04Z",
-      "messageReceived": "2026-04-28T13:44:04Z",
+      "updatedAt": "2026-04-28T13:45:01Z",
+      "messageReceived": "2026-04-28T13:45:01Z",
       "currentTool": "",
-      "model": "Unknown",
-      "steps": []
+      "model": "gpt-4.1",
+      "steps": [
+        {
+          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+          "status": "error",
+          "tool": "exec"
+        },
+        {
+          "label": "Sorare Daily Prep \u2014 Tue Apr 28 09:00:20 EDT 2026: Sorare daily prep complete",
+          "status": "error",
+          "tool": "exec"
+        }
+      ]
     }
   },
   "liveObjectives": {
@@ -1398,39 +1409,50 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T13:44:04Z",
-        "messageReceived": "2026-04-28T13:44:04Z",
+        "updatedAt": "2026-04-28T13:45:01Z",
+        "messageReceived": "2026-04-28T13:45:01Z",
         "currentTool": "",
-        "model": "Unknown",
-        "steps": []
+        "model": "gpt-4.1",
+        "steps": [
+          {
+            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+            "status": "error",
+            "tool": "exec"
+          },
+          {
+            "label": "Sorare Daily Prep \u2014 Tue Apr 28 09:00:20 EDT 2026: Sorare daily prep complete",
+            "status": "error",
+            "tool": "exec"
+          }
+        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T13:44:11Z",
+      "time": "2026-04-28T13:45:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-28T13:44:08Z",
+      "time": "2026-04-28T13:45:04Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T13:44:08Z",
+      "time": "2026-04-28T13:45:04Z",
       "event": "CodexBar: 99% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T13:44:05Z",
+      "time": "2026-04-28T13:45:02Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T13:44:05Z",
+      "time": "2026-04-28T13:45:02Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T13:44:05Z",
+      "time": "2026-04-28T13:45:02Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T13:44:05Z"
+  "lastUpdated": "2026-04-28T13:45:02Z"
 }
