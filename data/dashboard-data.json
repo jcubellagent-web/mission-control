@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
+    "objective": "memory sync to JAIN completed successfully",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T12:47:02Z",
-    "checkedAt": "2026-04-28T12:47:02Z",
+    "updatedAt": "2026-04-28T13:01:24Z",
+    "checkedAt": "2026-04-28T13:01:24Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
-    "updatedAt": "2026-04-28T13:00:03Z"
+    "context": "memory sync to JAIN completed successfully",
+    "updatedAt": "2026-04-28T13:05:04Z"
   },
   "contextWindow": {
     "usedTokens": 141925,
@@ -125,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 4,
+    "missionControlDirty": 5,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 98% left",
     "codexbar": {
@@ -133,9 +133,9 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 2h 43m",
+        "Resets in 2h 38m",
         "Weekly: 98% left [===========-]",
-        "Pace: 2% in reserve | Expected 4% used | Lasts until reset",
+        "Pace: 3% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 16h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
@@ -144,11 +144,11 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 43m",
+      "sessionReset": "2h 38m",
       "weeklyReset": "6d 16h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T13:00:06Z"
+    "updatedAt": "2026-04-28T13:05:06Z"
   },
   "modelUsage": {
     "session": 0.300958,
@@ -256,9 +256,9 @@
       {
         "name": "codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 1133,
-        "outputTokens": 6,
-        "totalTokens": 1139,
+        "inputTokens": 152,
+        "outputTokens": 51,
+        "totalTokens": 203,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
@@ -354,7 +354,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T13:00:09Z",
+    "lastUpdated": "2026-04-28T13:05:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -412,20 +412,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T13:00:14Z",
+    "updatedAt": "2026-04-28T13:05:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.4,
-      "cpu_user": 19.37,
-      "cpu_sys": 17.5,
-      "load1": 2.32,
-      "load5": 2.24,
-      "load15": 2.25,
+      "cpu_pct": 37.5,
+      "cpu_user": 19.77,
+      "cpu_sys": 17.7,
+      "load1": 2.24,
+      "load5": 2.36,
+      "load15": 2.32,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "86Gi",
@@ -433,14 +433,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.1,
-      "cpu_user": 5.88,
-      "cpu_sys": 9.24,
-      "load1": 3.05,
-      "load5": 2.38,
-      "load15": 2.11,
+      "cpu_pct": 22.8,
+      "cpu_user": 9.55,
+      "cpu_sys": 13.23,
+      "load1": 1.93,
+      "load5": 2.06,
+      "load15": 2.03,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -464,19 +464,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T13:00:03Z"
+      "lastChecked": "2026-04-28T13:05:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T13:00:03Z"
+      "lastChecked": "2026-04-28T13:05:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T13:00:03Z"
+      "lastChecked": "2026-04-28T13:05:04Z"
     }
   ],
   "crons": [
@@ -1025,7 +1025,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-28T13:00:00.714126+00:00"
+      "lastRun": "2026-04-28T13:00:20.281666+00:00"
     },
     {
       "name": "Sorare ML Missions",
@@ -1303,10 +1303,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
+      "objective": "memory sync to JAIN completed successfully",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T12:47:02Z",
+      "updatedAt": "2026-04-28T13:01:24Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.4",
@@ -1314,11 +1314,11 @@
     },
     "jain": {
       "agent": "J.A.I.N",
-      "active": true,
+      "active": false,
       "reportedActive": true,
       "objective": "memory sync to J.A.I.N completed successfully",
-      "status": "active",
-      "stale": false,
+      "status": "stale",
+      "stale": true,
       "updatedAt": "2026-04-28T11:01:20Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
@@ -1332,8 +1332,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T13:00:01Z",
-      "messageReceived": "2026-04-28T13:00:01Z",
+      "updatedAt": "2026-04-28T13:05:02Z",
+      "messageReceived": "2026-04-28T13:05:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1341,38 +1341,21 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JOSH 2.0",
-      "J.A.I.N"
+      "JOSH 2.0"
     ],
-    "activeCount": 2,
+    "activeCount": 1,
     "primaryAgent": "JOSH 2.0",
-    "dualMode": true,
-    "dualAgents": [
-      "JOSH 2.0",
-      "J.A.I.N"
-    ],
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
       {
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
+        "objective": "memory sync to JAIN completed successfully",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T12:47:02Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "memory sync to J.A.I.N completed successfully",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T11:01:20Z",
+        "updatedAt": "2026-04-28T13:01:24Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.4",
@@ -1385,39 +1368,52 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T13:00:01Z",
-        "messageReceived": "2026-04-28T13:00:01Z",
+        "updatedAt": "2026-04-28T13:05:02Z",
+        "messageReceived": "2026-04-28T13:05:02Z",
         "currentTool": "",
         "model": "Unknown",
+        "steps": []
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": false,
+        "reportedActive": true,
+        "objective": "memory sync to J.A.I.N completed successfully",
+        "status": "stale",
+        "stale": true,
+        "updatedAt": "2026-04-28T11:01:20Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.4",
         "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T13:00:09Z",
+      "time": "2026-04-28T13:05:09Z",
       "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T13:00:06Z",
+      "time": "2026-04-28T13:05:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T13:00:03Z",
+      "time": "2026-04-28T13:05:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T13:00:03Z",
+      "time": "2026-04-28T13:05:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T13:00:03Z",
+      "time": "2026-04-28T13:05:04Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-28T13:00:03Z",
+      "time": "2026-04-28T13:05:04Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-28T13:00:03Z"
+  "lastUpdated": "2026-04-28T13:05:04Z"
 }
