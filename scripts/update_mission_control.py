@@ -1534,6 +1534,28 @@ PY"""
             josh_verified_runs = json.loads(jv.stdout.strip() or "{}")
     except Exception:
         pass
+    if not josh_verified_runs:
+        try:
+            et = ZoneInfo("America/New_York")
+            today_local = dt.datetime.now(et).strftime('%Y-%m-%d')
+            local_jobs = {
+                'Mission Control Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
+                'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
+                'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
+                'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
+                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
+                'J.A.I.N Medic': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log'),
+                'Sorare Cookie Auto-Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log'),
+            }
+            for name, path in local_jobs.items():
+                info = {'verifiedToday': False}
+                if path.exists():
+                    mtime = dt.datetime.fromtimestamp(path.stat().st_mtime, tz=dt.timezone.utc)
+                    info['lastRun'] = mtime.isoformat()
+                    info['verifiedToday'] = mtime.astimezone(et).strftime('%Y-%m-%d') == today_local
+                josh_verified_runs[name] = info
+        except Exception:
+            pass
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
