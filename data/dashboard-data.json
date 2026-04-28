@@ -21,25 +21,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "tighten fantasy baseball alert rule",
+    "objective": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-28T17:18:48Z",
-    "checkedAt": "2026-04-28T17:18:48Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T17:24:28Z",
+    "checkedAt": "2026-04-28T17:24:28Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "tighten fantasy baseball alert rule",
-    "updatedAt": "2026-04-28T17:20:16Z"
+    "context": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
+    "updatedAt": "2026-04-28T17:24:38Z"
   },
   "contextWindow": {
     "usedTokens": 189301,
@@ -138,21 +132,21 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-28T17:18:08Z",
+    "lastTriggeredAt": "2026-04-28T17:23:08Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 192166,
+    "usedTokens": 189301,
     "limitTokens": 272000,
-    "pct": 0.7065
+    "pct": 0.696
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 12,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
       "mission-control/scripts/mission_control_visual_canaries.py",
-      "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/telegram_voice_task_router.py",
       "mission-control/scripts/update_and_push.sh"
     ],
@@ -162,7 +156,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 3h 29m",
+        "Resets in 3h 25m",
         "Weekly: 93% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
@@ -173,11 +167,11 @@
       "weekly": "93% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 29m",
+      "sessionReset": "3h 25m",
       "weeklyReset": "6d 12h",
       "summary": "92% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:20:18Z"
+    "updatedAt": "2026-04-28T17:24:39Z"
   },
   "modelUsage": {
     "session": 0.422039,
@@ -370,7 +364,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:20:21Z",
+    "lastUpdated": "2026-04-28T17:24:42Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -428,7 +422,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:20:26Z",
+    "updatedAt": "2026-04-28T17:24:47Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -445,14 +439,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.2,
-      "cpu_user": 17.98,
-      "cpu_sys": 18.18,
-      "load1": 2.8,
-      "load5": 2.66,
-      "load15": 2.51,
+      "cpu_pct": 43.9,
+      "cpu_user": 23.24,
+      "cpu_sys": 20.61,
+      "load1": 2.66,
+      "load5": 2.48,
+      "load15": 2.46,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -460,14 +454,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 3.97,
-      "cpu_sys": 11.25,
-      "load1": 1.95,
-      "load5": 1.89,
-      "load15": 1.95,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 16.4,
+      "cpu_user": 4.91,
+      "cpu_sys": 11.47,
+      "load1": 2.68,
+      "load5": 2.2,
+      "load15": 2.06,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -491,19 +485,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:20:16Z"
+      "lastChecked": "2026-04-28T17:24:38Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:20:16Z"
+      "lastChecked": "2026-04-28T17:24:38Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:20:16Z"
+      "lastChecked": "2026-04-28T17:24:38Z"
     }
   ],
   "crons": [
@@ -520,7 +514,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:20:26.474776+00:00"
+      "lastRun": "2026-04-28T17:20:29.555461+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1265,7 +1259,7 @@
     "ok": false,
     "status": "attention",
     "summary": "2 canary issue(s)",
-    "checkedAt": "2026-04-28T17:20:15.986981Z",
+    "checkedAt": "2026-04-28T17:24:38.123436Z",
     "checks": [
       {
         "name": "Dual objectives",
@@ -1380,7 +1374,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html",
+      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_regression_check.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1390,7 +1384,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 71%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 70%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1402,6 +1396,19 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
+      "active": true,
+      "reportedActive": true,
+      "objective": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-04-28T17:24:28Z",
+      "messageReceived": "2026-04-23T04:25:02Z",
+      "currentTool": "",
+      "model": "GPT-5.5",
+      "steps": []
+    },
+    "jain": {
+      "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
       "objective": "tighten fantasy baseball alert rule",
@@ -1419,48 +1426,59 @@
         }
       ]
     },
-    "jain": {
-      "agent": "J.A.I.N",
-      "active": true,
-      "reportedActive": true,
-      "objective": "Built and deployed Mission Control capability stack: canaries, Sorare ML cockpit, voice router, and ops inbox foundation",
-      "status": "active",
-      "stale": false,
-      "updatedAt": "2026-04-28T17:17:29Z",
-      "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
-      "model": "GPT-5.5",
-      "steps": []
-    },
     "jaimes": {
       "agent": "JAIMES",
       "active": true,
-      "reportedActive": false,
-      "objective": "Sorare ML Cockpit: model ownership and validation",
+      "reportedActive": true,
+      "objective": "Mission Control: JOSH deploying final polish",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T17:20:16Z",
-      "messageReceived": "2026-04-28T17:19:01Z",
+      "updatedAt": "2026-04-28T17:24:23Z",
+      "messageReceived": "2026-04-28T17:24:23Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Sorare ML Cockpit",
+          "label": "Visual canaries added",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Model Spend compacted",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "24in/Phone toggle added",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "JAIMES cockpit noise fix",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Mission Control: validating no cockpit auto-promote",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Mission Control: JOSH deploying final polish",
           "status": "active",
-          "tool": "capability cockpit"
+          "tool": "exec"
         }
-      ],
-      "capabilityBacked": true
+      ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0",
+      "JAIMES",
       "J.A.I.N"
     ],
     "activeCount": 3,
-    "primaryAgent": "JAIMES",
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1468,27 +1486,64 @@
     ],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
-        "reportedActive": false,
-        "objective": "Sorare ML Cockpit: model ownership and validation",
+        "reportedActive": true,
+        "objective": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:20:16Z",
-        "messageReceived": "2026-04-28T17:19:01Z",
+        "updatedAt": "2026-04-28T17:24:28Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
+      },
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "objective": "Mission Control: JOSH deploying final polish",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T17:24:23Z",
+        "messageReceived": "2026-04-28T17:24:23Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Sorare ML Cockpit",
+            "label": "Visual canaries added",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Model Spend compacted",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "24in/Phone toggle added",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "JAIMES cockpit noise fix",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Mission Control: validating no cockpit auto-promote",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Mission Control: JOSH deploying final polish",
             "status": "active",
-            "tool": "capability cockpit"
+            "tool": "exec"
           }
-        ],
-        "capabilityBacked": true
+        ]
       },
       {
-        "agent": "JOSH 2.0",
+        "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
         "objective": "tighten fantasy baseball alert rule",
@@ -1505,47 +1560,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "Built and deployed Mission Control capability stack: canaries, Sorare ML cockpit, voice router, and ops inbox foundation",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T17:17:29Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:20:21Z",
+      "time": "2026-04-28T17:24:42Z",
       "event": "Session spend: $0.42"
     },
     {
-      "time": "2026-04-28T17:20:18Z",
-      "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
+      "time": "2026-04-28T17:24:39Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_regression_check.py"
     },
     {
-      "time": "2026-04-28T17:20:18Z",
+      "time": "2026-04-28T17:24:39Z",
       "event": "CodexBar: 92% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:20:16Z",
+      "time": "2026-04-28T17:24:38Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:20:16Z",
+      "time": "2026-04-28T17:24:38Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:20:16Z",
+      "time": "2026-04-28T17:24:38Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:20:16Z"
+  "lastUpdated": "2026-04-28T17:24:38Z"
 }

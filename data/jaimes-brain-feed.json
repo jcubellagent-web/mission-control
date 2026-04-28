@@ -1,18 +1,18 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: approved Mission Control polish deployed",
-  "status": "idle",
-  "updatedAt": "2026-04-28T17:19:14Z",
-  "checkedAt": "2026-04-28T17:19:01Z",
+  "active": true,
+  "objective": "Mission Control: JOSH deploying final polish",
+  "status": "active",
+  "updatedAt": "2026-04-28T17:24:23Z",
+  "checkedAt": "2026-04-28T17:24:23Z",
   "source": "jaimes_bf_push",
   "reportedActive": true,
   "stale": false,
   "currentTool": "exec",
-  "tool": "exec",
+  "tool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
-  "lastEvent": "Approved Mission Control polish controls deployed to origin/main",
+  "lastEvent": "Suppressing idle Sorare cockpit promotion from Brain Feed",
   "steps": [
     {
       "label": "Visual canaries added",
@@ -30,16 +30,21 @@
       "tool": "code"
     },
     {
-      "label": "Mission Control: JOSH deploying approved polish",
+      "label": "JAIMES cockpit noise fix",
       "status": "done",
-      "tool": "exec"
+      "tool": "code"
     },
     {
-      "label": "Mission Control: verifying approved polish live",
+      "label": "Mission Control: validating no cockpit auto-promote",
       "status": "done",
-      "tool": "browser"
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: JOSH deploying final polish",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:19:01Z"
+  "messageReceived": "2026-04-28T17:24:23Z"
 }
