@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Image inspect: OCR fallback",
+  "objective": "Image inspect: check gateway status",
   "status": "active",
-  "updatedAt": "2026-04-28T03:47:00Z",
-  "checkedAt": "2026-04-28T03:47:00Z",
-  "messageReceived": "2026-04-28T03:47:00Z",
+  "updatedAt": "2026-04-28T03:47:16Z",
+  "checkedAt": "2026-04-28T03:47:16Z",
+  "messageReceived": "2026-04-28T03:47:16Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -22,6 +22,11 @@
     },
     {
       "label": "Image inspect: OCR fallback",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Image inspect: check gateway status",
       "status": "active",
       "tool": "exec"
     }
