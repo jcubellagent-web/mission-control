@@ -2012,6 +2012,14 @@
         .mu-health-divider::before, .mu-health-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
         .mu-health-divider-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.3); white-space: nowrap; }
         .system-health-body { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; overflow-y: auto; max-height: 200px; }
+
+        .ops-center-panel { margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; flex-shrink: 0; }
+        .ops-center-tile { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 7px 8px; min-width: 0; }
+        .ops-center-k { font-size: 0.52rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 3px; }
+        .ops-center-v { font-size: 0.66rem; font-weight: 800; color: rgba(255,255,255,0.86); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ops-center-v.ok { color: #4ade80; }
+        .ops-center-v.warn { color: #fbbf24; }
+        .ops-center-v.err { color: #f87171; }
         .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
@@ -6420,6 +6428,13 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div id="ops-center-panel" class="ops-center-panel" aria-label="Ops Center">
+                            <div class="ops-center-tile"><div class="ops-center-k">Alerts</div><div class="ops-center-v" id="ops-alerts-val">—</div></div>
+                            <div class="ops-center-tile"><div class="ops-center-k">Jobs</div><div class="ops-center-v" id="ops-jobs-val">—</div></div>
+                            <div class="ops-center-tile"><div class="ops-center-k">Calendar</div><div class="ops-center-v" id="ops-calendar-val">—</div></div>
+                            <div class="ops-center-tile"><div class="ops-center-k">MoltWorld</div><div class="ops-center-v" id="ops-molt-val">—</div></div>
+                        </div>
                     </div>
 
                     <!-- Remote Control card — phone-mode only -->
@@ -6872,6 +6887,7 @@
             if (window._mcLastDashData) {
                 renderJobsPanel(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
                 renderSystemHealth(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
+                renderOpsCenter(window._mcLastDashData);
             }
         }
 
@@ -6992,6 +7008,7 @@
             if (window._mcLastDashData) {
                 renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
                 renderSystemHealth(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+                renderOpsCenter(window._mcLastDashData);
             }
         }
 
@@ -8096,6 +8113,28 @@
                 jaimesTasks.textContent = jaimesStale ? (jaimesOnline ? '⚠ Stale feed' : 'Standby') : (obj ? obj.slice(0,30) : '—');
                 jaimesTasks.className = 'sh-mv ' + (jaimesStale && jaimesOnline ? 'warn' : '');
             }
+        }
+
+
+        function renderOpsCenter(data) {
+            const alerts = Array.isArray(data?.actionRequired) ? data.actionRequired : [];
+            const crons = Array.isArray(data?.crons) ? data.crons : [];
+            const today = crons.filter(c => c && c.todayRelevant !== false);
+            const active = today.filter(c => c.status !== 'paused').length;
+            const paused = today.filter(c => c.status === 'paused').length;
+            const due = today.filter(c => c.runStatus === 'due_unverified' || c.runStatus === 'missed' || c.needsAttention).length;
+            const cal = data?.calendarHealth || {};
+            const molt = data?.moltWorld || {};
+            const set = (id, text, cls) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = text;
+                el.className = 'ops-center-v ' + (cls || '');
+            };
+            set('ops-alerts-val', alerts.length ? `${alerts.length} action item${alerts.length === 1 ? '' : 's'}` : 'clear', alerts.length ? 'warn' : 'ok');
+            set('ops-jobs-val', `${active} active / ${paused} paused${due ? ' · ' + due + ' due' : ''}`, due ? 'warn' : 'ok');
+            set('ops-calendar-val', cal.status === 'ok' ? 'connected' : (cal.status || 'issue'), cal.status === 'ok' ? 'ok' : 'err');
+            set('ops-molt-val', molt.stale ? 'stale' : (molt.status || 'unknown'), molt.stale ? 'warn' : (molt.status === 'online' ? 'ok' : 'warn'));
         }
 
         // ── Jobs Panel — agent status + section data ──────────────────────
@@ -10972,6 +11011,7 @@
             renderJobsPanel(data, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             // Render system health
             renderSystemHealth(data, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+                renderOpsCenter(data);
 
         }
 
