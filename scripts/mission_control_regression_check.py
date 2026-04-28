@@ -117,11 +117,21 @@ def check_index_wiring() -> None:
 
     require('id="build-sha-badge"' in html, "Mission Control header must expose a visible build SHA badge")
     require('id="build-sha-text"' in html, "Mission Control build SHA badge must include a target text node")
+    require('id="build-age-chip"' in html, "Mission Control header must expose build age/status chip")
+    require('id="ci-run-chip"' in html, "Mission Control header must expose latest CI run chip")
     require("function hydrateBuildShaBadge" in html, "Mission Control must hydrate the visible build SHA")
     require(
         "api.github.com/repos/jcubellagent-web/mission-control/commits/main" in html,
         "Mission Control build SHA must resolve against origin/main",
     )
+    require(
+        "actions/workflows/mission-control-regression.yml/runs?branch=main&per_page=1" in html,
+        "Mission Control CI chip must resolve latest regression run",
+    )
+    require("function brainFeedAgentClass" in html, "Brain Feed cards must expose agent-specific visual classes")
+    require("agent-josh" in html and "agent-jaimes" in html, "Brain Feed cards must visually distinguish JOSH 2.0 and JAIMES")
+    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: 238px" in html, "Dual live objective boxes must be taller")
+    require(".bf-hero-grid.dual-live .bf-objective-text-wrap" in html and "* 3" in html, "Dual live objectives must show a taller text viewport")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
