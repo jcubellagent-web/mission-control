@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
+    "objective": "memory sync to J.A.I.N backup completed successfully",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T07:18:32Z",
-    "checkedAt": "2026-04-28T07:18:32Z",
+    "updatedAt": "2026-04-28T08:01:13Z",
+    "checkedAt": "2026-04-28T08:01:13Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
-    "updatedAt": "2026-04-28T08:00:03Z"
+    "context": "memory sync to J.A.I.N backup completed successfully",
+    "updatedAt": "2026-04-28T08:05:04Z"
   },
   "contextWindow": {
     "usedTokens": 141925,
@@ -140,7 +140,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 91% left [==========--]",
-        "Resets in 2h 30m",
+        "Resets in 2h 25m",
         "Weekly: 98% left [===========-]",
         "Resets in 6d 21h",
         "Credits: 0 left",
@@ -152,11 +152,11 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "2h 30m",
+      "sessionReset": "2h 25m",
       "weeklyReset": "6d 21h",
       "summary": "Pro \u00b7 91% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T08:00:05Z"
+    "updatedAt": "2026-04-28T08:05:05Z"
   },
   "modelUsage": {
     "session": 0.300958,
@@ -264,13 +264,13 @@
       {
         "name": "codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 39419,
-        "outputTokens": 219,
-        "totalTokens": 39638,
+        "inputTokens": 20635,
+        "outputTokens": 57,
+        "totalTokens": 20692,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
-        "sessions": 2,
+        "sessions": 1,
         "isGemini": false,
         "costEstimated": false
       },
@@ -362,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T08:00:09Z",
+    "lastUpdated": "2026-04-28T08:05:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -420,20 +420,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T08:00:14Z",
+    "updatedAt": "2026-04-28T08:05:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.7,
-      "cpu_user": 19.52,
-      "cpu_sys": 17.13,
-      "load1": 2.65,
-      "load5": 2.29,
-      "load15": 2.27,
+      "cpu_pct": 36.8,
+      "cpu_user": 19.48,
+      "cpu_sys": 17.29,
+      "load1": 2.18,
+      "load5": 2.24,
+      "load15": 2.25,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -441,12 +441,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.2,
-      "cpu_user": 1.73,
-      "cpu_sys": 10.43,
-      "load1": 1.92,
-      "load5": 1.84,
-      "load15": 1.97,
+      "cpu_pct": 13.2,
+      "cpu_user": 4.38,
+      "cpu_sys": 8.77,
+      "load1": 3.49,
+      "load5": 2.53,
+      "load15": 2.2,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -472,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T08:00:03Z"
+      "lastChecked": "2026-04-28T08:05:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T08:00:03Z"
+      "lastChecked": "2026-04-28T08:05:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T08:00:03Z"
+      "lastChecked": "2026-04-28T08:05:04Z"
     }
   ],
   "crons": [
@@ -1317,10 +1317,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
+      "objective": "memory sync to J.A.I.N backup completed successfully",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T07:18:32Z",
+      "updatedAt": "2026-04-28T08:01:13Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.4",
@@ -1346,8 +1346,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T08:00:01Z",
-      "messageReceived": "2026-04-28T08:00:01Z",
+      "updatedAt": "2026-04-28T08:05:01Z",
+      "messageReceived": "2026-04-28T08:05:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1370,10 +1370,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
+        "objective": "memory sync to J.A.I.N backup completed successfully",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T07:18:32Z",
+        "updatedAt": "2026-04-28T08:01:13Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.4",
@@ -1399,8 +1399,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T08:00:01Z",
-        "messageReceived": "2026-04-28T08:00:01Z",
+        "updatedAt": "2026-04-28T08:05:01Z",
+        "messageReceived": "2026-04-28T08:05:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1409,29 +1409,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T08:00:09Z",
+      "time": "2026-04-28T08:05:09Z",
       "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T08:00:05Z",
+      "time": "2026-04-28T08:05:05Z",
       "event": "Coding: scripts/handle_josh_callback.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-28T08:00:05Z",
+      "time": "2026-04-28T08:05:05Z",
       "event": "CodexBar: Pro \u00b7 91% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T08:00:03Z",
+      "time": "2026-04-28T08:05:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T08:00:03Z",
+      "time": "2026-04-28T08:05:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T08:00:03Z",
+      "time": "2026-04-28T08:05:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T08:00:03Z"
+  "lastUpdated": "2026-04-28T08:05:04Z"
 }
