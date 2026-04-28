@@ -4587,6 +4587,22 @@
             border-color: rgba(229,62,62,0.22);
             transform: translateY(-1px);
         }
+        .artifact-link-btn {
+            width: auto;
+            min-width: 26px;
+            padding: 0 8px;
+            gap: 5px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        .artifact-link-btn .artifact-link-label { display: inline; }
+        @media (max-width: 720px) {
+            .artifact-link-btn .artifact-link-label { display: none; }
+            .artifact-link-btn { padding: 0; width: 26px; }
+        }
 
         .card-brain {
             background: linear-gradient(180deg, rgba(14,17,25,0.97) 0%, rgba(8,11,18,0.985) 100%);
@@ -6205,6 +6221,9 @@
                             <span id="bf-active-model-badge" class="bf-model-badge" style="display:none"></span>
                         </div>
                         <div id="ctx-header-inline" style="display:flex;align-items:center;gap:8px;min-width:0"></div>
+                        <a class="module-action-btn artifact-link-btn" href="https://github.com/jcubellagent-web/mission-control/actions/workflows/mission-control-regression.yml" target="_blank" rel="noopener" aria-label="Open Brain Feed screenshot artifacts" title="Open screenshot artifacts">
+                            <span aria-hidden="true">📸</span><span class="artifact-link-label">ARTIFACTS</span>
+                        </a>
                     </div>
                     <!-- JOSH 2.0 — hero brain feed -->
                     <div id="brain-feed-card"></div>

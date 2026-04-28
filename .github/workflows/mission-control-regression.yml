@@ -10,13 +10,13 @@ jobs:
   regression:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
       - name: Install screenshot dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -31,7 +31,7 @@ jobs:
         run: python3 scripts/mission_control_screenshot_diff.py --max-diff-ratio 0.08
       - name: Upload Brain Feed screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mission-control-brain-feed-screenshots
           path: |
