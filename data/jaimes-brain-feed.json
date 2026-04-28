@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: follow-up reporting preference saved",
-  "status": "idle",
-  "updatedAt": "2026-04-28T03:13:29Z",
-  "checkedAt": "2026-04-28T03:13:19Z",
-  "messageReceived": "2026-04-28T03:13:19Z",
+  "active": true,
+  "objective": "Task: audit inline follow-up flows",
+  "status": "active",
+  "updatedAt": "2026-04-28T03:14:11Z",
+  "checkedAt": "2026-04-28T03:14:11Z",
+  "messageReceived": "2026-04-28T03:14:11Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -28,6 +28,11 @@
     {
       "label": "Task: record follow-up reporting preference",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: audit inline follow-up flows",
+      "status": "active",
       "tool": "exec"
     }
   ],
