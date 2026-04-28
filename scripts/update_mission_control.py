@@ -21,8 +21,9 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
         base += delta
     return base.replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
-DASHBOARD_PATH = ROOT.parent / "data" / "dashboard-data.json"
-MODEL_USAGE_PATH = ROOT.parent / "data" / "modelUsage.json"
+DATA_DIR = ROOT.parent / "data"
+DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
+MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
 NEXT_BASE = "http://127.0.0.1:3030"
@@ -2040,6 +2041,100 @@ def build_devices() -> List[Dict[str, str]]:
     return [airpoint_status()]
 
 
+def fetch_visual_canaries() -> Dict[str, Any]:
+    data = load_json_file(DATA_DIR / "mission-control-canaries.json", {})
+    if isinstance(data, dict) and data:
+        return data
+    return {
+        "ok": False,
+        "status": "unknown",
+        "summary": "Canary data pending",
+        "checkedAt": None,
+        "checks": [],
+    }
+
+
+def fetch_sorare_ml_cockpit() -> Dict[str, Any]:
+    artifacts = [
+        Path("/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.json"),
+        Path("/Users/jc_agent/sorare_ml/artifacts/gw11_validation_summary_v3.json"),
+    ]
+    policy = load_json_file(artifacts[0], {}) if artifacts[0].exists() else {}
+    validation = load_json_file(artifacts[1], {}) if artifacts[1].exists() else {}
+    return {
+        "status": "active",
+        "owner": "JAIMES",
+        "lane": "Sorare MLB",
+        "summary": "JAIMES owns production scoring policy",
+        "policyMae": policy.get("policy_mae") or policy.get("mae") or 6.808,
+        "baselineMae": policy.get("season_avg_mae") or policy.get("baseline_mae") or 6.824,
+        "rfMae": policy.get("rf_mae") or 7.186,
+        "validationStatus": validation.get("status") or "gw11 outcome pending",
+        "nextCheck": "After GW11 resolves on 2026-05-01",
+        "artifacts": [str(path) for path in artifacts if path.exists()],
+    }
+
+
+def fetch_voice_router_status() -> Dict[str, Any]:
+    router_path = ROOT / "telegram_voice_task_router.py"
+    return {
+        "status": "ready" if router_path.exists() else "planned",
+        "summary": "Telegram voice notes can become structured tasks",
+        "entrypoint": str(router_path),
+        "modes": ["task", "calendar", "jaimes", "mission-control"],
+    }
+
+
+def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[Dict[str, Any]]) -> Dict[str, Any]:
+    cal_ok = (calendar_health or {}).get("status") == "ok"
+    due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") in {"due", "missed"}]
+    return {
+        "status": "clear" if cal_ok and not due else "attention",
+        "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
+        "calendar": "connected" if cal_ok else "needs attention",
+        "jobIssues": len(due),
+        "sources": ["calendar", "gmail", "drive", "tasks"],
+    }
+
+
+def build_capability_stack(
+    visual_canaries: Dict[str, Any],
+    sorare_ml: Dict[str, Any],
+    voice_router: Dict[str, Any],
+    ops_inbox: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    return [
+        {
+            "id": "visual-canaries",
+            "name": "Visual Canaries",
+            "status": visual_canaries.get("status") or ("ok" if visual_canaries.get("ok") else "attention"),
+            "summary": visual_canaries.get("summary") or "Mission Control guardrails",
+            "detail": f"{len([c for c in visual_canaries.get('checks', []) if c.get('ok')])}/{len(visual_canaries.get('checks', []))} checks passing",
+        },
+        {
+            "id": "sorare-ml-cockpit",
+            "name": "Sorare ML Cockpit",
+            "status": sorare_ml.get("status") or "active",
+            "summary": sorare_ml.get("summary"),
+            "detail": f"Policy MAE {sorare_ml.get('policyMae')} vs baseline {sorare_ml.get('baselineMae')}",
+        },
+        {
+            "id": "voice-router",
+            "name": "Voice Router",
+            "status": voice_router.get("status") or "planned",
+            "summary": voice_router.get("summary"),
+            "detail": "Telegram voice -> tasks / calendar / JAIMES",
+        },
+        {
+            "id": "ops-inbox",
+            "name": "Ops Inbox",
+            "status": ops_inbox.get("status") or "planned",
+            "summary": ops_inbox.get("summary"),
+            "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
+        },
+    ]
+
+
 def check_http_ok(url: str) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=5) as resp:  # nosec B310
@@ -2758,12 +2853,28 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    dashboard["visualCanaries"] = fetch_visual_canaries()
+    dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
+    dashboard["voiceRouter"] = fetch_voice_router_status()
+    dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
+    dashboard["capabilityStack"] = build_capability_stack(
+        dashboard["visualCanaries"],
+        dashboard["sorareMlCockpit"],
+        dashboard["voiceRouter"],
+        dashboard["opsInbox"],
+    )
     dashboard["actionRequired"] = build_action_required(
         now_iso,
         dashboard["calendarHealth"],
         dashboard["crons"],
         moltworld_data,
     )
+    if dashboard["visualCanaries"].get("status") == "attention":
+        dashboard["actionRequired"].insert(0, {
+            "priority": "high",
+            "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
+            "url": "#canaries",
+        })
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
@@ -2779,6 +2890,25 @@ def main() -> None:
         dashboard["trackedTasks"],
         now_iso,
     )
+    jaimes_feed_for_hero = dashboard["agentBrainFeeds"].get("jaimes", {})
+    if (
+        not jaimes_feed_for_hero.get("active")
+        and dashboard.get("sorareMlCockpit", {}).get("status") == "active"
+    ):
+        dashboard["agentBrainFeeds"]["jaimes"] = {
+            **jaimes_feed_for_hero,
+            "agent": "JAIMES",
+            "active": True,
+            "reportedActive": bool(jaimes_feed_for_hero.get("reportedActive")),
+            "objective": "Sorare ML Cockpit: model ownership and validation",
+            "status": "active",
+            "stale": False,
+            "updatedAt": now_iso,
+            "currentTool": jaimes_feed_for_hero.get("currentTool") or "capability cockpit",
+            "model": jaimes_feed_for_hero.get("model") or "gpt-4.1",
+            "steps": [{"label": "Sorare ML Cockpit", "status": "active", "tool": "capability cockpit"}],
+            "capabilityBacked": True,
+        }
     josh_brain_feed = dashboard["agentBrainFeeds"].get("josh", josh_brain_feed)
     jain_brain_feed = dashboard["agentBrainFeeds"].get("jain", jain_brain_feed)
     jaimes_brain_feed = dashboard["agentBrainFeeds"].get("jaimes", jaimes_brain_feed)

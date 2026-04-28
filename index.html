@@ -2020,6 +2020,14 @@
         .ops-center-v.ok { color: #4ade80; }
         .ops-center-v.warn { color: #fbbf24; }
         .ops-center-v.err { color: #f87171; }
+        .capability-stack { margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .capability-tile { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 8px; min-width: 0; cursor: pointer; }
+        .capability-tile.ok { border-color: rgba(74,222,128,0.22); }
+        .capability-tile.active { border-color: rgba(167,139,250,0.24); }
+        .capability-tile.attention, .capability-tile.warn { border-color: rgba(251,191,36,0.28); }
+        .capability-k { font-size: 0.5rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 3px; }
+        .capability-v { font-size: 0.68rem; font-weight: 850; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .capability-d { margin-top: 3px; font-size: 0.54rem; line-height: 1.2; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
@@ -6484,11 +6492,11 @@
                             </div>
                         </div>
 
-                        <div id="ops-center-panel" class="ops-center-panel" aria-label="Ops Center">
-                            <div class="ops-center-tile"><div class="ops-center-k">Alerts</div><div class="ops-center-v" id="ops-alerts-val">—</div></div>
-                            <div class="ops-center-tile"><div class="ops-center-k">Jobs</div><div class="ops-center-v" id="ops-jobs-val">—</div></div>
-                            <div class="ops-center-tile"><div class="ops-center-k">Calendar</div><div class="ops-center-v" id="ops-calendar-val">—</div></div>
-                            <div class="ops-center-tile"><div class="ops-center-k">MoltWorld</div><div class="ops-center-v" id="ops-molt-val">—</div></div>
+                        <div id="ops-center-panel" class="ops-center-panel capability-stack" aria-label="Capability Stack">
+                            <div class="capability-tile"><div class="capability-k">Canaries</div><div class="capability-v">loading</div><div class="capability-d">dashboard guardrails</div></div>
+                            <div class="capability-tile"><div class="capability-k">Sorare ML</div><div class="capability-v">loading</div><div class="capability-d">JAIMES model cockpit</div></div>
+                            <div class="capability-tile"><div class="capability-k">Voice</div><div class="capability-v">loading</div><div class="capability-d">Telegram intake</div></div>
+                            <div class="capability-tile"><div class="capability-k">Ops Inbox</div><div class="capability-v">loading</div><div class="capability-d">personal command queue</div></div>
                         </div>
                     </div>
 
@@ -8189,6 +8197,25 @@
             set('ops-jobs-val', `${active} active / ${paused} paused${due ? ' · ' + due + ' due' : ''}`, due ? 'warn' : 'ok');
             set('ops-calendar-val', cal.status === 'ok' ? 'connected' : (cal.status || 'issue'), cal.status === 'ok' ? 'ok' : 'err');
             set('ops-molt-val', molt.stale ? 'stale' : (molt.status || 'unknown'), molt.stale ? 'warn' : (molt.status === 'online' ? 'ok' : 'warn'));
+
+            const stack = document.getElementById('ops-center-panel');
+            const capabilities = Array.isArray(data?.capabilityStack) ? data.capabilityStack : [];
+            if (stack) {
+                const tone = status => {
+                    const s = String(status || '').toLowerCase();
+                    if (['ok', 'clear', 'ready'].includes(s)) return 'ok';
+                    if (['active'].includes(s)) return 'active';
+                    if (['attention', 'warn', 'planned'].includes(s)) return 'attention';
+                    return '';
+                };
+                stack.innerHTML = capabilities.length ? capabilities.map(item => `
+                    <div class="capability-tile ${tone(item.status)}" title="${escapeHtml(item.summary || item.detail || '')}">
+                        <div class="capability-k">${escapeHtml(item.name || 'Capability')}</div>
+                        <div class="capability-v">${escapeHtml(item.status || 'unknown')}</div>
+                        <div class="capability-d">${escapeHtml(item.detail || item.summary || '')}</div>
+                    </div>
+                `).join('') : '<div class="capability-tile"><div class="capability-k">Capabilities</div><div class="capability-v">pending</div><div class="capability-d">waiting for data</div></div>';
+            }
         }
 
         // ── Jobs Panel — agent status + section data ──────────────────────
@@ -10181,12 +10208,22 @@
                 ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(239,68,68,0.35);cursor:pointer;"><span class="num" style="color:#f87171">📅</span><span class="label">Calendar Issue</span></div>`
                 : `<div class="stat-pill" id="calendar-bubble" style="cursor:pointer;"><span class="num">📅</span><span class="label">Calendar</span></div>`;
             const deviceAttention = data.devices?.filter(d => d.status && d.status !== 'ok').length || 0;
+            const canaryStatus = data.visualCanaries?.status || 'unknown';
+            const canaryPill = canaryStatus === 'ok'
+                ? `<div class="stat-pill" style="border-color:rgba(74,222,128,0.25);"><span class="num" style="color:#4ade80">✓</span><span class="label">Canaries OK</span></div>`
+                : `<div class="stat-pill" style="border-color:rgba(251,191,36,0.35);"><span class="num" style="color:#fbbf24">!</span><span class="label">Canaries</span></div>`;
+            const voiceStatus = data.voiceRouter?.status || 'planned';
+            const voicePill = `<div class="stat-pill" style="border-color:${voiceStatus === 'ready' ? 'rgba(74,222,128,0.22)' : 'rgba(251,191,36,0.25)'};"><span class="num">🎙</span><span class="label">Voice ${voiceStatus === 'ready' ? 'Ready' : 'Planned'}</span></div>`;
+            const sorareMlPill = `<div class="stat-pill" style="border-color:rgba(167,139,250,0.24);"><span class="num" style="color:#a78bfa">ML</span><span class="label">JAIMES</span></div>`;
             // Only show stats that have non-zero value or are actionable alerts
             statsRow.innerHTML = `
                 <div class="stat-pill" id="active-crons-bubble" style="cursor:pointer;"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
                 ${pausedCrons > 0 ? `<div class="stat-pill" id="paused-crons-bubble" style="cursor:pointer;"><span class="num">${pausedCrons}</span><span class="label">Paused</span></div>` : ''}
                 ${upcomingCount > 0 ? `<div class="stat-pill"><span class="num">${upcomingCount}</span><span class="label">Upcoming</span></div>` : ''}
                 ${calendarPill}
+                ${canaryPill}
+                ${sorareMlPill}
+                ${voicePill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
                 <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleepDashboard && window.openEightSleepDashboard()" style="cursor:pointer;">
