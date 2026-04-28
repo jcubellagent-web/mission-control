@@ -5,7 +5,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "heartbeat proactive checks and maintenance",
+    "objective": "restart OpenClaw gateway after Josh approval and verify button path",
     "status": "active",
     "steps": [
       {
@@ -15,22 +15,22 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T05:41:17Z",
-    "checkedAt": "2026-04-28T05:41:17Z",
+    "updatedAt": "2026-04-28T05:49:59Z",
+    "checkedAt": "2026-04-28T05:49:59Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "heartbeat proactive checks and maintenance",
-    "updatedAt": "2026-04-28T05:45:06Z"
+    "context": "restart OpenClaw gateway after Josh approval and verify button path",
+    "updatedAt": "2026-04-28T05:50:04Z"
   },
   "contextWindow": {
-    "usedTokens": 97326,
+    "usedTokens": 110588,
     "limitTokens": 272000,
-    "pct": 0.3578,
+    "pct": 0.4066,
     "model": "gpt-5.4",
-    "status": "green"
+    "status": "amber"
   },
   "agentBus": [
     {
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 2,
+    "missionControlDirty": 4,
     "recentFiles": [
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 4h 45m",
+        "Resets in 4h 40m",
         "Weekly: 100% left [============]",
         "Resets in 6d 23h",
         "Credits: 0 left",
@@ -158,11 +158,11 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "4h 45m",
+      "sessionReset": "4h 40m",
       "weeklyReset": "6d 23h",
       "summary": "Pro \u00b7 99% left \u00b7 wk 100% left"
     },
-    "updatedAt": "2026-04-28T05:45:09Z"
+    "updatedAt": "2026-04-28T05:50:06Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -322,9 +322,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 60106,
-        "outputTokens": 3129,
-        "totalTokens": 63235,
+        "inputTokens": 145830,
+        "outputTokens": 2227,
+        "totalTokens": 148057,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
@@ -368,7 +368,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T05:45:14Z",
+    "lastUpdated": "2026-04-28T05:50:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -426,18 +426,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T05:45:19Z",
+    "updatedAt": "2026-04-28T05:50:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 98.2,
-      "cpu_user": 51.5,
-      "cpu_sys": 46.71,
-      "load1": 9.97,
-      "load5": 8.34,
-      "load15": 8.54,
+      "cpu_pct": 78.4,
+      "cpu_user": 61.0,
+      "cpu_sys": 17.35,
+      "load1": 7.67,
+      "load5": 7.66,
+      "load15": 8.14,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -447,14 +447,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 26.9,
-      "cpu_user": 15.17,
-      "cpu_sys": 11.72,
-      "load1": 2.03,
-      "load5": 1.92,
-      "load15": 1.92,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 10.6,
+      "cpu_user": 1.76,
+      "cpu_sys": 8.84,
+      "load1": 1.97,
+      "load5": 2.04,
+      "load15": 1.97,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +478,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T05:45:06Z"
+      "lastChecked": "2026-04-28T05:50:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T05:45:06Z"
+      "lastChecked": "2026-04-28T05:50:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T05:45:06Z"
+      "lastChecked": "2026-04-28T05:50:04Z"
     }
   ],
   "crons": [
@@ -1240,9 +1240,9 @@
       "title": "Fix Telegram button UX end-to-end",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Heartbeat wake: direct-lane context was already at ~57%, which is inside the proactive reset band from HEARTBEAT.md. Button callbacks are still timing out when the direct lane gets stuck; heartbeat maintenance is checking whether that needs immediate intervention.",
+      "notes": "Continued audit confirms a repeating pattern beyond individual taps: direct-session stuck warnings, callback-answer expiry, recurring local gateway timeout health-check failures, and repeated Telegram provider restarts. Root cause looks increasingly like gateway/control-plane instability rather than the button payloads themselves.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 01:40",
+      "updatedAt": "2026-04-28 01:47",
       "owner": "JOSH 2.0"
     },
     {
@@ -1293,10 +1293,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "heartbeat proactive checks and maintenance",
+      "objective": "restart OpenClaw gateway after Josh approval and verify button path",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T05:41:17Z",
+      "updatedAt": "2026-04-28T05:49:59Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.4",
@@ -1312,20 +1312,14 @@
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
-      "objective": "heartbeat proactive checks and maintenance",
+      "objective": "continued button audit and isolated gateway/control-path instability pattern",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T05:41:17Z",
+      "updatedAt": "2026-04-28T05:48:28Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jaimes": {
       "agent": "JAIMES",
@@ -1334,8 +1328,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T05:45:03Z",
-      "messageReceived": "2026-04-28T05:45:03Z",
+      "updatedAt": "2026-04-28T05:50:02Z",
+      "messageReceived": "2026-04-28T05:50:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1358,10 +1352,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "heartbeat proactive checks and maintenance",
+        "objective": "restart OpenClaw gateway after Josh approval and verify button path",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T05:41:17Z",
+        "updatedAt": "2026-04-28T05:49:59Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.4",
@@ -1377,20 +1371,14 @@
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "heartbeat proactive checks and maintenance",
+        "objective": "continued button audit and isolated gateway/control-path instability pattern",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T05:41:17Z",
+        "updatedAt": "2026-04-28T05:48:28Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
@@ -1399,8 +1387,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T05:45:03Z",
-        "messageReceived": "2026-04-28T05:45:03Z",
+        "updatedAt": "2026-04-28T05:50:02Z",
+        "messageReceived": "2026-04-28T05:50:02Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1409,29 +1397,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T05:45:14Z",
+      "time": "2026-04-28T05:50:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-28T05:45:09Z",
+      "time": "2026-04-28T05:50:06Z",
       "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T05:45:09Z",
+      "time": "2026-04-28T05:50:06Z",
       "event": "CodexBar: Pro \u00b7 99% left \u00b7 wk 100% left"
     },
     {
-      "time": "2026-04-28T05:45:06Z",
+      "time": "2026-04-28T05:50:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T05:45:06Z",
+      "time": "2026-04-28T05:50:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T05:45:06Z",
+      "time": "2026-04-28T05:50:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T05:45:06Z"
+  "lastUpdated": "2026-04-28T05:50:04Z"
 }
