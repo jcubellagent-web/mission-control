@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Recommended next capability enhancements for Josh stack",
-    "updatedAt": "2026-04-28T16:57:28Z"
+    "updatedAt": "2026-04-28T16:58:17Z"
   },
   "contextWindow": {
     "usedTokens": 117269,
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 3,
+    "missionControlDirty": 2,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -144,7 +144,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 96% left [===========-]",
-        "Resets in 3h 52m",
+        "Resets in 3h 51m",
         "Weekly: 94% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
@@ -155,11 +155,11 @@
       "weekly": "94% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 52m",
+      "sessionReset": "3h 51m",
       "weeklyReset": "6d 12h",
       "summary": "96% left \u00b7 wk 94% left"
     },
-    "updatedAt": "2026-04-28T16:57:30Z"
+    "updatedAt": "2026-04-28T16:58:19Z"
   },
   "modelUsage": {
     "session": 0.064093,
@@ -352,7 +352,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T16:57:32Z",
+    "lastUpdated": "2026-04-28T16:58:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -410,7 +410,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T16:57:38Z",
+    "updatedAt": "2026-04-28T16:58:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -427,14 +427,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.2,
-      "cpu_user": 20.27,
-      "cpu_sys": 18.89,
-      "load1": 2.96,
-      "load5": 2.35,
-      "load15": 2.31,
+      "cpu_pct": 39.0,
+      "cpu_user": 20.17,
+      "cpu_sys": 18.85,
+      "load1": 3.14,
+      "load5": 2.48,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -442,14 +442,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.5,
-      "cpu_user": 5.51,
-      "cpu_sys": 14.96,
-      "load1": 2.18,
+      "cpu_pct": 18.1,
+      "cpu_user": 5.62,
+      "cpu_sys": 12.5,
+      "load1": 2.37,
       "load5": 2.46,
       "load15": 2.39,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -473,19 +473,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:57:28Z"
+      "lastChecked": "2026-04-28T16:58:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:57:28Z"
+      "lastChecked": "2026-04-28T16:58:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T16:57:28Z"
+      "lastChecked": "2026-04-28T16:58:17Z"
     }
   ],
   "crons": [
@@ -1306,13 +1306,13 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
-      "objective": "Mission Control: Josh publisher deploying polish",
-      "status": "active",
+      "active": false,
+      "reportedActive": false,
+      "objective": "Done: 24in Brain Feed polish deployed",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T16:57:19Z",
-      "messageReceived": "2026-04-28T16:57:19Z",
+      "updatedAt": "2026-04-28T16:58:14Z",
+      "messageReceived": "2026-04-28T16:57:47Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
@@ -1343,35 +1343,65 @@
         },
         {
           "label": "Mission Control: Josh publisher deploying polish",
-          "status": "active",
+          "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Mission Control: verifying live 24in polish",
+          "status": "done",
+          "tool": "browser"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 3,
-    "primaryAgent": "JAIMES",
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "JAIMES"
+      "J.A.I.N"
     ],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Mission Control: Josh publisher deploying polish",
+        "objective": "Recommended next capability enhancements for Josh stack",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T16:57:19Z",
-        "messageReceived": "2026-04-28T16:57:19Z",
+        "updatedAt": "2026-04-28T16:54:34Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "objective": "Recommended next capability enhancements for Josh stack",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T16:54:34Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Done: 24in Brain Feed polish deployed",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-28T16:58:14Z",
+        "messageReceived": "2026-04-28T16:57:47Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
@@ -1402,64 +1432,43 @@
           },
           {
             "label": "Mission Control: Josh publisher deploying polish",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Mission Control: verifying live 24in polish",
+            "status": "done",
+            "tool": "browser"
           }
         ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "objective": "Recommended next capability enhancements for Josh stack",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T16:54:34Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
-        "steps": []
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "Recommended next capability enhancements for Josh stack",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T16:54:34Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T16:57:32Z",
+      "time": "2026-04-28T16:58:22Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-28T16:57:30Z",
+      "time": "2026-04-28T16:58:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T16:57:30Z",
+      "time": "2026-04-28T16:58:19Z",
       "event": "CodexBar: 96% left \u00b7 wk 94% left"
     },
     {
-      "time": "2026-04-28T16:57:28Z",
+      "time": "2026-04-28T16:58:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T16:57:28Z",
+      "time": "2026-04-28T16:58:17Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T16:57:28Z",
+      "time": "2026-04-28T16:58:17Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T16:57:28Z"
+  "lastUpdated": "2026-04-28T16:58:17Z"
 }
