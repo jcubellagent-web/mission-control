@@ -4,11 +4,6 @@
       "priority": "high",
       "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
-    },
-    {
-      "priority": "medium",
-      "title": "1 job(s) due/unverified: Sorare Cookie Freshness",
-      "url": "#jobs"
     }
   ],
   "activeNow": [],
@@ -28,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Checked JAIMES Sorare validation: process finished, gate verified, model edge unproven, outcome check blocked until GW11 resolves",
-    "updatedAt": "2026-04-28T15:15:04Z"
+    "updatedAt": "2026-04-28T15:15:14Z"
   },
   "contextWindow": {
     "usedTokens": 42934,
@@ -136,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 3,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -163,7 +158,7 @@
       "weeklyReset": "6d 14h",
       "summary": "90% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-28T15:15:06Z"
+    "updatedAt": "2026-04-28T15:15:16Z"
   },
   "modelUsage": {
     "session": 0.024194,
@@ -356,7 +351,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:15:13Z",
+    "lastUpdated": "2026-04-28T15:15:19Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -414,7 +409,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:15:18Z",
+    "updatedAt": "2026-04-28T15:15:24Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -431,12 +426,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.3,
-      "cpu_user": 17.3,
-      "cpu_sys": 18.23,
-      "load1": 2.8,
-      "load5": 2.36,
-      "load15": 2.29,
+      "cpu_pct": 40.5,
+      "cpu_user": 20.88,
+      "cpu_sys": 19.55,
+      "load1": 2.58,
+      "load5": 2.32,
+      "load15": 2.27,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -446,11 +441,11 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.5,
-      "cpu_user": 3.41,
-      "cpu_sys": 11.11,
-      "load1": 2.4,
-      "load5": 2.42,
+      "cpu_pct": 18.7,
+      "cpu_user": 6.89,
+      "cpu_sys": 12.6,
+      "load1": 2.33,
+      "load5": 2.4,
       "load15": 2.33,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.2,
@@ -477,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:15:04Z"
+      "lastChecked": "2026-04-28T15:15:14Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:15:04Z"
+      "lastChecked": "2026-04-28T15:15:14Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:15:04Z"
+      "lastChecked": "2026-04-28T15:15:14Z"
     }
   ],
   "crons": [
@@ -505,7 +500,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "active"
+      "runStatus": "active",
+      "lastRun": "2026-04-28T15:15:20.809868+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -519,7 +515,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "active"
+      "runStatus": "active",
+      "lastRun": "2026-04-27T10:56:19.418413+00:00"
     },
     {
       "name": "Chiro Invite Sync",
@@ -533,7 +530,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-04-26T16:00:00.936978+00:00"
     },
     {
       "name": "J.A.I.N Silence Detector",
@@ -547,7 +545,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "active"
+      "runStatus": "active",
+      "lastRun": "2026-04-28T15:00:01.353012+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -561,7 +560,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "done",
+      "lastRun": "2026-04-28T04:00:06.327914+00:00"
     },
     {
       "name": "J.A.I.N Medic",
@@ -575,7 +575,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "active"
+      "runStatus": "active",
+      "lastRun": "2026-04-28T15:00:06.421284+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -588,7 +589,8 @@
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": false,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "lastRun": "2026-04-26T18:00:07.137292+00:00"
     },
     {
       "name": "Breaking News Scanner",
@@ -1379,29 +1381,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:15:13Z",
+      "time": "2026-04-28T15:15:19Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T15:15:06Z",
+      "time": "2026-04-28T15:15:16Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:15:06Z",
+      "time": "2026-04-28T15:15:16Z",
       "event": "CodexBar: 90% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-28T15:15:04Z",
+      "time": "2026-04-28T15:15:14Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:15:04Z",
+      "time": "2026-04-28T15:15:14Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:15:04Z",
+      "time": "2026-04-28T15:15:14Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:15:04Z"
+  "lastUpdated": "2026-04-28T15:15:14Z"
 }
