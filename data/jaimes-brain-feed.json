@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Skill review updated Mission Control cleanse",
-  "status": "idle",
-  "updatedAt": "2026-04-28T05:12:57Z",
-  "checkedAt": "2026-04-28T05:12:36Z",
-  "messageReceived": "2026-04-28T05:12:36Z",
+  "active": true,
+  "objective": "Mission Control: checking GitHub workflow auth",
+  "status": "active",
+  "updatedAt": "2026-04-28T05:14:13Z",
+  "checkedAt": "2026-04-28T05:14:13Z",
+  "messageReceived": "2026-04-28T05:14:13Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -23,6 +23,11 @@
     {
       "label": "Skill review: Mission Control watchdog learnings",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: checking GitHub workflow auth",
+      "status": "active",
       "tool": "exec"
     }
   ],
