@@ -21,30 +21,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "continue Sorare analytics",
+    "objective": "Continued Sorare analytics: verified model/submission artifacts, patched GW11 cron autosubmit audit to hold invalid proposals, updated memory/tasks, and reported exact evidence to Josh",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T14:34:28Z",
-    "checkedAt": "2026-04-28T14:34:28Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T14:39:26Z",
+    "checkedAt": "2026-04-28T14:39:26Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "continue Sorare analytics",
-    "updatedAt": "2026-04-28T14:35:03Z"
+    "context": "Continued Sorare analytics: verified model/submission artifacts, patched GW11 cron autosubmit audit to hold invalid proposals, updated memory/tasks, and reported exact evidence to Josh",
+    "updatedAt": "2026-04-28T14:40:03Z"
   },
   "contextWindow": {
-    "usedTokens": 168520,
-    "limitTokens": 272000,
-    "pct": 0.6196,
+    "usedTokens": 226140,
+    "limitTokens": 400000,
+    "pct": 0.5654,
     "model": "gpt-5.5",
     "status": "red"
   },
@@ -138,48 +132,48 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-27T04:17:10Z",
+    "lastTriggeredAt": "2026-04-28T14:38:05Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 164406,
+    "usedTokens": 168520,
     "limitTokens": 272000,
-    "pct": 0.6044
+    "pct": 0.6196
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 4,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
     ],
-    "codexbarStatus": "95% left \u00b7 wk 97% left",
+    "codexbarStatus": "94% left \u00b7 wk 97% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 95% left [===========-]",
-        "Resets in 1h 8m",
+        "Session: 94% left [===========-]",
+        "Resets in 1h 3m",
         "Weekly: 97% left [===========-]",
         "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "95% left",
+      "session": "94% left",
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 8m",
+      "sessionReset": "1h 3m",
       "weeklyReset": "6d 14h",
-      "summary": "95% left \u00b7 wk 97% left"
+      "summary": "94% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:35:05Z"
+    "updatedAt": "2026-04-28T14:40:06Z"
   },
   "modelUsage": {
-    "session": 0.08543,
-    "daily": 2.93639,
-    "weekly": 44.866157,
-    "monthly": 951.243576,
+    "session": 0.115392,
+    "daily": 2.966352,
+    "weekly": 44.896119,
+    "monthly": 951.273538,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -204,7 +198,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.08543
+        "cost": 0.115392
       }
     ],
     "breakdown": [
@@ -255,12 +249,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 200,
-        "outputTokens": 9,
-        "totalTokens": 209,
-        "sessionCost": 0.08543,
-        "dailyCost": 0.08543,
-        "weeklyCost": 0.08543,
+        "inputTokens": 476,
+        "outputTokens": 6,
+        "totalTokens": 482,
+        "sessionCost": 0.115392,
+        "dailyCost": 0.115392,
+        "weeklyCost": 0.115392,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -366,7 +360,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:35:08Z",
+    "lastUpdated": "2026-04-28T14:40:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -399,15 +393,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.93639,
-      "total": 46.808931,
-      "monthly": 951.243576
+      "daily": 2.966352,
+      "total": 46.838893,
+      "monthly": 951.273538
     },
     "weeklyRunRate": {
-      "total": 46.808931,
+      "total": 46.838893,
       "automation": 1.942774,
-      "interactive": 42.923383,
-      "projectedMonthly": 200.61
+      "interactive": 42.953345,
+      "projectedMonthly": 200.74
     }
   },
   "moltWorld": {
@@ -424,18 +418,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:35:13Z",
+    "updatedAt": "2026-04-28T14:40:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.6,
-      "cpu_user": 18.78,
-      "cpu_sys": 18.78,
-      "load1": 1.99,
-      "load5": 2.35,
-      "load15": 2.42,
+      "cpu_pct": 35.5,
+      "cpu_user": 17.72,
+      "cpu_sys": 17.72,
+      "load1": 1.89,
+      "load5": 2.24,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -445,14 +439,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.0,
-      "cpu_user": 4.45,
-      "cpu_sys": 9.55,
-      "load1": 2.31,
-      "load5": 2.05,
-      "load15": 1.99,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 18.4,
+      "cpu_user": 6.6,
+      "cpu_sys": 12.87,
+      "load1": 2.67,
+      "load5": 2.22,
+      "load15": 2.06,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -476,19 +470,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:35:03Z"
+      "lastChecked": "2026-04-28T14:40:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:35:03Z"
+      "lastChecked": "2026-04-28T14:40:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:35:03Z"
+      "lastChecked": "2026-04-28T14:40:03Z"
     }
   ],
   "crons": [
@@ -1238,6 +1232,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260425-919",
+      "title": "Sorare deep analytics upgrade research",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Continued on J.A.I.N `~/sorare_ml`: verified model metadata (`rf-owned-mlb-form-v1`, trained 2026-04-26, 7,434 rows, test MAE 7.23, R\u00b2 0.146), GW10/GW11 submit artifacts both 9/9 OK, and found the latest GW11 10:03 cron autosubmit audit incorrectly said `would submit` even though its proposal had 5 `min_inseason_violations`. Patched remote `artifacts/gw11_cron_autosubmit_audit.py` to include proposal validation blockers; backed up old script, recompiled, reran audit, and verified it now returns `dry_run_decision=hold_invalid_proposal` with the 5 blockers. Remaining work: true outcome/backtest validation against resolved scores, not just artifact/proposal validation.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 10:39",
+      "owner": "J.A.I.N"
+    },
+    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
@@ -1261,7 +1265,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 60%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 62%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1275,20 +1279,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "continue Sorare analytics",
+      "objective": "Continued Sorare analytics: verified model/submission artifacts, patched GW11 cron autosubmit audit to hold invalid proposals, updated memory/tasks, and reported exact evidence to Josh",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:34:28Z",
+      "updatedAt": "2026-04-28T14:39:26Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1316,8 +1314,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:35:01Z",
-      "messageReceived": "2026-04-28T14:35:01Z",
+      "updatedAt": "2026-04-28T14:40:01Z",
+      "messageReceived": "2026-04-28T14:40:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1340,20 +1338,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "continue Sorare analytics",
+        "objective": "Continued Sorare analytics: verified model/submission artifacts, patched GW11 cron autosubmit audit to hold invalid proposals, updated memory/tasks, and reported exact evidence to Josh",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:34:28Z",
+        "updatedAt": "2026-04-28T14:39:26Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1381,8 +1373,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:35:01Z",
-        "messageReceived": "2026-04-28T14:35:01Z",
+        "updatedAt": "2026-04-28T14:40:01Z",
+        "messageReceived": "2026-04-28T14:40:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1391,29 +1383,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:35:08Z",
-      "event": "Session spend: $0.09"
+      "time": "2026-04-28T14:40:09Z",
+      "event": "Session spend: $0.12"
     },
     {
-      "time": "2026-04-28T14:35:05Z",
+      "time": "2026-04-28T14:40:06Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T14:35:05Z",
-      "event": "CodexBar: 95% left \u00b7 wk 97% left"
+      "time": "2026-04-28T14:40:06Z",
+      "event": "CodexBar: 94% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:35:03Z",
+      "time": "2026-04-28T14:40:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:35:03Z",
+      "time": "2026-04-28T14:40:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:35:03Z",
+      "time": "2026-04-28T14:40:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:35:03Z"
+  "lastUpdated": "2026-04-28T14:40:03Z"
 }
