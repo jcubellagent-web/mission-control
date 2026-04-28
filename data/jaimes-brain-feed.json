@@ -1,19 +1,24 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: attempting Calendar auth repair",
+  "objective": "Mission Control: retrying MoltWorld health",
   "status": "active",
-  "updatedAt": "2026-04-28T14:25:38Z",
-  "checkedAt": "2026-04-28T14:25:38Z",
-  "messageReceived": "2026-04-28T14:25:38Z",
-  "currentTool": "exec",
+  "updatedAt": "2026-04-28T14:25:58Z",
+  "checkedAt": "2026-04-28T14:25:58Z",
+  "messageReceived": "2026-04-28T14:25:58Z",
+  "currentTool": "web",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
       "label": "Mission Control: attempting Calendar auth repair",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: retrying MoltWorld health",
+      "status": "active",
+      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
