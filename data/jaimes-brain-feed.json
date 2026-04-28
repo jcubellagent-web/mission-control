@@ -1,65 +1,40 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: continuing approved polish",
+  "objective": "Mission Control: JOSH deploying approved polish",
   "status": "active",
-  "updatedAt": "2026-04-28T17:14:38Z",
-  "checkedAt": "2026-04-28T17:14:38Z",
-  "messageReceived": "2026-04-28T17:14:38Z",
-  "currentTool": "code",
+  "updatedAt": "2026-04-28T17:18:23Z",
+  "checkedAt": "2026-04-28T17:18:23Z",
+  "source": "jaimes_bf_push",
+  "reportedActive": true,
+  "stale": false,
+  "currentTool": "exec",
+  "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
+  "lastEvent": "Approved Mission Control polish controls deployed to origin/main",
   "steps": [
     {
-      "label": "Mission Control: inspecting layout code",
+      "label": "Visual canaries added",
       "status": "done",
       "tool": "code"
     },
     {
-      "label": "Mission Control: applying 24in polish",
+      "label": "Model Spend compacted",
       "status": "done",
       "tool": "code"
     },
     {
-      "label": "Mission Control: validating 24in polish",
+      "label": "24in/Phone toggle added",
       "status": "done",
       "tool": "code"
     },
     {
-      "label": "Mission Control: deploying 24in polish",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: Josh publisher deploying polish",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: verifying live 24in polish",
-      "status": "done",
-      "tool": "browser"
-    },
-    {
-      "label": "Skill review: Mission Control UI polish",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: approved polish follow-ups",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: inspecting canary/test hooks",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Mission Control: continuing approved polish",
+      "label": "Mission Control: JOSH deploying approved polish",
       "status": "active",
-      "tool": "code"
+      "tool": "exec"
     }
   ],
-  "modelAuth": "gpt-5.5 (subscription)"
+  "modelAuth": "gpt-5.5 (subscription)",
+  "messageReceived": "2026-04-28T17:18:23Z"
 }
