@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: approved Mission Control polish deployed",
-  "status": "idle",
-  "updatedAt": "2026-04-28T17:31:00Z",
-  "checkedAt": "2026-04-28T17:31:00Z",
+  "active": true,
+  "objective": "Mission Control: approved calendar/highlights/spend polish",
+  "status": "active",
+  "updatedAt": "2026-04-28T17:38:38Z",
+  "checkedAt": "2026-04-28T17:38:38Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,12 +14,47 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {"label": "Visual canaries added", "status": "done", "tool": "code"},
-    {"label": "Model Spend compacted", "status": "done", "tool": "code"},
-    {"label": "24in/Phone toggle added", "status": "done", "tool": "code"},
-    {"label": "Canary noise reduced", "status": "done", "tool": "code"},
-    {"label": "Due/unverified noise suppressed", "status": "done", "tool": "code"}
+    {
+      "label": "Visual canaries added",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Model Spend compacted",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "24in/Phone toggle added",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Canary noise reduced",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Due/unverified noise suppressed",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Skill review: Mission Control workflow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: updating Mission Control skill",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: approved calendar/highlights/spend polish",
+      "status": "active",
+      "tool": "exec"
+    }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:31:00Z"
+  "messageReceived": "2026-04-28T17:38:38Z"
 }
