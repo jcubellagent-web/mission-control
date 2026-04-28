@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: running full cron health re-audit",
+  "objective": "Step: inspecting Mission Control dirty state",
   "status": "active",
-  "updatedAt": "2026-04-28T04:21:46Z",
-  "checkedAt": "2026-04-28T04:21:46Z",
-  "messageReceived": "2026-04-28T04:21:46Z",
+  "updatedAt": "2026-04-28T04:21:57Z",
+  "checkedAt": "2026-04-28T04:21:57Z",
+  "messageReceived": "2026-04-28T04:21:57Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -27,6 +27,11 @@
     },
     {
       "label": "Step: running full cron health re-audit",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: inspecting Mission Control dirty state",
       "status": "active",
       "tool": "exec"
     }
