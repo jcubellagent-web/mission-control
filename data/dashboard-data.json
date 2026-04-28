@@ -5,32 +5,26 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "continue deeper OpenClaw Telegram spinner patching",
+    "objective": "Reported successful completion of the OpenClaw 2026.4.26 async upgrade summary run",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T06:57:15Z",
-    "checkedAt": "2026-04-28T06:57:15Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T07:04:06Z",
+    "checkedAt": "2026-04-28T07:04:06Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "continue deeper OpenClaw Telegram spinner patching",
-    "updatedAt": "2026-04-28T07:00:03Z"
+    "context": "Reported successful completion of the OpenClaw 2026.4.26 async upgrade summary run",
+    "updatedAt": "2026-04-28T07:05:03Z"
   },
   "contextWindow": {
-    "usedTokens": 126052,
+    "usedTokens": 137842,
     "limitTokens": 272000,
-    "pct": 0.4634,
+    "pct": 0.5068,
     "model": "gpt-5.4",
-    "status": "amber"
+    "status": "red"
   },
   "agentBus": [
     {
@@ -146,7 +140,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 3h 30m",
+        "Resets in 3h 25m",
         "Weekly: 98% left [===========-]",
         "Resets in 6d 22h",
         "Credits: 0 left",
@@ -158,11 +152,11 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "3h 30m",
+      "sessionReset": "3h 25m",
       "weeklyReset": "6d 22h",
       "summary": "Pro \u00b7 92% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T07:00:05Z"
+    "updatedAt": "2026-04-28T07:05:05Z"
   },
   "modelUsage": {
     "session": 0.300958,
@@ -218,26 +212,26 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 69833,
-        "outputTokens": 5449,
-        "totalTokens": 75282,
+        "inputTokens": 216826,
+        "outputTokens": 7847,
+        "totalTokens": 224673,
         "sessionCost": 0.300958,
         "dailyCost": 0.300958,
         "weeklyCost": 0.300958,
-        "sessions": 3,
+        "sessions": 4,
         "isGemini": false,
         "costEstimated": false
       },
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 25498,
-        "outputTokens": 56,
-        "totalTokens": 25554,
+        "inputTokens": 482,
+        "outputTokens": 50,
+        "totalTokens": 532,
         "sessionCost": 0.29702,
         "dailyCost": 0.29702,
         "weeklyCost": 0.29702,
-        "sessions": 3,
+        "sessions": 2,
         "isGemini": false,
         "costEstimated": false
       },
@@ -270,9 +264,9 @@
       {
         "name": "codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 38265,
-        "outputTokens": 118,
-        "totalTokens": 38383,
+        "inputTokens": 39419,
+        "outputTokens": 219,
+        "totalTokens": 39638,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
@@ -368,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T07:00:08Z",
+    "lastUpdated": "2026-04-28T07:05:08Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -426,20 +420,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T07:00:13Z",
+    "updatedAt": "2026-04-28T07:05:13Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.5,
-      "cpu_user": 17.62,
-      "cpu_sys": 20.86,
-      "load1": 2.05,
-      "load5": 2.67,
-      "load15": 4.93,
+      "cpu_pct": 26.7,
+      "cpu_user": 12.9,
+      "cpu_sys": 13.78,
+      "load1": 2.56,
+      "load5": 2.65,
+      "load15": 4.23,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -447,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.8,
-      "cpu_user": 7.69,
-      "cpu_sys": 11.11,
-      "load1": 2.11,
-      "load5": 2.23,
-      "load15": 2.18,
+      "cpu_pct": 17.5,
+      "cpu_user": 6.14,
+      "cpu_sys": 11.4,
+      "load1": 2.58,
+      "load5": 2.44,
+      "load15": 2.28,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T07:00:03Z"
+      "lastChecked": "2026-04-28T07:05:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T07:00:03Z"
+      "lastChecked": "2026-04-28T07:05:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T07:00:03Z"
+      "lastChecked": "2026-04-28T07:05:03Z"
     }
   ],
   "crons": [
@@ -1323,20 +1317,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "continue deeper OpenClaw Telegram spinner patching",
+      "objective": "Reported successful completion of the OpenClaw 2026.4.26 async upgrade summary run",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T06:57:15Z",
+      "updatedAt": "2026-04-28T07:04:06Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1358,8 +1346,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T07:00:01Z",
-      "messageReceived": "2026-04-28T07:00:01Z",
+      "updatedAt": "2026-04-28T07:05:01Z",
+      "messageReceived": "2026-04-28T07:05:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1382,20 +1370,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "continue deeper OpenClaw Telegram spinner patching",
+        "objective": "Reported successful completion of the OpenClaw 2026.4.26 async upgrade summary run",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T06:57:15Z",
+        "updatedAt": "2026-04-28T07:04:06Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1417,8 +1399,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T07:00:01Z",
-        "messageReceived": "2026-04-28T07:00:01Z",
+        "updatedAt": "2026-04-28T07:05:01Z",
+        "messageReceived": "2026-04-28T07:05:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1427,29 +1409,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T07:00:08Z",
+      "time": "2026-04-28T07:05:08Z",
       "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T07:00:05Z",
+      "time": "2026-04-28T07:05:05Z",
       "event": "Coding: scripts/handle_josh_callback.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-28T07:00:05Z",
+      "time": "2026-04-28T07:05:05Z",
       "event": "CodexBar: Pro \u00b7 92% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T07:00:03Z",
+      "time": "2026-04-28T07:05:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T07:00:03Z",
+      "time": "2026-04-28T07:05:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T07:00:03Z",
+      "time": "2026-04-28T07:05:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T07:00:03Z"
+  "lastUpdated": "2026-04-28T07:05:03Z"
 }
