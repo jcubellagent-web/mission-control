@@ -1,18 +1,70 @@
 {
+  "agent": "JAIMES",
   "active": false,
-  "objective": "Standby",
+  "objective": "Done: highlight/spend polish deployed",
   "status": "idle",
-  "updatedAt": "2026-04-28T17:42:05Z",
-  "model": "gpt-4.1",
-  "messageReceived": "2026-04-28T17:42:05Z",
+  "updatedAt": "2026-04-28T17:42:26Z",
+  "checkedAt": "2026-04-28T17:41:46Z",
+  "source": "jaimes_bf_push",
+  "reportedActive": false,
+  "stale": false,
+  "currentTool": "exec",
+  "tool": "exec",
+  "model": "gpt-5.5",
+  "auth": "subscription",
+  "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
     {
-      "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-      "status": "error",
+      "label": "Visual canaries added",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Model Spend compacted",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "24in/Phone toggle added",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Canary noise reduced",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Due/unverified noise suppressed",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Skill review: Mission Control workflow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: updating Mission Control skill",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: approved calendar/highlights/spend polish",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: tightening highlights/spend text",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: deploying highlight/spend polish",
+      "status": "done",
       "tool": "exec"
     }
   ],
-  "currentTool": "",
-  "checkedAt": "2026-04-28T17:42:05Z",
-  "agent": "JAIMES"
+  "modelAuth": "gpt-5.5 (subscription)",
+  "messageReceived": "2026-04-28T17:41:46Z"
 }

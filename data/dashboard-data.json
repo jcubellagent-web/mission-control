@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "session startup completed",
-    "updatedAt": "2026-04-28T17:42:08Z"
+    "updatedAt": "2026-04-28T17:42:41Z"
   },
   "contextWindow": {
     "usedTokens": 30770,
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 13,
+    "missionControlDirty": 9,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -161,7 +161,7 @@
       "weeklyReset": "6d 11h",
       "summary": "90% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:42:09Z"
+    "updatedAt": "2026-04-28T17:42:43Z"
   },
   "modelUsage": {
     "session": 0.01867,
@@ -354,7 +354,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:42:13Z",
+    "lastUpdated": "2026-04-28T17:42:46Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -412,7 +412,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:42:18Z",
+    "updatedAt": "2026-04-28T17:42:51Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -429,27 +429,27 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.7,
-      "cpu_user": 20.34,
-      "cpu_sys": 17.31,
-      "load1": 2.49,
-      "load5": 2.43,
-      "load15": 2.36,
+      "cpu_pct": 39.7,
+      "cpu_user": 20.25,
+      "cpu_sys": 19.39,
+      "load1": 2.69,
+      "load5": 2.48,
+      "load15": 2.38,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
-      "disk_pct": 12,
+      "disk_pct": 13,
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.2,
-      "cpu_user": 4.61,
-      "cpu_sys": 11.53,
-      "load1": 1.9,
-      "load5": 1.87,
-      "load15": 1.88,
+      "cpu_pct": 14.6,
+      "cpu_user": 4.6,
+      "cpu_sys": 10.56,
+      "load1": 1.83,
+      "load5": 1.85,
+      "load15": 1.87,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -475,19 +475,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:42:08Z"
+      "lastChecked": "2026-04-28T17:42:41Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:42:08Z"
+      "lastChecked": "2026-04-28T17:42:41Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:42:08Z"
+      "lastChecked": "2026-04-28T17:42:41Z"
     }
   ],
   "crons": [
@@ -1249,7 +1249,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-28T17:42:08.249127Z",
+    "checkedAt": "2026-04-28T17:42:41.375468Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1414,17 +1414,62 @@
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "objective": "Standby",
+      "objective": "Done: highlight/spend polish deployed",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T17:42:05Z",
-      "messageReceived": "2026-04-28T17:42:05Z",
-      "currentTool": "",
-      "model": "gpt-4.1",
+      "updatedAt": "2026-04-28T17:42:26Z",
+      "messageReceived": "2026-04-28T17:41:46Z",
+      "currentTool": "exec",
+      "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-          "status": "error",
+          "label": "Visual canaries added",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Model Spend compacted",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "24in/Phone toggle added",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Canary noise reduced",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Due/unverified noise suppressed",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Skill review: Mission Control workflow",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Skill review: updating Mission Control skill",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control: approved calendar/highlights/spend polish",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control: tightening highlights/spend text",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Mission Control: deploying highlight/spend polish",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1473,17 +1518,62 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "objective": "Standby",
+        "objective": "Done: highlight/spend polish deployed",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T17:42:05Z",
-        "messageReceived": "2026-04-28T17:42:05Z",
-        "currentTool": "",
-        "model": "gpt-4.1",
+        "updatedAt": "2026-04-28T17:42:26Z",
+        "messageReceived": "2026-04-28T17:41:46Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-            "status": "error",
+            "label": "Visual canaries added",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Model Spend compacted",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "24in/Phone toggle added",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Canary noise reduced",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Due/unverified noise suppressed",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Skill review: Mission Control workflow",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Skill review: updating Mission Control skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control: approved calendar/highlights/spend polish",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control: tightening highlights/spend text",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Mission Control: deploying highlight/spend polish",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1492,29 +1582,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:42:13Z",
+      "time": "2026-04-28T17:42:46Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T17:42:09Z",
+      "time": "2026-04-28T17:42:43Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T17:42:09Z",
+      "time": "2026-04-28T17:42:43Z",
       "event": "CodexBar: 90% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:42:08Z",
+      "time": "2026-04-28T17:42:41Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:42:08Z",
+      "time": "2026-04-28T17:42:41Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:42:08Z",
+      "time": "2026-04-28T17:42:41Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:42:08Z"
+  "lastUpdated": "2026-04-28T17:42:41Z"
 }
