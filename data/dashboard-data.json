@@ -21,7 +21,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
+    "objective": "respond to specificity feedback",
     "status": "active",
     "steps": [
       {
@@ -31,20 +31,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T14:15:54Z",
-    "checkedAt": "2026-04-28T14:15:54Z",
+    "updatedAt": "2026-04-28T14:24:32Z",
+    "checkedAt": "2026-04-28T14:24:32Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fix Codex 5.5 subscription lane availability for Josh direct session",
-    "updatedAt": "2026-04-28T14:20:03Z"
+    "context": "respond to specificity feedback",
+    "updatedAt": "2026-04-28T14:25:04Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
+    "usedTokens": 91311,
+    "limitTokens": 272000,
+    "pct": 0.3357,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -147,7 +147,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 6,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html"
@@ -158,7 +158,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 96% left [===========-]",
-        "Resets in 1h 23m",
+        "Resets in 1h 18m",
         "Weekly: 97% left [===========-]",
         "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 15h",
@@ -169,17 +169,17 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 23m",
+      "sessionReset": "1h 18m",
       "weeklyReset": "6d 15h",
       "summary": "96% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:20:05Z"
+    "updatedAt": "2026-04-28T14:25:06Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 2.85096,
-    "weekly": 44.804013,
-    "monthly": 951.181432,
+    "session": 0.047199,
+    "daily": 2.898159,
+    "weekly": 44.827926,
+    "monthly": 951.205345,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -202,9 +202,9 @@
         "cost": 0.122313
       },
       {
-        "name": "deepseek/deepseek-v3.2",
+        "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.006918987599999999
+        "cost": 0.047199
       }
     ],
     "breakdown": [
@@ -248,7 +248,20 @@
         "sessionCost": 0.122313,
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
-        "sessions": 4,
+        "sessions": 3,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 303,
+        "outputTokens": 6,
+        "totalTokens": 309,
+        "sessionCost": 0.047199,
+        "dailyCost": 0.047199,
+        "weeklyCost": 0.047199,
+        "sessions": 1,
         "isGemini": false,
         "costEstimated": false
       },
@@ -353,7 +366,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:20:09Z",
+    "lastUpdated": "2026-04-28T14:25:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -386,15 +399,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.85096,
-      "total": 46.723501,
-      "monthly": 951.181432
+      "daily": 2.898159,
+      "total": 46.7707,
+      "monthly": 951.205345
     },
     "weeklyRunRate": {
-      "total": 46.746787,
+      "total": 46.7707,
       "automation": 1.942774,
-      "interactive": 42.861239,
-      "projectedMonthly": 200.34
+      "interactive": 42.885152,
+      "projectedMonthly": 200.45
     }
   },
   "moltWorld": {
@@ -411,20 +424,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:20:14Z",
+    "updatedAt": "2026-04-28T14:25:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.3,
-      "cpu_user": 21.75,
-      "cpu_sys": 21.52,
-      "load1": 2.62,
-      "load5": 2.65,
-      "load15": 2.52,
+      "cpu_pct": 40.4,
+      "cpu_user": 20.29,
+      "cpu_sys": 20.8,
+      "load1": 2.02,
+      "load5": 2.39,
+      "load15": 2.44,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -432,14 +445,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.8,
-      "cpu_user": 5.98,
-      "cpu_sys": 12.82,
-      "load1": 1.88,
-      "load5": 1.98,
-      "load15": 2.02,
+      "cpu_pct": 14.2,
+      "cpu_user": 3.14,
+      "cpu_sys": 11.2,
+      "load1": 1.64,
+      "load5": 1.85,
+      "load15": 1.95,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -463,19 +476,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:20:03Z"
+      "lastChecked": "2026-04-28T14:25:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:20:03Z"
+      "lastChecked": "2026-04-28T14:25:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:20:03Z"
+      "lastChecked": "2026-04-28T14:25:04Z"
     }
   ],
   "crons": [
@@ -1225,36 +1238,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260428-1002",
-      "title": "Reopen Mission Control on screen + continue spinner fix",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Continued spinner fix: found canary error `finalFetch is not defined`, patched direct Telegram callback ack to use `globalThis.fetch`, restarted gateway successfully at 10:07. Final verification still needs one fresh button tap canary.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-28 10:11",
-      "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260428-1000",
-      "title": "Patch OpenClaw Telegram callback spinner lane",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Patched `/opt/homebrew/lib/node_modules/openclaw/dist/extensions/telegram/bot-msflwCEW.js`: callback lane separation is present, `answerCallbackQuery` now uses direct `globalThis.fetch` instead of the throttled bot API path, and the gateway was restarted. Need one fresh tap to confirm native spinner clears.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-28 10:11",
-      "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260428-999",
-      "title": "Improve Telegram button feedback UX",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Fresh live tap test confirms the visible ack path works, but native spinner clearing still fails. New root-cause finding from heartbeat inspection: OpenClaw\u2019s `getTelegramSequentialKey()` currently puts callback queries on the same per-chat sequential lane as normal direct messages, so busy chat work can delay `answerCallbackQuery` long enough to miss Telegram\u2019s timeout. Most promising fix is a local Telegram extension patch that gives callback queries their own fast lane before normal chat processing.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-28 02:37",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260427-971",
       "title": "Clean stale task drift",
       "status": "active",
@@ -1265,23 +1248,23 @@
       "owner": "JOSH 2.0"
     },
     {
-      "id": "T-20260428-996",
-      "title": "Verify post-restart button behavior",
+      "id": "T-20260428-991",
+      "title": "Continue latency audit after quick wins",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Root cause is now specific: Telegram updates are sequentialized by chat/thread, and callback queries share the same lane as normal direct-chat turns. When this direct lane is busy or stuck in a tool loop, the callback waits behind it and `answerCallbackQuery` misses Telegram's timeout window. Fresh sweep: gateway is healthy/listening on 127.0.0.1:18790, but `openclaw status` timed out again after 8s, which reinforces the direct-lane/control-plane stall theory.",
+      "notes": "Confirmed again that the local work itself is small: model subprocess ~46\u201376 ms, steps subprocess ~32\u201352 ms, write logic ~0 ms. That reinforces the current root cause: control-plane/gateway responsiveness and direct-lane stalls, not the local timing math.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 02:06",
+      "updatedAt": "2026-04-28 01:39",
       "owner": "JOSH 2.0"
     },
     {
-      "id": "T-20260428-994",
-      "title": "Fix Telegram button UX end-to-end",
+      "id": "T-20260427-982",
+      "title": "Telegram voice/Talk workflow",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Continued audit confirms a repeating pattern beyond individual taps: direct-session stuck warnings, callback-answer expiry, recurring local gateway timeout health-check failures, and repeated Telegram provider restarts. Latest quick sweep shows the gateway is up while `openclaw status` still intermittently hangs, so the issue looks more like control-plane responsiveness/queueing than bad button payloads.",
+      "notes": "Keep full text reply + separate short voice-note TL;DR path; phone always-listening still blocked by missing internal-preview iOS app.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 02:06",
+      "updatedAt": "2026-04-28 00:43",
       "owner": "JOSH 2.0"
     }
   ],
@@ -1312,10 +1295,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
+      "objective": "respond to specificity feedback",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:15:54Z",
+      "updatedAt": "2026-04-28T14:24:32Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1347,8 +1330,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:20:01Z",
-      "messageReceived": "2026-04-28T14:20:01Z",
+      "updatedAt": "2026-04-28T14:25:02Z",
+      "messageReceived": "2026-04-28T14:25:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1371,10 +1354,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
+        "objective": "respond to specificity feedback",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:15:54Z",
+        "updatedAt": "2026-04-28T14:24:32Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1406,8 +1389,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:20:01Z",
-        "messageReceived": "2026-04-28T14:20:01Z",
+        "updatedAt": "2026-04-28T14:25:02Z",
+        "messageReceived": "2026-04-28T14:25:02Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1416,29 +1399,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:20:09Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-28T14:25:09Z",
+      "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-28T14:20:05Z",
+      "time": "2026-04-28T14:25:06Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:20:05Z",
+      "time": "2026-04-28T14:25:06Z",
       "event": "CodexBar: 96% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:20:03Z",
+      "time": "2026-04-28T14:25:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:20:03Z",
+      "time": "2026-04-28T14:25:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:20:03Z",
+      "time": "2026-04-28T14:25:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:20:03Z"
+  "lastUpdated": "2026-04-28T14:25:04Z"
 }

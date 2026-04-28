@@ -1,8 +1,8 @@
 {
-  "session": 0.0,
-  "daily": 2.85096,
-  "weekly": 44.804013,
-  "monthly": 951.181432,
+  "session": 0.047199,
+  "daily": 2.898159,
+  "weekly": 44.827926,
+  "monthly": 951.205345,
   "topModels": [
     {
       "name": "gpt-5.4",
@@ -25,9 +25,9 @@
       "cost": 0.122313
     },
     {
-      "name": "deepseek/deepseek-v3.2",
+      "name": "openai-codex/gpt-5.5",
       "window": "session",
-      "cost": 0.006918987599999999
+      "cost": 0.047199
     }
   ],
   "breakdown": [
@@ -71,7 +71,20 @@
       "sessionCost": 0.122313,
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
-      "sessions": 4,
+      "sessions": 3,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 303,
+      "outputTokens": 6,
+      "totalTokens": 309,
+      "sessionCost": 0.047199,
+      "dailyCost": 0.047199,
+      "weeklyCost": 0.047199,
+      "sessions": 1,
       "isGemini": false,
       "costEstimated": false
     },
@@ -176,7 +189,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-28T14:20:09Z",
+  "lastUpdated": "2026-04-28T14:25:09Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -209,14 +222,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 2.85096,
-    "total": 46.723501,
-    "monthly": 951.181432
+    "daily": 2.898159,
+    "total": 46.7707,
+    "monthly": 951.205345
   },
   "weeklyRunRate": {
-    "total": 46.746787,
+    "total": 46.7707,
     "automation": 1.942774,
-    "interactive": 42.861239,
-    "projectedMonthly": 200.34
+    "interactive": 42.885152,
+    "projectedMonthly": 200.45
   }
 }
