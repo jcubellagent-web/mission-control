@@ -2,7 +2,7 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Mission Control canary issue: 2 canary issue(s)",
+      "title": "Mission Control canary issue: 3 canary issue(s)",
       "url": "#canaries"
     },
     {
@@ -33,12 +33,12 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Tightened fantasy waiver alerts to roster-relative one-best add/drop recommendations",
-    "updatedAt": "2026-04-28T17:24:38Z"
+    "updatedAt": "2026-04-28T17:25:15Z"
   },
   "contextWindow": {
-    "usedTokens": 189301,
+    "usedTokens": 207207,
     "limitTokens": 272000,
-    "pct": 0.696,
+    "pct": 0.7618,
     "model": "gpt-5.5",
     "status": "red"
   },
@@ -141,7 +141,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 9,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_regression_check.py",
@@ -156,7 +156,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 3h 25m",
+        "Resets in 3h 24m",
         "Weekly: 93% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
@@ -167,17 +167,17 @@
       "weekly": "93% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 25m",
+      "sessionReset": "3h 24m",
       "weeklyReset": "6d 12h",
       "summary": "92% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:24:39Z"
+    "updatedAt": "2026-04-28T17:25:17Z"
   },
   "modelUsage": {
-    "session": 0.422039,
-    "daily": 3.295068,
-    "weekly": 45.224835,
-    "monthly": 951.602254,
+    "session": 0.189009,
+    "daily": 3.062038,
+    "weekly": 44.991805,
+    "monthly": 951.369224,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -190,14 +190,14 @@
         "cost": 7.387107749999999
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.444108
-      },
-      {
         "name": "codex/gpt-5.4",
         "window": "session",
         "cost": 0.29702
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.21107800000000002
       },
       {
         "name": "openai/gpt-5.5",
@@ -225,19 +225,6 @@
         "costEstimated": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 74098,
-        "outputTokens": 103,
-        "totalTokens": 74201,
-        "sessionCost": 0.444108,
-        "dailyCost": 0.444108,
-        "weeklyCost": 0.444108,
-        "sessions": 2,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
         "inputTokens": 339,
@@ -246,6 +233,19 @@
         "sessionCost": 0.29702,
         "dailyCost": 0.29702,
         "weeklyCost": 0.29702,
+        "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 20324,
+        "outputTokens": 103,
+        "totalTokens": 20427,
+        "sessionCost": 0.21107800000000002,
+        "dailyCost": 0.21107800000000002,
+        "weeklyCost": 0.21107800000000002,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -364,7 +364,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:24:42Z",
+    "lastUpdated": "2026-04-28T17:25:20Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -397,15 +397,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.295068,
-      "total": 47.167609,
-      "monthly": 951.602254
+      "daily": 3.062038,
+      "total": 46.934579,
+      "monthly": 951.369224
     },
     "weeklyRunRate": {
-      "total": 47.167609,
+      "total": 46.934579,
       "automation": 1.942774,
-      "interactive": 43.282061,
-      "projectedMonthly": 202.15
+      "interactive": 43.049031,
+      "projectedMonthly": 201.15
     }
   },
   "moltWorld": {
@@ -422,7 +422,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:24:47Z",
+    "updatedAt": "2026-04-28T17:25:25Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -439,14 +439,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.9,
-      "cpu_user": 23.24,
-      "cpu_sys": 20.61,
-      "load1": 2.66,
-      "load5": 2.48,
-      "load15": 2.46,
+      "cpu_pct": 40.2,
+      "cpu_user": 21.31,
+      "cpu_sys": 18.85,
+      "load1": 2.84,
+      "load5": 2.55,
+      "load15": 2.48,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -454,14 +454,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.4,
-      "cpu_user": 4.91,
-      "cpu_sys": 11.47,
-      "load1": 2.68,
-      "load5": 2.2,
-      "load15": 2.06,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 18.5,
+      "cpu_user": 5.64,
+      "cpu_sys": 12.9,
+      "load1": 2.12,
+      "load5": 2.11,
+      "load15": 2.03,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -485,19 +485,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:24:38Z"
+      "lastChecked": "2026-04-28T17:25:15Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:24:38Z"
+      "lastChecked": "2026-04-28T17:25:15Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:24:38Z"
+      "lastChecked": "2026-04-28T17:25:15Z"
     }
   ],
   "crons": [
@@ -514,7 +514,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:20:29.555461+00:00"
+      "lastRun": "2026-04-28T17:25:15.375416+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1258,14 +1258,14 @@
   "visualCanaries": {
     "ok": false,
     "status": "attention",
-    "summary": "2 canary issue(s)",
-    "checkedAt": "2026-04-28T17:24:38.123436Z",
+    "summary": "3 canary issue(s)",
+    "checkedAt": "2026-04-28T17:25:15.682905Z",
     "checks": [
       {
         "name": "Dual objectives",
-        "ok": true,
-        "detail": "dualAgents=['JOSH 2.0', 'JAIMES']",
-        "severity": "ok"
+        "ok": false,
+        "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
+        "severity": "high"
       },
       {
         "name": "Calendar tile",
@@ -1333,8 +1333,8 @@
       "id": "visual-canaries",
       "name": "Visual Canaries",
       "status": "attention",
-      "summary": "2 canary issue(s)",
-      "detail": "3/5 checks passing"
+      "summary": "3 canary issue(s)",
+      "detail": "2/5 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1428,12 +1428,12 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
-      "objective": "Mission Control: JOSH deploying final polish",
-      "status": "active",
+      "active": false,
+      "reportedActive": false,
+      "objective": "Done: approved Mission Control polish deployed",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T17:24:23Z",
+      "updatedAt": "2026-04-28T17:25:00Z",
       "messageReceived": "2026-04-28T17:24:23Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
@@ -1465,7 +1465,7 @@
         },
         {
           "label": "Mission Control: JOSH deploying final polish",
-          "status": "active",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1474,15 +1474,14 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
-      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 3,
+    "activeCount": 2,
     "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "JAIMES"
+      "J.A.I.N"
     ],
     "agents": [
       {
@@ -1499,13 +1498,32 @@
         "steps": []
       },
       {
-        "agent": "JAIMES",
+        "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "Mission Control: JOSH deploying final polish",
+        "objective": "tighten fantasy baseball alert rule",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:24:23Z",
+        "updatedAt": "2026-04-28T17:18:48Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "tool",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Done: approved Mission Control polish deployed",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-28T17:25:00Z",
         "messageReceived": "2026-04-28T17:24:23Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
@@ -1537,26 +1555,7 @@
           },
           {
             "label": "Mission Control: JOSH deploying final polish",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "tighten fantasy baseball alert rule",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T17:18:48Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1565,29 +1564,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:24:42Z",
-      "event": "Session spend: $0.42"
+      "time": "2026-04-28T17:25:20Z",
+      "event": "Session spend: $0.19"
     },
     {
-      "time": "2026-04-28T17:24:39Z",
+      "time": "2026-04-28T17:25:17Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_regression_check.py"
     },
     {
-      "time": "2026-04-28T17:24:39Z",
+      "time": "2026-04-28T17:25:17Z",
       "event": "CodexBar: 92% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:24:38Z",
+      "time": "2026-04-28T17:25:15Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:24:38Z",
+      "time": "2026-04-28T17:25:15Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:24:38Z",
+      "time": "2026-04-28T17:25:15Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:24:38Z"
+  "lastUpdated": "2026-04-28T17:25:15Z"
 }

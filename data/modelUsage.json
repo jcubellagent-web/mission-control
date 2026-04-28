@@ -1,8 +1,8 @@
 {
-  "session": 0.422039,
-  "daily": 3.295068,
-  "weekly": 45.224835,
-  "monthly": 951.602254,
+  "session": 0.189009,
+  "daily": 3.062038,
+  "weekly": 44.991805,
+  "monthly": 951.369224,
   "topModels": [
     {
       "name": "gpt-5.4",
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.444108
-    },
-    {
       "name": "codex/gpt-5.4",
       "window": "session",
       "cost": 0.29702
+    },
+    {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.21107800000000002
     },
     {
       "name": "openai/gpt-5.5",
@@ -50,19 +50,6 @@
       "costEstimated": false
     },
     {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 74098,
-      "outputTokens": 103,
-      "totalTokens": 74201,
-      "sessionCost": 0.444108,
-      "dailyCost": 0.444108,
-      "weeklyCost": 0.444108,
-      "sessions": 2,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
       "name": "codex/gpt-5.4",
       "source": "openclaw",
       "inputTokens": 339,
@@ -71,6 +58,19 @@
       "sessionCost": 0.29702,
       "dailyCost": 0.29702,
       "weeklyCost": 0.29702,
+      "sessions": 2,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 20324,
+      "outputTokens": 103,
+      "totalTokens": 20427,
+      "sessionCost": 0.21107800000000002,
+      "dailyCost": 0.21107800000000002,
+      "weeklyCost": 0.21107800000000002,
       "sessions": 2,
       "isGemini": false,
       "costEstimated": false
@@ -189,7 +189,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-28T17:24:42Z",
+  "lastUpdated": "2026-04-28T17:25:20Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -222,14 +222,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 3.295068,
-    "total": 47.167609,
-    "monthly": 951.602254
+    "daily": 3.062038,
+    "total": 46.934579,
+    "monthly": 951.369224
   },
   "weeklyRunRate": {
-    "total": 47.167609,
+    "total": 46.934579,
     "automation": 1.942774,
-    "interactive": 43.282061,
-    "projectedMonthly": 202.15
+    "interactive": 43.049031,
+    "projectedMonthly": 201.15
   }
 }
