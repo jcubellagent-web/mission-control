@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: GW11 DNP-calibrated slate live verified",
-  "status": "idle",
-  "updatedAt": "2026-04-28T00:57:42Z",
-  "checkedAt": "2026-04-28T00:57:09Z",
-  "messageReceived": "2026-04-28T00:57:09Z",
+  "active": true,
+  "objective": "Task: review skill updates from GW11 workflow",
+  "status": "active",
+  "updatedAt": "2026-04-28T00:57:53Z",
+  "checkedAt": "2026-04-28T00:57:53Z",
+  "messageReceived": "2026-04-28T00:57:53Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -28,6 +28,11 @@
     {
       "label": "Step: verify live calibrated GW11 slate",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill updates from GW11 workflow",
+      "status": "active",
       "tool": "exec"
     }
   ],
