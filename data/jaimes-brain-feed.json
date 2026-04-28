@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Mission Control watchdog clean",
-  "status": "idle",
-  "updatedAt": "2026-04-28T05:03:09Z",
-  "checkedAt": "2026-04-28T05:00:04Z",
-  "messageReceived": "2026-04-28T04:15:44Z",
-  "currentTool": "exec",
+  "active": true,
+  "objective": "Mission Control: running final validation for watchdog",
+  "status": "active",
+  "updatedAt": "2026-04-28T05:03:19Z",
+  "checkedAt": "2026-04-28T05:03:19Z",
+  "messageReceived": "2026-04-28T05:03:19Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -14,6 +14,11 @@
       "label": "jaimes-ops-drift-check",
       "status": "done",
       "tool": "hermes"
+    },
+    {
+      "label": "Mission Control: running final validation for watchdog",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
