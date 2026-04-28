@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Hermes gateway: restart for button patch",
+  "objective": "Hermes callback: fix reply delivery bug",
   "status": "active",
-  "updatedAt": "2026-04-28T03:40:17Z",
-  "checkedAt": "2026-04-28T03:40:17Z",
-  "messageReceived": "2026-04-28T03:40:17Z",
+  "updatedAt": "2026-04-28T03:40:45Z",
+  "checkedAt": "2026-04-28T03:40:45Z",
+  "messageReceived": "2026-04-28T03:40:45Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -22,6 +22,11 @@
     },
     {
       "label": "Hermes gateway: restart for button patch",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes callback: fix reply delivery bug",
       "status": "active",
       "tool": "exec"
     }
