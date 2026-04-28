@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Scheduled memory sync to J.A.I.N completed, verified, and logged",
-    "updatedAt": "2026-04-28T16:20:46Z"
+    "updatedAt": "2026-04-28T16:23:23Z"
   },
   "contextWindow": {
     "usedTokens": 68410,
@@ -144,7 +144,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 97% left [===========-]",
-        "Resets in 4h 29m",
+        "Resets in 4h 26m",
         "Weekly: 94% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 13h",
@@ -155,11 +155,11 @@
       "weekly": "94% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 29m",
+      "sessionReset": "4h 26m",
       "weeklyReset": "6d 13h",
       "summary": "97% left \u00b7 wk 94% left"
     },
-    "updatedAt": "2026-04-28T16:20:48Z"
+    "updatedAt": "2026-04-28T16:23:24Z"
   },
   "modelUsage": {
     "session": 0.179312,
@@ -352,7 +352,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T16:20:51Z",
+    "lastUpdated": "2026-04-28T16:23:28Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -410,7 +410,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T16:20:56Z",
+    "updatedAt": "2026-04-28T16:23:33Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -427,14 +427,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.5,
-      "cpu_user": 20.6,
-      "cpu_sys": 18.88,
-      "load1": 1.54,
-      "load5": 1.84,
-      "load15": 2.03,
+      "cpu_pct": 38.7,
+      "cpu_user": 20.73,
+      "cpu_sys": 17.97,
+      "load1": 2.28,
+      "load5": 1.98,
+      "load15": 2.05,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -442,14 +442,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.5,
-      "cpu_user": 4.3,
-      "cpu_sys": 10.48,
-      "load1": 3.09,
-      "load5": 2.67,
-      "load15": 2.37,
+      "cpu_pct": 31.5,
+      "cpu_user": 16.77,
+      "cpu_sys": 14.76,
+      "load1": 1.85,
+      "load5": 2.33,
+      "load15": 2.27,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -473,19 +473,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:20:46Z"
+      "lastChecked": "2026-04-28T16:23:23Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:20:46Z"
+      "lastChecked": "2026-04-28T16:23:23Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T16:20:46Z"
+      "lastChecked": "2026-04-28T16:23:23Z"
     }
   ],
   "crons": [
@@ -1253,17 +1253,6 @@
       "requestedAt": null,
       "updatedAt": "2026-04-28 00:43",
       "owner": "JOSH 2.0"
-    },
-    {
-      "id": "T-20260425-919",
-      "title": "Sorare deep analytics upgrade research",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "(updated 2026-04-28 11:35) Completed JAIMES handoff asks: accepted model ownership policy in `/Users/jc_agent/sorare_ml/artifacts/scorer_ownership_policy_2026-04-28.md`, wired `scoring_policy.production_score()` into `/Users/jc_agent/sorare_ml/ml_bot.py` and `/Users/jc_agent/.openclaw/workspace/scripts/sorare_mission_ranker.py`, generated `/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.{md,json}`. Result: policy blend MAE 6.808 vs season_avg 6.824 and raw RF 7.186 on 1,774-row holdout; raw RF no longer globally dominates production scoring. Verified `py_compile_ok`; pytest unavailable. Still blocked: true GW11 realized outcome validation after 2026-05-01 resolved scores.",
-      "background": "owner: JAIMES/J.A.I.N; JOSH 2.0 supervises/report-checks",
-      "requestedAt": null,
-      "updatedAt": null,
-      "owner": "JAIMES"
     }
   ],
   "activeAgents": [
@@ -1417,29 +1406,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T16:20:51Z",
+      "time": "2026-04-28T16:23:28Z",
       "event": "Session spend: $0.18"
     },
     {
-      "time": "2026-04-28T16:20:48Z",
+      "time": "2026-04-28T16:23:24Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-04-28T16:20:48Z",
+      "time": "2026-04-28T16:23:24Z",
       "event": "CodexBar: 97% left \u00b7 wk 94% left"
     },
     {
-      "time": "2026-04-28T16:20:46Z",
+      "time": "2026-04-28T16:23:23Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T16:20:46Z",
+      "time": "2026-04-28T16:23:23Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T16:20:46Z",
+      "time": "2026-04-28T16:23:23Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T16:20:46Z"
+  "lastUpdated": "2026-04-28T16:23:23Z"
 }
