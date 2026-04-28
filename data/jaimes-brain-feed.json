@@ -1,65 +1,19 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Step: retesting MC update/push path",
-  "status": "active",
-  "updatedAt": "2026-04-28T04:24:48Z",
-  "checkedAt": "2026-04-28T04:24:48Z",
-  "messageReceived": "2026-04-28T04:24:48Z",
-  "currentTool": "exec",
-  "model": "gpt-5.5",
+  "active": false,
+  "objective": "Idle \u00b7 last: jaimes-ops-drift-check (ok)",
+  "status": "idle",
+  "updatedAt": "2026-04-28T04:25:02Z",
+  "checkedAt": "2026-04-28T04:25:02Z",
+  "messageReceived": "2026-04-28T04:15:44Z",
+  "currentTool": "",
+  "model": "GPT-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "Task: review skill save/update need",
+      "label": "jaimes-ops-drift-check",
       "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: approved cron re-audit and MC cleanup",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: running full cron health re-audit",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspecting Mission Control dirty state",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: validating and committing MC dirty files",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: repairing empty MC JSON and pycache status",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: deploying MC JSON repair",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verifying Sorare 11am final state",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: testing Mission Control update/push path",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: retesting MC update/push path",
-      "status": "active",
-      "tool": "exec"
+      "tool": "hermes"
     }
-  ],
-  "modelAuth": "gpt-5.5 (subscription)"
+  ]
 }
