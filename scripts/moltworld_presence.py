@@ -187,6 +187,8 @@ def update_dashboard(prev, state, thought, action_result, balance):
         "blocks_built": int(prev.get("blocks_built", 0) or 0),
         "projection_per_day": projection_per_day,
         "updatedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "stale": False,
+        "lastError": None,
         "statusMessage": "Active in MoltWorld v2",
         "last_error": None,
         "last_action": action_result.get("message") if isinstance(action_result, dict) else None,
