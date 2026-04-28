@@ -11,30 +11,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "fix Mission Control dual objective display",
+    "objective": "Verified dual objectives and moved mouse away from Safari top popup area",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-28T15:53:10Z",
-    "checkedAt": "2026-04-28T15:53:10Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T15:58:25Z",
+    "checkedAt": "2026-04-28T15:58:25Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "fix Mission Control dual objective display",
-    "updatedAt": "2026-04-28T15:55:03Z"
+    "context": "Verified dual objectives and moved mouse away from Safari top popup area",
+    "updatedAt": "2026-04-28T16:00:04Z"
   },
   "contextWindow": {
-    "usedTokens": 36115,
-    "limitTokens": 400000,
-    "pct": 0.0903,
+    "usedTokens": 68410,
+    "limitTokens": 272000,
+    "pct": 0.2515,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -137,38 +131,38 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 6,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
       "mission-control/scripts/moltworld_presence.py"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 95% left",
+    "codexbarStatus": "98% left \u00b7 wk 95% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 4h 47m",
+        "Session: 98% left [===========-]",
+        "Resets in 4h 42m",
         "Weekly: 95% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 13h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "99% left",
+      "session": "98% left",
       "weekly": "95% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 47m",
+      "sessionReset": "4h 42m",
       "weeklyReset": "6d 13h",
-      "summary": "99% left \u00b7 wk 95% left"
+      "summary": "98% left \u00b7 wk 95% left"
     },
-    "updatedAt": "2026-04-28T15:55:05Z"
+    "updatedAt": "2026-04-28T16:00:07Z"
   },
   "modelUsage": {
-    "session": 0.022355,
-    "daily": 2.894269,
+    "session": 0.179312,
+    "daily": 3.051226,
     "weekly": 45.100681,
     "monthly": 951.4781,
     "topModels": [
@@ -188,14 +182,14 @@
         "cost": 0.29702
       },
       {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.200266
+      },
+      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
-      },
-      {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.043309
       }
     ],
     "breakdown": [
@@ -231,6 +225,19 @@
         "costEstimated": false
       },
       {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 32872,
+        "outputTokens": 15,
+        "totalTokens": 32887,
+        "sessionCost": 0.200266,
+        "dailyCost": 0.200266,
+        "weeklyCost": 0.200266,
+        "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 19438,
@@ -239,19 +246,6 @@
         "sessionCost": 0.122313,
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
-        "sessions": 2,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 1601,
-        "outputTokens": 12,
-        "totalTokens": 1613,
-        "sessionCost": 0.043309,
-        "dailyCost": 0.043309,
-        "weeklyCost": 0.043309,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -357,7 +351,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:55:08Z",
+    "lastUpdated": "2026-04-28T16:00:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -390,8 +384,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.894269,
-      "total": 46.76681,
+      "daily": 3.051226,
+      "total": 46.923767,
       "monthly": 951.4781
     },
     "weeklyRunRate": {
@@ -415,7 +409,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:55:13Z",
+    "updatedAt": "2026-04-28T16:00:15Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -432,12 +426,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.1,
-      "cpu_user": 19.96,
-      "cpu_sys": 19.18,
-      "load1": 2.61,
-      "load5": 2.25,
-      "load15": 2.04,
+      "cpu_pct": 36.8,
+      "cpu_user": 17.69,
+      "cpu_sys": 19.8,
+      "load1": 2.38,
+      "load5": 2.39,
+      "load15": 2.17,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -447,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 3.63,
-      "cpu_sys": 10.0,
-      "load1": 2.51,
-      "load5": 2.06,
-      "load15": 2.06,
+      "cpu_pct": 16.5,
+      "cpu_user": 6.61,
+      "cpu_sys": 9.91,
+      "load1": 2.0,
+      "load5": 2.03,
+      "load15": 2.05,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:55:03Z"
+      "lastChecked": "2026-04-28T16:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:55:03Z"
+      "lastChecked": "2026-04-28T16:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:55:03Z"
+      "lastChecked": "2026-04-28T16:00:04Z"
     }
   ],
   "crons": [
@@ -507,7 +501,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:55:13.651481+00:00"
+      "lastRun": "2026-04-28T16:00:15.717342+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -552,7 +546,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:00:01.353012+00:00"
+      "lastRun": "2026-04-28T16:00:01.298799+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -582,7 +576,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:00:06.421284+00:00"
+      "lastRun": "2026-04-28T16:00:05.764148+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -659,7 +653,7 @@
             "time": "12:00 PM",
             "mode": "Weekday",
             "label": "Midday brief",
-            "past": false,
+            "past": true,
             "done": false
           },
           {
@@ -825,7 +819,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-28T12:00:00"
     },
     {
       "name": "X Quote Tweets",
@@ -1107,7 +1102,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:45:04.457588+00:00"
+      "lastRun": "2026-04-28T16:00:05.987290+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1297,20 +1292,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "fix Mission Control dual objective display",
+      "objective": "Verified dual objectives and moved mouse away from Safari top popup area",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:53:10Z",
+      "updatedAt": "2026-04-28T15:58:25Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "exec",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "tool",
-          "status": "active",
-          "tool": "exec"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1332,8 +1321,8 @@
       "objective": "Sorare deep analytics upgrade research",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:55:03Z",
-      "messageReceived": "2026-04-28T15:55:01Z",
+      "updatedAt": "2026-04-28T16:00:04Z",
+      "messageReceived": "2026-04-28T16:00:02Z",
       "currentTool": "tracked task",
       "model": "Unknown",
       "steps": [
@@ -1368,8 +1357,8 @@
         "objective": "Sorare deep analytics upgrade research",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:55:03Z",
-        "messageReceived": "2026-04-28T15:55:01Z",
+        "updatedAt": "2026-04-28T16:00:04Z",
+        "messageReceived": "2026-04-28T16:00:02Z",
         "currentTool": "tracked task",
         "model": "Unknown",
         "steps": [
@@ -1386,20 +1375,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "fix Mission Control dual objective display",
+        "objective": "Verified dual objectives and moved mouse away from Safari top popup area",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:53:10Z",
+        "updatedAt": "2026-04-28T15:58:25Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "exec",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1418,29 +1401,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:55:08Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-28T16:00:10Z",
+      "event": "Session spend: $0.18"
     },
     {
-      "time": "2026-04-28T15:55:05Z",
+      "time": "2026-04-28T16:00:07Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:55:05Z",
-      "event": "CodexBar: 99% left \u00b7 wk 95% left"
+      "time": "2026-04-28T16:00:07Z",
+      "event": "CodexBar: 98% left \u00b7 wk 95% left"
     },
     {
-      "time": "2026-04-28T15:55:03Z",
+      "time": "2026-04-28T16:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:55:03Z",
+      "time": "2026-04-28T16:00:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:55:03Z",
+      "time": "2026-04-28T16:00:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:55:03Z"
+  "lastUpdated": "2026-04-28T16:00:04Z"
 }
