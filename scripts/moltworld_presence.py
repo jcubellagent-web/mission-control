@@ -90,7 +90,7 @@ def register_v2(external_id=None):
     external_id = external_id or _current_external_id()
     result = _request("POST", f"{API_V2}/api/register", {
         "external_id": external_id,
-        "name": AGENT_NAME,
+        "name": AGENT_NAME if external_id == DEFAULT_EXTERNAL_ID else f"{AGENT_NAME} Recovery",
         "model": "gpt-5.4",
         "alignment": "neutral_good",
         "personality": (
