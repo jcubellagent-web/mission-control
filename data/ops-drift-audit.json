@@ -1,0 +1,28 @@
+{
+  "generated_at_local": "2026-04-28T00:15:32-04:00",
+  "alerts": [
+    {
+      "type": "stale_backup_daily",
+      "age_hours": 33.33,
+      "path": "/Users/jc_agent/josh_2_backup/latest_daily.md"
+    }
+  ],
+  "alert_count": 1,
+  "notes": [
+    "legacy_sp_classic_raw_cron_present",
+    "josh_brain_feed_age_hours=24.41",
+    "jaimes_brain_feed_age_hours=0.0"
+  ],
+  "model": {
+    "provider": "openai-codex",
+    "name": "gpt-5.5",
+    "auth": "subscription"
+  },
+  "paths": {
+    "hermes_config": "/Users/jc_agent/.hermes/config.yaml",
+    "jaimes_brain_feed": "/Users/jc_agent/.openclaw/workspace/mission-control/data/jaimes-brain-feed.json",
+    "josh_brain_feed": "/Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json",
+    "backup_daily": "/Users/jc_agent/josh_2_backup/latest_daily.md",
+    "health_script": "/Users/jc_agent/scripts/check_josh_health.sh"
+  }
+}

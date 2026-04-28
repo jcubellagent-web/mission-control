@@ -5906,6 +5906,214 @@
 
         /* Header corner radius: already handled, just unify */
         header { border-radius: 10px 10px 10px 10px !important; }
+
+        /* PHASE: buttons-work */
+        header button,
+        .card button,
+        #phone-actions button,
+        #module-modal button,
+        #x-modal button,
+        #es-modal button,
+        #mw-modal button,
+        .sp-modal button,
+        #rr-modal button {
+            font-family: inherit;
+            letter-spacing: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #airpoint-toggle,
+        #night-mode-btn,
+        .refresh-btn,
+        .pca-btn,
+        .remote-btn,
+        .module-action-btn,
+        .agent-comms-toggle,
+        .mu-drill-card,
+        .es-tab,
+        .es-pm-btn,
+        .es-icon-btn {
+            background: var(--rv-surface-2) !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            color: var(--rv-text-dim) !important;
+            box-shadow: none !important;
+            transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.08s ease !important;
+        }
+
+        #airpoint-toggle:hover,
+        #night-mode-btn:hover,
+        .refresh-btn:hover,
+        .pca-btn:hover,
+        .remote-btn:hover,
+        .module-action-btn:hover,
+        .agent-comms-toggle:hover,
+        .mu-drill-card:hover,
+        .es-tab:hover,
+        .es-pm-btn:hover,
+        .es-icon-btn:hover {
+            background: rgba(255,255,255,0.035) !important;
+            border-color: var(--rv-line-strong) !important;
+            color: var(--rv-text) !important;
+            transform: translateY(-1px);
+        }
+
+        #airpoint-toggle:active,
+        #night-mode-btn:active,
+        .refresh-btn:active,
+        .pca-btn:active,
+        .remote-btn:active,
+        .module-action-btn:active,
+        .agent-comms-toggle:active,
+        .mu-drill-card:active,
+        .es-tab:active,
+        .es-pm-btn:active,
+        .es-icon-btn:active {
+            transform: translateY(0) scale(0.98);
+            transition-duration: 0.05s !important;
+        }
+
+        #airpoint-toggle,
+        #night-mode-btn,
+        .refresh-btn {
+            min-height: 30px !important;
+            border-radius: 6px !important;
+            padding: 0 10px !important;
+            font-size: 0.64rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        #night-mode-btn .nm-text,
+        .refresh-btn .rb-text {
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+        }
+        .refresh-btn .icon,
+        .refresh-btn .spinner {
+            width: 13px;
+            height: 13px;
+            font-size: 0.78rem;
+            line-height: 1;
+        }
+
+        .pca-btn {
+            min-width: 48px !important;
+            height: 40px !important;
+            border-radius: 7px !important;
+            padding: 5px 8px !important;
+            gap: 2px !important;
+        }
+        .pca-btn.pca-refresh,
+        .pca-btn.pca-night {
+            background: var(--rv-surface-2) !important;
+            border-color: var(--rv-line-soft) !important;
+            color: var(--rv-text-dim) !important;
+        }
+        .pca-label {
+            font-size: 0.50rem !important;
+            letter-spacing: 0.10em !important;
+        }
+        .pca-status {
+            min-width: 34px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .remote-btn {
+            border-radius: 8px !important;
+            padding: 12px 14px !important;
+            gap: 10px !important;
+        }
+        .remote-btn-title {
+            font-size: 0.72rem !important;
+            color: var(--rv-text) !important;
+        }
+        .remote-btn-sub {
+            color: var(--rv-text-muted) !important;
+            opacity: 1 !important;
+        }
+
+        .module-action-btn {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            border-radius: 5px !important;
+            padding: 0 !important;
+            font-size: 0.72rem !important;
+            line-height: 1 !important;
+        }
+
+        .mu-drill-card {
+            border-radius: 8px !important;
+            text-align: left;
+        }
+
+        .es-tab {
+            border-radius: 7px !important;
+            padding: 8px 10px !important;
+        }
+        .es-tab.es-tab-active {
+            background: rgba(229,62,62,0.08) !important;
+            border-color: rgba(229,62,62,0.24) !important;
+            color: #fca5a5 !important;
+        }
+        .es-pm-btn,
+        .es-icon-btn {
+            border-radius: 7px !important;
+        }
+
+        #module-modal-close,
+        #x-modal-close,
+        #es-modal-close,
+        #mw-modal-close,
+        #rr-modal-close,
+        .sp-modal-close {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            border-radius: 7px !important;
+            border: 1px solid var(--rv-line-soft) !important;
+            background: var(--rv-surface-2) !important;
+            color: var(--rv-text-muted) !important;
+            box-shadow: none !important;
+        }
+        #module-modal-close:hover,
+        #x-modal-close:hover,
+        #es-modal-close:hover,
+        #mw-modal-close:hover,
+        #rr-modal-close:hover,
+        .sp-modal-close:hover {
+            border-color: rgba(229,62,62,0.24) !important;
+            background: rgba(229,62,62,0.08) !important;
+            color: #fca5a5 !important;
+        }
+
+        .btn-x-dash,
+        .btn-x-dash .btn-icon {
+            color: var(--rv-text-dim) !important;
+            border-color: var(--rv-line-soft) !important;
+        }
+        .btn-x-dash:hover {
+            background: rgba(255,255,255,0.035) !important;
+            border-color: var(--rv-line-strong) !important;
+        }
+
+        @media (max-width: 520px) {
+            #airpoint-toggle,
+            #night-mode-btn,
+            .refresh-btn {
+                min-height: 28px !important;
+                padding: 0 8px !important;
+            }
+            .pca-btn {
+                min-width: 44px !important;
+                height: 38px !important;
+            }
+            .module-action-btn {
+                width: 26px !important;
+                height: 26px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -11976,6 +12184,48 @@
         transform: translateY(-1px);
     }
     .stat-pill-x .num { color: #1d9bf0 !important; }
+
+    /* PHASE: buttons-work final cascade guard */
+    #x-fab,
+    .btn-x-dash,
+    .es-tab,
+    .es-pm-btn,
+    .es-icon-btn,
+    #module-modal-close,
+    #x-modal-close,
+    #es-modal-close,
+    #mw-modal-close,
+    #rr-modal-close,
+    .sp-modal-close {
+        background: var(--rv-surface-2) !important;
+        border: 1px solid var(--rv-line-soft) !important;
+        color: var(--rv-text-dim) !important;
+        box-shadow: none !important;
+    }
+    #x-fab:hover,
+    .btn-x-dash:hover,
+    .es-tab:hover,
+    .es-pm-btn:hover,
+    .es-icon-btn:hover,
+    #module-modal-close:hover,
+    #x-modal-close:hover,
+    #es-modal-close:hover,
+    #mw-modal-close:hover,
+    #rr-modal-close:hover,
+    .sp-modal-close:hover {
+        background: rgba(255,255,255,0.035) !important;
+        border-color: var(--rv-line-strong) !important;
+        color: var(--rv-text) !important;
+    }
+    .es-tab.es-tab-active {
+        background: rgba(229,62,62,0.08) !important;
+        border-color: rgba(229,62,62,0.24) !important;
+        color: #fca5a5 !important;
+    }
+    .btn-x-dash .btn-icon,
+    #x-fab span {
+        color: inherit !important;
+    }
     </style>
 
     <script>

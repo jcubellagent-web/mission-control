@@ -119,6 +119,12 @@ needed to change.
 - Mobile (375px): card radius drop to 10px, chips shrink proportionally,
   agents row re-spaced.
 
+### Buttons work (`buttons_work`)
+- Added a CSS-only button layer covering header controls, phone remote buttons,
+  card expand buttons, drill cards, modal close buttons, X, and Eight Sleep controls.
+- Removed leftover gradient / purple-blue button treatments where the revamp layer can safely override them.
+- Stabilized button dimensions, active/hover states, and mobile sizes without changing DOM IDs or JavaScript handlers.
+
 ## IDs & classes preserved (nothing removed, nothing renamed)
 
 All DOM `id` attributes the JS reads from are untouched — verified by
