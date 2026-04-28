@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: MC skill updated for 24in polish",
-  "status": "idle",
-  "updatedAt": "2026-04-28T17:01:32Z",
-  "checkedAt": "2026-04-28T17:01:11Z",
-  "messageReceived": "2026-04-28T17:01:11Z",
-  "currentTool": "exec",
+  "active": true,
+  "objective": "Mission Control: inspecting canary/test hooks",
+  "status": "active",
+  "updatedAt": "2026-04-28T17:11:26Z",
+  "checkedAt": "2026-04-28T17:11:26Z",
+  "messageReceived": "2026-04-28T17:11:26Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -49,6 +49,16 @@
       "label": "Skill review: Mission Control UI polish",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: approved polish follow-ups",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: inspecting canary/test hooks",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
