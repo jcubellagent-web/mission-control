@@ -1,13 +1,20 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Standby",
-  "status": "idle",
-  "updatedAt": "2026-04-28T16:15:01Z",
-  "checkedAt": "2026-04-28T16:15:01Z",
-  "messageReceived": "2026-04-28T16:15:01Z",
-  "currentTool": "",
-  "model": "Unknown",
-  "auth": "api",
-  "steps": []
+  "active": true,
+  "objective": "Mission Control: Josh publisher aligned",
+  "status": "active",
+  "updatedAt": "2026-04-28T16:16:49Z",
+  "checkedAt": "2026-04-28T16:16:49Z",
+  "messageReceived": "2026-04-28T16:16:49Z",
+  "currentTool": "exec",
+  "model": "gpt-5.5",
+  "auth": "subscription",
+  "steps": [
+    {
+      "label": "Mission Control: Josh publisher aligned",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
+  "modelAuth": "gpt-5.5 (subscription)"
 }
