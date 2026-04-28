@@ -1,42 +1,36 @@
 {
-  "actionRequired": [
-    {
-      "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed",
-      "url": "#calendar"
-    }
-  ],
+  "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "verify Calendar reauth approval and refresh Mission Control",
+    "objective": "fix Mission Control dual objective display",
     "status": "active",
     "steps": [
       {
-        "label": "exec",
+        "label": "tool",
         "status": "active",
-        "tool": "bf_step"
+        "tool": "exec"
       }
     ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T15:48:59Z",
-    "checkedAt": "2026-04-28T15:48:59Z",
+    "currentTool": "exec",
+    "updatedAt": "2026-04-28T15:53:10Z",
+    "checkedAt": "2026-04-28T15:53:10Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "verify Calendar reauth approval and refresh Mission Control",
-    "updatedAt": "2026-04-28T15:50:04Z"
+    "context": "fix Mission Control dual objective display",
+    "updatedAt": "2026-04-28T15:54:48Z"
   },
   "contextWindow": {
-    "usedTokens": 231974,
-    "limitTokens": 272000,
-    "pct": 0.8528,
+    "usedTokens": 36115,
+    "limitTokens": 400000,
+    "pct": 0.0903,
     "model": "gpt-5.5",
-    "status": "red"
+    "status": "green"
   },
   "agentBus": [
     {
@@ -137,38 +131,38 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 11,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
       "mission-control/scripts/moltworld_presence.py"
     ],
-    "codexbarStatus": "100% left \u00b7 wk 95% left",
+    "codexbarStatus": "99% left \u00b7 wk 95% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 100% left [============]",
-        "Resets in 4h 52m",
+        "Session: 99% left [===========-]",
+        "Resets in 4h 48m",
         "Weekly: 95% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 13h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "100% left",
+      "session": "99% left",
       "weekly": "95% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 52m",
+      "sessionReset": "4h 48m",
       "weeklyReset": "6d 13h",
-      "summary": "100% left \u00b7 wk 95% left"
+      "summary": "99% left \u00b7 wk 95% left"
     },
-    "updatedAt": "2026-04-28T15:50:06Z"
+    "updatedAt": "2026-04-28T15:54:50Z"
   },
   "modelUsage": {
-    "session": 0.123418,
-    "daily": 2.995332,
+    "session": 0.022355,
+    "daily": 2.894269,
     "weekly": 45.100681,
     "monthly": 951.4781,
     "topModels": [
@@ -188,14 +182,14 @@
         "cost": 0.29702
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.144372
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.043309
       }
     ],
     "breakdown": [
@@ -231,19 +225,6 @@
         "costEstimated": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 1364,
-        "outputTokens": 152,
-        "totalTokens": 1516,
-        "sessionCost": 0.144372,
-        "dailyCost": 0.144372,
-        "weeklyCost": 0.144372,
-        "sessions": 2,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 19438,
@@ -252,6 +233,19 @@
         "sessionCost": 0.122313,
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
+        "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 1601,
+        "outputTokens": 12,
+        "totalTokens": 1613,
+        "sessionCost": 0.043309,
+        "dailyCost": 0.043309,
+        "weeklyCost": 0.043309,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -357,7 +351,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:50:10Z",
+    "lastUpdated": "2026-04-28T15:54:53Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -390,8 +384,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.995332,
-      "total": 46.867873,
+      "daily": 2.894269,
+      "total": 46.76681,
       "monthly": 951.4781
     },
     "weeklyRunRate": {
@@ -415,7 +409,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:50:15Z",
+    "updatedAt": "2026-04-28T15:54:58Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -432,14 +426,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.1,
-      "cpu_user": 19.75,
-      "cpu_sys": 20.36,
-      "load1": 2.21,
-      "load5": 1.78,
-      "load15": 1.86,
+      "cpu_pct": 40.5,
+      "cpu_user": 21.7,
+      "cpu_sys": 19.42,
+      "load1": 2.6,
+      "load5": 2.23,
+      "load15": 2.03,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -447,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.8,
-      "cpu_user": 3.25,
-      "cpu_sys": 10.56,
-      "load1": 1.84,
-      "load5": 1.89,
-      "load15": 2.07,
+      "cpu_pct": 19.2,
+      "cpu_user": 5.6,
+      "cpu_sys": 13.6,
+      "load1": 2.4,
+      "load5": 2.01,
+      "load15": 2.05,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -463,8 +457,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:50:04Z"
+      "lastChecked": "2026-04-28T15:54:48Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:50:04Z"
+      "lastChecked": "2026-04-28T15:54:48Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:50:04Z"
+      "lastChecked": "2026-04-28T15:54:48Z"
     }
   ],
   "crons": [
@@ -507,7 +501,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:50:15.800033+00:00"
+      "lastRun": "2026-04-28T15:50:18.494971+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1248,21 +1242,12 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260428-1007",
-      "title": "Complete JAIMES front-line Mission Control asks",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Calendar auth confirmed expired via `gog calendar events primary` invalid_grant and Mission Control cron `gog calendar list failed`; started `gog auth add jcubellagent@gmail.com --services calendar` and sent Josh OAuth URL, but reauth needs Google approval. Patched Mission Control renderer script to suppress idle Standby agent-comms spam, compact repeated same message rows, and change misleading coding row from running/Editing to done/Recently edited. Verified `python3 -m py_compile` and dashboard regeneration. Today Jobs: 42 jobs, no active error/missed rows; Chiro cannot be fully confirmed until Calendar auth works.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-28 11:42",
-      "owner": "JOSH 2.0"
-    },
-    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
       "notes": "Keep full text reply + separate short voice-note TL;DR path; phone always-listening still blocked by missing internal-preview iOS app.",
+      "background": "updated 2026-04-28 00:43",
       "requestedAt": null,
       "updatedAt": "2026-04-28 00:43",
       "owner": "JOSH 2.0"
@@ -1273,9 +1258,10 @@
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
       "notes": "(updated 2026-04-28 11:35) Completed JAIMES handoff asks: accepted model ownership policy in `/Users/jc_agent/sorare_ml/artifacts/scorer_ownership_policy_2026-04-28.md`, wired `scoring_policy.production_score()` into `/Users/jc_agent/sorare_ml/ml_bot.py` and `/Users/jc_agent/.openclaw/workspace/scripts/sorare_mission_ranker.py`, generated `/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.{md,json}`. Result: policy blend MAE 6.808 vs season_avg 6.824 and raw RF 7.186 on 1,774-row holdout; raw RF no longer globally dominates production scoring. Verified `py_compile_ok`; pytest unavailable. Still blocked: true GW11 realized outcome validation after 2026-05-01 resolved scores.",
+      "background": "owner: JAIMES/J.A.I.N; JOSH 2.0 supervises/report-checks",
       "requestedAt": null,
       "updatedAt": null,
-      "owner": "J.A.I.N"
+      "owner": "JAIMES"
     }
   ],
   "activeAgents": [
@@ -1305,18 +1291,18 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "verify Calendar reauth approval and refresh Mission Control",
+      "objective": "fix Mission Control dual objective display",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:48:59Z",
+      "updatedAt": "2026-04-28T15:53:10Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "exec",
+          "label": "tool",
           "status": "active",
-          "tool": "bf_step"
+          "tool": "exec"
         }
       ]
     },
@@ -1335,47 +1321,77 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
+      "active": true,
       "reportedActive": false,
-      "objective": "Standby",
-      "status": "idle",
+      "objective": "Sorare deep analytics upgrade research",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:50:02Z",
-      "messageReceived": "2026-04-28T15:50:02Z",
-      "currentTool": "",
+      "updatedAt": "2026-04-28T15:54:48Z",
+      "messageReceived": "2026-04-28T15:54:46Z",
+      "currentTool": "tracked task",
       "model": "Unknown",
-      "steps": []
+      "steps": [
+        {
+          "label": "Sorare deep analytics upgrade research",
+          "status": "active",
+          "tool": "tracked task"
+        }
+      ],
+      "taskBacked": true,
+      "taskId": "T-20260425-919"
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": false,
+        "objective": "Sorare deep analytics upgrade research",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T15:54:48Z",
+        "messageReceived": "2026-04-28T15:54:46Z",
+        "currentTool": "tracked task",
+        "model": "Unknown",
+        "steps": [
+          {
+            "label": "Sorare deep analytics upgrade research",
+            "status": "active",
+            "tool": "tracked task"
+          }
+        ],
+        "taskBacked": true,
+        "taskId": "T-20260425-919"
+      },
       {
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "verify Calendar reauth approval and refresh Mission Control",
+        "objective": "fix Mission Control dual objective display",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:48:59Z",
+        "updatedAt": "2026-04-28T15:53:10Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "exec",
+            "label": "tool",
             "status": "active",
-            "tool": "bf_step"
+            "tool": "exec"
           }
         ]
       },
@@ -1391,47 +1407,34 @@
         "currentTool": "",
         "model": "GPT-5.5",
         "steps": []
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Standby",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-28T15:50:02Z",
-        "messageReceived": "2026-04-28T15:50:02Z",
-        "currentTool": "",
-        "model": "Unknown",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:50:10Z",
-      "event": "Session spend: $0.12"
+      "time": "2026-04-28T15:54:53Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T15:50:06Z",
+      "time": "2026-04-28T15:54:50Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:50:06Z",
-      "event": "CodexBar: 100% left \u00b7 wk 95% left"
+      "time": "2026-04-28T15:54:50Z",
+      "event": "CodexBar: 99% left \u00b7 wk 95% left"
     },
     {
-      "time": "2026-04-28T15:50:04Z",
+      "time": "2026-04-28T15:54:48Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:50:04Z",
+      "time": "2026-04-28T15:54:48Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:50:04Z",
+      "time": "2026-04-28T15:54:48Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:50:04Z"
+  "lastUpdated": "2026-04-28T15:54:48Z"
 }
