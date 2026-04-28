@@ -414,6 +414,8 @@ def build_agent_comms(
         direction = str(entry.get("direction") or "")
         if not (message and timestamp and direction):
             return
+        if message.lower() in {"standby", "idle", "standing by"} and str(entry.get("status") or "").lower() in {"done", "idle", "sent"}:
+            return
         key = (timestamp, direction, message)
         if key in seen:
             return
@@ -440,24 +442,40 @@ def build_agent_comms(
             "status": agent_bus_status_to_comm_status(task.get("status")),
         })
 
-    if jain_brain_feed and is_recent_ts(jain_brain_feed.get("updatedAt"), hours=6):
+    if (
+        jain_brain_feed
+        and jain_brain_feed.get("active")
+        and is_recent_ts(jain_brain_feed.get("updatedAt"), hours=6)
+    ):
         push({
             "timestamp": jain_brain_feed.get("updatedAt") or utc_iso(),
             "direction": "jain→josh",
             "message": jain_brain_feed.get("objective") or "J.A.I.N standing by",
-            "status": "active" if jain_brain_feed.get("active") else "done",
+            "status": "active",
         })
 
-    if jaimes_brain_feed and is_recent_ts(jaimes_brain_feed.get("updatedAt"), hours=12):
+    if (
+        jaimes_brain_feed
+        and jaimes_brain_feed.get("active")
+        and is_recent_ts(jaimes_brain_feed.get("updatedAt"), hours=12)
+    ):
         push({
             "timestamp": jaimes_brain_feed.get("updatedAt") or utc_iso(),
             "direction": "jaimes→josh",
             "message": jaimes_brain_feed.get("objective") or "JAIMES standing by",
-            "status": "active" if jaimes_brain_feed.get("active") else "done",
+            "status": "active",
         })
 
     merged.sort(key=lambda item: iso_to_dt(item.get("timestamp")) or dt.datetime.min.replace(tzinfo=dt.timezone.utc), reverse=True)
-    return merged[:24]
+    compacted: List[Dict[str, Any]] = []
+    seen_messages: set[tuple[str, str, str]] = set()
+    for item in merged:
+        key = (item.get("direction", ""), item.get("message", ""), item.get("status", ""))
+        if key in seen_messages:
+            continue
+        seen_messages.add(key)
+        compacted.append(item)
+    return compacted[:24]
 
 
 # Known model aliases to canonical "provider/model" names (for models that appear without provider prefix)
@@ -2252,11 +2270,11 @@ def build_visibility_agents(
     if wf:
         rows.append({
             "id": "coding-visibility",
-            "label": "Editing: " + ", ".join(wf[:2]),
-            "status": "running",
+            "label": "Recently edited: " + ", ".join(wf[:2]),
+            "status": "done",
             "elapsedSecs": 0,
             "tool": "code",
-            "model": "live",
+            "model": "recent",
             "agentLabel": "CODING",
             "agentClass": "agent",
         })
@@ -2444,9 +2462,17 @@ def build_recent_activity(
             })
 
     items.append({"time": now_iso, "event": "Mission Control refresh published"})
+    deduped: List[Dict[str, str]] = []
+    seen_events: set[str] = set()
+    for item in items:
+        event = item.get("event", "")
+        if event in seen_events:
+            continue
+        seen_events.add(event)
+        deduped.append(item)
     # Sort most recent first
-    items.sort(key=lambda x: x.get("time", ""), reverse=True)
-    return items[:6]
+    deduped.sort(key=lambda x: x.get("time", ""), reverse=True)
+    return deduped[:6]
 
 
 BRAIN_FEED_PATH = ROOT.parent / "data" / "brain-feed.json"
