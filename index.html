@@ -6735,32 +6735,35 @@
 
         function applyBrainFeed(bf, source) {
             if (!bf) return;
+            const normalized = normalizeRemoteAgentFeed(bf, 2 * 60 * 60 * 1000) || bf;
             const current = window._mcLastBrainFeed;
             // Priority: local server (⚡ sub-100ms, always fresh) > supabase > github pages
             // Never block local updates — local IS the source of truth when available
             // Only block github pages (remote) from overwriting a fresher local/supabase state
             if (source === 'remote' && current) {
                 const currentTs = current.updatedAt ? new Date(current.updatedAt).getTime() : 0;
-                const newTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : 0;
+                const newTs = normalized.updatedAt ? new Date(normalized.updatedAt).getTime() : 0;
                 if (newTs <= currentTs) {
                     console.debug('[MC] brain-feed remote update skipped — not fresher than current');
                     return;
                 }
             }
-            const newHash = bfContentHash(bf);
-            if (newHash === lastBrainFeedHash) return;
+            const newHash = bfContentHash(normalized);
+            const brainFeedCard = document.getElementById('brain-feed-card');
+            const hasRenderedHero = !!brainFeedCard?.querySelector('.bf-objective');
+            if (newHash === lastBrainFeedHash && hasRenderedHero) return;
             lastBrainFeedHash = newHash;
             _bfSource = source;
-            window._mcLastBrainFeed = bf;
-            bfLastUpdatedTs = bf.updatedAt ? new Date(bf.updatedAt).getTime() : Date.now();
-            _uaJoshBf = bf;
+            window._mcLastBrainFeed = normalized;
+            bfLastUpdatedTs = normalized.updatedAt ? new Date(normalized.updatedAt).getTime() : Date.now();
+            _uaJoshBf = normalized;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
-            updateBfFreshness(bf);
+            updateBfFreshness(normalized);
             renderUnifiedActivity();
             // Update jobs + health panels when brain feed changes
             if (window._mcLastDashData) {
-                renderJobsPanel(window._mcLastDashData, bf, _jainBrainFeed, _uaJaimesBf);
-                renderSystemHealth(window._mcLastDashData, bf, _jainBrainFeed, _uaJaimesBf);
+                renderJobsPanel(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
+                renderSystemHealth(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
             }
         }
 
@@ -9206,13 +9209,15 @@
         }
 
         function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
-            // The two hero panels are intentionally pinned:
+            // The two hero panels are intentionally pinned when both are live:
             // left = JOSH 2.0, right = JAIMES. J.A.I.N belongs in health/jobs.
-            // This prevents a stale J.A.I.N feed from taking the JAIMES slot
-            // and makes the two panels stable even when one side is idle/stale.
+            // Do not split the hero for stale/idle feeds; that creates a crowded
+            // stale-looking layout and falsely advertises old work as live.
             const entries = [];
-            if (joshBf) entries.push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
-            if (jaimesBf) entries.push({ bf: jaimesBf, agentLabel: 'JAIMES' });
+            const joshEntry = { bf: joshBf, agentLabel: 'JOSH 2.0' };
+            const jaimesEntry = { bf: jaimesBf, agentLabel: 'JAIMES' };
+            if (isRenderableLiveObjective(joshEntry)) entries.push(joshEntry);
+            if (isRenderableLiveObjective(jaimesEntry)) entries.push(jaimesEntry);
             return entries.length === 2 ? entries : [];
         }
 
@@ -9806,6 +9811,9 @@
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
             renderCtxHeaderInline(data.contextWindow || null);
+            // Memory Roadmap depends on dashboard context, not just agent comms.
+            // Re-render here so context/roadmap freshness updates every poll.
+            renderAgentChatFeed(_uaComms || []);
             if (sectionChanged('activeAgents', data.activeAgents)) {
                 renderActiveAgents(data.activeAgents || []);
             }
@@ -9856,7 +9864,7 @@
                 ${calendarPill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
-                <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleep && window.openEightSleep()" style="cursor:pointer;">
+                <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleepDashboard && window.openEightSleepDashboard()" style="cursor:pointer;">
                     <span class="num">🛏️</span>
                     <span class="label">Sleep</span>
                 </div>
