@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Task: inspecting uploaded image",
+  "objective": "Step: vision failed; running OCR fallback",
   "status": "active",
-  "updatedAt": "2026-04-28T03:59:34Z",
-  "checkedAt": "2026-04-28T03:59:34Z",
-  "messageReceived": "2026-04-28T03:59:34Z",
-  "currentTool": "exec",
+  "updatedAt": "2026-04-28T03:59:45Z",
+  "checkedAt": "2026-04-28T03:59:45Z",
+  "messageReceived": "2026-04-28T03:59:45Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -52,8 +52,13 @@
     },
     {
       "label": "Task: inspecting uploaded image",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Step: vision failed; running OCR fallback",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
