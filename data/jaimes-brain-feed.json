@@ -3,43 +3,23 @@
   "active": false,
   "objective": "Done: approved Mission Control polish deployed",
   "status": "idle",
-  "updatedAt": "2026-04-28T17:27:13Z",
-  "checkedAt": "2026-04-28T17:28:00Z",
+  "updatedAt": "2026-04-28T17:31:00Z",
+  "checkedAt": "2026-04-28T17:31:00Z",
   "source": "jaimes_bf_push",
-  "reportedActive": true,
+  "reportedActive": false,
   "stale": false,
   "currentTool": "exec",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
-  "lastEvent": "Final deploy after canary noise cleanup",
+  "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Visual canaries added",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Model Spend compacted",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "24in/Phone toggle added",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Canary noise reduced",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Final JOSH deploy",
-      "status": "done",
-      "tool": "exec"
-    }
+    {"label": "Visual canaries added", "status": "done", "tool": "code"},
+    {"label": "Model Spend compacted", "status": "done", "tool": "code"},
+    {"label": "24in/Phone toggle added", "status": "done", "tool": "code"},
+    {"label": "Canary noise reduced", "status": "done", "tool": "code"},
+    {"label": "Due/unverified noise suppressed", "status": "done", "tool": "code"}
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:28:00Z"
+  "messageReceived": "2026-04-28T17:31:00Z"
 }
