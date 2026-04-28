@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Auditing plugin registry",
+  "objective": "Narrowing plugin allowlist",
   "status": "active",
-  "updatedAt": "2026-04-28T02:23:37Z",
-  "checkedAt": "2026-04-28T02:23:37Z",
-  "messageReceived": "2026-04-28T02:23:37Z",
+  "updatedAt": "2026-04-28T02:23:53Z",
+  "checkedAt": "2026-04-28T02:23:53Z",
+  "messageReceived": "2026-04-28T02:23:53Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -42,6 +42,11 @@
     },
     {
       "label": "Auditing plugin registry",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Narrowing plugin allowlist",
       "status": "active",
       "tool": "exec"
     }
