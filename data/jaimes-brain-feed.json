@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: GW11 lineups submitted and verified",
-  "status": "idle",
-  "updatedAt": "2026-04-28T00:38:11Z",
-  "checkedAt": "2026-04-28T00:37:29Z",
-  "messageReceived": "2026-04-28T00:37:29Z",
+  "active": true,
+  "objective": "Task: schedule GW11 pre-lock monitoring",
+  "status": "active",
+  "updatedAt": "2026-04-28T00:47:30Z",
+  "checkedAt": "2026-04-28T00:47:30Z",
+  "messageReceived": "2026-04-28T00:47:30Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -16,19 +16,9 @@
       "tool": "hermes"
     },
     {
-      "label": "Step: fetch GW11 live contender slots",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Step: submit approved GW11 lineups",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Step: verify live GW11 submissions",
-      "status": "done",
-      "tool": "web"
+      "label": "Task: schedule GW11 pre-lock monitoring",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
