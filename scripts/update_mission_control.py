@@ -2893,8 +2893,10 @@ def main() -> None:
     jaimes_feed_for_hero = dashboard["agentBrainFeeds"].get("jaimes", {})
     if (
         not jaimes_feed_for_hero.get("active")
-        and dashboard.get("sorareMlCockpit", {}).get("status") == "active"
+        and dashboard.get("sorareMlCockpit", {}).get("promoteToHero") is True
     ):
+        # Capability tiles are readiness/status, not live agent work.
+        # Only promote Sorare into Brain Feed if explicitly requested.
         dashboard["agentBrainFeeds"]["jaimes"] = {
             **jaimes_feed_for_hero,
             "agent": "JAIMES",
