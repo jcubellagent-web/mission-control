@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: inline follow-ups wired and verified",
-  "status": "idle",
-  "updatedAt": "2026-04-28T03:22:52Z",
-  "checkedAt": "2026-04-28T03:21:51Z",
-  "messageReceived": "2026-04-28T03:21:51Z",
+  "active": true,
+  "objective": "Task: review skill save/update need",
+  "status": "active",
+  "updatedAt": "2026-04-28T03:23:03Z",
+  "checkedAt": "2026-04-28T03:23:03Z",
+  "messageReceived": "2026-04-28T03:23:03Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -23,6 +23,11 @@
     {
       "label": "Button flows: install launchd keepalive",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update need",
+      "status": "active",
       "tool": "exec"
     }
   ],
