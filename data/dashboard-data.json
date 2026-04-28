@@ -1,35 +1,45 @@
 {
-  "actionRequired": [],
+  "actionRequired": [
+    {
+      "priority": "high",
+      "title": "Calendar issue: Calendar fetch failed",
+      "url": ""
+    },
+    {
+      "priority": "medium",
+      "title": "3 job(s) due/unverified: Chiro Invite Sync, Sorare Cookie Freshness, Sorare Nightly Claim",
+      "url": ""
+    },
+    {
+      "priority": "medium",
+      "title": "MoltWorld stale: <urlopen error timed out>",
+      "url": ""
+    }
+  ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "continue_spinner_fix",
+    "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec_command"
-      }
-    ],
-    "currentTool": "exec_command",
-    "updatedAt": "2026-04-28T14:05:17Z",
-    "checkedAt": "2026-04-28T14:05:17Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T14:13:02Z",
+    "checkedAt": "2026-04-28T14:13:02Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "GPT-5.4"
+    "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "continue_spinner_fix",
-    "updatedAt": "2026-04-28T14:10:04Z"
+    "context": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
+    "updatedAt": "2026-04-28T14:14:39Z"
   },
   "contextWindow": {
-    "usedTokens": 42083,
-    "limitTokens": 200000,
-    "pct": 0.2104,
-    "model": "",
+    "usedTokens": 41370,
+    "limitTokens": 272000,
+    "pct": 0.1521,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "agentBus": [
@@ -131,10 +141,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 3,
     "recentFiles": [
-      "mission-control/index.html",
-      "mission-control/scripts/update_mission_control.py"
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/index.html"
     ],
     "codexbarStatus": "97% left \u00b7 wk 97% left",
     "codexbar": {
@@ -142,7 +152,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 97% left [===========-]",
-        "Resets in 1h 33m",
+        "Resets in 1h 28m",
         "Weekly: 97% left [===========-]",
         "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 15h",
@@ -153,17 +163,17 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 33m",
+      "sessionReset": "1h 28m",
       "weeklyReset": "6d 15h",
       "summary": "97% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:10:06Z"
+    "updatedAt": "2026-04-28T14:14:40Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 2.85096,
-    "weekly": 44.780727,
-    "monthly": 951.158146,
+    "session": 0.023286,
+    "daily": 2.874246,
+    "weekly": 44.804013,
+    "monthly": 951.181432,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -183,7 +193,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.122313
+        "cost": 0.145599
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -226,13 +236,13 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 20080,
-        "outputTokens": 825,
-        "totalTokens": 20905,
-        "sessionCost": 0.122313,
-        "dailyCost": 0.0,
-        "weeklyCost": 0.122313,
-        "sessions": 3,
+        "inputTokens": 20618,
+        "outputTokens": 831,
+        "totalTokens": 21449,
+        "sessionCost": 0.145599,
+        "dailyCost": 0.023286,
+        "weeklyCost": 0.145599,
+        "sessions": 4,
         "isGemini": false,
         "costEstimated": false
       },
@@ -337,7 +347,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:10:10Z",
+    "lastUpdated": "2026-04-28T14:14:43Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -370,15 +380,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.85096,
-      "total": 46.723501,
-      "monthly": 951.158146
+      "daily": 2.874246,
+      "total": 46.746787,
+      "monthly": 951.181432
     },
     "weeklyRunRate": {
-      "total": 46.723501,
+      "total": 46.746787,
       "automation": 1.942774,
-      "interactive": 42.837953,
-      "projectedMonthly": 200.24
+      "interactive": 42.861239,
+      "projectedMonthly": 200.34
     }
   },
   "moltWorld": {
@@ -395,20 +405,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:10:15Z",
+    "updatedAt": "2026-04-28T14:14:48Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 46.0,
-      "cpu_user": 19.86,
-      "cpu_sys": 26.18,
-      "load1": 2.54,
-      "load5": 2.44,
-      "load15": 2.41,
+      "cpu_pct": 39.5,
+      "cpu_user": 20.9,
+      "cpu_sys": 18.63,
+      "load1": 2.42,
+      "load5": 2.47,
+      "load15": 2.42,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -416,14 +426,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.4,
-      "cpu_user": 5.12,
-      "cpu_sys": 10.25,
-      "load1": 2.29,
-      "load5": 2.17,
-      "load15": 2.1,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 17.2,
+      "cpu_user": 4.91,
+      "cpu_sys": 12.29,
+      "load1": 2.3,
+      "load5": 2.13,
+      "load15": 2.09,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -447,19 +457,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:10:04Z"
+      "lastChecked": "2026-04-28T14:14:39Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:10:04Z"
+      "lastChecked": "2026-04-28T14:14:39Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:10:04Z"
+      "lastChecked": "2026-04-28T14:14:39Z"
     }
   ],
   "crons": [
@@ -1213,19 +1223,19 @@
       "title": "Reopen Mission Control on screen + continue spinner fix",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh wants a concise summary he can relay to JAIMES, Mission Control pulled back up on screen, and then continued work on the Telegram spinner fix.",
+      "notes": "Continued spinner fix: found canary error `finalFetch is not defined`, patched direct Telegram callback ack to use `globalThis.fetch`, restarted gateway successfully at 10:07. Final verification still needs one fresh button tap canary.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 03:08",
-      "owner": "JAIMES"
+      "updatedAt": "2026-04-28 10:11",
+      "owner": "JOSH 2.0"
     },
     {
       "id": "T-20260428-1000",
       "title": "Patch OpenClaw Telegram callback spinner lane",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "The first callback-lane patch was not enough, so I added a second deeper patch in `/opt/homebrew/lib/node_modules/openclaw/dist/extensions/telegram/bot-msflwCEW.js`: `answerCallbackQuery` now uses a direct unthrottled fetch path instead of the general Telegram bot API throttler. Next step is restart + one fresh tap canary.",
+      "notes": "Patched `/opt/homebrew/lib/node_modules/openclaw/dist/extensions/telegram/bot-msflwCEW.js`: callback lane separation is present, `answerCallbackQuery` now uses direct `globalThis.fetch` instead of the throttled bot API path, and the gateway was restarted. Need one fresh tap to confirm native spinner clears.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 02:56",
+      "updatedAt": "2026-04-28 10:11",
       "owner": "JOSH 2.0"
     },
     {
@@ -1272,7 +1282,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1296,32 +1306,26 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "continue_spinner_fix",
+      "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:05:17Z",
+      "updatedAt": "2026-04-28T14:13:02Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "exec_command",
-      "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "tool",
-          "status": "active",
-          "tool": "exec_command"
-        }
-      ]
+      "currentTool": "",
+      "model": "GPT-5.5",
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
-      "objective": "handled approved async command completion and reported successful MEMORY routing snippet plus J.A.I.N sync status",
+      "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:03:52Z",
+      "updatedAt": "2026-04-28T14:13:02Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
-      "model": "GPT-5.4",
+      "model": "GPT-5.5",
       "steps": []
     },
     "jaimes": {
@@ -1331,22 +1335,11 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:10:14Z",
-      "messageReceived": "2026-04-28T14:10:14Z",
+      "updatedAt": "2026-04-28T14:14:36Z",
+      "messageReceived": "2026-04-28T14:14:36Z",
       "currentTool": "",
-      "model": "gpt-4.1",
-      "steps": [
-        {
-          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-          "status": "error",
-          "tool": "exec"
-        },
-        {
-          "label": "Sorare Daily Prep \u2014 Tue Apr 28 09:00:20 EDT 2026: Sorare daily prep complete",
-          "status": "error",
-          "tool": "exec"
-        }
-      ]
+      "model": "Unknown",
+      "steps": []
     }
   },
   "liveObjectives": {
@@ -1366,32 +1359,26 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "continue_spinner_fix",
+        "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:05:17Z",
+        "updatedAt": "2026-04-28T14:13:02Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "exec_command",
-        "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
-            "tool": "exec_command"
-          }
-        ]
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "handled approved async command completion and reported successful MEMORY routing snippet plus J.A.I.N sync status",
+        "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:03:52Z",
+        "updatedAt": "2026-04-28T14:13:02Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
-        "model": "GPT-5.4",
+        "model": "GPT-5.5",
         "steps": []
       },
       {
@@ -1401,50 +1388,39 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:10:14Z",
-        "messageReceived": "2026-04-28T14:10:14Z",
+        "updatedAt": "2026-04-28T14:14:36Z",
+        "messageReceived": "2026-04-28T14:14:36Z",
         "currentTool": "",
-        "model": "gpt-4.1",
-        "steps": [
-          {
-            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
-            "status": "error",
-            "tool": "exec"
-          },
-          {
-            "label": "Sorare Daily Prep \u2014 Tue Apr 28 09:00:20 EDT 2026: Sorare daily prep complete",
-            "status": "error",
-            "tool": "exec"
-          }
-        ]
+        "model": "Unknown",
+        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:10:10Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-28T14:14:43Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T14:10:06Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-28T14:14:40Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:10:06Z",
+      "time": "2026-04-28T14:14:40Z",
       "event": "CodexBar: 97% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:10:04Z",
+      "time": "2026-04-28T14:14:39Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:10:04Z",
+      "time": "2026-04-28T14:14:39Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:10:04Z",
+      "time": "2026-04-28T14:14:39Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:10:04Z"
+  "lastUpdated": "2026-04-28T14:14:39Z"
 }
