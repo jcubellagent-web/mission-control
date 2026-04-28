@@ -11,24 +11,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "session startup completed",
+    "objective": "gave personal Codex repo clone/path fix",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T17:31:10Z",
-    "checkedAt": "2026-04-28T17:31:10Z",
+    "updatedAt": "2026-04-28T17:49:31Z",
+    "checkedAt": "2026-04-28T17:49:31Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "GPT-5.4"
+    "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "session startup completed",
-    "updatedAt": "2026-04-28T17:45:16Z"
+    "context": "gave personal Codex repo clone/path fix",
+    "updatedAt": "2026-04-28T17:50:17Z"
   },
   "contextWindow": {
-    "usedTokens": 30770,
+    "usedTokens": 47645,
     "limitTokens": 272000,
-    "pct": 0.1131,
+    "pct": 0.1752,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 8,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 90% left [==========--]",
-        "Resets in 3h 4m",
+        "Resets in 2h 59m",
         "Weekly: 93% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 11h",
@@ -157,17 +157,17 @@
       "weekly": "93% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 4m",
+      "sessionReset": "2h 59m",
       "weeklyReset": "6d 11h",
       "summary": "90% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:45:18Z"
+    "updatedAt": "2026-04-28T17:50:19Z"
   },
   "modelUsage": {
-    "session": 0.01867,
-    "daily": 2.891699,
-    "weekly": 44.821466,
-    "monthly": 951.198885,
+    "session": 0.027013,
+    "daily": 2.900042,
+    "weekly": 44.829809,
+    "monthly": 951.207228,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -192,7 +192,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.040739
+        "cost": 0.049082
       }
     ],
     "breakdown": [
@@ -243,12 +243,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 2095,
+        "inputTokens": 2074,
         "outputTokens": 100,
-        "totalTokens": 2195,
-        "sessionCost": 0.040739,
-        "dailyCost": 0.040739,
-        "weeklyCost": 0.040739,
+        "totalTokens": 2174,
+        "sessionCost": 0.049082,
+        "dailyCost": 0.049082,
+        "weeklyCost": 0.049082,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -354,7 +354,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:45:22Z",
+    "lastUpdated": "2026-04-28T17:50:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -387,15 +387,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.891699,
-      "total": 46.76424,
-      "monthly": 951.198885
+      "daily": 2.900042,
+      "total": 46.772583,
+      "monthly": 951.207228
     },
     "weeklyRunRate": {
-      "total": 46.76424,
+      "total": 46.772583,
       "automation": 1.942774,
-      "interactive": 42.878692,
-      "projectedMonthly": 200.42
+      "interactive": 42.887035,
+      "projectedMonthly": 200.45
     }
   },
   "moltWorld": {
@@ -412,7 +412,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:45:27Z",
+    "updatedAt": "2026-04-28T17:50:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -429,29 +429,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.9,
-      "cpu_user": 18.75,
-      "cpu_sys": 19.12,
-      "load1": 2.35,
-      "load5": 2.45,
-      "load15": 2.38,
+      "cpu_pct": 24.9,
+      "cpu_user": 10.68,
+      "cpu_sys": 14.18,
+      "load1": 1.85,
+      "load5": 2.05,
+      "load15": 2.21,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
-      "disk_pct": 13,
+      "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 4.84,
-      "cpu_sys": 10.3,
-      "load1": 2.5,
-      "load5": 2.13,
-      "load15": 1.98,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 17.5,
+      "cpu_user": 5.55,
+      "cpu_sys": 11.9,
+      "load1": 2.63,
+      "load5": 2.12,
+      "load15": 1.99,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -475,19 +475,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:45:16Z"
+      "lastChecked": "2026-04-28T17:50:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:45:16Z"
+      "lastChecked": "2026-04-28T17:50:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:45:16Z"
+      "lastChecked": "2026-04-28T17:50:17Z"
     }
   ],
   "crons": [
@@ -504,7 +504,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:45:27.469817+00:00"
+      "lastRun": "2026-04-28T17:50:27.909902+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1249,7 +1249,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-28T17:45:16.036041Z",
+    "checkedAt": "2026-04-28T17:50:17.640953Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1388,13 +1388,13 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "session startup completed",
+      "objective": "gave personal Codex repo clone/path fix",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T17:31:10Z",
+      "updatedAt": "2026-04-28T17:49:31Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
-      "model": "GPT-5.4",
+      "model": "GPT-5.5",
       "steps": []
     },
     "jain": {
@@ -1414,29 +1414,14 @@
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "objective": "Done: Mission Control highlights/spend deployed",
+      "objective": "Done: Mission Control skill updated",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T17:44:42Z",
-      "messageReceived": "2026-04-28T17:44:15Z",
+      "updatedAt": "2026-04-28T17:49:23Z",
+      "messageReceived": "2026-04-28T17:49:22Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Model Spend compacted",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "24in/Phone toggle added",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Canary noise reduced",
-          "status": "done",
-          "tool": "code"
-        },
         {
           "label": "Due/unverified noise suppressed",
           "status": "done",
@@ -1471,6 +1456,21 @@
           "label": "Mission Control: deploying final compact copy",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Skill review: Mission Control workflow",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Skill review: updating Mission Control skill",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control: starting Calendar OAuth on JOSH",
+          "status": "done",
+          "tool": "exec"
         }
       ]
     }
@@ -1492,13 +1492,13 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "session startup completed",
+        "objective": "gave personal Codex repo clone/path fix",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:31:10Z",
+        "updatedAt": "2026-04-28T17:49:31Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
-        "model": "GPT-5.4",
+        "model": "GPT-5.5",
         "steps": []
       },
       {
@@ -1518,29 +1518,14 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "objective": "Done: Mission Control highlights/spend deployed",
+        "objective": "Done: Mission Control skill updated",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T17:44:42Z",
-        "messageReceived": "2026-04-28T17:44:15Z",
+        "updatedAt": "2026-04-28T17:49:23Z",
+        "messageReceived": "2026-04-28T17:49:22Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Model Spend compacted",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "24in/Phone toggle added",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Canary noise reduced",
-            "status": "done",
-            "tool": "code"
-          },
           {
             "label": "Due/unverified noise suppressed",
             "status": "done",
@@ -1575,6 +1560,21 @@
             "label": "Mission Control: deploying final compact copy",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Skill review: Mission Control workflow",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Skill review: updating Mission Control skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control: starting Calendar OAuth on JOSH",
+            "status": "done",
+            "tool": "exec"
           }
         ]
       }
@@ -1582,29 +1582,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:45:22Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-28T17:50:22Z",
+      "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-28T17:45:18Z",
+      "time": "2026-04-28T17:50:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T17:45:18Z",
+      "time": "2026-04-28T17:50:19Z",
       "event": "CodexBar: 90% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:45:16Z",
+      "time": "2026-04-28T17:50:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:45:16Z",
+      "time": "2026-04-28T17:50:17Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:45:16Z",
+      "time": "2026-04-28T17:50:17Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:45:16Z"
+  "lastUpdated": "2026-04-28T17:50:17Z"
 }

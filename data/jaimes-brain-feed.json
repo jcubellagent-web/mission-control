@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Done: Mission Control highlights/spend deployed",
+  "objective": "Done: Mission Control skill updated",
   "status": "idle",
-  "updatedAt": "2026-04-28T17:44:42Z",
-  "checkedAt": "2026-04-28T17:44:15Z",
+  "updatedAt": "2026-04-28T17:49:23Z",
+  "checkedAt": "2026-04-28T17:49:22Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,21 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Model Spend compacted",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "24in/Phone toggle added",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Canary noise reduced",
-      "status": "done",
-      "tool": "code"
-    },
     {
       "label": "Due/unverified noise suppressed",
       "status": "done",
@@ -63,8 +48,23 @@
       "label": "Mission Control: deploying final compact copy",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Skill review: Mission Control workflow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: updating Mission Control skill",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: starting Calendar OAuth on JOSH",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:44:15Z"
+  "messageReceived": "2026-04-28T17:49:22Z"
 }
