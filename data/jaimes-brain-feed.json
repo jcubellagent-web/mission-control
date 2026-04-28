@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: skill review updated GitHub auth",
-  "status": "idle",
-  "updatedAt": "2026-04-28T05:16:02Z",
-  "checkedAt": "2026-04-28T05:15:33Z",
-  "messageReceived": "2026-04-28T05:15:33Z",
+  "active": true,
+  "objective": "Mission Control: adding CI artifacts cleanup",
+  "status": "active",
+  "updatedAt": "2026-04-28T05:16:13Z",
+  "checkedAt": "2026-04-28T05:16:13Z",
+  "messageReceived": "2026-04-28T05:16:13Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -18,6 +18,11 @@
     {
       "label": "Skill review: surveying post-task learnings",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: adding CI artifacts cleanup",
+      "status": "active",
       "tool": "exec"
     }
   ],
