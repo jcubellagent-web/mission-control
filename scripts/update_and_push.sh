@@ -12,8 +12,7 @@ else
   echo "mission-control: kiosk-dashboard missing; skipping model sync"
 fi
 cd "$ROOT_DIR"
-python3 scripts/sync_jaimes_brain_feed.py || true
-# Pull J.A.I.N brain feed and newsfeed from remote (non-blocking on failure)
+# Pull J.A.I.N / JAIMES brain feed and newsfeed from remote (non-blocking on failure)
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
 bash scripts/jain_breaking_highlights_sync.sh || true
@@ -38,6 +37,7 @@ pull_json() {
 }
 
 # Pull remote JSON safely; never overwrite valid local JSON with empty SSH output.
+pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/jaimes-brain-feed.json" data/jaimes-brain-feed.json '{"agent":"JAIMES","status":"unknown","active":false}'
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" data/moltworld-state.json '{}'
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json" data/x-progress.json '{"available":false,"stale":true,"lastError":"fallback: source unavailable"}'
 python3 scripts/update_mission_control.py
