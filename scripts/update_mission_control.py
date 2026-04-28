@@ -23,6 +23,7 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 
 DATA_DIR = ROOT.parent / "data"
 DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
+PERSONAL_CODEX_PATH = DATA_DIR / "personal-codex.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
@@ -2132,13 +2133,38 @@ def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[D
     }
 
 
+def fetch_personal_codex_status(now_iso: str) -> Dict[str, Any]:
+    """Load local Personal Codex visibility without promoting it as an agent."""
+    fallback: Dict[str, Any] = {
+        "status": "idle",
+        "objective": "Local Codex contribution lane ready",
+        "validation": "pending",
+        "actionRequired": [],
+        "recentActivity": [],
+        "capabilities": ["inspect", "edit", "validate", "prepare patches"],
+        "updatedAt": now_iso,
+    }
+    raw = load_json_file(PERSONAL_CODEX_PATH, fallback)
+    if not isinstance(raw, dict):
+        raw = fallback
+    data = {**fallback, **raw}
+    data["agentSlot"] = False
+    data["promoteToBrainFeed"] = False
+    data["updatedAt"] = data.get("updatedAt") or now_iso
+    for key in ["actionRequired", "recentActivity", "capabilities"]:
+        if not isinstance(data.get(key), list):
+            data[key] = []
+    return data
+
+
 def build_capability_stack(
     visual_canaries: Dict[str, Any],
     sorare_ml: Dict[str, Any],
     voice_router: Dict[str, Any],
     ops_inbox: Dict[str, Any],
+    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
-    return [
+    stack = [
         {
             "id": "visual-canaries",
             "name": "Visual Canaries",
@@ -2168,6 +2194,17 @@ def build_capability_stack(
             "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
         },
     ]
+    pc = personal_codex or {}
+    if pc:
+        stack.append({
+            "id": "personal-codex",
+            "name": "Personal Codex",
+            "status": pc.get("status") or "idle",
+            "summary": pc.get("objective") or "Local Codex contribution visibility",
+            "detail": f"Personal Codex: {pc.get('validation') or 'validation pending'}",
+            "source": "personalCodex",
+        })
+    return stack
 
 
 def check_http_ok(url: str) -> bool:
@@ -2432,6 +2469,7 @@ def build_action_required(
     calendar_health: Dict[str, Any] | None,
     crons: List[Dict[str, Any]],
     moltworld_data: Dict[str, Any] | None,
+    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, str]]:
     """High-signal one-stop-shop alerts for Josh-facing ops health."""
     items: List[Dict[str, str]] = []
@@ -2488,6 +2526,20 @@ def build_action_required(
             title = f"MoltWorld status: {mw_status}"
         items.append({"priority": "medium", "title": title, "url": "#moltworld"})
 
+    for item in (personal_codex or {}).get("actionRequired") or []:
+        if isinstance(item, str):
+            title = item
+            priority = "medium"
+            url = "#personal-codex"
+        elif isinstance(item, dict):
+            title = str(item.get("title") or item.get("message") or "Personal Codex needs review")
+            priority = str(item.get("priority") or "medium")
+            url = str(item.get("url") or "#personal-codex")
+        else:
+            continue
+        if title.strip():
+            items.append({"priority": priority, "title": f"Personal Codex: {title.strip()}", "url": url})
+
     return items[:8]
 
 
@@ -2502,6 +2554,7 @@ def build_recent_activity(
     agent_bus_tasks: List[Dict[str, Any]] | None = None,
     coding_visibility: Dict[str, Any] | None = None,
     watchdog: Dict[str, Any] | None = None,
+    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, str]]:
     items: List[Dict[str, str]] = []
 
@@ -2565,6 +2618,18 @@ def build_recent_activity(
                 "time": coding_visibility.get("updatedAt") or now_iso,
                 "event": f"CodexBar: {coding_visibility.get('codexbarStatus')}",
             })
+
+    for activity in (personal_codex or {}).get("recentActivity") or []:
+        if isinstance(activity, str):
+            event = activity
+            when = (personal_codex or {}).get("updatedAt") or now_iso
+        elif isinstance(activity, dict):
+            event = str(activity.get("event") or activity.get("title") or activity.get("message") or "")
+            when = str(activity.get("time") or activity.get("updatedAt") or (personal_codex or {}).get("updatedAt") or now_iso)
+        else:
+            continue
+        if event.strip():
+            items.append({"time": when, "event": f"Personal Codex: {event.strip()}"})
 
     error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:
@@ -2843,6 +2908,7 @@ def main() -> None:
     brain = fetch_brain_feed()
     dashboard["focus"] = brain or build_focus_fallback(dashboard["brainFeed"], now_iso)
     dashboard["contextWindow"] = fetch_context_window()
+    dashboard["personalCodex"] = fetch_personal_codex_status(now_iso)
     agent_bus_tasks = fetch_agent_bus_tasks()
     context_watchdog = fetch_context_watchdog_status()
     coding_visibility = fetch_coding_visibility()
@@ -2893,12 +2959,14 @@ def main() -> None:
         dashboard["sorareMlCockpit"],
         dashboard["voiceRouter"],
         dashboard["opsInbox"],
+        dashboard["personalCodex"],
     )
     dashboard["actionRequired"] = build_action_required(
         now_iso,
         dashboard["calendarHealth"],
         dashboard["crons"],
         moltworld_data,
+        dashboard["personalCodex"],
     )
     if dashboard["visualCanaries"].get("status") == "attention":
         dashboard["actionRequired"].insert(0, {
@@ -2974,6 +3042,7 @@ def main() -> None:
         agent_bus_tasks,
         coding_visibility,
         context_watchdog,
+        dashboard["personalCodex"],
     )
     dashboard["lastUpdated"] = now_iso
 

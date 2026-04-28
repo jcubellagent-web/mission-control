@@ -2029,6 +2029,20 @@
         .capability-k { font-size: 0.5rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 3px; }
         .capability-v { font-size: 0.68rem; font-weight: 850; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .capability-d { margin-top: 3px; font-size: 0.54rem; line-height: 1.2; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .personal-codex-panel { display: none; margin: 0 0 10px; border: 1px solid rgba(96,165,250,0.22); background: linear-gradient(135deg, rgba(37,99,235,0.10), rgba(15,23,42,0.82)); border-radius: 14px; padding: 10px 12px; }
+        .personal-codex-panel.visible { display: grid; grid-template-columns: minmax(180px,0.7fr) minmax(220px,1fr) minmax(180px,0.8fr); gap: 10px; align-items: stretch; }
+        .pc-kicker { font-size: 0.54rem; font-weight: 900; letter-spacing: 0.12em; color: rgba(147,197,253,0.78); text-transform: uppercase; }
+        .pc-title { margin-top: 4px; font-size: 0.86rem; font-weight: 900; color: rgba(255,255,255,0.92); }
+        .pc-meta { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .pc-pill { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); border-radius: 999px; padding: 3px 7px; font-size: 0.54rem; font-weight: 800; color: rgba(255,255,255,0.58); }
+        .pc-list { display: grid; gap: 4px; min-width: 0; }
+        .pc-row { display: flex; gap: 6px; min-width: 0; font-size: 0.64rem; line-height: 1.25; color: rgba(255,255,255,0.72); }
+        .pc-row strong { color: rgba(147,197,253,0.9); font-size: 0.54rem; letter-spacing: 0.08em; text-transform: uppercase; flex: 0 0 auto; }
+        .pc-row span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .pc-status-ready, .pc-status-ok { color: #4ade80; }
+        .pc-status-active { color: #93c5fd; }
+        .pc-status-attention, .pc-status-warn { color: #fbbf24; }
+        @media (max-width: 900px) { .personal-codex-panel.visible { grid-template-columns: 1fr; } }
         .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
@@ -6415,6 +6429,19 @@
             <div class="alert-items" id="action-items"></div>
         </div>
 
+        <section class="personal-codex-panel" id="personal-codex" aria-label="Personal Codex">
+            <div>
+                <div class="pc-kicker">Personal Codex</div>
+                <div class="pc-title">Local contribution lane</div>
+                <div class="pc-meta">
+                    <span class="pc-pill" id="pc-status">loading</span>
+                    <span class="pc-pill" id="pc-validation">validation pending</span>
+                </div>
+            </div>
+            <div class="pc-list" id="pc-activity"></div>
+            <div class="pc-list" id="pc-capabilities"></div>
+        </section>
+
         <div class="stats-row" id="stats-row"></div>
 
         <!-- MoltWorld popup button — HIDDEN per Josh request 2026-04-07 -->
@@ -8287,6 +8314,38 @@
             }
         }
 
+
+        function renderPersonalCodex(data) {
+            const pc = data?.personalCodex || null;
+            const panel = document.getElementById('personal-codex');
+            if (!panel) return;
+            if (!pc) {
+                panel.classList.remove('visible');
+                return;
+            }
+            panel.classList.add('visible');
+            const status = document.getElementById('pc-status');
+            const validation = document.getElementById('pc-validation');
+            const activity = document.getElementById('pc-activity');
+            const capabilities = document.getElementById('pc-capabilities');
+            const safeStatus = String(pc.status || 'idle').toLowerCase();
+            if (status) {
+                status.textContent = safeStatus;
+                status.className = 'pc-pill pc-status-' + safeStatus.replace(/[^a-z0-9_-]/g, '-');
+            }
+            if (validation) validation.textContent = pc.validation || 'validation pending';
+            const recent = Array.isArray(pc.recentActivity) ? pc.recentActivity.slice(0, 3) : [];
+            if (activity) {
+                activity.innerHTML = recent.length ? recent.map(item => {
+                    const event = typeof item === 'string' ? item : (item.event || item.title || item.message || 'Codex activity');
+                    return `<div class="pc-row"><strong>Activity</strong><span>${escapeHtml(event)}</span></div>`;
+                }).join('') : '<div class="pc-row"><strong>Activity</strong><span>No recent local patches</span></div>';
+            }
+            const caps = Array.isArray(pc.capabilities) ? pc.capabilities.slice(0, 4) : [];
+            if (capabilities) {
+                capabilities.innerHTML = caps.length ? caps.map(cap => `<div class="pc-row"><strong>Can</strong><span>${escapeHtml(cap)}</span></div>`).join('') : '<div class="pc-row"><strong>Can</strong><span>Inspect, edit, validate</span></div>';
+            }
+        }
 
         function renderOpsCenter(data) {
             const alerts = Array.isArray(data?.actionRequired) ? data.actionRequired : [];
@@ -10272,6 +10331,7 @@
             window._mcLastProducts = data.products;
             window._mcLastContextWindow = data.contextWindow || null;
             renderCtxHeaderInline(data.contextWindow || null);
+            renderPersonalCodex(data);
             // Memory Roadmap depends on dashboard context, not just agent comms.
             // Re-render here so context/roadmap freshness updates every poll.
             renderAgentChatFeed(_uaComms || []);

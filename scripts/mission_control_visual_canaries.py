@@ -53,6 +53,7 @@ def main() -> int:
     today = [c for c in crons if c and c.get("todayRelevant") is not False]
     active_errors = [c for c in today if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("runStatus") == "missed")]
     action_required_raw = data.get("actionRequired") if isinstance(data.get("actionRequired"), list) else []
+    personal_codex = data.get("personalCodex") if isinstance(data.get("personalCodex"), dict) else {}
     action_required = []
     for item in action_required_raw:
         title = str(item.get("title", "")).lower()
@@ -73,7 +74,7 @@ def main() -> int:
             f"primary={primary_agent or 'missing'}; dualAgents={dual_agents or 'none'}; live={len(live_agents)}",
         ),
         status(
-            calendar.get("status") == "ok" or "No auth" in str(calendar_detail) or "fetch failed" in str(calendar_detail).lower(),
+            calendar.get("status") == "ok" or "No auth" in str(calendar_detail) or "gog CLI missing" in str(calendar_detail) or "fetch failed" in str(calendar_detail).lower(),
             "Calendar tile",
             calendar_detail,
             severity="medium",
@@ -96,6 +97,12 @@ def main() -> int:
             "pickDualLiveObjectiveFeeds" in html and "renderOpsCenter" in html,
             "Renderer wiring",
             "hero + ops renderers present" if html else "index.html missing",
+        ),
+        status(
+            bool(personal_codex) and "personalCodex" not in agent_feeds and 'id="personal-codex"' in html,
+            "Personal Codex lane",
+            f"status={personal_codex.get('status') or 'missing'}; brainFeed={'yes' if 'personalCodex' in agent_feeds else 'no'}",
+            severity="medium",
         ),
     ]
 

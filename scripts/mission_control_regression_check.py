@@ -140,6 +140,22 @@ def check_index_wiring() -> None:
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
+    require('id="personal-codex"' in html, "Personal Codex panel anchor missing")
+    require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
+    require("renderPersonalCodex(data)" in render_dashboard, "Personal Codex panel must render from dashboard data")
+
+    pc_path = DATA_DIR / "personal-codex.json"
+    require(pc_path.exists(), "data/personal-codex.json missing")
+    pc = json.loads(pc_path.read_text())
+    require(isinstance(pc, dict), "personal-codex.json must be an object")
+    require(pc.get("agentSlot") is False, "Personal Codex must not be a live-agent slot")
+    require(pc.get("promoteToBrainFeed") is False, "Personal Codex must not promote into Brain Feed")
+
+    dashboard_path = DATA_DIR / "dashboard-data.json"
+    if dashboard_path.exists():
+        dashboard = json.loads(dashboard_path.read_text())
+        if "personalCodex" in dashboard:
+            require("personalCodex" not in (dashboard.get("agentBrainFeeds") or {}), "Personal Codex must not be in agentBrainFeeds")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
