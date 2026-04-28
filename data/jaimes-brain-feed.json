@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: ops drift audit found stale backup_daily",
-  "status": "idle",
-  "updatedAt": "2026-04-28T04:15:39Z",
-  "checkedAt": "2026-04-28T04:15:24Z",
-  "messageReceived": "2026-04-28T04:15:24Z",
+  "active": true,
+  "objective": "Task: sync JOSH latest_daily backup",
+  "status": "active",
+  "updatedAt": "2026-04-28T04:15:59Z",
+  "checkedAt": "2026-04-28T04:15:59Z",
+  "messageReceived": "2026-04-28T04:15:59Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -23,6 +23,11 @@
     {
       "label": "Task: ops drift audit on J.A.I.N",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: sync JOSH latest_daily backup",
+      "status": "active",
       "tool": "exec"
     }
   ],
