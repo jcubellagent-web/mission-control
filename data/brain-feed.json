@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "memory sync to J.A.I.N completed and remote manifest verified",
+  "objective": "Check workspace HEARTBEAT.md and execute any current instructions",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-28T12:02:19Z",
-  "checkedAt": "2026-04-28T12:02:19Z",
+  "steps": [
+    {
+      "label": "shell",
+      "status": "active",
+      "tool": "heartbeat-check"
+    }
+  ],
+  "currentTool": "heartbeat-check",
+  "updatedAt": "2026-04-28T12:46:30Z",
+  "checkedAt": "2026-04-28T12:46:30Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
