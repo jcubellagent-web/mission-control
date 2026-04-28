@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Session startup completed and Josh greeted with active model/auth plus next-step buttons",
+  "objective": "verify Telegram spinner fix",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-28T14:21:36Z",
-  "checkedAt": "2026-04-28T14:21:36Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-28T14:21:48Z",
+  "checkedAt": "2026-04-28T14:21:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.4"
+  "model": "GPT-5.5"
 }
