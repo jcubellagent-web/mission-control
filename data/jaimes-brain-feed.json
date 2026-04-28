@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Task: review skill updates after GW11 DNP work",
-  "status": "active",
-  "updatedAt": "2026-04-28T01:24:39Z",
-  "checkedAt": "2026-04-28T01:24:39Z",
-  "messageReceived": "2026-04-28T01:24:39Z",
+  "active": false,
+  "objective": "Done: updated Sorare DNP skill guidance",
+  "status": "idle",
+  "updatedAt": "2026-04-28T01:25:09Z",
+  "checkedAt": "2026-04-28T01:25:02Z",
+  "messageReceived": "2026-04-28T00:52:25Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -14,26 +14,6 @@
       "label": "Sorare GW11 pre-lock lineup monitor",
       "status": "done",
       "tool": "hermes"
-    },
-    {
-      "label": "Task: verify GW11 DNP coverage",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: refetch GW11 live state for DNP",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: audit live GW11 DNP/SP risks",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Task: review skill updates after GW11 DNP work",
-      "status": "active",
-      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
