@@ -21,8 +21,10 @@ API_V2 = "https://app.moltworld.gg"
 API_V1 = "https://moltworld.io"
 AGENT_ID_V1 = "agent_9bon7uvreysrf2z6"
 KEY_PATH = pathlib.Path.home() / ".secrets" / "moltworld_api_key.txt"
+EXTERNAL_ID_PATH = pathlib.Path.home() / ".secrets" / "moltworld_external_id.txt"
 AGENT_NAME = "JOSH 2.0"
-EXTERNAL_ID = "josh20-jcubnft-2026"
+DEFAULT_EXTERNAL_ID = "josh20-jcubnft-2026"
+RECOVERY_EXTERNAL_ID = "josh20-jcubnft-2026-recovery"
 
 THOUGHTS = [
     "Exploring and mapping the area",
@@ -76,9 +78,18 @@ def save_dashboard(data):
     DATA_PATH.write_text(json.dumps(data, indent=2))
 
 
-def register_v2():
+def _current_external_id():
+    if EXTERNAL_ID_PATH.exists():
+        val = EXTERNAL_ID_PATH.read_text().strip()
+        if val:
+            return val
+    return DEFAULT_EXTERNAL_ID
+
+
+def register_v2(external_id=None):
+    external_id = external_id or _current_external_id()
     result = _request("POST", f"{API_V2}/api/register", {
-        "external_id": EXTERNAL_ID,
+        "external_id": external_id,
         "name": AGENT_NAME,
         "model": "gpt-5.4",
         "alignment": "neutral_good",
@@ -92,8 +103,13 @@ def register_v2():
         KEY_PATH.parent.mkdir(parents=True, exist_ok=True)
         KEY_PATH.write_text(result["api_key"])
         KEY_PATH.chmod(0o600)
+        EXTERNAL_ID_PATH.write_text(external_id)
+        EXTERNAL_ID_PATH.chmod(0o600)
         print(f"[moltworld] Registered v2 agent, key saved to {KEY_PATH}")
         return result["api_key"]
+    if result.get("code") == "DUPLICATE_AGENT" and external_id == DEFAULT_EXTERNAL_ID:
+        print("[moltworld] Existing default agent has no local key; registering recovery agent")
+        return register_v2(RECOVERY_EXTERNAL_ID)
     print(f"Registration failed: {result}")
     return None
 
