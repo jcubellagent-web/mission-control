@@ -8119,10 +8119,9 @@
         function renderOpsCenter(data) {
             const alerts = Array.isArray(data?.actionRequired) ? data.actionRequired : [];
             const crons = Array.isArray(data?.crons) ? data.crons : [];
-            const today = crons.filter(c => c && c.todayRelevant !== false);
-            const active = today.filter(c => c.status !== 'paused').length;
-            const paused = today.filter(c => c.status === 'paused').length;
-            const due = today.filter(c => c.runStatus === 'due_unverified' || c.runStatus === 'missed' || c.needsAttention).length;
+            const active = crons.filter(c => c && c.status !== 'paused').length;
+            const paused = crons.filter(c => c && c.status === 'paused').length;
+            const due = crons.filter(c => c && (c.runStatus === 'due_unverified' || c.runStatus === 'missed' || c.needsAttention)).length;
             const cal = data?.calendarHealth || {};
             const molt = data?.moltWorld || {};
             const set = (id, text, cls) => {
