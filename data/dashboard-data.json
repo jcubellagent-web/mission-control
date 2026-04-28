@@ -39,7 +39,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "fix JAIMES watcher false-positive alert",
-    "updatedAt": "2026-04-28T14:30:04Z"
+    "updatedAt": "2026-04-28T14:32:58Z"
   },
   "contextWindow": {
     "usedTokens": 115779,
@@ -147,7 +147,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 2,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
@@ -158,10 +158,10 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 1h 13m",
+        "Resets in 1h 10m",
         "Weekly: 97% left [===========-]",
         "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
-        "Resets in 6d 15h",
+        "Resets in 6d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -169,11 +169,11 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 13m",
-      "weeklyReset": "6d 15h",
+      "sessionReset": "1h 10m",
+      "weeklyReset": "6d 14h",
       "summary": "95% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:30:06Z"
+    "updatedAt": "2026-04-28T14:33:00Z"
   },
   "modelUsage": {
     "session": 0.058947,
@@ -366,7 +366,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:30:09Z",
+    "lastUpdated": "2026-04-28T14:33:03Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -424,18 +424,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:30:14Z",
+    "updatedAt": "2026-04-28T14:33:08Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.0,
-      "cpu_user": 17.6,
-      "cpu_sys": 18.4,
-      "load1": 2.8,
+      "cpu_pct": 40.5,
+      "cpu_user": 20.45,
+      "cpu_sys": 20.0,
+      "load1": 3.05,
       "load5": 2.56,
-      "load15": 2.5,
+      "load15": 2.49,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -445,13 +445,13 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 4.23,
-      "cpu_sys": 9.32,
-      "load1": 1.49,
-      "load5": 1.87,
-      "load15": 1.95,
-      "ram_used_gb": 14.0,
+      "cpu_pct": 20.5,
+      "cpu_user": 6.62,
+      "cpu_sys": 13.9,
+      "load1": 2.17,
+      "load5": 1.91,
+      "load15": 1.94,
+      "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
@@ -476,19 +476,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:30:04Z"
+      "lastChecked": "2026-04-28T14:32:58Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:30:04Z"
+      "lastChecked": "2026-04-28T14:32:58Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:30:04Z"
+      "lastChecked": "2026-04-28T14:32:58Z"
     }
   ],
   "crons": [
@@ -1294,10 +1294,10 @@
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
-      "objective": "continue after specificity correction",
+      "objective": "fix JAIMES watcher false-positive alert",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:26:13Z",
+      "updatedAt": "2026-04-28T14:29:44Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1316,8 +1316,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:30:02Z",
-      "messageReceived": "2026-04-28T14:30:02Z",
+      "updatedAt": "2026-04-28T14:32:56Z",
+      "messageReceived": "2026-04-28T14:32:56Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1359,10 +1359,10 @@
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "continue after specificity correction",
+        "objective": "fix JAIMES watcher false-positive alert",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:26:13Z",
+        "updatedAt": "2026-04-28T14:29:44Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1381,8 +1381,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:30:02Z",
-        "messageReceived": "2026-04-28T14:30:02Z",
+        "updatedAt": "2026-04-28T14:32:56Z",
+        "messageReceived": "2026-04-28T14:32:56Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1391,29 +1391,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:30:09Z",
+      "time": "2026-04-28T14:33:03Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-28T14:30:06Z",
+      "time": "2026-04-28T14:33:00Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T14:30:06Z",
+      "time": "2026-04-28T14:33:00Z",
       "event": "CodexBar: 95% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:30:04Z",
+      "time": "2026-04-28T14:32:58Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:30:04Z",
+      "time": "2026-04-28T14:32:58Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:30:04Z",
+      "time": "2026-04-28T14:32:58Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:30:04Z"
+  "lastUpdated": "2026-04-28T14:32:58Z"
 }
