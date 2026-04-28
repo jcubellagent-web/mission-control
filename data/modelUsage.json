@@ -1,54 +1,167 @@
 {
-  "session": 0.876,
-  "daily": 0.946686,
-  "weekly": 3.76546,
-  "monthly": 910.142879,
+  "session": 0.0,
+  "daily": 0.0,
+  "weekly": 43.02538,
+  "monthly": 990.541479,
   "topModels": [
     {
       "name": "gpt-5.4",
       "window": "session",
-      "cost": 1.942774
+      "cost": 34.41342725
+    },
+    {
+      "name": "gpt-5.4-mini",
+      "window": "session",
+      "cost": 7.387107749999999
+    },
+    {
+      "name": "codex/gpt-5.4",
+      "window": "session",
+      "cost": 0.29702
     },
     {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 1.822686
+      "cost": 0.122313
     },
     {
-      "name": "gpt-5.5",
+      "name": "deepseek/deepseek-v3.2",
       "window": "session",
-      "cost": 0.0
-    },
-    {
-      "name": "local/gemma4:26b",
-      "window": "session",
-      "cost": 0.0
-    },
-    {
-      "name": "local/llama3.2:latest",
-      "window": "session",
-      "cost": 0.0
+      "cost": 0.006918987599999999
     }
   ],
   "breakdown": [
     {
       "name": "gpt-5.4",
       "source": "codex",
-      "weeklyCost": 1.942774,
+      "weeklyCost": 34.41342725,
       "dailyCost": 0.0,
-      "sessionCost": 1.942774,
+      "sessionCost": 34.41342725,
       "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "gpt-5.4-mini",
+      "source": "codex",
+      "weeklyCost": 7.387107749999999,
+      "dailyCost": 0.0,
+      "sessionCost": 7.387107749999999,
+      "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
+      "name": "codex/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 59300,
+      "outputTokens": 197,
+      "totalTokens": 59497,
+      "sessionCost": 0.29702,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.29702,
+      "sessions": 4,
+      "isGemini": false,
       "costEstimated": false
     },
     {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 331482,
-      "outputTokens": 18,
-      "totalTokens": 331500,
-      "sessionCost": 1.822686,
-      "dailyCost": 0.946686,
-      "weeklyCost": 1.822686,
+      "inputTokens": 18839,
+      "outputTokens": 357,
+      "totalTokens": 19196,
+      "sessionCost": 0.122313,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.122313,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "deepseek/deepseek-v3.2",
+      "source": "openclaw",
+      "inputTokens": 26941,
+      "outputTokens": 335,
+      "totalTokens": 27276,
+      "sessionCost": 0.006918987599999999,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.006918987599999999,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 38143,
+      "outputTokens": 429,
+      "totalTokens": 38572,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 2,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "google/gemini-2.5-pro",
+      "source": "openclaw",
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 1,
+      "isGemini": true,
+      "costEstimated": false
+    },
+    {
+      "name": "codex/gpt-5.4-mini",
+      "source": "openclaw",
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 3,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-4.1",
+      "source": "openclaw",
+      "inputTokens": 167469,
+      "outputTokens": 2296,
+      "totalTokens": 169765,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 2,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-5.1-codex",
+      "source": "openclaw",
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 43768,
+      "outputTokens": 4913,
+      "totalTokens": 48681,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
       "sessions": 2,
       "isGemini": false,
       "costEstimated": false
@@ -63,33 +176,7 @@
       "costEstimated": false
     },
     {
-      "name": "local/gemma4:26b",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 17.99,
-      "loaded": false,
-      "_note": "Local Ollama model (18.0GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "local/llama3.2:latest",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 2.02,
-      "loaded": false,
-      "_note": "Local Ollama model (2.0GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "local/qwen2.5:7b",
+      "name": "local/qwen2.5-coder:7b",
       "source": "ollama",
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
@@ -100,32 +187,6 @@
       "sizeGb": 4.68,
       "loaded": false,
       "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "local/mistral:latest",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 4.37,
-      "loaded": false,
-      "_note": "Local Ollama model (4.4GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "local/llama3.1:8b",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 4.92,
-      "loaded": false,
-      "_note": "Local Ollama model (4.9GB). Free \u2014 runs on-device."
     },
     {
       "name": "local/nomic-embed-text:latest",
@@ -141,7 +202,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-28T04:34:19Z",
+  "lastUpdated": "2026-04-28T05:35:10Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -160,28 +221,26 @@
   "openrouter": {
     "daily": 0.0,
     "weekly": 0.0,
-    "monthly": 0.0,
+    "monthly": 87.095590246,
     "byok_daily": 0.0,
     "byok_weekly": 0.0,
-    "byok_monthly": 0.0,
-    "available": false,
-    "disabled": true,
-    "lastError": "disabled: OpenRouter usage fetch retired"
+    "byok_monthly": 0.0089194,
+    "available": true
   },
   "elevenlabs": {
     "chars_used": 0,
-    "chars_limit": 189219,
+    "chars_limit": 378438,
     "available": true
   },
   "aggregate": {
-    "daily": 0.946686,
-    "total": 5.708234,
-    "monthly": 910.142879
+    "daily": 0.0,
+    "total": 44.169561,
+    "monthly": 990.550398
   },
   "weeklyRunRate": {
-    "total": 5.708234,
+    "total": 44.968154,
     "automation": 1.942774,
-    "interactive": 1.822686,
-    "projectedMonthly": 24.46
+    "interactive": 41.082606,
+    "projectedMonthly": 192.72
   }
 }
