@@ -21,7 +21,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
+    "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
     "status": "active",
     "steps": [
       {
@@ -31,20 +31,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T14:14:45Z",
-    "checkedAt": "2026-04-28T14:14:45Z",
+    "updatedAt": "2026-04-28T14:15:54Z",
+    "checkedAt": "2026-04-28T14:15:54Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Assess whether GPT-5.5 subscription routing rules should be augmented",
-    "updatedAt": "2026-04-28T14:15:05Z"
+    "context": "Fix Codex 5.5 subscription lane availability for Josh direct session",
+    "updatedAt": "2026-04-28T14:20:03Z"
   },
   "contextWindow": {
-    "usedTokens": 41370,
-    "limitTokens": 272000,
-    "pct": 0.1521,
+    "usedTokens": 0,
+    "limitTokens": 200000,
+    "pct": 0.0,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -152,32 +152,32 @@
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html"
     ],
-    "codexbarStatus": "97% left \u00b7 wk 97% left",
+    "codexbarStatus": "96% left \u00b7 wk 97% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 97% left [===========-]",
-        "Resets in 1h 28m",
+        "Session: 96% left [===========-]",
+        "Resets in 1h 23m",
         "Weekly: 97% left [===========-]",
         "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
         "Resets in 6d 15h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "97% left",
+      "session": "96% left",
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 28m",
+      "sessionReset": "1h 23m",
       "weeklyReset": "6d 15h",
-      "summary": "97% left \u00b7 wk 97% left"
+      "summary": "96% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:15:07Z"
+    "updatedAt": "2026-04-28T14:20:05Z"
   },
   "modelUsage": {
-    "session": 0.023286,
-    "daily": 2.874246,
+    "session": 0.0,
+    "daily": 2.85096,
     "weekly": 44.804013,
     "monthly": 951.181432,
     "topModels": [
@@ -199,7 +199,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.145599
+        "cost": 0.122313
       },
       {
         "name": "deepseek/deepseek-v3.2",
@@ -242,12 +242,12 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 20618,
-        "outputTokens": 831,
-        "totalTokens": 21449,
-        "sessionCost": 0.145599,
-        "dailyCost": 0.023286,
-        "weeklyCost": 0.145599,
+        "inputTokens": 20080,
+        "outputTokens": 825,
+        "totalTokens": 20905,
+        "sessionCost": 0.122313,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.122313,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -353,7 +353,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:15:10Z",
+    "lastUpdated": "2026-04-28T14:20:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -386,8 +386,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.874246,
-      "total": 46.746787,
+      "daily": 2.85096,
+      "total": 46.723501,
       "monthly": 951.181432
     },
     "weeklyRunRate": {
@@ -411,20 +411,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:15:15Z",
+    "updatedAt": "2026-04-28T14:20:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.5,
-      "cpu_user": 18.96,
-      "cpu_sys": 18.56,
-      "load1": 2.38,
-      "load5": 2.45,
-      "load15": 2.41,
+      "cpu_pct": 43.3,
+      "cpu_user": 21.75,
+      "cpu_sys": 21.52,
+      "load1": 2.62,
+      "load5": 2.65,
+      "load15": 2.52,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -432,14 +432,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 19.8,
-      "cpu_user": 8.1,
-      "cpu_sys": 11.71,
-      "load1": 2.55,
-      "load5": 2.2,
-      "load15": 2.11,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "cpu_pct": 18.8,
+      "cpu_user": 5.98,
+      "cpu_sys": 12.82,
+      "load1": 1.88,
+      "load5": 1.98,
+      "load15": 2.02,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -463,19 +463,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:15:05Z"
+      "lastChecked": "2026-04-28T14:20:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:15:05Z"
+      "lastChecked": "2026-04-28T14:20:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:15:05Z"
+      "lastChecked": "2026-04-28T14:20:03Z"
     }
   ],
   "crons": [
@@ -1312,10 +1312,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
+      "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:14:45Z",
+      "updatedAt": "2026-04-28T14:15:54Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1347,8 +1347,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:15:01Z",
-      "messageReceived": "2026-04-28T14:15:01Z",
+      "updatedAt": "2026-04-28T14:20:01Z",
+      "messageReceived": "2026-04-28T14:20:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1371,10 +1371,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
+        "objective": "Fix Codex 5.5 subscription lane availability for Josh direct session",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:14:45Z",
+        "updatedAt": "2026-04-28T14:15:54Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1406,8 +1406,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:15:01Z",
-        "messageReceived": "2026-04-28T14:15:01Z",
+        "updatedAt": "2026-04-28T14:20:01Z",
+        "messageReceived": "2026-04-28T14:20:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1416,29 +1416,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:15:10Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-28T14:20:09Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-28T14:15:07Z",
+      "time": "2026-04-28T14:20:05Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:15:07Z",
-      "event": "CodexBar: 97% left \u00b7 wk 97% left"
+      "time": "2026-04-28T14:20:05Z",
+      "event": "CodexBar: 96% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:15:05Z",
+      "time": "2026-04-28T14:20:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:15:05Z",
+      "time": "2026-04-28T14:20:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:15:05Z",
+      "time": "2026-04-28T14:20:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:15:05Z"
+  "lastUpdated": "2026-04-28T14:20:03Z"
 }
