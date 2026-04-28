@@ -1,20 +1,15 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: verifying Mission Control remote patch",
+  "objective": "Step: committing actual MC push target patch",
   "status": "active",
-  "updatedAt": "2026-04-28T04:19:12Z",
-  "checkedAt": "2026-04-28T04:19:12Z",
-  "messageReceived": "2026-04-28T04:19:12Z",
+  "updatedAt": "2026-04-28T04:19:31Z",
+  "checkedAt": "2026-04-28T04:19:31Z",
+  "messageReceived": "2026-04-28T04:19:31Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
-    {
-      "label": "Step: directly disabling retired cron entry",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: ops drift audit on J.A.I.N",
       "status": "done",
@@ -57,6 +52,11 @@
     },
     {
       "label": "Step: verifying Mission Control remote patch",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: committing actual MC push target patch",
       "status": "active",
       "tool": "exec"
     }
