@@ -11,19 +11,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Recommended next capability enhancements for Josh stack",
+    "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-28T16:54:34Z",
-    "checkedAt": "2026-04-28T16:54:34Z",
+    "steps": [
+      {
+        "label": "tool",
+        "status": "active",
+        "tool": "exec"
+      }
+    ],
+    "currentTool": "exec",
+    "updatedAt": "2026-04-28T16:58:35Z",
+    "checkedAt": "2026-04-28T16:58:35Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Recommended next capability enhancements for Josh stack",
-    "updatedAt": "2026-04-28T16:58:17Z"
+    "context": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
+    "updatedAt": "2026-04-28T17:00:04Z"
   },
   "contextWindow": {
     "usedTokens": 117269,
@@ -131,35 +137,36 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 2,
+    "missionControlDirty": 3,
     "recentFiles": [
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh",
       "mission-control/scripts/moltworld_presence.py"
     ],
-    "codexbarStatus": "96% left \u00b7 wk 94% left",
+    "codexbarStatus": "95% left \u00b7 wk 94% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 96% left [===========-]",
-        "Resets in 3h 51m",
+        "Session: 95% left [===========-]",
+        "Resets in 3h 49m",
         "Weekly: 94% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "96% left",
+      "session": "95% left",
       "weekly": "94% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 51m",
+      "sessionReset": "3h 49m",
       "weeklyReset": "6d 12h",
-      "summary": "96% left \u00b7 wk 94% left"
+      "summary": "95% left \u00b7 wk 94% left"
     },
-    "updatedAt": "2026-04-28T16:58:19Z"
+    "updatedAt": "2026-04-28T17:00:06Z"
   },
   "modelUsage": {
     "session": 0.064093,
@@ -352,7 +359,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T16:58:22Z",
+    "lastUpdated": "2026-04-28T17:00:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -410,7 +417,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T16:58:27Z",
+    "updatedAt": "2026-04-28T17:00:15Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -427,14 +434,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.0,
-      "cpu_user": 20.17,
-      "cpu_sys": 18.85,
-      "load1": 3.14,
-      "load5": 2.48,
-      "load15": 2.36,
+      "cpu_pct": 35.3,
+      "cpu_user": 17.55,
+      "cpu_sys": 17.75,
+      "load1": 2.17,
+      "load5": 2.3,
+      "load15": 2.29,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -442,14 +449,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.1,
-      "cpu_user": 5.62,
-      "cpu_sys": 12.5,
-      "load1": 2.37,
-      "load5": 2.46,
-      "load15": 2.39,
+      "cpu_pct": 15.8,
+      "cpu_user": 4.86,
+      "cpu_sys": 11.11,
+      "load1": 2.26,
+      "load5": 2.31,
+      "load15": 2.33,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -473,19 +480,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:58:17Z"
+      "lastChecked": "2026-04-28T17:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T16:58:17Z"
+      "lastChecked": "2026-04-28T17:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T16:58:17Z"
+      "lastChecked": "2026-04-28T17:00:04Z"
     }
   ],
   "crons": [
@@ -502,7 +509,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T16:55:20.911840+00:00"
+      "lastRun": "2026-04-28T17:00:15.618668+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -547,7 +554,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T16:00:01.298799+00:00"
+      "lastRun": "2026-04-28T17:00:01.145151+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -577,7 +584,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T16:00:05.764148+00:00"
+      "lastRun": "2026-04-28T17:00:04.851600+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -835,14 +842,15 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
+      "lastRun": "2026-04-28T13:00:00",
+      "runStatus": "done",
       "multiRun": {
         "runs": [
           {
             "time": "1:00 PM",
             "label": "Quote Tweet",
-            "past": false,
-            "done": false
+            "past": true,
+            "done": true
           },
           {
             "time": "3:00 PM",
@@ -920,7 +928,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-28T11:00:00",
+      "lastRun": "2026-04-28T13:00:00",
       "multiRun": {
         "runs": [
           {
@@ -941,7 +949,7 @@
           {
             "time": "1:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "2:00 PM",
@@ -1103,7 +1111,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T16:45:05.045269+00:00"
+      "lastRun": "2026-04-28T17:00:05.068580+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1258,7 +1266,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Recently edited: mission-control/scripts/mission_control_visual_canaries.py, mission-control/index.html",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1282,14 +1290,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Recommended next capability enhancements for Josh stack",
+      "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T16:54:34Z",
+      "updatedAt": "2026-04-28T16:58:35Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "exec",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "tool",
+          "status": "active",
+          "tool": "exec"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1371,14 +1385,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Recommended next capability enhancements for Josh stack",
+        "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T16:54:34Z",
+        "updatedAt": "2026-04-28T16:58:35Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "exec",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "tool",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1446,29 +1466,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T16:58:22Z",
+      "time": "2026-04-28T17:00:10Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-28T16:58:19Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-28T17:00:06Z",
+      "event": "Coding: mission-control/scripts/mission_control_visual_canaries.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T16:58:19Z",
-      "event": "CodexBar: 96% left \u00b7 wk 94% left"
+      "time": "2026-04-28T17:00:06Z",
+      "event": "CodexBar: 95% left \u00b7 wk 94% left"
     },
     {
-      "time": "2026-04-28T16:58:17Z",
+      "time": "2026-04-28T17:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T16:58:17Z",
+      "time": "2026-04-28T17:00:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T16:58:17Z",
+      "time": "2026-04-28T17:00:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T16:58:17Z"
+  "lastUpdated": "2026-04-28T17:00:04Z"
 }
