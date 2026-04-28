@@ -21,19 +21,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
+    "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-28T14:13:02Z",
-    "checkedAt": "2026-04-28T14:13:02Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-28T14:14:45Z",
+    "checkedAt": "2026-04-28T14:14:45Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
-    "updatedAt": "2026-04-28T14:14:39Z"
+    "context": "Assess whether GPT-5.5 subscription routing rules should be augmented",
+    "updatedAt": "2026-04-28T14:15:05Z"
   },
   "contextWindow": {
     "usedTokens": 41370,
@@ -141,7 +147,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 3,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html"
@@ -167,7 +173,7 @@
       "weeklyReset": "6d 15h",
       "summary": "97% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:14:40Z"
+    "updatedAt": "2026-04-28T14:15:07Z"
   },
   "modelUsage": {
     "session": 0.023286,
@@ -347,7 +353,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:14:43Z",
+    "lastUpdated": "2026-04-28T14:15:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -405,18 +411,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:14:48Z",
+    "updatedAt": "2026-04-28T14:15:15Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.5,
-      "cpu_user": 20.9,
-      "cpu_sys": 18.63,
-      "load1": 2.42,
-      "load5": 2.47,
-      "load15": 2.42,
+      "cpu_pct": 37.5,
+      "cpu_user": 18.96,
+      "cpu_sys": 18.56,
+      "load1": 2.38,
+      "load5": 2.45,
+      "load15": 2.41,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -426,14 +432,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.2,
-      "cpu_user": 4.91,
-      "cpu_sys": 12.29,
-      "load1": 2.3,
-      "load5": 2.13,
-      "load15": 2.09,
+      "cpu_pct": 19.8,
+      "cpu_user": 8.1,
+      "cpu_sys": 11.71,
+      "load1": 2.55,
+      "load5": 2.2,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -457,19 +463,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:14:39Z"
+      "lastChecked": "2026-04-28T14:15:05Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:14:39Z"
+      "lastChecked": "2026-04-28T14:15:05Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:14:39Z"
+      "lastChecked": "2026-04-28T14:15:05Z"
     }
   ],
   "crons": [
@@ -1078,7 +1084,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T14:00:03.900404+00:00"
+      "lastRun": "2026-04-28T14:15:04.655662+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1306,14 +1312,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
+      "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:13:02Z",
+      "updatedAt": "2026-04-28T14:14:45Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1335,8 +1347,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:14:36Z",
-      "messageReceived": "2026-04-28T14:14:36Z",
+      "updatedAt": "2026-04-28T14:15:01Z",
+      "messageReceived": "2026-04-28T14:15:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1359,14 +1371,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Saved JAIMES-style work-in-progress breakdown preference and prepared Josh reply",
+        "objective": "Assess whether GPT-5.5 subscription routing rules should be augmented",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:13:02Z",
+        "updatedAt": "2026-04-28T14:14:45Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1388,8 +1406,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:14:36Z",
-        "messageReceived": "2026-04-28T14:14:36Z",
+        "updatedAt": "2026-04-28T14:15:01Z",
+        "messageReceived": "2026-04-28T14:15:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1398,29 +1416,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:14:43Z",
+      "time": "2026-04-28T14:15:10Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T14:14:40Z",
+      "time": "2026-04-28T14:15:07Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:14:40Z",
+      "time": "2026-04-28T14:15:07Z",
       "event": "CodexBar: 97% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:14:39Z",
+      "time": "2026-04-28T14:15:05Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:14:39Z",
+      "time": "2026-04-28T14:15:05Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:14:39Z",
+      "time": "2026-04-28T14:15:05Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:14:39Z"
+  "lastUpdated": "2026-04-28T14:15:05Z"
 }
