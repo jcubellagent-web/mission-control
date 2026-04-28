@@ -2087,7 +2087,7 @@ def fetch_voice_router_status() -> Dict[str, Any]:
 
 def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[Dict[str, Any]]) -> Dict[str, Any]:
     cal_ok = (calendar_health or {}).get("status") == "ok"
-    due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") in {"due", "missed"}]
+    due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "missed"]
     return {
         "status": "clear" if cal_ok and not due else "attention",
         "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
@@ -2417,10 +2417,6 @@ def build_action_required(
     if errored:
         sample = ", ".join(c.get("name", "job") for c in errored[:3])
         items.append({"priority": "high", "title": f"{len(errored)} job error(s): {sample}", "url": "#jobs"})
-    if due:
-        sample = ", ".join(c.get("name", "job") for c in due[:3])
-        items.append({"priority": "medium", "title": f"{len(due)} job(s) due/unverified: {sample}", "url": "#jobs"})
-
     stale_verified: List[Dict[str, Any]] = []
     now_dt = dt.datetime.now(dt.timezone.utc)
     for cron in crons:
