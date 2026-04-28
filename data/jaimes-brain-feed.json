@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: running final validation for watchdog",
-  "status": "active",
-  "updatedAt": "2026-04-28T05:03:19Z",
+  "active": false,
+  "objective": "Mission Control watchdog clean",
+  "status": "idle",
+  "updatedAt": "2026-04-28T05:11:50Z",
   "checkedAt": "2026-04-28T05:03:19Z",
   "messageReceived": "2026-04-28T05:03:19Z",
-  "currentTool": "code",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -17,7 +17,7 @@
     },
     {
       "label": "Mission Control: running final validation for watchdog",
-      "status": "active",
+      "status": "done",
       "tool": "code"
     }
   ],
