@@ -1,0 +1,38 @@
+{
+  "ok": false,
+  "status": "attention",
+  "summary": "3 canary issue(s)",
+  "checkedAt": "2026-04-28T17:05:16.113650Z",
+  "checks": [
+    {
+      "name": "Dual objectives",
+      "ok": false,
+      "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
+      "severity": "high"
+    },
+    {
+      "name": "Calendar tile",
+      "ok": false,
+      "detail": "Calendar fetch failed",
+      "severity": "high"
+    },
+    {
+      "name": "Today Jobs",
+      "ok": true,
+      "detail": "32 today-relevant; 0 active issue(s)",
+      "severity": "ok"
+    },
+    {
+      "name": "Action Required",
+      "ok": false,
+      "detail": "2 visible alert(s)",
+      "severity": "medium"
+    },
+    {
+      "name": "Renderer wiring",
+      "ok": true,
+      "detail": "hero + ops renderers present",
+      "severity": "ok"
+    }
+  ]
+}

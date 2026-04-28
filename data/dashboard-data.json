@@ -2,6 +2,11 @@
   "actionRequired": [
     {
       "priority": "high",
+      "title": "Mission Control canary issue: 3 canary issue(s)",
+      "url": "#canaries"
+    },
+    {
+      "priority": "high",
       "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
     }
@@ -11,25 +16,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
+    "objective": "memory backup sync to J.A.I.N completed and verified",
     "status": "active",
-    "steps": [
-      {
-        "label": "tool",
-        "status": "active",
-        "tool": "exec"
-      }
-    ],
-    "currentTool": "exec",
-    "updatedAt": "2026-04-28T16:58:35Z",
-    "checkedAt": "2026-04-28T16:58:35Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T17:01:47Z",
+    "checkedAt": "2026-04-28T17:01:47Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
-    "updatedAt": "2026-04-28T17:00:04Z"
+    "context": "memory backup sync to J.A.I.N completed and verified",
+    "updatedAt": "2026-04-28T17:05:16Z"
   },
   "contextWindow": {
     "usedTokens": 117269,
@@ -137,12 +136,13 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 3,
+    "missionControlDirty": 13,
     "recentFiles": [
-      "mission-control/scripts/mission_control_visual_canaries.py",
-      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
+      "mission-control/index.html",
+      "scripts/telegram_voice_task_router.py",
       "mission-control/scripts/update_and_push.sh",
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/moltworld_presence.py"
     ],
     "codexbarStatus": "95% left \u00b7 wk 94% left",
@@ -151,7 +151,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 3h 49m",
+        "Resets in 3h 44m",
         "Weekly: 94% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
@@ -162,15 +162,15 @@
       "weekly": "94% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 49m",
+      "sessionReset": "3h 44m",
       "weeklyReset": "6d 12h",
       "summary": "95% left \u00b7 wk 94% left"
     },
-    "updatedAt": "2026-04-28T17:00:06Z"
+    "updatedAt": "2026-04-28T17:05:18Z"
   },
   "modelUsage": {
     "session": 0.064093,
-    "daily": 2.962231,
+    "daily": 2.937122,
     "weekly": 44.891998,
     "monthly": 951.269417,
     "topModels": [
@@ -197,7 +197,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.111271
+        "cost": 0.08616199999999999
       }
     ],
     "breakdown": [
@@ -248,12 +248,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 7411,
-        "outputTokens": 12,
-        "totalTokens": 7423,
-        "sessionCost": 0.111271,
-        "dailyCost": 0.111271,
-        "weeklyCost": 0.111271,
+        "inputTokens": 2578,
+        "outputTokens": 100,
+        "totalTokens": 2678,
+        "sessionCost": 0.08616199999999999,
+        "dailyCost": 0.08616199999999999,
+        "weeklyCost": 0.08616199999999999,
         "sessions": 2,
         "isGemini": false,
         "costEstimated": false
@@ -359,7 +359,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:00:10Z",
+    "lastUpdated": "2026-04-28T17:05:21Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -392,8 +392,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.962231,
-      "total": 46.834772,
+      "daily": 2.937122,
+      "total": 46.809663,
       "monthly": 951.269417
     },
     "weeklyRunRate": {
@@ -417,7 +417,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:00:15Z",
+    "updatedAt": "2026-04-28T17:05:26Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -434,14 +434,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.3,
-      "cpu_user": 17.55,
-      "cpu_sys": 17.75,
-      "load1": 2.17,
-      "load5": 2.3,
-      "load15": 2.29,
+      "cpu_pct": 35.7,
+      "cpu_user": 17.34,
+      "cpu_sys": 18.32,
+      "load1": 2.48,
+      "load5": 2.44,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -449,14 +449,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.8,
-      "cpu_user": 4.86,
-      "cpu_sys": 11.11,
-      "load1": 2.26,
-      "load5": 2.31,
-      "load15": 2.33,
+      "cpu_pct": 16.4,
+      "cpu_user": 5.73,
+      "cpu_sys": 10.65,
+      "load1": 2.57,
+      "load5": 2.15,
+      "load15": 2.22,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -480,19 +480,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:00:04Z"
+      "lastChecked": "2026-04-28T17:05:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:00:04Z"
+      "lastChecked": "2026-04-28T17:05:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:00:04Z"
+      "lastChecked": "2026-04-28T17:05:16Z"
     }
   ],
   "crons": [
@@ -509,7 +509,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:00:15.618668+00:00"
+      "lastRun": "2026-04-28T17:05:26.885743+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1250,6 +1250,109 @@
       "lastError": null
     }
   ],
+  "visualCanaries": {
+    "ok": false,
+    "status": "attention",
+    "summary": "3 canary issue(s)",
+    "checkedAt": "2026-04-28T17:05:16.113650Z",
+    "checks": [
+      {
+        "name": "Dual objectives",
+        "ok": false,
+        "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
+        "severity": "high"
+      },
+      {
+        "name": "Calendar tile",
+        "ok": false,
+        "detail": "Calendar fetch failed",
+        "severity": "high"
+      },
+      {
+        "name": "Today Jobs",
+        "ok": true,
+        "detail": "32 today-relevant; 0 active issue(s)",
+        "severity": "ok"
+      },
+      {
+        "name": "Action Required",
+        "ok": false,
+        "detail": "2 visible alert(s)",
+        "severity": "medium"
+      },
+      {
+        "name": "Renderer wiring",
+        "ok": true,
+        "detail": "hero + ops renderers present",
+        "severity": "ok"
+      }
+    ]
+  },
+  "sorareMlCockpit": {
+    "status": "active",
+    "owner": "JAIMES",
+    "lane": "Sorare MLB",
+    "summary": "JAIMES owns production scoring policy",
+    "policyMae": 6.808,
+    "baselineMae": 6.824,
+    "rfMae": 7.186,
+    "validationStatus": "gw11 outcome pending",
+    "nextCheck": "After GW11 resolves on 2026-05-01",
+    "artifacts": []
+  },
+  "voiceRouter": {
+    "status": "planned",
+    "summary": "Telegram voice notes can become structured tasks",
+    "entrypoint": "/Users/josh2.0/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
+    "modes": [
+      "task",
+      "calendar",
+      "jaimes",
+      "mission-control"
+    ]
+  },
+  "opsInbox": {
+    "status": "attention",
+    "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
+    "calendar": "needs attention",
+    "jobIssues": 0,
+    "sources": [
+      "calendar",
+      "gmail",
+      "drive",
+      "tasks"
+    ]
+  },
+  "capabilityStack": [
+    {
+      "id": "visual-canaries",
+      "name": "Visual Canaries",
+      "status": "attention",
+      "summary": "3 canary issue(s)",
+      "detail": "2/5 checks passing"
+    },
+    {
+      "id": "sorare-ml-cockpit",
+      "name": "Sorare ML Cockpit",
+      "status": "active",
+      "summary": "JAIMES owns production scoring policy",
+      "detail": "Policy MAE 6.808 vs baseline 6.824"
+    },
+    {
+      "id": "voice-router",
+      "name": "Voice Router",
+      "status": "planned",
+      "summary": "Telegram voice notes can become structured tasks",
+      "detail": "Telegram voice -> tasks / calendar / JAIMES"
+    },
+    {
+      "id": "ops-inbox",
+      "name": "Ops Inbox",
+      "status": "attention",
+      "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
+      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+    }
+  ],
   "trackedTasks": [
     {
       "id": "T-20260427-982",
@@ -1266,7 +1369,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/mission_control_visual_canaries.py, mission-control/index.html",
+      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1290,20 +1393,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
+      "objective": "memory backup sync to J.A.I.N completed and verified",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T16:58:35Z",
+      "updatedAt": "2026-04-28T17:01:47Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "exec",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "tool",
-          "status": "active",
-          "tool": "exec"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1320,85 +1417,71 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
+      "active": true,
       "reportedActive": false,
-      "objective": "Done: 24in Brain Feed polish deployed",
-      "status": "idle",
+      "objective": "Sorare ML Cockpit: model ownership and validation",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T16:58:14Z",
-      "messageReceived": "2026-04-28T16:57:47Z",
+      "updatedAt": "2026-04-28T17:05:16Z",
+      "messageReceived": "2026-04-28T17:01:11Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Mission Control: optimizing 24in Brain Feed",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: inspecting layout code",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Mission Control: applying 24in polish",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Mission Control: validating 24in polish",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Mission Control: deploying 24in polish",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: Josh publisher deploying polish",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: verifying live 24in polish",
-          "status": "done",
-          "tool": "browser"
+          "label": "Sorare ML Cockpit",
+          "status": "active",
+          "tool": "capability cockpit"
         }
-      ]
+      ],
+      "capabilityBacked": true
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": false,
+        "objective": "Sorare ML Cockpit: model ownership and validation",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T17:05:16Z",
+        "messageReceived": "2026-04-28T17:01:11Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Sorare ML Cockpit",
+            "status": "active",
+            "tool": "capability cockpit"
+          }
+        ],
+        "capabilityBacked": true
+      },
       {
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "build Mission Control visual canaries, Sorare ML cockpit, ops inbox, and voice task router plan",
+        "objective": "memory backup sync to J.A.I.N completed and verified",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T16:58:35Z",
+        "updatedAt": "2026-04-28T17:01:47Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "exec",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "tool",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1412,83 +1495,34 @@
         "currentTool": "",
         "model": "GPT-5.5",
         "steps": []
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Done: 24in Brain Feed polish deployed",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-28T16:58:14Z",
-        "messageReceived": "2026-04-28T16:57:47Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Mission Control: optimizing 24in Brain Feed",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: inspecting layout code",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Mission Control: applying 24in polish",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Mission Control: validating 24in polish",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Mission Control: deploying 24in polish",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: Josh publisher deploying polish",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: verifying live 24in polish",
-            "status": "done",
-            "tool": "browser"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:00:10Z",
+      "time": "2026-04-28T17:05:21Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-28T17:00:06Z",
-      "event": "Coding: mission-control/scripts/mission_control_visual_canaries.py, mission-control/index.html"
+      "time": "2026-04-28T17:05:18Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T17:00:06Z",
+      "time": "2026-04-28T17:05:18Z",
       "event": "CodexBar: 95% left \u00b7 wk 94% left"
     },
     {
-      "time": "2026-04-28T17:00:04Z",
+      "time": "2026-04-28T17:05:16Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:00:04Z",
+      "time": "2026-04-28T17:05:16Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:00:04Z",
+      "time": "2026-04-28T17:05:16Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:00:04Z"
+  "lastUpdated": "2026-04-28T17:05:16Z"
 }
