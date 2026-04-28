@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Hermes callbacks: run targeted tests",
+  "objective": "Hermes callbacks: restart gateway",
   "status": "active",
-  "updatedAt": "2026-04-28T03:52:00Z",
-  "checkedAt": "2026-04-28T03:52:00Z",
-  "messageReceived": "2026-04-28T03:52:00Z",
+  "updatedAt": "2026-04-28T03:52:06Z",
+  "checkedAt": "2026-04-28T03:52:06Z",
+  "messageReceived": "2026-04-28T03:52:06Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -32,6 +32,11 @@
     },
     {
       "label": "Hermes callbacks: run targeted tests",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes callbacks: restart gateway",
       "status": "active",
       "tool": "exec"
     }
