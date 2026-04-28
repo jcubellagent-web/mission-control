@@ -17,16 +17,29 @@ python3 scripts/sync_jaimes_brain_feed.py || true
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
 bash scripts/jain_breaking_highlights_sync.sh || true
-# Pull MoltWorld state from J.A.I.N
-ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
-    jc_agent@100.121.89.84 \
-    "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" \
-    > data/moltworld-state.json 2>/dev/null || true
-# Pull J.A.I.N x-progress metrics (updated after every post)
-ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
-    jc_agent@100.121.89.84 \
-    "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json" \
-    > data/x-progress.json 2>/dev/null || true
+pull_json() {
+  local remote_path="$1"
+  local dest="$2"
+  local fallback="$3"
+  local tmp
+  tmp=$(mktemp)
+  if ssh -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no \
+      jc_agent@100.121.89.84 \
+      "cat ${remote_path}" > "$tmp" 2>/dev/null && python3 -m json.tool "$tmp" >/dev/null 2>&1; then
+    mv "$tmp" "$dest"
+  else
+    rm -f "$tmp"
+    if [[ ! -s "$dest" ]] || ! python3 -m json.tool "$dest" >/dev/null 2>&1; then
+      printf '%s
+' "$fallback" > "$dest"
+    fi
+    echo "mission-control: kept fallback for $dest"
+  fi
+}
+
+# Pull remote JSON safely; never overwrite valid local JSON with empty SSH output.
+pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" data/moltworld-state.json '{}'
+pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json" data/x-progress.json '{"available":false,"stale":true,"lastError":"fallback: source unavailable"}'
 python3 scripts/update_mission_control.py
 # Commit dashboard data — brain-feed.json is intentionally excluded.
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
