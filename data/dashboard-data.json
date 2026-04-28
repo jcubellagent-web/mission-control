@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: heartbeat triage completed, self-maintenance ran and mission control recency checked",
-    "updatedAt": "2026-04-28T04:24:50Z"
+    "updatedAt": "2026-04-28T04:26:29Z"
   },
   "contextWindow": {
     "usedTokens": 317418,
@@ -125,20 +125,20 @@
   },
   "codingVisibility": {
     "workspaceDirty": 0,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
-      "scripts/intel_feedback_offset.json",
       "scripts/feedback_offset.json",
+      "scripts/intel_feedback_offset.json",
+      "mission-control/scripts/jain_bf_pull.sh",
       "mission-control/scripts/update_and_push.sh",
       "scripts/jaimes_healthcheck_state.json",
-      "scripts/jaimes_healthcheck_status.json",
-      "scripts/audit_inline_followups.py"
+      "scripts/jaimes_healthcheck_status.json"
     ],
     "codexbarStatus": "Codex auth required",
     "codexbar": {
       "available": false
     },
-    "updatedAt": "2026-04-28T04:24:58Z"
+    "updatedAt": "2026-04-28T04:26:39Z"
   },
   "modelUsage": {
     "session": 0.876,
@@ -283,7 +283,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T04:25:00Z",
+    "lastUpdated": "2026-04-28T04:26:41Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -295,7 +295,9 @@
       "weekly": 0,
       "monthly": 0,
       "models": {},
-      "available": false
+      "available": true,
+      "stale": true,
+      "lastError": "fallback: source unavailable"
     },
     "openrouter": {
       "daily": 0.0,
@@ -337,20 +339,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T04:25:05Z",
+    "updatedAt": "2026-04-28T04:26:46Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 28.0,
-      "cpu_user": 9.84,
-      "cpu_sys": 18.18,
-      "load1": 2.02,
-      "load5": 1.84,
-      "load15": 1.89,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 28.7,
+      "cpu_user": 11.76,
+      "cpu_sys": 16.91,
+      "load1": 2.54,
+      "load5": 1.98,
+      "load15": 1.93,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -358,14 +360,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 21.1,
-      "cpu_user": 7.89,
-      "cpu_sys": 13.15,
-      "load1": 2.02,
-      "load5": 1.84,
-      "load15": 1.89,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 14.0,
+      "cpu_user": 2.63,
+      "cpu_sys": 11.4,
+      "load1": 2.54,
+      "load5": 1.98,
+      "load15": 1.93,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -389,19 +391,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T04:24:50Z"
+      "lastChecked": "2026-04-28T04:26:29Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T04:24:50Z"
+      "lastChecked": "2026-04-28T04:26:29Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T04:24:50Z"
+      "lastChecked": "2026-04-28T04:26:29Z"
     }
   ],
   "crons": [
@@ -1149,7 +1151,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/intel_feedback_offset.json, scripts/feedback_offset.json",
+      "label": "Editing: scripts/feedback_offset.json, scripts/intel_feedback_offset.json",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1192,7 +1194,7 @@
       "objective": "Idle \u00b7 last: jaimes-ops-drift-check (ok)",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T04:25:02Z",
+      "updatedAt": "2026-04-28T04:26:27Z",
       "messageReceived": "2026-04-28T04:15:44Z",
       "currentTool": "",
       "model": "GPT-5.5",
@@ -1219,7 +1221,7 @@
         "objective": "Idle \u00b7 last: jaimes-ops-drift-check (ok)",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T04:25:02Z",
+        "updatedAt": "2026-04-28T04:26:27Z",
         "messageReceived": "2026-04-28T04:15:44Z",
         "currentTool": "",
         "model": "GPT-5.5",
@@ -1261,29 +1263,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T04:25:00Z",
+      "time": "2026-04-28T04:26:41Z",
       "event": "Session spend: $0.88"
     },
     {
-      "time": "2026-04-28T04:24:58Z",
-      "event": "Coding: scripts/intel_feedback_offset.json, scripts/feedback_offset.json"
+      "time": "2026-04-28T04:26:39Z",
+      "event": "Coding: scripts/feedback_offset.json, scripts/intel_feedback_offset.json"
     },
     {
-      "time": "2026-04-28T04:24:58Z",
+      "time": "2026-04-28T04:26:39Z",
       "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-04-28T04:24:50Z",
+      "time": "2026-04-28T04:26:29Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-28T04:24:50Z",
+      "time": "2026-04-28T04:26:29Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T04:24:50Z",
+      "time": "2026-04-28T04:26:29Z",
       "event": "1 device alert"
     }
   ],
-  "lastUpdated": "2026-04-28T04:24:50Z"
+  "lastUpdated": "2026-04-28T04:26:29Z"
 }
