@@ -5,25 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "summarize Mission Control capture for JAIMES, reopen Mission Control on screen, continue spinner fix",
+    "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T07:09:06Z",
-    "checkedAt": "2026-04-28T07:09:06Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T07:18:32Z",
+    "checkedAt": "2026-04-28T07:18:32Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "summarize Mission Control capture for JAIMES, reopen Mission Control on screen, continue spinner fix",
-    "updatedAt": "2026-04-28T07:15:04Z"
+    "context": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
+    "updatedAt": "2026-04-28T07:20:04Z"
   },
   "contextWindow": {
     "usedTokens": 141925,
@@ -146,7 +140,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 91% left [==========--]",
-        "Resets in 3h 15m",
+        "Resets in 3h 10m",
         "Weekly: 98% left [===========-]",
         "Resets in 6d 22h",
         "Credits: 0 left",
@@ -158,22 +152,22 @@
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "3h 15m",
+      "sessionReset": "3h 10m",
       "weeklyReset": "6d 22h",
       "summary": "Pro \u00b7 91% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T07:15:06Z"
+    "updatedAt": "2026-04-28T07:20:06Z"
   },
   "modelUsage": {
     "session": 0.300958,
-    "daily": 0.862699,
-    "weekly": 42.792465,
-    "monthly": 949.169884,
+    "daily": 1.143769,
+    "weekly": 43.073535,
+    "monthly": 949.450954,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 34.67814775
+        "cost": 34.95921775
       },
       {
         "name": "gpt-5.4-mini",
@@ -200,9 +194,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 34.67814775,
-        "dailyCost": 0.2647205,
-        "sessionCost": 34.67814775,
+        "weeklyCost": 34.95921775,
+        "dailyCost": 0.5457905000000001,
+        "sessionCost": 34.95921775,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -231,9 +225,9 @@
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 482,
-        "outputTokens": 50,
-        "totalTokens": 532,
+        "inputTokens": 410,
+        "outputTokens": 71,
+        "totalTokens": 481,
         "sessionCost": 0.29702,
         "dailyCost": 0.29702,
         "weeklyCost": 0.29702,
@@ -368,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T07:15:09Z",
+    "lastUpdated": "2026-04-28T07:20:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -401,15 +395,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.862699,
-      "total": 44.735239,
-      "monthly": 949.169884
+      "daily": 1.143769,
+      "total": 45.016309,
+      "monthly": 949.450954
     },
     "weeklyRunRate": {
-      "total": 44.735239,
+      "total": 45.016309,
       "automation": 1.942774,
-      "interactive": 40.849691,
-      "projectedMonthly": 191.72
+      "interactive": 41.130761,
+      "projectedMonthly": 192.93
     }
   },
   "moltWorld": {
@@ -426,20 +420,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T07:15:14Z",
+    "updatedAt": "2026-04-28T07:20:15Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.3,
-      "cpu_user": 18.95,
-      "cpu_sys": 17.33,
-      "load1": 2.55,
-      "load5": 2.31,
-      "load15": 3.15,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "cpu_pct": 37.0,
+      "cpu_user": 19.6,
+      "cpu_sys": 17.42,
+      "load1": 2.16,
+      "load5": 2.36,
+      "load15": 2.92,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -447,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.0,
-      "cpu_user": 0.84,
-      "cpu_sys": 10.16,
-      "load1": 1.36,
-      "load5": 1.84,
-      "load15": 2.05,
+      "cpu_pct": 10.4,
+      "cpu_user": 1.56,
+      "cpu_sys": 9.37,
+      "load1": 2.54,
+      "load5": 2.21,
+      "load15": 2.15,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T07:15:04Z"
+      "lastChecked": "2026-04-28T07:20:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T07:15:04Z"
+      "lastChecked": "2026-04-28T07:20:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T07:15:04Z"
+      "lastChecked": "2026-04-28T07:20:04Z"
     }
   ],
   "crons": [
@@ -1323,20 +1317,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "summarize Mission Control capture for JAIMES, reopen Mission Control on screen, continue spinner fix",
+      "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T07:09:06Z",
+      "updatedAt": "2026-04-28T07:18:32Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1358,8 +1346,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T07:15:02Z",
-      "messageReceived": "2026-04-28T07:15:02Z",
+      "updatedAt": "2026-04-28T07:20:02Z",
+      "messageReceived": "2026-04-28T07:20:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1382,20 +1370,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "summarize Mission Control capture for JAIMES, reopen Mission Control on screen, continue spinner fix",
+        "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T07:09:06Z",
+        "updatedAt": "2026-04-28T07:18:32Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1417,8 +1399,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T07:15:02Z",
-        "messageReceived": "2026-04-28T07:15:02Z",
+        "updatedAt": "2026-04-28T07:20:02Z",
+        "messageReceived": "2026-04-28T07:20:02Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1427,29 +1409,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T07:15:09Z",
+      "time": "2026-04-28T07:20:10Z",
       "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T07:15:06Z",
+      "time": "2026-04-28T07:20:06Z",
       "event": "Coding: scripts/handle_josh_callback.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-28T07:15:06Z",
+      "time": "2026-04-28T07:20:06Z",
       "event": "CodexBar: Pro \u00b7 91% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T07:15:04Z",
+      "time": "2026-04-28T07:20:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T07:15:04Z",
+      "time": "2026-04-28T07:20:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T07:15:04Z",
+      "time": "2026-04-28T07:20:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T07:15:04Z"
+  "lastUpdated": "2026-04-28T07:20:04Z"
 }
