@@ -7228,7 +7228,15 @@
                 const stale = isFeedStale(bf);
                 const isActive = bf.active === true && !stale;
                 const fullMsg = bf.objective || (isActive ? 'Processing…' : 'Standby');
-                summaryItems.push({
+                const normalized = String(fullMsg || '').trim().toLowerCase();
+                const noisyIdle = !isActive && (
+                    stale ||
+                    !normalized ||
+                    ['standby', 'idle', 'working...', 'working…'].includes(normalized) ||
+                    normalized.startsWith('idle · last:')
+                );
+                if (noisyIdle) return;
+                const item = {
                     agentClass,
                     agentLabel,
                     dot: isActive ? 'active' : 'idle',
@@ -7238,7 +7246,9 @@
                     tool: prettyToolLabel(bf.currentTool || ''),
                     ts: bf.updatedAt ? formatRelTime(bf.updatedAt) : '',
                     stale,
-                });
+                };
+                if (isActive) summaryItems.push(item);
+                else recentItems.push(item);
             };
 
             pushBrainSummary(_uaJoshBf, 'josh', 'JOSH 2.0');
@@ -7305,7 +7315,9 @@
             }
 
             const expanded = isBrainActivityExpanded();
-            const items = expanded ? [...summaryItems, ...recentItems] : summaryItems;
+            const items = expanded
+                ? [...summaryItems, ...recentItems]
+                : (summaryItems.length ? summaryItems : recentItems);
             const maxItems = expanded ? 8 : 3;
 
             syncBrainActivityDrawer();
@@ -9186,7 +9198,6 @@
                     <span class="bf-signal-label">Live step</span>
                     <span class="bf-signal-value bf-signal-step" title="${escapeHtml(metrics.liveStep)}">${escapeHtml(metrics.liveStep)}</span>
                 </div>
-                ${renderModelKeyRow(modelVisual.key, 'bf-model-key')}
             </div>`;
         }
 
@@ -9544,7 +9555,7 @@
                                 </div>
                                 ${renderBrainFeedSignalRow(bf)}
                             </div>
-                            <div class="bf-timeline">${stepsHtml || '<div class="bf-empty-note">Awaiting the first concrete action…</div>'}</div>
+                            <div class="bf-timeline">${stepsHtml}</div>
                         </div>
                     `;
                     bfCont = brainFeedCard.querySelector('.bf-container');

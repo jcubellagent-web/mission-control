@@ -40,7 +40,7 @@ CRON_TARGETS = [
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Mission Control", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 1:00 PM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Maintenance", "agent": "JOSH 2.0"},
 
@@ -1408,12 +1408,25 @@ def fetch_active_subagents() -> List[Dict[str, Any]]:
 
 
 def fetch_crons() -> List[Dict[str, Any]]:
-    # JOSH 2.0 crontab
+    # JOSH 2.0 crontab — prefer the real JOSH host when this runs from JAIMES;
+    # fall back to local crontab when Mission Control refresh runs on JOSH itself.
+    josh_listing = ""
     try:
-        result = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True)
-        josh_listing = result.stdout
-    except (subprocess.CalledProcessError, OSError, PermissionError):
+        result = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "josh2.0@100.114.50.48", "crontab -l 2>/dev/null || true"],
+            capture_output=True, text=True, timeout=8
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            josh_listing = result.stdout
+    except (subprocess.CalledProcessError, OSError, PermissionError, subprocess.TimeoutExpired):
         josh_listing = ""
+    if not josh_listing:
+        try:
+            result = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True)
+            josh_listing = result.stdout
+        except (subprocess.CalledProcessError, OSError, PermissionError):
+            josh_listing = ""
     # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
     import datetime as _dt
     import re as _re
@@ -1430,6 +1443,40 @@ def fetch_crons() -> List[Dict[str, Any]]:
     _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
     jain_verified_runs: dict[str, dict[str, Any]] = {}
+    josh_verified_runs: dict[str, dict[str, Any]] = {}
+    try:
+        josh_verify_cmd = r"""python3 - <<'PY'
+import datetime as dt, json, pathlib
+from zoneinfo import ZoneInfo
+et = ZoneInfo('America/New_York')
+jobs = {
+    'Mission Control Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
+    'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
+    'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
+    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log',
+    'J.A.I.N Medic': '/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log',
+    'Sorare Cookie Auto-Refresh': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log',
+}
+out = {}
+for name, raw in jobs.items():
+    p = pathlib.Path(raw)
+    info = {'verifiedToday': False}
+    if p.exists():
+        mtime = dt.datetime.fromtimestamp(p.stat().st_mtime, tz=dt.timezone.utc)
+        info['lastRun'] = mtime.isoformat()
+        info['verifiedToday'] = mtime.astimezone(et).strftime('%Y-%m-%d') == dt.datetime.now(et).strftime('%Y-%m-%d')
+    out[name] = info
+print(json.dumps(out))
+PY"""
+        jv = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "josh2.0@100.114.50.48", josh_verify_cmd],
+            capture_output=True, text=True, timeout=8
+        )
+        if jv.returncode == 0:
+            josh_verified_runs = json.loads(jv.stdout.strip() or "{}")
+    except Exception:
+        pass
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
@@ -1698,6 +1745,7 @@ PY"""
         source = target.get('source', 'cron')
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
         jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
+        josh_verified = josh_verified_runs.get(target['name']) if not is_jain else None
         present = bool(hermes_job) if source == 'hermes' else target['pattern'] in listing
         sched_meta = schedule_today_meta(target.get('schedule', ''))
         today_relevant = bool(sched_meta.get('todayRelevant', True))
@@ -1713,6 +1761,8 @@ PY"""
                 last_run = _hlast
         if not last_run and jain_verified and jain_verified.get('lastRun'):
             last_run = jain_verified.get('lastRun')
+        if not last_run and josh_verified and josh_verified.get('lastRun'):
+            last_run = josh_verified.get('lastRun')
         last_run_today = False
         if last_run:
             try:
@@ -1720,10 +1770,13 @@ PY"""
                 last_run_today = _last_run_dt.strftime('%Y-%m-%d') == today_str
             except Exception:
                 last_run_today = False
-        verified_today = bool(jain_verified and jain_verified.get('verifiedToday'))
+        verified_today = bool(
+            (jain_verified and jain_verified.get('verifiedToday')) or
+            (josh_verified and josh_verified.get('verifiedToday'))
+        )
 
         is_jaimes_agent = target.get('agent') == 'JAIMES'
-        can_verify_run = bool(last_run) or hermes_job is not None or bool(jain_verified)
+        can_verify_run = bool(last_run) or hermes_job is not None or bool(jain_verified) or bool(josh_verified)
         schedule_time = parse_schedule_time(sched)
         if today_relevant and sched_meta.get('kind') in {'daily', 'weekly', 'weekday', 'weekend'}:
             if schedule_time is not None:
