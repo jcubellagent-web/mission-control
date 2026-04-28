@@ -2469,7 +2469,7 @@ def fetch_moltworld_data() -> Dict[str, Any]:
     for extra_key in ["statusMessage", "last_action", "biome", "health", "hunger", "thirst", "stamina", "system_warning", "tick", "world", "last_error"]:
         if extra_key in existing_data:
             payload[extra_key] = existing_data[extra_key]
-    if balance_error:
+    if balance_error and not is_online:
         payload["stale"] = True
         payload["lastError"] = balance_error
     else:
