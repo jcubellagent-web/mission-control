@@ -5,19 +5,19 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Workspace heartbeat checked; J.A.I.N ping passed and recurring lost-task warnings remain after maintenance",
+    "objective": "Workspace heartbeat checked; recurring lost-task warnings remain after maintenance",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T10:02:00Z",
-    "checkedAt": "2026-04-28T10:02:00Z",
+    "updatedAt": "2026-04-28T10:56:58Z",
+    "checkedAt": "2026-04-28T10:56:58Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Workspace heartbeat checked; J.A.I.N ping passed and recurring lost-task warnings remain after maintenance",
-    "updatedAt": "2026-04-28T10:55:04Z"
+    "context": "Workspace heartbeat checked; recurring lost-task warnings remain after maintenance",
+    "updatedAt": "2026-04-28T11:00:04Z"
   },
   "contextWindow": {
     "usedTokens": 141925,
@@ -133,7 +133,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 48m",
+        "Resets in 4h 43m",
         "Weekly: 98% left [===========-]",
         "Pace: On pace | Expected 3% used | Lasts until reset",
         "Resets in 6d 18h",
@@ -144,22 +144,22 @@
       "weekly": "98% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 48m",
+      "sessionReset": "4h 43m",
       "weeklyReset": "6d 18h",
       "summary": "100% left \u00b7 wk 98% left"
     },
-    "updatedAt": "2026-04-28T10:55:06Z"
+    "updatedAt": "2026-04-28T11:00:06Z"
   },
   "modelUsage": {
     "session": 0.300958,
-    "daily": 1.87057,
-    "weekly": 43.800337,
-    "monthly": 950.177756,
+    "daily": 2.147422,
+    "weekly": 44.077188,
+    "monthly": 950.454607,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 35.68601975
+        "cost": 35.96287075
       },
       {
         "name": "gpt-5.4-mini",
@@ -186,9 +186,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 35.68601975,
-        "dailyCost": 1.2725925,
-        "sessionCost": 35.68601975,
+        "weeklyCost": 35.96287075,
+        "dailyCost": 1.5494435000000002,
+        "sessionCost": 35.96287075,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -217,9 +217,9 @@
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 484,
-        "outputTokens": 40,
-        "totalTokens": 524,
+        "inputTokens": 278,
+        "outputTokens": 32,
+        "totalTokens": 310,
         "sessionCost": 0.29702,
         "dailyCost": 0.29702,
         "weeklyCost": 0.29702,
@@ -354,7 +354,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T10:55:10Z",
+    "lastUpdated": "2026-04-28T11:00:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -387,15 +387,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 1.87057,
-      "total": 45.743111,
-      "monthly": 950.177756
+      "daily": 2.147422,
+      "total": 46.019962,
+      "monthly": 950.454607
     },
     "weeklyRunRate": {
-      "total": 45.743111,
+      "total": 46.019962,
       "automation": 1.942774,
-      "interactive": 41.857563,
-      "projectedMonthly": 196.04
+      "interactive": 42.134414,
+      "projectedMonthly": 197.23
     }
   },
   "moltWorld": {
@@ -412,20 +412,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T10:55:15Z",
+    "updatedAt": "2026-04-28T11:00:15Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.4,
-      "cpu_user": 18.48,
-      "cpu_sys": 16.89,
-      "load1": 2.24,
-      "load5": 2.18,
-      "load15": 2.19,
+      "cpu_pct": 36.6,
+      "cpu_user": 18.99,
+      "cpu_sys": 17.63,
+      "load1": 2.63,
+      "load5": 2.21,
+      "load15": 2.18,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "86Gi",
@@ -433,12 +433,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.3,
-      "cpu_user": 4.23,
-      "cpu_sys": 11.1,
-      "load1": 1.87,
-      "load5": 1.96,
-      "load15": 2.04,
+      "cpu_pct": 13.8,
+      "cpu_user": 3.44,
+      "cpu_sys": 10.34,
+      "load1": 2.3,
+      "load5": 2.08,
+      "load15": 2.05,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -464,19 +464,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T10:55:04Z"
+      "lastChecked": "2026-04-28T11:00:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T10:55:04Z"
+      "lastChecked": "2026-04-28T11:00:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T10:55:04Z"
+      "lastChecked": "2026-04-28T11:00:04Z"
     }
   ],
   "crons": [
@@ -759,7 +759,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-28T07:00:00"
     },
     {
       "name": "X Market Open",
@@ -1299,10 +1300,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Workspace heartbeat checked; J.A.I.N ping passed and recurring lost-task warnings remain after maintenance",
+      "objective": "Workspace heartbeat checked; recurring lost-task warnings remain after maintenance",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T10:02:00Z",
+      "updatedAt": "2026-04-28T10:56:58Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.4",
@@ -1328,8 +1329,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T10:55:02Z",
-      "messageReceived": "2026-04-28T10:55:02Z",
+      "updatedAt": "2026-04-28T11:00:02Z",
+      "messageReceived": "2026-04-28T11:00:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1348,10 +1349,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Workspace heartbeat checked; J.A.I.N ping passed and recurring lost-task warnings remain after maintenance",
+        "objective": "Workspace heartbeat checked; recurring lost-task warnings remain after maintenance",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T10:02:00Z",
+        "updatedAt": "2026-04-28T10:56:58Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.4",
@@ -1364,8 +1365,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T10:55:02Z",
-        "messageReceived": "2026-04-28T10:55:02Z",
+        "updatedAt": "2026-04-28T11:00:02Z",
+        "messageReceived": "2026-04-28T11:00:02Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1387,29 +1388,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T10:55:10Z",
+      "time": "2026-04-28T11:00:10Z",
       "event": "Session spend: $0.30"
     },
     {
-      "time": "2026-04-28T10:55:06Z",
+      "time": "2026-04-28T11:00:06Z",
       "event": "CodexBar: 100% left \u00b7 wk 98% left"
     },
     {
-      "time": "2026-04-28T10:55:04Z",
+      "time": "2026-04-28T11:00:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T10:55:04Z",
+      "time": "2026-04-28T11:00:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T10:55:04Z",
+      "time": "2026-04-28T11:00:04Z",
       "event": "Device layer nominal"
     },
     {
-      "time": "2026-04-28T10:55:04Z",
+      "time": "2026-04-28T11:00:04Z",
       "event": "Mission Control refresh published"
     }
   ],
-  "lastUpdated": "2026-04-28T10:55:04Z"
+  "lastUpdated": "2026-04-28T11:00:04Z"
 }
