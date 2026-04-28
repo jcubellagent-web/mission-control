@@ -306,6 +306,7 @@ def fetch_tracked_tasks() -> List[Dict[str, Any]]:
                     "status": "active",
                     "statusLabel": status_label,
                     "notes": notes,
+                    "background": meta,
                     "requestedAt": requested_match.group(1) if requested_match else None,
                     "updatedAt": updated_match.group(1) if updated_match else None,
                 }
