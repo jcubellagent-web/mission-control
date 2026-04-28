@@ -1,40 +1,15 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: applying 24in polish",
+  "objective": "Mission Control: Josh publisher deploying polish",
   "status": "active",
-  "updatedAt": "2026-04-28T16:51:01Z",
-  "checkedAt": "2026-04-28T16:51:01Z",
-  "messageReceived": "2026-04-28T16:51:01Z",
-  "currentTool": "code",
+  "updatedAt": "2026-04-28T16:57:19Z",
+  "checkedAt": "2026-04-28T16:57:19Z",
+  "messageReceived": "2026-04-28T16:57:19Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
-    {
-      "label": "Mission Control: Josh publisher aligned",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: stale task override fixed",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: Mission Control workflow",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: patching MC cleanse",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control: optimizing 24in Brain Feed",
       "status": "done",
@@ -47,8 +22,23 @@
     },
     {
       "label": "Mission Control: applying 24in polish",
-      "status": "active",
+      "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Mission Control: validating 24in polish",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: deploying 24in polish",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: Josh publisher deploying polish",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
