@@ -136,7 +136,11 @@ def capture(update_baseline: bool, port: int, max_diff_ratio: float) -> int:
                             ),
                         )
                     page.goto(url, wait_until="networkidle", timeout=30000)
-                    page.wait_for_selector("#brain-feed-card", timeout=15000)
+                    page.wait_for_selector("#brain-feed-card .bf-objective", timeout=15000)
+                    page.wait_for_function("""
+                        () => document.querySelectorAll('#brain-feed-card .bf-objective').length >= 2
+                    """, timeout=15000)
+                    page.wait_for_timeout(250)
                     page.evaluate("""
                         () => {
                             window.scrollTo(0, 0);
