@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Restarting OpenClaw gateway",
+  "objective": "Gateway probe retry after restart",
   "status": "active",
-  "updatedAt": "2026-04-28T02:24:18Z",
-  "checkedAt": "2026-04-28T02:24:18Z",
-  "messageReceived": "2026-04-28T02:24:18Z",
+  "updatedAt": "2026-04-28T02:24:32Z",
+  "checkedAt": "2026-04-28T02:24:32Z",
+  "messageReceived": "2026-04-28T02:24:32Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -52,6 +52,11 @@
     },
     {
       "label": "Restarting OpenClaw gateway",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Gateway probe retry after restart",
       "status": "active",
       "tool": "exec"
     }
