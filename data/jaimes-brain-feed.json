@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Champion-priority GW11 slate submitted",
-  "status": "idle",
-  "updatedAt": "2026-04-28T01:14:02Z",
-  "checkedAt": "2026-04-28T01:12:53Z",
-  "messageReceived": "2026-04-28T01:12:53Z",
+  "active": true,
+  "objective": "Task: verify GW11 DNP coverage",
+  "status": "active",
+  "updatedAt": "2026-04-28T01:22:11Z",
+  "checkedAt": "2026-04-28T01:22:11Z",
+  "messageReceived": "2026-04-28T01:22:11Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -16,23 +16,8 @@
       "tool": "hermes"
     },
     {
-      "label": "Task: reallocate GW11 to maximize Champion",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: build Champion-priority GW11 slate",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Step: submit Champion-priority GW11 slate",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify live Champion-priority slate",
-      "status": "done",
+      "label": "Task: verify GW11 DNP coverage",
+      "status": "active",
       "tool": "exec"
     }
   ],
