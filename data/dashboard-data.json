@@ -21,30 +21,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "clarify Sorare validation ownership",
+    "objective": "clarified Sorare validation ownership",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "brainfeed"
-      }
-    ],
-    "currentTool": "brainfeed",
-    "updatedAt": "2026-04-28T14:44:52Z",
-    "checkedAt": "2026-04-28T14:44:52Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T14:45:43Z",
+    "checkedAt": "2026-04-28T14:45:43Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "clarify Sorare validation ownership",
-    "updatedAt": "2026-04-28T14:45:03Z"
+    "context": "clarified Sorare validation ownership",
+    "updatedAt": "2026-04-28T14:45:56Z"
   },
   "contextWindow": {
-    "usedTokens": 27713,
+    "usedTokens": 36425,
     "limitTokens": 272000,
-    "pct": 0.1019,
+    "pct": 0.1339,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -147,7 +141,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 3,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/moltworld_presence.py",
       "mission-control/index.html",
@@ -159,7 +153,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 93% left [===========-]",
-        "Resets in 58m",
+        "Resets in 57m",
         "Weekly: 97% left [===========-]",
         "Pace: 3% in reserve | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
@@ -170,17 +164,17 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "58m",
+      "sessionReset": "57m",
       "weeklyReset": "6d 14h",
       "summary": "93% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:45:05Z"
+    "updatedAt": "2026-04-28T14:45:57Z"
   },
   "modelUsage": {
-    "session": 0.109369,
-    "daily": 2.960329,
-    "weekly": 44.890096,
-    "monthly": 951.267515,
+    "session": 0.021601,
+    "daily": 2.872561,
+    "weekly": 44.802328,
+    "monthly": 951.179747,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -205,7 +199,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.109369
+        "cost": 0.021601
       }
     ],
     "breakdown": [
@@ -256,12 +250,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 21185,
+        "inputTokens": 713,
         "outputTokens": 6,
-        "totalTokens": 21191,
-        "sessionCost": 0.109369,
-        "dailyCost": 0.109369,
-        "weeklyCost": 0.109369,
+        "totalTokens": 719,
+        "sessionCost": 0.021601,
+        "dailyCost": 0.021601,
+        "weeklyCost": 0.021601,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -367,7 +361,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:45:08Z",
+    "lastUpdated": "2026-04-28T14:46:01Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -400,15 +394,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.960329,
-      "total": 46.83287,
-      "monthly": 951.267515
+      "daily": 2.872561,
+      "total": 46.745102,
+      "monthly": 951.179747
     },
     "weeklyRunRate": {
-      "total": 46.83287,
+      "total": 46.745102,
       "automation": 1.942774,
-      "interactive": 42.947322,
-      "projectedMonthly": 200.71
+      "interactive": 42.859554,
+      "projectedMonthly": 200.34
     }
   },
   "moltWorld": {
@@ -420,12 +414,12 @@
     "earning_rate": "0 SIM/hour",
     "position_x": 19,
     "position_y": 52,
-    "run_count": 1,
+    "run_count": 2,
     "nearby_agents": [],
-    "last_thought": "Looking for information, allies, and safe routes",
+    "last_thought": "Building something useful for Josh",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:45:13Z",
+    "updatedAt": "2026-04-28T14:46:06Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -442,12 +436,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.6,
-      "cpu_user": 19.9,
-      "cpu_sys": 18.5,
-      "load1": 2.66,
-      "load5": 2.11,
-      "load15": 2.22,
+      "cpu_pct": 47.7,
+      "cpu_user": 25.31,
+      "cpu_sys": 22.36,
+      "load1": 2.38,
+      "load5": 2.15,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -457,14 +451,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.7,
-      "cpu_user": 2.54,
-      "cpu_sys": 10.16,
-      "load1": 2.36,
-      "load5": 2.25,
-      "load15": 2.11,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 17.6,
+      "cpu_user": 5.6,
+      "cpu_sys": 12.0,
+      "load1": 1.75,
+      "load5": 2.13,
+      "load15": 2.07,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -488,19 +482,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:45:03Z"
+      "lastChecked": "2026-04-28T14:45:56Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:45:03Z"
+      "lastChecked": "2026-04-28T14:45:56Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:45:03Z"
+      "lastChecked": "2026-04-28T14:45:56Z"
     }
   ],
   "crons": [
@@ -1250,16 +1244,6 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260425-919",
-      "title": "Sorare deep analytics upgrade research",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Continued on J.A.I.N `~/sorare_ml`: verified model metadata (`rf-owned-mlb-form-v1`, trained 2026-04-26, 7,434 rows, test MAE 7.23, R\u00b2 0.146), GW10/GW11 submit artifacts both 9/9 OK, and found the latest GW11 10:03 cron autosubmit audit incorrectly said `would submit` even though its proposal had 5 `min_inseason_violations`. Patched remote `artifacts/gw11_cron_autosubmit_audit.py` to include proposal validation blockers; backed up old script, recompiled, reran audit, and verified it now returns `dry_run_decision=hold_invalid_proposal` with the 5 blockers. Remaining work: true outcome/backtest validation against resolved scores, not just artifact/proposal validation.",
-      "requestedAt": null,
-      "updatedAt": "2026-04-28 10:39",
-      "owner": "J.A.I.N"
-    },
-    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
@@ -1268,6 +1252,16 @@
       "requestedAt": null,
       "updatedAt": "2026-04-28 00:43",
       "owner": "JOSH 2.0"
+    },
+    {
+      "id": "T-20260425-919",
+      "title": "Sorare deep analytics upgrade research",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "(updated 2026-04-28 10:44) Work stays on J.A.I.N `~/sorare_ml`: verified model metadata (`rf-owned-mlb-form-v1`, trained 2026-04-26, 7,434 rows, test MAE 7.23, R\u00b2 0.146), GW10/GW11 submit artifacts both 9/9 OK, and found the latest GW11 10:03 cron autosubmit audit incorrectly said `would submit` even though its proposal had 5 `min_inseason_violations`. Patched remote `artifacts/gw11_cron_autosubmit_audit.py` to include proposal validation blockers; backed up old script, recompiled, reran audit, and verified it now returns `dry_run_decision=hold_invalid_proposal` with the 5 blockers. Remaining JAIMES/J.A.I.N-owned work: true outcome/backtest validation against resolved scores, not local foreground execution.",
+      "requestedAt": null,
+      "updatedAt": null,
+      "owner": "JAIMES"
     }
   ],
   "activeAgents": [
@@ -1297,6 +1291,19 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
+      "objective": "clarified Sorare validation ownership",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-04-28T14:45:43Z",
+      "messageReceived": "2026-04-23T04:25:02Z",
+      "currentTool": "",
+      "model": "GPT-5.5",
+      "steps": []
+    },
+    "jain": {
+      "agent": "J.A.I.N",
+      "active": true,
+      "reportedActive": true,
       "objective": "clarify Sorare validation ownership",
       "status": "active",
       "stale": false,
@@ -1312,19 +1319,6 @@
         }
       ]
     },
-    "jain": {
-      "agent": "J.A.I.N",
-      "active": true,
-      "reportedActive": true,
-      "objective": "session startup complete",
-      "status": "active",
-      "stale": false,
-      "updatedAt": "2026-04-28T14:41:48Z",
-      "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
-      "model": "GPT-5.4",
-      "steps": []
-    },
     "jaimes": {
       "agent": "JAIMES",
       "active": false,
@@ -1332,8 +1326,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:45:01Z",
-      "messageReceived": "2026-04-28T14:45:01Z",
+      "updatedAt": "2026-04-28T14:45:54Z",
+      "messageReceived": "2026-04-28T14:45:54Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1356,6 +1350,19 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
+        "objective": "clarified Sorare validation ownership",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T14:45:43Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
         "objective": "clarify Sorare validation ownership",
         "status": "active",
         "stale": false,
@@ -1372,27 +1379,14 @@
         ]
       },
       {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "session startup complete",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T14:41:48Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
-      },
-      {
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:45:01Z",
-        "messageReceived": "2026-04-28T14:45:01Z",
+        "updatedAt": "2026-04-28T14:45:54Z",
+        "messageReceived": "2026-04-28T14:45:54Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1401,29 +1395,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:45:08Z",
-      "event": "Session spend: $0.11"
+      "time": "2026-04-28T14:46:01Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T14:45:05Z",
+      "time": "2026-04-28T14:45:57Z",
       "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:45:05Z",
+      "time": "2026-04-28T14:45:57Z",
       "event": "CodexBar: 93% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:45:03Z",
+      "time": "2026-04-28T14:45:56Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:45:03Z",
+      "time": "2026-04-28T14:45:56Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:45:03Z",
+      "time": "2026-04-28T14:45:56Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:45:03Z"
+  "lastUpdated": "2026-04-28T14:45:56Z"
 }
