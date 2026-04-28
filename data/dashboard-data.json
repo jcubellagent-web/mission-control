@@ -9,6 +9,11 @@
       "priority": "high",
       "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
+    },
+    {
+      "priority": "medium",
+      "title": "1 job(s) due/unverified: Waiver Injury Alert",
+      "url": "#jobs"
     }
   ],
   "activeNow": [],
@@ -28,7 +33,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "memory backup sync to J.A.I.N completed and verified",
-    "updatedAt": "2026-04-28T17:05:16Z"
+    "updatedAt": "2026-04-28T17:10:17Z"
   },
   "contextWindow": {
     "usedTokens": 117269,
@@ -138,35 +143,35 @@
     "workspaceDirty": 53,
     "missionControlDirty": 13,
     "recentFiles": [
-      "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "scripts/telegram_voice_task_router.py",
       "mission-control/scripts/update_and_push.sh",
-      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/moltworld_presence.py"
     ],
-    "codexbarStatus": "95% left \u00b7 wk 94% left",
+    "codexbarStatus": "94% left \u00b7 wk 94% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 95% left [===========-]",
-        "Resets in 3h 44m",
+        "Session: 94% left [===========-]",
+        "Resets in 3h 39m",
         "Weekly: 94% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 12h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "95% left",
+      "session": "94% left",
       "weekly": "94% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 44m",
+      "sessionReset": "3h 39m",
       "weeklyReset": "6d 12h",
-      "summary": "95% left \u00b7 wk 94% left"
+      "summary": "94% left \u00b7 wk 94% left"
     },
-    "updatedAt": "2026-04-28T17:05:18Z"
+    "updatedAt": "2026-04-28T17:10:19Z"
   },
   "modelUsage": {
     "session": 0.064093,
@@ -359,7 +364,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:05:21Z",
+    "lastUpdated": "2026-04-28T17:10:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -417,7 +422,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:05:26Z",
+    "updatedAt": "2026-04-28T17:10:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -434,14 +439,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.7,
-      "cpu_user": 17.34,
-      "cpu_sys": 18.32,
-      "load1": 2.48,
-      "load5": 2.44,
-      "load15": 2.36,
+      "cpu_pct": 38.4,
+      "cpu_user": 19.36,
+      "cpu_sys": 18.98,
+      "load1": 2.62,
+      "load5": 2.52,
+      "load15": 2.41,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -449,12 +454,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 16.4,
-      "cpu_user": 5.73,
-      "cpu_sys": 10.65,
-      "load1": 2.57,
-      "load5": 2.15,
-      "load15": 2.22,
+      "cpu_pct": 13.8,
+      "cpu_user": 4.6,
+      "cpu_sys": 9.75,
+      "load1": 1.85,
+      "load5": 1.98,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -480,19 +485,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:05:16Z"
+      "lastChecked": "2026-04-28T17:10:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:05:16Z"
+      "lastChecked": "2026-04-28T17:10:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:05:16Z"
+      "lastChecked": "2026-04-28T17:10:17Z"
     }
   ],
   "crons": [
@@ -509,7 +514,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T17:05:26.885743+00:00"
+      "lastRun": "2026-04-28T17:10:28.213251+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1191,7 +1196,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -1254,13 +1259,13 @@
     "ok": false,
     "status": "attention",
     "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-28T17:05:16.113650Z",
+    "checkedAt": "2026-04-28T17:10:17.064431Z",
     "checks": [
       {
         "name": "Dual objectives",
-        "ok": false,
-        "detail": "dualAgents=['JOSH 2.0', 'J.A.I.N']",
-        "severity": "high"
+        "ok": true,
+        "detail": "dualAgents=['JOSH 2.0', 'JAIMES']",
+        "severity": "ok"
       },
       {
         "name": "Calendar tile",
@@ -1270,9 +1275,9 @@
       },
       {
         "name": "Today Jobs",
-        "ok": true,
-        "detail": "32 today-relevant; 0 active issue(s)",
-        "severity": "ok"
+        "ok": false,
+        "detail": "32 today-relevant; 1 active issue(s)",
+        "severity": "high"
       },
       {
         "name": "Action Required",
@@ -1301,9 +1306,9 @@
     "artifacts": []
   },
   "voiceRouter": {
-    "status": "planned",
+    "status": "ready",
     "summary": "Telegram voice notes can become structured tasks",
-    "entrypoint": "/Users/josh2.0/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
+    "entrypoint": "/Users/josh2.0/.openclaw/workspace/scripts/telegram_voice_task_router.py",
     "modes": [
       "task",
       "calendar",
@@ -1315,7 +1320,7 @@
     "status": "attention",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
     "calendar": "needs attention",
-    "jobIssues": 0,
+    "jobIssues": 1,
     "sources": [
       "calendar",
       "gmail",
@@ -1341,7 +1346,7 @@
     {
       "id": "voice-router",
       "name": "Voice Router",
-      "status": "planned",
+      "status": "ready",
       "summary": "Telegram voice notes can become structured tasks",
       "detail": "Telegram voice -> tasks / calendar / JAIMES"
     },
@@ -1350,7 +1355,7 @@
       "name": "Ops Inbox",
       "status": "attention",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar needs attention \u00b7 1 job issue(s)"
     }
   ],
   "trackedTasks": [
@@ -1369,7 +1374,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/index.html",
+      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1422,7 +1427,7 @@
       "objective": "Sorare ML Cockpit: model ownership and validation",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T17:05:16Z",
+      "updatedAt": "2026-04-28T17:10:17Z",
       "messageReceived": "2026-04-28T17:01:11Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
@@ -1457,7 +1462,7 @@
         "objective": "Sorare ML Cockpit: model ownership and validation",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:05:16Z",
+        "updatedAt": "2026-04-28T17:10:17Z",
         "messageReceived": "2026-04-28T17:01:11Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
@@ -1500,29 +1505,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:05:21Z",
+      "time": "2026-04-28T17:10:23Z",
       "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-28T17:05:18Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
+      "time": "2026-04-28T17:10:19Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T17:05:18Z",
-      "event": "CodexBar: 95% left \u00b7 wk 94% left"
+      "time": "2026-04-28T17:10:19Z",
+      "event": "CodexBar: 94% left \u00b7 wk 94% left"
     },
     {
-      "time": "2026-04-28T17:05:16Z",
+      "time": "2026-04-28T17:10:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:05:16Z",
+      "time": "2026-04-28T17:10:17Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:05:16Z",
+      "time": "2026-04-28T17:10:17Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:05:16Z"
+  "lastUpdated": "2026-04-28T17:10:17Z"
 }
