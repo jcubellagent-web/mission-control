@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Mission Control watchdog alert: === 2026-04-28T04:59:46Z mission-control watchdog === bad_json_count 0 script_chunks 6 roadmap_age_min 25.49 mission_control_regression_check OK screenshot_diff desktop ratio=1.000",
+  "objective": "Mission Control watchdog clean",
   "status": "idle",
-  "updatedAt": "2026-04-28T04:59:54Z",
-  "checkedAt": "2026-04-28T04:59:14Z",
-  "messageReceived": "2026-04-28T04:59:14Z",
+  "updatedAt": "2026-04-28T05:03:09Z",
+  "checkedAt": "2026-04-28T05:00:04Z",
+  "messageReceived": "2026-04-28T04:15:44Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -14,11 +14,6 @@
       "label": "jaimes-ops-drift-check",
       "status": "done",
       "tool": "hermes"
-    },
-    {
-      "label": "Mission Control: installing watchdog cron",
-      "status": "done",
-      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
