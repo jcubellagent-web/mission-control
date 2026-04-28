@@ -1508,8 +1508,9 @@ et = ZoneInfo('America/New_York')
 jobs = {
     'Mission Control Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
     'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
+    'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
-    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log',
+    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
     'J.A.I.N Medic': '/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log',
     'Sorare Cookie Auto-Refresh': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log',
 }
@@ -1849,7 +1850,7 @@ PY"""
                 else:
                     run_status = 'upcoming'
         elif today_relevant and sched_meta.get('kind') in {'recurring', 'calendar_split'}:
-            run_status = 'active' if present or last_run else 'due'
+            run_status = 'active' if present else 'due'
         elif target['name'] == 'X Strategic Replies':
             if last_run_today:
                 run_status = 'done'
@@ -1858,8 +1859,10 @@ PY"""
 
         if source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
             row_status = 'paused'
+        elif last_run_today or verified_today:
+            row_status = 'ok'
         else:
-            row_status = 'ok' if (present or last_run) else 'paused'
+            row_status = 'ok' if present else 'paused'
 
         # Hermes persists the last job result until the next scheduled run. Treat
         # old failures as historical context, not active Mission Control cron
@@ -2264,25 +2267,28 @@ def build_action_required(
     cal_msg = str(cal.get("message") or "Calendar lane unavailable")
     if cal_status not in {"ok", "green", "healthy"}:
         title = "Calendar auth needs refresh" if "auth" in cal_msg.lower() else f"Calendar issue: {cal_msg}"
-        items.append({"priority": "high", "title": title, "url": ""})
+        items.append({"priority": "high", "title": title, "url": "#calendar"})
 
-    missed = [c for c in crons if c.get("todayRelevant") and c.get("runStatus") == "missed"]
-    due = [c for c in crons if c.get("todayRelevant") and c.get("runStatus") == "due"]
-    errored = [c for c in crons if (c.get("errors") or 0) > 0 or c.get("status") == "error"]
+    missed = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "missed"]
+    due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "due"]
+    errored = [c for c in crons if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("status") == "error")]
     if missed:
         sample = ", ".join(c.get("name", "job") for c in missed[:3])
-        items.append({"priority": "high", "title": f"{len(missed)} scheduled job(s) missed: {sample}", "url": ""})
+        items.append({"priority": "high", "title": f"{len(missed)} scheduled job(s) missed: {sample}", "url": "#jobs"})
     if errored:
         sample = ", ".join(c.get("name", "job") for c in errored[:3])
-        items.append({"priority": "high", "title": f"{len(errored)} job error(s): {sample}", "url": ""})
+        items.append({"priority": "high", "title": f"{len(errored)} job error(s): {sample}", "url": "#jobs"})
     if due:
         sample = ", ".join(c.get("name", "job") for c in due[:3])
-        items.append({"priority": "medium", "title": f"{len(due)} job(s) due/unverified: {sample}", "url": ""})
+        items.append({"priority": "medium", "title": f"{len(due)} job(s) due/unverified: {sample}", "url": "#jobs"})
 
     stale_verified: List[Dict[str, Any]] = []
     now_dt = dt.datetime.now(dt.timezone.utc)
     for cron in crons:
         if not cron.get("todayRelevant") or cron.get("status") == "paused":
+            continue
+        sched_text = str(cron.get("schedule") or "").lower()
+        if sched_text.startswith("every ") or sched_text.startswith("hourly"):
             continue
         last_run = cron.get("lastRun")
         if not last_run:
@@ -2298,7 +2304,7 @@ def build_action_required(
             stale_verified.append(cron)
     if stale_verified:
         sample = ", ".join(c.get("name", "job") for c in stale_verified[:3])
-        items.append({"priority": "medium", "title": f"{len(stale_verified)} active job(s) stale >3h: {sample}", "url": ""})
+        items.append({"priority": "medium", "title": f"{len(stale_verified)} active job(s) stale >3h: {sample}", "url": "#jobs"})
 
     mw = moltworld_data or {}
     mw_status = str(mw.get("status") or "unknown").lower()
@@ -2310,7 +2316,7 @@ def build_action_required(
             title = f"MoltWorld stale: {mw_error[:90]}"
         else:
             title = f"MoltWorld status: {mw_status}"
-        items.append({"priority": "medium", "title": title, "url": ""})
+        items.append({"priority": "medium", "title": title, "url": "#moltworld"})
 
     return items[:8]
 
