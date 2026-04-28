@@ -593,17 +593,52 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
     }
 
 
+LOW_SIGNAL_BRAIN_OBJECTIVES = {
+    "sent mission control open link",
+    "mission control open link sent",
+    "opened mission control link",
+    "session startup completed",
+    "startup completed",
+    "standby",
+    "idle",
+    "heartbeat_ok",
+}
+
+LOW_SIGNAL_BRAIN_PREFIXES = (
+    "sent mission control open link",
+    "opened mission control",
+    "session startup",
+    "idle · last:",
+)
+
+
+def is_low_signal_brain_objective(objective: str) -> bool:
+    normalized = re.sub(r"\s+", " ", str(objective or "").strip().lower())
+    if not normalized:
+        return True
+    if normalized in LOW_SIGNAL_BRAIN_OBJECTIVES:
+        return True
+    return any(normalized.startswith(prefix) for prefix in LOW_SIGNAL_BRAIN_PREFIXES)
+
+
 def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
     raw = feed if isinstance(feed, dict) else {}
     updated_at = raw.get("updatedAt")
     reported_active = bool(raw.get("active"))
     stale = bool(updated_at) and not is_recent_ts(updated_at, hours=2)
+    objective = str(raw.get("objective") or "").strip()
+    low_signal = is_low_signal_brain_objective(objective)
+    active = reported_active and not stale and not low_signal
+    status = "stale" if stale and reported_active else str(raw.get("status") or "idle")
+    if low_signal and status == "active":
+        status = "idle"
     return {
         "agent": str(raw.get("agent") or fallback_agent),
-        "active": reported_active and not stale,
+        "active": active,
         "reportedActive": reported_active,
-        "objective": str(raw.get("objective") or "").strip(),
-        "status": "stale" if stale and reported_active else str(raw.get("status") or "idle"),
+        "lowSignal": low_signal,
+        "objective": objective,
+        "status": status,
         "stale": stale,
         "updatedAt": updated_at,
         "messageReceived": raw.get("messageReceived"),

@@ -7087,16 +7087,41 @@
             return clean.length > max ? clean.slice(0, max - 1) + '…' : clean;
         }
 
+        function isLowSignalBrainObjective(objective) {
+            const normalized = String(objective || '').trim().toLowerCase().replace(/\s+/g, ' ');
+            if (!normalized) return true;
+            const exact = new Set([
+                'sent mission control open link',
+                'mission control open link sent',
+                'opened mission control link',
+                'session startup completed',
+                'startup completed',
+                'standby',
+                'idle',
+                'heartbeat_ok',
+            ]);
+            if (exact.has(normalized)) return true;
+            return [
+                'sent mission control open link',
+                'opened mission control',
+                'session startup',
+                'idle · last:',
+            ].some(prefix => normalized.startsWith(prefix));
+        }
+
         function normalizeRemoteAgentFeed(feed, maxAgeMs = 2 * 60 * 60 * 1000) {
             if (!feed || typeof feed !== 'object') return null;
             const stale = isFeedStale(feed, maxAgeMs);
             const reportedActive = !!feed.active;
+            const lowSignal = feed.lowSignal === true || isLowSignalBrainObjective(feed.objective);
+            const status = stale && reportedActive ? 'stale' : (feed.status || 'idle');
             return {
                 ...feed,
                 reportedActive,
+                lowSignal,
                 stale,
-                active: reportedActive && !stale,
-                status: stale && reportedActive ? 'stale' : (feed.status || 'idle'),
+                active: reportedActive && !stale && !lowSignal,
+                status: lowSignal && status === 'active' ? 'idle' : status,
             };
         }
 
@@ -7386,12 +7411,14 @@
             const pushBrainSummary = (bf, agentClass, agentLabel) => {
                 if (!bf) return;
                 const stale = isFeedStale(bf);
-                const isActive = bf.active === true && !stale;
+                const isActive = bf.active === true && !stale && !bf.lowSignal && !isLowSignalBrainObjective(bf.objective);
                 const fullMsg = bf.objective || (isActive ? 'Processing…' : 'Standby');
                 const normalized = String(fullMsg || '').trim().toLowerCase();
                 const noisyIdle = !isActive && (
                     stale ||
                     !normalized ||
+                    bf.lowSignal === true ||
+                    isLowSignalBrainObjective(fullMsg) ||
                     ['standby', 'idle', 'working...', 'working…'].includes(normalized) ||
                     normalized.startsWith('idle · last:')
                 );
@@ -7862,15 +7889,18 @@
             const dot = document.querySelector('.bf-fresh-dot');
             const label = document.getElementById('bf-freshness-label-text');
             if (!dot) return;
-            // Always use the canonical state — never infer active from timestamp alone
-            const canonical = window._mcLastBrainFeed || bf;
-            const isActive = canonical && canonical.active === true;
+            // Reflect the hero actually rendered, not only JOSH's sidecar.
+            const canonical = window._mcLastRenderedBrainFeed || window._mcLastBrainFeed || bf;
+            const isActive = canonical && canonical.active === true && !canonical.lowSignal;
+            const agentLabel = canonical?.heroAgentLabel || canonical?.agent || 'AGENT';
             if (isActive) {
                 dot.style.background = '#e53e3e';
-                if (label) label.textContent = 'Live';
+                dot.style.animation = 'pulse 1.5s infinite';
+                if (label) label.textContent = `LIVE OBJECTIVE · ${agentLabel}`;
             } else {
                 dot.style.background = 'rgba(255,255,255,0.2)';
-                if (label) label.textContent = 'Standby';
+                dot.style.animation = '';
+                if (label) label.textContent = agentLabel && agentLabel !== 'AGENT' ? `LATEST · ${agentLabel}` : 'Standby';
             }
         }
 
@@ -9587,7 +9617,13 @@
         }
 
         function isRenderableLiveObjective(entry) {
-            return !!(entry?.bf && entry.bf.active && !isFeedStale(entry.bf, 2 * 60 * 60 * 1000));
+            return !!(
+                entry?.bf &&
+                entry.bf.active &&
+                !entry.bf.lowSignal &&
+                !isLowSignalBrainObjective(entry.bf.objective) &&
+                !isFeedStale(entry.bf, 2 * 60 * 60 * 1000)
+            );
         }
 
         function getActiveTrackedTaskByOwner(owner) {
