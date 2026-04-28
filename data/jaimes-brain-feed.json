@@ -1,62 +1,22 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Post-restart plugin allowlist cleanup",
+  "objective": "Retesting Telegram health",
   "status": "active",
-  "updatedAt": "2026-04-28T02:25:00Z",
-  "checkedAt": "2026-04-28T02:25:00Z",
-  "messageReceived": "2026-04-28T02:25:00Z",
+  "updatedAt": "2026-04-28T02:25:26Z",
+  "checkedAt": "2026-04-28T02:25:26Z",
+  "messageReceived": "2026-04-28T02:25:26Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "Checking inline buttons restart status",
+      "label": "jaimes-model-efficiency-guard",
       "status": "done",
-      "tool": "exec"
+      "tool": "hermes"
     },
     {
-      "label": "Inspecting inline button errors",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Checking gateway restart time",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Approve all: buttons + gateway + audit",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Cleaning plugin allowlist",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Auditing plugin registry",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Narrowing plugin allowlist",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Restarting OpenClaw gateway",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Gateway probe retry after restart",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Post-restart plugin allowlist cleanup",
+      "label": "Retesting Telegram health",
       "status": "active",
       "tool": "exec"
     }
