@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Task: inspect latest image from Josh",
+  "objective": "Image inspect: OCR fallback",
   "status": "active",
-  "updatedAt": "2026-04-28T03:46:40Z",
-  "checkedAt": "2026-04-28T03:46:40Z",
-  "messageReceived": "2026-04-28T03:46:40Z",
-  "currentTool": "browser",
+  "updatedAt": "2026-04-28T03:47:00Z",
+  "checkedAt": "2026-04-28T03:47:00Z",
+  "messageReceived": "2026-04-28T03:47:00Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -17,8 +17,13 @@
     },
     {
       "label": "Task: inspect latest image from Josh",
-      "status": "active",
+      "status": "done",
       "tool": "browser"
+    },
+    {
+      "label": "Image inspect: OCR fallback",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
