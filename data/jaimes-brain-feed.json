@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "GW11: test hard-DNP feasibility",
+  "objective": "GW11: submit champion-first DNP scrub",
   "status": "active",
-  "updatedAt": "2026-04-28T02:54:32Z",
-  "checkedAt": "2026-04-28T02:54:32Z",
-  "messageReceived": "2026-04-28T02:54:32Z",
-  "currentTool": "code",
+  "updatedAt": "2026-04-28T02:57:18Z",
+  "checkedAt": "2026-04-28T02:57:18Z",
+  "messageReceived": "2026-04-28T02:57:18Z",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -16,24 +16,9 @@
       "tool": "hermes"
     },
     {
-      "label": "GW11: test DNP-only feasibility",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "GW11: OCR user screenshot",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "GW11: dry-run raw native DNP scrub",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "GW11: test hard-DNP feasibility",
+      "label": "GW11: submit champion-first DNP scrub",
       "status": "active",
-      "tool": "code"
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
