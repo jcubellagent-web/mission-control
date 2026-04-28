@@ -9429,6 +9429,38 @@
             return !!(entry?.bf && entry.bf.active && !isFeedStale(entry.bf, 2 * 60 * 60 * 1000));
         }
 
+        function getActiveTrackedTaskByOwner(owner) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const tasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
+            return tasks.find(task => {
+                const taskOwner = String(task?.owner || 'JOSH 2.0');
+                const taskStatus = String(task?.status || 'active').toLowerCase();
+                return taskOwner === owner && taskStatus === 'active';
+            }) || null;
+        }
+
+        function synthesizeTaskBackedBrainFeed(feed, owner) {
+            const activeTask = getActiveTrackedTaskByOwner(owner);
+            if (!activeTask) return feed;
+            if (feed?.active && !isFeedStale(feed, 2 * 60 * 60 * 1000)) return feed;
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const objective = activeTask.title || feed?.objective || 'Working';
+            const updatedAt = data.lastUpdated || feed?.updatedAt || new Date().toISOString();
+            return {
+                ...(feed || {}),
+                active: true,
+                reportedActive: feed?.reportedActive || false,
+                objective,
+                status: 'active',
+                updatedAt,
+                currentTool: feed?.currentTool || 'tracked task',
+                model: feed?.model || '',
+                steps: [{ label: objective, status: 'active', tool: 'tracked task' }],
+                taskBacked: true,
+                taskId: activeTask.id || '',
+            };
+        }
+
         function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
             // The two hero panels are intentionally pinned when both are live:
             // left = JOSH 2.0, right = JAIMES. J.A.I.N belongs in health/jobs.
@@ -9499,6 +9531,8 @@
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
             const brainCard = card.closest('.card-brain');
+            jainBf = synthesizeTaskBackedBrainFeed(jainBf, 'J.A.I.N');
+            jaimesBf = synthesizeTaskBackedBrainFeed(jaimesBf, 'JAIMES');
             const primary = pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf);
             const dualEntries = pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf);
             const anyActive = !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
@@ -10048,9 +10082,10 @@
                 renderActiveAgents(data.activeAgents || []);
             }
 
-            // Brain Feed — Supabase is the ONLY source of truth. 
-            // Never apply brainFeed from dashboard-data.json — it's stale by up to 5 min
-            // and has different timestamps that cause flicker. Supabase WS + REST handles it.
+            // Brain Feed — Supabase is the live feed source of truth.
+            // Reconcile after dashboard data loads so delegated tracked tasks can
+            // promote JAIMES/J.A.I.N in the hero even when their feed sidecar is idle.
+            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
 
             // Action Required (diff-guarded)
             if (!sectionChanged('actionRequired', data.actionRequired)) { /* skip */ } else

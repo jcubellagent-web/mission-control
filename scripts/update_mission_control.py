@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -203,9 +204,21 @@ def load_json_file(path: Path, default: Any) -> Any:
 
 def infer_task_owner(title: str, notes: str = "", background: str = "") -> str:
     blob = f"{title} {notes} {background}".lower()
-    if any(token in blob for token in ["jaimes", "hermes"]):
+    compact = re.sub(r"\s+", " ", blob)
+    if re.search(r"owner\s*:\s*jaimes\b|target\s*:\s*jaimes\b", compact):
         return "JAIMES"
-    if any(token in blob for token in ["j.a.i.n", "jain", "jc_agent"]):
+    if any(token in compact for token in [
+        "handoff queued to jaimes",
+        "queued to jaimes",
+        "target=jaimes",
+        "target jaimes",
+        "via hermes",
+        "hermes_chat",
+    ]):
+        return "JAIMES"
+    if re.search(r"owner\s*:\s*j\.?a\.?i\.?n\b|target\s*:\s*j\.?a\.?i\.?n\b", compact):
+        return "J.A.I.N"
+    if any(token in compact for token in ["jc_agent", "on j.a.i.n", "on jain", "target=jain", "target jain"]):
         return "J.A.I.N"
     return "JOSH 2.0"
 
@@ -605,6 +618,49 @@ def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, A
         "dualAgents": dual_pair,
         "agents": ordered,
     }
+
+
+def apply_tracked_tasks_to_agent_feeds(
+    agent_feeds: Dict[str, Dict[str, Any]],
+    tracked_tasks: List[Dict[str, Any]],
+    now_iso: str,
+) -> Dict[str, Dict[str, Any]]:
+    """Represent delegated active tasks as live agent objectives.
+
+    JAIMES can be working through Hermes/J.A.I.N while its own brain-feed
+    sidecar briefly says Standby. The dashboard hero should reflect the
+    ownership in memory/tasks.md, not only the last brain-feed writer.
+    """
+    owner_to_key = {"JOSH 2.0": "josh", "J.A.I.N": "jain", "JAIMES": "jaimes"}
+    merged = {key: dict(value) for key, value in agent_feeds.items()}
+    for task in tracked_tasks:
+        if str(task.get("status") or "active").lower() != "active":
+            continue
+        owner = str(task.get("owner") or "JOSH 2.0")
+        key = owner_to_key.get(owner)
+        if not key:
+            continue
+        current = merged.get(key, {})
+        current_live = bool(current.get("active") and is_recent_ts(current.get("updatedAt"), hours=2))
+        if current_live:
+            continue
+        title = str(task.get("title") or current.get("objective") or "Working").strip()
+        merged[key] = {
+            **current,
+            "agent": owner,
+            "active": True,
+            "reportedActive": bool(current.get("reportedActive")),
+            "objective": title,
+            "status": "active",
+            "stale": False,
+            "updatedAt": now_iso,
+            "currentTool": current.get("currentTool") or "tracked task",
+            "model": current.get("model"),
+            "steps": [{"label": title, "status": "active", "tool": "tracked task"}],
+            "taskBacked": True,
+            "taskId": task.get("id"),
+        }
+    return merged
 
 
 OPENCLAW_SESSIONS_PATH = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
@@ -2656,11 +2712,18 @@ def main() -> None:
     josh_brain_feed = normalize_agent_brain_feed(dashboard["brainFeed"], "JOSH 2.0")
     jain_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {}), "J.A.I.N")
     jaimes_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jaimes-brain-feed.json", {}), "JAIMES")
-    dashboard["agentBrainFeeds"] = {
-        "josh": josh_brain_feed,
-        "jain": jain_brain_feed,
-        "jaimes": jaimes_brain_feed,
-    }
+    dashboard["agentBrainFeeds"] = apply_tracked_tasks_to_agent_feeds(
+        {
+            "josh": josh_brain_feed,
+            "jain": jain_brain_feed,
+            "jaimes": jaimes_brain_feed,
+        },
+        dashboard["trackedTasks"],
+        now_iso,
+    )
+    josh_brain_feed = dashboard["agentBrainFeeds"].get("josh", josh_brain_feed)
+    jain_brain_feed = dashboard["agentBrainFeeds"].get("jain", jain_brain_feed)
+    jaimes_brain_feed = dashboard["agentBrainFeeds"].get("jaimes", jaimes_brain_feed)
     dashboard["liveObjectives"] = build_live_objectives(dashboard["agentBrainFeeds"])
     agent_comms = build_agent_comms(
         load_json_file(AGENT_COMMS_PATH, []),
