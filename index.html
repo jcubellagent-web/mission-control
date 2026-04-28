@@ -1614,6 +1614,7 @@
         body.phone-mode .god-mode-badge,
         body.phone-mode .freshness-badge,
         body.phone-mode #airpoint-toggle,
+        body.phone-mode #layout-mode-toggle,
         body.phone-mode .connection-status,
         body.phone-mode .last-updated { display: none !important; }
         /* Phone header — hide desktop-only controls, use pca-btn row instead */
@@ -2662,6 +2663,12 @@
         .if-mover-chg.down { color: #e53e3e; }
         .if-gen-time { font-size: 0.58rem; color: rgba(255,255,255,0.85); padding: 4px 10px 6px; text-align: right; }
 
+
+        /* AirPoint + layout toggle buttons */
+        #layout-mode-toggle { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.52); font-size: 0.70rem; font-weight: 600; cursor: pointer; letter-spacing: 0.03em; transition: all 0.2s; }
+        #layout-mode-toggle:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); }
+        body.layout-forced-kiosk #layout-mode-toggle { border-color: rgba(74,222,128,0.30); background: rgba(74,222,128,0.08); color: rgba(134,239,172,0.90); }
+        body.layout-forced-phone #layout-mode-toggle { border-color: rgba(96,165,250,0.30); background: rgba(96,165,250,0.08); color: rgba(147,197,253,0.90); }
 
         /* AirPoint toggle button */
         #airpoint-toggle { display: none; }
@@ -6271,8 +6278,38 @@
             body:not(.phone-mode) #today-jobs-card .tjob-schedule { font-size: 0.54rem !important; }
         }
 
+        /* Model spend desktop: compact ledger view for 24in right rail */
+        @media (min-width: 1180px) {
+            body:not(.phone-mode) .card-model { padding: 13px !important; gap: 8px !important; }
+            body:not(.phone-mode) .card-model .card-header { margin-bottom: 8px !important; }
+            body:not(.phone-mode) .card-model #model-usage-card { max-height: 100% !important; overflow-y: auto; padding-right: 3px; }
+            body:not(.phone-mode) .card-model .mu-run-rate-banner { padding: 7px 9px !important; margin-bottom: 6px !important; grid-template-columns: auto 1fr auto !important; }
+            body:not(.phone-mode) .card-model .mu-run-rate-total { font-size: 0.72rem !important; }
+            body:not(.phone-mode) .card-model .mu-totals-section,
+            body:not(.phone-mode) .card-model .mu-budget-section,
+            body:not(.phone-mode) .card-model .mu-codexbar-section { margin-bottom: 5px !important; padding: 6px 7px !important; }
+            body:not(.phone-mode) .card-model .mu-lane-budget-strip { padding: 6px 8px !important; margin-bottom: 6px !important; border-radius: 10px !important; }
+            body:not(.phone-mode) .card-model .mu-lane-grid { grid-template-columns: 1fr !important; gap: 5px !important; }
+            body:not(.phone-mode) .card-model .mu-lane-card,
+            body:not(.phone-mode) .card-model .mu-lane-card.local {
+                grid-column: auto !important; min-height: 0 !important; padding: 7px 8px !important; border-radius: 10px !important; gap: 4px !important;
+            }
+            body:not(.phone-mode) .card-model .mu-lane-main { font-size: 0.70rem !important; }
+            body:not(.phone-mode) .card-model .mu-lane-meta,
+            body:not(.phone-mode) .card-model .mu-lane-legend,
+            body:not(.phone-mode) .card-model .mu-budget-note,
+            body:not(.phone-mode) .card-model .mu-codexbar-note { font-size: 0.50rem !important; line-height: 1.22 !important; }
+            body:not(.phone-mode) .card-model .mu-active-hero { padding: 8px 9px !important; margin-bottom: 6px !important; border-radius: 11px !important; }
+            body:not(.phone-mode) .card-model .mu-active-main { font-size: 0.78rem !important; }
+            body:not(.phone-mode) .card-model .mu-breakdown-panel { padding: 7px 8px !important; margin-top: 6px !important; border-radius: 10px !important; }
+            body:not(.phone-mode) .card-model .mu-model-key { gap: 4px !important; margin-top: 5px !important; }
+            body:not(.phone-mode) .card-model .mu-model-key-chip { padding: 3px 6px !important; font-size: 0.45rem !important; }
+            body:not(.phone-mode) .card-model .mu-health-machine { padding: 4px 6px !important; }
+        }
+
         @media (max-width: 520px) {
             #airpoint-toggle,
+            #layout-mode-toggle,
             #night-mode-btn,
             .refresh-btn {
                 min-height: 28px !important;
@@ -6317,6 +6354,7 @@
                 <a class="build-status-chip" id="ci-run-chip" href="https://github.com/jcubellagent-web/mission-control/actions/workflows/mission-control-regression.yml" target="_blank" rel="noopener" title="Latest Mission Control regression run"><span>CI</span> <strong id="ci-run-text">…</strong></a>
                 <div class="freshness-badge fresh" id="freshness-badge"><span class="freshness-dot"></span><span id="freshness-text">-</span></div>
                 <button id="airpoint-toggle" onclick="toggleAirpoint()" title="Toggle AirPoint copilot notch">🖐️ AP</button>
+                <button id="layout-mode-toggle" onclick="toggleLayoutMode()" title="Toggle layout: Auto / 24in / Phone"><span id="layout-mode-icon">▦</span><span id="layout-mode-text"> Auto</span></button>
                 <button id="night-mode-btn" onclick="enterNightMode()" title="Night Mode">🌙<span class="nm-text"> Night</span></button>
                 <button class="refresh-btn" onclick="forceUpdate()" id="refresh-btn" aria-label="Force update">
                     <span class="icon">↻</span>
@@ -6632,19 +6670,49 @@
         let bfCounterInterval = null;
         let updateTickerInterval;
 
+        function getLayoutModeOverride() {
+            try { return localStorage.getItem('mc_layout_mode') || 'auto'; } catch(e) { return 'auto'; }
+        }
+
         function isKioskMode() {
+            const mode = getLayoutModeOverride();
+            if (mode === 'kiosk') return true;
+            if (mode === 'phone') return false;
             return window.matchMedia('(min-width: 1400px) and (min-height: 880px)').matches;
         }
 
         function isPhoneMode() {
+            const mode = getLayoutModeOverride();
+            if (mode === 'phone') return true;
+            if (mode === 'kiosk') return false;
             return window.matchMedia('(max-width: 480px)').matches;
         }
 
+        function updateLayoutModeToggle(mode = getLayoutModeOverride()) {
+            const text = document.getElementById('layout-mode-text');
+            const icon = document.getElementById('layout-mode-icon');
+            const labels = { auto: ' Auto', kiosk: ' 24in', phone: ' Phone' };
+            const icons = { auto: '▦', kiosk: '▣', phone: '▯' };
+            if (text) text.textContent = labels[mode] || labels.auto;
+            if (icon) icon.textContent = icons[mode] || icons.auto;
+            document.body.classList.toggle('layout-forced-kiosk', mode === 'kiosk');
+            document.body.classList.toggle('layout-forced-phone', mode === 'phone');
+        }
+
+        function toggleLayoutMode() {
+            const current = getLayoutModeOverride();
+            const next = current === 'auto' ? 'kiosk' : current === 'kiosk' ? 'phone' : 'auto';
+            try { localStorage.setItem('mc_layout_mode', next); } catch(e) {}
+            syncViewportMode();
+        }
+
         function syncViewportMode() {
+            const mode = getLayoutModeOverride();
             const phoneMode = isPhoneMode();
             document.body.classList.toggle('kiosk-mode', isKioskMode());
             document.body.classList.toggle('phone-mode', phoneMode);
             document.body.classList.toggle('edge-laser-on', !!(phoneMode && window._mcLastBrainFeed && window._mcLastBrainFeed.active));
+            updateLayoutModeToggle(mode);
             if (document.getElementById('agent-comms-toggle')) {
                 restoreBrainActivityDrawer();
             }

@@ -133,6 +133,14 @@ def check_index_wiring() -> None:
     require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: clamp(224px, 23vh, 248px)" in html, "Dual live objective boxes must stay tall but kiosk-balanced")
     require(".bf-hero-grid.dual-live .bf-objective-text-wrap" in html and "* 3" in html, "Dual live objectives must show a taller text viewport")
 
+    # 24in visual canaries: prevent kiosk Brain Feed from regressing into tall/noisy poster cards.
+    require("24in fullscreen polish" in html, "24in desktop Brain Feed polish block missing")
+    require(".memory-roadmap-compact-grid" in html and "repeat(4, minmax(0, 1fr))" in html, "Memory Roadmap must stay compact on desktop")
+    require(".memory-roadmap-card-note { display: none" in html, "Desktop roadmap notes must stay hidden to reduce Brain Feed noise")
+    require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
+    require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
+    require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
+
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
     print("script_chunks", len(scripts))
