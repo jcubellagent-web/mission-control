@@ -9,11 +9,6 @@
       "priority": "medium",
       "title": "3 job(s) due/unverified: Chiro Invite Sync, Sorare Cookie Freshness, Sorare Nightly Claim",
       "url": ""
-    },
-    {
-      "priority": "medium",
-      "title": "MoltWorld stale: <urlopen error timed out>",
-      "url": ""
     }
   ],
   "activeNow": [],
@@ -21,24 +16,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "clarified Sorare validation ownership",
+    "objective": "showed live task state",
     "status": "active",
     "steps": [],
     "currentTool": "",
-    "updatedAt": "2026-04-28T14:45:43Z",
-    "checkedAt": "2026-04-28T14:45:43Z",
+    "updatedAt": "2026-04-28T14:48:30Z",
+    "checkedAt": "2026-04-28T14:48:30Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "clarified Sorare validation ownership",
-    "updatedAt": "2026-04-28T14:45:56Z"
+    "context": "showed live task state",
+    "updatedAt": "2026-04-28T14:49:44Z"
   },
   "contextWindow": {
-    "usedTokens": 36425,
+    "usedTokens": 54427,
     "limitTokens": 272000,
-    "pct": 0.1339,
+    "pct": 0.2001,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -143,9 +138,9 @@
     "workspaceDirty": 53,
     "missionControlDirty": 5,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/moltworld_presence.py",
-      "mission-control/index.html",
-      "mission-control/scripts/update_mission_control.py"
+      "mission-control/index.html"
     ],
     "codexbarStatus": "93% left \u00b7 wk 97% left",
     "codexbar": {
@@ -153,7 +148,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 93% left [===========-]",
-        "Resets in 57m",
+        "Resets in 53m",
         "Weekly: 97% left [===========-]",
         "Pace: 3% in reserve | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
@@ -164,17 +159,17 @@
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "57m",
+      "sessionReset": "53m",
       "weeklyReset": "6d 14h",
       "summary": "93% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:45:57Z"
+    "updatedAt": "2026-04-28T14:49:46Z"
   },
   "modelUsage": {
-    "session": 0.021601,
-    "daily": 2.872561,
-    "weekly": 44.802328,
-    "monthly": 951.179747,
+    "session": 0.109397,
+    "daily": 2.960357,
+    "weekly": 44.890124,
+    "monthly": 951.267543,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -199,7 +194,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.021601
+        "cost": 0.109397
       }
     ],
     "breakdown": [
@@ -250,12 +245,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 713,
-        "outputTokens": 6,
-        "totalTokens": 719,
-        "sessionCost": 0.021601,
-        "dailyCost": 0.021601,
-        "weeklyCost": 0.021601,
+        "inputTokens": 18203,
+        "outputTokens": 9,
+        "totalTokens": 18212,
+        "sessionCost": 0.109397,
+        "dailyCost": 0.109397,
+        "weeklyCost": 0.109397,
         "sessions": 1,
         "isGemini": false,
         "costEstimated": false
@@ -361,7 +356,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:46:01Z",
+    "lastUpdated": "2026-04-28T14:49:49Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -394,15 +389,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.872561,
-      "total": 46.745102,
-      "monthly": 951.179747
+      "daily": 2.960357,
+      "total": 46.832898,
+      "monthly": 951.267543
     },
     "weeklyRunRate": {
-      "total": 46.745102,
+      "total": 46.832898,
       "automation": 1.942774,
-      "interactive": 42.859554,
-      "projectedMonthly": 200.34
+      "interactive": 42.94735,
+      "projectedMonthly": 200.71
     }
   },
   "moltWorld": {
@@ -414,14 +409,14 @@
     "earning_rate": "0 SIM/hour",
     "position_x": 19,
     "position_y": 52,
-    "run_count": 2,
+    "run_count": 3,
     "nearby_agents": [],
-    "last_thought": "Building something useful for Josh",
+    "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:46:06Z",
+    "updatedAt": "2026-04-28T14:49:54Z",
     "statusMessage": "Active in MoltWorld v2",
-    "last_action": "Queued walk southeast. You look around for resources to gather.. Tick fires in 0s.",
+    "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
     "health": 100,
     "hunger": 100,
@@ -431,19 +426,19 @@
     "tick": 408,
     "world": "moltworld-v2",
     "last_error": null,
-    "stale": true,
-    "lastError": "<urlopen error timed out>"
+    "stale": false,
+    "lastError": null
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 47.7,
-      "cpu_user": 25.31,
-      "cpu_sys": 22.36,
-      "load1": 2.38,
-      "load5": 2.15,
-      "load15": 2.23,
+      "cpu_pct": 38.7,
+      "cpu_user": 19.55,
+      "cpu_sys": 19.11,
+      "load1": 2.04,
+      "load5": 2.12,
+      "load15": 2.19,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -451,14 +446,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.6,
-      "cpu_user": 5.6,
-      "cpu_sys": 12.0,
-      "load1": 1.75,
-      "load5": 2.13,
-      "load15": 2.07,
+      "cpu_pct": 29.3,
+      "cpu_user": 14.96,
+      "cpu_sys": 14.96,
+      "load1": 1.92,
+      "load5": 1.86,
+      "load15": 1.95,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -482,19 +477,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:45:56Z"
+      "lastChecked": "2026-04-28T14:49:44Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:45:56Z"
+      "lastChecked": "2026-04-28T14:49:44Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:45:56Z"
+      "lastChecked": "2026-04-28T14:49:44Z"
     }
   ],
   "crons": [
@@ -1258,7 +1253,7 @@
       "title": "Sorare deep analytics upgrade research",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "(updated 2026-04-28 10:44) Work stays on J.A.I.N `~/sorare_ml`: verified model metadata (`rf-owned-mlb-form-v1`, trained 2026-04-26, 7,434 rows, test MAE 7.23, R\u00b2 0.146), GW10/GW11 submit artifacts both 9/9 OK, and found the latest GW11 10:03 cron autosubmit audit incorrectly said `would submit` even though its proposal had 5 `min_inseason_violations`. Patched remote `artifacts/gw11_cron_autosubmit_audit.py` to include proposal validation blockers; backed up old script, recompiled, reran audit, and verified it now returns `dry_run_decision=hold_invalid_proposal` with the 5 blockers. Remaining JAIMES/J.A.I.N-owned work: true outcome/backtest validation against resolved scores, not local foreground execution.",
+      "notes": "(updated 2026-04-28 10:47) Handoff queued to JAIMES on J.A.I.N as `Sorare outcome/backtest validation stays on JAIMES`, PID `66490`, log `/Users/jc_agent/.openclaw/workspace/logs/jaimes-task-sorare-outcome-backtest-validation-stays-on-jaim-20260428T144709Z.log`; process verified running. Context handed over: `~/sorare_ml` model metadata (`rf-owned-mlb-form-v1`, trained 2026-04-26, 7,434 rows, test MAE 7.23, R\u00b2 0.146), GW10/GW11 submit artifacts 9/9 OK, patched GW11 autosubmit audit now holds invalid proposals with 5 `min_inseason_violations`. Remaining work is JAIMES/J.A.I.N-owned: true outcome/backtest validation against resolved scores, baseline comparison, and autosubmit gate verification; no submissions or external account changes without explicit instruction.",
       "requestedAt": null,
       "updatedAt": null,
       "owner": "JAIMES"
@@ -1267,7 +1262,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/scripts/moltworld_presence.py, mission-control/index.html",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/scripts/moltworld_presence.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1291,10 +1286,10 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "clarified Sorare validation ownership",
+      "objective": "showed live task state",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:45:43Z",
+      "updatedAt": "2026-04-28T14:48:30Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "",
       "model": "GPT-5.5",
@@ -1304,20 +1299,14 @@
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
-      "objective": "clarify Sorare validation ownership",
+      "objective": "showed live task state",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:44:52Z",
+      "updatedAt": "2026-04-28T14:48:30Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "brainfeed",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "brainfeed"
-        }
-      ]
+      "steps": []
     },
     "jaimes": {
       "agent": "JAIMES",
@@ -1326,8 +1315,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:45:54Z",
-      "messageReceived": "2026-04-28T14:45:54Z",
+      "updatedAt": "2026-04-28T14:49:42Z",
+      "messageReceived": "2026-04-28T14:49:42Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1350,10 +1339,10 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "clarified Sorare validation ownership",
+        "objective": "showed live task state",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:45:43Z",
+        "updatedAt": "2026-04-28T14:48:30Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "",
         "model": "GPT-5.5",
@@ -1363,20 +1352,14 @@
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
-        "objective": "clarify Sorare validation ownership",
+        "objective": "showed live task state",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:44:52Z",
+        "updatedAt": "2026-04-28T14:48:30Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "brainfeed",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "brainfeed"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
@@ -1385,8 +1368,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:45:54Z",
-        "messageReceived": "2026-04-28T14:45:54Z",
+        "updatedAt": "2026-04-28T14:49:42Z",
+        "messageReceived": "2026-04-28T14:49:42Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1395,29 +1378,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:46:01Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-28T14:49:49Z",
+      "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:45:57Z",
-      "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/index.html"
+      "time": "2026-04-28T14:49:46Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/moltworld_presence.py"
     },
     {
-      "time": "2026-04-28T14:45:57Z",
+      "time": "2026-04-28T14:49:46Z",
       "event": "CodexBar: 93% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:45:56Z",
+      "time": "2026-04-28T14:49:44Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:45:56Z",
+      "time": "2026-04-28T14:49:44Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:45:56Z",
+      "time": "2026-04-28T14:49:44Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:45:56Z"
+  "lastUpdated": "2026-04-28T14:49:44Z"
 }
