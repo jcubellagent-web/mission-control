@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: rerun GW11 with ceiling exposure rules",
+  "objective": "Step: fetch GW11 live contender slots",
   "status": "active",
-  "updatedAt": "2026-04-28T00:33:46Z",
-  "checkedAt": "2026-04-28T00:33:46Z",
-  "messageReceived": "2026-04-28T00:33:46Z",
-  "currentTool": "model",
+  "updatedAt": "2026-04-28T00:35:43Z",
+  "checkedAt": "2026-04-28T00:35:43Z",
+  "messageReceived": "2026-04-28T00:35:43Z",
+  "currentTool": "web",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -16,24 +16,9 @@
       "tool": "hermes"
     },
     {
-      "label": "Task: set Sorare GW11 lineups with ceiling rules",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: discover GW11 fixture and comps",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Step: generate GW11 injury-aware optimizer",
-      "status": "done",
-      "tool": "model"
-    },
-    {
-      "label": "Step: rerun GW11 with ceiling exposure rules",
+      "label": "Step: fetch GW11 live contender slots",
       "status": "active",
-      "tool": "model"
+      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
