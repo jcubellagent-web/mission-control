@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "investigate Telegram spinner clear path",
+    "objective": "ran live spinner test and reported blocker",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T06:27:45Z",
-    "checkedAt": "2026-04-28T06:27:45Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T06:34:22Z",
+    "checkedAt": "2026-04-28T06:34:22Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "investigate Telegram spinner clear path",
-    "updatedAt": "2026-04-28T06:30:03Z"
+    "context": "ran live spinner test and reported blocker",
+    "updatedAt": "2026-04-28T06:35:03Z"
   },
   "contextWindow": {
-    "usedTokens": 57355,
+    "usedTokens": 82472,
     "limitTokens": 272000,
-    "pct": 0.2109,
+    "pct": 0.3032,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -133,36 +127,36 @@
     "workspaceDirty": 53,
     "missionControlDirty": 4,
     "recentFiles": [
+      "scripts/handle_josh_callback.py",
+      "scripts/answer_callback.py",
       "scripts/send_josh_callback_ack.py",
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
-      "mission-control/scripts/update_mission_control.py",
-      "mission-control/scripts/update_and_push.sh",
-      "mission-control/scripts/sync_jaimes_brain_feed.py"
+      "mission-control/scripts/update_mission_control.py"
     ],
-    "codexbarStatus": "Pro \u00b7 95% left \u00b7 wk 99% left",
+    "codexbarStatus": "Pro \u00b7 94% left \u00b7 wk 99% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 95% left [===========-]",
-        "Resets in 4h",
+        "Session: 94% left [===========-]",
+        "Resets in 3h 55m",
         "Weekly: 99% left [===========-]",
-        "Resets in 6d 23h",
+        "Resets in 6d 22h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com",
         "Plan: Pro"
       ],
-      "session": "95% left",
+      "session": "94% left",
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "4h",
-      "weeklyReset": "6d 23h",
-      "summary": "Pro \u00b7 95% left \u00b7 wk 99% left"
+      "sessionReset": "3h 55m",
+      "weeklyReset": "6d 22h",
+      "summary": "Pro \u00b7 94% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-28T06:30:06Z"
+    "updatedAt": "2026-04-28T06:35:06Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -322,9 +316,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 79071,
-        "outputTokens": 8784,
-        "totalTokens": 87855,
+        "inputTokens": 90490,
+        "outputTokens": 6357,
+        "totalTokens": 96847,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
@@ -368,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T06:30:09Z",
+    "lastUpdated": "2026-04-28T06:35:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -426,18 +420,18 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T06:30:14Z",
+    "updatedAt": "2026-04-28T06:35:14Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 71.0,
-      "cpu_user": 54.31,
-      "cpu_sys": 16.67,
-      "load1": 7.78,
-      "load5": 8.87,
-      "load15": 8.49,
+      "cpu_pct": 71.6,
+      "cpu_user": 54.64,
+      "cpu_sys": 16.97,
+      "load1": 8.37,
+      "load5": 8.22,
+      "load15": 8.3,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -447,12 +441,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.0,
-      "cpu_user": 3.5,
-      "cpu_sys": 10.52,
-      "load1": 1.89,
-      "load5": 1.96,
-      "load15": 2.05,
+      "cpu_pct": 13.6,
+      "cpu_user": 3.2,
+      "cpu_sys": 10.4,
+      "load1": 2.18,
+      "load5": 2.33,
+      "load15": 2.22,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:30:03Z"
+      "lastChecked": "2026-04-28T06:35:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:30:03Z"
+      "lastChecked": "2026-04-28T06:35:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T06:30:03Z"
+      "lastChecked": "2026-04-28T06:35:03Z"
     }
   ],
   "crons": [
@@ -1240,9 +1234,9 @@
       "title": "Improve Telegram button feedback UX",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Added `scripts/send_josh_callback_ack.py` and used it to send an immediate visible ack for the selected button, confirming the chosen option and the next step being started. Remaining deeper fix: clear Telegram\u2019s spinner itself via `answerCallbackQuery`, which needs the callback query id surfaced reliably in this lane.",
+      "notes": "Fresh live tap test confirms the visible ack path works, but native spinner clearing still fails because the ID available in runtime-context/session data is not accepted by Telegram as a valid callback query id. Next likely fix is deeper: patch OpenClaw\u2019s Telegram callback handler or surface the real callback id to this lane immediately.",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 02:22",
+      "updatedAt": "2026-04-28 02:32",
       "owner": "JOSH 2.0"
     },
     {
@@ -1299,7 +1293,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: scripts/send_josh_callback_ack.py, mission-control/scripts/mission_control_regression_check.py",
+      "label": "Editing: scripts/handle_josh_callback.py, scripts/answer_callback.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1323,20 +1317,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "investigate Telegram spinner clear path",
+      "objective": "ran live spinner test and reported blocker",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T06:27:45Z",
+      "updatedAt": "2026-04-28T06:34:22Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1358,8 +1346,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T06:30:01Z",
-      "messageReceived": "2026-04-28T06:30:01Z",
+      "updatedAt": "2026-04-28T06:35:01Z",
+      "messageReceived": "2026-04-28T06:35:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1382,20 +1370,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "investigate Telegram spinner clear path",
+        "objective": "ran live spinner test and reported blocker",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T06:27:45Z",
+        "updatedAt": "2026-04-28T06:34:22Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1417,8 +1399,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T06:30:01Z",
-        "messageReceived": "2026-04-28T06:30:01Z",
+        "updatedAt": "2026-04-28T06:35:01Z",
+        "messageReceived": "2026-04-28T06:35:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1427,29 +1409,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T06:30:09Z",
+      "time": "2026-04-28T06:35:09Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-28T06:30:06Z",
-      "event": "Coding: scripts/send_josh_callback_ack.py, mission-control/scripts/mission_control_regression_check.py"
+      "time": "2026-04-28T06:35:06Z",
+      "event": "Coding: scripts/handle_josh_callback.py, scripts/answer_callback.py"
     },
     {
-      "time": "2026-04-28T06:30:06Z",
-      "event": "CodexBar: Pro \u00b7 95% left \u00b7 wk 99% left"
+      "time": "2026-04-28T06:35:06Z",
+      "event": "CodexBar: Pro \u00b7 94% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-28T06:30:03Z",
+      "time": "2026-04-28T06:35:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T06:30:03Z",
+      "time": "2026-04-28T06:35:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T06:30:03Z",
+      "time": "2026-04-28T06:35:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T06:30:03Z"
+  "lastUpdated": "2026-04-28T06:35:03Z"
 }
