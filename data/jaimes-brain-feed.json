@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: validating CI artifacts",
-  "status": "active",
-  "updatedAt": "2026-04-28T05:17:00Z",
+  "active": false,
+  "objective": "Mission Control watchdog clean",
+  "status": "idle",
+  "updatedAt": "2026-04-28T05:17:18Z",
   "checkedAt": "2026-04-28T05:17:00Z",
   "messageReceived": "2026-04-28T05:17:00Z",
-  "currentTool": "code",
+  "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -27,7 +27,7 @@
     },
     {
       "label": "Mission Control: validating CI artifacts",
-      "status": "active",
+      "status": "done",
       "tool": "code"
     }
   ],
