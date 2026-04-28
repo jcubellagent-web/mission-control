@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: inspecting Mission Control dirty state",
+  "objective": "Step: validating and committing MC dirty files",
   "status": "active",
-  "updatedAt": "2026-04-28T04:21:57Z",
-  "checkedAt": "2026-04-28T04:21:57Z",
-  "messageReceived": "2026-04-28T04:21:57Z",
+  "updatedAt": "2026-04-28T04:23:17Z",
+  "checkedAt": "2026-04-28T04:23:17Z",
+  "messageReceived": "2026-04-28T04:23:17Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -32,6 +32,11 @@
     },
     {
       "label": "Step: inspecting Mission Control dirty state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: validating and committing MC dirty files",
       "status": "active",
       "tool": "exec"
     }
