@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: refetch live GW11 and ESPN schedule",
+  "objective": "Step: audit GW11 SPs against probables",
   "status": "active",
-  "updatedAt": "2026-04-28T00:50:24Z",
-  "checkedAt": "2026-04-28T00:50:24Z",
-  "messageReceived": "2026-04-28T00:50:24Z",
-  "currentTool": "exec",
+  "updatedAt": "2026-04-28T00:51:10Z",
+  "checkedAt": "2026-04-28T00:51:10Z",
+  "messageReceived": "2026-04-28T00:51:10Z",
+  "currentTool": "web",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -17,8 +17,13 @@
     },
     {
       "label": "Step: refetch live GW11 and ESPN schedule",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Step: audit GW11 SPs against probables",
+      "status": "active",
+      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
