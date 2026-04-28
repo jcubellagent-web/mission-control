@@ -7,6 +7,7 @@ WORKSPACE_DIR=$(cd -- "$ROOT_DIR/.." && pwd)
 cd "$WORKSPACE_DIR/kiosk-dashboard"
 npm run model:sync
 cd "$ROOT_DIR"
+python3 scripts/sync_jaimes_brain_feed.py || true
 # Pull J.A.I.N brain feed and newsfeed from remote (non-blocking on failure)
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
@@ -42,7 +43,7 @@ else
 fi
 if [[ -n "$GH_TOKEN" ]]; then
   AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
-  git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin main
+  git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin HEAD:main
 else
-  git push origin main
+  git push origin HEAD:main
 fi
