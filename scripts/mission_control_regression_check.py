@@ -130,7 +130,7 @@ def check_index_wiring() -> None:
     )
     require("function brainFeedAgentClass" in html, "Brain Feed cards must expose agent-specific visual classes")
     require("agent-josh" in html and "agent-jaimes" in html, "Brain Feed cards must visually distinguish JOSH 2.0 and JAIMES")
-    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: 238px" in html, "Dual live objective boxes must be taller")
+    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: clamp(224px, 23vh, 248px)" in html, "Dual live objective boxes must stay tall but kiosk-balanced")
     require(".bf-hero-grid.dual-live .bf-objective-text-wrap" in html and "* 3" in html, "Dual live objectives must show a taller text viewport")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
