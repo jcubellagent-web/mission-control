@@ -10085,7 +10085,12 @@
             // Brain Feed — Supabase is the live feed source of truth.
             // Reconcile after dashboard data loads so delegated tracked tasks can
             // promote JAIMES/J.A.I.N in the hero even when their feed sidecar is idle.
-            renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+            const dashboardFeeds = data.agentBrainFeeds || {};
+            renderCombinedBrainFeed(
+                dashboardFeeds.josh || window._mcLastBrainFeed || null,
+                dashboardFeeds.jain || _jainBrainFeed,
+                dashboardFeeds.jaimes || _uaJaimesBf,
+            );
 
             // Action Required (diff-guarded)
             if (!sectionChanged('actionRequired', data.actionRequired)) { /* skip */ } else
