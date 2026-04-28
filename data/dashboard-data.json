@@ -17,7 +17,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: heartbeat triage completed, self-maintenance ran and mission control recency checked",
-    "updatedAt": "2026-04-28T04:26:29Z"
+    "updatedAt": "2026-04-28T04:34:09Z"
   },
   "contextWindow": {
     "usedTokens": 317418,
@@ -129,16 +129,16 @@
     "recentFiles": [
       "scripts/feedback_offset.json",
       "scripts/intel_feedback_offset.json",
-      "mission-control/scripts/jain_bf_pull.sh",
-      "mission-control/scripts/update_and_push.sh",
-      "scripts/jaimes_healthcheck_state.json",
-      "scripts/jaimes_healthcheck_status.json"
+      "scripts/model_efficiency_guard.py",
+      "scripts/x_growth_tracker.py",
+      "scripts/x_feedback_ml.py",
+      "mission-control/scripts/update_mission_control.py"
     ],
     "codexbarStatus": "Codex auth required",
     "codexbar": {
       "available": false
     },
-    "updatedAt": "2026-04-28T04:26:39Z"
+    "updatedAt": "2026-04-28T04:34:17Z"
   },
   "modelUsage": {
     "session": 0.876,
@@ -283,7 +283,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T04:26:41Z",
+    "lastUpdated": "2026-04-28T04:34:19Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -306,7 +306,9 @@
       "byok_daily": 0.0,
       "byok_weekly": 0.0,
       "byok_monthly": 0.0,
-      "available": false
+      "available": false,
+      "disabled": true,
+      "lastError": "disabled: OpenRouter usage fetch retired"
     },
     "elevenlabs": {
       "chars_used": 0,
@@ -339,20 +341,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T04:26:46Z",
+    "updatedAt": "2026-04-28T04:34:24Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 28.7,
-      "cpu_user": 11.76,
-      "cpu_sys": 16.91,
-      "load1": 2.54,
-      "load5": 1.98,
-      "load15": 1.93,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 28.0,
+      "cpu_user": 12.8,
+      "cpu_sys": 15.2,
+      "load1": 2.27,
+      "load5": 2.12,
+      "load15": 2.02,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -360,14 +362,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.0,
-      "cpu_user": 2.63,
-      "cpu_sys": 11.4,
-      "load1": 2.54,
-      "load5": 1.98,
-      "load15": 1.93,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 17.4,
+      "cpu_user": 6.95,
+      "cpu_sys": 10.43,
+      "load1": 2.27,
+      "load5": 2.12,
+      "load15": 2.02,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -391,19 +393,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T04:26:29Z"
+      "lastChecked": "2026-04-28T04:34:09Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T04:26:29Z"
+      "lastChecked": "2026-04-28T04:34:09Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T04:26:29Z"
+      "lastChecked": "2026-04-28T04:34:09Z"
     }
   ],
   "crons": [
@@ -1189,47 +1191,109 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
-      "objective": "Idle \u00b7 last: jaimes-ops-drift-check (ok)",
-      "status": "idle",
+      "active": true,
+      "reportedActive": true,
+      "objective": "Step: rerunning guards after alert patch",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T04:26:27Z",
-      "messageReceived": "2026-04-28T04:15:44Z",
-      "currentTool": "",
-      "model": "GPT-5.5",
+      "updatedAt": "2026-04-28T04:34:09Z",
+      "messageReceived": "2026-04-28T04:34:09Z",
+      "currentTool": "exec",
+      "model": "gpt-5.5",
       "steps": [
         {
           "label": "jaimes-ops-drift-check",
           "status": "done",
           "tool": "hermes"
+        },
+        {
+          "label": "Task: approved ops cleanup fixes",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: locating approved cleanup sources",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: patching retired X and OpenRouter cleanup",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Step: safely attempting raw X cron removal",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verifying approved ops cleanup",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: rerunning guards after alert patch",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JAIMES"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JAIMES",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Idle \u00b7 last: jaimes-ops-drift-check (ok)",
-        "status": "idle",
+        "active": true,
+        "reportedActive": true,
+        "objective": "Step: rerunning guards after alert patch",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T04:26:27Z",
-        "messageReceived": "2026-04-28T04:15:44Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
+        "updatedAt": "2026-04-28T04:34:09Z",
+        "messageReceived": "2026-04-28T04:34:09Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
         "steps": [
           {
             "label": "jaimes-ops-drift-check",
             "status": "done",
             "tool": "hermes"
+          },
+          {
+            "label": "Task: approved ops cleanup fixes",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: locating approved cleanup sources",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: patching retired X and OpenRouter cleanup",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Step: safely attempting raw X cron removal",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verifying approved ops cleanup",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: rerunning guards after alert patch",
+            "status": "active",
+            "tool": "exec"
           }
         ]
       },
@@ -1263,29 +1327,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T04:26:41Z",
+      "time": "2026-04-28T04:34:19Z",
       "event": "Session spend: $0.88"
     },
     {
-      "time": "2026-04-28T04:26:39Z",
+      "time": "2026-04-28T04:34:17Z",
       "event": "Coding: scripts/feedback_offset.json, scripts/intel_feedback_offset.json"
     },
     {
-      "time": "2026-04-28T04:26:39Z",
+      "time": "2026-04-28T04:34:17Z",
       "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-04-28T04:26:29Z",
+      "time": "2026-04-28T04:34:09Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-28T04:26:29Z",
+      "time": "2026-04-28T04:34:09Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T04:26:29Z",
+      "time": "2026-04-28T04:34:09Z",
       "event": "1 device alert"
     }
   ],
-  "lastUpdated": "2026-04-28T04:26:29Z"
+  "lastUpdated": "2026-04-28T04:34:09Z"
 }

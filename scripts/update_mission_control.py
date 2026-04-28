@@ -831,82 +831,23 @@ def save_accum(a: Dict[str, Any]) -> None:
     ACCUM_PATH.write_text(json.dumps(a, indent=2))
 
 def fetch_openrouter_usage() -> Dict[str, Any]:
-    """Fetch OpenRouter key usage stats (covers BYOK Grok/Claude calls routed via openrouter.ai).
-    Tries multiple keys — primary key (used for inference) + secondary key from secrets file.
-    Aggregates usage across all keys for the same account.
+    """OpenRouter usage disabled.
+
+    Josh moved JAIMES away from OpenRouter. Returning a stable disabled
+    payload avoids stale-key 401 warnings and prevents dashboard refreshes
+    from reading old OpenRouter secret files.
     """
-    empty = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0, "byok_daily": 0.0, "byok_weekly": 0.0,
-             "byok_monthly": 0.0, "available": False}
-    # Keys to try: load from ~/.secrets/openrouter_api_key.txt or auth-profiles.json
-    keys_to_try = []
-    # Priority 1: ~/.secrets/openrouter_api_key.txt (most up-to-date)
-    key_file = Path.home() / ".secrets" / "openrouter_api_key.txt"
-    if key_file.exists():
-        k = key_file.read_text().strip()
-        if k: keys_to_try.append(k)
-    # Priority 2: secrets env file
-    sec_key_path = Path(os.path.expanduser("~/.openclaw/workspace/secrets/openrouter.env"))
-    if sec_key_path.exists():
-        for line in sec_key_path.read_text().splitlines():
-            if line.startswith("OPENROUTER_API_KEY="):
-                sec_key = line.split("=", 1)[1].strip()
-                if sec_key and sec_key not in keys_to_try:
-                    keys_to_try.append(sec_key)
-    # Priority 3: openclaw auth-profiles (may be stale)
-    auth_path = Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json"
-    if auth_path.exists():
-        try:
-            import json as _json
-            d = _json.loads(auth_path.read_text())
-            k = d.get("profiles", {}).get("openrouter:default", {}).get("key", "")
-            if k and k not in keys_to_try: keys_to_try.append(k)
-        except: pass
-
-    agg: Dict[str, float] = {"daily": 0.0, "weekly": 0.0, "monthly": 0.0,
-                              "byok_daily": 0.0, "byok_weekly": 0.0, "byok_monthly": 0.0}
-    any_ok = False
-    seen_user_ids: set = set()
-
-    warnings: list[str] = []
-    for key in keys_to_try:
-        try:
-            req = urllib.request.Request(
-                "https://openrouter.ai/api/v1/auth/key",
-                headers={"Authorization": f"Bearer {key}", "User-Agent": "mission-control/1.0"},
-            )
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                data = json.loads(resp.read().decode())
-            if "error" in data:
-                continue
-            d = data.get("data", {})
-            # Skip if same account (same creator_user_id) — avoid double-counting
-            uid = d.get("creator_user_id", key)
-            if uid in seen_user_ids:
-                # Same account — take the max of each field (not sum) to avoid double-count
-                agg["daily"]        = max(agg["daily"],        float(d.get("usage_daily", 0) or 0))
-                agg["weekly"]       = max(agg["weekly"],       float(d.get("usage_weekly", 0) or 0))
-                agg["monthly"]      = max(agg["monthly"],      float(d.get("usage_monthly", 0) or 0))
-                agg["byok_daily"]   = max(agg["byok_daily"],   float(d.get("byok_usage_daily", 0) or 0))
-                agg["byok_weekly"]  = max(agg["byok_weekly"],  float(d.get("byok_usage_weekly", 0) or 0))
-                agg["byok_monthly"] = max(agg["byok_monthly"], float(d.get("byok_usage_monthly", 0) or 0))
-            else:
-                agg["daily"]        += float(d.get("usage_daily", 0) or 0)
-                agg["weekly"]       += float(d.get("usage_weekly", 0) or 0)
-                agg["monthly"]      += float(d.get("usage_monthly", 0) or 0)
-                agg["byok_daily"]   += float(d.get("byok_usage_daily", 0) or 0)
-                agg["byok_weekly"]  += float(d.get("byok_usage_weekly", 0) or 0)
-                agg["byok_monthly"] += float(d.get("byok_usage_monthly", 0) or 0)
-            seen_user_ids.add(uid)
-            any_ok = True
-        except Exception as exc:
-            warnings.append(f"fetch_openrouter_usage key={key[:12]}... failed: {exc}")
-
-    if not any_ok:
-        for msg in warnings[:2]:
-            print(f"[warn] {msg}", file=sys.stderr)
-        return empty
-    return {**agg, "available": True}
-
+    return {
+        "daily": 0.0,
+        "weekly": 0.0,
+        "monthly": 0.0,
+        "byok_daily": 0.0,
+        "byok_weekly": 0.0,
+        "byok_monthly": 0.0,
+        "available": False,
+        "disabled": True,
+        "lastError": "disabled: OpenRouter usage fetch retired",
+    }
 
 def fetch_elevenlabs_usage() -> Dict[str, Any]:
     """Fetch ElevenLabs character usage (both machines' keys)."""
