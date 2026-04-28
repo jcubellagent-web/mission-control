@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Workspace heartbeat checked; J.A.I.N ping passed and recurring lost-task warnings remain after maintenance",
+  "objective": "Check workspace HEARTBEAT.md and execute any current instructions",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-28T10:02:00Z",
-  "checkedAt": "2026-04-28T10:02:00Z",
+  "steps": [
+    {
+      "label": "shell",
+      "status": "active",
+      "tool": "heartbeat-check"
+    }
+  ],
+  "currentTool": "heartbeat-check",
+  "updatedAt": "2026-04-28T10:56:25Z",
+  "checkedAt": "2026-04-28T10:56:25Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
