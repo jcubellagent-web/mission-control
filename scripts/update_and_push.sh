@@ -4,8 +4,13 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/opt
 export HOME="${HOME:-/Users/josh2.0}"  # ensure HOME is set in cron environment
 ROOT_DIR=$(cd -- "$(dirname -- "$0")/.." && pwd)
 WORKSPACE_DIR=$(cd -- "$ROOT_DIR/.." && pwd)
-cd "$WORKSPACE_DIR/kiosk-dashboard"
-npm run model:sync
+KIOSK_DIR="$WORKSPACE_DIR/kiosk-dashboard"
+if [[ -d "$KIOSK_DIR" ]]; then
+  cd "$KIOSK_DIR"
+  npm run model:sync
+else
+  echo "mission-control: kiosk-dashboard missing; skipping model sync"
+fi
 cd "$ROOT_DIR"
 python3 scripts/sync_jaimes_brain_feed.py || true
 # Pull J.A.I.N brain feed and newsfeed from remote (non-blocking on failure)
