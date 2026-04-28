@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: JOSH deploying approved polish",
-  "status": "active",
-  "updatedAt": "2026-04-28T17:18:23Z",
-  "checkedAt": "2026-04-28T17:18:23Z",
+  "active": false,
+  "objective": "Done: approved Mission Control polish deployed",
+  "status": "idle",
+  "updatedAt": "2026-04-28T17:19:14Z",
+  "checkedAt": "2026-04-28T17:19:01Z",
   "source": "jaimes_bf_push",
   "reportedActive": true,
   "stale": false,
@@ -31,10 +31,15 @@
     },
     {
       "label": "Mission Control: JOSH deploying approved polish",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: verifying approved polish live",
+      "status": "done",
+      "tool": "browser"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:18:23Z"
+  "messageReceived": "2026-04-28T17:19:01Z"
 }
