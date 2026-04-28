@@ -7222,6 +7222,7 @@
             if (!el) return;
             const summaryItems = [];
             const recentItems = [];
+            const seenBrainMessages = new Set();
 
             const pushBrainSummary = (bf, agentClass, agentLabel) => {
                 if (!bf) return;
@@ -7236,6 +7237,8 @@
                     normalized.startsWith('idle · last:')
                 );
                 if (noisyIdle) return;
+                if (seenBrainMessages.has(normalized)) return;
+                seenBrainMessages.add(normalized);
                 const item = {
                     agentClass,
                     agentLabel,
