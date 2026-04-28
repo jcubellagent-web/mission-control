@@ -5,30 +5,24 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "optimize Telegram button feedback and selection ack",
+    "objective": "Workspace heartbeat checked; mission control was healthy, scheduled checks were not due, and OpenClaw self-maintenance timed out twice",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T06:11:37Z",
-    "checkedAt": "2026-04-28T06:11:37Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-28T06:24:49Z",
+    "checkedAt": "2026-04-28T06:24:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.4"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "optimize Telegram button feedback and selection ack",
-    "updatedAt": "2026-04-28T06:20:04Z"
+    "context": "Workspace heartbeat checked; mission control was healthy, scheduled checks were not due, and OpenClaw self-maintenance timed out twice",
+    "updatedAt": "2026-04-28T06:25:05Z"
   },
   "contextWindow": {
-    "usedTokens": 32384,
+    "usedTokens": 35485,
     "limitTokens": 272000,
-    "pct": 0.1191,
+    "pct": 0.1305,
     "model": "gpt-5.4",
     "status": "green"
   },
@@ -131,7 +125,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 4,
+    "missionControlDirty": 5,
     "recentFiles": [
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
@@ -140,40 +134,40 @@
       "mission-control/scripts/sync_jaimes_brain_feed.py",
       "mission-control/scripts/run_mission_control_watchdog.sh"
     ],
-    "codexbarStatus": "Pro \u00b7 96% left \u00b7 wk 99% left",
+    "codexbarStatus": "Pro \u00b7 95% left \u00b7 wk 99% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 96% left [===========-]",
-        "Resets in 4h 10m",
+        "Session: 95% left [===========-]",
+        "Resets in 4h 5m",
         "Weekly: 99% left [===========-]",
         "Resets in 6d 23h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com",
         "Plan: Pro"
       ],
-      "session": "96% left",
+      "session": "95% left",
       "weekly": "99% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
       "plan": "Pro",
-      "sessionReset": "4h 10m",
+      "sessionReset": "4h 5m",
       "weeklyReset": "6d 23h",
-      "summary": "Pro \u00b7 96% left \u00b7 wk 99% left"
+      "summary": "Pro \u00b7 95% left \u00b7 wk 99% left"
     },
-    "updatedAt": "2026-04-28T06:20:06Z"
+    "updatedAt": "2026-04-28T06:25:07Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 0.0,
-    "weekly": 42.226787,
-    "monthly": 948.604206,
+    "daily": 0.516439,
+    "weekly": 42.446205,
+    "monthly": 948.823624,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 34.41342725
+        "cost": 34.63284575
       },
       {
         "name": "gpt-5.4-mini",
@@ -200,9 +194,9 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 34.41342725,
-        "dailyCost": 0.0,
-        "sessionCost": 34.41342725,
+        "weeklyCost": 34.63284575,
+        "dailyCost": 0.21941850000000002,
+        "sessionCost": 34.63284575,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -218,11 +212,11 @@
       {
         "name": "codex/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 25412,
-        "outputTokens": 15,
-        "totalTokens": 25427,
+        "inputTokens": 25438,
+        "outputTokens": 72,
+        "totalTokens": 25510,
         "sessionCost": 0.29702,
-        "dailyCost": 0.0,
+        "dailyCost": 0.29702,
         "weeklyCost": 0.29702,
         "sessions": 3,
         "isGemini": false,
@@ -322,9 +316,9 @@
       {
         "name": "openai/gpt-5.4",
         "source": "openclaw",
-        "inputTokens": 81828,
-        "outputTokens": 6935,
-        "totalTokens": 88763,
+        "inputTokens": 58031,
+        "outputTokens": 5694,
+        "totalTokens": 63725,
         "sessionCost": 0.0,
         "dailyCost": 0.0,
         "weeklyCost": 0.0,
@@ -368,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T06:20:09Z",
+    "lastUpdated": "2026-04-28T06:25:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -401,15 +395,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.0,
-      "total": 44.169561,
-      "monthly": 948.604206
+      "daily": 0.516439,
+      "total": 44.388979,
+      "monthly": 948.823624
     },
     "weeklyRunRate": {
-      "total": 44.169561,
+      "total": 44.388979,
       "automation": 1.942774,
-      "interactive": 40.284013,
-      "projectedMonthly": 189.3
+      "interactive": 40.503431,
+      "projectedMonthly": 190.24
     }
   },
   "moltWorld": {
@@ -426,20 +420,20 @@
     "last_thought": "Error fetching data",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T06:20:15Z",
+    "updatedAt": "2026-04-28T06:25:15Z",
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 81.5,
-      "cpu_user": 55.95,
-      "cpu_sys": 25.49,
-      "load1": 7.89,
-      "load5": 7.79,
-      "load15": 7.89,
+      "cpu_pct": 95.2,
+      "cpu_user": 51.85,
+      "cpu_sys": 43.37,
+      "load1": 9.85,
+      "load5": 8.75,
+      "load15": 8.24,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -447,14 +441,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.3,
-      "cpu_user": 5.8,
-      "cpu_sys": 10.16,
-      "load1": 1.82,
-      "load5": 2.2,
-      "load15": 2.18,
+      "cpu_pct": 13.4,
+      "cpu_user": 3.14,
+      "cpu_sys": 10.23,
+      "load1": 1.31,
+      "load5": 1.95,
+      "load15": 2.08,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -478,19 +472,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:20:04Z"
+      "lastChecked": "2026-04-28T06:25:05Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T06:20:04Z"
+      "lastChecked": "2026-04-28T06:25:05Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T06:20:04Z"
+      "lastChecked": "2026-04-28T06:25:05Z"
     }
   ],
   "crons": [
@@ -1236,6 +1230,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260428-999",
+      "title": "Improve Telegram button feedback UX",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh wants immediate visible feedback on selection: acknowledge which option was tapped and confirm I\u2019ve started the chosen next step(s). Inspecting the existing button send/handle path now so I can add a fast ack without worsening callback lag.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 02:19",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260427-971",
       "title": "Clean stale task drift",
       "status": "active",
@@ -1313,20 +1317,14 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "optimize Telegram button feedback and selection ack",
+      "objective": "Workspace heartbeat checked; mission control was healthy, scheduled checks were not due, and OpenClaw self-maintenance timed out twice",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T06:11:37Z",
+      "updatedAt": "2026-04-28T06:24:49Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.4",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1348,8 +1346,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T06:20:02Z",
-      "messageReceived": "2026-04-28T06:20:02Z",
+      "updatedAt": "2026-04-28T06:25:02Z",
+      "messageReceived": "2026-04-28T06:25:02Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1372,20 +1370,14 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "optimize Telegram button feedback and selection ack",
+        "objective": "Workspace heartbeat checked; mission control was healthy, scheduled checks were not due, and OpenClaw self-maintenance timed out twice",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T06:11:37Z",
+        "updatedAt": "2026-04-28T06:24:49Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.4",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "J.A.I.N",
@@ -1407,8 +1399,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T06:20:02Z",
-        "messageReceived": "2026-04-28T06:20:02Z",
+        "updatedAt": "2026-04-28T06:25:02Z",
+        "messageReceived": "2026-04-28T06:25:02Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1417,29 +1409,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T06:20:09Z",
+      "time": "2026-04-28T06:25:10Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-28T06:20:06Z",
+      "time": "2026-04-28T06:25:07Z",
       "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T06:20:06Z",
-      "event": "CodexBar: Pro \u00b7 96% left \u00b7 wk 99% left"
+      "time": "2026-04-28T06:25:07Z",
+      "event": "CodexBar: Pro \u00b7 95% left \u00b7 wk 99% left"
     },
     {
-      "time": "2026-04-28T06:20:04Z",
+      "time": "2026-04-28T06:25:05Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T06:20:04Z",
+      "time": "2026-04-28T06:25:05Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T06:20:04Z",
+      "time": "2026-04-28T06:25:05Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T06:20:04Z"
+  "lastUpdated": "2026-04-28T06:25:05Z"
 }

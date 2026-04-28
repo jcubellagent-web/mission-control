@@ -1,13 +1,13 @@
 {
   "session": 0.0,
-  "daily": 0.0,
-  "weekly": 42.226787,
-  "monthly": 948.604206,
+  "daily": 0.516439,
+  "weekly": 42.446205,
+  "monthly": 948.823624,
   "topModels": [
     {
       "name": "gpt-5.4",
       "window": "session",
-      "cost": 34.41342725
+      "cost": 34.63284575
     },
     {
       "name": "gpt-5.4-mini",
@@ -34,9 +34,9 @@
     {
       "name": "gpt-5.4",
       "source": "codex",
-      "weeklyCost": 34.41342725,
-      "dailyCost": 0.0,
-      "sessionCost": 34.41342725,
+      "weeklyCost": 34.63284575,
+      "dailyCost": 0.21941850000000002,
+      "sessionCost": 34.63284575,
       "totalTokens": 0,
       "costEstimated": false
     },
@@ -52,11 +52,11 @@
     {
       "name": "codex/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 25412,
-      "outputTokens": 15,
-      "totalTokens": 25427,
+      "inputTokens": 25438,
+      "outputTokens": 72,
+      "totalTokens": 25510,
       "sessionCost": 0.29702,
-      "dailyCost": 0.0,
+      "dailyCost": 0.29702,
       "weeklyCost": 0.29702,
       "sessions": 3,
       "isGemini": false,
@@ -156,9 +156,9 @@
     {
       "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 81828,
-      "outputTokens": 6935,
-      "totalTokens": 88763,
+      "inputTokens": 58031,
+      "outputTokens": 5694,
+      "totalTokens": 63725,
       "sessionCost": 0.0,
       "dailyCost": 0.0,
       "weeklyCost": 0.0,
@@ -202,7 +202,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-28T06:20:09Z",
+  "lastUpdated": "2026-04-28T06:25:10Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -235,14 +235,14 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.0,
-    "total": 44.169561,
-    "monthly": 948.604206
+    "daily": 0.516439,
+    "total": 44.388979,
+    "monthly": 948.823624
   },
   "weeklyRunRate": {
-    "total": 44.169561,
+    "total": 44.388979,
     "automation": 1.942774,
-    "interactive": 40.284013,
-    "projectedMonthly": 189.3
+    "interactive": 40.503431,
+    "projectedMonthly": 190.24
   }
 }
