@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Hermes callbacks: inspect diff",
+  "objective": "Hermes callbacks: verify patch",
   "status": "active",
-  "updatedAt": "2026-04-28T03:51:15Z",
-  "checkedAt": "2026-04-28T03:51:15Z",
-  "messageReceived": "2026-04-28T03:51:15Z",
+  "updatedAt": "2026-04-28T03:51:52Z",
+  "checkedAt": "2026-04-28T03:51:52Z",
+  "messageReceived": "2026-04-28T03:51:52Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -22,6 +22,11 @@
     },
     {
       "label": "Hermes callbacks: inspect diff",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes callbacks: verify patch",
       "status": "active",
       "tool": "exec"
     }
