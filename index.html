@@ -8321,6 +8321,14 @@
             if (!panel) return;
             if (!pc) {
                 panel.classList.remove('visible');
+                if (!window._personalCodexFallbackLoading) {
+                    window._personalCodexFallbackLoading = true;
+                    fetch('./data/personal-codex.json?ts=' + Date.now(), { cache: 'no-store' })
+                        .then(r => r.ok ? r.json() : null)
+                        .then(fallback => { if (fallback) renderPersonalCodex({ personalCodex: fallback }); })
+                        .catch(() => {})
+                        .finally(() => { window._personalCodexFallbackLoading = false; });
+                }
                 return;
             }
             panel.classList.add('visible');
