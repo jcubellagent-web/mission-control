@@ -2,7 +2,7 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed",
+      "title": "Calendar auth needs refresh",
       "url": ""
     },
     {
@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "verify Mission Control JAIMES updates display",
-    "updatedAt": "2026-04-28T14:55:03Z"
+    "updatedAt": "2026-04-28T14:56:30Z"
   },
   "contextWindow": {
     "usedTokens": 54427,
@@ -142,10 +142,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 13,
+    "missionControlDirty": 7,
     "recentFiles": [
-      "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/moltworld_presence.py"
     ],
     "codexbarStatus": "92% left \u00b7 wk 96% left",
@@ -154,7 +154,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 48m",
+        "Resets in 46m",
         "Weekly: 96% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
@@ -165,11 +165,11 @@
       "weekly": "96% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "48m",
+      "sessionReset": "46m",
       "weeklyReset": "6d 14h",
       "summary": "92% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-28T14:55:05Z"
+    "updatedAt": "2026-04-28T14:56:32Z"
   },
   "modelUsage": {
     "session": 0.109397,
@@ -362,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:55:09Z",
+    "lastUpdated": "2026-04-28T14:56:35Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -420,7 +420,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:55:14Z",
+    "updatedAt": "2026-04-28T14:56:40Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -437,14 +437,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.4,
-      "cpu_user": 18.18,
-      "cpu_sys": 18.18,
-      "load1": 2.63,
-      "load5": 2.48,
-      "load15": 2.32,
+      "cpu_pct": 39.1,
+      "cpu_user": 20.46,
+      "cpu_sys": 18.6,
+      "load1": 2.48,
+      "load5": 2.44,
+      "load15": 2.31,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -452,14 +452,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.5,
-      "cpu_user": 8.4,
-      "cpu_sys": 10.8,
-      "load1": 2.21,
-      "load5": 2.08,
-      "load15": 2.01,
+      "cpu_pct": 31.5,
+      "cpu_user": 16.66,
+      "cpu_sys": 14.88,
+      "load1": 1.77,
+      "load5": 1.94,
+      "load15": 1.96,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -468,8 +468,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "auth_expired",
+    "message": "Re-auth required"
   },
   "devices": [
     {
@@ -483,19 +483,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:55:03Z"
+      "lastChecked": "2026-04-28T14:56:30Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:55:03Z"
+      "lastChecked": "2026-04-28T14:56:30Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:55:03Z"
+      "lastChecked": "2026-04-28T14:56:30Z"
     }
   ],
   "crons": [
@@ -1278,7 +1278,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
+      "label": "Editing: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1337,8 +1337,8 @@
       "objective": "Sorare deep analytics upgrade research",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:55:03Z",
-      "messageReceived": "2026-04-28T14:55:01Z",
+      "updatedAt": "2026-04-28T14:56:30Z",
+      "messageReceived": "2026-04-28T14:56:28Z",
       "currentTool": "tracked task",
       "model": "Unknown",
       "steps": [
@@ -1373,8 +1373,8 @@
         "objective": "Sorare deep analytics upgrade research",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:55:03Z",
-        "messageReceived": "2026-04-28T14:55:01Z",
+        "updatedAt": "2026-04-28T14:56:30Z",
+        "messageReceived": "2026-04-28T14:56:28Z",
         "currentTool": "tracked task",
         "model": "Unknown",
         "steps": [
@@ -1423,29 +1423,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:55:09Z",
+      "time": "2026-04-28T14:56:35Z",
       "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:55:05Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
+      "time": "2026-04-28T14:56:32Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T14:55:05Z",
+      "time": "2026-04-28T14:56:32Z",
       "event": "CodexBar: 92% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-28T14:55:03Z",
+      "time": "2026-04-28T14:56:30Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:55:03Z",
+      "time": "2026-04-28T14:56:30Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:55:03Z",
+      "time": "2026-04-28T14:56:30Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:55:03Z"
+  "lastUpdated": "2026-04-28T14:56:30Z"
 }
