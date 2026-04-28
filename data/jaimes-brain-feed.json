@@ -1,34 +1,24 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: GW11 DNP audit found swap risks",
-  "status": "idle",
-  "updatedAt": "2026-04-28T00:54:14Z",
-  "checkedAt": "2026-04-28T00:51:57Z",
-  "messageReceived": "2026-04-28T00:51:57Z",
+  "active": true,
+  "objective": "Task: submit approved GW11 DNP-calibrated slate",
+  "status": "active",
+  "updatedAt": "2026-04-28T00:56:24Z",
+  "checkedAt": "2026-04-28T00:56:24Z",
+  "messageReceived": "2026-04-28T00:56:24Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
+      "label": "Sorare GW11 pre-lock lineup monitor",
       "status": "done",
       "tool": "hermes"
     },
     {
-      "label": "Step: refetch live GW11 and ESPN schedule",
-      "status": "done",
+      "label": "Task: submit approved GW11 DNP-calibrated slate",
+      "status": "active",
       "tool": "exec"
-    },
-    {
-      "label": "Step: audit GW11 SPs against probables",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Step: regenerate GW11 excluding DNP SPs",
-      "status": "done",
-      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
