@@ -1,11 +1,11 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Mission Control publisher sync fixed",
-  "status": "idle",
-  "updatedAt": "2026-04-28T16:18:23Z",
-  "checkedAt": "2026-04-28T16:17:31Z",
-  "messageReceived": "2026-04-28T16:17:31Z",
+  "active": true,
+  "objective": "Mission Control: stale task override fixed",
+  "status": "active",
+  "updatedAt": "2026-04-28T16:19:58Z",
+  "checkedAt": "2026-04-28T16:19:58Z",
+  "messageReceived": "2026-04-28T16:19:58Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
@@ -18,6 +18,11 @@
     {
       "label": "Mission Control watchdog running",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: stale task override fixed",
+      "status": "active",
       "tool": "exec"
     }
   ],
