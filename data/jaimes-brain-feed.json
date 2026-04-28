@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Step: audit GW11 SPs against probables",
+  "objective": "Step: regenerate GW11 excluding DNP SPs",
   "status": "active",
-  "updatedAt": "2026-04-28T00:51:10Z",
-  "checkedAt": "2026-04-28T00:51:10Z",
-  "messageReceived": "2026-04-28T00:51:10Z",
-  "currentTool": "web",
+  "updatedAt": "2026-04-28T00:51:57Z",
+  "checkedAt": "2026-04-28T00:51:57Z",
+  "messageReceived": "2026-04-28T00:51:57Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -22,8 +22,13 @@
     },
     {
       "label": "Step: audit GW11 SPs against probables",
-      "status": "active",
+      "status": "done",
       "tool": "web"
+    },
+    {
+      "label": "Step: regenerate GW11 excluding DNP SPs",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
