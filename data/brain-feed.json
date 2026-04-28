@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Workspace heartbeat checked; Gmail/Calendar auth still revoked and recurring lost-task warnings remain after maintenance",
+  "objective": "explain why foreground chat uses GPT-5.4 API vs GPT-5.5 subscription",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-28T13:41:57Z",
-  "checkedAt": "2026-04-28T13:41:57Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-28T13:56:40Z",
+  "checkedAt": "2026-04-28T13:56:40Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
