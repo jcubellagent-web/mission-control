@@ -5716,31 +5716,42 @@
         }
         /* Tighten overall item rhythm */
         .card-intel-highlights .intel-hi-item {
-            padding: 7px 0;
+            padding: 5px 0;
             border-bottom: 1px solid var(--rv-line-soft);
-            gap: 8px;
+            gap: 7px;
         }
         .card-intel-highlights .intel-hi-text {
-            font-size: 0.72rem;
+            font-size: 0.69rem;
             color: var(--rv-text);
-            line-height: 1.35;
+            line-height: 1.26;
+            -webkit-line-clamp: 2;
         }
         .card-intel-highlights .intel-hi-time {
-            font-size: 0.54rem;
+            font-size: 0.51rem;
             color: var(--rv-text-muted);
             font-variant-numeric: tabular-nums;
             letter-spacing: 0.04em;
+            opacity: 0.78;
         }
         .card-intel-highlights .intel-hi-source {
-            font-size: 0.56rem;
+            font-size: 0.54rem;
             color: var(--rv-text-muted);
         }
         .card-intel-highlights .intel-hi-reason {
-            font-size: 0.60rem;
+            font-size: 0.56rem;
             color: var(--rv-text-dim);
-            border-left: 2px solid rgba(229,62,62,0.25);
-            padding-left: 8px;
+            border-left: 1px solid rgba(229,62,62,0.20);
+            padding-left: 6px;
+            margin-top: 1px;
+            line-height: 1.25;
             font-style: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        body.kiosk-mode:not(.phone-mode) .card-intel-highlights .intel-hi-item:nth-child(n+6) {
+            display: none;
         }
         /* Desaturate skeleton placeholder dots to match unified palette */
         .card-intel-highlights .ns-cat-blue,
@@ -10393,40 +10404,40 @@
                 const budgetProjected = Math.max(budgetActualMonthly, budgetPaceProjected);
                 const budgetFillPct = Math.max(0, Math.min(100, (budgetProjected / budgetCap) * 100));
                 let budgetTone = 'good';
-                let budgetLabel = 'Excellent';
+                let budgetLabel = 'Under floor';
                 let budgetScore = 100;
-                let budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetFloor - budgetProjected))} below the floor.`;
+                let budgetNote = `Pace ${fmtCost(budgetProjected)}/mo; ${fmtCost(Math.max(0, budgetFloor - budgetProjected))} below the $${budgetFloor} floor.`;
                 if (budgetProjected <= budgetFloor) {
                     budgetTone = 'good';
-                    budgetLabel = 'Excellent';
+                    budgetLabel = 'Under floor';
                     budgetScore = 100;
                 } else if (budgetProjected <= budgetTarget) {
                     budgetTone = 'ok';
                     budgetLabel = 'On target';
                     const t = (budgetProjected - budgetFloor) / Math.max(1, budgetTarget - budgetFloor);
                     budgetScore = Math.round(100 - (t * 15));
-                    budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetTarget - budgetProjected))} under the $${budgetTarget} target.`;
+                    budgetNote = `Pace ${fmtCost(budgetProjected)}/mo; ${fmtCost(Math.max(0, budgetTarget - budgetProjected))} under target.`;
                 } else if (budgetProjected <= budgetCap) {
                     budgetTone = 'watch';
-                    budgetLabel = 'Watch closely';
+                    budgetLabel = 'Watch';
                     const t = (budgetProjected - budgetTarget) / Math.max(1, budgetCap - budgetTarget);
                     budgetScore = Math.round(85 - (t * 25));
-                    budgetNote = `Projected to finish ${fmtCost(Math.max(0, budgetCap - budgetProjected))} under the $${budgetCap} cap.`;
+                    budgetNote = `Pace ${fmtCost(budgetProjected)}/mo; ${fmtCost(Math.max(0, budgetCap - budgetProjected))} under cap.`;
                 } else {
                     budgetTone = 'bad';
-                    budgetLabel = 'Over budget';
+                    budgetLabel = 'Over cap';
                     const over = budgetProjected - budgetCap;
                     budgetScore = Math.max(0, Math.round(60 - ((over / budgetCap) * 60)));
-                    budgetNote = `Projected to miss the $${budgetCap} cap by ${fmtCost(over)} unless usage cools off.`;
+                    budgetNote = `Pace ${fmtCost(budgetProjected)}/mo; ${fmtCost(over)} over cap unless usage cools.`;
                 }
 
                 const budgetHtml = `
                 <div class="mu-budget-section">
                     <div class="mu-budget-head">
                         <div>
-                            <span class="mu-budget-kicker">Budget health</span>
+                            <span class="mu-budget-kicker">Budget pace</span>
                             <div class="mu-budget-main">${budgetLabel}</div>
-                            <div class="mu-budget-sub">Month ${fmtCost(budgetActualMonthly)} · Pace ${fmtCost(budgetPaceProjected)}/mo</div>
+                            <div class="mu-budget-sub">MTD ${fmtCost(budgetActualMonthly)} · Pace ${fmtCost(budgetProjected)}/mo</div>
                         </div>
                         <div class="mu-budget-score ${budgetTone}">
                             <span class="mu-budget-score-num">${budgetScore}</span>
