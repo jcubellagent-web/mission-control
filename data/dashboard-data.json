@@ -16,19 +16,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "showed live task state",
+    "objective": "verify Mission Control JAIMES updates display",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-28T14:48:30Z",
-    "checkedAt": "2026-04-28T14:48:30Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "brainfeed"
+      }
+    ],
+    "currentTool": "brainfeed",
+    "updatedAt": "2026-04-28T14:49:56Z",
+    "checkedAt": "2026-04-28T14:49:56Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "showed live task state",
-    "updatedAt": "2026-04-28T14:49:44Z"
+    "context": "verify Mission Control JAIMES updates display",
+    "updatedAt": "2026-04-28T14:50:03Z"
   },
   "contextWindow": {
     "usedTokens": 54427,
@@ -163,7 +169,7 @@
       "weeklyReset": "6d 14h",
       "summary": "93% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:49:46Z"
+    "updatedAt": "2026-04-28T14:50:05Z"
   },
   "modelUsage": {
     "session": 0.109397,
@@ -356,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:49:49Z",
+    "lastUpdated": "2026-04-28T14:50:08Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -414,7 +420,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:49:54Z",
+    "updatedAt": "2026-04-28T14:50:13Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -431,14 +437,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.7,
-      "cpu_user": 19.55,
-      "cpu_sys": 19.11,
-      "load1": 2.04,
-      "load5": 2.12,
-      "load15": 2.19,
+      "cpu_pct": 36.5,
+      "cpu_user": 17.87,
+      "cpu_sys": 18.66,
+      "load1": 2.34,
+      "load5": 2.19,
+      "load15": 2.21,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -446,12 +452,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 29.3,
-      "cpu_user": 14.96,
-      "cpu_sys": 14.96,
-      "load1": 1.92,
-      "load5": 1.86,
-      "load15": 1.95,
+      "cpu_pct": 12.1,
+      "cpu_user": 2.41,
+      "cpu_sys": 9.67,
+      "load1": 1.8,
+      "load5": 1.83,
+      "load15": 1.94,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -477,19 +483,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:49:44Z"
+      "lastChecked": "2026-04-28T14:50:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:49:44Z"
+      "lastChecked": "2026-04-28T14:50:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:49:44Z"
+      "lastChecked": "2026-04-28T14:50:03Z"
     }
   ],
   "crons": [
@@ -1286,14 +1292,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "showed live task state",
+      "objective": "verify Mission Control JAIMES updates display",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:48:30Z",
+      "updatedAt": "2026-04-28T14:49:56Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "brainfeed",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "brainfeed"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1315,8 +1327,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:49:42Z",
-      "messageReceived": "2026-04-28T14:49:42Z",
+      "updatedAt": "2026-04-28T14:50:01Z",
+      "messageReceived": "2026-04-28T14:50:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1339,14 +1351,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "showed live task state",
+        "objective": "verify Mission Control JAIMES updates display",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:48:30Z",
+        "updatedAt": "2026-04-28T14:49:56Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "brainfeed",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "brainfeed"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1368,8 +1386,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:49:42Z",
-        "messageReceived": "2026-04-28T14:49:42Z",
+        "updatedAt": "2026-04-28T14:50:01Z",
+        "messageReceived": "2026-04-28T14:50:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1378,29 +1396,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:49:49Z",
+      "time": "2026-04-28T14:50:08Z",
       "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:49:46Z",
+      "time": "2026-04-28T14:50:05Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/moltworld_presence.py"
     },
     {
-      "time": "2026-04-28T14:49:46Z",
+      "time": "2026-04-28T14:50:05Z",
       "event": "CodexBar: 93% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:49:44Z",
+      "time": "2026-04-28T14:50:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:49:44Z",
+      "time": "2026-04-28T14:50:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:49:44Z",
+      "time": "2026-04-28T14:50:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:49:44Z"
+  "lastUpdated": "2026-04-28T14:50:03Z"
 }
