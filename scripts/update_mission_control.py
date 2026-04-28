@@ -660,8 +660,11 @@ def apply_tracked_tasks_to_agent_feeds(
         if not key:
             continue
         current = merged.get(key, {})
-        current_live = bool(current.get("active") and is_recent_ts(current.get("updatedAt"), hours=2))
-        if current_live:
+        current_recent = is_recent_ts(current.get("updatedAt"), hours=2)
+        # A fresh explicit brain-feed state wins over task-file inference.
+        # This prevents old/stale tracked tasks from resurrecting noisy
+        # "active" cards after an agent has reported idle/done.
+        if current_recent:
             continue
         title = str(task.get("title") or current.get("objective") or "Working").strip()
         merged[key] = {
