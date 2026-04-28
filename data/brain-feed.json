@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Workspace heartbeat checked; recurring lost-task audit warnings confirmed after maintenance",
+  "objective": "sync memory to JAIN backup",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-28T07:18:32Z",
-  "checkedAt": "2026-04-28T07:18:32Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "sync_memory_to_jain"
+    }
+  ],
+  "currentTool": "sync_memory_to_jain",
+  "updatedAt": "2026-04-28T08:00:59Z",
+  "checkedAt": "2026-04-28T08:00:59Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.4"
 }
