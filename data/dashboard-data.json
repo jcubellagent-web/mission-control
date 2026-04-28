@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "verify Mission Control JAIMES updates display",
-    "updatedAt": "2026-04-28T14:50:03Z"
+    "updatedAt": "2026-04-28T14:55:03Z"
   },
   "contextWindow": {
     "usedTokens": 54427,
@@ -142,34 +142,34 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
-      "mission-control/scripts/moltworld_presence.py",
-      "mission-control/index.html"
+      "mission-control/index.html",
+      "mission-control/scripts/moltworld_presence.py"
     ],
-    "codexbarStatus": "93% left \u00b7 wk 97% left",
+    "codexbarStatus": "92% left \u00b7 wk 96% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 93% left [===========-]",
-        "Resets in 53m",
-        "Weekly: 97% left [===========-]",
-        "Pace: 3% in reserve | Expected 6% used | Lasts until reset",
+        "Session: 92% left [===========-]",
+        "Resets in 48m",
+        "Weekly: 96% left [===========-]",
+        "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "93% left",
-      "weekly": "97% left",
+      "session": "92% left",
+      "weekly": "96% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "53m",
+      "sessionReset": "48m",
       "weeklyReset": "6d 14h",
-      "summary": "93% left \u00b7 wk 97% left"
+      "summary": "92% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-28T14:50:05Z"
+    "updatedAt": "2026-04-28T14:55:05Z"
   },
   "modelUsage": {
     "session": 0.109397,
@@ -362,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:50:08Z",
+    "lastUpdated": "2026-04-28T14:55:09Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -420,7 +420,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:50:13Z",
+    "updatedAt": "2026-04-28T14:55:14Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -437,14 +437,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.5,
-      "cpu_user": 17.87,
-      "cpu_sys": 18.66,
-      "load1": 2.34,
-      "load5": 2.19,
-      "load15": 2.21,
+      "cpu_pct": 36.4,
+      "cpu_user": 18.18,
+      "cpu_sys": 18.18,
+      "load1": 2.63,
+      "load5": 2.48,
+      "load15": 2.32,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -452,14 +452,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 2.41,
-      "cpu_sys": 9.67,
-      "load1": 1.8,
-      "load5": 1.83,
-      "load15": 1.94,
+      "cpu_pct": 18.5,
+      "cpu_user": 8.4,
+      "cpu_sys": 10.8,
+      "load1": 2.21,
+      "load5": 2.08,
+      "load15": 2.01,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -483,19 +483,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:50:03Z"
+      "lastChecked": "2026-04-28T14:55:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:50:03Z"
+      "lastChecked": "2026-04-28T14:55:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:50:03Z"
+      "lastChecked": "2026-04-28T14:55:03Z"
     }
   ],
   "crons": [
@@ -1245,6 +1245,16 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260428-1005",
+      "title": "Verify Mission Control JAIMES objective display",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Found hero was only considering brain-feed sidecars, so a JAIMES-owned tracked task could be visible in Jobs while JAIMES still appeared idle in the hero. Patched Mission Control renderer and dashboard generator to synthesize live agent objectives from active tracked tasks; tightening verification now.",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 10:54",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
@@ -1268,7 +1278,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/scripts/moltworld_presence.py",
+      "label": "Editing: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "running",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1322,31 +1332,61 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
+      "active": true,
       "reportedActive": false,
-      "objective": "Standby",
-      "status": "idle",
+      "objective": "Sorare deep analytics upgrade research",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:50:01Z",
-      "messageReceived": "2026-04-28T14:50:01Z",
-      "currentTool": "",
+      "updatedAt": "2026-04-28T14:55:03Z",
+      "messageReceived": "2026-04-28T14:55:01Z",
+      "currentTool": "tracked task",
       "model": "Unknown",
-      "steps": []
+      "steps": [
+        {
+          "label": "Sorare deep analytics upgrade research",
+          "status": "active",
+          "tool": "tracked task"
+        }
+      ],
+      "taskBacked": true,
+      "taskId": "T-20260425-919"
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": false,
+        "objective": "Sorare deep analytics upgrade research",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T14:55:03Z",
+        "messageReceived": "2026-04-28T14:55:01Z",
+        "currentTool": "tracked task",
+        "model": "Unknown",
+        "steps": [
+          {
+            "label": "Sorare deep analytics upgrade research",
+            "status": "active",
+            "tool": "tracked task"
+          }
+        ],
+        "taskBacked": true,
+        "taskId": "T-20260425-919"
+      },
       {
         "agent": "JOSH 2.0",
         "active": true,
@@ -1378,47 +1418,34 @@
         "currentTool": "",
         "model": "GPT-5.5",
         "steps": []
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Standby",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-28T14:50:01Z",
-        "messageReceived": "2026-04-28T14:50:01Z",
-        "currentTool": "",
-        "model": "Unknown",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:50:08Z",
+      "time": "2026-04-28T14:55:09Z",
       "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:50:05Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/moltworld_presence.py"
+      "time": "2026-04-28T14:55:05Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:50:05Z",
-      "event": "CodexBar: 93% left \u00b7 wk 97% left"
+      "time": "2026-04-28T14:55:05Z",
+      "event": "CodexBar: 92% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-28T14:50:03Z",
+      "time": "2026-04-28T14:55:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:50:03Z",
+      "time": "2026-04-28T14:55:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:50:03Z",
+      "time": "2026-04-28T14:55:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:50:03Z"
+  "lastUpdated": "2026-04-28T14:55:03Z"
 }
