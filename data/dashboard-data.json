@@ -23,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "session startup completed",
-    "updatedAt": "2026-04-28T17:42:41Z"
+    "updatedAt": "2026-04-28T17:44:30Z"
   },
   "contextWindow": {
     "usedTokens": 30770,
@@ -131,7 +131,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -146,7 +146,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 90% left [==========--]",
-        "Resets in 3h 7m",
+        "Resets in 3h 5m",
         "Weekly: 93% left [===========-]",
         "Pace: On pace | Expected 7% used | Lasts until reset",
         "Resets in 6d 11h",
@@ -157,11 +157,11 @@
       "weekly": "93% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 7m",
+      "sessionReset": "3h 5m",
       "weeklyReset": "6d 11h",
       "summary": "90% left \u00b7 wk 93% left"
     },
-    "updatedAt": "2026-04-28T17:42:43Z"
+    "updatedAt": "2026-04-28T17:44:32Z"
   },
   "modelUsage": {
     "session": 0.01867,
@@ -354,7 +354,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T17:42:46Z",
+    "lastUpdated": "2026-04-28T17:44:35Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -412,7 +412,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T17:42:51Z",
+    "updatedAt": "2026-04-28T17:44:40Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -429,29 +429,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.7,
-      "cpu_user": 20.25,
-      "cpu_sys": 19.39,
-      "load1": 2.69,
-      "load5": 2.48,
-      "load15": 2.38,
+      "cpu_pct": 40.2,
+      "cpu_user": 20.52,
+      "cpu_sys": 19.65,
+      "load1": 2.73,
+      "load5": 2.51,
+      "load15": 2.4,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
-      "disk_pct": 13,
+      "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.6,
-      "cpu_user": 4.6,
-      "cpu_sys": 10.56,
-      "load1": 1.83,
-      "load5": 1.85,
-      "load15": 1.87,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "cpu_pct": 22.1,
+      "cpu_user": 9.2,
+      "cpu_sys": 12.88,
+      "load1": 2.73,
+      "load5": 2.14,
+      "load15": 1.98,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -475,19 +475,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:42:41Z"
+      "lastChecked": "2026-04-28T17:44:30Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T17:42:41Z"
+      "lastChecked": "2026-04-28T17:44:30Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T17:42:41Z"
+      "lastChecked": "2026-04-28T17:44:30Z"
     }
   ],
   "crons": [
@@ -1249,12 +1249,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-28T17:42:41.375468Z",
+    "checkedAt": "2026-04-28T17:44:30.739783Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1412,21 +1412,16 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
-      "objective": "Done: highlight/spend polish deployed",
-      "status": "idle",
+      "active": true,
+      "reportedActive": true,
+      "objective": "Mission Control: deploying final compact copy",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T17:42:26Z",
-      "messageReceived": "2026-04-28T17:41:46Z",
+      "updatedAt": "2026-04-28T17:44:15Z",
+      "messageReceived": "2026-04-28T17:44:15Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Visual canaries added",
-          "status": "done",
-          "tool": "code"
-        },
         {
           "label": "Model Spend compacted",
           "status": "done",
@@ -1471,66 +1466,41 @@
           "label": "Mission Control: deploying highlight/spend polish",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Mission Control: deploying final compact copy",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
       {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "objective": "session startup completed",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T17:31:10Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "objective": "session startup completed",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-28T17:31:10Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
-      },
-      {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Done: highlight/spend polish deployed",
-        "status": "idle",
+        "active": true,
+        "reportedActive": true,
+        "objective": "Mission Control: deploying final compact copy",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T17:42:26Z",
-        "messageReceived": "2026-04-28T17:41:46Z",
+        "updatedAt": "2026-04-28T17:44:15Z",
+        "messageReceived": "2026-04-28T17:44:15Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Visual canaries added",
-            "status": "done",
-            "tool": "code"
-          },
           {
             "label": "Model Spend compacted",
             "status": "done",
@@ -1575,36 +1545,67 @@
             "label": "Mission Control: deploying highlight/spend polish",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Mission Control: deploying final compact copy",
+            "status": "active",
+            "tool": "exec"
           }
         ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "objective": "session startup completed",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T17:31:10Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.4",
+        "steps": []
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "objective": "session startup completed",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-28T17:31:10Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.4",
+        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T17:42:46Z",
+      "time": "2026-04-28T17:44:35Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-28T17:42:43Z",
+      "time": "2026-04-28T17:44:32Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-28T17:42:43Z",
+      "time": "2026-04-28T17:44:32Z",
       "event": "CodexBar: 90% left \u00b7 wk 93% left"
     },
     {
-      "time": "2026-04-28T17:42:41Z",
+      "time": "2026-04-28T17:44:30Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T17:42:41Z",
+      "time": "2026-04-28T17:44:30Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T17:42:41Z",
+      "time": "2026-04-28T17:44:30Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:42:41Z"
+  "lastUpdated": "2026-04-28T17:44:30Z"
 }

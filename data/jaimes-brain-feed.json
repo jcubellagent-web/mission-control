@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: highlight/spend polish deployed",
-  "status": "idle",
-  "updatedAt": "2026-04-28T17:42:26Z",
-  "checkedAt": "2026-04-28T17:41:46Z",
+  "active": true,
+  "objective": "Mission Control: deploying final compact copy",
+  "status": "active",
+  "updatedAt": "2026-04-28T17:44:15Z",
+  "checkedAt": "2026-04-28T17:44:15Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Visual canaries added",
-      "status": "done",
-      "tool": "code"
-    },
     {
       "label": "Model Spend compacted",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Mission Control: deploying highlight/spend polish",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: deploying final compact copy",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:41:46Z"
+  "messageReceived": "2026-04-28T17:44:15Z"
 }
