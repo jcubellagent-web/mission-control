@@ -21,19 +21,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "session startup complete",
+    "objective": "clarify Sorare validation ownership",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-28T14:41:48Z",
-    "checkedAt": "2026-04-28T14:41:48Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "brainfeed"
+      }
+    ],
+    "currentTool": "brainfeed",
+    "updatedAt": "2026-04-28T14:44:52Z",
+    "checkedAt": "2026-04-28T14:44:52Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
-    "model": "GPT-5.4"
+    "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "session startup complete",
-    "updatedAt": "2026-04-28T14:44:52Z"
+    "context": "clarify Sorare validation ownership",
+    "updatedAt": "2026-04-28T14:45:03Z"
   },
   "contextWindow": {
     "usedTokens": 27713,
@@ -168,7 +174,7 @@
       "weeklyReset": "6d 14h",
       "summary": "93% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:44:54Z"
+    "updatedAt": "2026-04-28T14:45:05Z"
   },
   "modelUsage": {
     "session": 0.109369,
@@ -361,7 +367,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:44:57Z",
+    "lastUpdated": "2026-04-28T14:45:08Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -419,7 +425,7 @@
     "last_thought": "Looking for information, allies, and safe routes",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:45:02Z",
+    "updatedAt": "2026-04-28T14:45:13Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southeast. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -436,11 +442,11 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.7,
-      "cpu_user": 23.63,
-      "cpu_sys": 19.9,
-      "load1": 2.69,
-      "load5": 2.1,
+      "cpu_pct": 37.6,
+      "cpu_user": 19.9,
+      "cpu_sys": 18.5,
+      "load1": 2.66,
+      "load5": 2.11,
       "load15": 2.22,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
@@ -451,14 +457,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.2,
-      "cpu_user": 8.87,
-      "cpu_sys": 15.32,
-      "load1": 1.97,
-      "load5": 2.18,
-      "load15": 2.08,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 12.7,
+      "cpu_user": 2.54,
+      "cpu_sys": 10.16,
+      "load1": 2.36,
+      "load5": 2.25,
+      "load15": 2.11,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -482,19 +488,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:44:52Z"
+      "lastChecked": "2026-04-28T14:45:03Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:44:52Z"
+      "lastChecked": "2026-04-28T14:45:03Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:44:52Z"
+      "lastChecked": "2026-04-28T14:45:03Z"
     }
   ],
   "crons": [
@@ -1103,7 +1109,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T14:30:05.531818+00:00"
+      "lastRun": "2026-04-28T14:45:04.516445+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1291,14 +1297,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "session startup complete",
+      "objective": "clarify Sorare validation ownership",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T14:41:48Z",
+      "updatedAt": "2026-04-28T14:44:52Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
-      "model": "GPT-5.4",
-      "steps": []
+      "currentTool": "brainfeed",
+      "model": "GPT-5.5",
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "brainfeed"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1344,14 +1356,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "session startup complete",
+        "objective": "clarify Sorare validation ownership",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T14:41:48Z",
+        "updatedAt": "2026-04-28T14:44:52Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
+        "currentTool": "brainfeed",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "brainfeed"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1383,29 +1401,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:44:57Z",
+      "time": "2026-04-28T14:45:08Z",
       "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:44:54Z",
+      "time": "2026-04-28T14:45:05Z",
       "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:44:54Z",
+      "time": "2026-04-28T14:45:05Z",
       "event": "CodexBar: 93% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:44:52Z",
+      "time": "2026-04-28T14:45:03Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:44:52Z",
+      "time": "2026-04-28T14:45:03Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:44:52Z",
+      "time": "2026-04-28T14:45:03Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:44:52Z"
+  "lastUpdated": "2026-04-28T14:45:03Z"
 }
