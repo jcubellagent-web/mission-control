@@ -2,7 +2,7 @@
   "ok": false,
   "status": "attention",
   "summary": "2 canary issue(s)",
-  "checkedAt": "2026-04-28T17:14:16.299281Z",
+  "checkedAt": "2026-04-28T17:15:14.963210Z",
   "checks": [
     {
       "name": "Dual objectives",
@@ -12,15 +12,15 @@
     },
     {
       "name": "Calendar tile",
-      "ok": true,
-      "detail": "Connected",
-      "severity": "ok"
+      "ok": false,
+      "detail": "Calendar fetch failed",
+      "severity": "high"
     },
     {
       "name": "Today Jobs",
-      "ok": false,
-      "detail": "32 today-relevant; 1 active issue(s)",
-      "severity": "high"
+      "ok": true,
+      "detail": "32 today-relevant; 0 active issue(s)",
+      "severity": "ok"
     },
     {
       "name": "Action Required",
