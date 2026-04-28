@@ -17,5 +17,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install screenshot dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pillow playwright
+          python3 -m playwright install --with-deps chromium
       - name: Run static UI/data regression checks
         run: python3 scripts/mission_control_regression_check.py
+      - name: Run Brain Feed screenshot diff
+        run: python3 scripts/mission_control_screenshot_diff.py --max-diff-ratio 0.08
+      - name: Upload Brain Feed screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-control-brain-feed-screenshots
+          path: |
+            screenshots/current/*.png
+            screenshots/diffs/*.png
+          if-no-files-found: warn
+          retention-days: 14
