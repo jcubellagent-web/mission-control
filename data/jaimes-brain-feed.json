@@ -1,18 +1,23 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: Josh publisher aligned",
-  "status": "active",
-  "updatedAt": "2026-04-28T16:16:49Z",
-  "checkedAt": "2026-04-28T16:16:49Z",
-  "messageReceived": "2026-04-28T16:16:49Z",
+  "active": false,
+  "objective": "Done: Mission Control publisher sync fixed",
+  "status": "idle",
+  "updatedAt": "2026-04-28T16:18:23Z",
+  "checkedAt": "2026-04-28T16:17:31Z",
+  "messageReceived": "2026-04-28T16:17:31Z",
   "currentTool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
     {
       "label": "Mission Control: Josh publisher aligned",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
       "tool": "exec"
     }
   ],
