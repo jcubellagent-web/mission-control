@@ -1,12 +1,12 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Task: inspecting uploaded image",
+  "objective": "Step: vision model failed; using local OCR",
   "status": "active",
-  "updatedAt": "2026-04-28T03:53:55Z",
-  "checkedAt": "2026-04-28T03:53:55Z",
-  "messageReceived": "2026-04-28T03:53:55Z",
-  "currentTool": "exec",
+  "updatedAt": "2026-04-28T03:54:08Z",
+  "checkedAt": "2026-04-28T03:54:08Z",
+  "messageReceived": "2026-04-28T03:54:08Z",
+  "currentTool": "code",
   "model": "gpt-5.5",
   "auth": "subscription",
   "steps": [
@@ -47,8 +47,13 @@
     },
     {
       "label": "Task: inspecting uploaded image",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Step: vision model failed; using local OCR",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)"
