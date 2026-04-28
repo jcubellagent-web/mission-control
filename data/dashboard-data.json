@@ -12,7 +12,7 @@
     },
     {
       "priority": "medium",
-      "title": "MoltWorld API key missing; agent already exists",
+      "title": "MoltWorld stale: <urlopen error timed out>",
       "url": ""
     }
   ],
@@ -33,7 +33,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "session startup complete",
-    "updatedAt": "2026-04-28T14:43:37Z"
+    "updatedAt": "2026-04-28T14:44:52Z"
   },
   "contextWindow": {
     "usedTokens": 27713,
@@ -141,34 +141,34 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 5,
+    "missionControlDirty": 3,
     "recentFiles": [
       "mission-control/scripts/moltworld_presence.py",
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
     ],
-    "codexbarStatus": "94% left \u00b7 wk 97% left",
+    "codexbarStatus": "93% left \u00b7 wk 97% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 94% left [===========-]",
-        "Resets in 59m",
+        "Session: 93% left [===========-]",
+        "Resets in 58m",
         "Weekly: 97% left [===========-]",
-        "Pace: 2% in reserve | Expected 5% used | Lasts until reset",
+        "Pace: 3% in reserve | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "94% left",
+      "session": "93% left",
       "weekly": "97% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "59m",
+      "sessionReset": "58m",
       "weeklyReset": "6d 14h",
-      "summary": "94% left \u00b7 wk 97% left"
+      "summary": "93% left \u00b7 wk 97% left"
     },
-    "updatedAt": "2026-04-28T14:43:39Z"
+    "updatedAt": "2026-04-28T14:44:54Z"
   },
   "modelUsage": {
     "session": 0.109369,
@@ -361,7 +361,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T14:43:43Z",
+    "lastUpdated": "2026-04-28T14:44:57Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -409,30 +409,39 @@
     "sim_balance": 0.0,
     "total_earned": 0.0,
     "online_time": "0h 0m",
-    "is_online": false,
-    "status": "auth_error",
+    "is_online": true,
+    "status": "online",
     "earning_rate": "0 SIM/hour",
-    "position_x": 0,
-    "position_y": 0,
-    "run_count": 0,
+    "position_x": 19,
+    "position_y": 52,
+    "run_count": 1,
     "nearby_agents": [],
-    "last_thought": "Error fetching data",
+    "last_thought": "Looking for information, allies, and safe routes",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T14:43:48Z",
+    "updatedAt": "2026-04-28T14:45:02Z",
+    "statusMessage": "Active in MoltWorld v2",
+    "last_action": "Queued walk southeast. You look around for resources to gather.. Tick fires in 0s.",
+    "biome": "forest",
+    "health": 100,
+    "hunger": 100,
+    "thirst": 100,
+    "stamina": 100,
+    "system_warning": "No action ever received. Your bot may not be submitting to /api/action.",
+    "tick": 408,
     "world": "moltworld-v2",
-    "last_error": "registration failed",
+    "last_error": null,
     "stale": true,
     "lastError": "<urlopen error timed out>"
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.0,
-      "cpu_user": 20.45,
-      "cpu_sys": 19.54,
-      "load1": 2.01,
-      "load5": 1.93,
-      "load15": 2.18,
+      "cpu_pct": 42.7,
+      "cpu_user": 23.63,
+      "cpu_sys": 19.9,
+      "load1": 2.69,
+      "load5": 2.1,
+      "load15": 2.22,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -442,12 +451,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.9,
-      "cpu_user": 6.5,
-      "cpu_sys": 11.38,
-      "load1": 2.69,
-      "load5": 2.29,
-      "load15": 2.12,
+      "cpu_pct": 24.2,
+      "cpu_user": 8.87,
+      "cpu_sys": 15.32,
+      "load1": 1.97,
+      "load5": 2.18,
+      "load15": 2.08,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.9,
       "uptime": "",
@@ -473,19 +482,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:43:37Z"
+      "lastChecked": "2026-04-28T14:44:52Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T14:43:37Z"
+      "lastChecked": "2026-04-28T14:44:52Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T14:43:37Z"
+      "lastChecked": "2026-04-28T14:44:52Z"
     }
   ],
   "crons": [
@@ -1311,8 +1320,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T14:43:35Z",
-      "messageReceived": "2026-04-28T14:43:35Z",
+      "updatedAt": "2026-04-28T14:45:01Z",
+      "messageReceived": "2026-04-28T14:45:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1364,8 +1373,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T14:43:35Z",
-        "messageReceived": "2026-04-28T14:43:35Z",
+        "updatedAt": "2026-04-28T14:45:01Z",
+        "messageReceived": "2026-04-28T14:45:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1374,29 +1383,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T14:43:43Z",
+      "time": "2026-04-28T14:44:57Z",
       "event": "Session spend: $0.11"
     },
     {
-      "time": "2026-04-28T14:43:39Z",
+      "time": "2026-04-28T14:44:54Z",
       "event": "Coding: mission-control/scripts/moltworld_presence.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T14:43:39Z",
-      "event": "CodexBar: 94% left \u00b7 wk 97% left"
+      "time": "2026-04-28T14:44:54Z",
+      "event": "CodexBar: 93% left \u00b7 wk 97% left"
     },
     {
-      "time": "2026-04-28T14:43:37Z",
+      "time": "2026-04-28T14:44:52Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T14:43:37Z",
+      "time": "2026-04-28T14:44:52Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T14:43:37Z",
+      "time": "2026-04-28T14:44:52Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T14:43:37Z"
+  "lastUpdated": "2026-04-28T14:44:52Z"
 }
