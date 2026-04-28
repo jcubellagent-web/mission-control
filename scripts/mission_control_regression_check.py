@@ -6,10 +6,12 @@ broken the kiosk before, without requiring a browser session.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +28,15 @@ def fail(msg: str) -> None:
 def require(condition: bool, msg: str) -> None:
     if not condition:
         fail(msg)
+
+
+def parse_iso(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    except ValueError:
+        return None
 
 
 def get_function(src: str, name: str) -> str:
@@ -78,7 +89,10 @@ def check_index_wiring() -> None:
     picker = get_function(html, "pickDualLiveObjectiveFeeds")
     require("isRenderableLiveObjective(joshEntry)" in picker, "JOSH hero must require live/renderable feed")
     require("isRenderableLiveObjective(jaimesEntry)" in picker, "JAIMES hero must require live/renderable feed")
-    require("agentLabel: 'J.A.I.N'" not in picker and 'agentLabel: "J.A.I.N"' not in picker, "J.A.I.N must not compete for hero objective slots")
+    require(
+        "agentLabel: 'J.A.I.N'" not in picker and 'agentLabel: "J.A.I.N"' not in picker,
+        "J.A.I.N must not compete for hero objective slots",
+    )
 
     render_dashboard = get_function(html, "renderDashboard")
     require(
@@ -113,9 +127,45 @@ def check_index_wiring() -> None:
     require(result.returncode == 0, "embedded index.html JavaScript syntax check failed")
 
 
+def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) -> None:
+    data = json.loads((DATA_DIR / "dashboard-data.json").read_text())
+    candidates = [
+        data.get("lastUpdated"),
+        (data.get("focus") or {}).get("updatedAt") if isinstance(data.get("focus"), dict) else None,
+        (data.get("codingVisibility") or {}).get("updatedAt") if isinstance(data.get("codingVisibility"), dict) else None,
+    ]
+    parsed = [ts for ts in (parse_iso(v) for v in candidates) if ts]
+    newest = max(parsed) if parsed else None
+    now = datetime.now(timezone.utc)
+    age_min = ((now - newest).total_seconds() / 60.0) if newest else None
+    fresh = bool(newest and age_min is not None and age_min <= max_age_min)
+    status = {
+        "ok": fresh,
+        "alert_count": 0 if fresh else 1,
+        "check": "memory-roadmap-freshness",
+        "maxAgeMinutes": max_age_min,
+        "ageMinutes": round(age_min, 2) if age_min is not None else None,
+        "newestSourceAt": newest.isoformat().replace("+00:00", "Z") if newest else None,
+        "checkedAt": now.isoformat().replace("+00:00", "Z"),
+    }
+    if write_status:
+        write_status.parent.mkdir(parents=True, exist_ok=True)
+        write_status.write_text(json.dumps(status, indent=2) + "\n")
+    print("roadmap_age_min", status["ageMinutes"])
+    require(fresh, f"Memory Roadmap stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check-roadmap-freshness", action="store_true")
+    parser.add_argument("--max-roadmap-age-min", type=int, default=20)
+    parser.add_argument("--write-status", type=Path)
+    args = parser.parse_args()
+
     check_json()
     check_index_wiring()
+    if args.check_roadmap_freshness:
+        check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
     print("mission_control_regression_check OK")
     return 0
 
