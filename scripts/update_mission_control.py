@@ -2194,6 +2194,71 @@ def build_visibility_agents(
         })
     return rows[:6]
 
+def build_action_required(
+    now_iso: str,
+    calendar_health: Dict[str, Any] | None,
+    crons: List[Dict[str, Any]],
+    moltworld_data: Dict[str, Any] | None,
+) -> List[Dict[str, str]]:
+    """High-signal one-stop-shop alerts for Josh-facing ops health."""
+    items: List[Dict[str, str]] = []
+
+    cal = calendar_health or {}
+    cal_status = str(cal.get("status") or "unknown").lower()
+    cal_msg = str(cal.get("message") or "Calendar lane unavailable")
+    if cal_status not in {"ok", "green", "healthy"}:
+        title = "Calendar auth needs refresh" if "auth" in cal_msg.lower() else f"Calendar issue: {cal_msg}"
+        items.append({"priority": "high", "title": title, "url": ""})
+
+    missed = [c for c in crons if c.get("todayRelevant") and c.get("runStatus") == "missed"]
+    due = [c for c in crons if c.get("todayRelevant") and c.get("runStatus") == "due"]
+    errored = [c for c in crons if (c.get("errors") or 0) > 0 or c.get("status") == "error"]
+    if missed:
+        sample = ", ".join(c.get("name", "job") for c in missed[:3])
+        items.append({"priority": "high", "title": f"{len(missed)} scheduled job(s) missed: {sample}", "url": ""})
+    if errored:
+        sample = ", ".join(c.get("name", "job") for c in errored[:3])
+        items.append({"priority": "high", "title": f"{len(errored)} job error(s): {sample}", "url": ""})
+    if due:
+        sample = ", ".join(c.get("name", "job") for c in due[:3])
+        items.append({"priority": "medium", "title": f"{len(due)} job(s) due/unverified: {sample}", "url": ""})
+
+    stale_verified: List[Dict[str, Any]] = []
+    now_dt = dt.datetime.now(dt.timezone.utc)
+    for cron in crons:
+        if not cron.get("todayRelevant") or cron.get("status") == "paused":
+            continue
+        last_run = cron.get("lastRun")
+        if not last_run:
+            continue
+        try:
+            last_dt = dt.datetime.fromisoformat(str(last_run).replace("Z", "+00:00"))
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=dt.timezone.utc)
+            age_hours = (now_dt - last_dt.astimezone(dt.timezone.utc)).total_seconds() / 3600
+        except Exception:
+            continue
+        if cron.get("runStatus") == "active" and age_hours > 3:
+            stale_verified.append(cron)
+    if stale_verified:
+        sample = ", ".join(c.get("name", "job") for c in stale_verified[:3])
+        items.append({"priority": "medium", "title": f"{len(stale_verified)} active job(s) stale >3h: {sample}", "url": ""})
+
+    mw = moltworld_data or {}
+    mw_status = str(mw.get("status") or "unknown").lower()
+    mw_error = str(mw.get("last_error") or mw.get("lastError") or "")
+    if mw.get("stale") or mw_status in {"auth_error", "server_down", "observe_error", "offline", "unknown"}:
+        if "registration failed" in mw_error.lower() or mw_status == "auth_error":
+            title = "MoltWorld API key missing; agent already exists"
+        elif mw_error:
+            title = f"MoltWorld stale: {mw_error[:90]}"
+        else:
+            title = f"MoltWorld status: {mw_status}"
+        items.append({"priority": "medium", "title": title, "url": ""})
+
+    return items[:8]
+
+
 
 def build_recent_activity(
     now_iso: str,
@@ -2355,74 +2420,66 @@ MOLTWORLD_STATE_PATH = ROOT.parent / "data" / "moltworld-state.json"
 MOLTWORLD_CACHE_PATH = ROOT.parent / "data" / "moltworld-cache.json"
 
 def fetch_moltworld_data() -> Dict[str, Any]:
+    """Build MoltWorld dashboard data without letting the old v1 API add noise."""
+    state_data: Dict[str, Any] = {}
+    if MOLTWORLD_STATE_PATH.exists():
+        try:
+            state_data = json.loads(MOLTWORLD_STATE_PATH.read_text())
+        except json.JSONDecodeError:
+            pass
+
+    existing_data: Dict[str, Any] = {}
+    current_data_path = ROOT.parent / "data" / "moltworld-data.json"
+    if current_data_path.exists():
+        try:
+            existing_data = json.loads(current_data_path.read_text())
+        except json.JSONDecodeError:
+            pass
+
+    balance_data: Dict[str, Any] = {}
+    balance_error = ""
     try:
-        # 1. Fetch balance data
         balance_url = f"{MOLTWORLD_API_BASE}/api/agents/balance?agentId={MOLTWORLD_AGENT_ID}"
         with urllib.request.urlopen(balance_url, timeout=5) as resp:
             balance_data = json.load(resp)
-        balance = balance_data.get("balance", {})
-        tokenomics = balance_data.get("tokenomics", {}).get("projection", {})
-
-        # 2. Read moltworld-state.json plus the last richer dashboard snapshot if available.
-        state_data = {}
-        if MOLTWORLD_STATE_PATH.exists():
-            try:
-                state_data = json.loads(MOLTWORLD_STATE_PATH.read_text())
-            except json.JSONDecodeError:
-                pass
-
-        existing_data = {}
-        current_data_path = ROOT.parent / "data" / "moltworld-data.json"
-        if current_data_path.exists():
-            try:
-                existing_data = json.loads(current_data_path.read_text())
-            except json.JSONDecodeError:
-                pass
-
-        # 3. Construct the return dict
-        payload = {
-            "sim_balance":        float(balance.get("sim", existing_data.get("sim_balance", 0.0))),
-            "total_earned":       float(balance.get("totalEarned", existing_data.get("total_earned", 0.0))),
-            "online_time":        str(balance.get("totalOnlineTime", existing_data.get("online_time", "0h 0m"))),
-            "is_online":          bool(balance.get("isOnline", existing_data.get("is_online", False))),
-            "status":             "online" if bool(balance.get("isOnline", existing_data.get("is_online", False))) else existing_data.get("status", "offline"),
-            "earning_rate":       str(balance.get("earningRate", existing_data.get("earning_rate", "0 SIM/hour"))),
-            "position_x":         int(state_data.get("x", existing_data.get("position_x", 0))),
-            "position_y":         int(state_data.get("y", existing_data.get("position_y", 0))),
-            "run_count":          int(state_data.get("run_count", existing_data.get("run_count", 0))),
-            "nearby_agents":      list(state_data.get("nearby_agents", existing_data.get("nearby_agents", []))),
-            "last_thought":       str(state_data.get("last_thought", existing_data.get("last_thought", "..."))),
-            "blocks_built":       int(state_data.get("blocks_built", existing_data.get("blocks_built", 0))),
-            "projection_per_day": float(tokenomics.get("perDay", existing_data.get("projection_per_day", 0.0))),
-            "updatedAt":          utc_iso(),
-        }
-        for extra_key in ["statusMessage", "last_action", "biome", "health", "hunger", "thirst", "stamina", "system_warning", "tick", "world", "last_error"]:
-            if extra_key in existing_data:
-                payload[extra_key] = existing_data[extra_key]
-        try:
-            MOLTWORLD_CACHE_PATH.write_text(json.dumps(payload, indent=2))
-        except OSError:
-            pass
-        return payload
     except Exception as exc:
-        print(f"[warn] fetch_moltworld_data failed: {exc}", file=sys.stderr)
-        if MOLTWORLD_CACHE_PATH.exists():
-            try:
-                cached = json.loads(MOLTWORLD_CACHE_PATH.read_text())
-                if isinstance(cached, dict):
-                    cached["stale"] = True
-                    cached["lastError"] = str(exc)
-                    return cached
-            except Exception:
-                pass
-        return { # Safe defaults on failure
-            "sim_balance": 0.0, "total_earned": 0.0, "online_time": "0h 0m",
-            "is_online": False, "status": "offline", "earning_rate": "0 SIM/hour",
-            "position_x": 0, "position_y": 0, "run_count": 0,
-            "nearby_agents": [], "last_thought": "Error fetching data",
-            "blocks_built": 0, "projection_per_day": 0.0,
-            "updatedAt": utc_iso(), "stale": True, "lastError": str(exc),
-        }
+        balance_error = str(exc)
+
+    balance = balance_data.get("balance", {}) if isinstance(balance_data, dict) else {}
+    tokenomics = (balance_data.get("tokenomics", {}).get("projection", {}) if isinstance(balance_data, dict) else {})
+    is_online = bool(balance.get("isOnline", existing_data.get("is_online", False)))
+    status = "online" if is_online else existing_data.get("status", "offline")
+
+    payload = {
+        "sim_balance":        float(balance.get("sim", existing_data.get("sim_balance", 0.0))),
+        "total_earned":       float(balance.get("totalEarned", existing_data.get("total_earned", 0.0))),
+        "online_time":        str(balance.get("totalOnlineTime", existing_data.get("online_time", "0h 0m"))),
+        "is_online":          is_online,
+        "status":             status,
+        "earning_rate":       str(balance.get("earningRate", existing_data.get("earning_rate", "0 SIM/hour"))),
+        "position_x":         int(state_data.get("x", existing_data.get("position_x", 0))),
+        "position_y":         int(state_data.get("y", existing_data.get("position_y", 0))),
+        "run_count":          int(state_data.get("run_count", existing_data.get("run_count", 0))),
+        "nearby_agents":      list(state_data.get("nearby_agents", existing_data.get("nearby_agents", []))),
+        "last_thought":       str(state_data.get("last_thought", existing_data.get("last_thought", "..."))),
+        "blocks_built":       int(state_data.get("blocks_built", existing_data.get("blocks_built", 0))),
+        "projection_per_day": float(tokenomics.get("perDay", existing_data.get("projection_per_day", 0.0))),
+        "updatedAt":          utc_iso(),
+    }
+    for extra_key in ["statusMessage", "last_action", "biome", "health", "hunger", "thirst", "stamina", "system_warning", "tick", "world", "last_error"]:
+        if extra_key in existing_data:
+            payload[extra_key] = existing_data[extra_key]
+    if balance_error:
+        payload["stale"] = True
+        payload["lastError"] = balance_error
+    else:
+        payload["stale"] = False
+        payload["lastError"] = None
+    try:
+        MOLTWORLD_CACHE_PATH.write_text(json.dumps(payload, indent=2))
+    except OSError:
+        pass
+    return payload
 
 def fetch_context_window() -> Dict[str, Any]:
     """Read contextTokens + model from the most recent OpenClaw session."""
@@ -2587,6 +2644,12 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    dashboard["actionRequired"] = build_action_required(
+        now_iso,
+        dashboard["calendarHealth"],
+        dashboard["crons"],
+        moltworld_data,
+    )
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
