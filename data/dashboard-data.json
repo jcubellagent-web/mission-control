@@ -11,19 +11,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Josh chose to manually share the JAIMES model-control note",
+    "objective": "read JAIMES message and complete asks",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-28T15:24:33Z",
-    "checkedAt": "2026-04-28T15:24:33Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-28T15:28:07Z",
+    "checkedAt": "2026-04-28T15:28:07Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Josh chose to manually share the JAIMES model-control note",
-    "updatedAt": "2026-04-28T15:25:04Z"
+    "context": "read JAIMES message and complete asks",
+    "updatedAt": "2026-04-28T15:30:04Z"
   },
   "contextWindow": {
     "usedTokens": 90610,
@@ -143,7 +149,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 89% left [==========--]",
-        "Resets in 18m",
+        "Resets in 13m",
         "Weekly: 96% left [===========-]",
         "Pace: On pace | Expected 6% used | Lasts until reset",
         "Resets in 6d 14h",
@@ -154,11 +160,11 @@
       "weekly": "96% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "18m",
+      "sessionReset": "13m",
       "weeklyReset": "6d 14h",
       "summary": "89% left \u00b7 wk 96% left"
     },
-    "updatedAt": "2026-04-28T15:25:06Z"
+    "updatedAt": "2026-04-28T15:30:07Z"
   },
   "modelUsage": {
     "session": 0.048302,
@@ -351,7 +357,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-28T15:25:09Z",
+    "lastUpdated": "2026-04-28T15:30:10Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -409,7 +415,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-28T15:25:14Z",
+    "updatedAt": "2026-04-28T15:30:15Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -426,14 +432,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.7,
-      "cpu_user": 19.57,
-      "cpu_sys": 18.8,
-      "load1": 1.89,
-      "load5": 2.09,
-      "load15": 2.17,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 36.9,
+      "cpu_user": 18.12,
+      "cpu_sys": 18.72,
+      "load1": 1.92,
+      "load5": 2.21,
+      "load15": 2.21,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "85Gi",
@@ -441,14 +447,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.4,
-      "cpu_user": 3.2,
-      "cpu_sys": 11.2,
-      "load1": 2.29,
-      "load5": 2.61,
-      "load15": 2.52,
+      "cpu_pct": 15.8,
+      "cpu_user": 5.0,
+      "cpu_sys": 10.83,
+      "load1": 2.2,
+      "load5": 2.3,
+      "load15": 2.39,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -472,19 +478,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:25:04Z"
+      "lastChecked": "2026-04-28T15:30:04Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-28T15:25:04Z"
+      "lastChecked": "2026-04-28T15:30:04Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-28T15:25:04Z"
+      "lastChecked": "2026-04-28T15:30:04Z"
     }
   ],
   "crons": [
@@ -501,7 +507,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:25:14.680455+00:00"
+      "lastRun": "2026-04-28T15:30:15.627631+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1101,7 +1107,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-28T15:15:04.208658+00:00"
+      "lastRun": "2026-04-28T15:30:05.013795+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1289,14 +1295,20 @@
       "agent": "JOSH 2.0",
       "active": true,
       "reportedActive": true,
-      "objective": "Josh chose to manually share the JAIMES model-control note",
+      "objective": "read JAIMES message and complete asks",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-28T15:24:33Z",
+      "updatedAt": "2026-04-28T15:28:07Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1318,8 +1330,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-28T15:25:01Z",
-      "messageReceived": "2026-04-28T15:25:01Z",
+      "updatedAt": "2026-04-28T15:30:01Z",
+      "messageReceived": "2026-04-28T15:30:01Z",
       "currentTool": "",
       "model": "Unknown",
       "steps": []
@@ -1342,14 +1354,20 @@
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
-        "objective": "Josh chose to manually share the JAIMES model-control note",
+        "objective": "read JAIMES message and complete asks",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-28T15:24:33Z",
+        "updatedAt": "2026-04-28T15:28:07Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1371,8 +1389,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-28T15:25:01Z",
-        "messageReceived": "2026-04-28T15:25:01Z",
+        "updatedAt": "2026-04-28T15:30:01Z",
+        "messageReceived": "2026-04-28T15:30:01Z",
         "currentTool": "",
         "model": "Unknown",
         "steps": []
@@ -1381,29 +1399,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-28T15:25:09Z",
+      "time": "2026-04-28T15:30:10Z",
       "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-28T15:25:06Z",
+      "time": "2026-04-28T15:30:07Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-28T15:25:06Z",
+      "time": "2026-04-28T15:30:07Z",
       "event": "CodexBar: 89% left \u00b7 wk 96% left"
     },
     {
-      "time": "2026-04-28T15:25:04Z",
+      "time": "2026-04-28T15:30:04Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-28T15:25:04Z",
+      "time": "2026-04-28T15:30:04Z",
       "event": "42 scheduled jobs healthy"
     },
     {
-      "time": "2026-04-28T15:25:04Z",
+      "time": "2026-04-28T15:30:04Z",
       "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T15:25:04Z"
+  "lastUpdated": "2026-04-28T15:30:04Z"
 }
