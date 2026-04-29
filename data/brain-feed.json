@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat check completed: HEARTBEAT.md read; source files checked; system health, mission-control, self-maintenance, and capability canary run; no attention needed",
+  "objective": "handle async command completion event",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T11:43:36Z",
-  "checkedAt": "2026-04-29T11:43:36Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bfd"
+    }
+  ],
+  "currentTool": "bfd",
+  "updatedAt": "2026-04-29T11:44:02Z",
+  "checkedAt": "2026-04-29T11:44:02Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
