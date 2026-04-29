@@ -1,39 +1,19 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Mission Control watchdog failed",
-  "status": "idle",
-  "updatedAt": "2026-04-29T16:17:59Z",
-  "checkedAt": "2026-04-29T16:17:43Z",
+  "active": true,
+  "objective": "Searching OpenClaw streaming code",
+  "status": "active",
+  "updatedAt": "2026-04-29T16:39:01Z",
+  "checkedAt": "2026-04-29T16:39:01Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "exec",
+  "currentTool": "code",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Dry-running hard-risk repair",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Submitting hard-risk repair swaps",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Retrying hard-risk repair submit",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Finding in-season SP repair",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Submitting final Hot 1 repair",
       "status": "done",
@@ -63,8 +43,28 @@
       "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "JOSH 2.0 detail issue: diagnosing active work visibility",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking JOSH 2.0 OpenClaw health",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Inspecting JOSH 2.0 config for progress updates",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Searching OpenClaw streaming code",
+      "status": "active",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T16:17:43Z"
+  "messageReceived": "2026-04-29T16:39:01Z"
 }
