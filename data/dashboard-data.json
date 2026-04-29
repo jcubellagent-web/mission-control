@@ -11,19 +11,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "handled async completion event",
+    "objective": "wire Airweave credentials and test",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T02:08:04Z",
-    "checkedAt": "2026-04-29T02:08:04Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-29T02:14:10Z",
+    "checkedAt": "2026-04-29T02:14:10Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "handled async completion event",
-    "updatedAt": "2026-04-29T02:10:18Z"
+    "context": "wire Airweave credentials and test",
+    "updatedAt": "2026-04-29T02:15:17Z"
   },
   "contextWindow": {
     "usedTokens": 151371,
@@ -48,7 +54,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T02:10:18Z",
+    "updatedAt": "2026-04-29T02:15:17Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -151,7 +157,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
@@ -166,7 +172,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 44m",
+        "Resets in 4h 39m",
         "Weekly: 90% left [==========--]",
         "Pace: 2% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
@@ -177,11 +183,11 @@
       "weekly": "90% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 44m",
+      "sessionReset": "4h 39m",
       "weeklyReset": "6d 3h",
       "summary": "98% left \u00b7 wk 90% left"
     },
-    "updatedAt": "2026-04-29T02:10:20Z"
+    "updatedAt": "2026-04-29T02:15:19Z"
   },
   "modelUsage": {
     "session": 0.078021,
@@ -374,7 +380,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T02:10:23Z",
+    "lastUpdated": "2026-04-29T02:15:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -432,7 +438,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T02:10:28Z",
+    "updatedAt": "2026-04-29T02:15:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -449,14 +455,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.3,
-      "cpu_user": 19.25,
-      "cpu_sys": 17.3,
-      "load1": 2.0,
-      "load5": 2.61,
-      "load15": 2.69,
+      "cpu_pct": 39.2,
+      "cpu_user": 23.72,
+      "cpu_sys": 16.18,
+      "load1": 3.12,
+      "load5": 2.67,
+      "load15": 2.67,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "107Gi",
@@ -464,14 +470,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 26.2,
-      "cpu_user": 14.61,
-      "cpu_sys": 11.53,
-      "load1": 2.23,
-      "load5": 2.21,
-      "load15": 2.2,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 32.3,
+      "cpu_user": 18.46,
+      "cpu_sys": 13.84,
+      "load1": 2.16,
+      "load5": 2.16,
+      "load15": 2.18,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -495,19 +501,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:10:18Z"
+      "lastChecked": "2026-04-29T02:15:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:10:18Z"
+      "lastChecked": "2026-04-29T02:15:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T02:10:18Z"
+      "lastChecked": "2026-04-29T02:15:17Z"
     }
   ],
   "crons": [
@@ -524,7 +530,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T02:10:28.614727+00:00"
+      "lastRun": "2026-04-29T02:15:28.016416+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1129,7 +1135,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T02:00:04.732856+00:00"
+      "lastRun": "2026-04-29T02:15:04.005178+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1272,12 +1278,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T02:10:18.160141Z",
+    "checkedAt": "2026-04-29T02:15:17.577679Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1594,6 +1600,17 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260428-1025",
+      "title": "Airweave next setup",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Received Airweave API-key-looking value and collection-id-looking value from Josh; wiring locally without echoing secrets, then testing `skills/airweave/scripts/search.py` and rerunning capability canary.",
+      "background": "owner: JOSH 2.0; updated 2026-04-28 22:13",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 22:13",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
@@ -1633,14 +1650,20 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "handled async completion event",
+      "objective": "wire Airweave credentials and test",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T02:08:04Z",
+      "updatedAt": "2026-04-29T02:14:10Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1664,27 +1687,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: mission-control skill updated for JOSHeX",
-      "status": "idle",
+      "objective": "Task: replace Memory Roadmap with JOSHeX quick panel",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T02:09:40Z",
-      "messageReceived": "2026-04-29T02:08:58Z",
+      "updatedAt": "2026-04-29T02:14:35Z",
+      "messageReceived": "2026-04-29T02:14:35Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: review skill update need",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: refresh JOSH 2.0 Mission Control screen",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Mission Control: checking live panel source",
           "status": "done",
@@ -1724,80 +1737,47 @@
           "label": "Task: review skills for JOSHeX workflow",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: assess Memory Roadmap replacement",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: replace Memory Roadmap with JOSHeX quick panel",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
       {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "handled async completion event",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T02:08:04Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
-        "steps": []
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "send Google reauth for Drive/Docs capability pack",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T01:55:38Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
-      },
-      {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: mission-control skill updated for JOSHeX",
-        "status": "idle",
+        "objective": "Task: replace Memory Roadmap with JOSHeX quick panel",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T02:09:40Z",
-        "messageReceived": "2026-04-29T02:08:58Z",
+        "updatedAt": "2026-04-29T02:14:35Z",
+        "messageReceived": "2026-04-29T02:14:35Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: review skill update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: refresh JOSH 2.0 Mission Control screen",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Mission Control: checking live panel source",
             "status": "done",
@@ -1837,6 +1817,56 @@
             "label": "Task: review skills for JOSHeX workflow",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Task: assess Memory Roadmap replacement",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: replace Memory Roadmap with JOSHeX quick panel",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "wire Airweave credentials and test",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T02:14:10Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "send Google reauth for Drive/Docs capability pack",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T01:55:38Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
           }
         ]
       }
@@ -1844,29 +1874,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T02:10:23Z",
+      "time": "2026-04-29T02:15:22Z",
       "event": "Session spend: $0.08"
     },
     {
-      "time": "2026-04-29T02:10:20Z",
+      "time": "2026-04-29T02:15:19Z",
       "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T02:10:20Z",
+      "time": "2026-04-29T02:15:19Z",
       "event": "CodexBar: 98% left \u00b7 wk 90% left"
     },
     {
-      "time": "2026-04-29T02:10:18Z",
+      "time": "2026-04-29T02:15:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T02:10:18Z",
+      "time": "2026-04-29T02:15:17Z",
       "event": "Personal Codex: JOSHeX lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T02:10:18Z",
+      "time": "2026-04-29T02:15:17Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T02:10:18Z"
+  "lastUpdated": "2026-04-29T02:15:17Z"
 }
