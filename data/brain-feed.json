@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "gateway restart acknowledgement sent; pending heartbeat work continued and summarized",
+  "objective": "test real-time response updates wiring",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T06:18:19Z",
-  "checkedAt": "2026-04-29T06:18:19Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-29T06:18:32Z",
+  "checkedAt": "2026-04-29T06:18:32Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
