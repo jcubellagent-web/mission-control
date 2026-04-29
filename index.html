@@ -8402,6 +8402,7 @@
                 return;
             }
             panel.classList.add('visible');
+            window._personalCodexFallback = pc;
             const status = document.getElementById('pc-status');
             const validation = document.getElementById('pc-validation');
             const activity = document.getElementById('pc-activity');
@@ -8416,7 +8417,8 @@
             if (activity) {
                 activity.innerHTML = recent.length ? recent.map(item => {
                     const event = typeof item === 'string' ? item : (item.event || item.title || item.message || 'Codex activity');
-                    return `<div class="pc-row"><strong>Activity</strong><span>${escapeHtml(event)}</span></div>`;
+                    const displayEvent = String(event).replace(/Personal Codex/g, 'JOSHeX');
+                    return `<div class="pc-row"><strong>Activity</strong><span>${escapeHtml(displayEvent)}</span></div>`;
                 }).join('') : '<div class="pc-row"><strong>Activity</strong><span>No recent local patches</span></div>';
             }
             const caps = Array.isArray(pc.capabilities) ? pc.capabilities.slice(0, 4) : [];
