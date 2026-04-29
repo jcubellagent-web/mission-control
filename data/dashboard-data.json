@@ -34,13 +34,13 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "fix expanded brain feed layout sizing",
-    "updatedAt": "2026-04-29T05:20:19Z"
+    "updatedAt": "2026-04-29T05:25:17Z"
   },
   "contextWindow": {
-    "usedTokens": 33944,
-    "limitTokens": 272000,
-    "pct": 0.1248,
-    "model": "gpt-5.5",
+    "usedTokens": 0,
+    "limitTokens": 200000,
+    "pct": 0.0,
+    "model": "",
     "status": "green"
   },
   "personalCodex": {
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T05:20:19Z"
+        "event": "Patch feed: 13 source file(s) changed",
+        "time": "2026-04-29T05:25:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T05:20:19Z",
+    "updatedAt": "2026-04-29T05:25:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "12 source file(s) changed",
+      "summary": "13 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 12,
+      "dirtyCount": 13,
       "files": [
-        "data/capability-canary.json",
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
         "data/model-usage-accum.json"
       ],
-      "head": "e89edf794",
-      "updatedAt": "2026-04-29T05:20:19Z"
+      "head": "693c5d0a3",
+      "updatedAt": "2026-04-29T05:25:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/service-worker.js",
@@ -197,32 +197,32 @@
       "mission-control/scripts/mission_control_screenshot_diff.py",
       "mission-control/docs/joshex-lane.md"
     ],
-    "codexbarStatus": "84% left \u00b7 wk 87% left",
+    "codexbarStatus": "83% left \u00b7 wk 87% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 84% left [==========--]",
-        "Resets in 1h 34m",
+        "Session: 83% left [=========---]",
+        "Resets in 1h 29m",
         "Weekly: 87% left [==========--]",
         "Pace: On pace | Expected 14% used | Lasts until reset",
         "Resets in 6d",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "84% left",
+      "session": "83% left",
       "weekly": "87% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 34m",
+      "sessionReset": "1h 29m",
       "weeklyReset": "6d",
-      "summary": "84% left \u00b7 wk 87% left"
+      "summary": "83% left \u00b7 wk 87% left"
     },
-    "updatedAt": "2026-04-29T05:20:21Z"
+    "updatedAt": "2026-04-29T05:25:19Z"
   },
   "modelUsage": {
-    "session": 0.020716,
-    "daily": 0.130678,
+    "session": 0.0,
+    "daily": 0.109962,
     "weekly": 45.475231,
     "monthly": 951.852654,
     "topModels": [
@@ -239,7 +239,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.23613799999999996
+        "cost": 0.215422
       },
       {
         "name": "openai/gpt-5.5",
@@ -274,13 +274,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 5334,
-        "outputTokens": 66,
-        "totalTokens": 5400,
-        "sessionCost": 0.23613799999999996,
-        "dailyCost": 0.13067800000000002,
-        "weeklyCost": 0.23613799999999996,
-        "sessions": 10,
+        "inputTokens": 4542,
+        "outputTokens": 60,
+        "totalTokens": 4602,
+        "sessionCost": 0.215422,
+        "dailyCost": 0.109962,
+        "weeklyCost": 0.215422,
+        "sessions": 9,
         "isGemini": false,
         "costEstimated": false
       },
@@ -372,7 +372,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T05:20:25Z",
+    "lastUpdated": "2026-04-29T05:25:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -405,8 +405,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.130678,
-      "total": 47.358751,
+      "daily": 0.109962,
+      "total": 47.338035,
       "monthly": 951.852654
     },
     "weeklyRunRate": {
@@ -430,7 +430,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T05:20:30Z",
+    "updatedAt": "2026-04-29T05:25:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -447,29 +447,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.6,
-      "cpu_user": 17.86,
-      "cpu_sys": 17.72,
-      "load1": 2.73,
-      "load5": 2.59,
-      "load15": 2.49,
+      "cpu_pct": 36.3,
+      "cpu_user": 18.43,
+      "cpu_sys": 17.87,
+      "load1": 3.12,
+      "load5": 2.91,
+      "load15": 2.65,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "106Gi",
+      "disk_avail": "107Gi",
       "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.8,
+      "cpu_pct": 13.4,
       "cpu_user": 1.57,
-      "cpu_sys": 10.23,
-      "load1": 1.55,
-      "load5": 1.79,
-      "load15": 1.79,
+      "cpu_sys": 11.81,
+      "load1": 2.79,
+      "load5": 2.13,
+      "load15": 1.92,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -493,19 +493,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T05:20:19Z"
+      "lastChecked": "2026-04-29T05:25:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T05:20:19Z"
+      "lastChecked": "2026-04-29T05:25:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T05:20:19Z"
+      "lastChecked": "2026-04-29T05:25:17Z"
     }
   ],
   "crons": [
@@ -522,7 +522,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T05:20:30.186416+00:00"
+      "lastRun": "2026-04-29T05:25:28.494385+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T05:20:19.297244Z",
+    "checkedAt": "2026-04-29T05:25:17.771341Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1653,42 +1653,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Mission Control watchdog clean",
-      "status": "idle",
+      "objective": "JOSH 2.0: inspecting Mission Control worktree",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T05:17:47Z",
-      "messageReceived": "2026-04-29T05:17:37Z",
+      "updatedAt": "2026-04-29T05:24:47Z",
+      "messageReceived": "2026-04-29T05:24:47Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Step: patching Mission Control skill with JOSHeX quick panel",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: apply approved JOSHeX panel cleanup",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: inspecting JOSHeX layout cleanup",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: validating JOSHeX cleanup",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: review skill save/update need",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Skill review: updating Mission Control workflow",
           "status": "done",
@@ -1713,23 +1688,114 @@
           "label": "Mission Control watchdog running",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: deep dive JOSH 2.0 slowness",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "JOSH 2.0: checking health logs",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "JOSH 2.0: auditing load/process pressure",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "JOSH 2.0: inspecting session/log pressure",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "JOSH 2.0: inspecting Mission Control worktree",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "JOSH 2.0: inspecting Mission Control worktree",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T05:24:47Z",
+        "messageReceived": "2026-04-29T05:24:47Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Skill review: updating Mission Control workflow",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: Mission Control 24in spacing fix",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: patch Mission Control skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: deep dive JOSH 2.0 slowness",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "JOSH 2.0: checking health logs",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "JOSH 2.0: auditing load/process pressure",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "JOSH 2.0: inspecting session/log pressure",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "JOSH 2.0: inspecting Mission Control worktree",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
       {
         "agent": "JOSH 2.0",
         "active": true,
@@ -1763,99 +1829,34 @@
         "currentTool": "",
         "model": "GPT-5.5",
         "steps": []
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Mission Control watchdog clean",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T05:17:47Z",
-        "messageReceived": "2026-04-29T05:17:37Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Step: patching Mission Control skill with JOSHeX quick panel",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: apply approved JOSHeX panel cleanup",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: inspecting JOSHeX layout cleanup",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: validating JOSHeX cleanup",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Skill review: updating Mission Control workflow",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: Mission Control 24in spacing fix",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill save/update",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: patch Mission Control skill",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T05:20:25Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-29T05:25:23Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T05:20:21Z",
+      "time": "2026-04-29T05:25:19Z",
       "event": "Coding: mission-control/index.html, mission-control/service-worker.js"
     },
     {
-      "time": "2026-04-29T05:20:21Z",
-      "event": "CodexBar: 84% left \u00b7 wk 87% left"
+      "time": "2026-04-29T05:25:19Z",
+      "event": "CodexBar: 83% left \u00b7 wk 87% left"
     },
     {
-      "time": "2026-04-29T05:20:19Z",
+      "time": "2026-04-29T05:25:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T05:20:19Z",
-      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
+      "time": "2026-04-29T05:25:17Z",
+      "event": "JOSHeX: Patch feed: 13 source file(s) changed"
     },
     {
-      "time": "2026-04-29T05:20:19Z",
+      "time": "2026-04-29T05:25:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T05:20:19Z"
+  "lastUpdated": "2026-04-29T05:25:17Z"
 }
