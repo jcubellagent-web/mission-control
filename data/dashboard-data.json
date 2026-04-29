@@ -1346,6 +1346,13 @@
       "status": "attention",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
       "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+    },
+    {
+      "id": "personal-codex",
+      "name": "Personal Codex",
+      "status": "ready",
+      "summary": "Personal Codex can inspect, edit, validate, and prepare local patches for Mission Control.",
+      "detail": "Mission Control contribution lane online"
     }
   ],
   "trackedTasks": [
@@ -1582,6 +1589,10 @@
   },
   "recentActivity": [
     {
+      "time": "2026-04-28T17:55:00Z",
+      "event": "Personal Codex: Personal Codex lane scaffolded for local Mission Control contributions"
+    },
+    {
       "time": "2026-04-28T17:45:22Z",
       "event": "Session spend: $0.02"
     },
@@ -1600,11 +1611,42 @@
     {
       "time": "2026-04-28T17:45:16Z",
       "event": "42 scheduled jobs healthy"
-    },
-    {
-      "time": "2026-04-28T17:45:16Z",
-      "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-04-28T17:45:16Z"
+  "lastUpdated": "2026-04-28T17:45:16Z",
+  "personalCodex": {
+    "status": "ready",
+    "objective": "Mission Control contribution lane online",
+    "updatedAt": "2026-04-28T17:55:00Z",
+    "summary": "Personal Codex can inspect, edit, validate, and prepare local patches for Mission Control.",
+    "mode": "local",
+    "repo": {
+      "path": "/Users/joshcubell/Documents/New project/mission-control",
+      "branch": "main",
+      "dirty": false
+    },
+    "validation": {
+      "pyCompile": "pass",
+      "regression": "pass",
+      "visualCanaries": "warn"
+    },
+    "actionRequired": [],
+    "recentActivity": [
+      {
+        "time": "2026-04-28T17:55:00Z",
+        "event": "Personal Codex lane scaffolded for local Mission Control contributions"
+      }
+    ],
+    "metrics": {
+      "openQuestions": 0,
+      "localChanges": 0,
+      "lastValidationMinutesAgo": 0
+    },
+    "links": [
+      {
+        "label": "Local repo",
+        "url": "#personal-codex"
+      }
+    ]
+  }
 }

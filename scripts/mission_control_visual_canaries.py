@@ -53,6 +53,7 @@ def main() -> int:
     today = [c for c in crons if c and c.get("todayRelevant") is not False]
     active_errors = [c for c in today if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("runStatus") == "missed")]
     action_required_raw = data.get("actionRequired") if isinstance(data.get("actionRequired"), list) else []
+    personal_codex = data.get("personalCodex") if isinstance(data.get("personalCodex"), dict) else {}
     action_required = []
     for item in action_required_raw:
         title = str(item.get("title", "")).lower()
@@ -96,6 +97,12 @@ def main() -> int:
             "pickDualLiveObjectiveFeeds" in html and "renderOpsCenter" in html,
             "Renderer wiring",
             "hero + ops renderers present" if html else "index.html missing",
+        ),
+        status(
+            bool(personal_codex) and "personal-codex-panel" in html and "renderPersonalCodex" in html,
+            "Personal Codex lane",
+            f"status={personal_codex.get('status', 'missing')}",
+            severity="medium",
         ),
     ]
 

@@ -26,6 +26,7 @@ DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
+PERSONAL_CODEX_PATH = ROOT.parent / "data" / "personal-codex.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -2097,13 +2098,88 @@ def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[D
     }
 
 
+def normalize_priority(value: Any) -> str:
+    priority = str(value or "medium").lower()
+    if priority in {"high", "medium", "low"}:
+        return priority
+    return "medium"
+
+
+def normalize_personal_codex(raw: Any, now_iso: str) -> Dict[str, Any]:
+    """Load the local Personal Codex lane without requiring live-system access."""
+    if not isinstance(raw, dict):
+        raw = {}
+
+    status = str(raw.get("status") or "offline").lower()
+    if status not in {"ready", "working", "blocked", "needs_josh", "offline"}:
+        status = "ready" if raw else "offline"
+
+    repo = raw.get("repo") if isinstance(raw.get("repo"), dict) else {}
+    validation = raw.get("validation") if isinstance(raw.get("validation"), dict) else {}
+    metrics = raw.get("metrics") if isinstance(raw.get("metrics"), dict) else {}
+    links = raw.get("links") if isinstance(raw.get("links"), list) else []
+
+    action_items: List[Dict[str, str]] = []
+    for item in raw.get("actionRequired", []) if isinstance(raw.get("actionRequired"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        if not title:
+            continue
+        action_items.append({
+            "priority": normalize_priority(item.get("priority")),
+            "title": title,
+            "url": str(item.get("url") or "#personal-codex"),
+        })
+
+    recent_items: List[Dict[str, str]] = []
+    for item in raw.get("recentActivity", []) if isinstance(raw.get("recentActivity"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        event = str(item.get("event") or item.get("title") or "").strip()
+        if not event:
+            continue
+        recent_items.append({
+            "time": str(item.get("time") or raw.get("updatedAt") or now_iso),
+            "event": event,
+        })
+
+    updated_at = raw.get("updatedAt") if is_valid_iso8601(raw.get("updatedAt")) else now_iso
+    return {
+        "status": status,
+        "objective": str(raw.get("objective") or ""),
+        "updatedAt": updated_at,
+        "summary": str(raw.get("summary") or "Personal Codex sidecar is not reporting yet."),
+        "mode": str(raw.get("mode") or "local"),
+        "repo": {
+            "path": str(repo.get("path") or ""),
+            "branch": str(repo.get("branch") or ""),
+            "dirty": bool(repo.get("dirty", False)),
+        },
+        "validation": {
+            "pyCompile": str(validation.get("pyCompile") or "unknown"),
+            "regression": str(validation.get("regression") or "unknown"),
+            "visualCanaries": str(validation.get("visualCanaries") or "unknown"),
+        },
+        "actionRequired": action_items[:5],
+        "recentActivity": recent_items[:5],
+        "metrics": {
+            "openQuestions": int(metrics.get("openQuestions") or 0),
+            "localChanges": int(metrics.get("localChanges") or 0),
+            "lastValidationMinutesAgo": int(metrics.get("lastValidationMinutesAgo") or 0),
+        },
+        "links": [link for link in links if isinstance(link, dict)][:5],
+    }
+
+
 def build_capability_stack(
     visual_canaries: Dict[str, Any],
     sorare_ml: Dict[str, Any],
     voice_router: Dict[str, Any],
     ops_inbox: Dict[str, Any],
+    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
-    return [
+    stack = [
         {
             "id": "visual-canaries",
             "name": "Visual Canaries",
@@ -2133,6 +2209,15 @@ def build_capability_stack(
             "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
         },
     ]
+    if personal_codex and personal_codex.get("status") != "offline":
+        stack.append({
+            "id": "personal-codex",
+            "name": "Personal Codex",
+            "status": personal_codex.get("status") or "ready",
+            "summary": personal_codex.get("summary"),
+            "detail": personal_codex.get("objective") or "Local Mission Control contribution lane",
+        })
+    return stack
 
 
 def check_http_ok(url: str) -> bool:
@@ -2853,11 +2938,13 @@ def main() -> None:
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
+    dashboard["personalCodex"] = normalize_personal_codex(load_json_file(PERSONAL_CODEX_PATH, {}), now_iso)
     dashboard["capabilityStack"] = build_capability_stack(
         dashboard["visualCanaries"],
         dashboard["sorareMlCockpit"],
         dashboard["voiceRouter"],
         dashboard["opsInbox"],
+        dashboard["personalCodex"],
     )
     dashboard["actionRequired"] = build_action_required(
         now_iso,
@@ -2865,12 +2952,20 @@ def main() -> None:
         dashboard["crons"],
         moltworld_data,
     )
+    for item in dashboard["personalCodex"].get("actionRequired", []):
+        dashboard["actionRequired"].append({
+            "priority": item.get("priority", "medium"),
+            "title": f"Personal Codex: {item.get('title')}",
+            "url": item.get("url") or "#personal-codex",
+        })
+    dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     if dashboard["visualCanaries"].get("status") == "attention":
         dashboard["actionRequired"].insert(0, {
             "priority": "high",
             "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
             "url": "#canaries",
         })
+    dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
@@ -2940,6 +3035,24 @@ def main() -> None:
         coding_visibility,
         context_watchdog,
     )
+    if dashboard["personalCodex"].get("status") != "offline":
+        codex_activity = dashboard["personalCodex"].get("recentActivity") or [{
+            "time": dashboard["personalCodex"].get("updatedAt") or now_iso,
+            "event": f"Personal Codex: {dashboard['personalCodex'].get('status', 'ready')}",
+        }]
+        dashboard["recentActivity"] = [
+            {
+                "time": item.get("time") or dashboard["personalCodex"].get("updatedAt") or now_iso,
+                "event": item.get("event") if str(item.get("event", "")).startswith("Personal Codex:")
+                else f"Personal Codex: {item.get('event', dashboard['personalCodex'].get('summary', 'updated'))}",
+            }
+            for item in codex_activity[:2]
+        ] + dashboard["recentActivity"]
+        seen_activity: set[str] = set()
+        dashboard["recentActivity"] = [
+            item for item in dashboard["recentActivity"]
+            if not (item.get("event", "") in seen_activity or seen_activity.add(item.get("event", "")))
+        ][:6]
     dashboard["lastUpdated"] = now_iso
 
     # Final validation — fills any missing required fields with safe defaults

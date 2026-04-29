@@ -140,6 +140,9 @@ def check_index_wiring() -> None:
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
+    require('id="personal-codex-panel"' in html, "Personal Codex panel shell missing")
+    require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
+    require("renderPersonalCodex(data)" in html, "renderDashboard must render Personal Codex lane")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))

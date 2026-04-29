@@ -2029,6 +2029,113 @@
         .capability-k { font-size: 0.5rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 3px; }
         .capability-v { font-size: 0.68rem; font-weight: 850; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .capability-d { margin-top: 3px; font-size: 0.54rem; line-height: 1.2; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .personal-codex-panel {
+            margin-top: 8px;
+            padding: 10px;
+            border: 1px solid rgba(251,191,36,0.22);
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(251,191,36,0.075), rgba(255,255,255,0.025));
+            display: none;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .personal-codex-panel.visible { display: grid; }
+        .pcx-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: start;
+        }
+        .pcx-kicker {
+            font-size: 0.5rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(251,191,36,0.78);
+            margin-bottom: 2px;
+        }
+        .pcx-title {
+            font-size: 0.78rem;
+            font-weight: 850;
+            color: rgba(255,255,255,0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pcx-status {
+            border: 1px solid rgba(251,191,36,0.28);
+            border-radius: 999px;
+            padding: 3px 7px;
+            background: rgba(251,191,36,0.08);
+            color: rgba(253,230,138,0.9);
+            font-size: 0.5rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .pcx-status.working { border-color: rgba(229,62,62,0.28); background: rgba(229,62,62,0.08); color: rgba(254,202,202,0.9); }
+        .pcx-status.blocked,
+        .pcx-status.needs-josh { border-color: rgba(251,191,36,0.36); background: rgba(251,191,36,0.12); color: #fde68a; }
+        .pcx-status.ready { border-color: rgba(74,222,128,0.22); background: rgba(74,222,128,0.06); color: rgba(187,247,208,0.88); }
+        .pcx-summary {
+            color: rgba(255,255,255,0.58);
+            font-size: 0.58rem;
+            line-height: 1.32;
+        }
+        .pcx-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .pcx-metric {
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.16);
+            padding: 6px 7px;
+        }
+        .pcx-metric-k {
+            font-size: 0.45rem;
+            color: rgba(255,255,255,0.35);
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .pcx-metric-v {
+            margin-top: 2px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.82);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pcx-activity {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .pcx-activity-row {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 6px;
+            align-items: baseline;
+            font-size: 0.54rem;
+            color: rgba(255,255,255,0.54);
+        }
+        .pcx-activity-time {
+            color: rgba(251,191,36,0.55);
+            font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 0.48rem;
+            white-space: nowrap;
+        }
+        .pcx-activity-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
         .sh-agent-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
         .sh-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
@@ -6541,6 +6648,23 @@
                             </div>
                         </div>
 
+                        <div id="personal-codex-panel" class="personal-codex-panel" aria-label="Personal Codex">
+                            <div class="pcx-top">
+                                <div>
+                                    <div class="pcx-kicker">Personal Codex</div>
+                                    <div class="pcx-title" id="pcx-objective">loading</div>
+                                </div>
+                                <div class="pcx-status" id="pcx-status">offline</div>
+                            </div>
+                            <div class="pcx-summary" id="pcx-summary">Waiting for local sidecar signal.</div>
+                            <div class="pcx-metrics">
+                                <div class="pcx-metric"><div class="pcx-metric-k">Mode</div><div class="pcx-metric-v" id="pcx-mode">local</div></div>
+                                <div class="pcx-metric"><div class="pcx-metric-k">Branch</div><div class="pcx-metric-v" id="pcx-branch">main</div></div>
+                                <div class="pcx-metric"><div class="pcx-metric-k">Validation</div><div class="pcx-metric-v" id="pcx-validation">unknown</div></div>
+                            </div>
+                            <div class="pcx-activity" id="pcx-activity"></div>
+                        </div>
+
                         <div id="ops-center-panel" class="ops-center-panel capability-stack" aria-label="Capability Stack">
                             <div class="capability-tile"><div class="capability-k">Canaries</div><div class="capability-v">loading</div><div class="capability-d">dashboard guardrails</div></div>
                             <div class="capability-tile"><div class="capability-k">Sorare ML</div><div class="capability-v">loading</div><div class="capability-d">JAIMES model cockpit</div></div>
@@ -7029,6 +7153,7 @@
             if (window._mcLastDashData) {
                 renderJobsPanel(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
                 renderSystemHealth(window._mcLastDashData, normalized, _jainBrainFeed, _uaJaimesBf);
+                renderPersonalCodex(window._mcLastDashData);
                 renderOpsCenter(window._mcLastDashData);
             }
         }
@@ -7150,6 +7275,7 @@
             if (window._mcLastDashData) {
                 renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
                 renderSystemHealth(window._mcLastDashData, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
+                renderPersonalCodex(window._mcLastDashData);
                 renderOpsCenter(window._mcLastDashData);
             }
         }
@@ -8294,6 +8420,57 @@
                         <div class="capability-d">${escapeHtml(item.detail || item.summary || '')}</div>
                     </div>
                 `).join('') : '<div class="capability-tile"><div class="capability-k">Capabilities</div><div class="capability-v">pending</div><div class="capability-d">waiting for data</div></div>';
+            }
+        }
+
+        function renderPersonalCodex(data) {
+            const pcx = data?.personalCodex || {};
+            const panel = document.getElementById('personal-codex-panel');
+            if (!panel) return;
+            const status = String(pcx.status || 'offline').toLowerCase();
+            const hasSignal = status !== 'offline' || pcx.objective || pcx.summary ||
+                (Array.isArray(pcx.actionRequired) && pcx.actionRequired.length) ||
+                (Array.isArray(pcx.recentActivity) && pcx.recentActivity.length);
+            panel.classList.toggle('visible', !!hasSignal);
+            if (!hasSignal) return;
+
+            const statusEl = document.getElementById('pcx-status');
+            const objectiveEl = document.getElementById('pcx-objective');
+            const summaryEl = document.getElementById('pcx-summary');
+            const modeEl = document.getElementById('pcx-mode');
+            const branchEl = document.getElementById('pcx-branch');
+            const validationEl = document.getElementById('pcx-validation');
+            const activityEl = document.getElementById('pcx-activity');
+            const repo = pcx.repo || {};
+            const validation = pcx.validation || {};
+            const activity = Array.isArray(pcx.recentActivity) ? pcx.recentActivity.slice(0, 3) : [];
+            const validationSummary = [
+                validation.pyCompile,
+                validation.regression,
+                validation.visualCanaries
+            ].filter(Boolean).join(' / ') || 'unknown';
+
+            if (statusEl) {
+                statusEl.textContent = status.replace('_', ' ');
+                statusEl.className = 'pcx-status ' + status.replace('_', '-');
+            }
+            if (objectiveEl) objectiveEl.textContent = pcx.objective || 'Mission Control contribution lane';
+            if (summaryEl) summaryEl.textContent = pcx.summary || 'Local Codex lane is available for scoped dashboard work.';
+            if (modeEl) modeEl.textContent = pcx.mode || 'local';
+            if (branchEl) branchEl.textContent = `${repo.branch || 'unknown'}${repo.dirty ? ' · dirty' : ''}`;
+            if (validationEl) validationEl.textContent = validationSummary;
+            if (activityEl) {
+                activityEl.innerHTML = activity.length ? activity.map(item => `
+                    <div class="pcx-activity-row">
+                        <span class="pcx-activity-time">${escapeHtml(item.time ? formatTime(item.time) : 'now')}</span>
+                        <span class="pcx-activity-text">${escapeHtml(item.event || item.title || 'Personal Codex updated')}</span>
+                    </div>
+                `).join('') : `
+                    <div class="pcx-activity-row">
+                        <span class="pcx-activity-time">${escapeHtml(pcx.updatedAt ? formatTime(pcx.updatedAt) : 'now')}</span>
+                        <span class="pcx-activity-text">Ready for local edits and validation</span>
+                    </div>
+                `;
             }
         }
 
@@ -11221,7 +11398,8 @@
             renderJobsPanel(data, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             // Render system health
             renderSystemHealth(data, window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
-                renderOpsCenter(data);
+            renderPersonalCodex(data);
+            renderOpsCenter(data);
 
         }
 
