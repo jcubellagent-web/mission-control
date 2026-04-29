@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "4 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-29T02:00:55Z",
+  "summary": "2 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-29T02:15:54Z",
   "counts": {
-    "ok": 22,
-    "warn": 4,
+    "ok": 24,
+    "warn": 2,
     "error": 0
   },
   "checks": [
@@ -108,14 +108,14 @@
       "meta": {
         "runtimeVersion": "2026.4.26",
         "model": "gpt-5.5",
-        "percentUsed": 48
+        "percentUsed": 56
       }
     },
     {
       "name": "memory:main",
       "status": "ok",
       "ok": true,
-      "detail": "files=105 chunks=1175 dirty=False",
+      "detail": "files=105 chunks=1177 dirty=False",
       "meta": {}
     },
     {
@@ -169,16 +169,16 @@
     },
     {
       "name": "env:AIRWEAVE_API_KEY",
-      "status": "warn",
-      "ok": false,
-      "detail": "missing",
+      "status": "ok",
+      "ok": true,
+      "detail": "present",
       "meta": {}
     },
     {
       "name": "env:AIRWEAVE_COLLECTION_ID",
-      "status": "warn",
-      "ok": false,
-      "detail": "missing",
+      "status": "ok",
+      "ok": true,
+      "detail": "present",
       "meta": {}
     },
     {
