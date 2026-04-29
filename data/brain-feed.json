@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Memory recovery bundle synced to J.A.I.N and verified at 09:01 EDT",
+  "objective": "heartbeat check",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T13:03:24Z",
-  "checkedAt": "2026-04-29T13:03:24Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "read-heartbeat"
+    }
+  ],
+  "currentTool": "read-heartbeat",
+  "updatedAt": "2026-04-29T13:31:57Z",
+  "checkedAt": "2026-04-29T13:31:57Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
