@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: Memory Roadmap replaced with JOSHeX quick panel",
-  "status": "idle",
-  "updatedAt": "2026-04-29T02:19:54Z",
-  "checkedAt": "2026-04-29T02:19:46Z",
+  "active": true,
+  "objective": "Mission Control: inspecting JOSHeX layout cleanup",
+  "status": "active",
+  "updatedAt": "2026-04-29T02:23:25Z",
+  "checkedAt": "2026-04-29T02:23:25Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,26 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control: verifying JOSHeX Pages refresh",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "GW11 dry-run autosubmit: checking Champion/DNP",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: verify JOSHeX visibility now",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Mission Control: reloading JOSH 2.0 to JOSHeX",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: verify stale local HTTP alert",
       "status": "done",
@@ -63,8 +43,28 @@
       "label": "Mission Control: reloading JOSH screen to quick panel",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update after Mission Control work",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: patching Mission Control skill with JOSHeX quick panel",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: apply approved JOSHeX panel cleanup",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: inspecting JOSHeX layout cleanup",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T02:19:46Z"
+  "messageReceived": "2026-04-29T02:23:25Z"
 }

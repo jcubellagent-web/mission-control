@@ -11,24 +11,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "answered Airweave Google Drive form fields",
+    "objective": "explain Airweave value and pause setup",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T02:20:15Z",
-    "checkedAt": "2026-04-29T02:20:15Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-29T02:25:02Z",
+    "checkedAt": "2026-04-29T02:25:02Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "answered Airweave Google Drive form fields",
-    "updatedAt": "2026-04-29T02:20:18Z"
+    "context": "explain Airweave value and pause setup",
+    "updatedAt": "2026-04-29T02:25:17Z"
   },
   "contextWindow": {
-    "usedTokens": 157281,
+    "usedTokens": 159814,
     "limitTokens": 272000,
-    "pct": 0.5782,
+    "pct": 0.5876,
     "model": "gpt-5.5",
     "status": "red"
   },
@@ -48,7 +54,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T02:20:18Z",
+    "updatedAt": "2026-04-29T02:25:17Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -142,16 +148,16 @@
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-04-28T17:28:08Z",
+    "lastTriggeredAt": "2026-04-29T02:23:19Z",
     "handoffExists": true,
     "sessionKey": "agent:main:telegram:direct:6218150306",
-    "usedTokens": 207207,
+    "usedTokens": 159814,
     "limitTokens": 272000,
-    "pct": 0.7618
+    "pct": 0.5876
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 14,
+    "missionControlDirty": 12,
     "recentFiles": [
       "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
@@ -160,34 +166,34 @@
       "scripts/capability_canary.sh",
       "mission-control/scripts/update_mission_control.py"
     ],
-    "codexbarStatus": "97% left \u00b7 wk 90% left",
+    "codexbarStatus": "96% left \u00b7 wk 90% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 97% left [===========-]",
-        "Resets in 4h 34m",
+        "Session: 96% left [===========-]",
+        "Resets in 4h 29m",
         "Weekly: 90% left [==========--]",
         "Pace: 2% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "97% left",
+      "session": "96% left",
       "weekly": "90% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 34m",
+      "sessionReset": "4h 29m",
       "weeklyReset": "6d 3h",
-      "summary": "97% left \u00b7 wk 90% left"
+      "summary": "96% left \u00b7 wk 90% left"
     },
-    "updatedAt": "2026-04-29T02:20:20Z"
+    "updatedAt": "2026-04-29T02:25:19Z"
   },
   "modelUsage": {
-    "session": 0.082227,
-    "daily": 3.518806,
-    "weekly": 45.448572,
-    "monthly": 951.825991,
+    "session": 0.083282,
+    "daily": 3.51986,
+    "weekly": 45.449627,
+    "monthly": 951.827046,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -202,7 +208,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.261814
+        "cost": 0.26286899999999996
       },
       {
         "name": "openai/gpt-5.5",
@@ -237,12 +243,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 4026,
-        "outputTokens": 214,
-        "totalTokens": 4240,
-        "sessionCost": 0.261814,
-        "dailyCost": 0.261814,
-        "weeklyCost": 0.261814,
+        "inputTokens": 3999,
+        "outputTokens": 211,
+        "totalTokens": 4210,
+        "sessionCost": 0.26286899999999996,
+        "dailyCost": 0.26286899999999996,
+        "weeklyCost": 0.26286899999999996,
         "sessions": 8,
         "isGemini": false,
         "costEstimated": false
@@ -374,7 +380,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T02:20:23Z",
+    "lastUpdated": "2026-04-29T02:25:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -407,14 +413,14 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.518806,
-      "total": 47.391346,
-      "monthly": 951.825991
+      "daily": 3.51986,
+      "total": 47.392401,
+      "monthly": 951.827046
     },
     "weeklyRunRate": {
-      "total": 47.391346,
+      "total": 47.392401,
       "automation": 1.942774,
-      "interactive": 43.505798,
+      "interactive": 43.506853,
       "projectedMonthly": 203.11
     }
   },
@@ -432,7 +438,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T02:20:28Z",
+    "updatedAt": "2026-04-29T02:25:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -449,12 +455,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.7,
-      "cpu_user": 18.69,
-      "cpu_sys": 18.3,
-      "load1": 2.33,
-      "load5": 2.47,
-      "load15": 2.56,
+      "cpu_pct": 37.1,
+      "cpu_user": 19.12,
+      "cpu_sys": 17.95,
+      "load1": 2.64,
+      "load5": 2.39,
+      "load15": 2.48,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -464,14 +470,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 25.4,
-      "cpu_user": 13.93,
-      "cpu_sys": 11.47,
-      "load1": 1.85,
-      "load5": 1.97,
-      "load15": 2.07,
+      "cpu_pct": 27.7,
+      "cpu_user": 17.7,
+      "cpu_sys": 10.56,
+      "load1": 2.01,
+      "load5": 2.01,
+      "load15": 2.06,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.1,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -495,19 +501,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:20:18Z"
+      "lastChecked": "2026-04-29T02:25:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:20:18Z"
+      "lastChecked": "2026-04-29T02:25:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T02:20:18Z"
+      "lastChecked": "2026-04-29T02:25:17Z"
     }
   ],
   "crons": [
@@ -524,7 +530,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T02:20:29.112700+00:00"
+      "lastRun": "2026-04-29T02:25:27.951347+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1272,12 +1278,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T02:20:17.851318Z",
+    "checkedAt": "2026-04-29T02:25:17.414577Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1618,7 +1624,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 76%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 59%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -1633,14 +1639,20 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "answered Airweave Google Drive form fields",
+      "objective": "explain Airweave value and pause setup",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T02:20:15Z",
+      "updatedAt": "2026-04-29T02:25:02Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1658,37 +1670,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: Memory Roadmap replaced with JOSHeX quick panel",
-      "status": "idle",
+      "objective": "Mission Control: inspecting JOSHeX layout cleanup",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T02:19:54Z",
-      "messageReceived": "2026-04-29T02:19:46Z",
+      "updatedAt": "2026-04-29T02:23:25Z",
+      "messageReceived": "2026-04-29T02:23:25Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Mission Control: verifying JOSHeX Pages refresh",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "GW11 dry-run autosubmit: checking Champion/DNP",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: verify JOSHeX visibility now",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "Mission Control: reloading JOSH 2.0 to JOSHeX",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Task: verify stale local HTTP alert",
           "status": "done",
@@ -1718,6 +1710,26 @@
           "label": "Mission Control: reloading JOSH screen to quick panel",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: review skill save/update after Mission Control work",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: patching Mission Control skill with JOSHeX quick panel",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: apply approved JOSHeX panel cleanup",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control: inspecting JOSHeX layout cleanup",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
@@ -1725,14 +1737,15 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
+      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 2,
+    "activeCount": 3,
     "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "J.A.I.N"
+      "JAIMES"
     ],
     "agents": [
       {
@@ -1740,62 +1753,34 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "answered Airweave Google Drive form fields",
+        "objective": "explain Airweave value and pause setup",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T02:20:15Z",
+        "updatedAt": "2026-04-29T02:25:02Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "handled async completion event",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T02:18:02Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: Memory Roadmap replaced with JOSHeX quick panel",
-        "status": "idle",
+        "objective": "Mission Control: inspecting JOSHeX layout cleanup",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T02:19:54Z",
-        "messageReceived": "2026-04-29T02:19:46Z",
+        "updatedAt": "2026-04-29T02:23:25Z",
+        "messageReceived": "2026-04-29T02:23:25Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Mission Control: verifying JOSHeX Pages refresh",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "GW11 dry-run autosubmit: checking Champion/DNP",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: verify JOSHeX visibility now",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "Mission Control: reloading JOSH 2.0 to JOSHeX",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Task: verify stale local HTTP alert",
             "status": "done",
@@ -1825,36 +1810,70 @@
             "label": "Mission Control: reloading JOSH screen to quick panel",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update after Mission Control work",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: patching Mission Control skill with JOSHeX quick panel",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: apply approved JOSHeX panel cleanup",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control: inspecting JOSHeX layout cleanup",
+            "status": "active",
+            "tool": "exec"
           }
         ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "handled async completion event",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T02:18:02Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T02:20:23Z",
+      "time": "2026-04-29T02:25:22Z",
       "event": "Session spend: $0.08"
     },
     {
-      "time": "2026-04-29T02:20:20Z",
+      "time": "2026-04-29T02:25:19Z",
       "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T02:20:20Z",
-      "event": "CodexBar: 97% left \u00b7 wk 90% left"
+      "time": "2026-04-29T02:25:19Z",
+      "event": "CodexBar: 96% left \u00b7 wk 90% left"
     },
     {
-      "time": "2026-04-29T02:20:18Z",
+      "time": "2026-04-29T02:25:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T02:20:18Z",
+      "time": "2026-04-29T02:25:17Z",
       "event": "Personal Codex: JOSHeX lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T02:20:18Z",
+      "time": "2026-04-29T02:25:17Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T02:20:18Z"
+  "lastUpdated": "2026-04-29T02:25:17Z"
 }
