@@ -143,6 +143,8 @@ def check_index_wiring() -> None:
     require('id="personal-codex"' in html, "Personal Codex panel anchor missing")
     require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
     require("renderPersonalCodex(data)" in render_dashboard, "Personal Codex panel must render from dashboard data")
+    require("_personalCodexFallbackLoading" in html and "./data/personal-codex.json" in html, "Personal Codex fallback source must be wired")
+    require("window.openIntelHighlightsModal" in html and "_breakingHighlightsSource" in html, "Breaking Highlights modal/fresh-source guard must be wired")
 
     pc_path = DATA_DIR / "personal-codex.json"
     require(pc_path.exists(), "data/personal-codex.json missing")

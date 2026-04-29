@@ -7880,6 +7880,7 @@
         }
 
         window.openModuleModal = openModuleModal;
+        window.openIntelHighlightsModal = () => openModuleModal('intel');
         window.closeModuleModal = closeModuleModal;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -8046,15 +8047,26 @@
                 './data/jain-breaking-highlights.json?_=' + Date.now(),
                 './data/breaking-highlights.json?_=' + Date.now(),
             ];
+            const candidates = [];
+            const getHighlightTime = (data) => {
+                const raw = data?.updatedAt || data?.items?.[0]?.sentAt || data?.items?.[0]?.displayTime || '';
+                const ts = Date.parse(raw);
+                return Number.isFinite(ts) ? ts : 0;
+            };
             for (const path of paths) {
                 try {
-                    const r = await fetch(path, { signal: AbortSignal.timeout(2000) });
+                    const r = await fetch(path, { cache: 'no-store', signal: AbortSignal.timeout(2500) });
                     if (!r.ok) continue;
                     const data = await r.json();
-                    if (data && Array.isArray(data.items)) return data;
+                    if (data && Array.isArray(data.items) && data.items.length) {
+                        candidates.push({ data, path, ts: getHighlightTime(data) });
+                    }
                 } catch (e) {}
             }
-            return null;
+            if (!candidates.length) return null;
+            candidates.sort((a, b) => b.ts - a.ts);
+            window._breakingHighlightsSource = candidates[0].path;
+            return candidates[0].data;
         }
 
         async function fetchIntelligenceFeed() {
