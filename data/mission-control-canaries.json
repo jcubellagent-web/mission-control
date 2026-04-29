@@ -1,8 +1,8 @@
 {
-  "ok": true,
-  "status": "ok",
-  "summary": "All canaries passed",
-  "checkedAt": "2026-04-29T02:30:17.255796Z",
+  "ok": false,
+  "status": "attention",
+  "summary": "1 canary issue(s)",
+  "checkedAt": "2026-04-29T03:20:17.705843Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -12,9 +12,9 @@
     },
     {
       "name": "Calendar tile",
-      "ok": true,
-      "detail": "Calendar fetch failed",
-      "severity": "ok"
+      "ok": false,
+      "detail": "Calendar re-auth required",
+      "severity": "medium"
     },
     {
       "name": "Today Jobs",

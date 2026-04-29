@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: validating JOSHeX cleanup",
+  "objective": "Mission Control: checking stale HTTP server",
   "status": "active",
-  "updatedAt": "2026-04-29T02:27:22Z",
-  "checkedAt": "2026-04-29T02:27:22Z",
+  "updatedAt": "2026-04-29T03:19:56Z",
+  "checkedAt": "2026-04-29T03:19:56Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Task: review skills for JOSHeX workflow",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: assess Memory Roadmap replacement",
       "status": "done",
@@ -61,10 +56,15 @@
     },
     {
       "label": "Mission Control: validating JOSHeX cleanup",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: checking stale HTTP server",
       "status": "active",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T02:27:22Z"
+  "messageReceived": "2026-04-29T03:19:56Z"
 }
