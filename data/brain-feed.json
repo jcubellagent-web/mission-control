@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat check completed",
+  "objective": "handle async command completion heartbeat",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T12:40:49Z",
-  "checkedAt": "2026-04-29T12:40:49Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-29T12:41:17Z",
+  "checkedAt": "2026-04-29T12:41:17Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
