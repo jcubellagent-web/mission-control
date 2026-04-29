@@ -34,12 +34,12 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Verifying JOSH 2.0 progress fix",
-    "updatedAt": "2026-04-29T16:55:17Z"
+    "updatedAt": "2026-04-29T17:00:19Z"
   },
   "contextWindow": {
-    "usedTokens": 39946,
+    "usedTokens": 79312,
     "limitTokens": 272000,
-    "pct": 0.1469,
+    "pct": 0.2916,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -51,7 +51,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T16:55:17Z"
+        "time": "2026-04-29T17:00:19Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,7 +69,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T16:55:17Z",
+    "updatedAt": "2026-04-29T17:00:19Z",
     "patchStatus": {
       "status": "pending",
       "summary": "8 source file(s) changed",
@@ -83,8 +83,8 @@
         "data/model-usage-tracker.json",
         "data/modelUsage.json"
       ],
-      "head": "530a859b7",
-      "updatedAt": "2026-04-29T16:55:17Z"
+      "head": "17d308235",
+      "updatedAt": "2026-04-29T17:00:19Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -203,7 +203,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 59m",
+        "Resets in 4h 54m",
         "Weekly: 83% left [=========---]",
         "Pace: 4% in reserve | Expected 21% used | Lasts until reset",
         "Resets in 5d 12h",
@@ -214,15 +214,15 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 59m",
+      "sessionReset": "4h 54m",
       "weeklyReset": "5d 12h",
       "summary": "100% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T16:55:19Z"
+    "updatedAt": "2026-04-29T17:00:21Z"
   },
   "modelUsage": {
-    "session": 0.025382,
-    "daily": 0.110634,
+    "session": 0.0,
+    "daily": 0.085252,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -244,7 +244,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.110634
+        "cost": 0.085252
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -291,13 +291,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 2572,
-        "outputTokens": 185,
-        "totalTokens": 2757,
-        "sessionCost": 0.110634,
-        "dailyCost": 0.110634,
-        "weeklyCost": 0.110634,
-        "sessions": 4,
+        "inputTokens": 1410,
+        "outputTokens": 179,
+        "totalTokens": 1589,
+        "sessionCost": 0.085252,
+        "dailyCost": 0.085252,
+        "weeklyCost": 0.085252,
+        "sessions": 3,
         "isGemini": false,
         "costEstimated": false
       },
@@ -378,7 +378,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T16:55:23Z",
+    "lastUpdated": "2026-04-29T17:00:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -411,8 +411,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.110634,
-      "total": 47.233247,
+      "daily": 0.085252,
+      "total": 47.207865,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -427,10 +427,10 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.16816,
-      "codexEquivalentDaily": 0.110634,
-      "codexEquivalentMonthlyProjection": 193.58,
-      "codexTokensWeekly": 322314141,
+      "codexEquivalentWeekly": 45.142778,
+      "codexEquivalentDaily": 0.085252,
+      "codexEquivalentMonthlyProjection": 193.47,
+      "codexTokensWeekly": 322312973,
       "codexTokensDaily": 76865577,
       "localModelCount": 2,
       "meteredModelCount": 2,
@@ -452,7 +452,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T16:55:28Z",
+    "updatedAt": "2026-04-29T17:00:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -469,14 +469,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.4,
-      "cpu_user": 16.48,
-      "cpu_sys": 16.89,
-      "load1": 2.29,
-      "load5": 2.4,
-      "load15": 2.41,
+      "cpu_pct": 39.5,
+      "cpu_user": 20.22,
+      "cpu_sys": 19.26,
+      "load1": 2.35,
+      "load5": 2.33,
+      "load15": 2.37,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -484,14 +484,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 25.4,
-      "cpu_user": 15.7,
-      "cpu_sys": 10.31,
-      "load1": 2.73,
-      "load5": 2.11,
-      "load15": 1.98,
+      "cpu_pct": 23.6,
+      "cpu_user": 12.19,
+      "cpu_sys": 11.38,
+      "load1": 3.14,
+      "load5": 2.5,
+      "load15": 2.17,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -515,19 +515,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:55:17Z"
+      "lastChecked": "2026-04-29T17:00:19Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:55:17Z"
+      "lastChecked": "2026-04-29T17:00:19Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T16:55:17Z"
+      "lastChecked": "2026-04-29T17:00:19Z"
     }
   ],
   "crons": [
@@ -544,7 +544,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:55:28.574975+00:00"
+      "lastRun": "2026-04-29T17:00:29.522448+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -589,7 +589,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:00:00.697260+00:00"
+      "lastRun": "2026-04-29T17:00:01.484932+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -604,7 +604,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-29T14:53:08.560412+00:00"
+      "lastRun": "2026-04-29T17:00:01.109136+00:00"
     },
     {
       "name": "J.A.I.N Medic",
@@ -619,7 +619,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:00:05.371516+00:00"
+      "lastRun": "2026-04-29T17:00:06.122401+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -908,7 +908,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:45:05.241728+00:00"
+      "lastRun": "2026-04-29T17:00:04.449092+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1091,7 +1091,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T16:55:17.322139Z",
+    "checkedAt": "2026-04-29T17:00:19.137890Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1671,29 +1671,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T16:55:23Z",
-      "event": "Session spend: $0.03"
+      "time": "2026-04-29T17:00:24Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T16:55:19Z",
+      "time": "2026-04-29T17:00:21Z",
       "event": "Coding: scripts/josh_bf_push.sh, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T16:55:19Z",
+      "time": "2026-04-29T17:00:21Z",
       "event": "CodexBar: 100% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T16:55:17Z",
+      "time": "2026-04-29T17:00:19Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T16:55:17Z",
+      "time": "2026-04-29T17:00:19Z",
       "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T16:55:17Z",
+      "time": "2026-04-29T17:00:19Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T16:55:17Z"
+  "lastUpdated": "2026-04-29T17:00:19Z"
 }
