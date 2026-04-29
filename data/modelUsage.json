@@ -1,6 +1,6 @@
 {
   "session": 0.014364,
-  "daily": 0.093652,
+  "daily": 0.24213,
   "weekly": 45.705728,
   "monthly": 952.083148,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.24212999999999998
+    },
+    {
       "name": "openai/gpt-5.5",
       "window": "session",
       "cost": 0.122313
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.093652
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -54,6 +54,19 @@
       "subscriptionIncluded": false
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 38558,
+      "outputTokens": 66,
+      "totalTokens": 38624,
+      "sessionCost": 0.24212999999999998,
+      "dailyCost": 0.24212999999999998,
+      "weeklyCost": 0.24212999999999998,
+      "sessions": 4,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
       "inputTokens": 18839,
@@ -63,19 +76,6 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
       "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 1188,
-      "outputTokens": 80,
-      "totalTokens": 1268,
-      "sessionCost": 0.093652,
-      "dailyCost": 0.093652,
-      "weeklyCost": 0.093652,
-      "sessions": 4,
       "isGemini": false,
       "costEstimated": false
     },
@@ -124,8 +124,8 @@
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
       "sessionCost": 0.0,
-      "totalTokens": 218746527,
-      "dailyTokens": 82012431,
+      "totalTokens": 219301213,
+      "dailyTokens": 82567117,
       "costEstimated": false,
       "subscriptionIncluded": true
     },
@@ -156,7 +156,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-29T19:55:22Z",
+  "lastUpdated": "2026-04-29T20:00:24Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -189,8 +189,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.093652,
-    "total": 47.216265,
+    "daily": 0.24213,
+    "total": 47.364743,
     "monthly": 952.083148
   },
   "weeklyRunRate": {
@@ -205,11 +205,11 @@
     "meteredMonthlyProjection": 0.52,
     "meteredWeekly": 0.122313,
     "meteredDaily": 0.0,
-    "codexEquivalentWeekly": 45.151178,
-    "codexEquivalentDaily": 0.093652,
-    "codexEquivalentMonthlyProjection": 193.51,
-    "codexTokensWeekly": 327459506,
-    "codexTokensDaily": 82012431,
+    "codexEquivalentWeekly": 45.299656,
+    "codexEquivalentDaily": 0.24213,
+    "codexEquivalentMonthlyProjection": 194.14,
+    "codexTokensWeekly": 328051548,
+    "codexTokensDaily": 82567117,
     "localModelCount": 2,
     "meteredModelCount": 2,
     "codexModelCount": 6,
