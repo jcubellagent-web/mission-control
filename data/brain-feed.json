@@ -1,18 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Handle queued heartbeat_fix_doctor_orphans request",
+  "objective": "Respond to Josh greeting",
   "status": "active",
   "steps": [
     {
-      "label": "functions.exec",
+      "label": "exec",
       "status": "active",
-      "tool": "heartbeat-orphans"
+      "tool": "bf_step"
     }
   ],
-  "currentTool": "heartbeat-orphans",
-  "updatedAt": "2026-04-29T06:21:42Z",
-  "checkedAt": "2026-04-29T06:21:42Z",
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-29T06:34:11Z",
+  "checkedAt": "2026-04-29T06:34:11Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
