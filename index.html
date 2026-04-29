@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777434355 -->
+    <!-- BUILD:1777436120 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -3169,6 +3169,82 @@
             -webkit-box-orient: vertical;
             line-height: 1.28;
         }
+
+        /* ============ BRAIN FEED REALTIME FILL ============ */
+        .bf-realtime-deck {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            flex: 0 0 auto;
+            min-height: 0;
+        }
+        .bf-realtime-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 82px;
+            padding: 10px 11px;
+            border-radius: 14px;
+            border: 1px solid rgba(148,163,184,0.16);
+            background: linear-gradient(180deg, rgba(15,23,42,0.74), rgba(2,6,23,0.56));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .bf-realtime-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--rt-accent, #22d3ee), transparent);
+            opacity: 0.72;
+        }
+        .bf-realtime-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 7px;
+        }
+        .bf-realtime-label {
+            font-size: 0.56rem;
+            font-weight: 850;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(226,232,240,0.48);
+            white-space: nowrap;
+        }
+        .bf-realtime-value {
+            font-size: 0.9rem;
+            font-weight: 850;
+            letter-spacing: -0.02em;
+            color: rgba(248,250,252,0.96);
+            white-space: nowrap;
+        }
+        .bf-realtime-main {
+            font-size: 0.75rem;
+            line-height: 1.25;
+            color: rgba(226,232,240,0.9);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .bf-realtime-sub {
+            margin-top: 6px;
+            font-size: 0.62rem;
+            line-height: 1.2;
+            color: rgba(148,163,184,0.72);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bf-realtime-card.warn { --rt-accent:#fbbf24; border-color:rgba(251,191,36,0.24); background:linear-gradient(180deg, rgba(113,63,18,0.18), rgba(15,23,42,0.58)); }
+        .bf-realtime-card.hot { --rt-accent:#22d3ee; border-color:rgba(34,211,238,0.24); }
+        .bf-realtime-card.good { --rt-accent:#34d399; border-color:rgba(52,211,153,0.22); }
+        .bf-realtime-card.purple { --rt-accent:#a78bfa; border-color:rgba(167,139,250,0.22); }
+        .bf-realtime-card.red { --rt-accent:#fb7185; border-color:rgba(251,113,133,0.25); }
+        body.kiosk-mode .bf-realtime-deck { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+        body.kiosk-mode .bf-realtime-card { min-height: 74px; padding: 9px 10px; }
+        body.phone-mode .bf-realtime-deck { grid-template-columns: 1fr; }
+        body.phone-mode .bf-realtime-card { min-height: auto; }
         .bf-timeline {
             display: flex;
             flex-direction: column;
@@ -9691,6 +9767,95 @@
             </div>`;
         }
 
+
+        // ============ BRAIN FEED REALTIME FILL ============
+        function numberOrDash(value, suffix = '') {
+            return (typeof value === 'number' && !isNaN(value)) ? `${Math.round(value)}${suffix}` : '—';
+        }
+
+        function pickCronLine(crons, matchers) {
+            const list = Array.isArray(crons) ? crons : [];
+            const found = list.find(c => matchers.some(rx => rx.test(`${c?.name || ''} ${c?.category || ''}`)));
+            if (!found) return null;
+            const status = found.runStatus || found.status || 'ok';
+            const when = found.lastRun ? formatRelTime(found.lastRun) : (found.schedule || 'scheduled');
+            return `${found.name}: ${status}${when ? ` · ${when}` : ''}`;
+        }
+
+        function renderBrainFeedRealtimeDeck(bf = null) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const crons = Array.isArray(data.crons) ? data.crons : (window._mcLastCrons || []);
+            const actions = Array.isArray(data.actionRequired) ? data.actionRequired : [];
+            const feeds = data.agentBrainFeeds || {};
+            const modelUsage = data.modelUsage || window._mcLastModelUsage || null;
+            const ctx = data.contextWindow || window._mcLastContextWindow || null;
+            const machine = data.machineHealth || {};
+            const products = Array.isArray(data.products) ? data.products : [];
+            const canary = data.visualCanaries || {};
+            const cal = data.calendarHealth || {};
+            const liveMap = new Map();
+            const seenObjectives = new Set();
+            [feeds.josh, feeds.jain, feeds.jaimes, bf].filter(Boolean)
+                .filter(f => f.active && !f.lowSignal)
+                .forEach(f => {
+                    const objKey = String(f.objective || '').trim().toLowerCase();
+                    if (objKey && seenObjectives.has(objKey)) return;
+                    if (objKey) seenObjectives.add(objKey);
+                    liveMap.set(f.agent || f.heroAgentLabel || f.objective || 'Agent', f);
+                });
+            const nowLive = Array.from(liveMap.values());
+            const activeCrons = crons.filter(c => c && c.status !== 'paused').length;
+            const dueCrons = crons.filter(c => c && (c.runStatus === 'missed' || c.runStatus === 'due_unverified' || c.needsAttention || (c.errors || 0) > 0)).length;
+            const liveProducts = products.filter(p => p.status === 'live').length;
+            const joshCpu = machine.josh?.cpu_pct;
+            const jainCpu = machine.jain?.cpu_pct;
+            const sysLine = [
+                `JOSH CPU ${numberOrDash(joshCpu, '%')}`,
+                `JAIN CPU ${numberOrDash(jainCpu, '%')}`,
+            ].join(' · ');
+            const sorareLine = pickCronLine(crons, [/sorare/i, /mlb/i]);
+            const fantasyLine = pickCronLine(crons, [/fantasy/i, /waiver/i, /injury/i]);
+            const cards = [
+                {
+                    cls: actions.length ? 'warn' : 'good', label: 'Action Required', value: actions.length ? String(actions.length) : 'Clear',
+                    main: actions[0]?.title || 'No urgent approvals or visible blockers',
+                    sub: actions.length > 1 ? `${actions.length - 1} more waiting` : (cal.status === 'auth_expired' ? 'Calendar auth still flagged' : 'Ops normal'),
+                },
+                {
+                    cls: dueCrons ? 'warn' : 'good', label: 'Automation', value: String(activeCrons),
+                    main: dueCrons ? `${dueCrons} cron(s) need attention` : `${activeCrons} active crons running`,
+                    sub: crons[0]?.lastRun ? `refresh ${formatRelTime(crons[0].lastRun)}` : 'scheduler online',
+                },
+                {
+                    cls: nowLive.length ? 'hot' : 'good', label: 'Agents Live', value: String(nowLive.length),
+                    main: nowLive.map(f => `${f.agent || 'Agent'}: ${f.objective || 'working'}`).join(' · ') || 'Agents standing by',
+                    sub: nowLive[0]?.updatedAt ? `fresh ${formatRelTime(nowLive[0].updatedAt)}` : 'no live objective',
+                },
+                {
+                    cls: ctx?.status === 'red' ? 'red' : ctx?.status === 'amber' ? 'warn' : 'purple', label: 'Model / Context', value: modelUsage ? formatCurrencyAlways(modelUsage.daily) : '—',
+                    main: ctx ? `${Math.round((ctx.pct || 0) * 100)}% context · ${ctx.model || 'model'}` : 'Context telemetry unavailable',
+                    sub: modelUsage ? `session ${formatCurrencyAlways(modelUsage.session)} · weekly ${formatCurrencyAlways(modelUsage.weekly)}` : 'cost feed pending',
+                },
+                {
+                    cls: canary.status === 'attention' || cal.status === 'auth_expired' ? 'warn' : 'good', label: 'Systems', value: canary.status === 'attention' ? 'Watch' : 'OK',
+                    main: sysLine,
+                    sub: `${liveProducts || 0} live products · ${cal.message || 'calendar ok'}`,
+                },
+                {
+                    cls: 'purple', label: 'Josh Ops', value: 'Live',
+                    main: [sorareLine || 'Sorare ML monitored', fantasyLine || 'Fantasy monitors ready'].join(' · '),
+                    sub: data.lastUpdated ? `dashboard ${formatRelTime(data.lastUpdated)}` : 'dashboard feed live',
+                },
+            ];
+            return `<div class="bf-realtime-deck" data-realtime-fill="true">
+                ${cards.map(card => `<div class="bf-realtime-card ${card.cls}">
+                    <div class="bf-realtime-head"><span class="bf-realtime-label">${escapeHtml(card.label)}</span><span class="bf-realtime-value">${escapeHtml(card.value)}</span></div>
+                    <div class="bf-realtime-main" title="${escapeHtml(card.main)}">${escapeHtml(card.main)}</div>
+                    <div class="bf-realtime-sub" title="${escapeHtml(card.sub)}">${escapeHtml(card.sub)}</div>
+                </div>`).join('')}
+            </div>`;
+        }
+
         function scrubLegacyDashboardCopy(value) {
             return String(value || '')
                 .replace(/Memory Roadmap/gi, 'legacy panel')
@@ -9984,6 +10149,7 @@
                     <div class="bf-hero-grid dual-live">
                         ${entries.map(entry => renderBrainFeedObjectiveCard(entry, true)).join('')}
                     </div>
+                    ${renderBrainFeedRealtimeDeck(primary)}
                 </div>
             `;
             syncBrainFeedObjectiveScroller(brainFeedCard);
@@ -10092,6 +10258,7 @@
                                 </div>
                                 ${renderBrainFeedSignalRow(bf)}
                             </div>
+                            ${renderBrainFeedRealtimeDeck(bf)}
                             <div class="bf-timeline">${stepsHtml}</div>
                         </div>
                     `;
@@ -10172,6 +10339,9 @@
                     }
                     const modelKey = brainFeedCard.querySelector('.bf-model-key');
                     if (modelKey) modelKey.outerHTML = renderModelKeyRow(modelVisual.key, 'bf-model-key');
+                    const realtimeDeck = brainFeedCard.querySelector('.bf-realtime-deck');
+                    if (realtimeDeck) realtimeDeck.outerHTML = renderBrainFeedRealtimeDeck(bf);
+                    else brainFeedCard.querySelector('.bf-hero-grid')?.insertAdjacentHTML('afterend', renderBrainFeedRealtimeDeck(bf));
 
                     // 4. Diff-update steps — animate step status changes, slide in new steps
                     const timeline = brainFeedCard.querySelector('.bf-timeline');
@@ -10493,6 +10663,7 @@
                             ${signalStripHtml}
                             ${ctxWarning}
                         </div>
+                        ${renderBrainFeedRealtimeDeck(bf)}
                         <div class="bf-idle-insights">
                             ${idleActivityHtml}
                             <div class="brain-meta">
