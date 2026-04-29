@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: measuring overflow on JOSH display",
-  "status": "active",
-  "updatedAt": "2026-04-29T04:39:21Z",
-  "checkedAt": "2026-04-29T04:39:21Z",
+  "active": false,
+  "objective": "Done: Mission Control skill updated",
+  "status": "idle",
+  "updatedAt": "2026-04-29T04:07:22Z",
+  "checkedAt": "2026-04-29T04:07:05Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,6 +14,16 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
+    {
+      "label": "Task: review skill save/update after Mission Control work",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: patching Mission Control skill with JOSHeX quick panel",
+      "status": "done",
+      "tool": "exec"
+    },
     {
       "label": "Task: apply approved JOSHeX panel cleanup",
       "status": "done",
@@ -53,18 +63,8 @@
       "label": "Step: patch Mission Control skill",
       "status": "done",
       "tool": "exec"
-    },
-    {
-      "label": "Task: Mission Control still wrong; diagnosing JOSH display",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: measuring overflow on JOSH display",
-      "status": "active",
-      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T04:39:21Z"
+  "messageReceived": "2026-04-29T04:07:05Z"
 }
