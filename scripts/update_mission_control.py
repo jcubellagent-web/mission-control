@@ -1522,6 +1522,44 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         elif metered_monthly_projection > 1:
             posture = "active"
 
+        active_metered_lanes = [
+            lane for lane in spend_lanes
+            if lane.get("billing") == "metered" and float(lane.get("monthlyProjection") or 0) > 0.01
+        ]
+        lead_metered_lane = max(
+            active_metered_lanes,
+            key=lambda lane: float(lane.get("monthlyProjection") or 0),
+            default=None,
+        )
+        lane_stack = [
+            {
+                "key": str(lane.get("key") or "lane"),
+                "label": str(lane.get("label") or "Lane"),
+                "billing": str(lane.get("billing") or "metered"),
+                "status": str(lane.get("status") or "idle"),
+                "monthlyProjection": round(float(lane.get("monthlyProjection") or 0), 2),
+                "weeklyCost": round(float(lane.get("weeklyCost") or lane.get("weeklyEquivalent") or 0), 6),
+                "modelCount": int(lane.get("modelCount") or 0),
+                "models": list(lane.get("models") or [])[:2],
+            }
+            for lane in spend_lanes
+        ]
+        kiosk_summary = {
+            "title": "Model spend cockpit",
+            "posture": posture,
+            "statusLabel": "Calm" if posture == "calm" else posture.title(),
+            "trueOutlayMonthly": effective_monthly_projection,
+            "fixedMonthly": fixed_codex_monthly,
+            "meteredMonthly": metered_monthly_projection,
+            "meteredWeekly": metered_weekly,
+            "codexValueMonthly": codex_value_projection,
+            "codexTokensWeekly": codex_tokens_weekly,
+            "activeMeteredLaneCount": len(active_metered_lanes),
+            "leadMeteredLane": lead_metered_lane.get("label") if lead_metered_lane else "Metered lanes idle",
+            "laneStack": lane_stack,
+            "mixLabel": f"{len(codex_rows)} Codex · {len(metered_rows)} API · {len(local_rows)} local",
+        }
+
         spend_overview = {
             "subscriptionMonthly": fixed_codex_monthly,
             "effectiveMonthlyProjection": effective_monthly_projection,
@@ -1538,6 +1576,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "codexModelCount": len(codex_rows),
             "meteredSources": metered_source_totals,
             "posture": posture,
+            "kioskSummary": kiosk_summary,
             "lanes": spend_lanes,
             "insights": [
                 f"True projected outlay is ${effective_monthly_projection:.2f}/mo: ${fixed_codex_monthly:.0f} fixed Codex + ${metered_monthly_projection:.2f} metered.",

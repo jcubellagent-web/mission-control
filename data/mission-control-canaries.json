@@ -1,20 +1,20 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "1 canary issue(s)",
-  "checkedAt": "2026-04-29T23:10:19.715080Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-04-29T23:12:02.066127Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+      "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
       "severity": "ok"
     },
     {
       "name": "Calendar tile",
-      "ok": false,
-      "detail": "Calendar re-auth required",
-      "severity": "medium"
+      "ok": true,
+      "detail": "Connected via local gog",
+      "severity": "ok"
     },
     {
       "name": "Today Jobs",
@@ -25,7 +25,7 @@
     {
       "name": "Action Required",
       "ok": true,
-      "detail": "1 visible alert(s)",
+      "detail": "clear",
       "severity": "ok"
     },
     {
