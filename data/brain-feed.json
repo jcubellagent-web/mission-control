@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Mission Control bottom-half cutoff root cause patched locally and verified; waiting on push-live approval",
+  "objective": "handle async screenshot diff completion",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T05:02:26Z",
-  "checkedAt": "2026-04-29T05:02:26Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-29T05:02:53Z",
+  "checkedAt": "2026-04-29T05:02:53Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
