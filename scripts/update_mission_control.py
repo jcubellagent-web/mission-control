@@ -839,6 +839,7 @@ def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
                 for mb in day_entry.get("modelBreakdowns", []):
                     name = mb.get("modelName", "")
                     cost = float(mb.get("cost") or 0)
+                    tokens = int(mb.get("totalTokens") or 0)
                     if not name or should_exclude_model(name, source):
                         continue
                     if name not in by_model:
@@ -849,12 +850,18 @@ def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
                             "dailyCost": 0.0,
                             "sessionCost": 0.0,
                             "totalTokens": 0,
+                            "dailyTokens": 0,
                             "costEstimated": False,
+                            "subscriptionIncluded": cost == 0 and source == "codex",
                         }
                     by_model[name]["weeklyCost"] += cost
                     by_model[name]["sessionCost"] += cost
+                    by_model[name]["totalTokens"] += tokens
                     if is_today:
                         by_model[name]["dailyCost"] += cost
+                        by_model[name]["dailyTokens"] += tokens
+                    if cost > 0:
+                        by_model[name]["subscriptionIncluded"] = False
 
         return list(by_model.values())
     except Exception as exc:
@@ -1337,6 +1344,62 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
         total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
 
+        fixed_codex_monthly = 200.0
+
+        def _is_local_row(row: Dict[str, Any]) -> bool:
+            src = str(row.get("source", "")).lower()
+            name = str(row.get("name", "")).lower()
+            return row.get("isLocal") is True or src in {"ollama", "local"} or name.startswith("local/")
+
+        def _is_codex_subscription_row(row: Dict[str, Any]) -> bool:
+            src = str(row.get("source", "")).lower()
+            name = str(row.get("name", "")).lower()
+            return (
+                src in {"codex", "codexbar"}
+                or "openai-codex" in name
+                or name.startswith("codex/")
+                or row.get("subscriptionIncluded") is True
+            )
+
+        codex_rows = [r for r in breakdown if _is_codex_subscription_row(r)]
+        local_rows = [r for r in breakdown if _is_local_row(r)]
+        metered_rows = [r for r in breakdown if not _is_local_row(r) and not _is_codex_subscription_row(r)]
+        codex_equivalent_weekly = round(sum(float(r.get("weeklyCost") or 0) for r in codex_rows), 6)
+        codex_equivalent_daily = round(sum(float(r.get("dailyCost") or 0) for r in codex_rows), 6)
+        codex_tokens_weekly = int(sum(int(r.get("totalTokens") or 0) for r in codex_rows))
+        codex_tokens_daily = int(sum(int(r.get("dailyTokens") or 0) for r in codex_rows))
+        metered_weekly = round(
+            sum(float(r.get("weeklyCost") or 0) for r in metered_rows)
+            + or_weekly
+            + jain_api.get("weekly", 0),
+            6,
+        )
+        metered_daily = round(
+            sum(float(r.get("dailyCost") or 0) for r in metered_rows)
+            + or_daily
+            + jain_api_daily,
+            6,
+        )
+        metered_monthly_projection = round(max(metered_weekly * (30 / 7), or_monthly, jain_api_monthly), 2)
+        effective_monthly_projection = round(fixed_codex_monthly + metered_monthly_projection, 2)
+        codex_value_projection = round(codex_equivalent_weekly * (30 / 7), 2)
+        spend_overview = {
+            "subscriptionMonthly": fixed_codex_monthly,
+            "effectiveMonthlyProjection": effective_monthly_projection,
+            "meteredMonthlyProjection": metered_monthly_projection,
+            "meteredWeekly": metered_weekly,
+            "meteredDaily": metered_daily,
+            "codexEquivalentWeekly": codex_equivalent_weekly,
+            "codexEquivalentDaily": codex_equivalent_daily,
+            "codexEquivalentMonthlyProjection": codex_value_projection,
+            "codexTokensWeekly": codex_tokens_weekly,
+            "codexTokensDaily": codex_tokens_daily,
+            "localModelCount": len(local_rows),
+            "meteredModelCount": len(metered_rows),
+            "codexModelCount": len(codex_rows),
+            "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription.",
+        }
+
         # ── Weekly Run Rate: automation baseline vs interactive ───────────────
         # automation = J.A.I.N scripts + OpenRouter background + JAIN API models
         # interactive = JOSH 2.0 chat sessions (Sonnet-driven, Josh-initiated)
@@ -1371,6 +1434,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 "monthly": total_monthly,
             },
             "weeklyRunRate": weekly_run_rate,
+            "spendOverview": spend_overview,
         }
         return payload
 

@@ -1112,6 +1112,117 @@
             line-height: 1.5;
             margin-top: 10px;
         }
+        .mu-spend-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 6px;
+            padding: 8px 9px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.028);
+        }
+        .mu-spend-hero.good { border-color: rgba(74,222,128,0.18); }
+        .mu-spend-hero.ok { border-color: rgba(96,165,250,0.18); }
+        .mu-spend-hero.watch { border-color: rgba(245,158,11,0.2); }
+        .mu-spend-hero.bad { border-color: rgba(103,232,249,0.22); }
+        .mu-spend-left,
+        .mu-spend-right { min-width: 0; }
+        .mu-spend-kicker,
+        .mu-spend-label {
+            font-size: 0.48rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.42);
+        }
+        .mu-spend-main {
+            margin-top: 2px;
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-spend-main span {
+            margin-left: 3px;
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.45);
+            font-weight: 700;
+        }
+        .mu-spend-sub {
+            margin-top: 4px;
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.62);
+            line-height: 1.25;
+        }
+        .mu-spend-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .mu-spend-chip {
+            max-width: 132px;
+            padding: 3px 6px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.035);
+            color: rgba(255,255,255,0.64);
+            font-size: 0.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mu-spend-chip.strong { color: #fff; }
+        .mu-spend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .mu-spend-cell {
+            min-width: 0;
+            padding: 6px 7px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.022);
+        }
+        .mu-spend-cell strong {
+            display: block;
+            margin-top: 2px;
+            color: #fff;
+            font-size: 0.72rem;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mu-spend-cell small {
+            display: block;
+            margin-top: 3px;
+            color: rgba(255,255,255,0.48);
+            font-size: 0.52rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mu-spend-note {
+            margin-bottom: 6px;
+            padding: 5px 7px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.018);
+            font-size: 0.52rem;
+            line-height: 1.3;
+        }
         .mu-totals-section { margin-bottom: 5px; }
         .mu-totals-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
         .mu-total-cell { display: flex; align-items: center; gap: 3px; padding: 3px 5px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); min-width: 0; }
@@ -11361,6 +11472,23 @@
                 const totalDaily   = Math.max(rawDaily, rawSession);
                 const totalWeekly  = Math.max(rawWeekly, totalDaily);
                 const totalMonthly = Math.max(rawMonthly, totalWeekly);
+                const spend = mu.spendOverview || {};
+                const fixedSubMonthly = Number(spend.subscriptionMonthly ?? 200);
+                const meteredMonthlyProjection = Number(spend.meteredMonthlyProjection ?? 0);
+                const effectiveMonthlyProjection = Number(spend.effectiveMonthlyProjection ?? (fixedSubMonthly + Math.max(0, totalMonthly - fixedSubMonthly)));
+                const codexValueMonthly = Number(spend.codexEquivalentMonthlyProjection ?? 0);
+                const codexValueWeekly = Number(spend.codexEquivalentWeekly ?? 0);
+                const codexTokensWeekly = Number(spend.codexTokensWeekly ?? 0);
+                const codexTokensDaily = Number(spend.codexTokensDaily ?? 0);
+                const meteredWeeklySpend = Number(spend.meteredWeekly ?? 0);
+                const meteredDailySpend = Number(spend.meteredDaily ?? 0);
+                const fmtTokensCompact = value => {
+                    const n = Number(value || 0);
+                    if (n >= 1000000000) return `${(n / 1000000000).toFixed(1)}B`;
+                    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+                    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+                    return `${Math.round(n)}`;
+                };
 
                 const activeBf = window._mcLastRenderedBrainFeed || null;
                 const activeModelRaw = activeBf?.model || data.contextWindow?.model || '';
@@ -11399,14 +11527,14 @@
                     <span class="mu-run-rate-info-btn" id="rr-info-btn" title="View detailed breakdown">i</span>
                 </div>`;
 
-                const budgetFloor = 200;
-                const budgetTarget = 400;
-                const budgetCap = 500;
+                const budgetFloor = fixedSubMonthly;
+                const budgetTarget = fixedSubMonthly + 50;
+                const budgetCap = fixedSubMonthly + 150;
                 const budgetNow = new Date();
                 const budgetDaysInMonth = new Date(budgetNow.getFullYear(), budgetNow.getMonth() + 1, 0).getDate();
                 const budgetDayOfMonth = Math.min(budgetDaysInMonth, Math.max(1, budgetNow.getDate()));
                 const budgetActualMonthly = totalDaily;
-                const budgetProjected = Math.max(wrrProjected || 0, totalMonthly || 0);
+                const budgetProjected = effectiveMonthlyProjection || (fixedSubMonthly + meteredMonthlyProjection);
                 const budgetFillPct = Math.max(0, Math.min(100, (budgetProjected / budgetCap) * 100));
                 let budgetTone = 'good';
                 let budgetLabel = 'Under floor';
@@ -11490,6 +11618,44 @@
                     <div class="mu-codexbar-note">${escapeHtml(codexbar.summary || data.codingVisibility?.codexbarStatus || 'CodexBar available')}</div>
                 </div>` : '';
 
+                const spendRiskTone = meteredMonthlyProjection <= 1 ? 'good' : (meteredMonthlyProjection <= 25 ? 'ok' : (meteredMonthlyProjection <= 75 ? 'watch' : 'bad'));
+                const codexValueText = codexValueMonthly > 0 ? `${fmtCost(codexValueMonthly)}/mo value` : 'included usage';
+                const spendCompactHtml = `
+                <div class="mu-spend-hero ${spendRiskTone}">
+                    <div class="mu-spend-left">
+                        <div class="mu-spend-kicker">Model spend</div>
+                        <div class="mu-spend-main">${fmtCost(effectiveMonthlyProjection)}<span>/mo</span></div>
+                        <div class="mu-spend-sub">${fmtCost(fixedSubMonthly)} Codex subscription + ${fmtCost(meteredMonthlyProjection)} projected metered</div>
+                    </div>
+                    <div class="mu-spend-right">
+                        <div class="mu-spend-chip strong">${escapeHtml(activeModelDisp || 'No live model')}</div>
+                        <div class="mu-spend-chip">${fmtTokensCompact(codexTokensWeekly)} Codex tokens/wk</div>
+                    </div>
+                </div>
+                <div class="mu-spend-grid">
+                    <div class="mu-spend-cell">
+                        <span class="mu-spend-label">Fixed plan</span>
+                        <strong>${fmtCost(fixedSubMonthly)}</strong>
+                        <small>Codex subscription</small>
+                    </div>
+                    <div class="mu-spend-cell">
+                        <span class="mu-spend-label">Metered extra</span>
+                        <strong>${fmtCost(meteredMonthlyProjection)}</strong>
+                        <small>${fmtCost(meteredWeeklySpend)}/wk · ${fmtCost(meteredDailySpend)} today</small>
+                    </div>
+                    <div class="mu-spend-cell">
+                        <span class="mu-spend-label">Codex value</span>
+                        <strong>${escapeHtml(codexValueText)}</strong>
+                        <small>${fmtCost(codexValueWeekly)}/wk API-equivalent</small>
+                    </div>
+                    <div class="mu-spend-cell">
+                        <span class="mu-spend-label">Tracked mix</span>
+                        <strong>${Number(spend.codexModelCount || 0)} / ${Number(spend.meteredModelCount || 0)} / ${Number(spend.localModelCount || 0)}</strong>
+                        <small>Codex / metered / local</small>
+                    </div>
+                </div>
+                <div class="mu-spend-note">CodexBar costs are subscription-equivalent value, not extra billing. True projected outlay is fixed Codex plan plus API/BYOK/direct calls.</div>`;
+
                 const breakdownModels = Array.isArray(mu.breakdown) ? mu.breakdown : [];
                 const isLocalModel = model => model.isLocal === true || ['ollama', 'local'].includes((model.source || '').toLowerCase()) || (model.name || '').toLowerCase().startsWith('local/');
                 const isCodexModel = model => {
@@ -11569,8 +11735,12 @@
                     const session = sumCost(models, 'sessionCost');
                     const daily = sumField(models, 'dailyCost');
                     const weekly = sumField(models, 'weeklyCost');
-                    const projected = lane.key === 'local' ? 0 : projectedMonthlyForModels(models);
-                    const impact = laneBudgetImpact(projected, lane.key);
+                    let projected = lane.key === 'local' ? 0 : projectedMonthlyForModels(models);
+                    if (lane.key === 'openai_codex') projected = fixedSubMonthly;
+                    if (lane.key === 'openai_api') projected = Math.max(projected, meteredMonthlyProjection);
+                    const impact = lane.key === 'openai_codex'
+                        ? { tone: 'good', short: 'fixed', long: 'Covered by the Codex subscription' }
+                        : laneBudgetImpact(projected, lane.key);
                     const topModels = laneModelList(models).slice(0, 2);
                     const capPct = Math.max(0, Math.min(100, (projected / budgetCap) * 100));
 
@@ -11582,10 +11752,10 @@
                         main = models.length ? `${fmtCost(projected)}/mo · ${lead}` : 'Idle';
                         meta = models.length ? `Sess ${fmtCost(session)} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No direct OpenAI API calls tracked in this window.';
                     } else if (lane.key === 'openai_codex') {
-                        main = codexbar?.available ? `Allowance ${codexbar.session || 'available'}` : (models.length ? `${fmtCost(projected)}/mo metered` : 'Idle');
+                        main = `${fmtCost(fixedSubMonthly)}/mo fixed · ${codexValueText}`;
                         meta = codexbar?.available
-                            ? `CodexBar ${codexbar.summary || 'ready'} · tracked wk ${fmtCost(weekly)}`
-                            : (models.length ? `Sess ${fmtCost(session)} · Wk ${fmtCost(weekly)} · ${topModels.join(', ')}` : 'No OpenAI Pro / Codex activity tracked.');
+                            ? `CodexBar ${codexbar.summary || 'ready'} · ${fmtTokensCompact(codexTokensWeekly)} tokens/wk`
+                            : (models.length ? `Subscription lane · ${fmtCost(weekly)}/wk API-equivalent · ${topModels.join(', ')}` : 'No OpenAI Pro / Codex activity tracked.');
                     } else if (lane.key === 'gemini') {
                         main = models.length ? `${fmtCost(projected)}/mo pace` : 'Idle';
                         meta = models.length ? `${topModels.join(', ')} · Day ${fmtCost(daily)} · Wk ${fmtCost(weekly)}` : 'No Gemini API calls tracked right now.';
@@ -11634,8 +11804,8 @@
                         <div class="mu-lane-meta">${escapeHtml(lane.meta)}</div>
                     </div>`;
                 }).join('');
-                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Projected monthly by lane. Guardrails: floor $${budgetFloor}, target $${budgetTarget}, cap $${budgetCap}. Local stays $0.</div>`;
-                const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">Run rate</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${budgetLabel} · floor $${budgetFloor} · target $${budgetTarget} · cap $${budgetCap}</span></div>`;
+                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Lane projection separates fixed subscription spend from metered API/BYOK/direct calls. Local stays $0.</div>`;
+                const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">True outlay</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${fmtCost(fixedSubMonthly)} fixed + ${fmtCost(meteredMonthlyProjection)} metered projection</span></div>`;
 
                 const activeUsageHeroHtml = `<div class="mu-active-hero" style="--mu-accent:${activeModelVisual.color};--mu-accent-soft:${activeModelVisual.bg};--mu-accent-border:${activeModelVisual.border};">
                     <div class="mu-active-head">
@@ -11814,7 +11984,7 @@
                     </div>
                 </div>`;
 
-                const usageDetailHtml = runRateHtml + budgetHtml + laneGridHtml + codexbarHtml + summaryHtml + breakdownHtml + elHtml;
+                const usageDetailHtml = spendCompactHtml + laneGridHtml + codexbarHtml + summaryHtml + runRateHtml + budgetHtml + breakdownHtml + elHtml;
                 const activeBus = (data.agentBus || []).filter(task => ['queued', 'retry', 'running', 'in_progress'].includes((task.status || '').toLowerCase()));
                 const jaimesQueue = activeBus.filter(task => (task.target_node || '').toUpperCase() === 'JAIMES').length;
                 const runningAgents = (data.activeAgents || []).filter(agent => agent.status === 'running').length;
@@ -11862,7 +12032,7 @@
                 window._moduleHealthHtml = healthDetailHtml;
                 window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
 
-                modelUsageCard.innerHTML = summaryHtml + runRateHtml + budgetStripHtml + laneGridHtml + breakdownHtml + elHtml;
+                modelUsageCard.innerHTML = spendCompactHtml + laneGridHtml + breakdownHtml + elHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');

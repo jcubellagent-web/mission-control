@@ -1,16 +1,5 @@
 {
-  "actionRequired": [
-    {
-      "priority": "high",
-      "title": "Mission Control canary issue: 1 canary issue(s)",
-      "url": "#canaries"
-    },
-    {
-      "priority": "high",
-      "title": "Calendar auth needs refresh",
-      "url": "#calendar"
-    }
-  ],
+  "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
@@ -34,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "revamp Mission Control model usage and spend component",
-    "updatedAt": "2026-04-29T16:40:14Z"
+    "updatedAt": "2026-04-29T16:42:01Z"
   },
   "contextWindow": {
     "usedTokens": 39946,
@@ -51,7 +40,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T16:40:14Z"
+        "time": "2026-04-29T16:42:01Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +58,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T16:40:14Z",
+    "updatedAt": "2026-04-29T16:42:01Z",
     "patchStatus": {
       "status": "pending",
       "summary": "12 source file(s) changed",
       "detail": "Ready for validation",
       "dirtyCount": 12,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json"
+        "data/mission-control-canaries.json",
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "7ff89d332",
-      "updatedAt": "2026-04-29T16:40:14Z"
+      "head": "4d66ac466",
+      "updatedAt": "2026-04-29T16:42:01Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +177,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 11,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -202,7 +191,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 14m",
+        "Resets in 12m",
         "Weekly: 83% left [=========---]",
         "Pace: 4% in reserve | Expected 21% used | Lasts until reset",
         "Resets in 5d 12h",
@@ -213,11 +202,11 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "14m",
+      "sessionReset": "12m",
       "weeklyReset": "5d 12h",
       "summary": "92% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T16:40:17Z"
+    "updatedAt": "2026-04-29T16:42:03Z"
   },
   "modelUsage": {
     "session": 0.025382,
@@ -345,8 +334,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 208440600,
-        "dailyTokens": 71706504,
+        "totalTokens": 211185389,
+        "dailyTokens": 74451293,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -377,7 +366,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T16:40:20Z",
+    "lastUpdated": "2026-04-29T16:42:06Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -429,8 +418,8 @@
       "codexEquivalentWeekly": 45.16816,
       "codexEquivalentDaily": 0.110634,
       "codexEquivalentMonthlyProjection": 193.58,
-      "codexTokensWeekly": 317155068,
-      "codexTokensDaily": 71706504,
+      "codexTokensWeekly": 319899857,
+      "codexTokensDaily": 74451293,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -451,7 +440,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T16:40:25Z",
+    "updatedAt": "2026-04-29T16:42:11Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -468,14 +457,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.6,
-      "cpu_user": 17.3,
-      "cpu_sys": 17.3,
-      "load1": 3.01,
-      "load5": 2.6,
-      "load15": 2.43,
+      "cpu_pct": 38.5,
+      "cpu_user": 20.6,
+      "cpu_sys": 18.42,
+      "load1": 1.99,
+      "load5": 2.33,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -483,14 +472,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.6,
-      "cpu_user": 4.0,
-      "cpu_sys": 9.6,
-      "load1": 1.38,
-      "load5": 1.74,
-      "load15": 1.9,
+      "cpu_pct": 28.2,
+      "cpu_user": 14.51,
+      "cpu_sys": 13.7,
+      "load1": 1.61,
+      "load5": 1.72,
+      "load15": 1.87,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -499,8 +488,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Calendar re-auth required"
+    "status": "ok",
+    "message": "Connected via local gog"
   },
   "devices": [
     {
@@ -514,19 +503,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:40:14Z"
+      "lastChecked": "2026-04-29T16:42:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:40:14Z"
+      "lastChecked": "2026-04-29T16:42:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T16:40:14Z"
+      "lastChecked": "2026-04-29T16:42:01Z"
     }
   ],
   "crons": [
@@ -543,7 +532,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:40:25.392243+00:00"
+      "lastRun": "2026-04-29T16:40:27.410953+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1087,10 +1076,10 @@
     }
   ],
   "visualCanaries": {
-    "ok": false,
-    "status": "attention",
-    "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T16:40:14.687849Z",
+    "ok": true,
+    "status": "ok",
+    "summary": "All canaries passed",
+    "checkedAt": "2026-04-29T16:41:52.660342Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1100,9 +1089,9 @@
       },
       {
         "name": "Calendar tile",
-        "ok": false,
-        "detail": "Calendar re-auth required",
-        "severity": "medium"
+        "ok": true,
+        "detail": "Connected via local gog",
+        "severity": "ok"
       },
       {
         "name": "Today Jobs",
@@ -1113,7 +1102,7 @@
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "1 visible alert(s)",
+        "detail": "clear",
         "severity": "ok"
       },
       {
@@ -1353,9 +1342,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1368,9 +1357,9 @@
     {
       "id": "visual-canaries",
       "name": "Visual Canaries",
-      "status": "attention",
-      "summary": "1 canary issue(s)",
-      "detail": "5/6 checks passing"
+      "status": "ok",
+      "summary": "All canaries passed",
+      "detail": "6/6 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1389,9 +1378,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1675,29 +1664,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T16:40:20Z",
+      "time": "2026-04-29T16:42:06Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T16:40:17Z",
+      "time": "2026-04-29T16:42:03Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T16:40:17Z",
+      "time": "2026-04-29T16:42:03Z",
       "event": "CodexBar: 92% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T16:40:14Z",
+      "time": "2026-04-29T16:42:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T16:40:14Z",
+      "time": "2026-04-29T16:42:01Z",
       "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T16:40:14Z",
+      "time": "2026-04-29T16:42:01Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T16:40:14Z"
+  "lastUpdated": "2026-04-29T16:42:01Z"
 }
