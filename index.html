@@ -31,17 +31,17 @@
             --text-secondary: rgba(255,255,255,0.62);
             --text-muted: rgba(255,255,255,0.38);
             --text-label: rgba(255,255,255,0.44);
-            --accent: #e53e3e;
-            --accent-focus: #e53e3e;
-            --accent-model: #e53e3e;
-            --accent-events: #e53e3e;
-            --accent-devices: #e53e3e;
-            --accent-active: #e53e3e;
-            --accent-cron: #e53e3e;
-            --accent-blue: #e53e3e;
-            --accent-red: #e53e3e;
-            --accent-orange: #e53e3e;
-            --accent-yellow: #e53e3e;
+            --accent: #22d3ee;
+            --accent-focus: #38bdf8;
+            --accent-model: #22d3ee;
+            --accent-events: #2dd4bf;
+            --accent-devices: #60a5fa;
+            --accent-active: #34d399;
+            --accent-cron: #22d3ee;
+            --accent-blue: #38bdf8;
+            --accent-red: #22d3ee;
+            --accent-orange: #2dd4bf;
+            --accent-yellow: #a7f3d0;
             --accent-green: #4ade80;
         }
         html {
@@ -133,15 +133,15 @@
             gap: 1px;
             margin-left: 10px;
             padding-left: 12px;
-            border-left: 1px solid rgba(229,62,62,0.2);
+            border-left: 1px solid rgba(34,211,238,0.2);
         }
         .mc-clock-time {
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
             font-size: 1.15rem;
             font-weight: 700;
-            color: #e53e3e;
+            color: #22d3ee;
             letter-spacing: 0.08em;
-            text-shadow: 0 0 12px rgba(229,62,62,0.5);
+            text-shadow: 0 0 12px rgba(34,211,238,0.5);
             line-height: 1;
             font-variant-numeric: tabular-nums;
         }
@@ -150,7 +150,7 @@
             font-weight: 600;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: rgba(229,62,62,0.55);
+            color: rgba(34,211,238,0.55);
             line-height: 1;
         }
         .logo-icon {
@@ -180,7 +180,7 @@
         }
         .connection-status.offline {
             color: var(--accent);
-            border-color: rgba(229,62,62,0.3);
+            border-color: rgba(34,211,238,0.3);
         }
         .connection-status.degraded {
             color: rgba(255,255,255,0.45);
@@ -218,9 +218,9 @@
             color: rgba(253,230,138,0.84);
         }
         .build-status-chip.err {
-            border-color: rgba(248,113,113,0.28);
-            background: rgba(248,113,113,0.07);
-            color: rgba(254,202,202,0.86);
+            border-color: rgba(103,232,249,0.28);
+            background: rgba(103,232,249,0.07);
+            color: rgba(191,219,254,0.86);
         }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
         .last-updated { color: rgba(255,255,255,0.56); font-size: 0.8rem; }
@@ -234,8 +234,8 @@
             display: flex; align-items: center; justify-content: center; gap: 8px;
             padding: 8px 18px; border-radius: 999px;
             background: rgba(20,20,28,0.92);
-            border: 1px solid rgba(229,62,62,0.35);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 12px rgba(229,62,62,0.15);
+            border: 1px solid rgba(34,211,238,0.35);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 12px rgba(34,211,238,0.15);
             font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
             color: rgba(255,255,255,0.8);
             pointer-events: none;
@@ -249,9 +249,9 @@
             transform: translateX(-50%) translateY(0px);
         }
         .pull-indicator.releasing {
-            border-color: rgba(229,62,62,0.7);
-            box-shadow: 0 4px 28px rgba(0,0,0,0.6), 0 0 20px rgba(229,62,62,0.3);
-            color: #f87171;
+            border-color: rgba(34,211,238,0.7);
+            box-shadow: 0 4px 28px rgba(0,0,0,0.6), 0 0 20px rgba(34,211,238,0.3);
+            color: #67e8f9;
         }
         .pull-indicator.refreshing {
             opacity: 1;
@@ -260,8 +260,8 @@
         @keyframes pull-spin { to { transform: rotate(360deg); } }
         .pull-spinner {
             width: 14px; height: 14px; border-radius: 50%;
-            border: 2px solid rgba(229,62,62,0.25);
-            border-top-color: #e53e3e;
+            border: 2px solid rgba(34,211,238,0.25);
+            border-top-color: #22d3ee;
             animation: pull-spin 0.7s linear infinite;
             display: none;
             flex-shrink: 0;
@@ -291,8 +291,8 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .alert-banner {
-            background: rgba(229,62,62,0.05);
-            border: 1px solid rgba(229,62,62,0.16);
+            background: rgba(34,211,238,0.05);
+            border: 1px solid rgba(34,211,238,0.16);
             border-radius: 12px;
             padding: 12px 14px;
             margin-bottom: 14px;
@@ -312,8 +312,8 @@
             padding: 4px 8px; border-radius: 4px;
             font-size: 0.75rem; font-weight: 500; text-transform: uppercase;
         }
-        .priority.high { background: rgba(229,62,62,0.12); color: #e53e3e; }
-        .priority.medium { background: rgba(229,62,62,0.08); color: rgba(229,62,62,0.75); }
+        .priority.high { background: rgba(34,211,238,0.12); color: #22d3ee; }
+        .priority.medium { background: rgba(34,211,238,0.08); color: rgba(34,211,238,0.75); }
         .priority.low { background: #2a2a2a; color: rgba(255,255,255,0.5); }
         .alert-item a { color: rgba(255,255,255,0.55); font-size: 0.82rem; text-decoration: none; }
         .alert-item a:hover { color: rgba(255,255,255,0.8); }
@@ -441,7 +441,7 @@
         .tjob-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 5px; margin-bottom: 2px; transition: background 0.12s; }
         .tjob-row:last-child { margin-bottom: 0; }
         .tjob-row:hover { background: rgba(255,255,255,0.04); }
-        .tjob-row.tjob-error  { background: rgba(239,68,68,0.04); }
+        .tjob-row.tjob-error  { background: rgba(34,211,238,0.04); }
         .tjob-row.tjob-done   { background: rgba(74,222,128,0.03); }
         .tjob-row.tjob-missed { background: rgba(245,158,11,0.04); }
         .tjob-name-done { text-decoration: line-through; opacity: 0.5; }
@@ -476,7 +476,7 @@
         .tjob-meta-row { display: flex; align-items: center; gap: 5px; }
         .tjob-schedule { font-size: 0.6rem; color: rgba(255,255,255,0.6); white-space: nowrap; }
         .tjob-status-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; margin-left: auto; }
-        .tjob-err-badge { font-size: 0.58rem; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 4px; padding: 0 4px; }
+        .tjob-err-badge { font-size: 0.58rem; background: rgba(34,211,238,0.15); color: #67e8f9; border: 1px solid rgba(34,211,238,0.25); border-radius: 4px; padding: 0 4px; }
         .tjob-multirun { align-items: flex-start; }
         .tjob-multirun .tjob-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; width: 100%; }
         .tjob-multirun .tjob-header-row { width: 100%; }
@@ -485,7 +485,7 @@
         .tjob-badge { display: inline-flex; align-items: center; min-height: 16px; font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
         .tjob-badge.done   { background: rgba(74,222,128,0.08); color: #4ade80; border-color: rgba(74,222,128,0.2); }
         .tjob-badge.past   { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.10); }
-        .tjob-badge.next   { background: rgba(229,62,62,0.15); color: #fca5a5; border-color: rgba(229,62,62,0.3); font-weight: 600; }
+        .tjob-badge.next   { background: rgba(34,211,238,0.15); color: #93c5fd; border-color: rgba(34,211,238,0.3); font-weight: 600; }
         .tjob-badge.future { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.07); }
         .tjob-badge.lite   { opacity: 0.65; }
         /* ── Legacy cron styles (kept for compatibility) ──────────────── */
@@ -505,13 +505,13 @@
             transition: background 0.15s;
         }
         .cron-row:hover { background: rgba(255,255,255,0.03); }
-        .cron-row.has-error { background: rgba(239,68,68,0.06); }
+        .cron-row.has-error { background: rgba(34,211,238,0.06); }
         .cron-dot {
             width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
             background: rgba(255,255,255,0.15);
         }
         .cron-dot.healthy { background: #4ade80; }
-        .cron-dot.error   { background: #e53e3e; }
+        .cron-dot.error   { background: #22d3ee; }
         .cron-dot.paused  { background: #3a3a4a; }
         .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
         .run-badge {
@@ -520,7 +520,7 @@
             border: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
         }
         .run-badge.done { background: rgba(74,222,128,0.12); color: #4ade80; border-color: rgba(74,222,128,0.25); }
-        .run-badge.next { background: #e53e3e; color: white; border-color: #e53e3e; }
+        .run-badge.next { background: #22d3ee; color: white; border-color: #22d3ee; }
         .run-badge.future { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.08); }
         .run-badge.lite { opacity: 0.7; }
         .cron-category { margin-bottom: 8px; }
@@ -542,14 +542,14 @@
             font-size: 0.75rem;
             padding: 2px 8px;
             border-radius: 10px;
-            background: rgba(239,68,68,0.2);
+            background: rgba(34,211,238,0.2);
             color: var(--accent-red);
         }
         .cron-error-detail {
             display: none;
             grid-column: 1 / -1;
             padding: 12px;
-            background: rgba(239,68,68,0.1);
+            background: rgba(34,211,238,0.1);
             border-radius: 6px;
             font-size: 0.8rem;
             color: var(--accent-red);
@@ -683,7 +683,7 @@
         .ua-agent-tag.jaimes { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
         .ua-agent-tag.agent { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
         .ua-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-        .ua-dot.active { background: #e53e3e; box-shadow: 0 0 4px #e53e3e; animation: pulse-dot 1.5s infinite; }
+        .ua-dot.active { background: #22d3ee; box-shadow: 0 0 4px #22d3ee; animation: pulse-dot 1.5s infinite; }
         .ua-dot.done { background: #4ade80; }
         .ua-dot.idle { background: rgba(255,255,255,0.2); }
         .ua-msg {
@@ -729,9 +729,9 @@
             display: inline-flex; align-items: center; gap: 6px;
             padding: 5px 10px;
             border-radius: 999px;
-            border: 1px solid rgba(229,62,62,0.2);
-            background: rgba(229,62,62,0.12);
-            color: #fca5a5;
+            border: 1px solid rgba(34,211,238,0.2);
+            background: rgba(34,211,238,0.12);
+            color: #93c5fd;
             font-size: 0.62rem;
             font-weight: 800;
             letter-spacing: 0.14em;
@@ -832,7 +832,7 @@
         }
         .job-chip.ok { color: #4ade80; border-color: rgba(74,222,128,0.15); background: rgba(74,222,128,0.08); }
         .job-chip.paused { color: rgba(255,255,255,0.35); border-color: rgba(255,255,255,0.05); background: #1e1e1e; }
-        .job-chip.error { color: #e53e3e; border-color: rgba(229,62,62,0.18); background: rgba(229,62,62,0.08); }
+        .job-chip.error { color: #22d3ee; border-color: rgba(34,211,238,0.18); background: rgba(34,211,238,0.08); }
 
         .model-usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px; }
         /* Compact model usage */
@@ -1009,7 +1009,7 @@
         .sp-badge-missed { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
         .sp-badge-done { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.08); }
         .sp-badge-paused { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.06); }
-        .sp-badge-error { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+        .sp-badge-error { background: rgba(34,211,238,0.12); color: #67e8f9; border: 1px solid rgba(34,211,238,0.25); }
         .sp-note { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-top: 10px; line-height: 1.5; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
         /* Run Rate Detail Modal */
         #rr-modal-overlay {
@@ -1127,7 +1127,7 @@
         .mu-budget-score.good { color: #4ade80; }
         .mu-budget-score.ok { color: #60a5fa; }
         .mu-budget-score.watch { color: #f59e0b; }
-        .mu-budget-score.bad { color: #f87171; }
+        .mu-budget-score.bad { color: #67e8f9; }
         .mu-budget-score-num { display: block; font-size: 0.88rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
         .mu-budget-score-label { display: block; font-size: 0.46rem; color: rgba(255,255,255,0.45); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
         .mu-budget-bar { position: relative; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; }
@@ -1135,7 +1135,7 @@
         .mu-budget-fill.good { background: linear-gradient(90deg, rgba(34,197,94,0.55), rgba(74,222,128,0.95)); }
         .mu-budget-fill.ok { background: linear-gradient(90deg, rgba(37,99,235,0.5), rgba(96,165,250,0.95)); }
         .mu-budget-fill.watch { background: linear-gradient(90deg, rgba(217,119,6,0.55), rgba(245,158,11,0.95)); }
-        .mu-budget-fill.bad { background: linear-gradient(90deg, rgba(220,38,38,0.55), rgba(248,113,113,0.95)); }
+        .mu-budget-fill.bad { background: linear-gradient(90deg, rgba(20,184,166,0.55), rgba(103,232,249,0.95)); }
         .mu-budget-threshold { position: absolute; top: -2px; bottom: -2px; width: 1px; background: rgba(255,255,255,0.18); }
         .mu-budget-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 5px; font-size: 0.5rem; color: rgba(255,255,255,0.42); text-transform: uppercase; letter-spacing: 0.05em; }
         .mu-budget-note { margin-top: 6px; font-size: 0.56rem; color: rgba(255,255,255,0.62); line-height: 1.35; }
@@ -1247,7 +1247,7 @@
         .mu-lane-impact.good { color: #4ade80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.08); }
         .mu-lane-impact.ok { color: #60a5fa; border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.08); }
         .mu-lane-impact.watch { color: #f59e0b; border-color: rgba(245,158,11,0.28); background: rgba(245,158,11,0.08); }
-        .mu-lane-impact.bad { color: #f87171; border-color: rgba(248,113,113,0.28); background: rgba(248,113,113,0.08); }
+        .mu-lane-impact.bad { color: #67e8f9; border-color: rgba(103,232,249,0.28); background: rgba(103,232,249,0.08); }
         .mu-lane-main {
             font-size: 0.8rem;
             font-weight: 700;
@@ -1444,8 +1444,8 @@
         .device-status.ok { color: #4ade80; }
         .device-status.attention { color: #fbbf24; }
         .device-status.warning { color: #fbbf24; }
-        .device-status.down { color: #e53e3e; }
-        .device-status.error { color: #e53e3e; }
+        .device-status.down { color: #22d3ee; }
+        .device-status.error { color: #22d3ee; }
         @media (max-width: 600px) {
             .container { padding: 16px; }
             .card { padding: 20px; }
@@ -1466,7 +1466,7 @@
            ═══════════════════════════════════════════════ */
 
         /* ══════════════════════════════════════════════════════════════
-           PHONE MODE — CINEMATIC REDESIGN
+           PHONE MODE — CINEMATIC REWORK
            ══════════════════════════════════════════════════════════════ */
         body.phone-mode {
             background: #05070d;
@@ -1510,8 +1510,8 @@
             background: rgba(5, 7, 13, 0.92);
             backdrop-filter: blur(32px) saturate(1.8);
             -webkit-backdrop-filter: blur(32px) saturate(1.8);
-            border-bottom: 1px solid rgba(229,62,62,0.08);
-            background-image: linear-gradient(180deg, rgba(229,62,62,0.06) 0%, transparent 60%);
+            border-bottom: 1px solid rgba(34,211,238,0.08);
+            background-image: linear-gradient(180deg, rgba(34,211,238,0.06) 0%, transparent 60%);
             gap: 8px;
         }
         body.phone-mode header::before { display: none; }
@@ -1662,7 +1662,7 @@
 
         /* ── Brain Feed card ─────────────────────────── */
         body.phone-mode .card-brain {
-            border-color: rgba(229,62,62,0.10);
+            border-color: rgba(34,211,238,0.10);
             background: rgba(14, 14, 14, 0.98);
         }
         body.phone-mode .card-brain.brain-active {
@@ -1730,7 +1730,7 @@
             flex-shrink: 0;
         }
         body.phone-mode .cron-dot.healthy { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.5); }
-        body.phone-mode .cron-dot.error   { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+        body.phone-mode .cron-dot.error   { background: #67e8f9; box-shadow: 0 0 6px rgba(103,232,249,0.5); }
         body.phone-mode .cron-dot.paused  { background: rgba(255,255,255,0.18); }
         body.phone-mode .cron-category { margin-bottom: 12px; }
         body.phone-mode .cron-name-group { flex: 1; min-width: 0; }
@@ -1761,7 +1761,7 @@
             white-space: nowrap;
             flex-shrink: 0;
         }
-        body.phone-mode .job-chip.error { color: #f87171; }
+        body.phone-mode .job-chip.error { color: #67e8f9; }
         body.phone-mode .cron-run-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
         body.phone-mode .run-badge {
             font-size: 0.58rem; padding: 1px 5px; border-radius: 4px;
@@ -1935,19 +1935,19 @@
         .jobs-section-badge { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 999px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.48); }
         .jobs-section-badge.green { background: rgba(74,222,128,0.12); color: #4ade80; }
         .jobs-section-badge.amber { background: rgba(251,191,36,0.12); color: #fbbf24; }
-        .jobs-section-badge.red { background: rgba(239,68,68,0.12); color: #f87171; }
+        .jobs-section-badge.red { background: rgba(34,211,238,0.12); color: #67e8f9; }
         .jobs-section-body { display: flex; flex-direction: column; gap: 3px; }
         .jobs-detail-row { display: flex; align-items: baseline; gap: 6px; }
         .jdr-label { font-size: 0.62rem; color: rgba(255,255,255,0.35); width: 80px; flex-shrink: 0; }
         .jdr-val { font-size: 0.68rem; color: rgba(255,255,255,0.75); flex: 1; }
         .jdr-val.ok { color: #4ade80; }
         .jdr-val.warn { color: #fbbf24; }
-        .jdr-val.err { color: #f87171; }
+        .jdr-val.err { color: #67e8f9; }
         .jobs-cron-row { display: flex; align-items: center; gap: 5px; padding: 1px 0; }
         .jobs-cron-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
         .jobs-cron-dot.ok { background: #4ade80; }
         .jobs-cron-dot.warn { background: #fbbf24; }
-        .jobs-cron-dot.err { background: #f87171; }
+        .jobs-cron-dot.err { background: #67e8f9; }
         .jobs-cron-dot.started { background: #60a5fa; animation: jcpulse 1.2s ease-in-out infinite; box-shadow: 0 0 4px #60a5fa; }
         @keyframes jcpulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(1.35); } }
         .jobs-cron-name { font-size: 0.62rem; color: rgba(255,255,255,0.6); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2020,7 +2020,7 @@
         .ops-center-v { font-size: 0.66rem; font-weight: 800; color: rgba(255,255,255,0.86); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ops-center-v.ok { color: #4ade80; }
         .ops-center-v.warn { color: #fbbf24; }
-        .ops-center-v.err { color: #f87171; }
+        .ops-center-v.err { color: #67e8f9; }
         .capability-stack { margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
         .capability-tile { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 8px; min-width: 0; cursor: pointer; }
         .capability-tile.ok { border-color: rgba(74,222,128,0.22); }
@@ -2059,7 +2059,7 @@
         .sh-mv { font-size: 0.6rem; color: rgba(255,255,255,0.76); line-height: 1.18; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
         .sh-mv.ok { color: #4ade80; }
         .sh-mv.warn { color: #fbbf24; }
-        .sh-mv.err { color: #f87171; }
+        .sh-mv.err { color: #67e8f9; }
         /* Left panel 50/50 — intel highlights and model card equal height */
         .kiosk-bottom-left .card-intel-highlights { flex: 0.9 1 0; min-height: 0; overflow: hidden; }
         .kiosk-bottom-left .card-model-health { flex: 1.1 1 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; }
@@ -2073,19 +2073,19 @@
         .intel-hi-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; white-space: nowrap; }
         .intel-hi-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
         .intel-hi-text { font-size: 0.7rem; color: rgba(255,255,255,0.88); line-height: 1.34; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .intel-hi-reason { font-size: 0.62rem; color: rgba(255,255,255,0.56); line-height: 1.4; border-left: 2px solid rgba(229,62,62,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
+        .intel-hi-reason { font-size: 0.62rem; color: rgba(255,255,255,0.56); line-height: 1.4; border-left: 2px solid rgba(34,211,238,0.2); padding-left: 7px; margin-top: 3px; font-style: italic; }
         .intel-hi-source { font-size: 0.58rem; color: rgba(255,255,255,0.32); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .intel-hi-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
         #newsfeed-live-badge.breaking-pulse { animation: breaking-badge-pulse 1200ms ease; }
         @keyframes breaking-highlight-in {
-            0% { opacity: 0; transform: translateY(-8px); background: rgba(239,68,68,0.14); }
-            60% { opacity: 1; transform: translateY(0); background: rgba(239,68,68,0.08); }
+            0% { opacity: 0; transform: translateY(-8px); background: rgba(34,211,238,0.14); }
+            60% { opacity: 1; transform: translateY(0); background: rgba(34,211,238,0.08); }
             100% { opacity: 1; transform: translateY(0); background: transparent; }
         }
         @keyframes breaking-badge-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
-            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+            0% { box-shadow: 0 0 0 0 rgba(34,211,238,0.45); }
+            70% { box-shadow: 0 0 0 10px rgba(34,211,238,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,211,238,0); }
         }
         /* Phone: compress intel highlights — hide reasons, max 3 items */
         body.phone-mode .intel-hi-reason,
@@ -2226,9 +2226,9 @@
 
         .remote-btn.btn-night {
             background: linear-gradient(135deg, rgba(100,18,18,0.55) 0%, rgba(50,8,8,0.85) 100%);
-            border-color: rgba(239,68,68,0.3);
-            color: #fecaca;
-            box-shadow: 0 1px 0 rgba(252,165,165,0.12) inset, 0 0 18px rgba(220,38,38,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
+            border-color: rgba(34,211,238,0.3);
+            color: #bfdbfe;
+            box-shadow: 0 1px 0 rgba(252,165,165,0.12) inset, 0 0 18px rgba(20,184,166,0.07) inset, 0 3px 10px rgba(0,0,0,0.4);
         }
         .remote-btn.btn-night:active {
             background: linear-gradient(135deg, rgba(140,22,22,0.8) 0%, rgba(90,12,12,0.95) 100%);
@@ -2252,7 +2252,7 @@
             padding-top: 2px;
         }
         #remote-status.ok  { color: #34d399; }
-        #remote-status.err { color: #f87171; }
+        #remote-status.err { color: #67e8f9; }
 
         /* Hide remote card on both desktop and mobile — controls live in header */
         .card-remote { display: none !important; }
@@ -2521,7 +2521,7 @@
         .intel-ticker-item .t-price { color: rgba(255,255,255,0.6); }
         .intel-ticker-item .t-chg  { font-weight: 600; }
         .intel-ticker-item .t-chg.up   { color: #4ade80; }
-        .intel-ticker-item .t-chg.down { color: #f87171; }
+        .intel-ticker-item .t-chg.down { color: #67e8f9; }
         .intel-ticker-item .t-sep  { color: rgba(255,255,255,0.15); margin: 0 2px; }
         .intel-ticker-item.headline { max-width: 320px; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.45); font-style: italic; }
         .live-badge {
@@ -2531,12 +2531,12 @@
             gap: 5px;
             padding: 3px 7px;
             border-radius: 999px;
-            border: 1px solid rgba(229,62,62,0.18);
-            background: rgba(229,62,62,0.08);
+            border: 1px solid rgba(34,211,238,0.18);
+            background: rgba(34,211,238,0.08);
             font-size: 9px;
             font-weight: 700;
             letter-spacing: 0.08em;
-            color: #f87171;
+            color: #67e8f9;
             animation: live-pulse 1.5s ease-in-out infinite;
         }
         @keyframes live-pulse {
@@ -2572,7 +2572,7 @@
         .ns-cat-green  { background: #48bb78; }
         .ns-cat-orange { background: #ed8936; }
         .ns-cat-purple { background: #9f7aea; }
-        .ns-cat-red    { background: #e53e3e; }
+        .ns-cat-red    { background: #22d3ee; }
         .ns-lines { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .ns-line {
             height: 10px;
@@ -2618,7 +2618,7 @@
         .fg-meta { display: flex; gap: 10px; margin-top: 3px; flex-wrap: wrap; }
         .fg-pill { font-size: 0.62rem; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
                    padding: 1px 6px; border-radius: 3px; }
-        .fg-pill.fear { color: #e53e3e; }
+        .fg-pill.fear { color: #22d3ee; }
         .fg-pill.greed { color: #4ade80; }
 
         /* Signal / article items */
@@ -2663,7 +2663,7 @@
         .if-mood { display: inline-block; font-size: 0.55rem; font-weight: 700; padding: 0 5px;
                    border-radius: 3px; margin-right: 4px; vertical-align: middle; }
         .if-mood.BULL  { background: rgba(74,222,128,0.15); color: #4ade80; }
-        .if-mood.BEAR  { background: rgba(239,68,68,0.15); color: #e53e3e; }
+        .if-mood.BEAR  { background: rgba(34,211,238,0.15); color: #22d3ee; }
         .if-mood.FADE  { background: rgba(251,191,36,0.15); color: #fbbf24; }
         .if-mood.NEUTRAL { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.4); }
 
@@ -2674,7 +2674,7 @@
         .if-mover-name { font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.7); }
         .if-mover-chg { font-size: 0.65rem; font-weight: 600; }
         .if-mover-chg.up { color: #4ade80; }
-        .if-mover-chg.down { color: #e53e3e; }
+        .if-mover-chg.down { color: #22d3ee; }
         .if-gen-time { font-size: 0.58rem; color: rgba(255,255,255,0.85); padding: 4px 10px 6px; text-align: right; }
 
 
@@ -2699,9 +2699,9 @@
             background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75);
         }
         body.kiosk-mode.airpoint-active #airpoint-toggle {
-            border-color: rgba(229,62,62,0.35);
-            background: rgba(229,62,62,0.08);
-            color: rgba(229,62,62,0.8);
+            border-color: rgba(34,211,238,0.35);
+            background: rgba(34,211,238,0.08);
+            color: rgba(34,211,238,0.8);
         }
         body.kiosk-mode .card {
             padding: 16px;
@@ -2778,7 +2778,7 @@
             padding-right: 4px;
         }
 
-        @keyframes flash-update { 0% { background-color: rgba(229,62,62,0.22); } 60% { background-color: rgba(229,62,62,0.08); } 100% { background-color: transparent; } }
+        @keyframes flash-update { 0% { background-color: rgba(34,211,238,0.22); } 60% { background-color: rgba(34,211,238,0.08); } 100% { background-color: transparent; } }
         .flash-update { animation: flash-update 1.2s ease-out; }
 
         /* ============ BRAIN FEED - IDLE BREATHING LASER ============ */
@@ -2787,14 +2787,14 @@
             50% { opacity: 1; transform: scale(1.01); }
         }
         @keyframes brain-idle-glow {
-            0%, 100% { box-shadow: 0 0 0 1px rgba(229,62,62,0.08), 0 0 14px rgba(229,62,62,0.06), 0 1px 3px rgba(0,0,0,0.5); }
-            50% { box-shadow: 0 0 0 1px rgba(229,62,62,0.18), 0 0 28px rgba(229,62,62,0.13), 0 1px 3px rgba(0,0,0,0.5); }
+            0%, 100% { box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 0 14px rgba(34,211,238,0.06), 0 1px 3px rgba(0,0,0,0.5); }
+            50% { box-shadow: 0 0 0 1px rgba(34,211,238,0.18), 0 0 28px rgba(34,211,238,0.13), 0 1px 3px rgba(0,0,0,0.5); }
         }
         @keyframes brain-activate {
-            0% { box-shadow: 0 0 0 1px rgba(229,62,62,0.1), 0 0 8px rgba(229,62,62,0.08); }
-            30% { box-shadow: 0 0 0 2px rgba(229,62,62,0.5), 0 0 48px rgba(229,62,62,0.35); }
-            60% { box-shadow: 0 0 0 1px rgba(229,62,62,0.3), 0 0 32px rgba(229,62,62,0.22); }
-            100% { box-shadow: 0 0 0 1px rgba(229,62,62,0.12), 0 0 32px rgba(229,62,62,0.14), 0 1px 3px rgba(0,0,0,0.5); }
+            0% { box-shadow: 0 0 0 1px rgba(34,211,238,0.1), 0 0 8px rgba(34,211,238,0.08); }
+            30% { box-shadow: 0 0 0 2px rgba(34,211,238,0.5), 0 0 48px rgba(34,211,238,0.35); }
+            60% { box-shadow: 0 0 0 1px rgba(34,211,238,0.3), 0 0 32px rgba(34,211,238,0.22); }
+            100% { box-shadow: 0 0 0 1px rgba(34,211,238,0.12), 0 0 32px rgba(34,211,238,0.14), 0 1px 3px rgba(0,0,0,0.5); }
         }
         .card-brain {
             border-color: rgba(255,255,255,0.06);
@@ -2847,10 +2847,10 @@
             background: conic-gradient(from 0deg,
                 transparent 0deg,
                 transparent 328deg,
-                color-mix(in srgb, var(--bf-model-color, #e53e3e) 8%, transparent) 342deg,
-                color-mix(in srgb, var(--bf-model-color, #e53e3e) 16%, transparent) 351deg,
-                color-mix(in srgb, var(--bf-model-color, #e53e3e) 12%, transparent) 355deg,
-                color-mix(in srgb, var(--bf-model-color, #e53e3e) 8%, transparent) 360deg
+                color-mix(in srgb, var(--bf-model-color, #22d3ee) 8%, transparent) 342deg,
+                color-mix(in srgb, var(--bf-model-color, #22d3ee) 16%, transparent) 351deg,
+                color-mix(in srgb, var(--bf-model-color, #22d3ee) 12%, transparent) 355deg,
+                color-mix(in srgb, var(--bf-model-color, #22d3ee) 8%, transparent) 360deg
             );
             animation: bf-laser-spin 5.5s linear infinite;
             z-index: 0;
@@ -2879,7 +2879,7 @@
 
         /* ============ BRAIN FEED - ACTIVE LASER STATE ============ */
         .card-brain.brain-active {
-            border-color: rgba(229,62,62,0.22);
+            border-color: rgba(34,211,238,0.22);
             overflow: hidden;
             animation: brain-activate 0.8s ease-out forwards, brain-idle-glow 3.6s ease-in-out infinite 0.8s;
         }
@@ -2893,11 +2893,11 @@
             background: conic-gradient(from 0deg,
                 transparent 0deg,
                 transparent 325deg,
-                rgba(229,62,62,0.4) 340deg,
-                #e53e3e 350deg,
-                #ff7b7b 354deg,
-                #ff4444 357deg,
-                #e53e3e 360deg
+                rgba(34,211,238,0.4) 340deg,
+                #22d3ee 350deg,
+                #6ee7b7 354deg,
+                #38bdf8 357deg,
+                #22d3ee 360deg
             );
             animation: bf-laser-spin 2.4s linear infinite;
             z-index: 0;
@@ -2955,9 +2955,9 @@
           to { transform: rotate(360deg); }
         }
         @keyframes bf-banner-flash {
-          0%   { background: rgba(229,62,62,0.28); border-color: rgba(229,62,62,0.8); }
-          60%  { background: rgba(229,62,62,0.06); border-color: rgba(229,62,62,0.15); }
-          100% { background: rgba(229,62,62,0.06); border-color: rgba(229,62,62,0.15); }
+          0%   { background: rgba(34,211,238,0.28); border-color: rgba(34,211,238,0.8); }
+          60%  { background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.15); }
+          100% { background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.15); }
         }
         @keyframes bf-dot-fast {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -2980,7 +2980,7 @@
         .bf-scan-line::after {
             content: "";
             position: absolute; top: 0; bottom: 0; width: 40%;
-            background: linear-gradient(90deg, transparent, rgba(229,62,62,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(34,211,238,0.4), transparent);
             animation: bf-scan-line 0.9s ease-out both;
         }
         .bf-msg-dot.bf-dot-recv { animation: bf-dot-fast 0.45s infinite !important; }
@@ -2993,7 +2993,7 @@
             position: absolute; inset: -3px;
             border-radius: 50%;
             border: 2px solid transparent;
-            border-top-color: #e53e3e;
+            border-top-color: #22d3ee;
             animation: bf-ring-spin 0.85s linear infinite;
         }
         .bf-done-success-banner {
@@ -3044,14 +3044,14 @@
             align-items: center;
             gap: 10px;
             padding: 8px 12px;
-            background: rgba(229,62,62,0.06);
-            border: 1px solid rgba(229,62,62,0.15);
+            background: rgba(34,211,238,0.06);
+            border: 1px solid rgba(34,211,238,0.15);
             border-radius: 8px;
         }
         .bf-msg-dot {
             width: 7px; height: 7px;
             border-radius: 50%;
-            background: #e53e3e;
+            background: #22d3ee;
             animation: pulse 1.5s infinite;
             flex-shrink: 0;
         }
@@ -3060,7 +3060,7 @@
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #e53e3e;
+            color: #22d3ee;
         }
         .bf-msg-time {
             font-size: 0.68rem;
@@ -3096,7 +3096,7 @@
             font-weight: 800;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: #fca5a5;
+            color: #93c5fd;
             margin-bottom: 0;
         }
         .bf-objective-text {
@@ -3148,7 +3148,7 @@
         }
         .bf-signal-tool {
             font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
-            color: #ffb4b4;
+            color: #93c5fd;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -3205,7 +3205,7 @@
         }
         .bf-step-icon { transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease; }
         .bf-step-icon.done   { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
-        .bf-step-icon.active { background: rgba(229,62,62,0.1);  color: #e53e3e; border: 1px solid rgba(229,62,62,0.3); animation: pulse 1.2s infinite; }
+        .bf-step-icon.active { background: rgba(34,211,238,0.1);  color: #22d3ee; border: 1px solid rgba(34,211,238,0.3); animation: pulse 1.2s infinite; }
         .bf-step-icon.pending{ background: rgba(255,255,255,0.03); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
         .bf-step { transition: background 0.25s ease; }
         .bf-step-body { flex: 1; min-width: 0; }
@@ -3229,7 +3229,7 @@
         }
         .bf-tool-pill.tool-read   { background: rgba(99,179,237,0.1);  color: #63b3ed; border: 1px solid rgba(99,179,237,0.2); }
         .bf-tool-pill.tool-image  { background: rgba(154,117,245,0.1); color: #9a75f5; border: 1px solid rgba(154,117,245,0.2); }
-        .bf-tool-pill.tool-claude { background: rgba(229,62,62,0.1);   color: #e53e3e; border: 1px solid rgba(229,62,62,0.2); }
+        .bf-tool-pill.tool-claude { background: rgba(34,211,238,0.1);   color: #22d3ee; border: 1px solid rgba(34,211,238,0.2); }
         .bf-tool-pill.tool-git    { background: rgba(249,115,22,0.1);  color: #f97316; border: 1px solid rgba(249,115,22,0.2); }
         .bf-tool-pill.tool-exec   { background: rgba(74,222,128,0.1);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
         .bf-tool-pill.tool-web    { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
@@ -3258,7 +3258,7 @@
             display: none !important;
         }
         body.phone-mode .card-brain.brain-active {
-            border-color: rgba(229,62,62,0.25);
+            border-color: rgba(34,211,238,0.25);
         }
 
         /* Ensure desktop brain laser is always on (not phone-mode) */
@@ -3841,7 +3841,7 @@
             font-weight: 700;
             letter-spacing: 0.04em;
         }
-        .chat-status-pill.active { background: rgba(229,62,62,0.25); color: #fc8181; }
+        .chat-status-pill.active { background: rgba(34,211,238,0.25); color: #fc8181; }
         .chat-status-pill.done { background: rgba(72,187,120,0.2); color: #68d391; }
         .chat-status-pill.sent { background: rgba(237,137,54,0.2); color: #f6ad55; }
         /* cmd: system message pill */
@@ -4058,7 +4058,7 @@
         .aa-dot {
             width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
         }
-        .aa-dot.running { background: #e53e3e; animation: pulse 1.2s infinite; }
+        .aa-dot.running { background: #22d3ee; animation: pulse 1.2s infinite; }
         .aa-dot.done    { background: #4ade80; }
         .aa-label {
             flex: 1; color: rgba(255,255,255,0.65); overflow: hidden;
@@ -4104,7 +4104,7 @@
         }
         .freshness-badge.fresh { color: #4ade80; border-color: rgba(74,222,128,0.25); background: rgba(74,222,128,0.06); }
         .freshness-badge.stale { color: #fbbf24; border-color: rgba(251,191,36,0.25); background: rgba(251,191,36,0.06); }
-        .freshness-badge.old   { color: #e53e3e; border-color: rgba(229,62,62,0.25);  background: rgba(229,62,62,0.06); }
+        .freshness-badge.old   { color: #22d3ee; border-color: rgba(34,211,238,0.25);  background: rgba(34,211,238,0.06); }
         .freshness-dot {
             width: 6px; height: 6px; border-radius: 50%;
             background: currentColor;
@@ -4121,11 +4121,11 @@
         .god-mode-badge {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 5px 11px;
-            background: rgba(229,62,62,0.08);
-            border: 1px solid rgba(229,62,62,0.2);
+            background: rgba(34,211,238,0.08);
+            border: 1px solid rgba(34,211,238,0.2);
             border-radius: 999px;
             font-size: 0.7rem; font-weight: 700;
-            color: rgba(229,62,62,0.85);
+            color: rgba(34,211,238,0.85);
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
@@ -4143,7 +4143,7 @@
             flex-shrink: 0;
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .card-brain.brain-active .bf-freshness-row { background: rgba(229,62,62,0.08); border-color: rgba(229,62,62,0.2); box-shadow: none; }
+        .card-brain.brain-active .bf-freshness-row { background: rgba(34,211,238,0.08); border-color: rgba(34,211,238,0.2); box-shadow: none; }
         .bf-fresh-dot {
             width: 7px; height: 7px; border-radius: 50%;
             flex-shrink: 0;
@@ -4154,8 +4154,8 @@
 
         /* ===== Offline/degraded banner improvements ===== */
         .connection-status.offline {
-            background: rgba(229,62,62,0.08);
-            border-color: rgba(229,62,62,0.3);
+            background: rgba(34,211,238,0.08);
+            border-color: rgba(34,211,238,0.3);
             padding: 8px 14px;
             font-size: 0.82rem;
             font-weight: 600;
@@ -4230,7 +4230,7 @@
             transition: color 0.3s;
         }
         .pca-status.ok  { color: #4ade80; }
-        .pca-status.err { color: #f87171; }
+        .pca-status.err { color: #67e8f9; }
 
         /* ── Status strip (below header) ── */
         #phone-status-strip { display: none; }
@@ -4250,7 +4250,7 @@
         }
         #phone-status-dot.fresh { background: #4ade80; }
         #phone-status-dot.stale { background: #fbbf24; }
-        #phone-status-dot.old   { background: #e53e3e; }
+        #phone-status-dot.old   { background: #22d3ee; }
 
         /* ── Phone card layout — show only 3 cards ── */
         body.phone-mode .kiosk-main,
@@ -4443,14 +4443,14 @@
 
         /* ── Brain active laser — phone simplified ── */
         body.phone-mode .card-brain.brain-active {
-            border-color: rgba(229,62,62,0.35);
+            border-color: rgba(34,211,238,0.35);
         }
 
         /* ===== Brain feed title & text overflow ===== */
         .brain-title, .bf-objective-text { word-break: break-word; overflow-wrap: anywhere; }
         /* Active brain feed - glow on objective text */
         .card-brain.brain-active .bf-objective-text {
-            text-shadow: 0 0 20px rgba(229,62,62,0.35), 0 0 40px rgba(229,62,62,0.12);
+            text-shadow: 0 0 20px rgba(34,211,238,0.35), 0 0 40px rgba(34,211,238,0.12);
             color: rgba(255,255,255,0.92);
         }
         /* Smooth fade-in on section updates */
@@ -4471,7 +4471,7 @@
             .mu-lane-card.local { grid-column: auto; }
         }
 
-        /* ============ MODEL USAGE - REDESIGN ============ */
+        /* ============ MODEL USAGE - REWORK ============ */
         .mu-header-row {
             display: flex;
             align-items: center;
@@ -4549,7 +4549,7 @@
             font-weight: 500;
             flex-shrink: 0;
         }
-        .mu-source-tag.openclaw   { background: rgba(229,62,62,0.08); color: rgba(229,62,62,0.8); border: 1px solid rgba(229,62,62,0.18); }
+        .mu-source-tag.openclaw   { background: rgba(34,211,238,0.08); color: rgba(34,211,238,0.8); border: 1px solid rgba(34,211,238,0.18); }
         .mu-source-tag.codexbar   { background: rgba(99,179,237,0.08); color: rgba(99,179,237,0.8); border: 1px solid rgba(99,179,237,0.18); }
         .mu-source-tag.openrouter { background: rgba(34,211,238,0.08); color: #22d3ee; border: 1px solid rgba(34,211,238,0.25); font-weight: 600; }
         .mu-source-tag.other      { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.07); }
@@ -4618,7 +4618,7 @@
         /* 2026-04-13 polish pass */
         body {
             background:
-                radial-gradient(circle at top, rgba(229,62,62,0.08), transparent 32%),
+                radial-gradient(circle at top, rgba(34,211,238,0.08), transparent 32%),
                 linear-gradient(180deg, #06080d 0%, #090c12 45%, #05070b 100%);
         }
         .hero-grid { grid-template-columns: minmax(0, 1.55fr) minmax(330px, 0.95fr); gap: 12px; }
@@ -4628,7 +4628,7 @@
             border-radius: 18px;
             box-shadow: 0 12px 40px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.025);
         }
-        .card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 0 1px rgba(229,62,62,0.06); }
+        .card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 0 1px rgba(34,211,238,0.06); }
         .card-header {
             margin-bottom: 14px;
             padding-bottom: 12px;
@@ -4657,8 +4657,8 @@
         }
         .module-action-btn:hover {
             color: #fff;
-            background: rgba(229,62,62,0.12);
-            border-color: rgba(229,62,62,0.22);
+            background: rgba(34,211,238,0.12);
+            border-color: rgba(34,211,238,0.22);
             transform: translateY(-1px);
         }
         .artifact-link-btn {
@@ -5152,7 +5152,7 @@
         .mu-drill-card:hover,
         .module-click-row:hover {
             transform: translateY(-1px);
-            border-color: rgba(229,62,62,0.18);
+            border-color: rgba(34,211,238,0.18);
             background: rgba(255,255,255,0.055);
         }
         .mu-drill-kicker {
@@ -5400,7 +5400,7 @@
         /* ══════════════════════════════════════════════════════════════════
            REVAMP LAYER — ui-revamp-2026-04-19
            Unified flat-dark polish. Rides on top of existing rules with
-           higher specificity. No JS/ID changes. Accent = #e53e3e only.
+           higher specificity. No JS/ID changes. Accent = #22d3ee only.
            ══════════════════════════════════════════════════════════════════ */
 
         /* ── shared tokens for the revamp layer ── */
@@ -5415,8 +5415,8 @@
             --rv-text-dim: rgba(255,255,255,0.60);
             --rv-text-muted: rgba(255,255,255,0.38);
             --rv-text-label: rgba(255,255,255,0.44);
-            --rv-accent: #e53e3e;
-            --rv-accent-dim: rgba(229,62,62,0.14);
+            --rv-accent: #22d3ee;
+            --rv-accent-dim: rgba(34,211,238,0.14);
             --rv-ok: #4ade80;
             --rv-ok-dim: rgba(74,222,128,0.10);
         }
@@ -5496,7 +5496,7 @@
             gap: 8px;
         }
         .card-jobs-full .tjob-row:hover { background: rgba(255,255,255,0.035); }
-        .card-jobs-full .tjob-row.tjob-error  { background: rgba(229,62,62,0.06); }
+        .card-jobs-full .tjob-row.tjob-error  { background: rgba(34,211,238,0.06); }
         .card-jobs-full .tjob-row.tjob-done   { background: transparent; }
         .card-jobs-full .tjob-row.tjob-missed { background: rgba(245,158,11,0.05); }
         .card-jobs-full .tjob-status-dot { width: 4px; height: 4px; }
@@ -5539,9 +5539,9 @@
             border: 1px solid rgba(74,222,128,0.18);
         }
         .card-jobs-full .tjob-run-due {
-            background: rgba(229,62,62,0.12);
-            color: #fca5a5;
-            border: 1px solid rgba(229,62,62,0.22);
+            background: rgba(34,211,238,0.12);
+            color: #93c5fd;
+            border: 1px solid rgba(34,211,238,0.22);
         }
         .card-jobs-full .tjob-run-missed {
             background: rgba(245,158,11,0.10);
@@ -5595,7 +5595,7 @@
         .card-model .mu-budget-fill.bad {
             background: rgba(255,255,255,0.14) !important;
         }
-        .card-model .mu-budget-fill.bad { background: rgba(229,62,62,0.55) !important; }
+        .card-model .mu-budget-fill.bad { background: rgba(34,211,238,0.55) !important; }
         .card-model .mu-budget-fill.watch { background: rgba(245,158,11,0.55) !important; }
         .card-model .mu-budget-fill.good { background: rgba(74,222,128,0.45) !important; }
         .card-model .mu-budget-fill.ok { background: rgba(255,255,255,0.22) !important; }
@@ -5710,7 +5710,7 @@
         }
 
         /* ── PHASE: intel-highlights ────────────────────────────── */
-        /* Desaturate category chips: only SIGNAL (red) keeps its accent.
+        /* Desaturate category chips: only SIGNAL keeps its accent.
            All other chip backgrounds get overridden to a neutral chip. */
         .card-intel-highlights .intel-hi-cat {
             background: rgba(255,255,255,0.06) !important;
@@ -5721,12 +5721,12 @@
             border-radius: 3px;
             font-size: 0.52rem;
         }
-        /* Restore the accent only for the SIGNAL / BREAKING label (contains red bg) */
+        /* Restore the accent only for the SIGNAL / BREAKING label (contains accent bg) */
         .card-intel-highlights .intel-hi-cat[style*="239,68,68"],
         .card-intel-highlights .intel-hi-cat[style*="229,62,62"] {
-            background: rgba(229,62,62,0.12) !important;
-            color: #fca5a5 !important;
-            border-color: rgba(229,62,62,0.22);
+            background: rgba(34,211,238,0.12) !important;
+            color: #93c5fd !important;
+            border-color: rgba(34,211,238,0.22);
         }
         /* Tighten overall item rhythm */
         .card-intel-highlights .intel-hi-item {
@@ -5754,7 +5754,7 @@
         .card-intel-highlights .intel-hi-reason {
             font-size: 0.56rem;
             color: var(--rv-text-dim);
-            border-left: 1px solid rgba(229,62,62,0.20);
+            border-left: 1px solid rgba(34,211,238,0.20);
             padding-left: 6px;
             margin-top: 1px;
             line-height: 1.25;
@@ -5780,16 +5780,16 @@
         /* Live badge: tighten and use accent consistently */
         .card-intel-highlights .live-badge,
         .card-brain .live-badge {
-            border: 1px solid rgba(229,62,62,0.22);
-            background: rgba(229,62,62,0.08);
-            color: #fca5a5;
+            border: 1px solid rgba(34,211,238,0.22);
+            background: rgba(34,211,238,0.08);
+            color: #93c5fd;
             font-size: 8px;
             padding: 2px 6px;
             letter-spacing: 0.14em;
         }
 
         /* ── PHASE: memory-roadmap ──────────────────────────────── */
-        /* Move off cyan/amber palette, use neutral + red accent for active week */
+        /* Move off cyan/amber palette, use neutral + blue-green accent for active week */
         .card-brain .agent-chat-section {
             padding: 12px;
             border: 1px solid var(--rv-line-soft);
@@ -5811,24 +5811,24 @@
             background: var(--rv-ok);
             box-shadow: 0 0 0 2px rgba(74,222,128,0.15);
         }
-        /* Roadmap cards: unify all to a single dark surface, use red accent for active */
+        /* Roadmap cards: unify all to a single dark surface, use blue-green accent for active */
         .memory-roadmap-card {
             background: var(--rv-surface-2) !important;
             border: 1px solid var(--rv-line-soft) !important;
             border-radius: 8px !important;
         }
         .memory-roadmap-card.active {
-            border-color: rgba(229,62,62,0.26) !important;
-            background: rgba(229,62,62,0.05) !important;
+            border-color: rgba(34,211,238,0.26) !important;
+            background: rgba(34,211,238,0.05) !important;
         }
         .memory-roadmap-card.future {
             border-color: var(--rv-line) !important;
             background: var(--rv-surface-2) !important;
         }
         .memory-roadmap-card.active .memory-roadmap-card-pill {
-            background: rgba(229,62,62,0.12) !important;
-            color: #fca5a5 !important;
-            border-color: rgba(229,62,62,0.22) !important;
+            background: rgba(34,211,238,0.12) !important;
+            color: #93c5fd !important;
+            border-color: rgba(34,211,238,0.22) !important;
         }
         .memory-roadmap-card.future .memory-roadmap-card-pill {
             background: rgba(255,255,255,0.04) !important;
@@ -5838,10 +5838,10 @@
         /* Flatten pill radii */
         .memory-roadmap-summary-pill,
         .memory-roadmap-card-pill { border-radius: 3px !important; padding: 2px 6px; }
-        /* Week scale: current week highlight uses accent red */
+        /* Week scale: current week highlight uses accent cyan */
         .memory-roadmap-week.current {
-            color: #fca5a5 !important;
-            border-bottom-color: rgba(229,62,62,0.35) !important;
+            color: #93c5fd !important;
+            border-bottom-color: rgba(34,211,238,0.35) !important;
         }
         .memory-roadmap-summary-pill.live {
             color: var(--rv-ok) !important;
@@ -5867,10 +5867,10 @@
             padding: 2px 6px;
             font-weight: 700;
         }
-        /* Keep only the active status dot — single red pulse */
+        /* Keep only the active status dot — single cyan pulse */
         .card-brain .ua-dot.active {
             background: var(--rv-accent) !important;
-            box-shadow: 0 0 0 2px rgba(229,62,62,0.2) !important;
+            box-shadow: 0 0 0 2px rgba(34,211,238,0.2) !important;
         }
         .card-brain .ua-dot.done { background: var(--rv-ok) !important; }
         .card-brain .ua-dot.idle { background: rgba(255,255,255,0.18) !important; }
@@ -5968,8 +5968,8 @@
 
         /* Alert banner tighten */
         .alert-banner {
-            background: rgba(229,62,62,0.04);
-            border: 1px solid rgba(229,62,62,0.14);
+            background: rgba(34,211,238,0.04);
+            border: 1px solid rgba(34,211,238,0.14);
             border-radius: 8px;
             padding: 10px 12px;
         }
@@ -5996,8 +5996,8 @@
             font-size: 0.66rem;
         }
         .card-brain.brain-active .bf-freshness-row {
-            background: rgba(229,62,62,0.06) !important;
-            border-color: rgba(229,62,62,0.18) !important;
+            background: rgba(34,211,238,0.06) !important;
+            border-color: rgba(34,211,238,0.18) !important;
         }
         .bf-freshness-label {
             font-size: 0.58rem !important;
@@ -6203,9 +6203,9 @@
             padding: 8px 10px !important;
         }
         .es-tab.es-tab-active {
-            background: rgba(229,62,62,0.08) !important;
-            border-color: rgba(229,62,62,0.24) !important;
-            color: #fca5a5 !important;
+            background: rgba(34,211,238,0.08) !important;
+            border-color: rgba(34,211,238,0.24) !important;
+            color: #93c5fd !important;
         }
         .es-pm-btn,
         .es-icon-btn {
@@ -6233,9 +6233,9 @@
         #mw-modal-close:hover,
         #rr-modal-close:hover,
         .sp-modal-close:hover {
-            border-color: rgba(229,62,62,0.24) !important;
-            background: rgba(229,62,62,0.08) !important;
-            color: #fca5a5 !important;
+            border-color: rgba(34,211,238,0.24) !important;
+            background: rgba(34,211,238,0.08) !important;
+            color: #93c5fd !important;
         }
 
         .btn-x-dash,
@@ -6349,6 +6349,64 @@
                 height: 26px !important;
             }
         }
+
+        /* ============ BLUE/GREEN RESKIN OVERRIDES ============ */
+        :root {
+            --theme-cyan: #22d3ee;
+            --theme-blue: #38bdf8;
+            --theme-green: #34d399;
+            --theme-mint: #2dd4bf;
+            --theme-glow: rgba(34,211,238,0.32);
+            --theme-glow-green: rgba(52,211,153,0.28);
+        }
+        body { background: radial-gradient(circle at 20% 0%, rgba(34,211,238,0.08), transparent 32%), radial-gradient(circle at 86% 8%, rgba(52,211,153,0.07), transparent 30%), #061014; }
+        header::before { background: linear-gradient(135deg, rgba(4,16,24,0.9), rgba(4,24,20,0.86)); }
+        .mc-clock-wrap { border-left-color: rgba(34,211,238,0.28); }
+        .mc-clock-time { color: var(--theme-cyan); text-shadow: 0 0 14px rgba(34,211,238,0.48); }
+        .mc-clock-date { color: rgba(110,231,183,0.72); }
+        .connection-status.offline,
+        .build-status-chip.err,
+        .priority.high,
+        .priority.medium,
+        .job-chip.error,
+        .tjob-err-badge,
+        .ops-center-v.err { color: #67e8f9; border-color: rgba(34,211,238,0.30); background: rgba(34,211,238,0.08); }
+        .alert-banner { background: linear-gradient(135deg, rgba(34,211,238,0.055), rgba(52,211,153,0.045)); border-color: rgba(34,211,238,0.18); }
+        .alert-header h2 { color: var(--theme-cyan); }
+        .stats-row .stat-card,
+        .card { background: linear-gradient(180deg, rgba(8,22,28,0.94), rgba(5,12,15,0.98)); border-color: rgba(34,211,238,0.10); }
+        .card:hover { border-color: rgba(52,211,153,0.22); box-shadow: 0 0 22px rgba(34,211,238,0.08); }
+        .card-header { border-bottom-color: rgba(34,211,238,0.08); }
+        @keyframes brain-idle-glow {
+            0%, 100% { box-shadow: 0 0 0 1px rgba(34,211,238,0.12), 0 0 18px rgba(34,211,238,0.09), 0 1px 3px rgba(0,0,0,0.5); }
+            50% { box-shadow: 0 0 0 1px rgba(52,211,153,0.24), 0 0 34px rgba(34,211,238,0.18), 0 1px 3px rgba(0,0,0,0.5); }
+        }
+        @keyframes brain-activate {
+            0% { box-shadow: 0 0 0 1px rgba(34,211,238,0.14), 0 0 10px rgba(34,211,238,0.12); }
+            30% { box-shadow: 0 0 0 2px rgba(52,211,153,0.55), 0 0 54px rgba(34,211,238,0.36); }
+            60% { box-shadow: 0 0 0 1px rgba(34,211,238,0.34), 0 0 34px rgba(52,211,153,0.24); }
+            100% { box-shadow: 0 0 0 1px rgba(34,211,238,0.16), 0 0 34px rgba(34,211,238,0.18), 0 1px 3px rgba(0,0,0,0.5); }
+        }
+        .card-brain { border-color: rgba(34,211,238,0.16); background: linear-gradient(180deg, rgba(6,28,35,0.94), rgba(4,13,16,0.99)); }
+        .card-brain::before { background: conic-gradient(from 0deg, transparent 0deg, transparent 328deg, rgba(34,211,238,0.12) 342deg, rgba(52,211,153,0.24) 351deg, rgba(56,189,248,0.18) 355deg, rgba(34,211,238,0.12) 360deg); }
+        .card-brain::after,
+        .card-brain.brain-active::after { background: linear-gradient(180deg, rgba(6,19,24,0.985), rgba(3,10,12,0.995)); }
+        .card-brain.brain-active { border-color: rgba(52,211,153,0.30); }
+        .card-brain.brain-active::before { background: conic-gradient(from 0deg, transparent 0deg, transparent 325deg, rgba(34,211,238,0.42) 340deg, #22d3ee 350deg, #6ee7b7 354deg, #38bdf8 357deg, #22d3ee 360deg); }
+        .bf-scan-line::after { background: linear-gradient(90deg, transparent, rgba(34,211,238,0.42), rgba(52,211,153,0.28), transparent); }
+        .bf-step-icon.active.bf-ring::before { border-top-color: var(--theme-cyan); }
+        .bf-msg-banner.bf-banner-flash { border-color: rgba(34,211,238,0.35) !important; background: rgba(34,211,238,0.10) !important; }
+        @keyframes bf-banner-flash {
+          0% { background: rgba(34,211,238,0.28); border-color: rgba(52,211,153,0.8); }
+          60% { background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.15); }
+          100% { background: rgba(34,211,238,0.06); border-color: rgba(34,211,238,0.15); }
+        }
+        @keyframes breaking-badge-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34,211,238,0.45); }
+            70% { box-shadow: 0 0 0 10px rgba(34,211,238,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,211,238,0); }
+        }
+
     </style>
 </head>
 <body>
@@ -7265,7 +7323,7 @@
             const rawPct = Math.round((ctxWin.pct || 0) * 100);
             const pct = isNaN(rawPct) ? 0 : Math.min(rawPct, 100);
             const ragStatus = ctxWin.status || 'green';
-            const barColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
+            const barColor = ragStatus === 'red' ? '#22d3ee' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
             const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
             const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
             el.innerHTML = `<div class="ctx-inline-bar" title="${usedK}K / ${limK}K tokens">
@@ -7922,7 +7980,7 @@
             const isActive = canonical && canonical.active === true && !canonical.lowSignal;
             const agentLabel = canonical?.heroAgentLabel || canonical?.agent || 'AGENT';
             if (isActive) {
-                dot.style.background = '#e53e3e';
+                dot.style.background = '#22d3ee';
                 dot.style.animation = 'pulse 1.5s infinite';
                 if (label) label.textContent = `LIVE OBJECTIVE · ${agentLabel}`;
             } else {
@@ -8136,7 +8194,7 @@
                 return `<div class="intel-hi-item${freshClass}">
                     <div class="intel-hi-body">
                         <div style="display:flex;align-items:flex-start;gap:5px;flex-wrap:wrap;">
-                            <span class="intel-hi-cat" style="background:rgba(239,68,68,0.15);color:#f87171">${label}</span>
+                            <span class="intel-hi-cat" style="background:rgba(34,211,238,0.15);color:#67e8f9">${label}</span>
                             ${scoreTag}
                             <span class="intel-hi-text">${title}</span>
                             ${timeStr ? `<span class="intel-hi-time">${timeStr}</span>` : ''}
@@ -8170,7 +8228,7 @@
 
             // Pull top signals first, then other categories
             const CAT_COLORS = {
-                signal: { bg: 'rgba(239,68,68,0.15)', color: '#f87171', label: 'SIGNAL' },
+                signal: { bg: 'rgba(34,211,238,0.15)', color: '#67e8f9', label: 'SIGNAL' },
                 ai_value_chain: { bg: 'rgba(96,165,250,0.12)', color: '#60a5fa', label: 'AI' },
                 enterprise_ai: { bg: 'rgba(96,165,250,0.12)', color: '#60a5fa', label: 'AI' },
                 macro_geo: { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', label: 'MACRO' },
@@ -8720,7 +8778,7 @@
             // Fear & Greed
             if (f.fear_greed) {
                 const fg = f.fear_greed;
-                const fgColor = fg.value < 30 ? '#f87171' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
+                const fgColor = fg.value < 30 ? '#67e8f9' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
                 items.push(`<span class="intel-ticker-item">
                     <span class="t-sym">F&amp;G</span>
                     <span class="t-chg" style="color:${fgColor}">${fg.value} ${escapeHtml(fg.label || '')}</span>
@@ -8730,7 +8788,7 @@
             // VIX
             if (f.macro_context && f.macro_context.vix) {
                 const vix = f.macro_context.vix;
-                const vixColor = vix >= 30 ? '#f87171' : vix >= 20 ? '#fb923c' : 'rgba(255,255,255,0.6)';
+                const vixColor = vix >= 30 ? '#67e8f9' : vix >= 20 ? '#fb923c' : 'rgba(255,255,255,0.6)';
                 items.push(`<span class="intel-ticker-item">
                     <span class="t-sym">VIX</span>
                     <span class="t-price" style="color:${vixColor}">${vix.toFixed(1)}</span>
@@ -8881,7 +8939,7 @@
             // ── Fear & Greed ──────────────────────────────────────────────
             if (f.fear_greed) {
                 const fg = f.fear_greed;
-                const fgColor = fg.value < 30 ? '#f87171' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
+                const fgColor = fg.value < 30 ? '#67e8f9' : fg.value < 50 ? '#fb923c' : fg.value < 65 ? '#facc15' : '#4ade80';
                 html += `<div class="if-section" id="ifs-fg">
                     <div class="if-section-header">Fear &amp; Greed</div>
                     <div class="fg-bar-wrap">
@@ -8930,9 +8988,9 @@
 
             // ── Shared table builder ───────────────────────────────────────
             function ssBar(score) {
-                // score: 0-10 → colored number, green=high, red=low
+                // score: 0-10 → colored number, green=high, cyan=low
                 const pct = Math.min(10, Math.max(0, score || 0)) / 10;
-                const color = pct >= 0.85 ? '#4ade80' : pct >= 0.65 ? '#86efac' : pct >= 0.45 ? '#fbbf24' : '#f87171';
+                const color = pct >= 0.85 ? '#4ade80' : pct >= 0.65 ? '#86efac' : pct >= 0.45 ? '#fbbf24' : '#67e8f9';
                 const numLabel = score != null ? score.toFixed(1) : '—';
                 return `<div class="ift-ss-wrap" title="Signal strength: ${numLabel}/10">
                     <div class="ift-ss-score" style="color:${color}">${numLabel}</div>
@@ -9056,7 +9114,7 @@
             const _fmtChg = (v, alwaysSign=true) => {
                 if (v == null) return '<span style="color:#fff">N/A</span>';
                 const s = alwaysSign && v >= 0 ? '+' : '';
-                const col = v >= 0 ? '#4ade80' : '#f87171';
+                const col = v >= 0 ? '#4ade80' : '#67e8f9';
                 return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
             };
             const _colStyle = {
@@ -9109,7 +9167,7 @@
                 const _fmtChgC = (v) => {
                     if (v == null) return '<span style="color:#fff">N/A</span>';
                     const s = v >= 0 ? '+' : '';
-                    const col = v >= 0 ? '#4ade80' : '#f87171';
+                    const col = v >= 0 ? '#4ade80' : '#67e8f9';
                     return `<span style="color:${col}">${s}${v.toFixed(2)}%</span>`;
                 };
                 // Crypto price: always 2 decimal places, no locale separators (keeps column narrow)
@@ -9772,7 +9830,7 @@
             return `<div class="bf-objective ${agentClass}${compact ? ' bf-objective-compact' : ''}" data-agent="${escapeHtml(heroAgentLabel)}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                 <div class="bf-objective-meta">
                     <div class="bf-objective-live">
-                        <span class="bf-fresh-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
+                        <span class="bf-fresh-dot" style="background:${isActiveBf ? '#22d3ee' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(34,211,238,0.6)' : ''}"></span>
                         <span class="bf-agent-name">${escapeHtml(heroAgentLabel)}</span>
                         <span class="bf-objective-kicker">${isActiveBf ? 'LIVE OBJECTIVE' : 'LATEST'}</span>
                     </div>
@@ -9843,7 +9901,7 @@
             const msgTime = bf && bf.messageReceived ? formatAbsoluteTime(bf.messageReceived) : '';
             const isActiveBf = bf && bf.active;
             const statusLabel = isActiveBf ? 'ACTIVE · MSG RECEIVED' : stateLabel;
-            const statusDotColor = isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)';
+            const statusDotColor = isActiveBf ? '#22d3ee' : 'rgba(255,255,255,0.2)';
             const modelLabel = (bf && bf.model) ? formatModelLabel(bf.model) : '';
             const toolLabel = prettyToolLabel(bf?.currentTool || '');
             const modelVisual = getModelVisual(bf?.model || '', toolLabel || '');
@@ -9865,7 +9923,7 @@
             const objectiveDetail = getBrainFeedObjectiveDetail(bf);
             const objectiveMeta = `<div class="bf-objective-meta" id="bf-status-bar">
                 <div class="bf-objective-live">
-                    <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#e53e3e' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(229,62,62,0.6)' : ''}"></span>
+                    <span class="bf-fresh-dot" id="bf-status-dot" style="background:${isActiveBf ? '#22d3ee' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(34,211,238,0.6)' : ''}"></span>
                     <span class="bf-objective-kicker" id="bf-freshness-label-text">${isActiveBf ? `LIVE OBJECTIVE · ${heroAgentLabel}` : `LATEST · ${heroAgentLabel}`}</span>
                 </div>
                 ${providerLabel ? `<span class="bf-objective-provider"><span>Model</span><span>${escapeHtml(providerLabel)}</span></span>` : ''}
@@ -10066,7 +10124,7 @@
                     }
                     if (statusLabel) {
                         statusLabel.textContent = 'MSG RECEIVED';
-                        statusLabel.style.color = '#e53e3e';
+                        statusLabel.style.color = '#22d3ee';
                         // Fade back to LIVE OBJECTIVE after 3s
                         setTimeout(() => {
                             statusLabel.textContent = `LIVE OBJECTIVE · ${heroAgentLabel}`;
@@ -10131,9 +10189,9 @@
                     const usedK = Math.round((ctxWin.usedTokens || 0) / 1000);
                     const limK = Math.round((ctxWin.limitTokens || 0) / 1000);
                     const ragStatus = ctxWin.status || 'green';
-                    const barColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
+                    const barColor = ragStatus === 'red' ? '#22d3ee' : ragStatus === 'amber' ? '#fbbf24' : '#4ade80';
                     const statusLabel = ragStatus === 'red' ? '⚠ New session recommended' : ragStatus === 'amber' ? '· Consider /new soon' : '· Plenty of room';
-                    const statusColor = ragStatus === 'red' ? '#e53e3e' : ragStatus === 'amber' ? '#fbbf24' : 'var(--text-muted)';
+                    const statusColor = ragStatus === 'red' ? '#22d3ee' : ragStatus === 'amber' ? '#fbbf24' : 'var(--text-muted)';
                     ctxMeterHtml = `
                         <div class="ctx-meter-wrap">
                             <div class="ctx-meter-header">
@@ -10166,7 +10224,7 @@
                 // Context window warning (only show if amber/red — stays lean)
                 const ctxPct = ctxWin ? Math.round((ctxWin.pct || 0) * 100) : null;
                 const ctxStatus = ctxWin?.status || 'green';
-                const ctxColor  = ctxStatus === 'red' ? '#e53e3e' : ctxStatus === 'amber' ? '#fbbf24' : '#4ade80';
+                const ctxColor  = ctxStatus === 'red' ? '#22d3ee' : ctxStatus === 'amber' ? '#fbbf24' : '#4ade80';
                 const ctxWarning = ctxStatus !== 'green' && ctxPct !== null
                     ? `<div class="bf-idle-warning" style="color:${ctxColor};border-color:${ctxColor}30;background:${ctxColor}08">
                          ${ctxStatus === 'red' ? '⚠' : '·'} Context at ${ctxPct}% — ${ctxStatus === 'red' ? 'new session recommended' : 'consider /new soon'}
@@ -10400,7 +10458,7 @@
                 : calendarHealth.status === 'auth_expired'
                 ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(251,191,36,0.35);cursor:pointer;"><span class="num" style="color:#fbbf24">📅</span><span class="label">Calendar Re-auth</span></div>`
                 : calendarHealth.status === 'error'
-                ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(239,68,68,0.35);cursor:pointer;"><span class="num" style="color:#f87171">📅</span><span class="label">Calendar Issue</span></div>`
+                ? `<div class="stat-pill" id="calendar-bubble" style="border-color:rgba(34,211,238,0.35);cursor:pointer;"><span class="num" style="color:#67e8f9">📅</span><span class="label">Calendar Issue</span></div>`
                 : `<div class="stat-pill" id="calendar-bubble" style="cursor:pointer;"><span class="num">📅</span><span class="label">Calendar</span></div>`;
             const deviceAttention = data.devices?.filter(d => d.status && d.status !== 'ok').length || 0;
             const canaryStatus = data.visualCanaries?.status || 'unknown';
@@ -10898,13 +10956,13 @@
                 // ── Machine Health ──
                 function renderMachineHealth(mh, label, color) {
                     if (!mh || !mh.available) return `<div class="mu-health-machine">
-                        <div class="mu-health-machine-label"><span class="mu-health-online-dot" style="background:#e53e3e"></span><span style="color:${color}">${label}</span></div>
+                        <div class="mu-health-machine-label"><span class="mu-health-online-dot" style="background:#22d3ee"></span><span style="color:${color}">${label}</span></div>
                         <div class="mu-health-offline">Offline</div></div>`;
                     const cpuPct = mh.cpu_pct ?? 0;
                     const ramPct = mh.ram_total_gb ? Math.round((mh.ram_used_gb / mh.ram_total_gb) * 100) : 0;
-                    const cpuColor = cpuPct > 80 ? '#e53e3e' : cpuPct > 50 ? '#f97316' : '#4ade80';
-                    const ramColor = ramPct > 85 ? '#e53e3e' : ramPct > 65 ? '#fbbf24' : '#60a5fa';
-                    const diskColor = (mh.disk_pct||0) > 85 ? '#e53e3e' : (mh.disk_pct||0) > 65 ? '#fbbf24' : '#4ade80';
+                    const cpuColor = cpuPct > 80 ? '#22d3ee' : cpuPct > 50 ? '#f97316' : '#4ade80';
+                    const ramColor = ramPct > 85 ? '#22d3ee' : ramPct > 65 ? '#fbbf24' : '#60a5fa';
+                    const diskColor = (mh.disk_pct||0) > 85 ? '#22d3ee' : (mh.disk_pct||0) > 65 ? '#fbbf24' : '#4ade80';
                     const uptime = mh.uptime ? `<div class="mu-health-row"><span class="mu-health-key">Uptime</span><span class="mu-health-val">${escapeHtml(mh.uptime)}</span></div>` : '';
                     return `<div class="mu-health-machine">
                         <div class="mu-health-machine-label"><span class="mu-health-online-dot" style="background:#4ade80;box-shadow:0 0 5px #4ade8080"></span><span style="color:${color}">${label}</span></div>
@@ -11112,7 +11170,7 @@
                     const isOk     = cron.status === 'ok';
                     const isPaused = cron.status === 'paused';
                     const hasErr   = cron.errors > 0;
-                    const statusColor = hasErr ? '#e53e3e' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const statusColor = hasErr ? '#22d3ee' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const statusLabel = hasErr ? 'ERROR' : isPaused ? 'PAUSED' : 'ACTIVE';
                     const agentName   = cron.agent || 'JOSH 2.0';
                     const agentIsJain   = agentName === 'J.A.I.N';
@@ -11194,7 +11252,7 @@
                     const sourceText = cron.sourceLabel || '';
                     const subline = [desc, sourceText, lastRunText].filter(Boolean).join(' · ');
                     const rowExtra = isDone ? ' tjob-done' : isMissed ? ' tjob-missed' : '';
-                    const dotColor = hasErr ? '#e53e3e' : isMissed ? '#f59e0b' : isStarted ? '#60a5fa' : isDue ? '#60a5fa' : isDone || isActive ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
+                    const dotColor = hasErr ? '#22d3ee' : isMissed ? '#f59e0b' : isStarted ? '#60a5fa' : isDue ? '#60a5fa' : isDone || isActive ? '#4ade80' : isPaused ? 'rgba(255,255,255,0.18)' : cfg.color;
                     const dotExtraCls = isStarted ? ' started' : '';
                     const statusBadge = isDone
                         ? `<span class="tjob-run-badge tjob-run-done">✓ done</span>`
@@ -11387,7 +11445,7 @@
             if (v == null || isNaN(v)) return 'var(--text-muted)';
             if (v < 1) return '#4ade80';
             if (v <= 5) return '#fbbf24';
-            return '#e53e3e';
+            return '#22d3ee';
         }
 
         function fmtCost(v) {
@@ -11483,10 +11541,10 @@
                 ctx.clearRect(0, 0, W, H);
 
                 // ── Get model color from CSS variable ──
-                const modelColor = getComputedStyle(document.documentElement).getPropertyValue('--bf-model-color').trim() || '#e53e3e';
+                const modelColor = getComputedStyle(document.documentElement).getPropertyValue('--bf-model-color').trim() || '#22d3ee';
                 const rgb = modelColor.startsWith('#') ? 
                     [parseInt(modelColor.slice(1,3),16), parseInt(modelColor.slice(3,5),16), parseInt(modelColor.slice(5,7),16)] :
-                    [229, 62, 62]; // default red
+                    [34, 211, 238]; // default cyan
                 
                 // ── Ambient border dim line ──
                 ctx.beginPath();
@@ -11686,7 +11744,7 @@
                 flash.style.cssText = `
                     position:fixed;inset:0;z-index:99998;pointer-events:none;
                     display:flex;flex-direction:column;align-items:center;justify-content:center;
-                    background:rgba(229,62,62,0.0);
+                    background:rgba(34,211,238,0.0);
                     transition:background 0.12s ease;
                 `;
                 flash.innerHTML = `
@@ -11696,18 +11754,18 @@
                         display:flex;align-items:center;gap:14px;
                         padding:18px 32px;border-radius:16px;
                         background:rgba(10,10,10,0.92);
-                        border:1.5px solid rgba(229,62,62,0.7);
-                        box-shadow:0 0 60px rgba(229,62,62,0.5),0 0 120px rgba(229,62,62,0.2);
+                        border:1.5px solid rgba(34,211,238,0.7);
+                        box-shadow:0 0 60px rgba(34,211,238,0.5),0 0 120px rgba(34,211,238,0.2);
                     ">
                         <span style="font-size:2rem">📱</span>
                         <div>
-                            <div style="font-size:0.65rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:rgba(229,62,62,0.9);margin-bottom:4px">Remote Command</div>
+                            <div style="font-size:0.65rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:rgba(34,211,238,0.9);margin-bottom:4px">Remote Command</div>
                             <div style="font-size:1.4rem;font-weight:700;color:rgba(255,255,255,0.92);letter-spacing:0.04em">REFRESHING</div>
                         </div>
                         <div id="rrf-spinner" style="
                             width:28px;height:28px;border-radius:50%;
-                            border:3px solid rgba(229,62,62,0.25);
-                            border-top-color:#e53e3e;
+                            border:3px solid rgba(34,211,238,0.25);
+                            border-top-color:#22d3ee;
                             animation:spin 0.7s linear infinite;
                         "></div>
                     </div>
@@ -11717,13 +11775,13 @@
             const badge = flash.querySelector('#rrf-badge');
             // Flash in
             requestAnimationFrame(() => {
-                flash.style.background = 'rgba(229,62,62,0.06)';
+                flash.style.background = 'rgba(34,211,238,0.06)';
                 badge.style.opacity = '1';
                 badge.style.transform = 'translateY(0) scale(1)';
             });
             // Fetch fresh data, then fade out — always clears regardless of outcome
             const fadeOut = () => {
-                flash.style.background = 'rgba(229,62,62,0)';
+                flash.style.background = 'rgba(34,211,238,0)';
                 badge.style.opacity = '0';
                 badge.style.transform = 'translateY(-10px) scale(0.94)';
                 setTimeout(() => { if (flash.parentNode) flash.remove(); }, 400);
@@ -12784,9 +12842,9 @@
         color: var(--rv-text) !important;
     }
     .es-tab.es-tab-active {
-        background: rgba(229,62,62,0.08) !important;
-        border-color: rgba(229,62,62,0.24) !important;
-        color: #fca5a5 !important;
+        background: rgba(34,211,238,0.08) !important;
+        border-color: rgba(34,211,238,0.24) !important;
+        color: #93c5fd !important;
     }
     .btn-x-dash .btn-icon,
     #x-fab span {
@@ -13608,7 +13666,7 @@
             const s = health.status || 'unknown';
             if (s === 'ok') return '<div class="sp-note" style="border-color:rgba(74,222,128,0.2);color:rgba(74,222,128,0.8);">✅ Calendar connected and syncing normally.</div>';
             if (s === 'auth_expired') return '<div class="sp-note" style="border-color:rgba(251,191,36,0.3);color:#fbbf24;">⚠️ Calendar needs re-auth. Run <code style="background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">openclaw calendar reauth</code> on JOSH 2.0.</div>';
-            if (s === 'error') return '<div class="sp-note" style="border-color:rgba(239,68,68,0.3);color:#f87171;">⛔ Calendar error: ' + escH(health.message || 'Unknown error') + '</div>';
+            if (s === 'error') return '<div class="sp-note" style="border-color:rgba(34,211,238,0.3);color:#67e8f9;">⛔ Calendar error: ' + escH(health.message || 'Unknown error') + '</div>';
             return '<div class="sp-note">Calendar status: ' + escH(s) + '</div>';
         })();
 
