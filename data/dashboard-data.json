@@ -1,5 +1,16 @@
 {
-  "actionRequired": [],
+  "actionRequired": [
+    {
+      "priority": "high",
+      "title": "Mission Control canary issue: 1 canary issue(s)",
+      "url": "#canaries"
+    },
+    {
+      "priority": "high",
+      "title": "Calendar auth needs refresh",
+      "url": "#calendar"
+    }
+  ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
@@ -17,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Memory sync to J.A.I.N completed successfully",
-    "updatedAt": "2026-04-29T06:02:49Z"
+    "updatedAt": "2026-04-29T06:05:18Z"
   },
   "contextWindow": {
     "usedTokens": 37796,
@@ -33,8 +44,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 13 source file(s) changed",
-        "time": "2026-04-29T06:02:49Z"
+        "event": "Patch feed: 11 source file(s) changed",
+        "time": "2026-04-29T06:05:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -52,12 +63,12 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T06:02:49Z",
+    "updatedAt": "2026-04-29T06:05:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "13 source file(s) changed",
+      "summary": "11 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 13,
+      "dirtyCount": 11,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
@@ -66,8 +77,8 @@
         "data/model-usage-accum.json",
         "data/model-usage-tracker.json"
       ],
-      "head": "6597cfbd9",
-      "updatedAt": "2026-04-29T06:02:49Z"
+      "head": "f7eeadd71",
+      "updatedAt": "2026-04-29T06:05:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -171,7 +182,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
@@ -186,7 +197,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 80% left [=========---]",
-        "Resets in 52m",
+        "Resets in 49m",
         "Weekly: 86% left [==========--]",
         "Pace: On pace | Expected 15% used | Lasts until reset",
         "Resets in 5d 23h",
@@ -197,11 +208,11 @@
       "weekly": "86% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "52m",
+      "sessionReset": "49m",
       "weeklyReset": "5d 23h",
       "summary": "80% left \u00b7 wk 86% left"
     },
-    "updatedAt": "2026-04-29T06:02:51Z"
+    "updatedAt": "2026-04-29T06:05:20Z"
   },
   "modelUsage": {
     "session": 0.028546,
@@ -355,7 +366,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T06:02:55Z",
+    "lastUpdated": "2026-04-29T06:05:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -413,7 +424,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T06:03:00Z",
+    "updatedAt": "2026-04-29T06:05:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -430,14 +441,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.3,
-      "cpu_user": 20.0,
-      "cpu_sys": 19.27,
-      "load1": 2.25,
-      "load5": 2.52,
-      "load15": 2.59,
+      "cpu_pct": 33.8,
+      "cpu_user": 16.72,
+      "cpu_sys": 17.4,
+      "load1": 2.94,
+      "load5": 2.7,
+      "load15": 2.65,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -445,14 +456,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 17.7,
-      "cpu_user": 6.72,
-      "cpu_sys": 10.92,
-      "load1": 2.17,
-      "load5": 1.97,
-      "load15": 1.94,
+      "cpu_pct": 24.6,
+      "cpu_user": 13.84,
+      "cpu_sys": 10.76,
+      "load1": 2.02,
+      "load5": 2.17,
+      "load15": 2.04,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -461,8 +472,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected via local gog"
+    "status": "auth_expired",
+    "message": "Calendar re-auth required"
   },
   "devices": [
     {
@@ -476,19 +487,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T06:02:49Z"
+      "lastChecked": "2026-04-29T06:05:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T06:02:49Z"
+      "lastChecked": "2026-04-29T06:05:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T06:02:49Z"
+      "lastChecked": "2026-04-29T06:05:18Z"
     }
   ],
   "crons": [
@@ -505,7 +516,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T06:00:30.831284+00:00"
+      "lastRun": "2026-04-29T06:05:28.232439+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1241,22 +1252,22 @@
     }
   ],
   "visualCanaries": {
-    "ok": true,
-    "status": "ok",
-    "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T06:01:09.905442Z",
+    "ok": false,
+    "status": "attention",
+    "summary": "1 canary issue(s)",
+    "checkedAt": "2026-04-29T06:05:17.955097Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
         "name": "Calendar tile",
-        "ok": true,
-        "detail": "Connected via local gog",
-        "severity": "ok"
+        "ok": false,
+        "detail": "Calendar re-auth required",
+        "severity": "medium"
       },
       {
         "name": "Today Jobs",
@@ -1267,7 +1278,7 @@
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "clear",
+        "detail": "1 visible alert(s)",
         "severity": "ok"
       },
       {
@@ -1507,9 +1518,9 @@
     ]
   },
   "opsInbox": {
-    "status": "clear",
+    "status": "attention",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "connected",
+    "calendar": "needs attention",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1522,9 +1533,9 @@
     {
       "id": "visual-canaries",
       "name": "Visual Canaries",
-      "status": "ok",
-      "summary": "All canaries passed",
-      "detail": "6/6 checks passing"
+      "status": "attention",
+      "summary": "1 canary issue(s)",
+      "detail": "5/6 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1543,9 +1554,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "clear",
+      "status": "attention",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar connected \u00b7 0 job issue(s)"
+      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1564,19 +1575,7 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0001",
-      "title": "Fix Mission Control brain feed readability/JOSHeX",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh reported the cutoff fix made Brain Feed too small/hard to read and JOSHeX disappeared/should be less prominent than JOSH 2.0 + JAIMES. Current investigation found renderer was promoting JOSHeX into same hero grid as the two primary agents, compressing hero cards and pushing lower panels. Patch in progress: keep JOSH 2.0 + JAIMES as large hero lanes and render JOSHeX as a minimal support strip/quick panel, then verify with Mission Control regression + 1920x1080 screenshot/no-overlap check. Local unrelated data files remain dirty and should not be reverted.",
-      "background": "owner: JOSH 2.0; updated 2026-04-29 01:42",
-      "requestedAt": null,
-      "updatedAt": "2026-04-29 01:42",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1804,29 +1803,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T06:02:55Z",
+      "time": "2026-04-29T06:05:23Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T06:02:51Z",
+      "time": "2026-04-29T06:05:20Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T06:02:51Z",
+      "time": "2026-04-29T06:05:20Z",
       "event": "CodexBar: 80% left \u00b7 wk 86% left"
     },
     {
-      "time": "2026-04-29T06:02:49Z",
+      "time": "2026-04-29T06:05:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T06:02:49Z",
-      "event": "JOSHeX: Patch feed: 13 source file(s) changed"
+      "time": "2026-04-29T06:05:18Z",
+      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T06:02:49Z",
+      "time": "2026-04-29T06:05:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T06:02:49Z"
+  "lastUpdated": "2026-04-29T06:05:18Z"
 }
