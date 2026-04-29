@@ -21,7 +21,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Fix mission control dashboard polish and remove X workflows",
+    "objective": "mc_clean_deploy",
     "status": "active",
     "steps": [
       {
@@ -31,21 +31,21 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T14:22:13Z",
-    "checkedAt": "2026-04-29T14:22:13Z",
+    "updatedAt": "2026-04-29T14:44:14Z",
+    "checkedAt": "2026-04-29T14:44:14Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Fix mission control dashboard polish and remove X workflows",
-    "updatedAt": "2026-04-29T14:40:16Z"
+    "context": "mc_clean_deploy",
+    "updatedAt": "2026-04-29T14:45:17Z"
   },
   "contextWindow": {
-    "usedTokens": 41264,
-    "limitTokens": 272000,
-    "pct": 0.1517,
-    "model": "gpt-5.5",
+    "usedTokens": 0,
+    "limitTokens": 200000,
+    "pct": 0.0,
+    "model": "",
     "status": "green"
   },
   "personalCodex": {
@@ -56,7 +56,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 15 source file(s) changed",
-        "time": "2026-04-29T14:40:16Z"
+        "time": "2026-04-29T14:45:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -74,7 +74,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:40:16Z",
+    "updatedAt": "2026-04-29T14:45:17Z",
     "patchStatus": {
       "status": "pending",
       "summary": "15 source file(s) changed",
@@ -88,8 +88,8 @@
         "data/model-usage-accum.json",
         "data/model-usage-tracker.json"
       ],
-      "head": "eaee05bd4",
-      "updatedAt": "2026-04-29T14:40:16Z"
+      "head": "fca22005c",
+      "updatedAt": "2026-04-29T14:45:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -207,7 +207,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 2h 14m",
+        "Resets in 2h 9m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 14h",
@@ -218,11 +218,11 @@
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 14m",
+      "sessionReset": "2h 9m",
       "weeklyReset": "5d 14h",
       "summary": "95% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:40:18Z"
+    "updatedAt": "2026-04-29T14:45:19Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -376,7 +376,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:40:21Z",
+    "lastUpdated": "2026-04-29T14:45:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -434,7 +434,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:40:26Z",
+    "updatedAt": "2026-04-29T14:45:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -451,14 +451,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.5,
-      "cpu_user": 19.55,
-      "cpu_sys": 17.91,
-      "load1": 2.2,
-      "load5": 2.22,
-      "load15": 2.24,
+      "cpu_pct": 34.9,
+      "cpu_user": 17.12,
+      "cpu_sys": 17.76,
+      "load1": 2.48,
+      "load5": 2.45,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -466,12 +466,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.7,
-      "cpu_user": 11.29,
-      "cpu_sys": 9.67,
-      "load1": 2.1,
-      "load5": 1.96,
-      "load15": 1.94,
+      "cpu_pct": 22.5,
+      "cpu_user": 12.5,
+      "cpu_sys": 10.0,
+      "load1": 2.65,
+      "load5": 2.11,
+      "load15": 1.97,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -497,19 +497,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:40:16Z"
+      "lastChecked": "2026-04-29T14:45:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:40:16Z"
+      "lastChecked": "2026-04-29T14:45:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:40:16Z"
+      "lastChecked": "2026-04-29T14:45:17Z"
     }
   ],
   "crons": [
@@ -526,7 +526,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:40:26.771619+00:00"
+      "lastRun": "2026-04-29T14:45:28.141953+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -890,7 +890,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:30:03.827140+00:00"
+      "lastRun": "2026-04-29T14:45:04.674097+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1034,7 +1034,7 @@
     "ok": false,
     "status": "attention",
     "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-29T14:40:16.063192Z",
+    "checkedAt": "2026-04-29T14:45:17.225483Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1395,10 +1395,10 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Fix mission control dashboard polish and remove X workflows",
+      "objective": "mc_clean_deploy",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T14:22:13Z",
+      "updatedAt": "2026-04-29T14:44:14Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1507,10 +1507,10 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Fix mission control dashboard polish and remove X workflows",
+        "objective": "mc_clean_deploy",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:22:13Z",
+        "updatedAt": "2026-04-29T14:44:14Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1605,29 +1605,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:40:21Z",
+      "time": "2026-04-29T14:45:23Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T14:40:18Z",
+      "time": "2026-04-29T14:45:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T14:40:18Z",
+      "time": "2026-04-29T14:45:19Z",
       "event": "CodexBar: 95% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:40:16Z",
+      "time": "2026-04-29T14:45:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:40:16Z",
+      "time": "2026-04-29T14:45:17Z",
       "event": "JOSHeX: Patch feed: 15 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:40:16Z",
+      "time": "2026-04-29T14:45:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:40:16Z"
+  "lastUpdated": "2026-04-29T14:45:17Z"
 }
