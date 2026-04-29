@@ -14,27 +14,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-29T21:49:54Z",
-    "objective": "Done: Memory backup synced to J.A.I.N successfully \u00b7 Awaiting further instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-29T22:12:12Z",
+    "objective": "Running Mission Control canaries after JAIMES layout patch",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - Memory backup synced to J.A.I.N successfully",
-        "status": "done",
+        "label": "Running Mission Control canaries after JAIMES layout patch",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T22:01:56Z",
-    "checkedAt": "2026-04-29T22:01:43Z",
+    "updatedAt": "2026-04-29T22:15:13Z",
+    "checkedAt": "2026-04-29T22:15:13Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Done: Memory backup synced to J.A.I.N successfully \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T22:10:16Z"
+    "status": "Brain Feed live",
+    "context": "Running Mission Control canaries after JAIMES layout patch",
+    "updatedAt": "2026-04-29T22:15:15Z"
   },
   "contextWindow": {
     "usedTokens": 82115,
@@ -51,7 +51,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T22:10:16Z"
+        "time": "2026-04-29T22:15:15Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,7 +69,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T22:10:16Z",
+    "updatedAt": "2026-04-29T22:15:15Z",
     "patchStatus": {
       "status": "pending",
       "summary": "11 source file(s) changed",
@@ -78,13 +78,13 @@
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "e4262f577",
-      "updatedAt": "2026-04-29T22:10:16Z"
+      "head": "09f07ac47",
+      "updatedAt": "2026-04-29T22:15:15Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,33 +188,33 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 11,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
     ],
-    "codexbarStatus": "100% left \u00b7 wk 83% left",
+    "codexbarStatus": "99% left \u00b7 wk 82% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 100% left [============]",
-        "Resets in 4h 49m",
-        "Weekly: 83% left [=========---]",
-        "Pace: 7% in reserve | Expected 24% used | Lasts until reset",
+        "Session: 99% left [===========-]",
+        "Resets in 4h 44m",
+        "Weekly: 82% left [=========---]",
+        "Pace: 6% in reserve | Expected 24% used | Lasts until reset",
         "Resets in 5d 7h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "100% left",
-      "weekly": "83% left",
+      "session": "99% left",
+      "weekly": "82% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 49m",
+      "sessionReset": "4h 44m",
       "weeklyReset": "5d 7h",
-      "summary": "100% left \u00b7 wk 83% left"
+      "summary": "99% left \u00b7 wk 82% left"
     },
-    "updatedAt": "2026-04-29T22:10:18Z"
+    "updatedAt": "2026-04-29T22:15:17Z"
   },
   "modelUsage": {
     "session": 0.047299,
@@ -342,8 +342,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 225941230,
-        "dailyTokens": 89207134,
+        "totalTokens": 227379888,
+        "dailyTokens": 90645792,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -374,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T22:10:25Z",
+    "lastUpdated": "2026-04-29T22:15:21Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -426,8 +426,8 @@
       "codexEquivalentWeekly": 45.500221,
       "codexEquivalentDaily": 0.442695,
       "codexEquivalentMonthlyProjection": 195.0,
-      "codexTokensWeekly": 334729329,
-      "codexTokensDaily": 89207134,
+      "codexTokensWeekly": 336167987,
+      "codexTokensDaily": 90645792,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -458,7 +458,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T22:10:30Z",
+    "updatedAt": "2026-04-29T22:15:26Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -475,14 +475,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.8,
-      "cpu_user": 16.81,
+      "cpu_pct": 36.4,
+      "cpu_user": 19.39,
       "cpu_sys": 16.96,
-      "load1": 2.64,
+      "load1": 3.02,
       "load5": 2.46,
-      "load15": 2.41,
+      "load15": 2.4,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -490,14 +490,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.2,
-      "cpu_user": 14.51,
-      "cpu_sys": 9.67,
-      "load1": 2.46,
-      "load5": 2.15,
-      "load15": 2.09,
+      "cpu_pct": 15.3,
+      "cpu_user": 5.8,
+      "cpu_sys": 10.16,
+      "load1": 2.18,
+      "load5": 2.06,
+      "load15": 2.04,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -521,19 +521,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:10:16Z"
+      "lastChecked": "2026-04-29T22:15:15Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:10:16Z"
+      "lastChecked": "2026-04-29T22:15:15Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T22:10:16Z"
+      "lastChecked": "2026-04-29T22:15:15Z"
     }
   ],
   "crons": [
@@ -550,7 +550,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:10:30.527131+00:00"
+      "lastRun": "2026-04-29T22:15:26.188270+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -914,7 +914,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:00:05.408352+00:00"
+      "lastRun": "2026-04-29T22:15:04.907086+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1097,12 +1097,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T22:10:16.492338Z",
+    "checkedAt": "2026-04-29T22:15:15.178668Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1455,20 +1455,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: Memory backup synced to J.A.I.N successfully \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Running Mission Control canaries after JAIMES layout patch",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:01:56Z",
-      "messageReceived": "2026-04-29T21:49:54Z",
+      "updatedAt": "2026-04-29T22:15:13Z",
+      "messageReceived": "2026-04-29T22:12:12Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - Memory backup synced to J.A.I.N successfully",
-          "status": "done",
+          "label": "Running Mission Control canaries after JAIMES layout patch",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1498,11 +1498,11 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Mission Control watchdog failed",
+      "objective": "Done: Hermes Labyrinth watch removed",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T21:17:51Z",
-      "messageReceived": "2026-04-29T21:17:29Z",
+      "updatedAt": "2026-04-29T22:13:44Z",
+      "messageReceived": "2026-04-29T22:13:34Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
@@ -1525,33 +1525,43 @@
           "label": "Mission Control watchdog running",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Stopping Hermes Labyrinth reminder/watch",
+          "status": "done",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JOSH 2.0"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JOSH 2.0",
-    "dualMode": false,
-    "dualAgents": [],
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "JAIMES"
+    ],
     "agents": [
       {
         "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: Memory backup synced to J.A.I.N successfully \u00b7 Awaiting further instruction",
-        "status": "idle",
+        "objective": "Running Mission Control canaries after JAIMES layout patch",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:01:56Z",
-        "messageReceived": "2026-04-29T21:49:54Z",
+        "updatedAt": "2026-04-29T22:15:13Z",
+        "messageReceived": "2026-04-29T22:12:12Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Done - Memory backup synced to J.A.I.N successfully",
-            "status": "done",
+            "label": "Running Mission Control canaries after JAIMES layout patch",
+            "status": "active",
             "tool": "exec"
           }
         ]
@@ -1561,11 +1571,11 @@
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
-        "objective": "Mission Control watchdog failed",
+        "objective": "Done: Hermes Labyrinth watch removed",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T21:17:51Z",
-        "messageReceived": "2026-04-29T21:17:29Z",
+        "updatedAt": "2026-04-29T22:13:44Z",
+        "messageReceived": "2026-04-29T22:13:34Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
@@ -1586,6 +1596,11 @@
           },
           {
             "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Stopping Hermes Labyrinth reminder/watch",
             "status": "done",
             "tool": "exec"
           }
@@ -1615,29 +1630,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T22:10:25Z",
+      "time": "2026-04-29T22:15:21Z",
       "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-29T22:10:18Z",
+      "time": "2026-04-29T22:15:17Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T22:10:18Z",
-      "event": "CodexBar: 100% left \u00b7 wk 83% left"
+      "time": "2026-04-29T22:15:17Z",
+      "event": "CodexBar: 99% left \u00b7 wk 82% left"
     },
     {
-      "time": "2026-04-29T22:10:16Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-29T22:15:15Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T22:10:16Z",
+      "time": "2026-04-29T22:15:15Z",
       "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T22:10:16Z",
+      "time": "2026-04-29T22:15:15Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T22:10:16Z"
+  "lastUpdated": "2026-04-29T22:15:15Z"
 }
