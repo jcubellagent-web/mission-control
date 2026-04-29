@@ -39,12 +39,12 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Fix mission control dashboard polish and remove X workflows",
-    "updatedAt": "2026-04-29T14:25:17Z"
+    "updatedAt": "2026-04-29T14:30:18Z"
   },
   "contextWindow": {
-    "usedTokens": 83654,
-    "limitTokens": 400000,
-    "pct": 0.2091,
+    "usedTokens": 41264,
+    "limitTokens": 272000,
+    "pct": 0.1517,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -55,8 +55,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T14:25:17Z"
+        "event": "Patch feed: 16 source file(s) changed",
+        "time": "2026-04-29T14:30:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -74,12 +74,12 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:25:17Z",
+    "updatedAt": "2026-04-29T14:30:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "12 source file(s) changed",
+      "summary": "16 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 12,
+      "dirtyCount": 16,
       "files": [
         "data/agent-comms.json",
         "data/dashboard-data.json",
@@ -88,8 +88,8 @@
         "data/mission-control-canaries.json",
         "data/model-usage-accum.json"
       ],
-      "head": "570c59210",
-      "updatedAt": "2026-04-29T14:25:17Z"
+      "head": "8bbd14ce7",
+      "updatedAt": "2026-04-29T14:30:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -193,36 +193,40 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 16,
     "recentFiles": [
+      "mission-control/index.html",
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/scripts/brain_feed_server.py",
+      "mission-control/scripts/update_and_push.sh",
       "scripts/send_josh_reply.py"
     ],
-    "codexbarStatus": "96% left \u00b7 wk 84% left",
+    "codexbarStatus": "95% left \u00b7 wk 84% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 96% left [===========-]",
-        "Resets in 2h 29m",
+        "Session: 95% left [===========-]",
+        "Resets in 2h 24m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 15h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "96% left",
+      "session": "95% left",
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 29m",
+      "sessionReset": "2h 24m",
       "weeklyReset": "5d 15h",
-      "summary": "96% left \u00b7 wk 84% left"
+      "summary": "95% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:25:19Z"
+    "updatedAt": "2026-04-29T14:30:21Z"
   },
   "modelUsage": {
-    "session": 0.045778,
-    "daily": 0.125985,
+    "session": 0.0,
+    "daily": 0.080207,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -237,14 +241,14 @@
         "cost": 7.387107749999999
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.125985
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.080207
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -272,19 +276,6 @@
         "costEstimated": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 3111,
-        "outputTokens": 481,
-        "totalTokens": 3592,
-        "sessionCost": 0.125985,
-        "dailyCost": 0.125985,
-        "weeklyCost": 0.125985,
-        "sessions": 4,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 18839,
@@ -294,6 +285,19 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
         "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 2273,
+        "outputTokens": 475,
+        "totalTokens": 2748,
+        "sessionCost": 0.080207,
+        "dailyCost": 0.080207,
+        "weeklyCost": 0.080207,
+        "sessions": 3,
         "isGemini": false,
         "costEstimated": false
       },
@@ -372,7 +376,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:25:22Z",
+    "lastUpdated": "2026-04-29T14:30:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -405,8 +409,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.125985,
-      "total": 47.248598,
+      "daily": 0.080207,
+      "total": 47.20282,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -430,7 +434,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:25:27Z",
+    "updatedAt": "2026-04-29T14:30:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -447,14 +451,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.2,
-      "cpu_user": 16.85,
-      "cpu_sys": 17.34,
-      "load1": 2.76,
-      "load5": 2.5,
-      "load15": 2.36,
+      "cpu_pct": 40.7,
+      "cpu_user": 20.91,
+      "cpu_sys": 19.81,
+      "load1": 2.05,
+      "load5": 2.21,
+      "load15": 2.27,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -462,14 +466,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 23.2,
-      "cpu_user": 12.8,
-      "cpu_sys": 10.4,
-      "load1": 1.54,
-      "load5": 1.8,
-      "load15": 1.88,
+      "cpu_pct": 20.7,
+      "cpu_user": 11.29,
+      "cpu_sys": 9.67,
+      "load1": 2.17,
+      "load5": 1.98,
+      "load15": 1.93,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -493,19 +497,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:25:17Z"
+      "lastChecked": "2026-04-29T14:30:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:25:17Z"
+      "lastChecked": "2026-04-29T14:30:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:25:17Z"
+      "lastChecked": "2026-04-29T14:30:18Z"
     }
   ],
   "crons": [
@@ -522,7 +526,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:25:28.089468+00:00"
+      "lastRun": "2026-04-29T14:30:29.638374+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -617,20 +621,6 @@
       "name": "Breaking News Scanner",
       "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
       "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT",
-      "category": "Intelligence Feed",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "active"
-    },
-    {
-      "name": "X Watchlist Monitor",
-      "schedule": "Every 5 min (6:00 AM\u201311:15 PM ET)",
-      "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane",
       "category": "Intelligence Feed",
       "agent": "J.A.I.N",
       "status": "ok",
@@ -784,227 +774,6 @@
       "lastError": null
     },
     {
-      "name": "X Pre-Market",
-      "schedule": "Daily 7:00 AM ET",
-      "description": "[Original] Futures and overnight setup",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-29T07:00:00"
-    },
-    {
-      "name": "X Market Open",
-      "schedule": "Daily 8:00 AM ET",
-      "description": "[Original] Market-open macro take",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-29T08:00:00"
-    },
-    {
-      "name": "X Mover",
-      "schedule": "Daily 11:00 AM ET",
-      "description": "[Original] Mid-morning mover or stat",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming"
-    },
-    {
-      "name": "X Hot Take",
-      "schedule": "Daily 12:00 PM ET",
-      "description": "[Original] Contrarian take built to spark replies",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming"
-    },
-    {
-      "name": "X Quote Tweets",
-      "schedule": "Daily 1p/3p/6p/8p ET",
-      "description": "[QT] Quotes breaking or viral posts with our angle",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming",
-      "multiRun": {
-        "runs": [
-          {
-            "time": "1:00 PM",
-            "label": "Quote Tweet",
-            "past": false,
-            "done": false
-          },
-          {
-            "time": "3:00 PM",
-            "label": "Quote Tweet",
-            "past": false,
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "label": "Quote Tweet",
-            "past": false,
-            "done": false
-          },
-          {
-            "time": "8:00 PM",
-            "label": "Quote Tweet",
-            "past": false,
-            "done": false
-          }
-        ]
-      }
-    },
-    {
-      "name": "X Market Close",
-      "schedule": "Daily 5:00 PM ET",
-      "description": "[Original] Close wrap and next-day setup",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming"
-    },
-    {
-      "name": "X Prime Take",
-      "schedule": "Daily 9:00 PM ET",
-      "description": "[Original] Prime-time flagship take",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming"
-    },
-    {
-      "name": "X Nightcap",
-      "schedule": "Daily 10:00 PM ET",
-      "description": "[Original] Last sharp insight of the day",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "upcoming"
-    },
-    {
-      "name": "X Strategic Replies",
-      "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)",
-      "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies",
-      "category": "X Account",
-      "agent": "J.A.I.N",
-      "status": "ok",
-      "source": "cron",
-      "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "done",
-      "lastRun": "2026-04-29T10:00:00",
-      "multiRun": {
-        "runs": [
-          {
-            "time": "9:00 AM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "10:00 AM",
-            "label": "Strategic Reply",
-            "done": true
-          },
-          {
-            "time": "11:00 AM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "1:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "2:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "3:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "4:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "5:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "7:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "9:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          },
-          {
-            "time": "11:00 PM",
-            "label": "Strategic Reply",
-            "done": false
-          }
-        ]
-      }
-    },
-    {
       "name": "Sorare ML Training",
       "schedule": "Daily 2:00 AM ET",
       "description": "Hermes retrains the Sorare MLB model on the latest results",
@@ -1121,7 +890,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:15:05.331035+00:00"
+      "lastRun": "2026-04-29T14:30:03.827140+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1265,7 +1034,7 @@
     "ok": false,
     "status": "attention",
     "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-29T14:25:17.386551Z",
+    "checkedAt": "2026-04-29T14:30:18.055957Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1282,7 +1051,7 @@
       {
         "name": "Today Jobs",
         "ok": false,
-        "detail": "33 today-relevant; 1 active issue(s)",
+        "detail": "23 today-relevant; 1 active issue(s)",
         "severity": "high"
       },
       {
@@ -1601,7 +1370,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: scripts/send_josh_reply.py",
+      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1660,44 +1429,14 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Verifying submitted GW11 lineups",
+      "objective": "Final GW11 post-submit verification",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T14:23:37Z",
-      "messageReceived": "2026-04-29T14:23:37Z",
+      "updatedAt": "2026-04-29T14:29:33Z",
+      "messageReceived": "2026-04-29T14:29:33Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Checking Sale scoring/probable status",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Querying MLB probable starters",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "Re-running corrected audit",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control watchdog running",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Skill review: Sorare sanity-check lesson",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Patching Sorare skill: DTD soft-watch",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "GW11 approved: strict rebuild and submit gate",
           "status": "done",
@@ -1715,6 +1454,36 @@
         },
         {
           "label": "Verifying submitted GW11 lineups",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Dry-running hard-risk repair",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Submitting hard-risk repair swaps",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Retrying hard-risk repair submit",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Finding in-season SP repair",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Submitting final Hot 1 repair",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Final GW11 post-submit verification",
           "status": "active",
           "tool": "exec"
         }
@@ -1739,44 +1508,14 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Verifying submitted GW11 lineups",
+        "objective": "Final GW11 post-submit verification",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:23:37Z",
-        "messageReceived": "2026-04-29T14:23:37Z",
+        "updatedAt": "2026-04-29T14:29:33Z",
+        "messageReceived": "2026-04-29T14:29:33Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Checking Sale scoring/probable status",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Querying MLB probable starters",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "Re-running corrected audit",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Skill review: Sorare sanity-check lesson",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Patching Sorare skill: DTD soft-watch",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "GW11 approved: strict rebuild and submit gate",
             "status": "done",
@@ -1794,6 +1533,36 @@
           },
           {
             "label": "Verifying submitted GW11 lineups",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Dry-running hard-risk repair",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Submitting hard-risk repair swaps",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Retrying hard-risk repair submit",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Finding in-season SP repair",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Submitting final Hot 1 repair",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Final GW11 post-submit verification",
             "status": "active",
             "tool": "exec"
           }
@@ -1837,29 +1606,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:25:22Z",
-      "event": "Session spend: $0.05"
+      "time": "2026-04-29T14:30:24Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T14:25:19Z",
-      "event": "Coding: scripts/send_josh_reply.py"
+      "time": "2026-04-29T14:30:21Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T14:25:19Z",
-      "event": "CodexBar: 96% left \u00b7 wk 84% left"
+      "time": "2026-04-29T14:30:21Z",
+      "event": "CodexBar: 95% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:25:17Z",
+      "time": "2026-04-29T14:30:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:25:17Z",
-      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
+      "time": "2026-04-29T14:30:18Z",
+      "event": "JOSHeX: Patch feed: 16 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:25:17Z",
+      "time": "2026-04-29T14:30:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:25:17Z"
+  "lastUpdated": "2026-04-29T14:30:18Z"
 }

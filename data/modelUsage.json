@@ -1,6 +1,6 @@
 {
-  "session": 0.045778,
-  "daily": 0.125985,
+  "session": 0.0,
+  "daily": 0.080207,
   "weekly": 45.705728,
   "monthly": 952.083148,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.125985
-    },
-    {
       "name": "openai/gpt-5.5",
       "window": "session",
       "cost": 0.122313
+    },
+    {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.080207
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -50,19 +50,6 @@
       "costEstimated": false
     },
     {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 3111,
-      "outputTokens": 481,
-      "totalTokens": 3592,
-      "sessionCost": 0.125985,
-      "dailyCost": 0.125985,
-      "weeklyCost": 0.125985,
-      "sessions": 4,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
       "inputTokens": 18839,
@@ -72,6 +59,19 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
       "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 2273,
+      "outputTokens": 475,
+      "totalTokens": 2748,
+      "sessionCost": 0.080207,
+      "dailyCost": 0.080207,
+      "weeklyCost": 0.080207,
+      "sessions": 3,
       "isGemini": false,
       "costEstimated": false
     },
@@ -150,7 +150,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-29T14:25:22Z",
+  "lastUpdated": "2026-04-29T14:30:24Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -183,8 +183,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.125985,
-    "total": 47.248598,
+    "daily": 0.080207,
+    "total": 47.20282,
     "monthly": 952.083148
   },
   "weeklyRunRate": {

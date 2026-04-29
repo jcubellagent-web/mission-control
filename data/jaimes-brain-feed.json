@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Verifying submitted GW11 lineups",
+  "objective": "Final GW11 post-submit verification",
   "status": "active",
-  "updatedAt": "2026-04-29T14:23:37Z",
-  "checkedAt": "2026-04-29T14:23:37Z",
+  "updatedAt": "2026-04-29T14:29:33Z",
+  "checkedAt": "2026-04-29T14:29:33Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,36 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Checking Sale scoring/probable status",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Querying MLB probable starters",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Re-running corrected audit",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: Sorare sanity-check lesson",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Patching Sorare skill: DTD soft-watch",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "GW11 approved: strict rebuild and submit gate",
       "status": "done",
@@ -61,10 +31,40 @@
     },
     {
       "label": "Verifying submitted GW11 lineups",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Dry-running hard-risk repair",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Submitting hard-risk repair swaps",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Retrying hard-risk repair submit",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Finding in-season SP repair",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Submitting final Hot 1 repair",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Final GW11 post-submit verification",
       "status": "active",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T14:23:37Z"
+  "messageReceived": "2026-04-29T14:29:33Z"
 }
