@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Completed memory sync to J.A.I.N and verified remote manifest, file count, permissions, and copied completion records",
-    "updatedAt": "2026-04-29T10:25:17Z"
+    "updatedAt": "2026-04-29T10:30:18Z"
   },
   "contextWindow": {
     "usedTokens": 35786,
@@ -45,7 +45,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T10:25:17Z"
+        "time": "2026-04-29T10:30:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,7 +63,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T10:25:17Z",
+    "updatedAt": "2026-04-29T10:30:18Z",
     "patchStatus": {
       "status": "pending",
       "summary": "11 source file(s) changed",
@@ -77,8 +77,8 @@
         "data/model-usage-accum.json",
         "data/model-usage-tracker.json"
       ],
-      "head": "8904052b9",
-      "updatedAt": "2026-04-29T10:25:17Z"
+      "head": "901d60c74",
+      "updatedAt": "2026-04-29T10:30:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -190,7 +190,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 1h 29m",
+        "Resets in 1h 24m",
         "Weekly: 85% left [==========--]",
         "Pace: 2% in reserve | Expected 17% used | Lasts until reset",
         "Resets in 5d 19h",
@@ -201,15 +201,15 @@
       "weekly": "85% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 29m",
+      "sessionReset": "1h 24m",
       "weeklyReset": "5d 19h",
       "summary": "98% left \u00b7 wk 85% left"
     },
-    "updatedAt": "2026-04-29T10:25:19Z"
+    "updatedAt": "2026-04-29T10:30:20Z"
   },
   "modelUsage": {
     "session": 0.02071,
-    "daily": 0.160483,
+    "daily": 0.107964,
     "weekly": 45.459433,
     "monthly": 951.836853,
     "topModels": [
@@ -224,14 +224,14 @@
         "cost": 7.387107749999999
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.16048300000000001
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.107964
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -259,19 +259,6 @@
         "costEstimated": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 19517,
-        "outputTokens": 151,
-        "totalTokens": 19668,
-        "sessionCost": 0.16048300000000001,
-        "dailyCost": 0.16048300000000001,
-        "weeklyCost": 0.16048300000000001,
-        "sessions": 4,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 18839,
@@ -281,6 +268,19 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
         "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 1902,
+        "outputTokens": 165,
+        "totalTokens": 2067,
+        "sessionCost": 0.107964,
+        "dailyCost": 0.107964,
+        "weeklyCost": 0.107964,
+        "sessions": 4,
         "isGemini": false,
         "costEstimated": false
       },
@@ -359,7 +359,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T10:25:22Z",
+    "lastUpdated": "2026-04-29T10:30:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -392,8 +392,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.160483,
-      "total": 47.283096,
+      "daily": 0.107964,
+      "total": 47.230577,
       "monthly": 951.836853
     },
     "weeklyRunRate": {
@@ -417,7 +417,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T10:25:27Z",
+    "updatedAt": "2026-04-29T10:30:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -434,12 +434,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.6,
-      "cpu_user": 17.62,
-      "cpu_sys": 16.96,
-      "load1": 2.18,
-      "load5": 2.39,
-      "load15": 2.39,
+      "cpu_pct": 35.1,
+      "cpu_user": 17.84,
+      "cpu_sys": 17.23,
+      "load1": 2.45,
+      "load5": 2.34,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -449,14 +449,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 26.1,
-      "cpu_user": 14.49,
-      "cpu_sys": 11.59,
-      "load1": 2.06,
-      "load5": 1.79,
-      "load15": 1.78,
+      "cpu_pct": 12.7,
+      "cpu_user": 3.17,
+      "cpu_sys": 9.52,
+      "load1": 1.42,
+      "load5": 1.68,
+      "load15": 1.74,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -480,19 +480,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T10:25:17Z"
+      "lastChecked": "2026-04-29T10:30:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T10:25:17Z"
+      "lastChecked": "2026-04-29T10:30:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T10:25:17Z"
+      "lastChecked": "2026-04-29T10:30:18Z"
     }
   ],
   "crons": [
@@ -509,7 +509,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T10:25:27.445601+00:00"
+      "lastRun": "2026-04-29T10:30:29.230129+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1248,7 +1248,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T10:25:17.210964Z",
+    "checkedAt": "2026-04-29T10:30:18.539224Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1809,29 +1809,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T10:25:22Z",
+      "time": "2026-04-29T10:30:24Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T10:25:19Z",
+      "time": "2026-04-29T10:30:20Z",
       "event": "CodexBar: 98% left \u00b7 wk 85% left"
     },
     {
-      "time": "2026-04-29T10:25:17Z",
+      "time": "2026-04-29T10:30:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T10:25:17Z",
+      "time": "2026-04-29T10:30:18Z",
       "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T10:25:17Z",
+      "time": "2026-04-29T10:30:18Z",
       "event": "JOSHeX: Patch status feed added"
     },
     {
-      "time": "2026-04-29T10:25:17Z",
+      "time": "2026-04-29T10:30:18Z",
       "event": "JOSHeX: JOSHeX docs renamed"
     }
   ],
-  "lastUpdated": "2026-04-29T10:25:17Z"
+  "lastUpdated": "2026-04-29T10:30:18Z"
 }
