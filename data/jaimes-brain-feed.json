@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Mission Control watchdog clean",
+  "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T09:18:11Z",
-  "checkedAt": "2026-04-29T09:18:02Z",
+  "updatedAt": "2026-04-29T10:18:07Z",
+  "checkedAt": "2026-04-29T10:17:57Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,21 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: validating JOSH autorecovery script",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: final JOSH health verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: updating OpenClaw recovery skill",
       "status": "done",
@@ -63,8 +48,23 @@
       "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: ops drift audit on J.A.I.N",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog failed; collecting logs",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T09:18:02Z"
+  "messageReceived": "2026-04-29T10:17:57Z"
 }
