@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: approved async completion reported \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T23:30:16Z"
+    "updatedAt": "2026-04-29T23:35:17Z"
   },
   "contextWindow": {
     "usedTokens": 54539,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T23:30:16Z"
+        "event": "Patch feed: 7 source file(s) changed",
+        "time": "2026-04-29T23:35:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T23:30:16Z",
+    "updatedAt": "2026-04-29T23:35:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "8 source file(s) changed",
+      "summary": "7 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 8,
+      "dirtyCount": 7,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/modelUsage.json",
+        "data/moltworld-data.json"
       ],
-      "head": "31e64568d",
-      "updatedAt": "2026-04-29T23:30:16Z"
+      "head": "57516f6c3",
+      "updatedAt": "2026-04-29T23:35:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 8,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -200,10 +200,10 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 90% left [==========--]",
-        "Resets in 3h 29m",
+        "Resets in 3h 24m",
         "Weekly: 80% left [=========---]",
         "Pace: 5% in reserve | Expected 25% used | Lasts until reset",
-        "Resets in 5d 6h",
+        "Resets in 5d 5h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -211,11 +211,11 @@
       "weekly": "80% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 29m",
-      "weeklyReset": "5d 6h",
+      "sessionReset": "3h 24m",
+      "weeklyReset": "5d 5h",
       "summary": "90% left \u00b7 wk 80% left"
     },
-    "updatedAt": "2026-04-29T23:30:18Z"
+    "updatedAt": "2026-04-29T23:35:19Z"
   },
   "modelUsage": {
     "session": 0.029227,
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T23:30:22Z",
+    "lastUpdated": "2026-04-29T23:35:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -622,7 +622,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T23:30:27Z",
+    "updatedAt": "2026-04-29T23:35:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -639,11 +639,11 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.3,
-      "cpu_user": 16.97,
-      "cpu_sys": 17.28,
-      "load1": 2.36,
-      "load5": 2.17,
+      "cpu_pct": 35.2,
+      "cpu_user": 17.36,
+      "cpu_sys": 17.82,
+      "load1": 2.41,
+      "load5": 2.23,
       "load15": 2.19,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
@@ -654,12 +654,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.5,
-      "cpu_user": 3.96,
-      "cpu_sys": 9.52,
-      "load1": 2.17,
-      "load5": 1.97,
-      "load15": 1.97,
+      "cpu_pct": 13.2,
+      "cpu_user": 3.1,
+      "cpu_sys": 10.7,
+      "load1": 2.3,
+      "load5": 2.04,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -685,19 +685,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:30:16Z"
+      "lastChecked": "2026-04-29T23:35:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:30:16Z"
+      "lastChecked": "2026-04-29T23:35:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T23:30:16Z"
+      "lastChecked": "2026-04-29T23:35:17Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:30:27.404293+00:00"
+      "lastRun": "2026-04-29T23:35:28.271966+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T23:30:16.774939Z",
+    "checkedAt": "2026-04-29T23:35:17.599997Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JAIMES', 'J.A.I.N']; live=3",
+        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
         "severity": "ok"
       },
       {
@@ -1647,37 +1647,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Step: verify fantasy upgrades dry-run",
-      "status": "active",
+      "objective": "Done: fantasy cron skill update saved",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T23:29:21Z",
-      "messageReceived": "2026-04-29T23:29:21Z",
+      "updatedAt": "2026-04-29T23:32:10Z",
+      "messageReceived": "2026-04-29T23:31:40Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Mission Control watchdog running",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control watchdog failed; collecting logs",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: final fantasy verification",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: review skill save/update need",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Step: inspect related skills for fantasy automation",
           "status": "done",
@@ -1705,7 +1685,27 @@
         },
         {
           "label": "Step: verify fantasy upgrades dry-run",
-          "status": "active",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: assess ComfyUI skill relevance",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: wire fantasy planner pre-lock cron",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verify fantasy planner cron wiring",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review skill updates from fantasy cron work",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1713,50 +1713,46 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JAIMES",
-    "dualMode": true,
-    "dualAgents": [
-      "JAIMES",
-      "J.A.I.N"
-    ],
+    "activeCount": 1,
+    "primaryAgent": "J.A.I.N",
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Step: verify fantasy upgrades dry-run",
+        "objective": "Redesigning model usage module around spend lanes and signals",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T23:29:21Z",
-        "messageReceived": "2026-04-29T23:29:21Z",
+        "updatedAt": "2026-04-29T22:26:53Z",
+        "messageReceived": "2026-04-29T22:19:08Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Redesigning model usage module around spend lanes and signals",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: fantasy cron skill update saved",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:32:10Z",
+        "messageReceived": "2026-04-29T23:31:40Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog failed; collecting logs",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: final fantasy verification",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Step: inspect related skills for fantasy automation",
             "status": "done",
@@ -1784,27 +1780,27 @@
           },
           {
             "label": "Step: verify fantasy upgrades dry-run",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Redesigning model usage module around spend lanes and signals",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T22:26:53Z",
-        "messageReceived": "2026-04-29T22:19:08Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
+          },
           {
-            "label": "Redesigning model usage module around spend lanes and signals",
-            "status": "active",
+            "label": "Task: assess ComfyUI skill relevance",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: wire fantasy planner pre-lock cron",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verify fantasy planner cron wiring",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill updates from fantasy cron work",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1833,29 +1829,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T23:30:22Z",
+      "time": "2026-04-29T23:35:23Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T23:30:18Z",
+      "time": "2026-04-29T23:35:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T23:30:18Z",
+      "time": "2026-04-29T23:35:19Z",
       "event": "CodexBar: 90% left \u00b7 wk 80% left"
     },
     {
-      "time": "2026-04-29T23:30:16Z",
+      "time": "2026-04-29T23:35:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T23:30:16Z",
-      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
+      "time": "2026-04-29T23:35:17Z",
+      "event": "JOSHeX: Patch feed: 7 source file(s) changed"
     },
     {
-      "time": "2026-04-29T23:30:16Z",
+      "time": "2026-04-29T23:35:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T23:30:16Z"
+  "lastUpdated": "2026-04-29T23:35:17Z"
 }

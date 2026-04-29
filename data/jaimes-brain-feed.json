@@ -1,36 +1,16 @@
 {
-  "active": true,
-  "objective": "Step: verify fantasy upgrades dry-run",
-  "status": "active",
-  "updatedAt": "2026-04-29T23:29:21Z",
+  "active": false,
+  "objective": "Done: fantasy cron skill update saved",
+  "status": "idle",
+  "updatedAt": "2026-04-29T23:32:10Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:29:21Z",
-  "messageReceived": "2026-04-29T23:29:21Z",
+  "checkedAt": "2026-04-29T23:31:40Z",
+  "messageReceived": "2026-04-29T23:31:40Z",
   "steps": [
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog failed; collecting logs",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: final fantasy verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: inspect related skills for fantasy automation",
       "status": "done",
@@ -58,7 +38,27 @@
     },
     {
       "label": "Step: verify fantasy upgrades dry-run",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: assess ComfyUI skill relevance",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: wire fantasy planner pre-lock cron",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verify fantasy planner cron wiring",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill updates from fantasy cron work",
+      "status": "done",
       "tool": "exec"
     }
   ]
