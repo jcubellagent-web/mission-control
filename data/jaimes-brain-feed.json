@@ -1,26 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: Mission Control watchdog failed",
-  "status": "idle",
-  "updatedAt": "2026-04-29T22:18:08Z",
+  "active": true,
+  "objective": "Mission Control: reproducing screenshot diff",
+  "status": "active",
+  "updatedAt": "2026-04-29T22:24:59Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T22:18:02Z",
-  "messageReceived": "2026-04-29T22:18:02Z",
+  "checkedAt": "2026-04-29T22:24:59Z",
+  "messageReceived": "2026-04-29T22:24:59Z",
   "steps": [
-    {
-      "label": "Task: ops drift audit on J.A.I.N",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Checking JAIN button/approval status",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Checking Mission Control repo state",
       "status": "done",
@@ -59,6 +49,16 @@
     {
       "label": "Mission Control watchdog failed",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: auditing watchdog screenshot failure",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: reproducing screenshot diff",
+      "status": "active",
       "tool": "exec"
     }
   ]

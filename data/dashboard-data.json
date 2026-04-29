@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Handling async command completion heartbeat",
-    "updatedAt": "2026-04-29T22:20:17Z"
+    "updatedAt": "2026-04-29T22:25:17Z"
   },
   "contextWindow": {
     "usedTokens": 24782,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-29T22:20:17Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-29T22:25:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T22:20:17Z",
+    "updatedAt": "2026-04-29T22:25:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 10,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "152c1afa3",
-      "updatedAt": "2026-04-29T22:20:17Z"
+      "head": "4e0a42bc7",
+      "updatedAt": "2026-04-29T22:25:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
@@ -199,7 +199,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 4h 39m",
+        "Resets in 4h 34m",
         "Weekly: 82% left [=========---]",
         "Pace: 6% in reserve | Expected 24% used | Lasts until reset",
         "Resets in 5d 7h",
@@ -210,11 +210,11 @@
       "weekly": "82% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 39m",
+      "sessionReset": "4h 34m",
       "weeklyReset": "5d 7h",
       "summary": "99% left \u00b7 wk 82% left"
     },
-    "updatedAt": "2026-04-29T22:20:19Z"
+    "updatedAt": "2026-04-29T22:25:19Z"
   },
   "modelUsage": {
     "session": 0.014164,
@@ -374,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T22:20:22Z",
+    "lastUpdated": "2026-04-29T22:25:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -458,7 +458,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T22:20:27Z",
+    "updatedAt": "2026-04-29T22:25:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -475,14 +475,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.8,
-      "cpu_user": 17.94,
-      "cpu_sys": 16.82,
-      "load1": 2.23,
-      "load5": 2.22,
-      "load15": 2.29,
+      "cpu_pct": 35.5,
+      "cpu_user": 18.66,
+      "cpu_sys": 16.79,
+      "load1": 2.8,
+      "load5": 2.35,
+      "load15": 2.3,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -490,12 +490,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.2,
-      "cpu_user": 2.47,
-      "cpu_sys": 10.74,
-      "load1": 1.8,
-      "load5": 1.99,
-      "load15": 2.01,
+      "cpu_pct": 17.4,
+      "cpu_user": 7.43,
+      "cpu_sys": 9.91,
+      "load1": 2.56,
+      "load5": 2.3,
+      "load15": 2.12,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -521,19 +521,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:20:17Z"
+      "lastChecked": "2026-04-29T22:25:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:20:17Z"
+      "lastChecked": "2026-04-29T22:25:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T22:20:17Z"
+      "lastChecked": "2026-04-29T22:25:17Z"
     }
   ],
   "crons": [
@@ -550,7 +550,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:20:27.549056+00:00"
+      "lastRun": "2026-04-29T22:25:27.518887+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1097,12 +1097,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T22:20:17.181671Z",
+    "checkedAt": "2026-04-29T22:25:17.292163Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1483,27 +1483,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: Mission Control watchdog failed",
-      "status": "idle",
+      "objective": "Mission Control: reproducing screenshot diff",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:18:08Z",
-      "messageReceived": "2026-04-29T22:18:02Z",
+      "updatedAt": "2026-04-29T22:24:59Z",
+      "messageReceived": "2026-04-29T22:24:59Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: ops drift audit on J.A.I.N",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Checking JAIN button/approval status",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Checking Mission Control repo state",
           "status": "done",
@@ -1543,16 +1533,27 @@
           "label": "Mission Control watchdog failed",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Mission Control: auditing watchdog screenshot failure",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control: reproducing screenshot diff",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0"
     ],
-    "activeCount": 1,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 2,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1560,48 +1561,18 @@
     ],
     "agents": [
       {
-        "agent": "JOSH 2.0",
+        "agent": "JAIMES",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Handling async command completion heartbeat",
+        "objective": "Mission Control: reproducing screenshot diff",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:19:08Z",
-        "messageReceived": "2026-04-29T22:19:08Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Handling async command completion heartbeat",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: Mission Control watchdog failed",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T22:18:08Z",
-        "messageReceived": "2026-04-29T22:18:02Z",
+        "updatedAt": "2026-04-29T22:24:59Z",
+        "messageReceived": "2026-04-29T22:24:59Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: ops drift audit on J.A.I.N",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Checking JAIN button/approval status",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Checking Mission Control repo state",
             "status": "done",
@@ -1641,6 +1612,36 @@
             "label": "Mission Control watchdog failed",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Mission Control: auditing watchdog screenshot failure",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control: reproducing screenshot diff",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Handling async command completion heartbeat",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T22:19:08Z",
+        "messageReceived": "2026-04-29T22:19:08Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Handling async command completion heartbeat",
+            "status": "active",
+            "tool": "exec"
           }
         ]
       },
@@ -1668,29 +1669,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T22:20:22Z",
+      "time": "2026-04-29T22:25:22Z",
       "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-04-29T22:20:19Z",
+      "time": "2026-04-29T22:25:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T22:20:19Z",
+      "time": "2026-04-29T22:25:19Z",
       "event": "CodexBar: 99% left \u00b7 wk 82% left"
     },
     {
-      "time": "2026-04-29T22:20:17Z",
+      "time": "2026-04-29T22:25:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T22:20:17Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-29T22:25:17Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-29T22:20:17Z",
+      "time": "2026-04-29T22:25:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T22:20:17Z"
+  "lastUpdated": "2026-04-29T22:25:17Z"
 }
