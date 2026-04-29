@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777440002 -->
+    <!-- BUILD:1777440328 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -6866,6 +6866,52 @@
             body:not(.phone-mode).kiosk-mode .capability-stack { margin-top: 5px !important; gap: 5px !important; }
             body:not(.phone-mode).kiosk-mode .capability-tile { padding: 5px 6px !important; border-radius: 8px !important; }
             body:not(.phone-mode).kiosk-mode .capability-d { display: none !important; }
+        }
+
+        /* Expanded Brain Feed should use the full active module, not sit at the top. */
+        @media (min-width: 1180px) {
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-shell {
+                display: grid !important;
+                grid-template-rows: minmax(0, 1.45fr) minmax(72px, 0.55fr) !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                align-content: stretch !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-hero-grid.dual-live,
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-realtime-deck {
+                min-height: 0 !important;
+                height: 100% !important;
+                align-items: stretch !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective,
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-realtime-card {
+                height: 100% !important;
+                min-height: 0 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective {
+                justify-content: space-between !important;
+                --bf-objective-font-size: clamp(1.08rem, 1.18vw, 1.42rem) !important;
+                --bf-objective-line-height: 1.15 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-text-wrap {
+                flex: 1 1 auto !important;
+                display: flex !important;
+                align-items: center !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-text {
+                font-size: var(--bf-objective-font-size) !important;
+                line-height: var(--bf-objective-line-height) !important;
+            }
         }
 
     </style>
