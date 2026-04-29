@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Done: Brain Feed realtime cards live",
+  "objective": "Done: Mission Control skill updated",
   "status": "idle",
-  "updatedAt": "2026-04-29T04:04:44Z",
-  "checkedAt": "2026-04-29T03:44:56Z",
+  "updatedAt": "2026-04-29T04:07:22Z",
+  "checkedAt": "2026-04-29T04:07:05Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,16 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control: verifying live JOSHeX quick panel",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Mission Control: reloading JOSH screen to quick panel",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill save/update after Mission Control work",
       "status": "done",
@@ -63,8 +53,18 @@
       "label": "Task: Mission Control 24in spacing fix",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: patch Mission Control skill",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T03:44:56Z"
+  "messageReceived": "2026-04-29T04:07:05Z"
 }
