@@ -6,6 +6,7 @@ import datetime as dt
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import urllib.error
@@ -1410,35 +1411,56 @@ def fetch_model_usage() -> Dict[str, Any] | None:
     return normalize_model_usage_payload(fallback)
 
 
+def _calendar_events_command() -> tuple[List[str], str]:
+    gog_bin = os.environ.get("GOG_BIN") or shutil.which("gog")
+    args = [
+        "calendar", "events", "primary",
+        "--account", "jcubellagent@gmail.com",
+        "--from", "today",
+        "--days", "3",
+        "--max", "10",
+        "-j", "--results-only",
+    ]
+    if gog_bin:
+        return [gog_bin, *args], "local gog"
+    # Mission Control often refreshes from JAIMES, while gog lives on JOSH 2.0.
+    remote = "gog " + " ".join(args)
+    return [
+        "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+        "josh2.0@100.114.50.48", remote,
+    ], "JOSH 2.0 gog"
+
+
 def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
     fetch_upcoming_events._status = {"status": "unknown", "message": "Unknown"}  # type: ignore[attr-defined]
+    source = "unknown"
     try:
+        cmd, source = _calendar_events_command()
         result = subprocess.run(
-            [
-                "gog", "calendar", "events", "primary",
-                "--account", "jcubellagent@gmail.com",
-                "--from", "today",
-                "--days", "3",
-                "--max", "10",
-                "-j", "--results-only",
-            ],
+            cmd,
             capture_output=True,
             text=True,
             check=True,
+            timeout=18,
         )
-        fetch_upcoming_events._status = {"status": "ok", "message": "Connected"}  # type: ignore[attr-defined]
-    except FileNotFoundError:
-        fetch_upcoming_events._status = {"status": "unavailable", "message": "gog CLI missing"}  # type: ignore[attr-defined]
-        print("[warn] gog CLI missing; skipping calendar fetch", file=sys.stderr)
+        fetch_upcoming_events._status = {"status": "ok", "message": f"Connected via {source}"}  # type: ignore[attr-defined]
+    except FileNotFoundError as exc:
+        fetch_upcoming_events._status = {"status": "unavailable", "message": f"Calendar CLI unavailable: {exc.filename or 'command missing'}"}  # type: ignore[attr-defined]
+        print(f"[warn] calendar command missing via {source}: {exc}", file=sys.stderr)
+        return []
+    except subprocess.TimeoutExpired:
+        fetch_upcoming_events._status = {"status": "timeout", "message": f"Calendar fetch timed out via {source}"}  # type: ignore[attr-defined]
+        print(f"[warn] calendar fetch timed out via {source}", file=sys.stderr)
         return []
     except subprocess.CalledProcessError as exc:
-        err = (exc.stderr or '').strip()
-        if 'invalid_grant' in err or 'expired or revoked' in err:
-            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Re-auth required"}  # type: ignore[attr-defined]
-            print("[info] gog calendar auth needs re-login; skipping calendar fetch", file=sys.stderr)
+        err = ((exc.stderr or '') + '\n' + (exc.stdout or '')).strip()
+        lower = err.lower()
+        if 'no auth for calendar' in lower or 'invalid_grant' in lower or 'expired or revoked' in lower:
+            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Calendar re-auth required"}  # type: ignore[attr-defined]
+            print(f"[info] gog calendar auth needs re-login via {source}", file=sys.stderr)
             return []
-        fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
-        print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)
+        fetch_upcoming_events._status = {"status": "error", "message": f"Calendar fetch failed via {source}"}  # type: ignore[attr-defined]
+        print(f"[warn] gog calendar list failed via {source}: {err}", file=sys.stderr)
         return []
     try:
         raw = json.loads(result.stdout or "[]")
@@ -2152,11 +2174,57 @@ def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[D
     }
 
 
+def fetch_joshex_patch_status(now_iso: str) -> Dict[str, Any]:
+    """Expose Mission Control patch state without creating a live-agent slot."""
+    try:
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=ROOT.parent,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        ).stdout.splitlines()
+        head = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=ROOT.parent,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        ).stdout.strip()
+    except Exception as exc:
+        return {
+            "status": "unknown",
+            "summary": "Patch state unavailable",
+            "detail": str(exc)[:120],
+            "dirtyCount": 0,
+            "head": "unknown",
+            "updatedAt": now_iso,
+        }
+
+    volatile = {"data/jaimes-brain-feed.json"}
+    files = [line[3:] for line in status if len(line) >= 4]
+    source_files = [path for path in files if path not in volatile]
+    dirty_count = len(source_files)
+    state = "clean" if dirty_count == 0 else "pending"
+    summary = f"Clean at {head}" if dirty_count == 0 else f"{dirty_count} source file(s) changed"
+    return {
+        "status": state,
+        "summary": summary,
+        "detail": "Volatile brain telemetry ignored" if files and dirty_count == 0 else "Ready for validation" if dirty_count else "No source patch pending",
+        "dirtyCount": dirty_count,
+        "files": source_files[:6],
+        "head": head,
+        "updatedAt": now_iso,
+    }
+
+
 def fetch_personal_codex_status(now_iso: str) -> Dict[str, Any]:
-    """Load local Personal Codex visibility without promoting it as an agent."""
+    """Load local JOSHeX visibility without promoting it as an agent."""
     fallback: Dict[str, Any] = {
         "status": "idle",
-        "objective": "Local Codex contribution lane ready",
+        "objective": "JOSHeX contribution lane ready",
         "validation": "pending",
         "actionRequired": [],
         "recentActivity": [],
@@ -2170,9 +2238,13 @@ def fetch_personal_codex_status(now_iso: str) -> Dict[str, Any]:
     data["agentSlot"] = False
     data["promoteToBrainFeed"] = False
     data["updatedAt"] = data.get("updatedAt") or now_iso
+    data["patchStatus"] = fetch_joshex_patch_status(now_iso)
     for key in ["actionRequired", "recentActivity", "capabilities"]:
         if not isinstance(data.get(key), list):
             data[key] = []
+    patch_summary = data["patchStatus"].get("summary")
+    if patch_summary:
+        data["recentActivity"] = [{"event": f"Patch feed: {patch_summary}", "time": now_iso}, *data["recentActivity"]]
     return data
 
 
@@ -2229,10 +2301,10 @@ def build_capability_stack(
     if pc:
         stack.append({
             "id": "personal-codex",
-            "name": "Personal Codex",
+            "name": "JOSHeX",
             "status": pc.get("status") or "idle",
             "summary": pc.get("objective") or "Local Codex contribution visibility",
-            "detail": f"Personal Codex: {pc.get('validation') or 'validation pending'}",
+            "detail": f"JOSHeX: {pc.get('validation') or 'validation pending'}",
             "source": "personalCodex",
         })
     return stack
@@ -2563,13 +2635,13 @@ def build_action_required(
             priority = "medium"
             url = "#personal-codex"
         elif isinstance(item, dict):
-            title = str(item.get("title") or item.get("message") or "Personal Codex needs review")
+            title = str(item.get("title") or item.get("message") or "JOSHeX needs review")
             priority = str(item.get("priority") or "medium")
             url = str(item.get("url") or "#personal-codex")
         else:
             continue
         if title.strip():
-            items.append({"priority": priority, "title": f"Personal Codex: {title.strip()}", "url": url})
+            items.append({"priority": priority, "title": f"JOSHeX: {title.strip()}", "url": url})
 
     return items[:8]
 
@@ -2660,7 +2732,7 @@ def build_recent_activity(
         else:
             continue
         if event.strip():
-            items.append({"time": when, "event": f"Personal Codex: {event.strip()}"})
+            items.append({"time": when, "event": f"JOSHeX: {event.strip()}"})
 
     error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:

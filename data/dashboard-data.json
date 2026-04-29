@@ -2,7 +2,7 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed",
+      "title": "Calendar auth needs refresh",
       "url": "#calendar"
     }
   ],
@@ -35,22 +35,36 @@
   "personalCodex": {
     "status": "ready",
     "objective": "Local Codex can inspect, edit, validate, and prepare Mission Control patches",
-    "validation": "live on GitHub Pages; dashboard fallback active",
+    "validation": "Pages live; patch feed ready",
+    "patchStatus": {
+      "status": "clean",
+      "summary": "Patch feed ready",
+      "dirtyCount": 0,
+      "files": [],
+      "head": "fallback",
+      "updatedAt": null
+    },
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "JOSHeX lane scaffolded for local contribution visibility"
+        "event": "Patch status feed added"
+      },
+      {
+        "event": "JOSHeX docs renamed"
+      },
+      {
+        "event": "Calendar fallback hardened"
       }
     ],
     "capabilities": [
-      "inspect Mission Control source",
-      "edit local dashboard files",
-      "run regression checks",
-      "prepare Git patches"
+      "inspect",
+      "edit",
+      "verify",
+      "patch"
     ],
-    "updatedAt": "2026-04-29T02:30:17Z",
     "agentSlot": false,
-    "promoteToBrainFeed": false
+    "promoteToBrainFeed": false,
+    "updatedAt": "2026-04-29T02:30:17Z"
   },
   "agentBus": [
     {
@@ -480,8 +494,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "auth_expired",
+    "message": "Calendar re-auth required"
   },
   "devices": [
     {
@@ -1585,10 +1599,10 @@
     },
     {
       "id": "personal-codex",
-      "name": "Personal Codex",
+      "name": "JOSHeX",
       "status": "ready",
-      "summary": "Local Codex can inspect, edit, validate, and prepare Mission Control patches",
-      "detail": "Personal Codex: live on GitHub Pages; dashboard fallback active",
+      "summary": "JOSHeX can inspect, edit, validate, and stage Mission Control patches",
+      "detail": "JOSHeX: Pages live; patch feed ready",
       "source": "personalCodex"
     }
   ],

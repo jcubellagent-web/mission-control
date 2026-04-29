@@ -7620,21 +7620,42 @@
 
         function getJoshexData() {
             const data = window._latestDashboardData || window._mcLastDashData || {};
-            return data.personalCodex || window._personalCodexFallback || {};
+            const live = data.personalCodex || {};
+            const fallback = window._personalCodexFallback || {};
+            return { ...fallback, ...live, patchStatus: live.patchStatus || fallback.patchStatus };
+        }
+
+        function ensureJoshexFallbackLoaded() {
+            const pc = getJoshexData();
+            if (pc.patchStatus || window._personalCodexFallbackLoading) return;
+            window._personalCodexFallbackLoading = true;
+            fetch('./data/personal-codex.json?ts=' + Date.now(), { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : null)
+                .then(fallback => {
+                    if (!fallback) return;
+                    window._personalCodexFallback = fallback;
+                    renderPersonalCodex({ personalCodex: getJoshexData() });
+                    renderAgentChatFeed(window._agentCommsEntries || []);
+                })
+                .catch(() => {})
+                .finally(() => { window._personalCodexFallbackLoading = false; });
         }
 
         function buildJoshexQuickMarkup(expanded = false) {
             const data = window._latestDashboardData || window._mcLastDashData || {};
+            ensureJoshexFallbackLoaded();
             const pc = getJoshexData();
             const status = normalizeJoshexCopy(pc.status || 'ready');
             const validation = normalizeJoshexCopy(pc.validation || 'local contribution lane');
             const updatedAt = newestIso(pc.updatedAt, data.lastUpdated, window._mcLastBrainFeed?.updatedAt);
             const isFresh = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) < 30 * 60 * 1000 : true;
             const rawActivity = Array.isArray(pc.recentActivity) ? pc.recentActivity : [];
+            const patchStatus = pc.patchStatus || {};
+            const patchSummary = normalizeJoshexCopy(patchStatus.summary || '');
             const activity = rawActivity.map(item => normalizeJoshexCopy(typeof item === 'string' ? item : (item.event || item.title || item.message || 'JOSHeX activity'))).filter(Boolean);
             const rawCapabilities = Array.isArray(pc.capabilities) ? pc.capabilities : [];
             const capabilities = rawCapabilities.map(item => compactUiLabel(normalizeJoshexCopy(typeof item === 'string' ? item : (item.label || item.title || item.name || item)), 26)).filter(Boolean);
-            const topActivity = activity.slice(0, expanded ? 3 : 1);
+            const topActivity = (patchSummary ? [patchSummary, ...activity] : activity).slice(0, expanded ? 3 : 1);
             const topCaps = capabilities.slice(0, expanded ? 4 : 3);
             const activityHtml = topActivity.length
                 ? topActivity.map(item => `<div class="jx-row"><span class="jx-key">NOW</span><span>${escapeHtml(compactUiLabel(item, expanded ? 72 : 54))}</span></div>`).join('')
@@ -8203,12 +8224,17 @@
             }
             if (validation) validation.textContent = normalizeJoshexCopy(pc.validation || 'validation pending');
             const recent = Array.isArray(pc.recentActivity) ? pc.recentActivity.slice(0, 2) : [];
+            const patchStatus = pc.patchStatus || {};
+            const patchSummary = normalizeJoshexCopy(patchStatus.summary || '');
             if (activity) {
-                activity.innerHTML = recent.length ? recent.map(item => {
+                const rows = [];
+                if (patchSummary) rows.push(`<div class="pc-row"><strong>Patch</strong><span>${escapeHtml(compactUiLabel(patchSummary, 64))}</span></div>`);
+                rows.push(...(recent.length ? recent.map(item => {
                     const event = typeof item === 'string' ? item : (item.event || item.title || item.message || 'Codex activity');
                     const displayEvent = compactUiLabel(normalizeJoshexCopy(event), 64);
                     return `<div class="pc-row"><strong>Now</strong><span>${escapeHtml(displayEvent)}</span></div>`;
-                }).join('') : '<div class="pc-row"><strong>Now</strong><span>Ready for Codex handoffs</span></div>';
+                }) : ['<div class="pc-row"><strong>Now</strong><span>Ready for Codex handoffs</span></div>']));
+                activity.innerHTML = rows.slice(0, 3).join('');
             }
             const caps = Array.isArray(pc.capabilities) ? pc.capabilities.slice(0, 4) : [];
             if (capabilities) {
@@ -8246,10 +8272,10 @@
                     return '';
                 };
                 stack.innerHTML = capabilities.length ? capabilities.map(item => `
-                    <div class="capability-tile ${tone(item.status)}" title="${escapeHtml(item.summary || item.detail || '')}">
-                        <div class="capability-k">${escapeHtml(item.name || 'Capability')}</div>
+                    <div class="capability-tile ${tone(item.status)}" title="${escapeHtml(normalizeJoshexCopy(item.summary || item.detail || ''))}">
+                        <div class="capability-k">${escapeHtml(normalizeJoshexCopy(item.name || 'Capability'))}</div>
                         <div class="capability-v">${escapeHtml(item.status || 'unknown')}</div>
-                        <div class="capability-d">${escapeHtml(item.detail || item.summary || '')}</div>
+                        <div class="capability-d">${escapeHtml(normalizeJoshexCopy(item.detail || item.summary || ''))}</div>
                     </div>
                 `).join('') : '<div class="capability-tile"><div class="capability-k">Capabilities</div><div class="capability-v">pending</div><div class="capability-d">waiting for data</div></div>';
             }

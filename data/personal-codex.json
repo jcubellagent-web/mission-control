@@ -1,11 +1,25 @@
 {
   "status": "ready",
   "objective": "JOSHeX can inspect, edit, validate, and stage Mission Control patches",
-  "validation": "Pages live; fallback ready",
+  "validation": "Pages live; patch feed ready",
+  "patchStatus": {
+    "status": "clean",
+    "summary": "Patch feed ready",
+    "dirtyCount": 0,
+    "files": [],
+    "head": "fallback",
+    "updatedAt": null
+  },
   "actionRequired": [],
   "recentActivity": [
     {
-      "event": "JOSHeX patch lane ready"
+      "event": "Patch status feed added"
+    },
+    {
+      "event": "JOSHeX docs renamed"
+    },
+    {
+      "event": "Calendar fallback hardened"
     }
   ],
   "capabilities": [
