@@ -3,8 +3,8 @@
   "active": false,
   "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T15:17:44Z",
-  "checkedAt": "2026-04-29T15:17:22Z",
+  "updatedAt": "2026-04-29T16:17:59Z",
+  "checkedAt": "2026-04-29T16:17:43Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,21 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Building strict hard-DNP proposal",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Submitting approved GW11 strict rebuild",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Verifying submitted GW11 lineups",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Dry-running hard-risk repair",
       "status": "done",
@@ -63,8 +48,23 @@
       "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: JAIMES/JOSH 2.0 ops drift audit",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: stale backup daily detected in ops audit",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T15:17:22Z"
+  "messageReceived": "2026-04-29T16:17:43Z"
 }
