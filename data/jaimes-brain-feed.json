@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "JOSH 2.0: checking command authorization config",
+  "objective": "JOSH 2.0: locating command auth rules",
   "status": "active",
-  "updatedAt": "2026-04-29T05:39:52Z",
-  "checkedAt": "2026-04-29T05:39:52Z",
+  "updatedAt": "2026-04-29T05:47:36Z",
+  "checkedAt": "2026-04-29T05:47:36Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,16 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Task: deep dive JOSH 2.0 slowness",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "JOSH 2.0: checking health logs",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "JOSH 2.0: auditing load/process pressure",
       "status": "done",
@@ -61,10 +51,20 @@
     },
     {
       "label": "JOSH 2.0: checking command authorization config",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: fix JOSH Telegram command auth",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "JOSH 2.0: locating command auth rules",
       "status": "active",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T05:39:52Z"
+  "messageReceived": "2026-04-29T05:47:36Z"
 }
