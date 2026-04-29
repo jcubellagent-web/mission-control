@@ -14,27 +14,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-29T20:20:24Z",
-    "objective": "Done: identified JAIMES objective wrapping cause \u00b7 Awaiting further instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-29T20:54:39Z",
+    "objective": "Handling async exec completion heartbeat",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - identified JAIMES objective wrapping cause",
-        "status": "done",
+        "label": "Handling async exec completion heartbeat",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T20:21:54Z",
-    "checkedAt": "2026-04-29T20:21:09Z",
+    "updatedAt": "2026-04-29T20:54:39Z",
+    "checkedAt": "2026-04-29T20:54:39Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Done: identified JAIMES objective wrapping cause \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T20:50:17Z"
+    "status": "Brain Feed live",
+    "context": "Handling async exec completion heartbeat",
+    "updatedAt": "2026-04-29T20:55:17Z"
   },
   "contextWindow": {
     "usedTokens": 82115,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 10 source file(s) changed",
-        "time": "2026-04-29T20:50:17Z"
+        "event": "Patch feed: 11 source file(s) changed",
+        "time": "2026-04-29T20:55:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T20:50:17Z",
+    "updatedAt": "2026-04-29T20:55:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "10 source file(s) changed",
+      "summary": "11 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 10,
+      "dirtyCount": 11,
       "files": [
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "2f6569086",
-      "updatedAt": "2026-04-29T20:50:17Z"
+      "head": "60b1429d3",
+      "updatedAt": "2026-04-29T20:55:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
@@ -199,7 +199,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 1h 4m",
+        "Resets in 59m",
         "Weekly: 83% left [=========---]",
         "Pace: 6% in reserve | Expected 23% used | Lasts until reset",
         "Resets in 5d 8h",
@@ -210,15 +210,15 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 4m",
+      "sessionReset": "59m",
       "weeklyReset": "5d 8h",
       "summary": "98% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T20:50:19Z"
+    "updatedAt": "2026-04-29T20:55:19Z"
   },
   "modelUsage": {
     "session": 0.047299,
-    "daily": 0.251917,
+    "daily": 0.075916,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -233,14 +233,14 @@
         "cost": 7.387107749999999
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.251917
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.075916
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -272,19 +272,6 @@
         "subscriptionIncluded": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 39201,
-        "outputTokens": 44,
-        "totalTokens": 39245,
-        "sessionCost": 0.251917,
-        "dailyCost": 0.251917,
-        "weeklyCost": 0.251917,
-        "sessions": 3,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 18839,
@@ -294,6 +281,19 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
         "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 2004,
+        "outputTokens": 44,
+        "totalTokens": 2048,
+        "sessionCost": 0.075916,
+        "dailyCost": 0.075916,
+        "weeklyCost": 0.075916,
+        "sessions": 3,
         "isGemini": false,
         "costEstimated": false
       },
@@ -342,8 +342,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 223399868,
-        "dailyTokens": 86665772,
+        "totalTokens": 224006735,
+        "dailyTokens": 87272639,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -374,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T20:50:22Z",
+    "lastUpdated": "2026-04-29T20:55:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -407,8 +407,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.251917,
-      "total": 47.37453,
+      "daily": 0.075916,
+      "total": 47.198529,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -423,11 +423,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.309443,
-      "codexEquivalentDaily": 0.251917,
-      "codexEquivalentMonthlyProjection": 194.18,
-      "codexTokensWeekly": 332150824,
-      "codexTokensDaily": 86665772,
+      "codexEquivalentWeekly": 45.133442,
+      "codexEquivalentDaily": 0.075916,
+      "codexEquivalentMonthlyProjection": 193.43,
+      "codexTokensWeekly": 332720494,
+      "codexTokensDaily": 87272639,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -458,7 +458,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T20:50:27Z",
+    "updatedAt": "2026-04-29T20:55:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -475,14 +475,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 32.5,
-      "cpu_user": 15.77,
-      "cpu_sys": 16.74,
-      "load1": 2.45,
-      "load5": 2.29,
-      "load15": 2.25,
+      "cpu_pct": 34.5,
+      "cpu_user": 16.95,
+      "cpu_sys": 17.59,
+      "load1": 2.39,
+      "load5": 2.36,
+      "load15": 2.29,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -490,12 +490,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 41.3,
-      "cpu_user": 26.98,
-      "cpu_sys": 14.28,
-      "load1": 2.98,
-      "load5": 2.29,
-      "load15": 2.2,
+      "cpu_pct": 24.0,
+      "cpu_user": 13.6,
+      "cpu_sys": 10.4,
+      "load1": 2.1,
+      "load5": 2.06,
+      "load15": 2.09,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -521,19 +521,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T20:50:17Z"
+      "lastChecked": "2026-04-29T20:55:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T20:50:17Z"
+      "lastChecked": "2026-04-29T20:55:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T20:50:17Z"
+      "lastChecked": "2026-04-29T20:55:17Z"
     }
   ],
   "crons": [
@@ -550,7 +550,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T20:50:27.802612+00:00"
+      "lastRun": "2026-04-29T20:55:28.059165+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1097,12 +1097,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T20:50:17.370960Z",
+    "checkedAt": "2026-04-29T20:55:17.507572Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1141,7 +1141,7 @@
     "status": "warn",
     "ok": false,
     "summary": "2 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-29T19:58:41Z",
+    "checkedAt": "2026-04-29T20:53:13Z",
     "counts": {
       "ok": 24,
       "warn": 2,
@@ -1243,18 +1243,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=42ms audit=0/0",
+        "detail": "gateway=True latency=1665ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.26",
           "model": "gpt-5.5",
-          "percentUsed": 30
+          "percentUsed": 15
         }
       },
       {
         "name": "memory:main",
         "status": "ok",
         "ok": true,
-        "detail": "files=107 chunks=1206 dirty=False",
+        "detail": "files=107 chunks=1209 dirty=False",
         "meta": {}
       },
       {
@@ -1443,20 +1443,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: identified JAIMES objective wrapping cause \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Handling async exec completion heartbeat",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T20:21:54Z",
-      "messageReceived": "2026-04-29T20:20:24Z",
+      "updatedAt": "2026-04-29T20:54:39Z",
+      "messageReceived": "2026-04-29T20:54:39Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - identified JAIMES objective wrapping cause",
-          "status": "done",
+          "label": "Handling async exec completion heartbeat",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1513,28 +1513,33 @@
     }
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JOSH 2.0"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JOSH 2.0",
-    "dualMode": false,
-    "dualAgents": [],
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "JAIMES"
+    ],
     "agents": [
       {
         "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: identified JAIMES objective wrapping cause \u00b7 Awaiting further instruction",
-        "status": "idle",
+        "objective": "Handling async exec completion heartbeat",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T20:21:54Z",
-        "messageReceived": "2026-04-29T20:20:24Z",
+        "updatedAt": "2026-04-29T20:54:39Z",
+        "messageReceived": "2026-04-29T20:54:39Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Done - identified JAIMES objective wrapping cause",
-            "status": "done",
+            "label": "Handling async exec completion heartbeat",
+            "status": "active",
             "tool": "exec"
           }
         ]
@@ -1593,29 +1598,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T20:50:22Z",
+      "time": "2026-04-29T20:55:22Z",
       "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-29T20:50:19Z",
+      "time": "2026-04-29T20:55:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T20:50:19Z",
+      "time": "2026-04-29T20:55:19Z",
       "event": "CodexBar: 98% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T20:50:17Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-29T20:55:17Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T20:50:17Z",
-      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
+      "time": "2026-04-29T20:55:17Z",
+      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T20:50:17Z",
+      "time": "2026-04-29T20:55:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T20:50:17Z"
+  "lastUpdated": "2026-04-29T20:55:17Z"
 }
