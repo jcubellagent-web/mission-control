@@ -1,24 +1,19 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Mission Control watchdog failed",
+  "objective": "Cron: Sorare GW draft report complete",
   "status": "idle",
-  "updatedAt": "2026-04-29T11:17:47Z",
-  "checkedAt": "2026-04-29T11:17:27Z",
+  "updatedAt": "2026-04-29T12:02:12Z",
+  "checkedAt": "2026-04-29T12:00:07Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "exec",
+  "currentTool": "code",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Task: approved JOSH final hardening/test",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: checking JOSH Codex 5.5 state",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Cron: Sorare GW draft report",
+      "status": "done",
+      "tool": "code"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T11:17:27Z"
+  "messageReceived": "2026-04-29T12:00:07Z"
 }
