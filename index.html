@@ -9828,7 +9828,7 @@
                 },
                 {
                     cls: nowLive.length ? 'hot' : 'good', label: 'Agents Live', value: String(nowLive.length),
-                    main: nowLive.map(f => `${f.agent || 'Agent'}: ${f.objective || 'working'}`).join(' · ') || 'Agents standing by',
+                    main: nowLive.map(f => `${f.agent || f.heroAgentLabel || 'JOSH 2.0'}: ${f.objective || 'working'}`).join(' · ') || 'Agents standing by',
                     sub: nowLive[0]?.updatedAt ? `fresh ${formatRelTime(nowLive[0].updatedAt)}` : 'no live objective',
                 },
                 {
