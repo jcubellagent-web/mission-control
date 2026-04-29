@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "heartbeat completed: HEARTBEAT.md checks read; mission control recent, self-maintenance clean, capability canary unchanged warnings, J.A.I.N reachable",
-    "updatedAt": "2026-04-29T15:40:18Z"
+    "updatedAt": "2026-04-29T15:45:16Z"
   },
   "contextWindow": {
     "usedTokens": 36488,
@@ -45,7 +45,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T15:40:18Z"
+        "time": "2026-04-29T15:45:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,7 +63,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T15:40:18Z",
+    "updatedAt": "2026-04-29T15:45:16Z",
     "patchStatus": {
       "status": "pending",
       "summary": "8 source file(s) changed",
@@ -77,8 +77,8 @@
         "data/modelUsage.json",
         "data/moltworld-data.json"
       ],
-      "head": "7271d5444",
-      "updatedAt": "2026-04-29T15:40:18Z"
+      "head": "abe63e305",
+      "updatedAt": "2026-04-29T15:45:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -196,7 +196,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 93% left [===========-]",
-        "Resets in 1h 14m",
+        "Resets in 1h 9m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 13h",
@@ -207,11 +207,11 @@
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 14m",
+      "sessionReset": "1h 9m",
       "weeklyReset": "5d 13h",
       "summary": "93% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T15:40:20Z"
+    "updatedAt": "2026-04-29T15:45:18Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -365,7 +365,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T15:40:24Z",
+    "lastUpdated": "2026-04-29T15:45:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -423,7 +423,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T15:40:29Z",
+    "updatedAt": "2026-04-29T15:45:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -440,14 +440,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.6,
-      "cpu_user": 17.15,
-      "cpu_sys": 17.45,
-      "load1": 2.46,
-      "load5": 2.44,
-      "load15": 2.44,
+      "cpu_pct": 35.3,
+      "cpu_user": 17.65,
+      "cpu_sys": 17.65,
+      "load1": 2.51,
+      "load5": 2.29,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -455,14 +455,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 35.2,
-      "cpu_user": 22.4,
-      "cpu_sys": 12.8,
-      "load1": 2.37,
-      "load5": 2.1,
-      "load15": 2.12,
+      "cpu_pct": 11.1,
+      "cpu_user": 1.7,
+      "cpu_sys": 9.4,
+      "load1": 2.03,
+      "load5": 2.33,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -486,19 +486,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T15:40:18Z"
+      "lastChecked": "2026-04-29T15:45:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T15:40:18Z"
+      "lastChecked": "2026-04-29T15:45:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T15:40:18Z"
+      "lastChecked": "2026-04-29T15:45:16Z"
     }
   ],
   "crons": [
@@ -515,7 +515,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T15:40:30.098674+00:00"
+      "lastRun": "2026-04-29T15:45:27.266151+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -879,7 +879,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T15:30:03.999510+00:00"
+      "lastRun": "2026-04-29T15:45:04.858457+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1062,7 +1062,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T15:40:18.238351Z",
+    "checkedAt": "2026-04-29T15:45:16.680605Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1609,29 +1609,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T15:40:24Z",
+      "time": "2026-04-29T15:45:22Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T15:40:20Z",
+      "time": "2026-04-29T15:45:18Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-04-29T15:40:20Z",
+      "time": "2026-04-29T15:45:18Z",
       "event": "CodexBar: 93% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T15:40:18Z",
+      "time": "2026-04-29T15:45:16Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T15:40:18Z",
+      "time": "2026-04-29T15:45:16Z",
       "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T15:40:18Z",
+      "time": "2026-04-29T15:45:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T15:40:18Z"
+  "lastUpdated": "2026-04-29T15:45:16Z"
 }
