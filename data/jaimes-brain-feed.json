@@ -1,39 +1,19 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "GW11 dry-run autosubmit done",
-  "status": "idle",
-  "updatedAt": "2026-04-29T14:09:26Z",
-  "checkedAt": "2026-04-29T14:07:42Z",
+  "active": true,
+  "objective": "Querying MLB probable starters",
+  "status": "active",
+  "updatedAt": "2026-04-29T14:13:19Z",
+  "checkedAt": "2026-04-29T14:13:19Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "exec",
+  "currentTool": "web",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: ops drift audit on J.A.I.N",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control watchdog failed; collecting logs",
       "status": "done",
@@ -63,8 +43,28 @@
       "label": "GW11 dry-run autosubmit: checking Champion/DNP",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Sorare GW11 sanity check: Chris Sale",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Inspecting GW11 monitor output",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking Sale scoring/probable status",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Querying MLB probable starters",
+      "status": "active",
+      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T14:07:42Z"
+  "messageReceived": "2026-04-29T14:13:19Z"
 }
