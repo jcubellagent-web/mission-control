@@ -4,6 +4,11 @@
       "priority": "high",
       "title": "Mission Control canary issue: 1 canary issue(s)",
       "url": "#canaries"
+    },
+    {
+      "priority": "high",
+      "title": "Calendar auth needs refresh",
+      "url": "#calendar"
     }
   ],
   "activeNow": [],
@@ -11,25 +16,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-29T22:19:08Z",
-    "objective": "Clearing incidental Calendar canary before final checks",
+    "objective": "Watching Mission Control deploy after usage refresh push",
     "status": "active",
     "steps": [
       {
-        "label": "Clearing incidental Calendar canary before final checks",
+        "label": "Watching Mission Control deploy after usage refresh push",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T22:47:18Z",
-    "checkedAt": "2026-04-29T22:47:18Z",
+    "updatedAt": "2026-04-29T22:49:44Z",
+    "checkedAt": "2026-04-29T22:49:44Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Clearing incidental Calendar canary before final checks",
-    "updatedAt": "2026-04-29T22:47:30Z"
+    "context": "Watching Mission Control deploy after usage refresh push",
+    "updatedAt": "2026-04-29T22:50:19Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -45,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T22:47:30Z"
+        "event": "Patch feed: 11 source file(s) changed",
+        "time": "2026-04-29T22:50:19Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T22:47:30Z",
+    "updatedAt": "2026-04-29T22:50:19Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "8 source file(s) changed",
+      "summary": "11 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 8,
+      "dirtyCount": 11,
       "files": [
+        "data/agent-comms.json",
+        "data/dashboard-data.json",
+        "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/newsfeed.json",
-        "index.html",
-        "scripts/__pycache__/update_mission_control.cpython-314.pyc"
+        "data/mission-control-canaries.json"
       ],
-      "head": "8a898ce91",
-      "updatedAt": "2026-04-29T22:47:30Z"
+      "head": "95d58d0a4",
+      "updatedAt": "2026-04-29T22:50:19Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,33 +188,34 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 11,
     "recentFiles": [
+      "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
-      "mission-control/scripts/update_mission_control.py"
+      "mission-control/scripts/run_mission_control_watchdog.sh"
     ],
-    "codexbarStatus": "96% left \u00b7 wk 82% left",
+    "codexbarStatus": "95% left \u00b7 wk 81% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 96% left [===========-]",
-        "Resets in 4h 12m",
-        "Weekly: 82% left [=========---]",
-        "Pace: 7% in reserve | Expected 25% used | Lasts until reset",
+        "Session: 95% left [===========-]",
+        "Resets in 4h 9m",
+        "Weekly: 81% left [=========---]",
+        "Pace: 6% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "96% left",
-      "weekly": "82% left",
+      "session": "95% left",
+      "weekly": "81% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 12m",
+      "sessionReset": "4h 9m",
       "weeklyReset": "5d 6h",
-      "summary": "96% left \u00b7 wk 82% left"
+      "summary": "95% left \u00b7 wk 81% left"
     },
-    "updatedAt": "2026-04-29T22:47:31Z"
+    "updatedAt": "2026-04-29T22:50:22Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -337,8 +343,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 239452961,
-        "dailyTokens": 102718865,
+        "totalTokens": 243088930,
+        "dailyTokens": 106354834,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -369,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T22:47:35Z",
+    "lastUpdated": "2026-04-29T22:50:25Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -421,8 +427,8 @@
       "codexEquivalentWeekly": 45.452922,
       "codexEquivalentDaily": 0.395396,
       "codexEquivalentMonthlyProjection": 194.8,
-      "codexTokensWeekly": 348239707,
-      "codexTokensDaily": 102718865,
+      "codexTokensWeekly": 351875676,
+      "codexTokensDaily": 106354834,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -447,7 +453,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.452922,
           "dailyEquivalent": 0.395396,
-          "tokensWeekly": 348239707,
+          "tokensWeekly": 351875676,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -541,7 +547,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T22:47:40Z",
+    "updatedAt": "2026-04-29T22:50:30Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -558,12 +564,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.9,
-      "cpu_user": 21.53,
-      "cpu_sys": 19.34,
-      "load1": 1.94,
-      "load5": 2.14,
-      "load15": 2.26,
+      "cpu_pct": 34.7,
+      "cpu_user": 17.32,
+      "cpu_sys": 17.32,
+      "load1": 2.39,
+      "load5": 2.2,
+      "load15": 2.25,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -573,14 +579,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 31.7,
-      "cpu_user": 14.8,
-      "cpu_sys": 17.6,
-      "load1": 1.8,
-      "load5": 2.05,
-      "load15": 2.05,
+      "cpu_pct": 13.4,
+      "cpu_user": 3.14,
+      "cpu_sys": 10.23,
+      "load1": 1.88,
+      "load5": 2.01,
+      "load15": 2.03,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -589,8 +595,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected via local gog"
+    "status": "auth_expired",
+    "message": "Calendar re-auth required"
   },
   "devices": [
     {
@@ -604,19 +610,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:47:30Z"
+      "lastChecked": "2026-04-29T22:50:19Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:47:30Z"
+      "lastChecked": "2026-04-29T22:50:19Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T22:47:30Z"
+      "lastChecked": "2026-04-29T22:50:19Z"
     }
   ],
   "crons": [
@@ -633,7 +639,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:45:30.003472+00:00"
+      "lastRun": "2026-04-29T22:50:30.471730+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1180,12 +1186,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T22:47:10.579463Z",
+    "checkedAt": "2026-04-29T22:50:19.670187Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1443,9 +1449,9 @@
     ]
   },
   "opsInbox": {
-    "status": "clear",
+    "status": "attention",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "connected",
+    "calendar": "needs attention",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1479,9 +1485,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "clear",
+      "status": "attention",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar connected \u00b7 0 job issue(s)"
+      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1516,7 +1522,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/index.html",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1541,16 +1547,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Clearing incidental Calendar canary before final checks",
+      "objective": "Watching Mission Control deploy after usage refresh push",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:47:18Z",
+      "updatedAt": "2026-04-29T22:49:44Z",
       "messageReceived": "2026-04-29T22:19:08Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Clearing incidental Calendar canary before final checks",
+          "label": "Watching Mission Control deploy after usage refresh push",
           "status": "active",
           "tool": "exec"
         }
@@ -1578,65 +1584,65 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: updated Mission Control skill",
-      "status": "idle",
+      "objective": "Step: syncing available credentials",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:30:38Z",
-      "messageReceived": "2026-04-29T22:30:23Z",
+      "updatedAt": "2026-04-29T22:50:02Z",
+      "messageReceived": "2026-04-29T22:50:02Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Resolving volatile Brain Feed merge state",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Verifying Mission Control JSON after cleanup",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Reviewing skill-save decision",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Patching Mission Control skill with approval-timeout triage",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
           "label": "Mission Control watchdog running",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control watchdog failed",
+          "label": "Task: capability enhancement audit",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control: auditing watchdog screenshot failure",
+          "label": "Step: checking Hermes status",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control: reproducing screenshot diff",
+          "label": "Step: checking host capability gaps",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Reviewing whether to update skills",
+          "label": "Task: god-mode readiness upgrades",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control watchdog running",
+          "label": "Step: running full Hermes audit",
           "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking auth and browser backends",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: reviewing safe config settings",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking Hermes env file keys",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: syncing available credentials",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1644,11 +1650,12 @@
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1656,20 +1663,85 @@
     ],
     "agents": [
       {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Step: syncing available credentials",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T22:50:02Z",
+        "messageReceived": "2026-04-29T22:50:02Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: capability enhancement audit",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking Hermes status",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking host capability gaps",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: god-mode readiness upgrades",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: running full Hermes audit",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking auth and browser backends",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: reviewing safe config settings",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking Hermes env file keys",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: syncing available credentials",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Clearing incidental Calendar canary before final checks",
+        "objective": "Watching Mission Control deploy after usage refresh push",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:47:18Z",
+        "updatedAt": "2026-04-29T22:49:44Z",
         "messageReceived": "2026-04-29T22:19:08Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Clearing incidental Calendar canary before final checks",
+            "label": "Watching Mission Control deploy after usage refresh push",
             "status": "active",
             "tool": "exec"
           }
@@ -1694,99 +1766,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: updated Mission Control skill",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T22:30:38Z",
-        "messageReceived": "2026-04-29T22:30:23Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Resolving volatile Brain Feed merge state",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Verifying Mission Control JSON after cleanup",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Reviewing skill-save decision",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Patching Mission Control skill with approval-timeout triage",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog failed",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: auditing watchdog screenshot failure",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: reproducing screenshot diff",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Reviewing whether to update skills",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T22:47:35Z",
+      "time": "2026-04-29T22:50:25Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T22:47:31Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-29T22:50:22Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T22:47:31Z",
-      "event": "CodexBar: 96% left \u00b7 wk 82% left"
+      "time": "2026-04-29T22:50:22Z",
+      "event": "CodexBar: 95% left \u00b7 wk 81% left"
     },
     {
-      "time": "2026-04-29T22:47:30Z",
+      "time": "2026-04-29T22:50:19Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T22:47:30Z",
-      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
+      "time": "2026-04-29T22:50:19Z",
+      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T22:47:30Z",
+      "time": "2026-04-29T22:50:19Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T22:47:30Z"
+  "lastUpdated": "2026-04-29T22:50:19Z"
 }
