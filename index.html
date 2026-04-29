@@ -3557,6 +3557,106 @@
             text-align: center;
             padding: 10px 0;
         }
+        .joshex-quick {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .jx-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 13px;
+            border: 1px solid rgba(34,211,238,0.22);
+            background: linear-gradient(135deg, rgba(14,165,233,0.14), rgba(16,185,129,0.09));
+        }
+        .jx-kicker {
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #67e8f9;
+        }
+        .jx-title {
+            margin-top: 2px;
+            font-size: 12px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.88);
+        }
+        .jx-open {
+            border: 1px solid rgba(74,222,128,0.28);
+            background: rgba(34,197,94,0.12);
+            color: #bbf7d0;
+            border-radius: 999px;
+            padding: 6px 9px;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .jx-status-row,
+        .jx-cap-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .jx-pill,
+        .jx-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 7px;
+            border-radius: 999px;
+            font-size: 7px;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.72);
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.065);
+        }
+        .jx-pill.live {
+            color: #6ee7b7;
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.24);
+        }
+        .jx-pill.warn {
+            color: rgba(253,224,71,0.92);
+            background: rgba(251,191,36,0.12);
+            border-color: rgba(251,191,36,0.22);
+        }
+        .jx-activity {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .jx-row {
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            gap: 6px;
+            align-items: start;
+            padding: 6px 8px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.045);
+            color: rgba(255,255,255,0.72);
+            font-size: 9px;
+            line-height: 1.25;
+        }
+        .jx-key {
+            color: #67e8f9;
+            font-size: 7px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+        }
+        .jx-note {
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
+            line-height: 1.35;
+            padding-top: 2px;
+        }
         .memory-roadmap {
             display: flex;
             flex-direction: column;
@@ -6518,20 +6618,20 @@
                             </button>
                             <div id="unified-activity-log"></div>
                         </div>
-                        <!-- Memory roadmap -->
-                        <div class="agent-chat-section">
+                        <!-- JOSHeX quick panel -->
+                        <div class="agent-chat-section joshex-quick-section">
                         <div class="agent-chat-header">
                             <div class="agent-chat-heading">
-                                <span class="agent-chat-icon">🗺️</span>
-                                <span class="agent-chat-title">MEMORY ROADMAP</span>
+                                <span class="agent-chat-icon">⌘</span>
+                                <span class="agent-chat-title">JOSHeX QUICK PANEL</span>
                                 <span class="agent-chat-live-dot" id="agent-chat-live-dot"></span>
                             </div>
                             <div class="agent-chat-tools">
                                 <span id="agent-chat-agents" class="agent-chat-agents"></span>
-                                <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand memory roadmap">↗</button>
+                                <button class="module-action-btn" type="button" onclick="openModuleModal('comms')" aria-label="Expand JOSHeX quick panel">↗</button>
                             </div>
                         </div>
-                            <div id="agent-chat-feed"><div class="agent-chat-empty">Loading roadmap…</div></div>
+                            <div id="agent-chat-feed"><div class="agent-chat-empty">Loading JOSHeX…</div></div>
                         </div>
                     </div>
                 </div>
@@ -7757,117 +7857,49 @@
             return winner;
         }
 
-        function buildMemoryRoadmapMarkup(expanded = false) {
+        function normalizeJoshexCopy(value) {
+            return String(value || '').replace(/Personal Codex/g, 'JOSHeX');
+        }
+
+        function getJoshexData() {
             const data = window._latestDashboardData || window._mcLastDashData || {};
-            const trackedTasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
-            const liveTasks = trackedTasks.filter(task => String(task.status || 'active') === 'active');
-            const contextPct = typeof data.contextWindow?.pct === 'number' ? Math.round(data.contextWindow.pct * 100) : null;
-            const watchdogPct = typeof data.contextWatchdog?.pct === 'number' ? Math.round(data.contextWatchdog.pct * 100) : null;
-            const updatedAt = newestIso(data.lastUpdated, data.focus?.updatedAt, data.codingVisibility?.updatedAt, window._mcLastBrainFeed?.updatedAt);
-            const isFresh = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) < 15 * 60 * 1000 : false;
-            const activeMemoryNote = [
-                'Primary recall lane is live now.',
-                contextPct !== null ? `Context ${contextPct}%.` : '',
-                watchdogPct !== null ? `Watchdog last handoff ${watchdogPct}%.` : '',
-            ].filter(Boolean).join(' ');
-            const roadmap = [
-                {
-                    week: 'W1',
-                    title: 'Active Memory',
-                    note: activeMemoryNote,
-                    compactNote: [
-                        'Recall lane live.',
-                        contextPct !== null ? `Context ${contextPct}%.` : '',
-                        watchdogPct !== null ? `Handoff ${watchdogPct}%.` : '',
-                    ].filter(Boolean).join(' '),
-                    pill: 'Live now',
-                    weeks: [1],
-                    tone: 'active',
-                },
-                {
-                    week: 'W2',
-                    title: 'Memory hygiene',
-                    note: liveTasks.length ? `Queued behind ${liveTasks.length} live tracked task${liveTasks.length === 1 ? '' : 's'}. Tighten durable notes after the live lane settles.` : 'Queued next. Trim noise, tighten durable notes, and tune recall quality.',
-                    compactNote: liveTasks.length ? `Queued after ${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}.` : 'Queued next for cleanup.',
-                    pill: liveTasks.length ? 'Queued' : 'Next',
-                    weeks: [1, 2],
-                    tone: 'planned',
-                },
-                {
-                    week: 'W3',
-                    title: 'QMD pilot',
-                    note: 'Still on deck. Only promote it if current-memory retrieval clearly improves first.',
-                    compactNote: 'On deck if recall gains are real.',
-                    pill: 'On deck',
-                    weeks: [3],
-                    tone: 'planned',
-                },
-                {
-                    week: 'W4',
-                    title: 'Session recall?',
-                    note: 'Deferred until transcript indexing proves it is worth the extra complexity.',
-                    compactNote: 'Deferred until transcript indexing earns it.',
-                    pill: 'Deferred',
-                    weeks: [4],
-                    tone: 'future',
-                },
-            ];
+            return data.personalCodex || window._personalCodexFallback || {};
+        }
 
-            const summaryPills = [
-                `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live now' : 'Needs refresh'}</span>`,
-                contextPct !== null ? `<span class="memory-roadmap-summary-pill">Context ${contextPct}%</span>` : '',
-                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live task${liveTasks.length === 1 ? '' : 's'}</span>` : '',
-                updatedAt ? `<span class="memory-roadmap-summary-pill">Updated ${escapeHtml(formatRelTime(updatedAt))}</span>` : '',
-            ].filter(Boolean).join('');
-            const compactSummaryPills = [
-                contextPct !== null ? `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">Ctx ${contextPct}%</span>` : `<span class="memory-roadmap-summary-pill ${isFresh ? 'live' : 'warn'}">${isFresh ? 'Live' : 'Refresh'}</span>`,
-                liveTasks.length ? `<span class="memory-roadmap-summary-pill">${liveTasks.length} live</span>` : '',
-            ].filter(Boolean).join('');
-
-            if (!expanded) {
-                const cards = roadmap.map(item => `
-                    <div class="memory-roadmap-card ${item.tone}">
-                        <div class="memory-roadmap-card-top">
-                            <div class="memory-roadmap-card-week">${escapeHtml(item.week)}</div>
-                            <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
-                        </div>
-                        <div class="memory-roadmap-card-title">${escapeHtml(item.title)}</div>
-                        <div class="memory-roadmap-card-note">${escapeHtml(item.compactNote || item.note)}</div>
-                    </div>
-                `).join('');
-
-                return {
-                    html: `<div class="memory-roadmap compact"><div class="memory-roadmap-summary">${compactSummaryPills}</div><div class="memory-roadmap-compact-grid">${cards}</div></div>`,
-                    meta: isFresh ? 'live roadmap' : 'roadmap stale',
-                    live: isFresh,
-                };
-            }
-
-            const scale = `<div class="memory-roadmap-scale">${[1, 2, 3, 4].map(week => `<span class="memory-roadmap-week${week === 1 ? ' current' : ''}">W${week}</span>`).join('')}</div>`;
-
-            const rows = roadmap.map(item => `
-                <div class="memory-roadmap-row">
-                    <div class="memory-roadmap-row-head">
-                        <div class="memory-roadmap-row-top">
-                            <div class="memory-roadmap-title">${escapeHtml(item.week)} · ${escapeHtml(item.title)}</div>
-                            <div class="memory-roadmap-card-pill">${escapeHtml(item.pill)}</div>
-                        </div>
-                        <div class="memory-roadmap-note">${escapeHtml(item.note)}</div>
-                    </div>
-                    <div class="memory-roadmap-track">
-                        ${[1, 2, 3, 4].map(week => {
-                            const tone = item.weeks.includes(week) ? item.tone : '';
-                            return `<span class="memory-roadmap-seg${tone ? ' ' + tone : ''}"></span>`;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            const footer = '<div class="memory-roadmap-footer">Current posture: keep Active Memory live, do hygiene next, pilot QMD only if it clearly improves recall, and leave transcript indexing deferred until it earns the added complexity.</div>';
-
+        function buildJoshexQuickMarkup(expanded = false) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const pc = getJoshexData();
+            const status = normalizeJoshexCopy(pc.status || 'ready');
+            const validation = normalizeJoshexCopy(pc.validation || 'local contribution lane');
+            const updatedAt = newestIso(pc.updatedAt, data.lastUpdated, window._mcLastBrainFeed?.updatedAt);
+            const isFresh = updatedAt ? (Date.now() - new Date(updatedAt).getTime()) < 30 * 60 * 1000 : true;
+            const rawActivity = Array.isArray(pc.recentActivity) ? pc.recentActivity : [];
+            const activity = rawActivity.map(item => normalizeJoshexCopy(typeof item === 'string' ? item : (item.event || item.title || item.message || 'JOSHeX activity'))).filter(Boolean);
+            const rawCapabilities = Array.isArray(pc.capabilities) ? pc.capabilities : [];
+            const capabilities = rawCapabilities.map(item => normalizeJoshexCopy(typeof item === 'string' ? item : (item.label || item.title || item.name || item))).filter(Boolean);
+            const topActivity = activity.slice(0, expanded ? 4 : 2);
+            const topCaps = capabilities.slice(0, expanded ? 6 : 4);
+            const activityHtml = topActivity.length
+                ? topActivity.map(item => `<div class="jx-row"><span class="jx-key">ACT</span><span>${escapeHtml(item)}</span></div>`).join('')
+                : '<div class="jx-row"><span class="jx-key">ACT</span><span>Ready for local Codex handoffs</span></div>';
+            const capsHtml = topCaps.length
+                ? topCaps.map(item => `<span class="jx-chip">${escapeHtml(item)}</span>`).join('')
+                : ['inspect source', 'edit dashboard', 'run checks', 'prepare patches'].map(item => `<span class="jx-chip">${escapeHtml(item)}</span>`).join('');
+            const footer = expanded
+                ? '<div class="jx-note">JOSHeX is visibility only. It is not Brain Feed, not JAIMES, and not a live-agent slot.</div>'
+                : '';
             return {
-                html: `<div class="memory-roadmap"><div class="memory-roadmap-summary">${summaryPills}</div>${scale}${rows}${footer}</div>`,
-                meta: isFresh ? 'live roadmap' : 'roadmap stale',
+                html: `<div class="joshex-quick ${expanded ? 'expanded' : 'compact'}">
+                    <div class="jx-hero">
+                        <div><div class="jx-kicker">JOSHeX</div><div class="jx-title">Local Codex lane</div></div>
+                        <button class="jx-open" type="button" onclick="document.getElementById('personal-codex')?.scrollIntoView({behavior:'smooth',block:'center'})">Open panel</button>
+                    </div>
+                    <div class="jx-status-row"><span class="jx-pill ${isFresh ? 'live' : 'warn'}">${escapeHtml(status)}</span><span class="jx-pill">${escapeHtml(validation)}</span></div>
+                    <div class="jx-activity">${activityHtml}</div>
+                    <div class="jx-cap-row">${capsHtml}</div>
+                    ${footer}
+                </div>`,
+                meta: isFresh ? 'JOSHeX ready' : 'JOSHeX stale',
                 live: isFresh,
             };
         }
@@ -7877,8 +7909,8 @@
             const dot = document.getElementById('agent-chat-live-dot');
             if (!el) return;
 
-            const compact = buildMemoryRoadmapMarkup(false);
-            const expanded = buildMemoryRoadmapMarkup(true);
+            const compact = buildJoshexQuickMarkup(false);
+            const expanded = buildJoshexQuickMarkup(true);
             window._moduleModalCommsHtml = expanded.html;
 
             if (dot) dot.classList.toggle('live', !!compact.live);
@@ -7916,9 +7948,9 @@
                 const liveHealth = document.getElementById('system-health-card')?.innerHTML || '';
                 body = `<div class="module-modal-stack">${window._moduleHealthHtml || ''}${liveHealth ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live node status</div>${liveHealth}</div>` : ''}</div>` || body;
             } else if (kind === 'comms') {
-                title = 'Memory Roadmap';
-                const roadmap = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
-                body = `<div class="module-modal-stack">${roadmap ? `<div class="module-modal-panel"><div class="module-modal-section-title">Live roadmap state</div><div class="module-modal-chat">${roadmap}</div></div>` : body}</div>`;
+                title = 'JOSHeX Quick Panel';
+                const quickPanel = window._moduleModalCommsHtml || document.getElementById('agent-chat-feed')?.innerHTML || '';
+                body = `<div class="module-modal-stack">${quickPanel ? `<div class="module-modal-panel"><div class="module-modal-section-title">Local Codex visibility</div><div class="module-modal-chat">${quickPanel}</div></div>` : body}</div>`;
             }
 
             titleEl.textContent = title;

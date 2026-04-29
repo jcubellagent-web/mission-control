@@ -135,8 +135,9 @@ def check_index_wiring() -> None:
 
     # 24in visual canaries: prevent kiosk Brain Feed from regressing into tall/noisy poster cards.
     require("24in fullscreen polish" in html, "24in desktop Brain Feed polish block missing")
-    require(".memory-roadmap-compact-grid" in html and "repeat(4, minmax(0, 1fr))" in html, "Memory Roadmap must stay compact on desktop")
-    require(".memory-roadmap-card-note { display: none" in html, "Desktop roadmap notes must stay hidden to reduce Brain Feed noise")
+    require('JOSHeX QUICK PANEL' in html and 'function buildJoshexQuickMarkup' in html, "JOSHeX quick panel must replace Memory Roadmap")
+    require('MEMORY ROADMAP' not in html and 'buildMemoryRoadmapMarkup' not in html, "Legacy Memory Roadmap UI must not render in Brain Feed")
+    require('class="joshex-quick' in html and 'Local Codex lane' in html, "JOSHeX quick panel body missing")
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
