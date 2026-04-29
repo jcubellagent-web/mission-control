@@ -1,35 +1,29 @@
 {
-  "actionRequired": [
-    {
-      "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed",
-      "url": "#calendar"
-    }
-  ],
+  "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "complete Google OAuth step 2 and verify Drive Docs",
+    "objective": "Run memory sync to JAIN and verify success",
     "status": "active",
     "steps": [
       {
-        "label": "exec",
+        "label": "cron",
         "status": "active",
-        "tool": "bf_step"
+        "tool": "memory-sync-to-jain"
       }
     ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T01:59:38Z",
-    "checkedAt": "2026-04-29T01:59:38Z",
+    "currentTool": "memory-sync-to-jain",
+    "updatedAt": "2026-04-29T02:01:01Z",
+    "checkedAt": "2026-04-29T02:01:01Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "complete Google OAuth step 2 and verify Drive Docs",
-    "updatedAt": "2026-04-29T02:00:17Z"
+    "context": "Run memory sync to JAIN and verify success",
+    "updatedAt": "2026-04-29T02:01:11Z"
   },
   "contextWindow": {
     "usedTokens": 129518,
@@ -54,7 +48,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T02:00:17Z",
+    "updatedAt": "2026-04-29T02:01:11Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -157,7 +151,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 13,
+    "missionControlDirty": 6,
     "recentFiles": [
       "mission-control/scripts/update_and_push.sh",
       "scripts/capability_canary.sh",
@@ -172,7 +166,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 4h 54m",
+        "Resets in 4h 53m",
         "Weekly: 90% left [==========--]",
         "Pace: 2% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
@@ -183,15 +177,15 @@
       "weekly": "90% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 54m",
+      "sessionReset": "4h 53m",
       "weeklyReset": "6d 3h",
       "summary": "99% left \u00b7 wk 90% left"
     },
-    "updatedAt": "2026-04-29T02:00:19Z"
+    "updatedAt": "2026-04-29T02:01:13Z"
   },
   "modelUsage": {
     "session": 0.067738,
-    "daily": 3.480228,
+    "daily": 3.458353,
     "weekly": 45.409995,
     "monthly": 951.787414,
     "topModels": [
@@ -208,7 +202,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.223237
+        "cost": 0.201362
       },
       {
         "name": "openai/gpt-5.5",
@@ -243,12 +237,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 3399,
-        "outputTokens": 191,
-        "totalTokens": 3590,
-        "sessionCost": 0.223237,
-        "dailyCost": 0.223237,
-        "weeklyCost": 0.223237,
+        "inputTokens": 3164,
+        "outputTokens": 45,
+        "totalTokens": 3209,
+        "sessionCost": 0.201362,
+        "dailyCost": 0.201362,
+        "weeklyCost": 0.201362,
         "sessions": 7,
         "isGemini": false,
         "costEstimated": false
@@ -380,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T02:00:22Z",
+    "lastUpdated": "2026-04-29T02:01:17Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -413,8 +407,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.480228,
-      "total": 47.352769,
+      "daily": 3.458353,
+      "total": 47.330894,
       "monthly": 951.787414
     },
     "weeklyRunRate": {
@@ -438,7 +432,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T02:00:27Z",
+    "updatedAt": "2026-04-29T02:01:22Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -455,14 +449,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 47.3,
-      "cpu_user": 21.56,
-      "cpu_sys": 25.68,
-      "load1": 2.53,
-      "load5": 2.57,
-      "load15": 2.53,
+      "cpu_pct": 44.5,
+      "cpu_user": 23.14,
+      "cpu_sys": 21.39,
+      "load1": 6.72,
+      "load5": 3.72,
+      "load15": 2.95,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "107Gi",
@@ -470,14 +464,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 28.1,
-      "cpu_user": 16.87,
-      "cpu_sys": 11.25,
-      "load1": 3.1,
-      "load5": 2.62,
-      "load15": 2.36,
+      "cpu_pct": 38.1,
+      "cpu_user": 20.0,
+      "cpu_sys": 18.6,
+      "load1": 2.29,
+      "load5": 2.5,
+      "load15": 2.32,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -486,8 +480,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -501,19 +495,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:00:17Z"
+      "lastChecked": "2026-04-29T02:01:11Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T02:00:17Z"
+      "lastChecked": "2026-04-29T02:01:11Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T02:00:17Z"
+      "lastChecked": "2026-04-29T02:01:11Z"
     }
   ],
   "crons": [
@@ -530,7 +524,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T02:00:28.096256+00:00"
+      "lastRun": "2026-04-29T02:00:30.896571+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1321,11 +1315,11 @@
   "capabilityCanary": {
     "status": "warn",
     "ok": false,
-    "summary": "5 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-29T01:52:51Z",
+    "summary": "4 warning(s), 0 error(s)",
+    "checkedAt": "2026-04-29T02:00:55Z",
     "counts": {
-      "ok": 21,
-      "warn": 5,
+      "ok": 22,
+      "warn": 4,
       "error": 0
     },
     "checks": [
@@ -1424,18 +1418,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=44ms audit=0/0",
+        "detail": "gateway=True latency=43ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.26",
           "model": "gpt-5.5",
-          "percentUsed": 33
+          "percentUsed": 48
         }
       },
       {
         "name": "memory:main",
         "status": "ok",
         "ok": true,
-        "detail": "files=105 chunks=1174 dirty=False",
+        "detail": "files=105 chunks=1175 dirty=False",
         "meta": {}
       },
       {
@@ -1461,9 +1455,9 @@
       },
       {
         "name": "google:drive",
-        "status": "warn",
-        "ok": false,
-        "detail": "Google API error (403 insufficientPermissions): Request had insufficient authentication scopes.",
+        "status": "ok",
+        "ok": true,
+        "detail": "read ok",
         "meta": {}
       },
       {
@@ -1541,9 +1535,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1577,16 +1571,16 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
       "name": "Capability Canary",
       "status": "warn",
-      "summary": "5 warning(s), 0 error(s)",
-      "detail": "21 ok \u00b7 5 warn \u00b7 0 err",
+      "summary": "4 warning(s), 0 error(s)",
+      "detail": "22 ok \u00b7 4 warn \u00b7 0 err",
       "source": "capabilityCanary"
     },
     {
@@ -1639,18 +1633,18 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "complete Google OAuth step 2 and verify Drive Docs",
+      "objective": "Run memory sync to JAIN and verify success",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:59:38Z",
+      "updatedAt": "2026-04-29T02:01:01Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "memory-sync-to-jain",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "exec",
+          "label": "cron",
           "status": "active",
-          "tool": "bf_step"
+          "tool": "memory-sync-to-jain"
         }
       ]
     },
@@ -1759,18 +1753,18 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "complete Google OAuth step 2 and verify Drive Docs",
+        "objective": "Run memory sync to JAIN and verify success",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:59:38Z",
+        "updatedAt": "2026-04-29T02:01:01Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "memory-sync-to-jain",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "exec",
+            "label": "cron",
             "status": "active",
-            "tool": "bf_step"
+            "tool": "memory-sync-to-jain"
           }
         ]
       },
@@ -1863,29 +1857,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T02:00:22Z",
+      "time": "2026-04-29T02:01:17Z",
       "event": "Session spend: $0.07"
     },
     {
-      "time": "2026-04-29T02:00:19Z",
+      "time": "2026-04-29T02:01:13Z",
       "event": "Coding: mission-control/scripts/update_and_push.sh, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-29T02:00:19Z",
+      "time": "2026-04-29T02:01:13Z",
       "event": "CodexBar: 99% left \u00b7 wk 90% left"
     },
     {
-      "time": "2026-04-29T02:00:17Z",
+      "time": "2026-04-29T02:01:11Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T02:00:17Z",
+      "time": "2026-04-29T02:01:11Z",
       "event": "Personal Codex: Personal Codex lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T02:00:17Z",
+      "time": "2026-04-29T02:01:11Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T02:00:17Z"
+  "lastUpdated": "2026-04-29T02:01:11Z"
 }

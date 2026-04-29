@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "5 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-29T01:52:51Z",
+  "summary": "4 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-29T02:00:55Z",
   "counts": {
-    "ok": 21,
-    "warn": 5,
+    "ok": 22,
+    "warn": 4,
     "error": 0
   },
   "checks": [
@@ -104,18 +104,18 @@
       "name": "openclaw:status",
       "status": "ok",
       "ok": true,
-      "detail": "gateway=True latency=44ms audit=0/0",
+      "detail": "gateway=True latency=43ms audit=0/0",
       "meta": {
         "runtimeVersion": "2026.4.26",
         "model": "gpt-5.5",
-        "percentUsed": 33
+        "percentUsed": 48
       }
     },
     {
       "name": "memory:main",
       "status": "ok",
       "ok": true,
-      "detail": "files=105 chunks=1174 dirty=False",
+      "detail": "files=105 chunks=1175 dirty=False",
       "meta": {}
     },
     {
@@ -141,9 +141,9 @@
     },
     {
       "name": "google:drive",
-      "status": "warn",
-      "ok": false,
-      "detail": "Google API error (403 insufficientPermissions): Request had insufficient authentication scopes.",
+      "status": "ok",
+      "ok": true,
+      "detail": "read ok",
       "meta": {}
     },
     {
