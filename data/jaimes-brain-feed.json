@@ -3,8 +3,8 @@
   "active": false,
   "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T10:18:07Z",
-  "checkedAt": "2026-04-29T10:17:57Z",
+  "updatedAt": "2026-04-29T11:17:47Z",
+  "checkedAt": "2026-04-29T11:17:27Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: updating OpenClaw recovery skill",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: approved JOSH final hardening/test",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Mission Control watchdog failed; collecting logs",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T10:17:57Z"
+  "messageReceived": "2026-04-29T11:17:27Z"
 }
