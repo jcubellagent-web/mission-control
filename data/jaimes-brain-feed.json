@@ -1,24 +1,19 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Mission Control: syncing JOSH 2.0 checkout",
+  "objective": "Mission Control: verifying JOSHeX Pages refresh",
   "status": "active",
-  "updatedAt": "2026-04-29T01:39:48Z",
-  "checkedAt": "2026-04-29T01:39:48Z",
+  "updatedAt": "2026-04-29T01:58:49Z",
+  "checkedAt": "2026-04-29T01:58:49Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "exec",
+  "currentTool": "web",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control: validating Codex lane source",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control: running Codex lane checks",
       "status": "done",
@@ -61,10 +56,15 @@
     },
     {
       "label": "Mission Control: syncing JOSH 2.0 checkout",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: verifying JOSHeX Pages refresh",
+      "status": "active",
+      "tool": "web"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T01:39:48Z"
+  "messageReceived": "2026-04-29T01:58:49Z"
 }

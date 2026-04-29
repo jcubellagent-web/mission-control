@@ -11,7 +11,7 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "build capability canary",
+    "objective": "complete Google OAuth step 2 and verify Drive Docs",
     "status": "active",
     "steps": [
       {
@@ -21,22 +21,22 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T01:48:24Z",
-    "checkedAt": "2026-04-29T01:48:24Z",
+    "updatedAt": "2026-04-29T01:59:38Z",
+    "checkedAt": "2026-04-29T01:59:38Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "build capability canary",
-    "updatedAt": "2026-04-29T01:55:16Z"
+    "context": "complete Google OAuth step 2 and verify Drive Docs",
+    "updatedAt": "2026-04-29T02:00:17Z"
   },
   "contextWindow": {
-    "usedTokens": 90677,
+    "usedTokens": 129518,
     "limitTokens": 272000,
-    "pct": 0.3334,
+    "pct": 0.4762,
     "model": "gpt-5.5",
-    "status": "green"
+    "status": "amber"
   },
   "personalCodex": {
     "status": "ready",
@@ -54,7 +54,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T01:55:16Z",
+    "updatedAt": "2026-04-29T02:00:17Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -157,7 +157,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/scripts/update_and_push.sh",
       "scripts/capability_canary.sh",
@@ -166,34 +166,34 @@
       "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/mission_control_regression_check.py"
     ],
-    "codexbarStatus": "100% left \u00b7 wk 90% left",
+    "codexbarStatus": "99% left \u00b7 wk 90% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 100% left [============]",
-        "Resets in 4h 59m",
+        "Session: 99% left [===========-]",
+        "Resets in 4h 54m",
         "Weekly: 90% left [==========--]",
         "Pace: 2% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "100% left",
+      "session": "99% left",
       "weekly": "90% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 59m",
+      "sessionReset": "4h 54m",
       "weeklyReset": "6d 3h",
-      "summary": "100% left \u00b7 wk 90% left"
+      "summary": "99% left \u00b7 wk 90% left"
     },
-    "updatedAt": "2026-04-29T01:55:18Z"
+    "updatedAt": "2026-04-29T02:00:19Z"
   },
   "modelUsage": {
-    "session": 0.046423,
-    "daily": 3.458913,
-    "weekly": 45.38868,
-    "monthly": 951.766099,
+    "session": 0.067738,
+    "daily": 3.480228,
+    "weekly": 45.409995,
+    "monthly": 951.787414,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -208,7 +208,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.20192199999999996
+        "cost": 0.223237
       },
       {
         "name": "openai/gpt-5.5",
@@ -243,12 +243,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 2958,
-        "outputTokens": 194,
-        "totalTokens": 3152,
-        "sessionCost": 0.20192199999999996,
-        "dailyCost": 0.20192199999999996,
-        "weeklyCost": 0.20192199999999996,
+        "inputTokens": 3399,
+        "outputTokens": 191,
+        "totalTokens": 3590,
+        "sessionCost": 0.223237,
+        "dailyCost": 0.223237,
+        "weeklyCost": 0.223237,
         "sessions": 7,
         "isGemini": false,
         "costEstimated": false
@@ -380,7 +380,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T01:55:21Z",
+    "lastUpdated": "2026-04-29T02:00:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -413,15 +413,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.458913,
-      "total": 47.331454,
-      "monthly": 951.766099
+      "daily": 3.480228,
+      "total": 47.352769,
+      "monthly": 951.787414
     },
     "weeklyRunRate": {
-      "total": 47.331454,
+      "total": 47.352769,
       "automation": 1.942774,
-      "interactive": 43.445906,
-      "projectedMonthly": 202.85
+      "interactive": 43.467221,
+      "projectedMonthly": 202.94
     }
   },
   "moltWorld": {
@@ -438,7 +438,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T01:55:26Z",
+    "updatedAt": "2026-04-29T02:00:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -455,14 +455,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 46.6,
-      "cpu_user": 20.28,
-      "cpu_sys": 26.29,
-      "load1": 2.92,
-      "load5": 2.77,
-      "load15": 2.59,
+      "cpu_pct": 47.3,
+      "cpu_user": 21.56,
+      "cpu_sys": 25.68,
+      "load1": 2.53,
+      "load5": 2.57,
+      "load15": 2.53,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "107Gi",
@@ -470,14 +470,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 26.2,
-      "cpu_user": 14.37,
-      "cpu_sys": 11.87,
-      "load1": 2.07,
-      "load5": 2.25,
-      "load15": 2.19,
+      "cpu_pct": 28.1,
+      "cpu_user": 16.87,
+      "cpu_sys": 11.25,
+      "load1": 3.1,
+      "load5": 2.62,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -501,19 +501,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:55:16Z"
+      "lastChecked": "2026-04-29T02:00:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:55:16Z"
+      "lastChecked": "2026-04-29T02:00:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T01:55:16Z"
+      "lastChecked": "2026-04-29T02:00:17Z"
     }
   ],
   "crons": [
@@ -530,7 +530,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:55:26.092190+00:00"
+      "lastRun": "2026-04-29T02:00:28.096256+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -575,7 +575,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:00:01.246032+00:00"
+      "lastRun": "2026-04-29T02:00:01.336287+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -605,7 +605,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:00:04.856832+00:00"
+      "lastRun": "2026-04-29T02:00:05.220472+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -936,7 +936,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-28T22:00:00"
     },
     {
       "name": "X Strategic Replies",
@@ -1134,7 +1135,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:45:04.429554+00:00"
+      "lastRun": "2026-04-29T02:00:04.732856+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1277,7 +1278,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T01:55:16.020116Z",
+    "checkedAt": "2026-04-29T02:00:17.700739Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1638,10 +1639,10 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "build capability canary",
+      "objective": "complete Google OAuth step 2 and verify Drive Docs",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:48:24Z",
+      "updatedAt": "2026-04-29T01:59:38Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1658,10 +1659,10 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "build capability canary",
+      "objective": "send Google reauth for Drive/Docs capability pack",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:48:24Z",
+      "updatedAt": "2026-04-29T01:55:38Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1678,19 +1679,14 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Mission Control: syncing JOSH 2.0 checkout",
+      "objective": "Mission Control: verifying JOSHeX Pages refresh",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:39:48Z",
-      "messageReceived": "2026-04-29T01:39:48Z",
-      "currentTool": "exec",
+      "updatedAt": "2026-04-29T01:58:49Z",
+      "messageReceived": "2026-04-29T01:58:49Z",
+      "currentTool": "web",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Mission Control: validating Codex lane source",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Mission Control: running Codex lane checks",
           "status": "done",
@@ -1733,8 +1729,13 @@
         },
         {
           "label": "Mission Control: syncing JOSH 2.0 checkout",
-          "status": "active",
+          "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Mission Control: verifying JOSHeX Pages refresh",
+          "status": "active",
+          "tool": "web"
         }
       ]
     }
@@ -1742,8 +1743,8 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
-      "J.A.I.N",
-      "JAIMES"
+      "JAIMES",
+      "J.A.I.N"
     ],
     "activeCount": 3,
     "primaryAgent": "JOSH 2.0",
@@ -1758,30 +1759,10 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "build capability canary",
+        "objective": "complete Google OAuth step 2 and verify Drive Docs",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:48:24Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "build capability canary",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T01:48:24Z",
+        "updatedAt": "2026-04-29T01:59:38Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1798,19 +1779,14 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Mission Control: syncing JOSH 2.0 checkout",
+        "objective": "Mission Control: verifying JOSHeX Pages refresh",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:39:48Z",
-        "messageReceived": "2026-04-29T01:39:48Z",
-        "currentTool": "exec",
+        "updatedAt": "2026-04-29T01:58:49Z",
+        "messageReceived": "2026-04-29T01:58:49Z",
+        "currentTool": "web",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Mission Control: validating Codex lane source",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Mission Control: running Codex lane checks",
             "status": "done",
@@ -1853,8 +1829,33 @@
           },
           {
             "label": "Mission Control: syncing JOSH 2.0 checkout",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Mission Control: verifying JOSHeX Pages refresh",
+            "status": "active",
+            "tool": "web"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "send Google reauth for Drive/Docs capability pack",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T01:55:38Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
           }
         ]
       }
@@ -1862,29 +1863,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T01:55:21Z",
-      "event": "Session spend: $0.05"
+      "time": "2026-04-29T02:00:22Z",
+      "event": "Session spend: $0.07"
     },
     {
-      "time": "2026-04-29T01:55:18Z",
+      "time": "2026-04-29T02:00:19Z",
       "event": "Coding: mission-control/scripts/update_and_push.sh, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-29T01:55:18Z",
-      "event": "CodexBar: 100% left \u00b7 wk 90% left"
+      "time": "2026-04-29T02:00:19Z",
+      "event": "CodexBar: 99% left \u00b7 wk 90% left"
     },
     {
-      "time": "2026-04-29T01:55:16Z",
+      "time": "2026-04-29T02:00:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T01:55:16Z",
+      "time": "2026-04-29T02:00:17Z",
       "event": "Personal Codex: Personal Codex lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T01:55:16Z",
+      "time": "2026-04-29T02:00:17Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T01:55:16Z"
+  "lastUpdated": "2026-04-29T02:00:17Z"
 }
