@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "memory sync to J.A.I.N completed and verified for 2026-04-29 11:02 EDT",
-    "updatedAt": "2026-04-29T15:15:18Z"
+    "updatedAt": "2026-04-29T15:20:18Z"
   },
   "contextWindow": {
     "usedTokens": 40216,
@@ -44,8 +44,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T15:15:18Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-29T15:20:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,22 +63,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T15:15:18Z",
+    "updatedAt": "2026-04-29T15:20:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "8 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 8,
+      "dirtyCount": 9,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json",
-        "data/moltworld-data.json"
+        "data/modelUsage.json"
       ],
-      "head": "35c4dcd03",
-      "updatedAt": "2026-04-29T15:15:18Z"
+      "head": "aa73b9b57",
+      "updatedAt": "2026-04-29T15:20:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -182,7 +182,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 9,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/update_and_push.sh",
@@ -196,7 +196,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 93% left [===========-]",
-        "Resets in 1h 39m",
+        "Resets in 1h 34m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 14h",
@@ -207,11 +207,11 @@
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 39m",
+      "sessionReset": "1h 34m",
       "weeklyReset": "5d 14h",
       "summary": "93% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T15:15:20Z"
+    "updatedAt": "2026-04-29T15:20:20Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -365,7 +365,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T15:15:24Z",
+    "lastUpdated": "2026-04-29T15:20:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -423,7 +423,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T15:15:29Z",
+    "updatedAt": "2026-04-29T15:20:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -440,12 +440,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.8,
-      "cpu_user": 18.5,
-      "cpu_sys": 17.75,
-      "load1": 2.28,
-      "load5": 2.36,
-      "load15": 2.35,
+      "cpu_pct": 34.6,
+      "cpu_user": 17.2,
+      "cpu_sys": 17.35,
+      "load1": 2.15,
+      "load5": 2.09,
+      "load15": 2.21,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -455,14 +455,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.1,
-      "cpu_user": 12.78,
-      "cpu_sys": 11.27,
-      "load1": 2.69,
-      "load5": 2.24,
-      "load15": 2.05,
+      "cpu_pct": 25.9,
+      "cpu_user": 13.38,
+      "cpu_sys": 12.59,
+      "load1": 2.28,
+      "load5": 2.17,
+      "load15": 2.06,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -486,19 +486,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T15:15:18Z"
+      "lastChecked": "2026-04-29T15:20:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T15:15:18Z"
+      "lastChecked": "2026-04-29T15:20:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T15:15:18Z"
+      "lastChecked": "2026-04-29T15:20:18Z"
     }
   ],
   "crons": [
@@ -515,7 +515,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T15:15:29.873916+00:00"
+      "lastRun": "2026-04-29T15:20:28.941054+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1062,7 +1062,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T15:15:18.675548Z",
+    "checkedAt": "2026-04-29T15:20:18.016849Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1439,19 +1439,14 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Done: GW11 approved repair verified",
+      "objective": "Mission Control watchdog failed",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T14:30:35Z",
-      "messageReceived": "2026-04-29T14:29:33Z",
+      "updatedAt": "2026-04-29T15:17:44Z",
+      "messageReceived": "2026-04-29T15:17:22Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "GW11 approved: strict rebuild and submit gate",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Building strict hard-DNP proposal",
           "status": "done",
@@ -1496,6 +1491,11 @@
           "label": "Final GW11 post-submit verification",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Mission Control watchdog running",
+          "status": "done",
+          "tool": "exec"
         }
       ]
     }
@@ -1531,19 +1531,14 @@
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
-        "objective": "Done: GW11 approved repair verified",
+        "objective": "Mission Control watchdog failed",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T14:30:35Z",
-        "messageReceived": "2026-04-29T14:29:33Z",
+        "updatedAt": "2026-04-29T15:17:44Z",
+        "messageReceived": "2026-04-29T15:17:22Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "GW11 approved: strict rebuild and submit gate",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Building strict hard-DNP proposal",
             "status": "done",
@@ -1588,6 +1583,11 @@
             "label": "Final GW11 post-submit verification",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
           }
         ]
       },
@@ -1609,29 +1609,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T15:15:24Z",
+      "time": "2026-04-29T15:20:23Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T15:15:20Z",
+      "time": "2026-04-29T15:20:20Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-04-29T15:15:20Z",
+      "time": "2026-04-29T15:20:20Z",
       "event": "CodexBar: 93% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T15:15:18Z",
+      "time": "2026-04-29T15:20:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T15:15:18Z",
-      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
+      "time": "2026-04-29T15:20:18Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-29T15:15:18Z",
+      "time": "2026-04-29T15:20:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T15:15:18Z"
+  "lastUpdated": "2026-04-29T15:20:18Z"
 }

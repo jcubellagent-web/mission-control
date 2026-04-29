@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Done: GW11 approved repair verified",
+  "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T14:30:35Z",
-  "checkedAt": "2026-04-29T14:29:33Z",
+  "updatedAt": "2026-04-29T15:17:44Z",
+  "checkedAt": "2026-04-29T15:17:22Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "GW11 approved: strict rebuild and submit gate",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Building strict hard-DNP proposal",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Final GW11 post-submit verification",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T14:29:33Z"
+  "messageReceived": "2026-04-29T15:17:22Z"
 }
