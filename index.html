@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777431982 -->
+    <!-- BUILD:1777434355 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -6303,8 +6303,23 @@
             animation: none !important;
         }
         body:not(.phone-mode) .container {
-            width: min(100%, 1680px);
-            padding: clamp(14px, 1.45vw, 24px);
+            width: 100%;
+            max-width: none;
+            padding: clamp(8px, 0.70vw, 14px);
+        }
+        /* 24IN FULLSCREEN DENSITY: use the panel width, not side gutters */
+        @media (min-width: 1180px) {
+            body:not(.phone-mode) .container {
+                width: 100vw;
+                max-width: none;
+                padding-left: clamp(8px, 0.55vw, 12px);
+                padding-right: clamp(8px, 0.55vw, 12px);
+            }
+            body.kiosk-mode:not(.phone-mode) .container {
+                width: 100vw;
+                max-width: none;
+                padding: 6px 8px;
+            }
         }
         body:not(.phone-mode) header {
             border: 1px solid rgba(125, 211, 252, 0.12);
