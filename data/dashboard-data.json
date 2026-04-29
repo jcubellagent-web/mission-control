@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: identified JAIMES objective wrapping cause \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T20:35:17Z"
+    "updatedAt": "2026-04-29T20:40:16Z"
   },
   "contextWindow": {
     "usedTokens": 82115,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 10 source file(s) changed",
-        "time": "2026-04-29T20:35:17Z"
+        "event": "Patch feed: 11 source file(s) changed",
+        "time": "2026-04-29T20:40:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T20:35:17Z",
+    "updatedAt": "2026-04-29T20:40:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "10 source file(s) changed",
+      "summary": "11 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 10,
+      "dirtyCount": 11,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "db993e6c7",
-      "updatedAt": "2026-04-29T20:35:17Z"
+      "head": "fc51a0821",
+      "updatedAt": "2026-04-29T20:40:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
@@ -199,7 +199,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 1h 19m",
+        "Resets in 1h 14m",
         "Weekly: 83% left [=========---]",
         "Pace: 6% in reserve | Expected 23% used | Lasts until reset",
         "Resets in 5d 8h",
@@ -210,11 +210,11 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 19m",
+      "sessionReset": "1h 14m",
       "weeklyReset": "5d 8h",
       "summary": "98% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T20:35:19Z"
+    "updatedAt": "2026-04-29T20:40:18Z"
   },
   "modelUsage": {
     "session": 0.047299,
@@ -374,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T20:35:23Z",
+    "lastUpdated": "2026-04-29T20:40:21Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -458,7 +458,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T20:35:28Z",
+    "updatedAt": "2026-04-29T20:40:26Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -475,14 +475,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.8,
-      "cpu_user": 18.84,
-      "cpu_sys": 16.93,
-      "load1": 2.45,
-      "load5": 2.33,
-      "load15": 2.34,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 34.6,
+      "cpu_user": 16.92,
+      "cpu_sys": 17.69,
+      "load1": 2.31,
+      "load5": 2.3,
+      "load15": 2.32,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -490,14 +490,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.8,
-      "cpu_user": 14.4,
-      "cpu_sys": 10.4,
-      "load1": 2.14,
-      "load5": 2.2,
-      "load15": 2.21,
+      "cpu_pct": 23.5,
+      "cpu_user": 13.44,
+      "cpu_sys": 10.8,
+      "load1": 2.0,
+      "load5": 2.12,
+      "load15": 2.16,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -521,19 +521,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T20:35:17Z"
+      "lastChecked": "2026-04-29T20:40:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T20:35:17Z"
+      "lastChecked": "2026-04-29T20:40:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T20:35:17Z"
+      "lastChecked": "2026-04-29T20:40:16Z"
     }
   ],
   "crons": [
@@ -550,7 +550,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T20:35:28.177597+00:00"
+      "lastRun": "2026-04-29T20:40:26.621215+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1097,7 +1097,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T20:35:17.443203Z",
+    "checkedAt": "2026-04-29T20:40:16.346188Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1593,29 +1593,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T20:35:23Z",
+      "time": "2026-04-29T20:40:21Z",
       "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-29T20:35:19Z",
+      "time": "2026-04-29T20:40:18Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T20:35:19Z",
+      "time": "2026-04-29T20:40:18Z",
       "event": "CodexBar: 98% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T20:35:17Z",
+      "time": "2026-04-29T20:40:16Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T20:35:17Z",
-      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
+      "time": "2026-04-29T20:40:16Z",
+      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T20:35:17Z",
+      "time": "2026-04-29T20:40:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T20:35:17Z"
+  "lastUpdated": "2026-04-29T20:40:16Z"
 }
