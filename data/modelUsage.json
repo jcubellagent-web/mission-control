@@ -1,6 +1,6 @@
 {
-  "session": 0.013869,
-  "daily": 0.094076,
+  "session": 0.045778,
+  "daily": 0.125985,
   "weekly": 45.705728,
   "monthly": 952.083148,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.125985
+    },
+    {
       "name": "openai/gpt-5.5",
       "window": "session",
       "cost": 0.122313
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.09407599999999999
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -50,6 +50,19 @@
       "costEstimated": false
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 3111,
+      "outputTokens": 481,
+      "totalTokens": 3592,
+      "sessionCost": 0.125985,
+      "dailyCost": 0.125985,
+      "weeklyCost": 0.125985,
+      "sessions": 4,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
       "inputTokens": 18839,
@@ -59,19 +72,6 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
       "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 2548,
-      "outputTokens": 484,
-      "totalTokens": 3032,
-      "sessionCost": 0.09407599999999999,
-      "dailyCost": 0.09407599999999999,
-      "weeklyCost": 0.09407599999999999,
-      "sessions": 4,
       "isGemini": false,
       "costEstimated": false
     },
@@ -150,7 +150,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-29T14:15:23Z",
+  "lastUpdated": "2026-04-29T14:20:22Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -183,8 +183,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.094076,
-    "total": 47.216689,
+    "daily": 0.125985,
+    "total": 47.248598,
     "monthly": 952.083148
   },
   "weeklyRunRate": {

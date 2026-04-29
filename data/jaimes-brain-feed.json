@@ -1,49 +1,19 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Querying MLB probable starters",
+  "objective": "Building strict hard-DNP proposal",
   "status": "active",
-  "updatedAt": "2026-04-29T14:13:19Z",
-  "checkedAt": "2026-04-29T14:13:19Z",
+  "updatedAt": "2026-04-29T14:19:53Z",
+  "checkedAt": "2026-04-29T14:19:53Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "web",
+  "currentTool": "exec",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control watchdog failed; collecting logs",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Cron: Sorare GW draft report",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "GW11 dry-run autosubmit: checking Champion/DNP",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Sorare GW11 sanity check: Chris Sale",
       "status": "done",
@@ -61,10 +31,40 @@
     },
     {
       "label": "Querying MLB probable starters",
-      "status": "active",
+      "status": "done",
       "tool": "web"
+    },
+    {
+      "label": "Re-running corrected audit",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: Sorare sanity-check lesson",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Patching Sorare skill: DTD soft-watch",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "GW11 approved: strict rebuild and submit gate",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Building strict hard-DNP proposal",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T14:13:19Z"
+  "messageReceived": "2026-04-29T14:19:53Z"
 }
