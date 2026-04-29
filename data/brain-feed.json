@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Mission Control cutoff fix deployed; regression and Pages passed; live page includes BUILD 1777440002",
+  "objective": "confirm Mission Control deploy status",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T05:12:39Z",
-  "checkedAt": "2026-04-29T05:12:39Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "status"
+    }
+  ],
+  "currentTool": "status",
+  "updatedAt": "2026-04-29T05:13:06Z",
+  "checkedAt": "2026-04-29T05:13:06Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
