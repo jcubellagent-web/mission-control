@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "respond to live Telegram detail preference",
-    "updatedAt": "2026-04-29T03:20:17Z"
+    "updatedAt": "2026-04-29T03:25:27Z"
   },
   "contextWindow": {
     "usedTokens": 172500,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 14 source file(s) changed",
-        "time": "2026-04-29T03:20:17Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-29T03:25:27Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T03:20:17Z",
+    "updatedAt": "2026-04-29T03:25:27Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "14 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 14,
+      "dirtyCount": 10,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
-        "data/eight-sleep-data.json",
-        "data/jain-brain-feed.json",
-        "data/jain-breaking-highlights.json",
-        "data/jain-newsfeed.json"
+        "data/jain-newsfeed.json",
+        "data/mission-control-canaries.json",
+        "data/model-usage-accum.json",
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "e95e866e4",
-      "updatedAt": "2026-04-29T03:20:17Z"
+      "head": "1da586d44",
+      "updatedAt": "2026-04-29T03:25:27Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 14,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_screenshot_diff.py",
@@ -203,7 +203,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 90% left [==========--]",
-        "Resets in 3h 34m",
+        "Resets in 3h 29m",
         "Weekly: 88% left [==========--]",
         "Pace: On pace | Expected 13% used | Lasts until reset",
         "Resets in 6d 2h",
@@ -214,11 +214,11 @@
       "weekly": "88% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 34m",
+      "sessionReset": "3h 29m",
       "weeklyReset": "6d 2h",
       "summary": "90% left \u00b7 wk 88% left"
     },
-    "updatedAt": "2026-04-29T03:20:19Z"
+    "updatedAt": "2026-04-29T03:25:29Z"
   },
   "modelUsage": {
     "session": 0.089202,
@@ -372,7 +372,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T03:20:22Z",
+    "lastUpdated": "2026-04-29T03:25:32Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -430,7 +430,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T03:20:27Z",
+    "updatedAt": "2026-04-29T03:25:37Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -447,12 +447,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.6,
-      "cpu_user": 16.99,
-      "cpu_sys": 17.63,
-      "load1": 2.59,
+      "cpu_pct": 36.0,
+      "cpu_user": 17.83,
+      "cpu_sys": 18.16,
+      "load1": 2.42,
       "load5": 2.48,
-      "load15": 2.44,
+      "load15": 2.45,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -462,14 +462,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 10.2,
-      "cpu_user": 1.69,
-      "cpu_sys": 8.47,
-      "load1": 2.14,
-      "load5": 2.34,
-      "load15": 2.5,
+      "cpu_pct": 21.8,
+      "cpu_user": 11.29,
+      "cpu_sys": 10.48,
+      "load1": 2.53,
+      "load5": 2.35,
+      "load15": 2.43,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -493,19 +493,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T03:20:17Z"
+      "lastChecked": "2026-04-29T03:25:27Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T03:20:17Z"
+      "lastChecked": "2026-04-29T03:25:27Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T03:20:17Z"
+      "lastChecked": "2026-04-29T03:25:27Z"
     }
   ],
   "crons": [
@@ -522,7 +522,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T03:20:27.981555+00:00"
+      "lastRun": "2026-04-29T03:25:37.342788+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1270,12 +1270,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T03:20:17.705843Z",
+    "checkedAt": "2026-04-29T03:25:27.213584Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
         "severity": "ok"
       },
       {
@@ -1668,22 +1668,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Mission Control: checking stale HTTP server",
-      "status": "active",
+      "objective": "Done: skill review updated Mission Control skill",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T03:19:56Z",
-      "messageReceived": "2026-04-29T03:19:56Z",
+      "updatedAt": "2026-04-29T03:21:04Z",
+      "messageReceived": "2026-04-29T03:20:32Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: assess Memory Roadmap replacement",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Task: replace Memory Roadmap with JOSHeX quick panel",
           "status": "done",
@@ -1725,8 +1720,13 @@
           "tool": "exec"
         },
         {
-          "label": "Mission Control: checking stale HTTP server",
-          "status": "active",
+          "label": "Task: review skill save/update need",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Skill review: updating Mission Control workflow",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1734,36 +1734,70 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 3,
-    "primaryAgent": "JAIMES",
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "JAIMES"
+      "J.A.I.N"
     ],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Mission Control: checking stale HTTP server",
+        "objective": "respond to live Telegram detail preference",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T03:19:56Z",
-        "messageReceived": "2026-04-29T03:19:56Z",
+        "updatedAt": "2026-04-29T02:33:17Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "respond to live Telegram detail preference",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T02:33:17Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: skill review updated Mission Control skill",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T03:21:04Z",
+        "messageReceived": "2026-04-29T03:20:32Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: assess Memory Roadmap replacement",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Task: replace Memory Roadmap with JOSHeX quick panel",
             "status": "done",
@@ -1805,49 +1839,14 @@
             "tool": "exec"
           },
           {
-            "label": "Mission Control: checking stale HTTP server",
-            "status": "active",
+            "label": "Task: review skill save/update need",
+            "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "respond to live Telegram detail preference",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T02:33:17Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
+          },
           {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "respond to live Telegram detail preference",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T02:33:17Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
+            "label": "Skill review: updating Mission Control workflow",
+            "status": "done",
+            "tool": "exec"
           }
         ]
       }
@@ -1855,29 +1854,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T03:20:22Z",
+      "time": "2026-04-29T03:25:32Z",
       "event": "Session spend: $0.09"
     },
     {
-      "time": "2026-04-29T03:20:19Z",
+      "time": "2026-04-29T03:25:29Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_screenshot_diff.py"
     },
     {
-      "time": "2026-04-29T03:20:19Z",
+      "time": "2026-04-29T03:25:29Z",
       "event": "CodexBar: 90% left \u00b7 wk 88% left"
     },
     {
-      "time": "2026-04-29T03:20:17Z",
+      "time": "2026-04-29T03:25:27Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T03:20:17Z",
-      "event": "JOSHeX: Patch feed: 14 source file(s) changed"
+      "time": "2026-04-29T03:25:27Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-29T03:20:17Z",
+      "time": "2026-04-29T03:25:27Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T03:20:17Z"
+  "lastUpdated": "2026-04-29T03:25:27Z"
 }
