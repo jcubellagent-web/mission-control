@@ -1,35 +1,40 @@
 {
-  "actionRequired": [],
+  "actionRequired": [
+    {
+      "priority": "high",
+      "title": "Mission Control canary issue: 1 canary issue(s)",
+      "url": "#canaries"
+    },
+    {
+      "priority": "high",
+      "title": "Calendar auth needs refresh",
+      "url": "#calendar"
+    }
+  ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "mc_clean_deploy",
+    "objective": "Mission Control cleanup/polish deployed: commit eaf95d53e live, canaries/regression/screenshot/Pages all green; X scripts no-op, crontab residue blocked by protected macOS write",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T14:44:14Z",
-    "checkedAt": "2026-04-29T14:44:14Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-29T14:59:56Z",
+    "checkedAt": "2026-04-29T14:59:56Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "mc_clean_deploy",
-    "updatedAt": "2026-04-29T14:55:50Z"
+    "context": "Mission Control cleanup/polish deployed: commit eaf95d53e live, canaries/regression/screenshot/Pages all green; X scripts no-op, crontab residue blocked by protected macOS write",
+    "updatedAt": "2026-04-29T15:00:18Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 41264,
+    "limitTokens": 272000,
+    "pct": 0.1517,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -39,8 +44,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 16 source file(s) changed",
-        "time": "2026-04-29T14:55:50Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-29T15:00:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -58,22 +63,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:55:50Z",
+    "updatedAt": "2026-04-29T15:00:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "16 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 16,
+      "dirtyCount": 9,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-newsfeed.json",
+        "data/jain-breaking-highlights.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-accum.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "0af1f6337",
-      "updatedAt": "2026-04-29T14:55:50Z"
+      "head": "e7cf80492",
+      "updatedAt": "2026-04-29T15:00:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -177,36 +182,36 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 15,
+    "missionControlDirty": 8,
     "recentFiles": [
-      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
-      "mission-control/scripts/brain_feed_server.py",
       "mission-control/scripts/update_and_push.sh",
+      "mission-control/scripts/brain_feed_server.py",
+      "mission-control/index.html",
       "scripts/send_josh_reply.py"
     ],
-    "codexbarStatus": "94% left \u00b7 wk 84% left",
+    "codexbarStatus": "93% left \u00b7 wk 84% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 94% left [===========-]",
-        "Resets in 1h 59m",
+        "Session: 93% left [===========-]",
+        "Resets in 1h 54m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "94% left",
+      "session": "93% left",
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 59m",
+      "sessionReset": "1h 54m",
       "weeklyReset": "5d 14h",
-      "summary": "94% left \u00b7 wk 84% left"
+      "summary": "93% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:55:52Z"
+    "updatedAt": "2026-04-29T15:00:20Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -360,7 +365,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:55:55Z",
+    "lastUpdated": "2026-04-29T15:00:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -418,7 +423,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:56:00Z",
+    "updatedAt": "2026-04-29T15:00:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -435,14 +440,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.6,
-      "cpu_user": 18.61,
-      "cpu_sys": 18.97,
-      "load1": 1.95,
-      "load5": 2.24,
-      "load15": 2.3,
+      "cpu_pct": 39.6,
+      "cpu_user": 22.83,
+      "cpu_sys": 16.79,
+      "load1": 3.23,
+      "load5": 2.44,
+      "load15": 2.35,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -450,12 +455,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.4,
-      "cpu_user": 3.84,
-      "cpu_sys": 11.53,
-      "load1": 2.23,
-      "load5": 2.09,
-      "load15": 2.01,
+      "cpu_pct": 23.8,
+      "cpu_user": 13.49,
+      "cpu_sys": 10.31,
+      "load1": 2.18,
+      "load5": 2.04,
+      "load15": 2.0,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.6,
       "uptime": "",
@@ -466,8 +471,8 @@
     }
   },
   "calendarHealth": {
-    "status": "ok",
-    "message": "Connected via local gog"
+    "status": "auth_expired",
+    "message": "Calendar re-auth required"
   },
   "devices": [
     {
@@ -481,19 +486,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:55:50Z"
+      "lastChecked": "2026-04-29T15:00:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:55:50Z"
+      "lastChecked": "2026-04-29T15:00:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:55:50Z"
+      "lastChecked": "2026-04-29T15:00:18Z"
     }
   ],
   "crons": [
@@ -510,7 +515,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:55:28.964242+00:00"
+      "lastRun": "2026-04-29T15:00:29.034067+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -555,7 +560,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:00:01.073025+00:00"
+      "lastRun": "2026-04-29T15:00:00.974532+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -585,7 +590,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:00:06.152414+00:00"
+      "lastRun": "2026-04-29T15:00:05.343975+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -858,8 +863,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-04-28T15:00:01.055688+00:00"
+      "runStatus": "done",
+      "lastRun": "2026-04-29T15:00:00.674322+00:00"
     },
     {
       "name": "Sorare Canonical Reflector",
@@ -874,7 +879,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:45:04.674097+00:00"
+      "lastRun": "2026-04-29T15:00:04.061436+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1054,10 +1059,10 @@
     }
   ],
   "visualCanaries": {
-    "ok": true,
-    "status": "ok",
-    "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T14:55:50.788480Z",
+    "ok": false,
+    "status": "attention",
+    "summary": "1 canary issue(s)",
+    "checkedAt": "2026-04-29T15:00:18.535480Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1067,9 +1072,9 @@
       },
       {
         "name": "Calendar tile",
-        "ok": true,
-        "detail": "Connected via local gog",
-        "severity": "ok"
+        "ok": false,
+        "detail": "Calendar re-auth required",
+        "severity": "medium"
       },
       {
         "name": "Today Jobs",
@@ -1080,7 +1085,7 @@
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "clear",
+        "detail": "1 visible alert(s)",
         "severity": "ok"
       },
       {
@@ -1320,9 +1325,9 @@
     ]
   },
   "opsInbox": {
-    "status": "clear",
+    "status": "attention",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "connected",
+    "calendar": "needs attention",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1335,9 +1340,9 @@
     {
       "id": "visual-canaries",
       "name": "Visual Canaries",
-      "status": "ok",
-      "summary": "All canaries passed",
-      "detail": "6/6 checks passing"
+      "status": "attention",
+      "summary": "1 canary issue(s)",
+      "detail": "5/6 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1356,9 +1361,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "clear",
+      "status": "attention",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar connected \u00b7 0 job issue(s)"
+      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1377,23 +1382,11 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0014",
-      "title": "Mission Control cleanup/polish",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh asked to clean up sloppy Brain Feed, model usage/spend, breaking highlights signal/noise, Today Jobs completion display, remove X account/workflows/crons across devices, and emphasize Sorare + fantasy baseball beyond maintenance. Initial context loaded; next: inspect dashboard/data generators, cron/workflow inventory, patch UI/data, verify, deploy.",
-      "background": "owner: JOSH 2.0; updated 2026-04-29 10:22",
-      "requestedAt": null,
-      "updatedAt": "2026-04-29 10:22",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
+      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1418,20 +1411,14 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "mc_clean_deploy",
+      "objective": "Mission Control cleanup/polish deployed: commit eaf95d53e live, canaries/regression/screenshot/Pages all green; X scripts no-op, crontab residue blocked by protected macOS write",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T14:44:14Z",
+      "updatedAt": "2026-04-29T14:59:56Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "",
       "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "exec",
-          "status": "active",
-          "tool": "bf_step"
-        }
-      ]
+      "steps": []
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1530,20 +1517,14 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "mc_clean_deploy",
+        "objective": "Mission Control cleanup/polish deployed: commit eaf95d53e live, canaries/regression/screenshot/Pages all green; X scripts no-op, crontab residue blocked by protected macOS write",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:44:14Z",
+        "updatedAt": "2026-04-29T14:59:56Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
+        "currentTool": "",
         "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
+        "steps": []
       },
       {
         "agent": "JAIMES",
@@ -1628,29 +1609,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:55:55Z",
+      "time": "2026-04-29T15:00:23Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T14:55:52Z",
-      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
+      "time": "2026-04-29T15:00:20Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-04-29T14:55:52Z",
-      "event": "CodexBar: 94% left \u00b7 wk 84% left"
+      "time": "2026-04-29T15:00:20Z",
+      "event": "CodexBar: 93% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:55:50Z",
+      "time": "2026-04-29T15:00:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:55:50Z",
-      "event": "JOSHeX: Patch feed: 16 source file(s) changed"
+      "time": "2026-04-29T15:00:18Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:55:50Z",
+      "time": "2026-04-29T15:00:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:55:50Z"
+  "lastUpdated": "2026-04-29T15:00:18Z"
 }
