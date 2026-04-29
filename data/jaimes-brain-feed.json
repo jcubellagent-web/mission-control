@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Done: updated OpenClaw Telegram recovery skill",
+  "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T16:48:17Z",
-  "checkedAt": "2026-04-29T16:46:04Z",
+  "updatedAt": "2026-04-29T17:17:47Z",
+  "checkedAt": "2026-04-29T17:17:30Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "JOSH 2.0 detail issue: diagnosing active work visibility",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Checking JOSH 2.0 OpenClaw health",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Skill review: JOSH 2.0 progress fix",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T16:46:04Z"
+  "messageReceived": "2026-04-29T17:17:30Z"
 }
