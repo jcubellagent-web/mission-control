@@ -28,7 +28,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "memory sync to J.A.I.N completed and verified at 05:01 EDT",
-    "updatedAt": "2026-04-29T09:05:18Z"
+    "updatedAt": "2026-04-29T09:10:16Z"
   },
   "contextWindow": {
     "usedTokens": 35786,
@@ -44,8 +44,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T09:05:18Z"
+        "event": "Patch feed: 11 source file(s) changed",
+        "time": "2026-04-29T09:10:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,22 +63,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T09:05:18Z",
+    "updatedAt": "2026-04-29T09:10:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "12 source file(s) changed",
+      "summary": "11 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 12,
+      "dirtyCount": 11,
       "files": [
-        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-accum.json"
+        "data/model-usage-accum.json",
+        "data/model-usage-tracker.json"
       ],
-      "head": "0ddc05a6f",
-      "updatedAt": "2026-04-29T09:05:18Z"
+      "head": "09b482f9a",
+      "updatedAt": "2026-04-29T09:10:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -182,7 +182,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 11,
     "recentFiles": [
       "scripts/safe_telegram_edit.py",
       "mission-control/index.html"
@@ -193,7 +193,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 99% left [===========-]",
-        "Resets in 2h 49m",
+        "Resets in 2h 44m",
         "Weekly: 85% left [==========--]",
         "Pace: On pace | Expected 16% used | Lasts until reset",
         "Resets in 5d 20h",
@@ -204,11 +204,11 @@
       "weekly": "85% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 49m",
+      "sessionReset": "2h 44m",
       "weeklyReset": "5d 20h",
       "summary": "99% left \u00b7 wk 85% left"
     },
-    "updatedAt": "2026-04-29T09:05:20Z"
+    "updatedAt": "2026-04-29T09:10:19Z"
   },
   "modelUsage": {
     "session": 0.02071,
@@ -362,7 +362,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T09:05:23Z",
+    "lastUpdated": "2026-04-29T09:10:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -420,7 +420,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T09:05:28Z",
+    "updatedAt": "2026-04-29T09:10:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -437,14 +437,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.1,
-      "cpu_user": 17.76,
-      "cpu_sys": 17.13,
-      "load1": 2.62,
-      "load5": 2.75,
-      "load15": 2.54,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 35.9,
+      "cpu_user": 17.99,
+      "cpu_sys": 17.99,
+      "load1": 2.45,
+      "load5": 2.5,
+      "load15": 2.47,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -452,12 +452,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 4.3,
-      "cpu_sys": 8.87,
-      "load1": 2.21,
-      "load5": 2.03,
-      "load15": 2.03,
+      "cpu_pct": 18.8,
+      "cpu_user": 5.46,
+      "cpu_sys": 13.28,
+      "load1": 1.74,
+      "load5": 1.91,
+      "load15": 1.96,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -483,19 +483,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T09:05:18Z"
+      "lastChecked": "2026-04-29T09:10:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T09:05:18Z"
+      "lastChecked": "2026-04-29T09:10:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T09:05:18Z"
+      "lastChecked": "2026-04-29T09:10:16Z"
     }
   ],
   "crons": [
@@ -512,7 +512,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T09:05:28.831472+00:00"
+      "lastRun": "2026-04-29T09:10:27.752003+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1251,7 +1251,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T09:05:18.071954Z",
+    "checkedAt": "2026-04-29T09:10:16.739551Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1645,17 +1645,62 @@
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "lowSignal": true,
-      "objective": "Standby",
+      "lowSignal": false,
+      "objective": "Mission Control watchdog clean",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T09:05:28Z",
-      "messageReceived": "2026-04-29T09:05:28Z",
-      "currentTool": "",
-      "model": "gpt-4.1",
+      "updatedAt": "2026-04-29T08:17:42Z",
+      "messageReceived": "2026-04-29T08:17:32Z",
+      "currentTool": "exec",
+      "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Last: Sorare Canonical \u2014 sorare_canonical_reflector.py \u2014 done",
+          "label": "Step: adding edit timeout wrapper/autorecovery",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: validating JOSH autorecovery script",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: final JOSH health verification",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review skill save/update need",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: updating OpenClaw recovery skill",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: approved JOSH final hardening/test",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking JOSH Codex 5.5 state",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review memory and skills updates",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control watchdog running",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control watchdog running",
           "status": "done",
           "tool": "exec"
         }
@@ -1692,17 +1737,62 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "lowSignal": true,
-        "objective": "Standby",
+        "lowSignal": false,
+        "objective": "Mission Control watchdog clean",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T09:05:28Z",
-        "messageReceived": "2026-04-29T09:05:28Z",
-        "currentTool": "",
-        "model": "gpt-4.1",
+        "updatedAt": "2026-04-29T08:17:42Z",
+        "messageReceived": "2026-04-29T08:17:32Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Last: Sorare Canonical \u2014 sorare_canonical_reflector.py \u2014 done",
+            "label": "Step: adding edit timeout wrapper/autorecovery",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: validating JOSH autorecovery script",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: final JOSH health verification",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update need",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: updating OpenClaw recovery skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: approved JOSH final hardening/test",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking JOSH Codex 5.5 state",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review memory and skills updates",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog running",
             "status": "done",
             "tool": "exec"
           }
@@ -1732,29 +1822,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T09:05:23Z",
+      "time": "2026-04-29T09:10:22Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T09:05:20Z",
+      "time": "2026-04-29T09:10:19Z",
       "event": "Coding: scripts/safe_telegram_edit.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T09:05:20Z",
+      "time": "2026-04-29T09:10:19Z",
       "event": "CodexBar: 99% left \u00b7 wk 85% left"
     },
     {
-      "time": "2026-04-29T09:05:18Z",
+      "time": "2026-04-29T09:10:16Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T09:05:18Z",
-      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
+      "time": "2026-04-29T09:10:16Z",
+      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-29T09:05:18Z",
+      "time": "2026-04-29T09:10:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T09:05:18Z"
+  "lastUpdated": "2026-04-29T09:10:16Z"
 }
