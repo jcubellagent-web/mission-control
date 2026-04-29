@@ -1,31 +1,16 @@
 {
   "active": true,
-  "objective": "Step: pulling ESPN league settings",
+  "objective": "Task: fantasy weekly-lock automation upgrades",
   "status": "active",
-  "updatedAt": "2026-04-29T23:09:25Z",
+  "updatedAt": "2026-04-29T23:13:27Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:09:25Z",
-  "messageReceived": "2026-04-29T23:09:25Z",
+  "checkedAt": "2026-04-29T23:13:27Z",
+  "messageReceived": "2026-04-29T23:13:27Z",
   "steps": [
-    {
-      "label": "Step: final verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: confirm JAIMES is back online",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: approved health/audit/ops checks",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: checking JOSH 2.0 health",
       "status": "done",
@@ -58,6 +43,21 @@
     },
     {
       "label": "Step: pulling ESPN league settings",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verifying fantasy weekly-lock patch",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update need",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: fantasy weekly-lock automation upgrades",
       "status": "active",
       "tool": "exec"
     }
