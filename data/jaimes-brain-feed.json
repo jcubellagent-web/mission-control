@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Step: recovering stuck JOSH direct session",
-  "status": "active",
-  "updatedAt": "2026-04-29T06:23:59Z",
-  "checkedAt": "2026-04-29T06:23:59Z",
+  "active": false,
+  "objective": "Done: JOSH hardening cleanup complete",
+  "status": "idle",
+  "updatedAt": "2026-04-29T06:29:48Z",
+  "checkedAt": "2026-04-29T06:29:30Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,41 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "JOSH 2.0: patching command owner allowlist",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: skill review for JOSH command auth",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: updating Mission Control skill trigger",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: check JOSH 2.0 realtime status",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: checking JOSH gateway/tasks",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: probing JOSH session/logs",
       "status": "done",
@@ -61,10 +26,45 @@
     },
     {
       "label": "Step: recovering stuck JOSH direct session",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skills after JOSH recovery",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: approved JOSH hardening cleanup",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: cleaning JOSH helper load",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: locating JOSH edit/autorecovery hooks",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: adding edit timeout wrapper/autorecovery",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: validating JOSH autorecovery script",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: final JOSH health verification",
+      "status": "done",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T06:23:59Z"
+  "messageReceived": "2026-04-29T06:29:30Z"
 }
