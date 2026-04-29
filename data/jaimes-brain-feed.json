@@ -1,24 +1,19 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Cron: Sorare GW draft report complete",
+  "objective": "Mission Control watchdog alert: mission_control_regression_check.py: error: unrecognized arguments: --check-roadmap-freshness --max-roadmap-age-min 45 screenshot_diff desktop ratio=1.00000 max=0.08000 screenshot_",
   "status": "idle",
-  "updatedAt": "2026-04-29T12:02:12Z",
-  "checkedAt": "2026-04-29T12:00:07Z",
+  "updatedAt": "2026-04-29T12:17:52Z",
+  "checkedAt": "2026-04-29T12:17:40Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "code",
+  "currentTool": "exec",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: checking JOSH Codex 5.5 state",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review memory and skills updates",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Cron: Sorare GW draft report",
       "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T12:00:07Z"
+  "messageReceived": "2026-04-29T12:17:40Z"
 }
