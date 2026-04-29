@@ -1,56 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: JAIMES online confirmation",
-  "status": "idle",
-  "updatedAt": "2026-04-29T23:02:35Z",
+  "active": true,
+  "objective": "Step: pulling ESPN league settings",
+  "status": "active",
+  "updatedAt": "2026-04-29T23:09:25Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:02:35Z",
-  "messageReceived": "2026-04-29T23:02:35Z",
+  "checkedAt": "2026-04-29T23:09:25Z",
+  "messageReceived": "2026-04-29T23:09:25Z",
   "steps": [
-    {
-      "label": "Step: adding GitHub/filesystem/memory MCP",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspecting MCP config schema",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: patching MCP config safely",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: checking Docker daemon",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: restarting gateway",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verifying MCP and Hermes status",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: testing MCP servers",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: hardening GitHub MCP tool policy",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: final verification",
       "status": "done",
@@ -59,6 +19,46 @@
     {
       "label": "Task: confirm JAIMES is back online",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: approved health/audit/ops checks",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: checking JOSH 2.0 health",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: auditing Mission Control",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: checking Sorare and fantasy ops",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verifying fantasy script path",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review whether skill update is needed",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: audit fantasy league rules",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: pulling ESPN league settings",
+      "status": "active",
       "tool": "exec"
     }
   ]

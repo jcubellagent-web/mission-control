@@ -14,27 +14,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-29T23:04:38Z",
-    "objective": "Done: MEMORY snippet read completion handled \u00b7 Awaiting further instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-29T23:05:19Z",
+    "objective": "Patching usage spend renderer class mismatch",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - MEMORY snippet read completion handled",
-        "status": "done",
+        "label": "Patching usage spend renderer class mismatch",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T23:04:45Z",
-    "checkedAt": "2026-04-29T23:04:38Z",
+    "updatedAt": "2026-04-29T23:08:54Z",
+    "checkedAt": "2026-04-29T23:08:54Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Done: MEMORY snippet read completion handled \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T23:05:16Z"
+    "status": "Brain Feed live",
+    "context": "Patching usage spend renderer class mismatch",
+    "updatedAt": "2026-04-29T23:10:18Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T23:05:16Z"
+        "event": "Patch feed: 12 source file(s) changed",
+        "time": "2026-04-29T23:10:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T23:05:16Z",
+    "updatedAt": "2026-04-29T23:10:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "12 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 12,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "664d40790",
-      "updatedAt": "2026-04-29T23:05:16Z"
+      "head": "1375d1334",
+      "updatedAt": "2026-04-29T23:10:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -200,7 +200,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 93% left [===========-]",
-        "Resets in 3h 54m",
+        "Resets in 3h 49m",
         "Weekly: 81% left [=========---]",
         "Pace: 6% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
@@ -211,11 +211,11 @@
       "weekly": "81% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 54m",
+      "sessionReset": "3h 49m",
       "weeklyReset": "5d 6h",
       "summary": "93% left \u00b7 wk 81% left"
     },
-    "updatedAt": "2026-04-29T23:05:18Z"
+    "updatedAt": "2026-04-29T23:10:19Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -343,8 +343,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 251193229,
-        "dailyTokens": 114459133,
+        "totalTokens": 253044275,
+        "dailyTokens": 116310179,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T23:05:22Z",
+    "lastUpdated": "2026-04-29T23:10:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -427,8 +427,8 @@
       "codexEquivalentWeekly": 45.489881,
       "codexEquivalentDaily": 0.432355,
       "codexEquivalentMonthlyProjection": 194.96,
-      "codexTokensWeekly": 359980979,
-      "codexTokensDaily": 114459133,
+      "codexTokensWeekly": 361832025,
+      "codexTokensDaily": 116310179,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -452,7 +452,7 @@
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
         "codexValueMonthly": 194.96,
-        "codexTokensWeekly": 359980979,
+        "codexTokensWeekly": 361832025,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -528,7 +528,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.489881,
           "dailyEquivalent": 0.432355,
-          "tokensWeekly": 359980979,
+          "tokensWeekly": 361832025,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -622,7 +622,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T23:05:27Z",
+    "updatedAt": "2026-04-29T23:10:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -639,12 +639,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.5,
-      "cpu_user": 18.72,
-      "cpu_sys": 18.72,
-      "load1": 2.04,
-      "load5": 2.47,
-      "load15": 2.36,
+      "cpu_pct": 34.1,
+      "cpu_user": 16.56,
+      "cpu_sys": 17.51,
+      "load1": 2.28,
+      "load5": 2.37,
+      "load15": 2.34,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -654,14 +654,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.2,
-      "cpu_user": 11.66,
-      "cpu_sys": 12.5,
-      "load1": 1.61,
-      "load5": 1.87,
-      "load15": 1.9,
+      "cpu_pct": 14.7,
+      "cpu_user": 4.72,
+      "cpu_sys": 10.23,
+      "load1": 2.62,
+      "load5": 2.12,
+      "load15": 1.99,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -685,19 +685,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:05:16Z"
+      "lastChecked": "2026-04-29T23:10:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:05:16Z"
+      "lastChecked": "2026-04-29T23:10:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T23:05:16Z"
+      "lastChecked": "2026-04-29T23:10:18Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:05:27.834635+00:00"
+      "lastRun": "2026-04-29T23:10:28.327642+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T23:05:16.628137Z",
+    "checkedAt": "2026-04-29T23:10:19.715080Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1619,20 +1619,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: MEMORY snippet read completion handled \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Patching usage spend renderer class mismatch",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T23:04:45Z",
-      "messageReceived": "2026-04-29T23:04:38Z",
+      "updatedAt": "2026-04-29T23:08:54Z",
+      "messageReceived": "2026-04-29T23:05:19Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - MEMORY snippet read completion handled",
-          "status": "done",
+          "label": "Patching usage spend renderer class mismatch",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1659,57 +1659,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: JAIMES online confirmation",
-      "status": "idle",
+      "objective": "Step: pulling ESPN league settings",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T23:02:35Z",
-      "messageReceived": "2026-04-29T23:02:35Z",
+      "updatedAt": "2026-04-29T23:09:25Z",
+      "messageReceived": "2026-04-29T23:09:25Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Step: adding GitHub/filesystem/memory MCP",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: inspecting MCP config schema",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: patching MCP config safely",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: checking Docker daemon",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: restarting gateway",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: verifying MCP and Hermes status",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: testing MCP servers",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: hardening GitHub MCP tool policy",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Step: final verification",
           "status": "done",
@@ -1719,19 +1679,149 @@
           "label": "Task: confirm JAIMES is back online",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: approved health/audit/ops checks",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking JOSH 2.0 health",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: auditing Mission Control",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking Sorare and fantasy ops",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verifying fantasy script path",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review whether skill update is needed",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: audit fantasy league rules",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: pulling ESPN league settings",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
+      "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 1,
-    "primaryAgent": "J.A.I.N",
-    "dualMode": false,
-    "dualAgents": [],
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "JAIMES"
+    ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Step: pulling ESPN league settings",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:09:25Z",
+        "messageReceived": "2026-04-29T23:09:25Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Step: final verification",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: confirm JAIMES is back online",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: approved health/audit/ops checks",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking JOSH 2.0 health",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: auditing Mission Control",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking Sorare and fantasy ops",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verifying fantasy script path",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review whether skill update is needed",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: audit fantasy league rules",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: pulling ESPN league settings",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Patching usage spend renderer class mismatch",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:08:54Z",
+        "messageReceived": "2026-04-29T23:05:19Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Patching usage spend renderer class mismatch",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
       {
         "agent": "J.A.I.N",
         "active": true,
@@ -1751,119 +1841,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: MEMORY snippet read completion handled \u00b7 Awaiting further instruction",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T23:04:45Z",
-        "messageReceived": "2026-04-29T23:04:38Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Done - MEMORY snippet read completion handled",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: JAIMES online confirmation",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T23:02:35Z",
-        "messageReceived": "2026-04-29T23:02:35Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Step: adding GitHub/filesystem/memory MCP",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: inspecting MCP config schema",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: patching MCP config safely",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking Docker daemon",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: restarting gateway",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: verifying MCP and Hermes status",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: testing MCP servers",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: hardening GitHub MCP tool policy",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: final verification",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: confirm JAIMES is back online",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T23:05:22Z",
+      "time": "2026-04-29T23:10:23Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T23:05:18Z",
+      "time": "2026-04-29T23:10:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T23:05:18Z",
+      "time": "2026-04-29T23:10:19Z",
       "event": "CodexBar: 93% left \u00b7 wk 81% left"
     },
     {
-      "time": "2026-04-29T23:05:16Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-29T23:10:18Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T23:05:16Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-29T23:10:18Z",
+      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T23:05:16Z",
+      "time": "2026-04-29T23:10:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T23:05:16Z"
+  "lastUpdated": "2026-04-29T23:10:18Z"
 }
