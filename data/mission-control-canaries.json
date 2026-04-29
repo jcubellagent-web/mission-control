@@ -2,12 +2,12 @@
   "ok": true,
   "status": "ok",
   "summary": "All canaries passed",
-  "checkedAt": "2026-04-28T18:00:19.574953Z",
+  "checkedAt": "2026-04-29T01:40:17.283336Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
+      "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
       "severity": "ok"
     },
     {
@@ -32,6 +32,12 @@
       "name": "Renderer wiring",
       "ok": true,
       "detail": "hero + ops renderers present",
+      "severity": "ok"
+    },
+    {
+      "name": "Personal Codex lane",
+      "ok": true,
+      "detail": "status=ready; brainFeed=no",
       "severity": "ok"
     }
   ]

@@ -2,41 +2,35 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Calendar issue: gog CLI missing",
+      "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
     }
   ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
+    "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Run memory sync backup to JAIN and verify success",
+    "objective": "async heartbeat completion handled internally",
     "status": "active",
-    "steps": [
-      {
-        "label": "exec",
-        "status": "active",
-        "tool": "bf_step"
-      }
-    ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-28T18:01:03Z",
-    "checkedAt": "2026-04-28T18:01:03Z",
+    "steps": [],
+    "currentTool": "",
+    "updatedAt": "2026-04-29T01:40:02Z",
+    "checkedAt": "2026-04-29T01:40:02Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Run memory sync backup to JAIN and verify success",
-    "updatedAt": "2026-04-29T00:41:35Z"
+    "status": "Brain Feed live",
+    "context": "async heartbeat completion handled internally",
+    "updatedAt": "2026-04-29T01:40:17Z"
   },
   "contextWindow": {
-    "usedTokens": 317418,
+    "usedTokens": 32366,
     "limitTokens": 272000,
-    "pct": 1.0,
+    "pct": 0.119,
     "model": "gpt-5.5",
-    "status": "red"
+    "status": "green"
   },
   "personalCodex": {
     "status": "ready",
@@ -54,7 +48,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T00:41:35Z",
+    "updatedAt": "2026-04-29T01:40:17Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -145,85 +139,201 @@
     }
   ],
   "contextWatchdog": {
-    "loaded": false,
+    "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": null,
-    "handoffExists": false,
-    "sessionKey": null,
-    "usedTokens": 0,
-    "limitTokens": 0,
-    "pct": 0.0
+    "lastTriggeredAt": "2026-04-28T17:28:08Z",
+    "handoffExists": true,
+    "sessionKey": "agent:main:telegram:direct:6218150306",
+    "usedTokens": 207207,
+    "limitTokens": 272000,
+    "pct": 0.7618
   },
   "codingVisibility": {
-    "workspaceDirty": 0,
-    "missionControlDirty": 19,
+    "workspaceDirty": 53,
+    "missionControlDirty": 14,
     "recentFiles": [
-      "scripts/feedback_offset.json",
-      "scripts/intel_feedback_offset.json",
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/mission_control_regression_check.py",
-      "scripts/breaking_news_state.json",
       "mission-control/index.html",
-      "scripts/jaimes_healthcheck_state.json"
+      "mission-control/docs/personal-codex-lane.md"
     ],
-    "codexbarStatus": "Codex auth required",
+    "codexbarStatus": "92% left \u00b7 wk 91% left",
     "codexbar": {
-      "available": false
+      "available": true,
+      "raw": [
+        "== Codex 0.125.0 (codex-cli) ==",
+        "Session: 92% left [===========-]",
+        "Resets in 14m",
+        "Weekly: 91% left [==========--]",
+        "Pace: 3% in reserve | Expected 12% used | Lasts until reset",
+        "Resets in 6d 3h",
+        "Credits: 0 left",
+        "Account: jcubell16@gmail.com"
+      ],
+      "session": "92% left",
+      "weekly": "91% left",
+      "credits": "0 left",
+      "account": "jcubell16@gmail.com",
+      "sessionReset": "14m",
+      "weeklyReset": "6d 3h",
+      "summary": "92% left \u00b7 wk 91% left"
     },
-    "updatedAt": "2026-04-29T00:41:44Z"
+    "updatedAt": "2026-04-29T01:40:19Z"
   },
   "modelUsage": {
-    "session": 0.876,
-    "daily": 1.060672,
-    "weekly": 3.879446,
-    "monthly": 910.256865,
+    "session": 0.017434,
+    "daily": 3.429924,
+    "weekly": 45.361049,
+    "monthly": 951.738468,
     "topModels": [
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 1.942774
+        "cost": 37.670418749999996
+      },
+      {
+        "name": "gpt-5.4-mini",
+        "window": "session",
+        "cost": 7.387107749999999
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.17293300000000003
       },
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 1.9366720000000002
+        "cost": 0.122313
       },
       {
-        "name": "gpt-5.5",
+        "name": "deepseek/deepseek-v3.2",
         "window": "session",
-        "cost": 0.0
-      },
-      {
-        "name": "local/gemma4:26b",
-        "window": "session",
-        "cost": 0.0
-      },
-      {
-        "name": "local/llama3.2:latest",
-        "window": "session",
-        "cost": 0.0
+        "cost": 0.006918987599999999
       }
     ],
     "breakdown": [
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 1.942774,
-        "dailyCost": 0.0,
-        "sessionCost": 1.942774,
+        "weeklyCost": 37.670418749999996,
+        "dailyCost": 3.2569915,
+        "sessionCost": 37.670418749999996,
         "totalTokens": 0,
+        "costEstimated": false
+      },
+      {
+        "name": "gpt-5.4-mini",
+        "source": "codex",
+        "weeklyCost": 7.387107749999999,
+        "dailyCost": 0.0,
+        "sessionCost": 7.387107749999999,
+        "totalTokens": 0,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 3015,
+        "outputTokens": 191,
+        "totalTokens": 3206,
+        "sessionCost": 0.17293300000000003,
+        "dailyCost": 0.17293300000000003,
+        "weeklyCost": 0.17293300000000003,
+        "sessions": 7,
+        "isGemini": false,
         "costEstimated": false
       },
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 352180,
-        "outputTokens": 18,
-        "totalTokens": 352198,
-        "sessionCost": 1.9366720000000002,
-        "dailyCost": 1.060672,
-        "weeklyCost": 1.9366720000000002,
+        "inputTokens": 18839,
+        "outputTokens": 357,
+        "totalTokens": 19196,
+        "sessionCost": 0.122313,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.122313,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "deepseek/deepseek-v3.2",
+        "source": "openclaw",
+        "inputTokens": 26941,
+        "outputTokens": 335,
+        "totalTokens": 27276,
+        "sessionCost": 0.006918987599999999,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.006918987599999999,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "google/gemini-2.5-pro",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 1,
+        "isGemini": true,
+        "costEstimated": false
+      },
+      {
+        "name": "codex/gpt-5.4-mini",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 3,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-4.1",
+        "source": "openclaw",
+        "inputTokens": 167469,
+        "outputTokens": 2296,
+        "totalTokens": 169765,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
         "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-5.1-codex",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "codex/gpt-5.4",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 1,
         "isGemini": false,
         "costEstimated": false
       },
@@ -237,33 +347,7 @@
         "costEstimated": false
       },
       {
-        "name": "local/gemma4:26b",
-        "source": "ollama",
-        "weeklyCost": 0.0,
-        "dailyCost": 0.0,
-        "sessionCost": 0.0,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "isLocal": true,
-        "sizeGb": 17.99,
-        "loaded": false,
-        "_note": "Local Ollama model (18.0GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "local/llama3.2:latest",
-        "source": "ollama",
-        "weeklyCost": 0.0,
-        "dailyCost": 0.0,
-        "sessionCost": 0.0,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "isLocal": true,
-        "sizeGb": 2.02,
-        "loaded": false,
-        "_note": "Local Ollama model (2.0GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "local/qwen2.5:7b",
+        "name": "local/qwen2.5-coder:7b",
         "source": "ollama",
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
@@ -274,32 +358,6 @@
         "sizeGb": 4.68,
         "loaded": false,
         "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "local/mistral:latest",
-        "source": "ollama",
-        "weeklyCost": 0.0,
-        "dailyCost": 0.0,
-        "sessionCost": 0.0,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "isLocal": true,
-        "sizeGb": 4.37,
-        "loaded": false,
-        "_note": "Local Ollama model (4.4GB). Free \u2014 runs on-device."
-      },
-      {
-        "name": "local/llama3.1:8b",
-        "source": "ollama",
-        "weeklyCost": 0.0,
-        "dailyCost": 0.0,
-        "sessionCost": 0.0,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "isLocal": true,
-        "sizeGb": 4.92,
-        "loaded": false,
-        "_note": "Local Ollama model (4.9GB). Free \u2014 runs on-device."
       },
       {
         "name": "local/nomic-embed-text:latest",
@@ -315,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T00:41:45Z",
+    "lastUpdated": "2026-04-29T01:40:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -344,19 +402,19 @@
     },
     "elevenlabs": {
       "chars_used": 0,
-      "chars_limit": 189219,
+      "chars_limit": 378438,
       "available": true
     },
     "aggregate": {
-      "daily": 1.060672,
-      "total": 5.82222,
-      "monthly": 910.256865
+      "daily": 3.429924,
+      "total": 47.302465,
+      "monthly": 951.738468
     },
     "weeklyRunRate": {
-      "total": 5.82222,
+      "total": 47.303823,
       "automation": 1.942774,
-      "interactive": 1.936672,
-      "projectedMonthly": 24.95
+      "interactive": 43.418275,
+      "projectedMonthly": 202.73
     }
   },
   "moltWorld": {
@@ -373,7 +431,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T00:41:50Z",
+    "updatedAt": "2026-04-29T01:40:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -390,29 +448,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 18.9,
-      "cpu_user": 7.54,
-      "cpu_sys": 11.32,
-      "load1": 2.1,
-      "load5": 2.05,
-      "load15": 2.04,
+      "cpu_pct": 43.3,
+      "cpu_user": 23.62,
+      "cpu_sys": 19.63,
+      "load1": 2.43,
+      "load5": 2.52,
+      "load15": 2.28,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "45Gi",
-      "disk_pct": 21,
+      "disk_avail": "83Gi",
+      "disk_pct": 13,
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.1,
-      "cpu_user": 3.87,
-      "cpu_sys": 9.3,
-      "load1": 2.1,
-      "load5": 2.05,
-      "load15": 2.04,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 22.6,
+      "cpu_user": 13.11,
+      "cpu_sys": 9.83,
+      "load1": 2.78,
+      "load5": 2.32,
+      "load15": 2.12,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -421,14 +479,14 @@
     }
   },
   "calendarHealth": {
-    "status": "unavailable",
-    "message": "gog CLI missing"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
       "name": "Airpoint",
-      "status": "unknown",
-      "detail": "airpoint CLI missing"
+      "status": "ok",
+      "detail": "v1.3.23"
     }
   ],
   "products": [
@@ -436,19 +494,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T00:41:35Z"
+      "lastChecked": "2026-04-29T01:40:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T00:41:35Z"
+      "lastChecked": "2026-04-29T01:40:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T00:41:35Z"
+      "lastChecked": "2026-04-29T01:40:17Z"
     }
   ],
   "crons": [
@@ -465,7 +523,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T00:40:28.933311+00:00"
+      "lastRun": "2026-04-29T01:40:27.855980+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -510,7 +568,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T00:00:00.750515+00:00"
+      "lastRun": "2026-04-29T01:00:01.246032+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -540,7 +598,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T00:00:05.060856+00:00"
+      "lastRun": "2026-04-29T01:00:04.856832+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -645,7 +703,7 @@
             "time": "9:00 PM",
             "mode": "Daily",
             "label": "Late brief",
-            "past": false,
+            "past": true,
             "done": false
           },
           {
@@ -856,7 +914,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "done",
+      "lastRun": "2026-04-28T21:00:00"
     },
     {
       "name": "X Nightcap",
@@ -885,7 +944,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-04-28T19:00:00",
+      "lastRun": "2026-04-28T21:00:00",
       "multiRun": {
         "runs": [
           {
@@ -941,7 +1000,7 @@
           {
             "time": "9:00 PM",
             "label": "Strategic Reply",
-            "done": false
+            "done": true
           },
           {
             "time": "11:00 PM",
@@ -1068,7 +1127,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T00:30:04.967751+00:00"
+      "lastRun": "2026-04-29T01:30:04.884782+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1211,18 +1270,18 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-28T21:32:07.443727Z",
+    "checkedAt": "2026-04-29T01:40:17.283336Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
         "name": "Calendar tile",
         "ok": true,
-        "detail": "gog CLI missing",
+        "detail": "Calendar fetch failed",
         "severity": "ok"
       },
       {
@@ -1261,15 +1320,12 @@
     "rfMae": 7.186,
     "validationStatus": "gw11 outcome pending",
     "nextCheck": "After GW11 resolves on 2026-05-01",
-    "artifacts": [
-      "/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.json",
-      "/Users/jc_agent/sorare_ml/artifacts/gw11_validation_summary_v3.json"
-    ]
+    "artifacts": []
   },
   "voiceRouter": {
     "status": "ready",
     "summary": "Telegram voice notes can become structured tasks",
-    "entrypoint": "/Users/jc_agent/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
+    "entrypoint": "/Users/josh2.0/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
     "modes": [
       "task",
       "calendar",
@@ -1327,27 +1383,63 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260427-982",
+      "title": "Telegram voice/Talk workflow",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Keep full text reply + separate short voice-note TL;DR path; phone always-listening still blocked by missing internal-preview iOS app.",
+      "background": "updated 2026-04-28 00:43",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 00:43",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: scripts/feedback_offset.json, scripts/intel_feedback_offset.json",
+      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_visual_canaries.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
       "model": "recent",
       "agentLabel": "CODING",
       "agentClass": "agent"
+    },
+    {
+      "id": "context-watchdog",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 76%",
+      "status": "done",
+      "elapsedSecs": 0,
+      "tool": "watchdog",
+      "model": "50% rule",
+      "agentLabel": "WATCHDOG",
+      "agentClass": "agent"
     }
   ],
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
+      "active": true,
+      "reportedActive": true,
+      "lowSignal": false,
+      "objective": "async heartbeat completion handled internally",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-04-29T01:40:02Z",
+      "messageReceived": "2026-04-23T04:25:02Z",
+      "currentTool": "",
+      "model": "GPT-5.5",
+      "steps": []
+    },
+    "jain": {
+      "agent": "J.A.I.N",
       "active": false,
-      "reportedActive": false,
+      "reportedActive": true,
       "lowSignal": false,
       "objective": "Run memory sync backup to JAIN and verify success",
-      "status": "active",
+      "status": "stale",
       "stale": true,
       "updatedAt": "2026-04-28T18:01:03Z",
       "messageReceived": "2026-04-23T04:25:02Z",
@@ -1361,80 +1453,66 @@
         }
       ]
     },
-    "jain": {
-      "agent": "J.A.I.N",
-      "active": false,
-      "reportedActive": true,
-      "lowSignal": true,
-      "objective": "session startup completed",
-      "status": "stale",
-      "stale": true,
-      "updatedAt": "2026-04-28T17:31:10Z",
-      "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
-      "model": "GPT-5.4",
-      "steps": []
-    },
     "jaimes": {
       "agent": "JAIMES",
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Mission Control: regenerating and checking panels",
+      "objective": "Mission Control: syncing JOSH 2.0 checkout",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T00:41:35Z",
-      "messageReceived": "2026-04-29T00:41:35Z",
+      "updatedAt": "2026-04-29T01:39:48Z",
+      "messageReceived": "2026-04-29T01:39:48Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Task: reviewing skill updates",
+          "label": "Mission Control: validating Codex lane source",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control: checking stale local server notice",
+          "label": "Mission Control: running Codex lane checks",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Task: ops drift audit on J.A.I.N",
+          "label": "Mission Control: validating Codex panel placement",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: running ops drift check",
+          "label": "Mission Control: publishing Codex placement fix",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control watchdog running",
+          "label": "Mission Control: verifying Pages Codex lane",
+          "status": "done",
+          "tool": "web"
+        },
+        {
+          "label": "Mission Control: publishing dashboard Codex data",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control watchdog running",
+          "label": "Task: review skill update need",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control watchdog running",
+          "label": "Task: refresh JOSH 2.0 Mission Control screen",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Mission Control: auditing broken panels",
+          "label": "Mission Control: checking live panel source",
           "status": "done",
-          "tool": "exec"
+          "tool": "web"
         },
         {
-          "label": "Mission Control: fixing stale Breaking feed",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: regenerating and checking panels",
+          "label": "Mission Control: syncing JOSH 2.0 checkout",
           "status": "active",
           "tool": "exec"
         }
@@ -1443,85 +1521,103 @@
   },
   "liveObjectives": {
     "activeAgents": [
+      "JOSH 2.0",
       "JAIMES"
     ],
-    "activeCount": 1,
-    "primaryAgent": "JAIMES",
-    "dualMode": false,
-    "dualAgents": [],
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "JAIMES"
+    ],
     "agents": [
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "async heartbeat completion handled internally",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T01:40:02Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "",
+        "model": "GPT-5.5",
+        "steps": []
+      },
       {
         "agent": "JAIMES",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Mission Control: regenerating and checking panels",
+        "objective": "Mission Control: syncing JOSH 2.0 checkout",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T00:41:35Z",
-        "messageReceived": "2026-04-29T00:41:35Z",
+        "updatedAt": "2026-04-29T01:39:48Z",
+        "messageReceived": "2026-04-29T01:39:48Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Task: reviewing skill updates",
+            "label": "Mission Control: validating Codex lane source",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Mission Control: checking stale local server notice",
+            "label": "Mission Control: running Codex lane checks",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Task: ops drift audit on J.A.I.N",
+            "label": "Mission Control: validating Codex panel placement",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: running ops drift check",
+            "label": "Mission Control: publishing Codex placement fix",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Mission Control watchdog running",
+            "label": "Mission Control: verifying Pages Codex lane",
+            "status": "done",
+            "tool": "web"
+          },
+          {
+            "label": "Mission Control: publishing dashboard Codex data",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Mission Control watchdog running",
+            "label": "Task: review skill update need",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Mission Control watchdog running",
+            "label": "Task: refresh JOSH 2.0 Mission Control screen",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Mission Control: auditing broken panels",
+            "label": "Mission Control: checking live panel source",
             "status": "done",
-            "tool": "exec"
+            "tool": "web"
           },
           {
-            "label": "Mission Control: fixing stale Breaking feed",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: regenerating and checking panels",
+            "label": "Mission Control: syncing JOSH 2.0 checkout",
             "status": "active",
             "tool": "exec"
           }
         ]
       },
       {
-        "agent": "JOSH 2.0",
+        "agent": "J.A.I.N",
         "active": false,
-        "reportedActive": false,
+        "reportedActive": true,
         "lowSignal": false,
         "objective": "Run memory sync backup to JAIN and verify success",
-        "status": "active",
+        "status": "stale",
         "stale": true,
         "updatedAt": "2026-04-28T18:01:03Z",
         "messageReceived": "2026-04-23T04:25:02Z",
@@ -1534,48 +1630,34 @@
             "tool": "bf_step"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": false,
-        "reportedActive": true,
-        "lowSignal": true,
-        "objective": "session startup completed",
-        "status": "stale",
-        "stale": true,
-        "updatedAt": "2026-04-28T17:31:10Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T00:41:45Z",
-      "event": "Session spend: $0.88"
+      "time": "2026-04-29T01:40:22Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T00:41:44Z",
-      "event": "Coding: scripts/feedback_offset.json, scripts/intel_feedback_offset.json"
+      "time": "2026-04-29T01:40:19Z",
+      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_visual_canaries.py"
     },
     {
-      "time": "2026-04-29T00:41:44Z",
-      "event": "CodexBar: Codex auth required"
+      "time": "2026-04-29T01:40:19Z",
+      "event": "CodexBar: 92% left \u00b7 wk 91% left"
     },
     {
-      "time": "2026-04-29T00:41:35Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-29T01:40:17Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T00:41:35Z",
+      "time": "2026-04-29T01:40:17Z",
       "event": "Personal Codex: Personal Codex lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T00:41:35Z",
+      "time": "2026-04-29T01:40:17Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T00:41:35Z"
+  "lastUpdated": "2026-04-29T01:40:17Z"
 }

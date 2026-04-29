@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Calendar OAuth blocked: JOSH keychain prompt open",
-  "status": "idle",
-  "updatedAt": "2026-04-28T17:50:39Z",
-  "checkedAt": "2026-04-28T17:49:22Z",
+  "active": true,
+  "objective": "Mission Control: syncing JOSH 2.0 checkout",
+  "status": "active",
+  "updatedAt": "2026-04-29T01:39:48Z",
+  "checkedAt": "2026-04-29T01:39:48Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -15,56 +15,56 @@
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
     {
-      "label": "Due/unverified noise suppressed",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Skill review: Mission Control workflow",
+      "label": "Mission Control: validating Codex lane source",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Skill review: updating Mission Control skill",
+      "label": "Mission Control: running Codex lane checks",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Mission Control: approved calendar/highlights/spend polish",
+      "label": "Mission Control: validating Codex panel placement",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Mission Control: tightening highlights/spend text",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Mission Control: deploying highlight/spend polish",
+      "label": "Mission Control: publishing Codex placement fix",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Mission Control: deploying final compact copy",
+      "label": "Mission Control: verifying Pages Codex lane",
+      "status": "done",
+      "tool": "web"
+    },
+    {
+      "label": "Mission Control: publishing dashboard Codex data",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Skill review: Mission Control workflow",
+      "label": "Task: review skill update need",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Skill review: updating Mission Control skill",
+      "label": "Task: refresh JOSH 2.0 Mission Control screen",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Mission Control: starting Calendar OAuth on JOSH",
+      "label": "Mission Control: checking live panel source",
       "status": "done",
+      "tool": "web"
+    },
+    {
+      "label": "Mission Control: syncing JOSH 2.0 checkout",
+      "status": "active",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-28T17:49:22Z"
+  "messageReceived": "2026-04-29T01:39:48Z"
 }
