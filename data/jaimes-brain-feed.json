@@ -1,70 +1,18 @@
 {
-  "agent": "JAIMES",
   "active": false,
-  "objective": "Mission Control watchdog failed",
+  "objective": "Standby",
   "status": "idle",
-  "updatedAt": "2026-04-29T17:17:47Z",
-  "checkedAt": "2026-04-29T17:17:30Z",
-  "source": "jaimes_bf_push",
-  "reportedActive": false,
-  "stale": false,
-  "currentTool": "exec",
-  "tool": "exec",
-  "model": "gpt-5.5",
-  "auth": "subscription",
-  "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
+  "updatedAt": "2026-04-29T17:50:06Z",
+  "model": "gpt-4.1",
+  "messageReceived": "2026-04-29T17:50:06Z",
   "steps": [
     {
-      "label": "Checking JOSH 2.0 OpenClaw health",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Inspecting JOSH 2.0 config for progress updates",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Searching OpenClaw streaming code",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Checking JOSH 2.0 brain-feed instructions",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Patching JOSH 2.0 brain-feed wrapper",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Disabling generic Telegram progress bullets",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Verifying JOSH 2.0 progress fix",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Hardening JOSH brain-feed wrapper",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: JOSH 2.0 progress fix",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
+      "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+      "status": "error",
       "tool": "exec"
     }
   ],
-  "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T17:17:30Z"
+  "currentTool": "",
+  "checkedAt": "2026-04-29T17:50:06Z",
+  "agent": "JAIMES"
 }

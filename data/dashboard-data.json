@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: async completion event handled internally \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T17:45:17Z"
+    "updatedAt": "2026-04-29T17:50:17Z"
   },
   "contextWindow": {
     "usedTokens": 24822,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-29T17:45:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-29T17:50:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T17:45:17Z",
+    "updatedAt": "2026-04-29T17:50:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 8,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "e21e6cc6b",
-      "updatedAt": "2026-04-29T17:45:17Z"
+      "head": "5c98729cc",
+      "updatedAt": "2026-04-29T17:50:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -202,7 +202,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 9m",
+        "Resets in 4h 4m",
         "Weekly: 83% left [=========---]",
         "Pace: 5% in reserve | Expected 22% used | Lasts until reset",
         "Resets in 5d 11h",
@@ -213,11 +213,11 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 9m",
+      "sessionReset": "4h 4m",
       "weeklyReset": "5d 11h",
       "summary": "100% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T17:45:19Z"
+    "updatedAt": "2026-04-29T17:50:19Z"
   },
   "modelUsage": {
     "session": 0.014364,
@@ -377,7 +377,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T17:45:22Z",
+    "lastUpdated": "2026-04-29T17:50:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -451,7 +451,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T17:45:27Z",
+    "updatedAt": "2026-04-29T17:50:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -468,12 +468,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.8,
-      "cpu_user": 17.83,
-      "cpu_sys": 16.99,
-      "load1": 2.36,
-      "load5": 2.35,
-      "load15": 2.36,
+      "cpu_pct": 34.2,
+      "cpu_user": 18.1,
+      "cpu_sys": 16.89,
+      "load1": 2.43,
+      "load5": 2.31,
+      "load15": 2.33,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -483,12 +483,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.5,
-      "cpu_user": 12.29,
-      "cpu_sys": 8.19,
-      "load1": 2.02,
-      "load5": 1.93,
-      "load15": 1.98,
+      "cpu_pct": 24.6,
+      "cpu_user": 13.11,
+      "cpu_sys": 11.47,
+      "load1": 2.18,
+      "load5": 1.97,
+      "load15": 1.96,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -514,19 +514,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T17:45:17Z"
+      "lastChecked": "2026-04-29T17:50:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T17:45:17Z"
+      "lastChecked": "2026-04-29T17:50:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T17:45:17Z"
+      "lastChecked": "2026-04-29T17:50:17Z"
     }
   ],
   "crons": [
@@ -543,7 +543,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T17:45:27.853232+00:00"
+      "lastRun": "2026-04-29T17:50:28.269579+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1090,7 +1090,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T17:45:17.458020Z",
+    "checkedAt": "2026-04-29T17:50:17.402549Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1490,63 +1490,18 @@
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "lowSignal": false,
-      "objective": "Mission Control watchdog failed",
+      "lowSignal": true,
+      "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T17:17:47Z",
-      "messageReceived": "2026-04-29T17:17:30Z",
-      "currentTool": "exec",
-      "model": "gpt-5.5",
+      "updatedAt": "2026-04-29T17:50:06Z",
+      "messageReceived": "2026-04-29T17:50:06Z",
+      "currentTool": "",
+      "model": "gpt-4.1",
       "steps": [
         {
-          "label": "Checking JOSH 2.0 OpenClaw health",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Inspecting JOSH 2.0 config for progress updates",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Searching OpenClaw streaming code",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Checking JOSH 2.0 brain-feed instructions",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Patching JOSH 2.0 brain-feed wrapper",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Disabling generic Telegram progress bullets",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Verifying JOSH 2.0 progress fix",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Hardening JOSH brain-feed wrapper",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Skill review: JOSH 2.0 progress fix",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control watchdog running",
-          "status": "done",
+          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+          "status": "error",
           "tool": "exec"
         }
       ]
@@ -1585,63 +1540,18 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Mission Control watchdog failed",
+        "lowSignal": true,
+        "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T17:17:47Z",
-        "messageReceived": "2026-04-29T17:17:30Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
+        "updatedAt": "2026-04-29T17:50:06Z",
+        "messageReceived": "2026-04-29T17:50:06Z",
+        "currentTool": "",
+        "model": "gpt-4.1",
         "steps": [
           {
-            "label": "Checking JOSH 2.0 OpenClaw health",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Inspecting JOSH 2.0 config for progress updates",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Searching OpenClaw streaming code",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Checking JOSH 2.0 brain-feed instructions",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Patching JOSH 2.0 brain-feed wrapper",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Disabling generic Telegram progress bullets",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Verifying JOSH 2.0 progress fix",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Hardening JOSH brain-feed wrapper",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Skill review: JOSH 2.0 progress fix",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
+            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+            "status": "error",
             "tool": "exec"
           }
         ]
@@ -1670,29 +1580,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T17:45:22Z",
+      "time": "2026-04-29T17:50:23Z",
       "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-04-29T17:45:19Z",
+      "time": "2026-04-29T17:50:19Z",
       "event": "Coding: scripts/josh_bf_push.sh, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T17:45:19Z",
+      "time": "2026-04-29T17:50:19Z",
       "event": "CodexBar: 100% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T17:45:17Z",
+      "time": "2026-04-29T17:50:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T17:45:17Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-29T17:50:17Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T17:45:17Z",
+      "time": "2026-04-29T17:50:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T17:45:17Z"
+  "lastUpdated": "2026-04-29T17:50:17Z"
 }
