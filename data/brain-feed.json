@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "confirmed Google reauth not complete and requested localhost redirect URL",
+  "objective": "complete Google OAuth step 2 and verify Drive Docs",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T01:58:48Z",
-  "checkedAt": "2026-04-29T01:58:48Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-29T01:59:38Z",
+  "checkedAt": "2026-04-29T01:59:38Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
