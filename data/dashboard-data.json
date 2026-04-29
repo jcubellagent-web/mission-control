@@ -16,30 +16,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "test real-time response updates wiring",
+    "objective": "Handle queued heartbeat_fix_doctor_orphans request",
     "status": "active",
     "steps": [
       {
-        "label": "exec",
+        "label": "functions.exec",
         "status": "active",
-        "tool": "bf_step"
+        "tool": "heartbeat-orphans"
       }
     ],
-    "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T06:18:32Z",
-    "checkedAt": "2026-04-29T06:18:32Z",
+    "currentTool": "heartbeat-orphans",
+    "updatedAt": "2026-04-29T06:21:42Z",
+    "checkedAt": "2026-04-29T06:21:42Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "test real-time response updates wiring",
-    "updatedAt": "2026-04-29T06:20:18Z"
+    "context": "Handle queued heartbeat_fix_doctor_orphans request",
+    "updatedAt": "2026-04-29T06:25:17Z"
   },
   "contextWindow": {
-    "usedTokens": 38711,
-    "limitTokens": 400000,
-    "pct": 0.0968,
+    "usedTokens": 35445,
+    "limitTokens": 272000,
+    "pct": 0.1303,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -51,7 +51,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T06:20:18Z"
+        "time": "2026-04-29T06:25:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T06:20:18Z",
+    "updatedAt": "2026-04-29T06:25:17Z",
     "patchStatus": {
       "status": "pending",
       "summary": "12 source file(s) changed",
       "detail": "Ready for validation",
       "dirtyCount": 12,
       "files": [
-        "data/capability-canary.json",
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
         "data/model-usage-accum.json"
       ],
-      "head": "93c3d3f59",
-      "updatedAt": "2026-04-29T06:20:18Z"
+      "head": "439b7e588",
+      "updatedAt": "2026-04-29T06:25:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -202,7 +202,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 78% left [=========---]",
-        "Resets in 34m",
+        "Resets in 29m",
         "Weekly: 86% left [==========--]",
         "Pace: On pace | Expected 15% used | Lasts until reset",
         "Resets in 5d 23h",
@@ -213,15 +213,15 @@
       "weekly": "86% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "34m",
+      "sessionReset": "29m",
       "weeklyReset": "5d 23h",
       "summary": "78% left \u00b7 wk 86% left"
     },
-    "updatedAt": "2026-04-29T06:20:20Z"
+    "updatedAt": "2026-04-29T06:25:19Z"
   },
   "modelUsage": {
-    "session": 0.021511,
-    "daily": 0.190503,
+    "session": 0.0,
+    "daily": 0.168992,
     "weekly": 45.459433,
     "monthly": 951.836853,
     "topModels": [
@@ -238,7 +238,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.274124
+        "cost": 0.252613
       },
       {
         "name": "openai/gpt-5.5",
@@ -273,13 +273,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 25018,
-        "outputTokens": 123,
-        "totalTokens": 25141,
-        "sessionCost": 0.274124,
-        "dailyCost": 0.19050300000000003,
-        "weeklyCost": 0.274124,
-        "sessions": 9,
+        "inputTokens": 24579,
+        "outputTokens": 117,
+        "totalTokens": 24696,
+        "sessionCost": 0.252613,
+        "dailyCost": 0.16899200000000003,
+        "weeklyCost": 0.252613,
+        "sessions": 8,
         "isGemini": false,
         "costEstimated": false
       },
@@ -371,7 +371,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T06:20:23Z",
+    "lastUpdated": "2026-04-29T06:25:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -404,8 +404,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.190503,
-      "total": 47.396737,
+      "daily": 0.168992,
+      "total": 47.375226,
       "monthly": 951.836853
     },
     "weeklyRunRate": {
@@ -429,7 +429,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T06:20:28Z",
+    "updatedAt": "2026-04-29T06:25:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -446,14 +446,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.9,
-      "cpu_user": 26.7,
-      "cpu_sys": 17.78,
-      "load1": 2.9,
-      "load5": 2.83,
-      "load15": 2.79,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "cpu_pct": 34.4,
+      "cpu_user": 17.12,
+      "cpu_sys": 17.28,
+      "load1": 2.52,
+      "load5": 2.69,
+      "load15": 2.73,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "112Gi",
@@ -461,12 +461,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 25.9,
-      "cpu_user": 13.38,
-      "cpu_sys": 12.59,
-      "load1": 2.27,
-      "load5": 2.1,
-      "load15": 2.03,
+      "cpu_pct": 25.0,
+      "cpu_user": 13.7,
+      "cpu_sys": 11.29,
+      "load1": 2.06,
+      "load5": 2.13,
+      "load15": 2.06,
       "ram_used_gb": 14.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -492,19 +492,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T06:20:18Z"
+      "lastChecked": "2026-04-29T06:25:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T06:20:18Z"
+      "lastChecked": "2026-04-29T06:25:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T06:20:18Z"
+      "lastChecked": "2026-04-29T06:25:17Z"
     }
   ],
   "crons": [
@@ -521,7 +521,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T06:20:29.042573+00:00"
+      "lastRun": "2026-04-29T06:25:27.979170+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1260,12 +1260,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T06:20:18.518165Z",
+    "checkedAt": "2026-04-29T06:25:17.569135Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1582,14 +1582,14 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260429-0003",
-      "title": "Real-time response update wiring test",
+      "id": "T-20260429-0004",
+      "title": "Fix doctor/task orphan drift",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh asked to verify real-time response updates after queued direct-chat messages. Plan: inspect send/edit tooling, send a real Telegram test, edit the same message, verify CLI/API/log result, then report concise status with buttons.",
-      "background": "owner: JOSH 2.0; updated 2026-04-29 02:17",
+      "notes": "Josh queued `heartbeat_fix_doctor_orphans`. Initial checks: `openclaw doctor` found 79 orphan transcript files under `~/.openclaw/agents/main/sessions`; `openclaw tasks audit --json` found 3 warning-only lost exec-approval followup rows with missing backing sessions. Applying native `openclaw doctor --fix` plus `openclaw tasks maintenance --apply --json`, then re-auditing.",
+      "background": "owner: JOSH 2.0; updated 2026-04-29 02:29",
       "requestedAt": null,
-      "updatedAt": "2026-04-29 02:17",
+      "updatedAt": "2026-04-29 02:29",
       "owner": "JOSH 2.0"
     }
   ],
@@ -1621,18 +1621,18 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "test real-time response updates wiring",
+      "objective": "Handle queued heartbeat_fix_doctor_orphans request",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T06:18:32Z",
+      "updatedAt": "2026-04-29T06:21:42Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "bf_step",
+      "currentTool": "heartbeat-orphans",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "exec",
+          "label": "functions.exec",
           "status": "active",
-          "tool": "bf_step"
+          "tool": "heartbeat-orphans"
         }
       ]
     },
@@ -1658,42 +1658,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: skill review updated Mission Control trigger",
-      "status": "idle",
+      "objective": "Step: recovering stuck JOSH direct session",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T06:18:24Z",
-      "messageReceived": "2026-04-29T06:18:17Z",
+      "updatedAt": "2026-04-29T06:23:59Z",
+      "messageReceived": "2026-04-29T06:23:59Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: review skill save/update need",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: analyze JOSH 2.0 command/auth screenshot",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "JOSH 2.0: checking command authorization config",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: fix JOSH Telegram command auth",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "JOSH 2.0: locating command auth rules",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "JOSH 2.0: patching command owner allowlist",
           "status": "done",
@@ -1718,17 +1693,43 @@
           "label": "Step: updating Mission Control skill trigger",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: check JOSH 2.0 realtime status",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: checking JOSH gateway/tasks",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: probing JOSH session/logs",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: inspecting JOSH direct session state",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: recovering stuck JOSH direct session",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
+    "activeCount": 3,
+    "primaryAgent": "JAIMES",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1736,83 +1737,18 @@
     ],
     "agents": [
       {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "test real-time response updates wiring",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T06:18:32Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "acknowledge reply-format regression and restore detailed Josh response rules",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T06:11:45Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
-      },
-      {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: skill review updated Mission Control trigger",
-        "status": "idle",
+        "objective": "Step: recovering stuck JOSH direct session",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T06:18:24Z",
-        "messageReceived": "2026-04-29T06:18:17Z",
+        "updatedAt": "2026-04-29T06:23:59Z",
+        "messageReceived": "2026-04-29T06:23:59Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: analyze JOSH 2.0 command/auth screenshot",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "JOSH 2.0: checking command authorization config",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: fix JOSH Telegram command auth",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "JOSH 2.0: locating command auth rules",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "JOSH 2.0: patching command owner allowlist",
             "status": "done",
@@ -1837,6 +1773,71 @@
             "label": "Step: updating Mission Control skill trigger",
             "status": "done",
             "tool": "exec"
+          },
+          {
+            "label": "Task: check JOSH 2.0 realtime status",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking JOSH gateway/tasks",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: probing JOSH session/logs",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: inspecting JOSH direct session state",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: recovering stuck JOSH direct session",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Handle queued heartbeat_fix_doctor_orphans request",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T06:21:42Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "heartbeat-orphans",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "functions.exec",
+            "status": "active",
+            "tool": "heartbeat-orphans"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "acknowledge reply-format regression and restore detailed Josh response rules",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T06:11:45Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
           }
         ]
       }
@@ -1844,29 +1845,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T06:20:23Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-29T06:25:22Z",
+      "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T06:20:20Z",
+      "time": "2026-04-29T06:25:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T06:20:20Z",
+      "time": "2026-04-29T06:25:19Z",
       "event": "CodexBar: 78% left \u00b7 wk 86% left"
     },
     {
-      "time": "2026-04-29T06:20:18Z",
+      "time": "2026-04-29T06:25:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T06:20:18Z",
+      "time": "2026-04-29T06:25:17Z",
       "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T06:20:18Z",
+      "time": "2026-04-29T06:25:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T06:20:18Z"
+  "lastUpdated": "2026-04-29T06:25:17Z"
 }

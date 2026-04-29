@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: skill review updated Mission Control trigger",
-  "status": "idle",
-  "updatedAt": "2026-04-29T06:18:24Z",
-  "checkedAt": "2026-04-29T06:18:17Z",
+  "active": true,
+  "objective": "Step: recovering stuck JOSH direct session",
+  "status": "active",
+  "updatedAt": "2026-04-29T06:23:59Z",
+  "checkedAt": "2026-04-29T06:23:59Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,31 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: analyze JOSH 2.0 command/auth screenshot",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "JOSH 2.0: checking command authorization config",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: fix JOSH Telegram command auth",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "JOSH 2.0: locating command auth rules",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "JOSH 2.0: patching command owner allowlist",
       "status": "done",
@@ -63,8 +38,33 @@
       "label": "Step: updating Mission Control skill trigger",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: check JOSH 2.0 realtime status",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: checking JOSH gateway/tasks",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: probing JOSH session/logs",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: inspecting JOSH direct session state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: recovering stuck JOSH direct session",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T06:18:17Z"
+  "messageReceived": "2026-04-29T06:23:59Z"
 }
