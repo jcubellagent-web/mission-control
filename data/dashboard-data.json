@@ -39,7 +39,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Fix mission control dashboard polish and remove X workflows",
-    "updatedAt": "2026-04-29T14:30:18Z"
+    "updatedAt": "2026-04-29T14:35:18Z"
   },
   "contextWindow": {
     "usedTokens": 41264,
@@ -56,7 +56,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 16 source file(s) changed",
-        "time": "2026-04-29T14:30:18Z"
+        "time": "2026-04-29T14:35:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -74,22 +74,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:30:18Z",
+    "updatedAt": "2026-04-29T14:35:18Z",
     "patchStatus": {
       "status": "pending",
       "summary": "16 source file(s) changed",
       "detail": "Ready for validation",
       "dirtyCount": 16,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
         "data/model-usage-accum.json"
       ],
-      "head": "8bbd14ce7",
-      "updatedAt": "2026-04-29T14:30:18Z"
+      "head": "cced83221",
+      "updatedAt": "2026-04-29T14:35:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -207,10 +207,10 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 95% left [===========-]",
-        "Resets in 2h 24m",
+        "Resets in 2h 19m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
-        "Resets in 5d 15h",
+        "Resets in 5d 14h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -218,11 +218,11 @@
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 24m",
-      "weeklyReset": "5d 15h",
+      "sessionReset": "2h 19m",
+      "weeklyReset": "5d 14h",
       "summary": "95% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:30:21Z"
+    "updatedAt": "2026-04-29T14:35:20Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -376,7 +376,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:30:24Z",
+    "lastUpdated": "2026-04-29T14:35:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -434,7 +434,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:30:29Z",
+    "updatedAt": "2026-04-29T14:35:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -451,12 +451,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.7,
-      "cpu_user": 20.91,
-      "cpu_sys": 19.81,
-      "load1": 2.05,
-      "load5": 2.21,
-      "load15": 2.27,
+      "cpu_pct": 36.1,
+      "cpu_user": 18.5,
+      "cpu_sys": 18.5,
+      "load1": 2.64,
+      "load5": 2.35,
+      "load15": 2.29,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -466,14 +466,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.7,
-      "cpu_user": 11.29,
-      "cpu_sys": 9.67,
-      "load1": 2.17,
-      "load5": 1.98,
-      "load15": 1.93,
+      "cpu_pct": 29.4,
+      "cpu_user": 15.44,
+      "cpu_sys": 13.97,
+      "load1": 2.2,
+      "load5": 2.06,
+      "load15": 1.98,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -497,19 +497,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:30:18Z"
+      "lastChecked": "2026-04-29T14:35:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:30:18Z"
+      "lastChecked": "2026-04-29T14:35:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:30:18Z"
+      "lastChecked": "2026-04-29T14:35:18Z"
     }
   ],
   "crons": [
@@ -526,7 +526,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:30:29.638374+00:00"
+      "lastRun": "2026-04-29T14:35:29.598404+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1034,12 +1034,12 @@
     "ok": false,
     "status": "attention",
     "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-29T14:30:18.055957Z",
+    "checkedAt": "2026-04-29T14:35:18.640606Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1426,13 +1426,13 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Final GW11 post-submit verification",
-      "status": "active",
+      "objective": "Done: GW11 approved repair verified",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T14:29:33Z",
+      "updatedAt": "2026-04-29T14:30:35Z",
       "messageReceived": "2026-04-29T14:29:33Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
@@ -1484,7 +1484,7 @@
         },
         {
           "label": "Final GW11 post-submit verification",
-          "status": "active",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1492,11 +1492,10 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JAIMES",
+    "activeCount": 1,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1504,14 +1503,34 @@
     ],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Final GW11 post-submit verification",
+        "objective": "Fix mission control dashboard polish and remove X workflows",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:29:33Z",
+        "updatedAt": "2026-04-29T14:22:13Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: GW11 approved repair verified",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T14:30:35Z",
         "messageReceived": "2026-04-29T14:29:33Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
@@ -1563,28 +1582,8 @@
           },
           {
             "label": "Final GW11 post-submit verification",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Fix mission control dashboard polish and remove X workflows",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T14:22:13Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
           }
         ]
       },
@@ -1606,29 +1605,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:30:24Z",
+      "time": "2026-04-29T14:35:24Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T14:30:21Z",
+      "time": "2026-04-29T14:35:20Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T14:30:21Z",
+      "time": "2026-04-29T14:35:20Z",
       "event": "CodexBar: 95% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:30:18Z",
+      "time": "2026-04-29T14:35:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:30:18Z",
+      "time": "2026-04-29T14:35:18Z",
       "event": "JOSHeX: Patch feed: 16 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:30:18Z",
+      "time": "2026-04-29T14:35:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:30:18Z"
+  "lastUpdated": "2026-04-29T14:35:18Z"
 }
