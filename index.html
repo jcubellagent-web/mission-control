@@ -8745,10 +8745,31 @@
                 './data/breaking-highlights.json?_=' + Date.now(),
             ];
             const candidates = [];
+            const nowMs = Date.now();
+            const staleCutoffMs = 6 * 60 * 60 * 1000;
+            const lowSignalReasons = [
+                'significant price movement detected',
+                'routine appointment',
+                'announces new appointments',
+            ];
             const getHighlightTime = (data) => {
                 const raw = data?.updatedAt || data?.items?.[0]?.sentAt || data?.items?.[0]?.displayTime || '';
                 const ts = Date.parse(raw);
                 return Number.isFinite(ts) ? ts : 0;
+            };
+            const isHighSignalHighlight = (item) => {
+                if (!item) return false;
+                const score = Number(item.score || 0);
+                const title = String(item.title || '').trim();
+                const reason = String(item.reason || '').trim().toLowerCase();
+                const source = String(item.source || '').trim().toLowerCase();
+                const sentAt = Date.parse(item.sentAt || '');
+                const ageMs = Number.isFinite(sentAt) ? nowMs - sentAt : 0;
+                if (!title || score < 8.8) return false;
+                if (Number.isFinite(sentAt) && ageMs > staleCutoffMs) return false;
+                if (lowSignalReasons.some(needle => reason.includes(needle)) && score < 9.4) return false;
+                if ((source.includes('monitor') || source.includes('treasury')) && score < 9.4) return false;
+                return true;
             };
             for (const path of paths) {
                 try {
@@ -8756,6 +8777,8 @@
                     if (!r.ok) continue;
                     const data = await r.json();
                     if (data && Array.isArray(data.items) && data.items.length) {
+                        data.items = data.items.filter(isHighSignalHighlight);
+                        if (!data.items.length) continue;
                         candidates.push({ data, path, ts: getHighlightTime(data) });
                     }
                 } catch (e) {}
@@ -8875,13 +8898,12 @@
                 hot_takes: { bg: 'rgba(251,146,60,0.12)', color: '#fb923c', label: 'HOT' },
                 nasdaq_movers: { bg: 'rgba(74,222,128,0.12)', color: '#4ade80', label: 'NASDAQ' },
                 crypto_movers: { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', label: 'CRYPTO' },
-                x_signals: { bg: 'rgba(29,155,240,0.12)', color: '#1d9bf0', label: '𝕏' },
             };
 
             // Collect all items, deduplicating by headline — merge category tags
             const seenTexts = new Map(); // headline -> item index
             const items = [];
-            const order = ['signal','x_signals','macro_geo','nasdaq_movers','ai_value_chain','enterprise_ai','hot_takes','regulation','crypto_movers'];
+            const order = ['signal','macro_geo','nasdaq_movers','ai_value_chain','enterprise_ai','hot_takes','regulation','crypto_movers'];
             for (const key of order) {
                 const section = f[key];
                 if (!section) continue;
@@ -9321,23 +9343,6 @@
                 }
             }
 
-            // X posts today — from x-progress recentPosts
-            const xPostsEl = document.getElementById('x-posts-today-val');
-            if (xPostsEl) {
-                if (window._xProgressData) {
-                    const xp = window._xProgressData;
-                    const today = new Date().toISOString().slice(0,10);
-                    const todayPosts = (xp.recentPosts || []).filter(p => p.posted_at && p.posted_at.startsWith(today));
-                    xPostsEl.textContent = todayPosts.length + ' post' + (todayPosts.length !== 1 ? 's' : '');
-                    xPostsEl.className = 'jdr-val ' + (todayPosts.length > 0 ? 'ok' : '');
-                } else {
-                    // Try to get from dashboard data crons
-                    if (data && data.crons) {
-                        const xCron = data.crons.find(c => c.name && (c.name.includes('X Post') || c.category === 'X Account'));
-                        if (xCron) xPostsEl.textContent = xCron.runStatus === 'done' ? 'ran ✓' : xCron.schedule || '—';
-                    }
-                }
-            }
 
             // Sorare — use cron data for last run
             const sorMissions = document.getElementById('sorare-missions-val');
@@ -11345,11 +11350,11 @@
                 const orDaily  = orData?.available ? (orData.byok_daily  || 0) : 0;
                 const orWeekly = orData?.available ? (orData.byok_weekly || 0) : 0;
                 const orMonthly = orData?.available ? (orData.byok_monthly || orData.monthly || 0) : 0;
-                const monthlyV  = mu.monthly || mu.aggregate?.monthly || 0;
-                // Aggregate totals across all sources
+                const monthlyV  = mu.weeklyRunRate?.projectedMonthly || mu.aggregate?.monthly || mu.monthly || 0;
+                // Aggregate totals across all sources. Monthly uses the rolling run-rate first, not the stale accumulator.
                 const rawDaily   = (dailyV  || 0) + jainDaily  + orDaily;
                 const rawWeekly  = (weeklyV || 0) + jainWeekly + orWeekly;
-                const rawMonthly = (monthlyV || 0) + orMonthly;
+                const rawMonthly = (monthlyV || 0) + (mu.weeklyRunRate?.projectedMonthly ? 0 : orMonthly);
                 const rawSession = mu.session || 0;
                 // Clamp: daily ≥ session, weekly ≥ daily, monthly ≥ weekly
                 const totalSession = rawSession;
@@ -11400,11 +11405,8 @@
                 const budgetNow = new Date();
                 const budgetDaysInMonth = new Date(budgetNow.getFullYear(), budgetNow.getMonth() + 1, 0).getDate();
                 const budgetDayOfMonth = Math.min(budgetDaysInMonth, Math.max(1, budgetNow.getDate()));
-                const budgetActualMonthly = totalMonthly;
-                const budgetPaceProjected = budgetActualMonthly > 0
-                    ? (budgetActualMonthly / budgetDayOfMonth) * budgetDaysInMonth
-                    : 0;
-                const budgetProjected = Math.max(budgetActualMonthly, budgetPaceProjected);
+                const budgetActualMonthly = totalDaily;
+                const budgetProjected = Math.max(wrrProjected || 0, totalMonthly || 0);
                 const budgetFillPct = Math.max(0, Math.min(100, (budgetProjected / budgetCap) * 100));
                 let budgetTone = 'good';
                 let budgetLabel = 'Under floor';
@@ -11440,7 +11442,7 @@
                         <div>
                             <span class="mu-budget-kicker">Budget pace</span>
                             <div class="mu-budget-main">${budgetLabel}</div>
-                            <div class="mu-budget-sub">MTD ${fmtCost(budgetActualMonthly)} · Pace ${fmtCost(budgetProjected)}/mo</div>
+                            <div class="mu-budget-sub">Today ${fmtCost(budgetActualMonthly)} · Pace ${fmtCost(budgetProjected)}/mo</div>
                         </div>
                         <div class="mu-budget-score ${budgetTone}">
                             <span class="mu-budget-score-num">${budgetScore}</span>
@@ -11671,7 +11673,7 @@
                             <span class="mu-total-val">${fmtCost(totalWeekly)}</span>
                         </div>
                         <div class="mu-total-cell">
-                            <span class="mu-total-label">Month</span>
+                            <span class="mu-total-label">Pace</span>
                             <span class="mu-total-val">${fmtCost(totalMonthly)}</span>
                         </div>
                     </div>
@@ -11829,7 +11831,7 @@
                                 </div>
                                 <div class="mu-arch-node">
                                     <div class="mu-arch-node-title" style="color:#60a5fa">J.A.I.N</div>
-                                    <div class="mu-arch-node-role">Automation engine for X, intelligence, and background schedulers</div>
+                                    <div class="mu-arch-node-role">Automation engine for intelligence, Sorare, fantasy, and background schedulers</div>
                                     <div class="mu-arch-node-meta">SSH reachable · cron-backed workflows live</div>
                                 </div>
                                 <div class="mu-arch-node">
@@ -11924,14 +11926,13 @@
             // Category config: accent color + emoji
             const CAT_CONFIG = {
                 'Intelligence Feed': { color: '#60a5fa', emoji: '⚡' },
-                'X Account':         { color: '#1d9bf0', emoji: '𝕏' },
                 'Sorare MLB':        { color: '#a78bfa', emoji: '⚾' },
                 'Fantasy Baseball':  { color: '#c084fc', emoji: '🏆' },
                 'Maintenance':       { color: '#4ade80', emoji: '⚙' },
                 'Appointments':      { color: '#fbbf24', emoji: '📅' },
                 'Other':             { color: 'rgba(255,255,255,0.3)', emoji: '·' },
             };
-            const categoryOrder = ['Intelligence Feed', 'X Account', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
+            const categoryOrder = ['Sorare MLB', 'Fantasy Baseball', 'Intelligence Feed', 'Maintenance', 'Appointments'];
             const trackedTasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
 
             const trackedHtml = trackedTasks.length ? `<div class="tjob-category" id="tjob-cat-active-work" data-cat="Active Work">
@@ -12779,7 +12780,7 @@
                     <span class="xd-logo">𝕏</span>
                     <div class="xd-title-block">
                         <h2>Growth Dashboard</h2>
-                        <span id="xd-account" class="xd-account">@AgentJc11443</span>
+                        <span id="xd-account" class="xd-account">Retired</span>
                     </div>
                     <span id="xd-updated" class="xd-updated">–</span>
                 </div>
@@ -13947,7 +13948,7 @@
         _xData = data;
 
         // Header
-        document.getElementById('xd-account').textContent = data.account || '@AgentJc11443';
+        document.getElementById('xd-account').textContent = data.account || 'Retired';
         const updEl = document.getElementById('xd-updated');
         if (data.updatedAt) {
             const d = new Date(data.updatedAt);
@@ -14089,6 +14090,7 @@
 
     async function fetchXProgress() {
         try {
+            return;
             const r = await fetch('data/x-progress.json?t=' + Date.now());
             if (!r.ok) return;
             const data = await r.json();
@@ -14107,7 +14109,7 @@
 
         // Handle
         const handleEl = document.getElementById('xm-handle');
-        if (handleEl) handleEl.textContent = data.account || '@AgentJc11443';
+        if (handleEl) handleEl.textContent = data.account || 'Retired';
 
         // Updated
         const updEl = document.getElementById('xm-updated');
@@ -14189,12 +14191,11 @@
 
         // Mobile remote card button (static element)
         const mobileBtn = document.getElementById('x-progress-btn-mobile');
-        if (mobileBtn) mobileBtn.addEventListener('click', function() { window.openXDashboard(); });
+        if (mobileBtn) mobileBtn.style.display = 'none';
     });
 
     // Use document-level delegation only for dynamically-injected bubble
     document.addEventListener('click', function(e) {
-        if (e.target.closest('#x-progress-bubble')) window.openXDashboard();
         if (e.target.closest('#eightsleep-bubble')) window.openEightSleepDashboard && window.openEightSleepDashboard();
         if (e.target.closest('#active-crons-bubble')) window.openActiveCronsModal && window.openActiveCronsModal();
         if (e.target.closest('#paused-crons-bubble')) window.openPausedCronsModal && window.openPausedCronsModal();

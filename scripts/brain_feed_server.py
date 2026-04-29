@@ -294,26 +294,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass  # suppress access logs
 
-def _poll_jain_x_progress():
-    """Background thread: pull J.A.I.N x-progress.json via SSH every 60s for tight post feedback."""
-    import time
-    dest = DATA_DIR / "x-progress.json"
-    while True:
-        try:
-            result = subprocess.run(
-                ["ssh", "-o", "ConnectTimeout=3", "-o", "BatchMode=yes",
-                 "-o", "StrictHostKeyChecking=no",
-                 "jc_agent@100.121.89.84",
-                 "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json"],
-                capture_output=True, timeout=5
-            )
-            if result.returncode == 0 and result.stdout:
-                dest.write_bytes(result.stdout)
-        except Exception:
-            pass
-        time.sleep(60)
-
-
 def _poll_jain_brain_feed():
     """Background thread: pull J.A.I.N brain feed via SSH every 30s, completely independent of cron."""
     import time
@@ -443,10 +423,6 @@ if __name__ == "__main__":
     t = threading.Thread(target=_poll_jain_brain_feed, daemon=True)
     t.start()
     print("J.A.I.N brain feed poller started (30s interval)", flush=True)
-    t2 = threading.Thread(target=_poll_jain_x_progress, daemon=True)
-    t2.start()
-    print("J.A.I.N x-progress poller started (60s interval)", flush=True)
-
     t3 = threading.Thread(target=_poll_supabase_commands, daemon=True)
     t3.start()
     print("Supabase remote command poller started (3s interval)", flush=True)

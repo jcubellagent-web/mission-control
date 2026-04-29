@@ -45,13 +45,12 @@ CRON_TARGETS = [
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Mission Control", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Sorare MLB", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Sorare MLB", "agent": "JOSH 2.0"},
 
     # ── J.A.I.N intelligence + maintenance ──────────────────────────────────
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "weekdayRuns": [
@@ -77,41 +76,6 @@ CRON_TARGETS = [
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "XMCP Boot", "pattern": "xmcp", "schedule": "On boot", "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
 
-    # ── X account engine ─────────────────────────────────────────────────────
-    {"name": "X Pre-Market", "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET", "description": "[Original] Futures and overnight setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Market Open", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "[Original] Market-open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Mover", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Hot Take", "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Contrarian take built to spark replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Quote Tweets", "pattern": "x_post_agent.py", "schedule": "Daily 1p/3p/6p/8p ET", "description": "[QT] Quotes breaking or viral posts with our angle", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "1:00 PM", "label": "Quote Tweet"},
-             {"time": "3:00 PM", "label": "Quote Tweet"},
-             {"time": "6:00 PM", "label": "Quote Tweet"},
-             {"time": "8:00 PM", "label": "Quote Tweet"},
-         ]
-     }},
-    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "[Original] Close wrap and next-day setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Prime Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "[Original] Prime-time flagship take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Nightcap", "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] Last sharp insight of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Strategic Replies", "pattern": "x_strategic_reply", "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)", "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "9:00 AM",  "label": "Strategic Reply"},
-             {"time": "10:00 AM", "label": "Strategic Reply"},
-             {"time": "11:00 AM", "label": "Strategic Reply"},
-             {"time": "1:00 PM",  "label": "Strategic Reply"},
-             {"time": "2:00 PM",  "label": "Strategic Reply"},
-             {"time": "3:00 PM",  "label": "Strategic Reply"},
-             {"time": "4:00 PM",  "label": "Strategic Reply"},
-             {"time": "5:00 PM",  "label": "Strategic Reply"},
-             {"time": "6:00 PM",  "label": "Strategic Reply"},
-             {"time": "7:00 PM",  "label": "Strategic Reply"},
-             {"time": "9:00 PM",  "label": "Strategic Reply"},
-             {"time": "11:00 PM", "label": "Strategic Reply"},
-         ]
-     }},
-
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
     {"name": "Sorare Nightly Claim", "pattern": "sorare_missions.py --claim-only --rarity limited", "schedule": "Daily 3:35 AM ET", "description": "LaunchAgent claim sweep for overnight Sorare rewards", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
@@ -131,6 +95,9 @@ CRON_TARGETS = [
     {"name": "Waiver Injury Alert", "pattern": "waiver_injury_alert.py", "schedule": "Daily 1:00 PM ET", "description": "Surfaces injured-player replacement opportunities", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Fantasy Waiver Review (Hermes)", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed/Fri 1:00 PM ET", "description": "Hermes waiver review lane that runs mid-week", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "fantasy-waiver-scan"},
     {"name": "Fantasy Waiver Scan (pre-game)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 7:00 AM ET", "description": "Final waiver review before first-pitch lineup lock", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy Results Fetch", "pattern": "fetch_fantasy_results.py", "schedule": "Mon 2:15 AM ET", "description": "Captures weekly matchup outcomes for fantasy model feedback", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
+    {"name": "Fantasy ML Prediction Build", "pattern": "fantasy_ml/cron/run_weekly_prediction.sh", "schedule": "Fri 7:00 PM ET", "description": "Builds the weekly fantasy matchup prediction report", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
+    {"name": "Fantasy ML Prediction Refresh", "pattern": "fantasy_ml/cron/run_weekly_prediction.sh", "schedule": "Sat 7:00 AM ET", "description": "Refreshes fantasy matchup predictions before weekend moves", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
 
     # ── JAIMES / Hermes maintenance ─────────────────────────────────────────
     {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Hermes daily system-health pass", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
@@ -1579,7 +1546,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
             josh_listing = result.stdout
         except (subprocess.CalledProcessError, OSError, PermissionError):
             josh_listing = ""
-    # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
+    # J.A.I.N — single batched SSH call for crontab, Sorare tails, and Hermes jobs.
     import datetime as _dt
     import re as _re
     from zoneinfo import ZoneInfo
@@ -1588,11 +1555,6 @@ def fetch_crons() -> List[Dict[str, Any]]:
     today_str = now_et.strftime('%Y-%m-%d')
 
     jain_listing = ""
-    x_log_lines_raw = ""
-    reply_state_raw = "{}"
-    x_log_runs: dict[str, str] = {}
-    x_log_hours: dict[str, list[int]] = {}
-    _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
     jain_verified_runs: dict[str, dict[str, Any]] = {}
     josh_verified_runs: dict[str, dict[str, Any]] = {}
@@ -1606,7 +1568,7 @@ jobs = {
     'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
-    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
+    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log',
     'J.A.I.N Medic': '/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log',
     'Sorare Cookie Auto-Refresh': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log',
 }
@@ -1639,7 +1601,7 @@ PY"""
                 'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
-                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
+                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log'),
                 'J.A.I.N Medic': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log'),
                 'Sorare Cookie Auto-Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log'),
             }
@@ -1655,12 +1617,8 @@ PY"""
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
-            "echo '===XLOG==='; grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}.*X Post Agent|Posted' "
-            "  /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null | tail -50 || true; "
-            "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'; "
             f"echo '===SORAREMISSIONS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_missions.log 2>/dev/null || echo ''; "
             f"echo '===SORARELINEUPS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_lineups.log 2>/dev/null || echo ''; "
-            f"echo '===STRATEGICREPLIES==='; grep -E '^\\[([0-9]{{2}}):' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -20 || echo ''; "
             f"echo '===HERMESJOBS==='; cat /Users/jc_agent/.hermes/cron/jobs.json 2>/dev/null || echo '{{}}'"
         )
         r = subprocess.run(
@@ -1670,46 +1628,23 @@ PY"""
         )
         if r.returncode == 0:
             raw = r.stdout
-            parts = raw.split("===XLOG===")
+            parts = raw.split("===SORAREMISSIONS===")
             jain_listing = parts[0].replace("===CRON===", "").strip() if parts else ""
-            if len(parts) > 1:
-                reply_split = parts[1].split("===REPLY===")
-                x_log_lines_raw = reply_split[0].strip()
-                rest = reply_split[1] if len(reply_split) > 1 else ""
-                missions_split = rest.split("===SORAREMISSIONS===")
-                reply_state_raw = missions_split[0].strip()
-                if len(missions_split) > 1:
-                    lineups_split = missions_split[1].split("===SORARELINEUPS===")
-                    sorare_missions_tail = lineups_split[0].strip()
-                    rest2 = lineups_split[1] if len(lineups_split) > 1 else ""
-                    strategic_split = rest2.split("===STRATEGICREPLIES===")
-                    sorare_lineups_tail = strategic_split[0].strip()
-                    strategic_reply_log = strategic_split[1].strip() if len(strategic_split) > 1 else ""
-                    # Split out Hermes jobs JSON
-                    hermes_split = strategic_reply_log.split("===HERMESJOBS===")
-                    strategic_reply_log_clean = hermes_split[0].strip()
-                    hermes_jobs_raw = hermes_split[1].strip() if len(hermes_split) > 1 else "{}"
-                    # Parse strategic reply hours from log
-                    _strategic_reply_hours: list[int] = []
-                    for _srl in strategic_reply_log_clean.splitlines():
-                        _srm = _re.match(r'^\[(\d{2}):', _srl.strip())
-                        if _srm:
-                            _h = int(_srm.group(1))
-                            if _h <= now_et.hour:
-                                _strategic_reply_hours.append(_h)
-                    if _strategic_reply_hours:
-                        _jain_replies_today_from_log = _strategic_reply_hours
-                    else:
-                        _jain_replies_today_from_log = []
-                    # Parse Hermes jobs for JAIMES-agent last_run data
-                    try:
-                        _hdata = json.loads(hermes_jobs_raw)
-                        for _hj in _hdata.get('jobs', []):
-                            _hname = _hj.get('name', '')
-                            if _hname:
-                                hermes_jobs[_hname] = _hj
-                    except Exception:
-                        pass
+            rest = parts[1] if len(parts) > 1 else ""
+            lineups_split = rest.split("===SORARELINEUPS===")
+            sorare_missions_tail = lineups_split[0].strip()
+            rest2 = lineups_split[1] if len(lineups_split) > 1 else ""
+            hermes_split = rest2.split("===HERMESJOBS===")
+            sorare_lineups_tail = hermes_split[0].strip()
+            hermes_jobs_raw = hermes_split[1].strip() if len(hermes_split) > 1 else "{}"
+            try:
+                _hdata = json.loads(hermes_jobs_raw)
+                for _hj in _hdata.get('jobs', []):
+                    _hname = _hj.get('name', '')
+                    if _hname:
+                        hermes_jobs[_hname] = _hj
+            except Exception:
+                pass
     except Exception:
         pass
 
@@ -1812,66 +1747,6 @@ PY"""
     except Exception:
         pass
 
-    # Parse X post log for lastRun data (ET hours only, today only)
-    try:
-        log_lines = x_log_lines_raw.splitlines()
-        # Keys are ET hours (cron schedule hours) — log timestamps are also ET
-        hour_to_job = {
-            7:  "X Pre-Market",
-            8:  "X Market Open",
-            11: "X Mover",
-            12: "X Hot Take",
-            17: "X Market Close",
-            21: "X Prime Take",
-            22: "X Nightcap",
-            13: "X Quote Tweets",
-            15: "X Quote Tweets",
-            18: "X Quote Tweets",
-            20: "X Quote Tweets",
-        }
-        # We need date context — log lines don't include date so we only count if
-        # timestamp hour is plausible for today (hour <= now_et.hour + 1 guard)
-        for line in log_lines:
-            m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
-            if m:
-                h = int(m.group(1))
-                # Only count hours that have already passed today (avoid yesterday bleed)
-                if h > now_et.hour:
-                    continue
-                job_name = hour_to_job.get(h)
-                if job_name:
-                    iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
-                    x_log_runs[job_name] = iso
-                    x_log_hours.setdefault(job_name, []).append(h)
-    except Exception:
-        pass
-
-    # Parse strategic reply state
-    _jain_replies_today: list[int] = []
-    try:
-        reply_state_r_stdout = reply_state_raw
-        if True:  # keep indentation compatible with original code below
-            jain_rs = json.loads(reply_state_r_stdout.strip() or '{}')
-            for r_item in jain_rs.get('replies', []):
-                posted = r_item.get('posted_at', '')
-                try:
-                    dt_utc = _dt.datetime.fromisoformat(posted.replace('Z', '+00:00'))
-                    dt_et = dt_utc.astimezone(ZoneInfo("America/New_York"))
-                    if dt_et.strftime('%Y-%m-%d') == today_str:
-                        _jain_replies_today.append(dt_et.hour)
-                except Exception:
-                    pass
-            # Also merge log-based hours (more reliable than stale reply_state.json)
-            for _lh in _jain_replies_today_from_log:
-                if _lh not in _jain_replies_today:
-                    _jain_replies_today.append(_lh)
-            if _jain_replies_today:
-                x_log_runs["X Strategic Replies"] = f"{today_str}T{max(_jain_replies_today):02d}:00:00"
-    except Exception:
-        pass
-    fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
-
-
 
     def parse_schedule_time(schedule_str: str) -> tuple[int, int] | None:
         m = _re.search(r'(\d{1,2})(?::(\d{2}))?\s*(AM|PM)', schedule_str, _re.IGNORECASE)
@@ -1929,8 +1804,8 @@ PY"""
         # Compute runStatus for daily jobs
         sched = target.get('schedule', '')
         run_status = None  # 'done' | 'missed' | 'upcoming' | None
-        last_run = x_log_runs.get(target['name'])
-        if not last_run and hermes_job:
+        last_run = None
+        if hermes_job:
             _hlast = hermes_job.get('last_run_at')
             if _hlast and hermes_job.get('last_status') == 'ok':
                 last_run = _hlast
@@ -1969,12 +1844,6 @@ PY"""
                     run_status = 'upcoming'
         elif today_relevant and sched_meta.get('kind') in {'recurring', 'calendar_split'}:
             run_status = 'active' if present else 'due'
-        elif target['name'] == 'X Strategic Replies':
-            if last_run_today:
-                run_status = 'done'
-            elif now_et.hour >= 9:
-                run_status = 'upcoming'
-
         if source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
             row_status = 'paused'
         elif last_run_today or verified_today:
@@ -2024,88 +1893,18 @@ PY"""
             else:
                 runs = list(multi.get('weekendRuns', []))
 
-            # For X Strategic Replies: mark slots done based on actual replies posted today
-            if target['name'] == 'X Strategic Replies':
-                # Collect reply timestamps from both machines
-                reply_hours_today: list[int] = []
-
-                def _utc_to_et_date_hour(posted_iso: str):
-                    """Convert UTC ISO timestamp to (ET_date_str, ET_hour). Returns (None, None) on error."""
-                    try:
-                        dt_utc = _dt.datetime.fromisoformat(posted_iso.replace('Z', '+00:00'))
-                        dt_et = dt_utc.astimezone(ZoneInfo("America/New_York"))
-                        return dt_et.strftime('%Y-%m-%d'), dt_et.hour
-                    except Exception:
-                        return None, None
-
-                for rs_path in [
-                    ROOT.parent / 'data' / 'x_reply_state.json',
-                ]:
-                    if rs_path.exists():
-                        try:
-                            rs_data = json.loads(rs_path.read_text())
-                            for r in rs_data.get('replies', []):
-                                posted = r.get('posted_at', '')
-                                et_date, et_hour = _utc_to_et_date_hour(posted)
-                                if et_date == today_str and et_hour is not None:
-                                    reply_hours_today.append(et_hour)
-                        except Exception:
-                            pass
-                # Also pull J.A.I.N replies (fetched above)
-                for rh in getattr(fetch_crons, '_jain_replies_today', []):
-                    reply_hours_today.append(rh)
-
-                # Slot schedule hours (ET)
-                slot_hours = [9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 21, 23]
-                replies_done = sorted(reply_hours_today)
-
-                # Greedily assign each reply to the earliest slot it could cover
-                assigned = [False] * len(slot_hours)
-                for rh in replies_done:
-                    for i, sh in enumerate(slot_hours):
-                        if not assigned[i] and rh >= sh:
-                            assigned[i] = True
-                            break
-
-                for i, run in enumerate(runs):
-                    run['done'] = assigned[i] if i < len(assigned) else False
-                if any(assigned):
-                    row['runStatus'] = 'done'
-                elif now_et.hour >= 9 and 'runStatus' not in row:
-                    row['runStatus'] = 'upcoming'
-            elif target['name'] == 'X Quote Tweets':
-                done_hours = set(x_log_hours.get(target['name'], []))
-                for run in runs:
-                    t_str = run['time']
-                    try:
-                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
-                            year=now_et.year, month=now_et.month, day=now_et.day,
-                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
-                        )
-                        run['past'] = now_et >= t
-                        run['done'] = t.hour in done_hours
-                    except Exception:
-                        run['past'] = False
-                        run['done'] = False
-                if any(run.get('done') for run in runs):
-                    row['runStatus'] = 'done'
-                elif any(run.get('past') for run in runs):
-                    row['runStatus'] = 'due'
-                elif 'runStatus' not in row:
-                    row['runStatus'] = 'upcoming'
-            else:
-                for run in runs:
-                    t_str = run['time']
-                    try:
-                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
-                            year=now_et.year, month=now_et.month, day=now_et.day,
-                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
-                        )
-                        run['past'] = now_et >= t
-                        run['done'] = False
-                    except Exception:
-                        run['past'] = False
-                        run['done'] = False
+            for run in runs:
+                t_str = run['time']
+                try:
+                    t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                        year=now_et.year, month=now_et.month, day=now_et.day,
+                        tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                    )
+                    run['past'] = now_et >= t
+                    run['done'] = False
+                except Exception:
+                    run['past'] = False
+                    run['done'] = False
             row['multiRun'] = {'runs': runs}
         rows.append(row)
     return rows
@@ -3177,100 +2976,6 @@ def main() -> None:
     print(f"Updated {MODEL_USAGE_PATH}")
     print(f"Updated {AGENT_COMMS_PATH}")
     print(f"Updated {ROOT.parent / 'data' / 'moltworld-data.json'}")
-
-    # ── Sync browser reply state into x-progress.json ──────────────────────
-    try:
-        xp_path = ROOT.parent / "data" / "x-progress.json"
-        reply_state_path = ROOT.parent / "data" / "x_reply_state.json"
-        if xp_path.exists():
-            xp = json.loads(xp_path.read_text())
-            total_browser_replies = 0
-            browser_recent = []
-            if reply_state_path.exists():
-                rs = json.loads(reply_state_path.read_text())
-                total_browser_replies = len(rs.get('replied_tweet_ids', []))
-                for r in rs.get('replies', [])[-10:]:
-                    browser_recent.append({
-                        'id': r.get('tweet_id', ''),
-                        'text': r.get('reply_text', ''),
-                        'type': 'engagement',
-                        'posted_at': r.get('posted_at', ''),
-                        'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
-                        'reply_to': f"@{r.get('tweet_author','')}",
-                    })
-
-            # Also pull reply state from J.A.I.N if available
-            try:
-                import subprocess as _sp
-                r2 = _sp.run(
-                    ['ssh', '-o', 'ConnectTimeout=5', '-o', 'BatchMode=yes',
-                     'jc_agent@100.121.89.84',
-                     'cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo "{}"'],
-                    capture_output=True, text=True, timeout=8
-                )
-                if r2.returncode == 0 and r2.stdout.strip().startswith('{'):
-                    jain_rs = json.loads(r2.stdout)
-                    jain_total = len(jain_rs.get('replied_tweet_ids', []))
-                    total_browser_replies = max(total_browser_replies, jain_total)
-                    # Add J.A.I.N replies to recent list
-                    for r in jain_rs.get('replies', [])[-10:]:
-                        browser_recent.append({
-                            'id': r.get('tweet_id', ''),
-                            'text': r.get('reply_text', ''),
-                            'type': 'engagement',
-                            'posted_at': r.get('posted_at', ''),
-                            'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
-                            'reply_to': f"@{r.get('tweet_author','')}",
-                        })
-            except Exception:
-                pass
-
-            # Merge into recentPosts — deduplicate by id
-            existing_ids = {p.get('id', '') for p in xp.get('recentPosts', [])}
-            new_posts = [p for p in browser_recent if p.get('id') and p['id'] not in existing_ids]
-            merged_posts = new_posts + xp.get('recentPosts', [])
-            # Sort by posted_at desc, keep top 8
-            merged_posts.sort(key=lambda p: p.get('posted_at', ''), reverse=True)
-            xp['recentPosts'] = merged_posts[:8]
-
-            # Update lead metrics
-            lead = xp.setdefault('lead', {})
-            lead['total_replies_all_time'] = total_browser_replies
-
-            # Today's browser reply count
-            today_iso = now_iso[:10]
-            today_replies = [p for p in browser_recent if p.get('posted_at', '')[:10] == today_iso]
-            strategy = xp.setdefault('strategy', {})
-            strategy['replies_today'] = len(today_replies)
-            strategy['engagement_today'] = len(today_replies)
-
-            # 7-day reply count
-            import datetime as _dt
-            week_ago = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=7)).isoformat()
-            week_replies = [p for p in browser_recent if p.get('posted_at', '') >= week_ago]
-            strategy['replies_7d'] = len(week_replies)
-
-            # Top reply targets (most replied-to authors this week)
-            from collections import Counter as _Counter
-            author_counts = _Counter(p.get('reply_to', '').lstrip('@') for p in week_replies if p.get('reply_to'))
-            strategy['best_reply_targets'] = [a for a, _ in author_counts.most_common(5)]
-
-            # Brand voice + slot config (for dashboard display)
-            strategy['brand_voice'] = 'AI character — sharp, irreverent, owns AI identity'
-            strategy['reply_slots_per_day'] = 12
-            strategy['target_accounts_count'] = 23
-
-            # Update milestone for total replies
-            for ms in xp.get('milestones', []):
-                if ms.get('metric') == 'total_replies':
-                    ms['current'] = total_browser_replies
-                    ms['achieved'] = total_browser_replies >= ms.get('target', 9999)
-
-            xp['updatedAt'] = now_iso
-            xp_path.write_text(json.dumps(xp, indent=2, default=str))
-            print(f"Updated x-progress.json (replies={total_browser_replies})")
-    except Exception as _xe:
-        print(f"x-progress sync warning: {_xe}")
 
 
 if __name__ == "__main__":

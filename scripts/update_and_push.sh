@@ -39,7 +39,6 @@ pull_json() {
 # Pull remote JSON safely; never overwrite valid local JSON with empty SSH output.
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/jaimes-brain-feed.json" data/jaimes-brain-feed.json '{"agent":"JAIMES","status":"unknown","active":false}'
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" data/moltworld-state.json '{}'
-pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json" data/x-progress.json '{"available":false,"stale":true,"lastError":"fallback: source unavailable"}'
 python3 scripts/update_mission_control.py
 python3 scripts/mission_control_visual_canaries.py || true
 python3 scripts/update_mission_control.py
@@ -47,7 +46,7 @@ python3 scripts/update_mission_control.py
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
+git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   exit 0

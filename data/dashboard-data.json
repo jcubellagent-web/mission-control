@@ -1,16 +1,5 @@
 {
-  "actionRequired": [
-    {
-      "priority": "high",
-      "title": "Mission Control canary issue: 1 canary issue(s)",
-      "url": "#canaries"
-    },
-    {
-      "priority": "high",
-      "title": "Calendar auth needs refresh",
-      "url": "#calendar"
-    }
-  ],
+  "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
@@ -34,7 +23,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "mc_clean_deploy",
-    "updatedAt": "2026-04-29T14:55:16Z"
+    "updatedAt": "2026-04-29T14:55:50Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -50,8 +39,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 17 source file(s) changed",
-        "time": "2026-04-29T14:55:16Z"
+        "event": "Patch feed: 16 source file(s) changed",
+        "time": "2026-04-29T14:55:50Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +58,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:55:16Z",
+    "updatedAt": "2026-04-29T14:55:50Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "17 source file(s) changed",
+      "summary": "16 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 17,
+      "dirtyCount": 16,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-accum.json"
+        "data/model-usage-accum.json",
+        "data/model-usage-tracker.json"
       ],
-      "head": "d07349c24",
-      "updatedAt": "2026-04-29T14:55:16Z"
+      "head": "0af1f6337",
+      "updatedAt": "2026-04-29T14:55:50Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +177,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 16,
+    "missionControlDirty": 15,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -217,7 +206,7 @@
       "weeklyReset": "5d 14h",
       "summary": "94% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:55:18Z"
+    "updatedAt": "2026-04-29T14:55:52Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -371,7 +360,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:55:21Z",
+    "lastUpdated": "2026-04-29T14:55:55Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -429,7 +418,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:55:26Z",
+    "updatedAt": "2026-04-29T14:56:00Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -446,12 +435,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.8,
-      "cpu_user": 17.88,
-      "cpu_sys": 17.88,
-      "load1": 2.36,
-      "load5": 2.34,
-      "load15": 2.34,
+      "cpu_pct": 37.6,
+      "cpu_user": 18.61,
+      "cpu_sys": 18.97,
+      "load1": 1.95,
+      "load5": 2.24,
+      "load15": 2.3,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.2,
       "uptime": "",
@@ -461,14 +450,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.2,
-      "cpu_user": 14.84,
-      "cpu_sys": 9.37,
-      "load1": 2.33,
-      "load5": 2.1,
-      "load15": 2.02,
+      "cpu_pct": 15.4,
+      "cpu_user": 3.84,
+      "cpu_sys": 11.53,
+      "load1": 2.23,
+      "load5": 2.09,
+      "load15": 2.01,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -477,8 +466,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Calendar re-auth required"
+    "status": "ok",
+    "message": "Connected via local gog"
   },
   "devices": [
     {
@@ -492,19 +481,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:55:16Z"
+      "lastChecked": "2026-04-29T14:55:50Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:55:16Z"
+      "lastChecked": "2026-04-29T14:55:50Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:55:16Z"
+      "lastChecked": "2026-04-29T14:55:50Z"
     }
   ],
   "crons": [
@@ -521,7 +510,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:55:27.040354+00:00"
+      "lastRun": "2026-04-29T14:55:28.964242+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1065,10 +1054,10 @@
     }
   ],
   "visualCanaries": {
-    "ok": false,
-    "status": "attention",
-    "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T14:55:16.256069Z",
+    "ok": true,
+    "status": "ok",
+    "summary": "All canaries passed",
+    "checkedAt": "2026-04-29T14:55:50.788480Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1078,9 +1067,9 @@
       },
       {
         "name": "Calendar tile",
-        "ok": false,
-        "detail": "Calendar re-auth required",
-        "severity": "medium"
+        "ok": true,
+        "detail": "Connected via local gog",
+        "severity": "ok"
       },
       {
         "name": "Today Jobs",
@@ -1091,7 +1080,7 @@
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "1 visible alert(s)",
+        "detail": "clear",
         "severity": "ok"
       },
       {
@@ -1331,9 +1320,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1346,9 +1335,9 @@
     {
       "id": "visual-canaries",
       "name": "Visual Canaries",
-      "status": "attention",
-      "summary": "1 canary issue(s)",
-      "detail": "5/6 checks passing"
+      "status": "ok",
+      "summary": "All canaries passed",
+      "detail": "6/6 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -1367,9 +1356,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1639,29 +1628,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:55:21Z",
+      "time": "2026-04-29T14:55:55Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T14:55:18Z",
+      "time": "2026-04-29T14:55:52Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T14:55:18Z",
+      "time": "2026-04-29T14:55:52Z",
       "event": "CodexBar: 94% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:55:16Z",
+      "time": "2026-04-29T14:55:50Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:55:16Z",
-      "event": "JOSHeX: Patch feed: 17 source file(s) changed"
+      "time": "2026-04-29T14:55:50Z",
+      "event": "JOSHeX: Patch feed: 16 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:55:16Z",
+      "time": "2026-04-29T14:55:50Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:55:16Z"
+  "lastUpdated": "2026-04-29T14:55:50Z"
 }
