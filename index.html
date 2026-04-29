@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777213760 -->
+    <!-- BUILD:1777431982 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -6256,6 +6256,295 @@
             100% { box-shadow: 0 0 0 0 rgba(34,211,238,0); }
         }
 
+
+        /* ============ PROFESSIONAL CONTROL ROOM POLISH ============ */
+        :root {
+            --pro-bg-0: #05080b;
+            --pro-bg-1: #071116;
+            --pro-panel: rgba(9, 18, 24, 0.88);
+            --pro-panel-strong: rgba(10, 23, 30, 0.96);
+            --pro-panel-soft: rgba(255, 255, 255, 0.035);
+            --pro-line: rgba(148, 163, 184, 0.13);
+            --pro-line-strong: rgba(125, 211, 252, 0.22);
+            --pro-text: rgba(248, 250, 252, 0.92);
+            --pro-muted: rgba(203, 213, 225, 0.58);
+            --pro-faint: rgba(148, 163, 184, 0.38);
+            --pro-cyan: #22d3ee;
+            --pro-blue: #38bdf8;
+            --pro-green: #34d399;
+            --pro-amber: #fbbf24;
+            --pro-shadow: 0 18px 52px rgba(0, 0, 0, 0.34);
+            --pro-inner: inset 0 1px 0 rgba(255,255,255,0.045);
+        }
+        html { background: var(--pro-bg-0) !important; }
+        body:not(.phone-mode) {
+            background:
+                radial-gradient(circle at 16% -10%, rgba(34, 211, 238, 0.11), transparent 30%),
+                radial-gradient(circle at 88% 0%, rgba(52, 211, 153, 0.08), transparent 28%),
+                linear-gradient(180deg, var(--pro-bg-1) 0%, var(--pro-bg-0) 64%, #030506 100%) !important;
+            color: var(--pro-muted);
+            letter-spacing: -0.006em;
+        }
+        body:not(.phone-mode)::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(148,163,184,0.026) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148,163,184,0.022) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.68), transparent 78%);
+        }
+        body:not(.phone-mode) .lobster-bg {
+            opacity: 0.035 !important;
+            filter: grayscale(1) saturate(0.45) contrast(1.05) brightness(0.68) !important;
+            animation: none !important;
+        }
+        body:not(.phone-mode) .container {
+            width: min(100%, 1680px);
+            padding: clamp(14px, 1.45vw, 24px);
+        }
+        body:not(.phone-mode) header {
+            border: 1px solid rgba(125, 211, 252, 0.12);
+            box-shadow: var(--pro-shadow), var(--pro-inner);
+            background-size: 280px auto;
+            overflow: hidden;
+        }
+        body:not(.phone-mode) header::before {
+            background:
+                linear-gradient(135deg, rgba(5, 12, 16, 0.94), rgba(7, 23, 29, 0.88)),
+                linear-gradient(90deg, rgba(34,211,238,0.10), transparent 44%, rgba(52,211,153,0.08)) !important;
+        }
+        body:not(.phone-mode) header::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34,211,238,0.42), rgba(52,211,153,0.30), transparent);
+            z-index: 1;
+        }
+        body:not(.phone-mode) .logo h1 {
+            color: var(--pro-text);
+            font-size: 1.02rem;
+            font-weight: 760;
+            letter-spacing: 0.015em;
+        }
+        body:not(.phone-mode) .logo-icon {
+            border: 1px solid rgba(125,211,252,0.22);
+            box-shadow: 0 0 0 4px rgba(34,211,238,0.045), 0 12px 28px rgba(0,0,0,0.28);
+        }
+        body:not(.phone-mode) .header-status {
+            gap: 8px;
+        }
+        body:not(.phone-mode) .build-sha-badge,
+        body:not(.phone-mode) .build-status-chip,
+        body:not(.phone-mode) .freshness-badge,
+        body:not(.phone-mode) .connection-status,
+        body:not(.phone-mode) #airpoint-toggle,
+        body:not(.phone-mode) #layout-mode-toggle,
+        body:not(.phone-mode) #night-mode-btn,
+        body:not(.phone-mode) .refresh-btn {
+            min-height: 29px;
+            border-radius: 9px;
+            border-color: rgba(148,163,184,0.13) !important;
+            background: rgba(3, 9, 12, 0.45) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+            color: rgba(226,232,240,0.66) !important;
+        }
+        body:not(.phone-mode) .refresh-btn:hover,
+        body:not(.phone-mode) #layout-mode-toggle:hover,
+        body:not(.phone-mode) #night-mode-btn:hover {
+            border-color: rgba(34,211,238,0.34) !important;
+            background: rgba(34,211,238,0.08) !important;
+            color: var(--pro-text) !important;
+        }
+        body:not(.phone-mode) .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+            gap: 10px;
+        }
+        body:not(.phone-mode) .stat-card,
+        body:not(.phone-mode) .stat-pill {
+            border: 1px solid var(--pro-line) !important;
+            background: linear-gradient(180deg, rgba(10,24,31,0.82), rgba(5,12,16,0.88)) !important;
+            border-radius: 12px !important;
+            box-shadow: var(--pro-inner);
+        }
+        body:not(.phone-mode) .card {
+            border: 1px solid var(--pro-line) !important;
+            border-radius: 16px !important;
+            background:
+                linear-gradient(180deg, rgba(11, 25, 32, 0.90), rgba(5, 12, 16, 0.96)) !important;
+            box-shadow: var(--pro-shadow), var(--pro-inner) !important;
+            backdrop-filter: blur(18px) saturate(1.12) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(1.12) !important;
+            overflow: hidden;
+        }
+        body:not(.phone-mode) .card:hover {
+            border-color: rgba(125,211,252,0.26) !important;
+            box-shadow: 0 22px 60px rgba(0,0,0,0.40), 0 0 0 1px rgba(34,211,238,0.05), var(--pro-inner) !important;
+        }
+        body:not(.phone-mode) .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.050), transparent 28%, transparent 72%, rgba(34,211,238,0.035));
+            opacity: 0.72;
+        }
+        body:not(.phone-mode) .card > * { position: relative; z-index: 1; }
+        body:not(.phone-mode) .card-header {
+            margin: -2px -2px 10px;
+            padding: 0 0 10px;
+            border-bottom: 1px solid rgba(125,211,252,0.11) !important;
+        }
+        body:not(.phone-mode) .card-header h2 {
+            color: rgba(226,232,240,0.74) !important;
+            font-size: 0.66rem;
+            letter-spacing: 0.155em;
+            font-weight: 820;
+        }
+        body:not(.phone-mode) .section-icon-image,
+        body:not(.phone-mode) .card-header .icon {
+            opacity: 0.92;
+            filter: drop-shadow(0 0 10px rgba(34,211,238,0.18));
+        }
+        body:not(.phone-mode) .module-action-btn,
+        body:not(.phone-mode) .artifact-link-btn {
+            border-radius: 8px !important;
+            border-color: rgba(148,163,184,0.14) !important;
+            background: rgba(3, 9, 12, 0.42) !important;
+            color: rgba(226,232,240,0.62) !important;
+        }
+        body:not(.phone-mode) .module-action-btn:hover,
+        body:not(.phone-mode) .artifact-link-btn:hover {
+            border-color: rgba(34,211,238,0.38) !important;
+            background: rgba(34,211,238,0.09) !important;
+            color: #e0faff !important;
+        }
+        body:not(.phone-mode) .card-brain {
+            border-color: rgba(34,211,238,0.22) !important;
+            background:
+                radial-gradient(circle at 18% 0%, rgba(34,211,238,0.12), transparent 34%),
+                linear-gradient(180deg, rgba(8,31,39,0.94), rgba(4,12,16,0.98)) !important;
+        }
+        body:not(.phone-mode) .card-brain.brain-active {
+            border-color: rgba(52,211,153,0.34) !important;
+        }
+        body:not(.phone-mode) .bf-objective,
+        body:not(.phone-mode) .bf-signal-chip,
+        body:not(.phone-mode) .agent-comms-section,
+        body:not(.phone-mode) .agent-chat-section,
+        body:not(.phone-mode) .intel-hi-item,
+        body:not(.phone-mode) .mu-lane-card,
+        body:not(.phone-mode) .mu-budget-section,
+        body:not(.phone-mode) .mu-codexbar-section,
+        body:not(.phone-mode) .sh-agent-row,
+        body:not(.phone-mode) .capability-tile,
+        body:not(.phone-mode) .jobs-agent-chip {
+            border-color: rgba(148,163,184,0.12) !important;
+            background: rgba(3, 9, 12, 0.36) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+        }
+        body:not(.phone-mode) .bf-objective {
+            border-radius: 14px !important;
+        }
+        body:not(.phone-mode) .bf-objective-text,
+        body:not(.phone-mode) .bf-objective-title,
+        body:not(.phone-mode) .pc-title,
+        body:not(.phone-mode) .mu-active-main,
+        body:not(.phone-mode) .mu-lane-main,
+        body:not(.phone-mode) .capability-v,
+        body:not(.phone-mode) .sh-agent-name,
+        body:not(.phone-mode) .tjob-name {
+            color: var(--pro-text) !important;
+        }
+        body:not(.phone-mode) .bf-objective-detail,
+        body:not(.phone-mode) .mu-lane-meta,
+        body:not(.phone-mode) .capability-d,
+        body:not(.phone-mode) .sh-agent-tag,
+        body:not(.phone-mode) .tjob-subline {
+            color: var(--pro-muted) !important;
+        }
+        body:not(.phone-mode) .card-intel-highlights {
+            border-color: rgba(56,189,248,0.17) !important;
+        }
+        body:not(.phone-mode) .card-model-health {
+            border-color: rgba(52,211,153,0.16) !important;
+        }
+        body:not(.phone-mode) .card-jobs-full {
+            border-color: rgba(125,211,252,0.18) !important;
+        }
+        body:not(.phone-mode) .card-jobs-full .card-header,
+        body:not(.phone-mode) .card-jobs-full .jobs-agents-row {
+            background: linear-gradient(180deg, rgba(7,18,24,0.96), rgba(7,18,24,0.88)) !important;
+            backdrop-filter: blur(14px);
+        }
+        body:not(.phone-mode) .tjob-cat-header {
+            background: rgba(255,255,255,0.018);
+            border: 1px solid transparent;
+        }
+        body:not(.phone-mode) .tjob-cat-header:hover {
+            background: rgba(34,211,238,0.055) !important;
+            border-color: rgba(34,211,238,0.12);
+        }
+        body:not(.phone-mode) .tjob-row {
+            border: 1px solid transparent;
+        }
+        body:not(.phone-mode) .tjob-row:hover {
+            border-color: rgba(148,163,184,0.10);
+            background: rgba(255,255,255,0.035) !important;
+        }
+        body:not(.phone-mode) .live-badge,
+        body:not(.phone-mode) .bf-model-badge,
+        body:not(.phone-mode) .pc-pill,
+        body:not(.phone-mode) .tjob-run-badge,
+        body:not(.phone-mode) .run-badge,
+        body:not(.phone-mode) .job-chip,
+        body:not(.phone-mode) .priority {
+            border-radius: 999px !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+        }
+        body:not(.phone-mode) ::-webkit-scrollbar { width: 7px; height: 7px; }
+        body:not(.phone-mode) ::-webkit-scrollbar-track { background: transparent; }
+        body:not(.phone-mode) ::-webkit-scrollbar-thumb {
+            background: rgba(125,211,252,0.18);
+            border-radius: 999px;
+            border: 2px solid rgba(4,10,13,0.84);
+        }
+        body:not(.phone-mode) ::-webkit-scrollbar-thumb:hover { background: rgba(125,211,252,0.32); }
+        body:not(.phone-mode) .modal-content,
+        body:not(.phone-mode) .sp-modal-content {
+            border: 1px solid rgba(125,211,252,0.18) !important;
+            border-radius: 18px !important;
+            background: linear-gradient(180deg, rgba(8,22,30,0.98), rgba(4,10,14,0.99)) !important;
+            box-shadow: 0 28px 80px rgba(0,0,0,0.55), var(--pro-inner) !important;
+        }
+        @media (min-width: 1180px) {
+            body:not(.phone-mode) .kiosk-main { gap: 14px !important; }
+            body:not(.phone-mode).kiosk-mode .kiosk-main { grid-template-columns: minmax(0, 1.58fr) minmax(410px, 0.82fr) !important; }
+            body:not(.phone-mode).kiosk-mode .hero-grid { gap: 14px !important; grid-template-rows: minmax(0, 1.32fr) minmax(0, 1.0fr) !important; }
+            body:not(.phone-mode).kiosk-mode .kiosk-bottom-left { gap: 14px !important; }
+            body:not(.phone-mode).kiosk-mode .card { padding: 14px !important; }
+            body:not(.phone-mode).kiosk-mode .card-jobs-full { padding-right: 13px !important; }
+            body:not(.phone-mode).kiosk-mode .card-brain .bf-objective { min-height: 136px !important; }
+            body:not(.phone-mode).kiosk-mode .card-intel-highlights { flex: 0.82 1 0 !important; }
+            body:not(.phone-mode).kiosk-mode .card-model-health { flex: 1.18 1 0 !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body:not(.phone-mode) *,
+            body:not(.phone-mode) *::before,
+            body:not(.phone-mode) *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -6587,7 +6876,7 @@
         // ============================================
         // CONFIGURATION - Edit these values
         // ============================================
-        const BUILD_ID = '1776483510';
+        const BUILD_ID = '1777431982';
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file

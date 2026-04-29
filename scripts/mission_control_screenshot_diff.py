@@ -39,6 +39,10 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         return
 
 
+class ReusableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+
 def stable_payloads() -> dict[str, object]:
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     dashboard = json.loads((ROOT / "data" / "dashboard-data.json").read_text())
@@ -85,7 +89,7 @@ def stable_payloads() -> dict[str, object]:
 
 def start_server(port: int) -> socketserver.TCPServer:
     handler = lambda *a, **kw: QuietHandler(*a, directory=str(ROOT), **kw)  # noqa: E731
-    httpd = socketserver.TCPServer(("127.0.0.1", port), handler)
+    httpd = ReusableTCPServer(("127.0.0.1", port), handler)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
     return httpd
