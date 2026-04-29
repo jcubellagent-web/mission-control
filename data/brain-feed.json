@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "heartbeat completed: HEARTBEAT.md checks read; mission control recent, self-maintenance clean, capability canary unchanged warnings",
+  "objective": "handle async completion event internally",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T16:17:45Z",
-  "checkedAt": "2026-04-29T16:17:45Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-29T16:18:10Z",
+  "checkedAt": "2026-04-29T16:18:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
