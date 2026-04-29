@@ -78,6 +78,18 @@ def stable_payloads() -> dict[str, object]:
     jain = {**josh, "agent": "J.A.I.N", "active": False, "status": "idle", "objective": "Regression fixture idle lane"}
     dashboard["brainFeed"] = josh
     dashboard["agentBrainFeeds"] = {"josh": josh, "jaimes": jaimes, "jain": jain}
+    dashboard["personalCodex"] = {
+        "objective": "Regression fixture: JOSHeX support lane",
+        "validation": "Visible but secondary",
+        "status": "ready",
+        "updatedAt": now,
+        "patchStatus": {
+            "status": "clean",
+            "summary": "JOSHeX fixture clean",
+            "detail": "support strip should not compress hero lanes",
+            "updatedAt": now,
+        },
+    }
     return {
         "brain-feed.json": josh,
         "jaimes-brain-feed.json": jaimes,

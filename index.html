@@ -4702,9 +4702,9 @@
             gap: 12px;
         }
         .bf-hero-grid.dual-live .bf-objective {
-            min-height: clamp(224px, 23vh, 248px);
-            padding: 17px 18px 15px;
-            gap: 13px;
+            min-height: clamp(250px, 25vh, 286px);
+            padding: 20px 21px 18px;
+            gap: 14px;
         }
         .bf-objective.agent-josh {
             --bf-agent-color: #38bdf8;
@@ -4824,7 +4824,7 @@
             padding-top: 2px;
         }
         .bf-objective.bf-objective-compact {
-            --bf-objective-font-size: clamp(2.05rem, 3.05vw, 2.55rem);
+            --bf-objective-font-size: clamp(2.2rem, 3.25vw, 2.85rem);
             --bf-objective-line-height: 1.08;
         }
         .bf-hero-grid.dual-live .bf-objective-text-wrap {
@@ -4855,6 +4855,56 @@
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-support-strip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(103,232,249,0.15);
+            border-left: 3px solid rgba(103,232,249,0.6);
+            background: linear-gradient(90deg, rgba(103,232,249,0.075), rgba(255,255,255,0.016));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+        .bf-support-strip .bf-agent-name {
+            flex: 0 0 auto;
+            font-size: 0.58rem;
+            padding: 4px 8px;
+        }
+        .bf-support-main {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .bf-support-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.82rem;
+            font-weight: 750;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-support-detail {
+            color: rgba(255,255,255,0.52);
+            font-size: 0.64rem;
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-support-meta {
+            flex: 0 0 auto;
+            color: rgba(103,232,249,0.68);
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             white-space: nowrap;
         }
         #bf-last-updated, .bf-last-updated {
@@ -6640,22 +6690,22 @@
                 height: auto !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                gap: 8px !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective {
-                min-height: clamp(126px, 15vh, 156px) !important;
-                padding: 10px 11px 9px !important;
-                gap: 7px !important;
+                min-height: clamp(188px, 22vh, 238px) !important;
+                padding: 14px 15px 12px !important;
+                gap: 9px !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text {
-                font-size: clamp(0.82rem, 0.9vw, 1.02rem) !important;
-                line-height: 1.18 !important;
+                font-size: clamp(1.55rem, 1.72vw, 2.05rem) !important;
+                line-height: 1.08 !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text-wrap {
-                height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
-                min-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
-                max-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
+                min-height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
+                max-height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-realtime-deck:has(+ *) ,
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-realtime-deck {
@@ -6779,24 +6829,24 @@
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
             }
-            /* 24IN BRAIN FEED OBJECTIVE STACK: JOSH + JAIMES + JOSHeX */
+            /* 24IN BRAIN FEED OBJECTIVE STACK: JOSH + JAIMES primary, JOSHeX secondary */
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                gap: 8px !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
             }
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective {
-                min-height: clamp(126px, 15vh, 156px) !important;
-                padding: 10px 11px 9px !important;
-                gap: 7px !important;
+                min-height: clamp(188px, 22vh, 238px) !important;
+                padding: 14px 15px 12px !important;
+                gap: 9px !important;
             }
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-text {
-                font-size: clamp(0.82rem, 0.9vw, 1.02rem) !important;
-                line-height: 1.18 !important;
+                font-size: clamp(1.55rem, 1.72vw, 2.05rem) !important;
+                line-height: 1.08 !important;
             }
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-text-wrap {
-                height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
-                min-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
-                max-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
+                min-height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
+                max-height: calc(2.05rem * 1.08 * 3 + 0.2rem) !important;
             }
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-detail,
             body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-submeta {
@@ -6879,7 +6929,7 @@
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-shell {
                 display: grid !important;
-                grid-template-rows: minmax(0, 1.45fr) minmax(72px, 0.55fr) !important;
+                grid-template-rows: minmax(188px, 1fr) minmax(42px, auto) minmax(52px, auto) !important;
                 height: 100% !important;
                 min-height: 0 !important;
                 align-content: stretch !important;
@@ -6897,8 +6947,8 @@
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective {
                 justify-content: space-between !important;
-                --bf-objective-font-size: clamp(1.08rem, 1.18vw, 1.42rem) !important;
-                --bf-objective-line-height: 1.15 !important;
+                --bf-objective-font-size: clamp(1.55rem, 1.72vw, 2.05rem) !important;
+                --bf-objective-line-height: 1.08 !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-text-wrap {
                 flex: 1 1 auto !important;
@@ -10411,8 +10461,8 @@
         }
 
         function pickBrainFeedObjectiveFeeds(joshBf, jainBf, jaimesBf) {
-            // Explicit operator view: JOSH 2.0, JAIMES, and JOSHeX all get
-            // objective slots when available. J.A.I.N stays out of hero space.
+            // Hero space is reserved for the two primary operators. JOSHeX is
+            // visible as a support strip, not promoted to a third full card.
             const entries = [];
             const seen = new Set();
             const push = (entry, allowReady = false) => {
@@ -10426,7 +10476,6 @@
             };
             push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
             push({ bf: coerceOperatorObjectiveFeed(jaimesBf, 'JAIMES'), agentLabel: 'JAIMES' }, true);
-            push({ bf: synthesizeJoshexBrainFeed(), agentLabel: 'JOSHeX' }, true);
             return entries;
         }
 
@@ -10479,6 +10528,22 @@
             </div>`;
         }
 
+        function renderJoshexSupportStrip() {
+            const bf = synthesizeJoshexBrainFeed();
+            if (!bf) return '';
+            const objectiveText = getBrainFeedObjectiveText(bf);
+            const objectiveDetail = getBrainFeedObjectiveDetail(bf);
+            const updated = bf.updatedAt ? formatRelTime(bf.updatedAt) : 'ready';
+            return `<div class="bf-support-strip agent-joshex" data-agent="JOSHeX">
+                <span class="bf-agent-name">JOSHeX</span>
+                <div class="bf-support-main">
+                    <span class="bf-support-title" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</span>
+                    <span class="bf-support-detail" title="${escapeHtml(objectiveDetail)}">${escapeHtml(objectiveDetail)}</span>
+                </div>
+                <span class="bf-support-meta">${escapeHtml(updated)}</span>
+            </div>`;
+        }
+
         function renderObjectiveBrainFeed(entries) {
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard || !entries.length) return;
@@ -10489,6 +10554,7 @@
                     <div class="bf-hero-grid dual-live">
                         ${entries.map(entry => renderBrainFeedObjectiveCard(entry, true)).join('')}
                     </div>
+                    ${renderJoshexSupportStrip()}
                     ${renderBrainFeedRealtimeDeck(primary)}
                 </div>
             `;
