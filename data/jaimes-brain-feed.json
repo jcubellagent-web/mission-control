@@ -1,21 +1,16 @@
 {
   "active": false,
-  "objective": "Done: fantasy automation skill updated",
+  "objective": "Done: clarified 9am and 11am reports",
   "status": "idle",
-  "updatedAt": "2026-04-29T23:48:49Z",
+  "updatedAt": "2026-04-29T23:52:38Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:47:19Z",
-  "messageReceived": "2026-04-29T23:47:19Z",
+  "checkedAt": "2026-04-29T23:52:38Z",
+  "messageReceived": "2026-04-29T23:52:38Z",
   "steps": [
-    {
-      "label": "Step: patch exact MLB lock lookup + ESPN projections",
-      "status": "done",
-      "tool": "code"
-    },
     {
       "label": "Step: verify fantasy upgrades dry-run",
       "status": "done",
@@ -58,6 +53,11 @@
     },
     {
       "label": "Task: review skill updates after fantasy automation",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: clarify fantasy report timing",
       "status": "done",
       "tool": "exec"
     }
