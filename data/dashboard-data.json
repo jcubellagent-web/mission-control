@@ -15,32 +15,32 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-29T22:19:08Z",
-    "objective": "Watching Mission Control deploy after usage refresh push",
+    "messageReceived": "2026-04-29T22:54:39Z",
+    "objective": "Verifying Mission Control deploy status",
     "status": "active",
     "steps": [
       {
-        "label": "Watching Mission Control deploy after usage refresh push",
+        "label": "Verifying Mission Control deploy status",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T22:49:44Z",
-    "checkedAt": "2026-04-29T22:49:44Z",
+    "updatedAt": "2026-04-29T22:54:39Z",
+    "checkedAt": "2026-04-29T22:54:39Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Watching Mission Control deploy after usage refresh push",
-    "updatedAt": "2026-04-29T22:50:19Z"
+    "context": "Verifying Mission Control deploy status",
+    "updatedAt": "2026-04-29T22:55:17Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 39359,
+    "limitTokens": 400000,
+    "pct": 0.0984,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T22:50:19Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-29T22:55:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T22:50:19Z",
+    "updatedAt": "2026-04-29T22:55:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 10,
       "files": [
         "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json"
+        "data/mission-control-canaries.json",
+        "data/model-usage-tracker.json"
       ],
-      "head": "95d58d0a4",
-      "updatedAt": "2026-04-29T22:50:19Z"
+      "head": "840cd7b57",
+      "updatedAt": "2026-04-29T22:55:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,38 +188,38 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
       "mission-control/scripts/run_mission_control_watchdog.sh"
     ],
-    "codexbarStatus": "95% left \u00b7 wk 81% left",
+    "codexbarStatus": "94% left \u00b7 wk 81% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 95% left [===========-]",
-        "Resets in 4h 9m",
+        "Session: 94% left [===========-]",
+        "Resets in 4h 4m",
         "Weekly: 81% left [=========---]",
         "Pace: 6% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "95% left",
+      "session": "94% left",
       "weekly": "81% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 9m",
+      "sessionReset": "4h 4m",
       "weeklyReset": "5d 6h",
-      "summary": "95% left \u00b7 wk 81% left"
+      "summary": "94% left \u00b7 wk 81% left"
     },
-    "updatedAt": "2026-04-29T22:50:22Z"
+    "updatedAt": "2026-04-29T22:55:19Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.395396,
+    "session": 0.022447,
+    "daily": 0.417843,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -236,7 +236,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.395396
+        "cost": 0.417843
       },
       {
         "name": "openai/gpt-5.5",
@@ -275,13 +275,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 74838,
-        "outputTokens": 197,
-        "totalTokens": 75035,
-        "sessionCost": 0.395396,
-        "dailyCost": 0.395396,
-        "weeklyCost": 0.395396,
-        "sessions": 2,
+        "inputTokens": 75413,
+        "outputTokens": 203,
+        "totalTokens": 75616,
+        "sessionCost": 0.417843,
+        "dailyCost": 0.417843,
+        "weeklyCost": 0.417843,
+        "sessions": 3,
         "isGemini": false,
         "costEstimated": false
       },
@@ -343,8 +343,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 243088930,
-        "dailyTokens": 106354834,
+        "totalTokens": 247623663,
+        "dailyTokens": 110889567,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T22:50:25Z",
+    "lastUpdated": "2026-04-29T22:55:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -408,8 +408,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.395396,
-      "total": 47.518009,
+      "daily": 0.417843,
+      "total": 47.540456,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -424,11 +424,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.452922,
-      "codexEquivalentDaily": 0.395396,
-      "codexEquivalentMonthlyProjection": 194.8,
-      "codexTokensWeekly": 351875676,
-      "codexTokensDaily": 106354834,
+      "codexEquivalentWeekly": 45.475369,
+      "codexEquivalentDaily": 0.417843,
+      "codexEquivalentMonthlyProjection": 194.89,
+      "codexTokensWeekly": 356410990,
+      "codexTokensDaily": 110889567,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -451,9 +451,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.452922,
-          "dailyEquivalent": 0.395396,
-          "tokensWeekly": 351875676,
+          "weeklyEquivalent": 45.475369,
+          "dailyEquivalent": 0.417843,
+          "tokensWeekly": 356410990,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -527,7 +527,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $194.80/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $194.89/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -547,7 +547,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T22:50:30Z",
+    "updatedAt": "2026-04-29T22:55:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -564,14 +564,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.7,
-      "cpu_user": 17.32,
-      "cpu_sys": 17.32,
-      "load1": 2.39,
-      "load5": 2.2,
-      "load15": 2.25,
+      "cpu_pct": 35.9,
+      "cpu_user": 17.54,
+      "cpu_sys": 18.34,
+      "load1": 2.08,
+      "load5": 2.18,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -579,14 +579,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.4,
-      "cpu_user": 3.14,
-      "cpu_sys": 10.23,
-      "load1": 1.88,
-      "load5": 2.01,
-      "load15": 2.03,
+      "cpu_pct": 12.2,
+      "cpu_user": 2.29,
+      "cpu_sys": 9.92,
+      "load1": 1.81,
+      "load5": 1.93,
+      "load15": 1.98,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -610,19 +610,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:50:19Z"
+      "lastChecked": "2026-04-29T22:55:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:50:19Z"
+      "lastChecked": "2026-04-29T22:55:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T22:50:19Z"
+      "lastChecked": "2026-04-29T22:55:17Z"
     }
   ],
   "crons": [
@@ -639,7 +639,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:50:30.471730+00:00"
+      "lastRun": "2026-04-29T22:55:27.668390+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1186,12 +1186,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T22:50:19.670187Z",
+    "checkedAt": "2026-04-29T22:55:16.921327Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1506,19 +1506,7 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0021",
-      "title": "Refresh Mission Control model usage/spend module",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Full refresh requested because the current module is ugly/messy/not informative. Scope: audit `mission-control` usage/spend data pipeline and UI, redesign the panel around true spend, subscription value, metered run-rate, provider/auth attribution, and verify with dashboard regeneration + visual checks. Avoid unrelated dirty workspace files.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 18:25; updated 2026-04-29 18:27",
-      "requestedAt": "2026-04-29 18:25",
-      "updatedAt": "2026-04-29 18:27",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1547,16 +1535,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Watching Mission Control deploy after usage refresh push",
+      "objective": "Verifying Mission Control deploy status",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:49:44Z",
-      "messageReceived": "2026-04-29T22:19:08Z",
+      "updatedAt": "2026-04-29T22:54:39Z",
+      "messageReceived": "2026-04-29T22:54:39Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Watching Mission Control deploy after usage refresh push",
+          "label": "Verifying Mission Control deploy status",
           "status": "active",
           "tool": "exec"
         }
@@ -1587,61 +1575,61 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Step: syncing available credentials",
+      "objective": "Step: final verification",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:50:02Z",
-      "messageReceived": "2026-04-29T22:50:02Z",
+      "updatedAt": "2026-04-29T22:54:37Z",
+      "messageReceived": "2026-04-29T22:54:37Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Mission Control watchdog running",
+          "label": "Step: testing MCP package availability",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Task: capability enhancement audit",
+          "label": "Step: adding GitHub/filesystem/memory MCP",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: checking Hermes status",
+          "label": "Step: inspecting MCP config schema",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: checking host capability gaps",
+          "label": "Step: patching MCP config safely",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Task: god-mode readiness upgrades",
+          "label": "Step: checking Docker daemon",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: running full Hermes audit",
+          "label": "Step: restarting gateway",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: checking auth and browser backends",
+          "label": "Step: verifying MCP and Hermes status",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: reviewing safe config settings",
+          "label": "Step: testing MCP servers",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: checking Hermes env file keys",
+          "label": "Step: hardening GitHub MCP tool policy",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: syncing available credentials",
+          "label": "Step: final verification",
           "status": "active",
           "tool": "exec"
         }
@@ -1650,12 +1638,12 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0",
+      "JAIMES",
       "J.A.I.N"
     ],
     "activeCount": 3,
-    "primaryAgent": "JAIMES",
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1663,85 +1651,85 @@
     ],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Step: syncing available credentials",
+        "objective": "Verifying Mission Control deploy status",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:50:02Z",
-        "messageReceived": "2026-04-29T22:50:02Z",
+        "updatedAt": "2026-04-29T22:54:39Z",
+        "messageReceived": "2026-04-29T22:54:39Z",
         "currentTool": "exec",
-        "model": "gpt-5.5",
+        "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: capability enhancement audit",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking Hermes status",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking host capability gaps",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: god-mode readiness upgrades",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: running full Hermes audit",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking auth and browser backends",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: reviewing safe config settings",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking Hermes env file keys",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: syncing available credentials",
+            "label": "Verifying Mission Control deploy status",
             "status": "active",
             "tool": "exec"
           }
         ]
       },
       {
-        "agent": "JOSH 2.0",
+        "agent": "JAIMES",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Watching Mission Control deploy after usage refresh push",
+        "objective": "Step: final verification",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:49:44Z",
-        "messageReceived": "2026-04-29T22:19:08Z",
+        "updatedAt": "2026-04-29T22:54:37Z",
+        "messageReceived": "2026-04-29T22:54:37Z",
         "currentTool": "exec",
-        "model": "GPT-5.5",
+        "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Watching Mission Control deploy after usage refresh push",
+            "label": "Step: testing MCP package availability",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: adding GitHub/filesystem/memory MCP",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: inspecting MCP config schema",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: patching MCP config safely",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: checking Docker daemon",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: restarting gateway",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verifying MCP and Hermes status",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: testing MCP servers",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: hardening GitHub MCP tool policy",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: final verification",
             "status": "active",
             "tool": "exec"
           }
@@ -1771,29 +1759,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T22:50:25Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-29T22:55:22Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T22:50:22Z",
+      "time": "2026-04-29T22:55:19Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
     },
     {
-      "time": "2026-04-29T22:50:22Z",
-      "event": "CodexBar: 95% left \u00b7 wk 81% left"
+      "time": "2026-04-29T22:55:19Z",
+      "event": "CodexBar: 94% left \u00b7 wk 81% left"
     },
     {
-      "time": "2026-04-29T22:50:19Z",
+      "time": "2026-04-29T22:55:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T22:50:19Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-29T22:55:17Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-29T22:50:19Z",
+      "time": "2026-04-29T22:55:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T22:50:19Z"
+  "lastUpdated": "2026-04-29T22:55:17Z"
 }
