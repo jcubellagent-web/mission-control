@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777440001 -->
+    <!-- BUILD:1777440002 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -6631,6 +6631,48 @@
             body:not(.phone-mode).kiosk-mode .card-brain .bf-objective { min-height: 136px !important; }
             body:not(.phone-mode).kiosk-mode .card-intel-highlights { flex: 0.82 1 0 !important; }
             body:not(.phone-mode).kiosk-mode .card-model-health { flex: 1.18 1 0 !important; }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) {
+                flex: 0 0 auto !important;
+                overflow: hidden !important;
+                max-height: none !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-shell {
+                height: auto !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective {
+                min-height: clamp(126px, 15vh, 156px) !important;
+                padding: 10px 11px 9px !important;
+                gap: 7px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text {
+                font-size: clamp(0.82rem, 0.9vw, 1.02rem) !important;
+                line-height: 1.18 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text-wrap {
+                height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                min-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                max-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-realtime-deck:has(+ *) ,
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-realtime-deck {
+                gap: 5px !important;
+                grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-realtime-card {
+                min-height: 48px !important;
+                padding: 5px 6px !important;
+                border-radius: 8px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) + .brain-feed-lower {
+                flex: 1 1 0 !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+                align-items: stretch !important;
+            }
         }
         @media (prefers-reduced-motion: reduce) {
             body:not(.phone-mode) *,
@@ -6789,7 +6831,21 @@
                 font-size: 0.48rem !important;
                 line-height: 1.05 !important;
             }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) {
+                flex: 0 0 auto !important;
+                overflow: hidden !important;
+                max-height: none !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-shell {
+                height: auto !important;
+            }
             body:not(.phone-mode).kiosk-mode .card-brain .brain-feed-lower { gap: 6px !important; }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) + .brain-feed-lower {
+                flex: 1 1 0 !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+                align-items: stretch !important;
+            }
             body:not(.phone-mode).kiosk-mode .card-brain .agent-comms-toggle,
             body:not(.phone-mode).kiosk-mode .card-brain .agent-chat-header { padding: 5px 7px !important; }
             body:not(.phone-mode).kiosk-mode .card-brain #unified-activity-log,

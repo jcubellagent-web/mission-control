@@ -1,4 +1,4 @@
-const CACHE_NAME = "mission-control-pwa-v1777213760";
+const CACHE_NAME = "mission-control-pwa-v1777440002";
 const FILES_TO_CACHE = [
   "./manifest.webmanifest",
   "./assets/logo.jpg",
