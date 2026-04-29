@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": true,
-  "objective": "Building strict hard-DNP proposal",
+  "objective": "Verifying submitted GW11 lineups",
   "status": "active",
-  "updatedAt": "2026-04-29T14:19:53Z",
-  "checkedAt": "2026-04-29T14:19:53Z",
+  "updatedAt": "2026-04-29T14:23:37Z",
+  "checkedAt": "2026-04-29T14:23:37Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,16 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Sorare GW11 sanity check: Chris Sale",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Inspecting GW11 monitor output",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Checking Sale scoring/probable status",
       "status": "done",
@@ -61,10 +51,20 @@
     },
     {
       "label": "Building strict hard-DNP proposal",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Submitting approved GW11 strict rebuild",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Verifying submitted GW11 lineups",
       "status": "active",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T14:19:53Z"
+  "messageReceived": "2026-04-29T14:23:37Z"
 }

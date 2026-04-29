@@ -21,19 +21,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Patched Josh Telegram send guard and verified dry-run/idempotency behavior",
+    "objective": "Fix mission control dashboard polish and remove X workflows",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T14:18:54Z",
-    "checkedAt": "2026-04-29T14:18:54Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-29T14:22:13Z",
+    "checkedAt": "2026-04-29T14:22:13Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Patched Josh Telegram send guard and verified dry-run/idempotency behavior",
-    "updatedAt": "2026-04-29T14:20:17Z"
+    "context": "Fix mission control dashboard polish and remove X workflows",
+    "updatedAt": "2026-04-29T14:25:17Z"
   },
   "contextWindow": {
     "usedTokens": 83654,
@@ -50,7 +56,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-29T14:20:17Z"
+        "time": "2026-04-29T14:25:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -68,7 +74,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T14:20:17Z",
+    "updatedAt": "2026-04-29T14:25:17Z",
     "patchStatus": {
       "status": "pending",
       "summary": "12 source file(s) changed",
@@ -82,8 +88,8 @@
         "data/mission-control-canaries.json",
         "data/model-usage-accum.json"
       ],
-      "head": "af523f36d",
-      "updatedAt": "2026-04-29T14:20:17Z"
+      "head": "570c59210",
+      "updatedAt": "2026-04-29T14:25:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -191,28 +197,28 @@
     "recentFiles": [
       "scripts/send_josh_reply.py"
     ],
-    "codexbarStatus": "97% left \u00b7 wk 84% left",
+    "codexbarStatus": "96% left \u00b7 wk 84% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 97% left [===========-]",
-        "Resets in 2h 34m",
+        "Session: 96% left [===========-]",
+        "Resets in 2h 29m",
         "Weekly: 84% left [==========--]",
         "Pace: 4% in reserve | Expected 20% used | Lasts until reset",
         "Resets in 5d 15h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "97% left",
+      "session": "96% left",
       "weekly": "84% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 34m",
+      "sessionReset": "2h 29m",
       "weeklyReset": "5d 15h",
-      "summary": "97% left \u00b7 wk 84% left"
+      "summary": "96% left \u00b7 wk 84% left"
     },
-    "updatedAt": "2026-04-29T14:20:19Z"
+    "updatedAt": "2026-04-29T14:25:19Z"
   },
   "modelUsage": {
     "session": 0.045778,
@@ -366,7 +372,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T14:20:22Z",
+    "lastUpdated": "2026-04-29T14:25:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -424,7 +430,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T14:20:27Z",
+    "updatedAt": "2026-04-29T14:25:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -441,14 +447,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.4,
-      "cpu_user": 17.13,
-      "cpu_sys": 17.29,
-      "load1": 2.0,
-      "load5": 2.08,
-      "load15": 2.22,
+      "cpu_pct": 34.2,
+      "cpu_user": 16.85,
+      "cpu_sys": 17.34,
+      "load1": 2.76,
+      "load5": 2.5,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -456,14 +462,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.7,
-      "cpu_user": 4.65,
-      "cpu_sys": 10.7,
-      "load1": 1.7,
-      "load5": 1.88,
-      "load15": 1.94,
+      "cpu_pct": 23.2,
+      "cpu_user": 12.8,
+      "cpu_sys": 10.4,
+      "load1": 1.54,
+      "load5": 1.8,
+      "load15": 1.88,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -487,19 +493,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:20:17Z"
+      "lastChecked": "2026-04-29T14:25:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T14:20:17Z"
+      "lastChecked": "2026-04-29T14:25:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T14:20:17Z"
+      "lastChecked": "2026-04-29T14:25:17Z"
     }
   ],
   "crons": [
@@ -516,7 +522,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T14:20:27.979854+00:00"
+      "lastRun": "2026-04-29T14:25:28.089468+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,7 +1265,7 @@
     "ok": false,
     "status": "attention",
     "summary": "3 canary issue(s)",
-    "checkedAt": "2026-04-29T14:20:17.344885Z",
+    "checkedAt": "2026-04-29T14:25:17.386551Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1579,7 +1585,19 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260429-0014",
+      "title": "Mission Control cleanup/polish",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh asked to clean up sloppy Brain Feed, model usage/spend, breaking highlights signal/noise, Today Jobs completion display, remove X account/workflows/crons across devices, and emphasize Sorare + fantasy baseball beyond maintenance. Initial context loaded; next: inspect dashboard/data generators, cron/workflow inventory, patch UI/data, verify, deploy.",
+      "background": "owner: JOSH 2.0; updated 2026-04-29 10:22",
+      "requestedAt": null,
+      "updatedAt": "2026-04-29 10:22",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1608,14 +1626,20 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Patched Josh Telegram send guard and verified dry-run/idempotency behavior",
+      "objective": "Fix mission control dashboard polish and remove X workflows",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T14:18:54Z",
+      "updatedAt": "2026-04-29T14:22:13Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1636,24 +1660,14 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Building strict hard-DNP proposal",
+      "objective": "Verifying submitted GW11 lineups",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T14:19:53Z",
-      "messageReceived": "2026-04-29T14:19:53Z",
+      "updatedAt": "2026-04-29T14:23:37Z",
+      "messageReceived": "2026-04-29T14:23:37Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Sorare GW11 sanity check: Chris Sale",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Inspecting GW11 monitor output",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Checking Sale scoring/probable status",
           "status": "done",
@@ -1691,6 +1705,16 @@
         },
         {
           "label": "Building strict hard-DNP proposal",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Submitting approved GW11 strict rebuild",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Verifying submitted GW11 lineups",
           "status": "active",
           "tool": "exec"
         }
@@ -1715,24 +1739,14 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Building strict hard-DNP proposal",
+        "objective": "Verifying submitted GW11 lineups",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:19:53Z",
-        "messageReceived": "2026-04-29T14:19:53Z",
+        "updatedAt": "2026-04-29T14:23:37Z",
+        "messageReceived": "2026-04-29T14:23:37Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Sorare GW11 sanity check: Chris Sale",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Inspecting GW11 monitor output",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Checking Sale scoring/probable status",
             "status": "done",
@@ -1770,6 +1784,16 @@
           },
           {
             "label": "Building strict hard-DNP proposal",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Submitting approved GW11 strict rebuild",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Verifying submitted GW11 lineups",
             "status": "active",
             "tool": "exec"
           }
@@ -1780,14 +1804,20 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Patched Josh Telegram send guard and verified dry-run/idempotency behavior",
+        "objective": "Fix mission control dashboard polish and remove X workflows",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T14:18:54Z",
+        "updatedAt": "2026-04-29T14:22:13Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1807,29 +1837,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T14:20:22Z",
+      "time": "2026-04-29T14:25:22Z",
       "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-29T14:20:19Z",
+      "time": "2026-04-29T14:25:19Z",
       "event": "Coding: scripts/send_josh_reply.py"
     },
     {
-      "time": "2026-04-29T14:20:19Z",
-      "event": "CodexBar: 97% left \u00b7 wk 84% left"
+      "time": "2026-04-29T14:25:19Z",
+      "event": "CodexBar: 96% left \u00b7 wk 84% left"
     },
     {
-      "time": "2026-04-29T14:20:17Z",
+      "time": "2026-04-29T14:25:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T14:20:17Z",
+      "time": "2026-04-29T14:25:17Z",
       "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T14:20:17Z",
+      "time": "2026-04-29T14:25:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T14:20:17Z"
+  "lastUpdated": "2026-04-29T14:25:17Z"
 }
