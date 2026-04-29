@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "approved overnight cleanup sweep completed: doctor orphan cleanup, clean task audit, clean Mission Control action-required rows, calendar/canary verification, and memory task update",
+  "objective": "handle async completion heartbeat",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T12:48:36Z",
-  "checkedAt": "2026-04-29T12:48:36Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-29T12:49:17Z",
+  "checkedAt": "2026-04-29T12:49:17Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
