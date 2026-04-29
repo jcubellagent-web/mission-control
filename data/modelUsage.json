@@ -1,6 +1,6 @@
 {
-  "session": 0.0,
-  "daily": 0.053846,
+  "session": 0.109793,
+  "daily": 0.163639,
   "weekly": 45.459433,
   "monthly": 951.836853,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.163639
+    },
+    {
       "name": "openai/gpt-5.5",
       "window": "session",
       "cost": 0.122313
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.053846
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -50,6 +50,19 @@
       "costEstimated": false
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 23341,
+      "outputTokens": 197,
+      "totalTokens": 23538,
+      "sessionCost": 0.163639,
+      "dailyCost": 0.163639,
+      "weeklyCost": 0.163639,
+      "sessions": 3,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
       "inputTokens": 18839,
@@ -59,19 +72,6 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
       "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 1782,
-      "outputTokens": 188,
-      "totalTokens": 1970,
-      "sessionCost": 0.053846,
-      "dailyCost": 0.053846,
-      "weeklyCost": 0.053846,
-      "sessions": 2,
       "isGemini": false,
       "costEstimated": false
     },
@@ -150,7 +150,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-29T12:45:26Z",
+  "lastUpdated": "2026-04-29T12:50:22Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -183,8 +183,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.053846,
-    "total": 47.176459,
+    "daily": 0.163639,
+    "total": 47.286252,
     "monthly": 951.836853
   },
   "weeklyRunRate": {
