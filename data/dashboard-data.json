@@ -11,24 +11,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "async heartbeat completion handled internally",
+    "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T01:40:02Z",
-    "checkedAt": "2026-04-29T01:40:02Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-29T01:43:11Z",
+    "checkedAt": "2026-04-29T01:43:11Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "async heartbeat completion handled internally",
-    "updatedAt": "2026-04-29T01:40:17Z"
+    "context": "run capability audit for Codex 5.5/OpenClaw enhancements",
+    "updatedAt": "2026-04-29T01:45:16Z"
   },
   "contextWindow": {
-    "usedTokens": 32366,
+    "usedTokens": 37154,
     "limitTokens": 272000,
-    "pct": 0.119,
+    "pct": 0.1366,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -48,7 +54,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T01:40:17Z",
+    "updatedAt": "2026-04-29T01:45:16Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -151,7 +157,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 14,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_visual_canaries.py",
@@ -165,7 +171,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 92% left [===========-]",
-        "Resets in 14m",
+        "Resets in 9m",
         "Weekly: 91% left [==========--]",
         "Pace: 3% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
@@ -176,17 +182,17 @@
       "weekly": "91% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "14m",
+      "sessionReset": "9m",
       "weeklyReset": "6d 3h",
       "summary": "92% left \u00b7 wk 91% left"
     },
-    "updatedAt": "2026-04-29T01:40:19Z"
+    "updatedAt": "2026-04-29T01:45:18Z"
   },
   "modelUsage": {
-    "session": 0.017434,
-    "daily": 3.429924,
-    "weekly": 45.361049,
-    "monthly": 951.738468,
+    "session": 0.156574,
+    "daily": 3.569064,
+    "weekly": 45.498831,
+    "monthly": 951.87625,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -201,7 +207,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.17293300000000003
+        "cost": 0.31207299999999993
       },
       {
         "name": "openai/gpt-5.5",
@@ -236,12 +242,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 3015,
+        "inputTokens": 33403,
         "outputTokens": 191,
-        "totalTokens": 3206,
-        "sessionCost": 0.17293300000000003,
-        "dailyCost": 0.17293300000000003,
-        "weeklyCost": 0.17293300000000003,
+        "totalTokens": 33594,
+        "sessionCost": 0.31207299999999993,
+        "dailyCost": 0.31207299999999993,
+        "weeklyCost": 0.31207299999999993,
         "sessions": 7,
         "isGemini": false,
         "costEstimated": false
@@ -373,7 +379,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T01:40:22Z",
+    "lastUpdated": "2026-04-29T01:45:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -406,15 +412,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.429924,
-      "total": 47.302465,
-      "monthly": 951.738468
+      "daily": 3.569064,
+      "total": 47.441605,
+      "monthly": 951.87625
     },
     "weeklyRunRate": {
-      "total": 47.303823,
+      "total": 47.441605,
       "automation": 1.942774,
-      "interactive": 43.418275,
-      "projectedMonthly": 202.73
+      "interactive": 43.556057,
+      "projectedMonthly": 203.32
     }
   },
   "moltWorld": {
@@ -431,7 +437,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T01:40:27Z",
+    "updatedAt": "2026-04-29T01:45:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -448,29 +454,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.3,
-      "cpu_user": 23.62,
-      "cpu_sys": 19.63,
-      "load1": 2.43,
-      "load5": 2.52,
-      "load15": 2.28,
+      "cpu_pct": 44.6,
+      "cpu_user": 22.95,
+      "cpu_sys": 21.63,
+      "load1": 3.51,
+      "load5": 2.82,
+      "load15": 2.47,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "83Gi",
-      "disk_pct": 13,
+      "disk_avail": "88Gi",
+      "disk_pct": 12,
       "available": true
     },
     "jain": {
-      "cpu_pct": 22.6,
-      "cpu_user": 13.11,
-      "cpu_sys": 9.83,
-      "load1": 2.78,
-      "load5": 2.32,
-      "load15": 2.12,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 27.4,
+      "cpu_user": 16.23,
+      "cpu_sys": 11.11,
+      "load1": 1.97,
+      "load5": 2.21,
+      "load15": 2.14,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -494,19 +500,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:40:17Z"
+      "lastChecked": "2026-04-29T01:45:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:40:17Z"
+      "lastChecked": "2026-04-29T01:45:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T01:40:17Z"
+      "lastChecked": "2026-04-29T01:45:16Z"
     }
   ],
   "crons": [
@@ -523,7 +529,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:40:27.855980+00:00"
+      "lastRun": "2026-04-29T01:45:16.830012+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1127,7 +1133,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:30:04.884782+00:00"
+      "lastRun": "2026-04-29T01:45:04.429554+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1270,7 +1276,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-29T01:40:17.283336Z",
+    "checkedAt": "2026-04-29T01:45:16.829204Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1385,6 +1391,17 @@
   ],
   "trackedTasks": [
     {
+      "id": "T-20260428-1022",
+      "title": "Run Codex 5.5/OpenClaw capability audit",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Auditing installed skills, auth/config state, gateway/task health, and high-value enhancement candidates. Early findings: GPT-5.5 OAuth lane healthy, gateway reachable, task audit clean, Google auth currently lists calendar scope only.",
+      "background": "owner: JOSH 2.0; updated 2026-04-28 21:43",
+      "requestedAt": null,
+      "updatedAt": "2026-04-28 21:43",
+      "owner": "JOSH 2.0"
+    },
+    {
       "id": "T-20260427-982",
       "title": "Telegram voice/Talk workflow",
       "status": "active",
@@ -1424,24 +1441,30 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "async heartbeat completion handled internally",
+      "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:40:02Z",
+      "updatedAt": "2026-04-29T01:43:11Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
-      "active": false,
+      "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Run memory sync backup to JAIN and verify success",
-      "status": "stale",
-      "stale": true,
-      "updatedAt": "2026-04-28T18:01:03Z",
+      "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-04-29T01:43:11Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1522,9 +1545,10 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
+      "J.A.I.N",
       "JAIMES"
     ],
-    "activeCount": 2,
+    "activeCount": 3,
     "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
@@ -1537,14 +1561,40 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "async heartbeat completion handled internally",
+        "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:40:02Z",
+        "updatedAt": "2026-04-29T01:43:11Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T01:43:11Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "bf_step",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
@@ -1610,54 +1660,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": false,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Run memory sync backup to JAIN and verify success",
-        "status": "stale",
-        "stale": true,
-        "updatedAt": "2026-04-28T18:01:03Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "bf_step",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "exec",
-            "status": "active",
-            "tool": "bf_step"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T01:40:22Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-29T01:45:22Z",
+      "event": "Session spend: $0.16"
     },
     {
-      "time": "2026-04-29T01:40:19Z",
+      "time": "2026-04-29T01:45:18Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_visual_canaries.py"
     },
     {
-      "time": "2026-04-29T01:40:19Z",
+      "time": "2026-04-29T01:45:18Z",
       "event": "CodexBar: 92% left \u00b7 wk 91% left"
     },
     {
-      "time": "2026-04-29T01:40:17Z",
+      "time": "2026-04-29T01:45:16Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T01:40:17Z",
+      "time": "2026-04-29T01:45:16Z",
       "event": "Personal Codex: Personal Codex lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T01:40:17Z",
+      "time": "2026-04-29T01:45:16Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T01:40:17Z"
+  "lastUpdated": "2026-04-29T01:45:16Z"
 }
