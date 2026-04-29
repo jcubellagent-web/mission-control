@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "confirmed live feedback/breadcrumb operating change for Josh",
+  "objective": "heartbeat doctor restart check",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T05:56:33Z",
-  "checkedAt": "2026-04-29T05:56:33Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "heartbeat"
+    }
+  ],
+  "currentTool": "heartbeat",
+  "updatedAt": "2026-04-29T05:58:10Z",
+  "checkedAt": "2026-04-29T05:58:10Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
