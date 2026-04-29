@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: approved async completion reported \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T23:25:17Z"
+    "updatedAt": "2026-04-29T23:30:16Z"
   },
   "contextWindow": {
     "usedTokens": 54539,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 7 source file(s) changed",
-        "time": "2026-04-29T23:25:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-29T23:30:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T23:25:17Z",
+    "updatedAt": "2026-04-29T23:30:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "7 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 7,
+      "dirtyCount": 8,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json",
-        "data/moltworld-data.json"
+        "data/modelUsage.json"
       ],
-      "head": "f07143611",
-      "updatedAt": "2026-04-29T23:25:17Z"
+      "head": "31e64568d",
+      "updatedAt": "2026-04-29T23:30:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,34 +188,34 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/run_mission_control_watchdog.sh"
     ],
-    "codexbarStatus": "91% left \u00b7 wk 81% left",
+    "codexbarStatus": "90% left \u00b7 wk 80% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 91% left [==========--]",
-        "Resets in 3h 34m",
-        "Weekly: 81% left [=========---]",
-        "Pace: 6% in reserve | Expected 25% used | Lasts until reset",
+        "Session: 90% left [==========--]",
+        "Resets in 3h 29m",
+        "Weekly: 80% left [=========---]",
+        "Pace: 5% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "91% left",
-      "weekly": "81% left",
+      "session": "90% left",
+      "weekly": "80% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 34m",
+      "sessionReset": "3h 29m",
       "weeklyReset": "5d 6h",
-      "summary": "91% left \u00b7 wk 81% left"
+      "summary": "90% left \u00b7 wk 80% left"
     },
-    "updatedAt": "2026-04-29T23:25:19Z"
+    "updatedAt": "2026-04-29T23:30:18Z"
   },
   "modelUsage": {
     "session": 0.029227,
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T23:25:22Z",
+    "lastUpdated": "2026-04-29T23:30:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -622,7 +622,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T23:25:27Z",
+    "updatedAt": "2026-04-29T23:30:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -639,14 +639,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 45.5,
-      "cpu_user": 27.77,
-      "cpu_sys": 17.67,
-      "load1": 2.3,
-      "load5": 2.26,
-      "load15": 2.26,
+      "cpu_pct": 34.3,
+      "cpu_user": 16.97,
+      "cpu_sys": 17.28,
+      "load1": 2.36,
+      "load5": 2.17,
+      "load15": 2.19,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -654,12 +654,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 19.2,
-      "cpu_user": 5.38,
-      "cpu_sys": 13.84,
-      "load1": 1.94,
-      "load5": 2.15,
-      "load15": 2.06,
+      "cpu_pct": 13.5,
+      "cpu_user": 3.96,
+      "cpu_sys": 9.52,
+      "load1": 2.17,
+      "load5": 1.97,
+      "load15": 1.97,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.7,
       "uptime": "",
@@ -685,19 +685,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:25:17Z"
+      "lastChecked": "2026-04-29T23:30:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:25:17Z"
+      "lastChecked": "2026-04-29T23:30:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T23:25:17Z"
+      "lastChecked": "2026-04-29T23:30:16Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:25:27.720515+00:00"
+      "lastRun": "2026-04-29T23:30:27.404293+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1078,7 +1078,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:15:04.641574+00:00"
+      "lastRun": "2026-04-29T23:30:04.428472+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T23:25:17.424333Z",
+    "checkedAt": "2026-04-29T23:30:16.774939Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JAIMES', 'J.A.I.N']; live=3",
         "severity": "ok"
       },
       {
@@ -1647,37 +1647,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: saved fantasy automation skill",
-      "status": "idle",
+      "objective": "Step: verify fantasy upgrades dry-run",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T23:22:11Z",
-      "messageReceived": "2026-04-29T23:21:21Z",
+      "updatedAt": "2026-04-29T23:29:21Z",
+      "messageReceived": "2026-04-29T23:29:21Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: review skill save/update need",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: fantasy weekly-lock automation upgrades",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: adding waiver impact scoring",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Step: verifying fantasy automation",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Mission Control watchdog running",
           "status": "done",
@@ -1707,19 +1687,108 @@
           "label": "Step: saving ESPN fantasy automation skill",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: fantasy exact lock + FA coverage upgrades",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: inspect ESPN FA stats fields",
+          "status": "done",
+          "tool": "web"
+        },
+        {
+          "label": "Step: patch exact MLB lock lookup + ESPN projections",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Step: verify fantasy upgrades dry-run",
+          "status": "active",
+          "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 1,
-    "primaryAgent": "J.A.I.N",
-    "dualMode": false,
-    "dualAgents": [],
+    "activeCount": 2,
+    "primaryAgent": "JAIMES",
+    "dualMode": true,
+    "dualAgents": [
+      "JAIMES",
+      "J.A.I.N"
+    ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Step: verify fantasy upgrades dry-run",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:29:21Z",
+        "messageReceived": "2026-04-29T23:29:21Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog failed; collecting logs",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: final fantasy verification",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update need",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: inspect related skills for fantasy automation",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: saving ESPN fantasy automation skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: fantasy exact lock + FA coverage upgrades",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: inspect ESPN FA stats fields",
+            "status": "done",
+            "tool": "web"
+          },
+          {
+            "label": "Step: patch exact MLB lock lookup + ESPN projections",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Step: verify fantasy upgrades dry-run",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
       {
         "agent": "J.A.I.N",
         "active": true,
@@ -1759,99 +1828,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: saved fantasy automation skill",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T23:22:11Z",
-        "messageReceived": "2026-04-29T23:21:21Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: fantasy weekly-lock automation upgrades",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: adding waiver impact scoring",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Step: verifying fantasy automation",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog failed; collecting logs",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: final fantasy verification",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: inspect related skills for fantasy automation",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: saving ESPN fantasy automation skill",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T23:25:22Z",
+      "time": "2026-04-29T23:30:22Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T23:25:19Z",
+      "time": "2026-04-29T23:30:18Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T23:25:19Z",
-      "event": "CodexBar: 91% left \u00b7 wk 81% left"
+      "time": "2026-04-29T23:30:18Z",
+      "event": "CodexBar: 90% left \u00b7 wk 80% left"
     },
     {
-      "time": "2026-04-29T23:25:17Z",
+      "time": "2026-04-29T23:30:16Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T23:25:17Z",
-      "event": "JOSHeX: Patch feed: 7 source file(s) changed"
+      "time": "2026-04-29T23:30:16Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T23:25:17Z",
+      "time": "2026-04-29T23:30:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T23:25:17Z"
+  "lastUpdated": "2026-04-29T23:30:16Z"
 }

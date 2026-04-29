@@ -1,36 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: saved fantasy automation skill",
-  "status": "idle",
-  "updatedAt": "2026-04-29T23:22:11Z",
+  "active": true,
+  "objective": "Step: verify fantasy upgrades dry-run",
+  "status": "active",
+  "updatedAt": "2026-04-29T23:29:21Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:21:21Z",
-  "messageReceived": "2026-04-29T23:21:21Z",
+  "checkedAt": "2026-04-29T23:29:21Z",
+  "messageReceived": "2026-04-29T23:29:21Z",
   "steps": [
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: fantasy weekly-lock automation upgrades",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: adding waiver impact scoring",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Step: verifying fantasy automation",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control watchdog running",
       "status": "done",
@@ -59,6 +39,26 @@
     {
       "label": "Step: saving ESPN fantasy automation skill",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: fantasy exact lock + FA coverage upgrades",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: inspect ESPN FA stats fields",
+      "status": "done",
+      "tool": "web"
+    },
+    {
+      "label": "Step: patch exact MLB lock lookup + ESPN projections",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Step: verify fantasy upgrades dry-run",
+      "status": "active",
       "tool": "exec"
     }
   ]
