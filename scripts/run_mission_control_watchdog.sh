@@ -13,8 +13,8 @@ run_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 {
   echo "=== $run_ts mission-control watchdog ==="
   python3 scripts/mission_control_regression_check.py \
-    --check-roadmap-freshness \
-    --max-roadmap-age-min 45 \
+    --check-joshex-freshness \
+    --max-joshex-age-min 45 \
     --write-status "$status_path"
   python3 scripts/mission_control_screenshot_diff.py --max-diff-ratio 0.08
 } >> "$log_path" 2>&1 || {
