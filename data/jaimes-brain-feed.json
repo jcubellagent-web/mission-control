@@ -1,18 +1,53 @@
 {
   "active": false,
-  "objective": "Done: Hermes Labyrinth watch removed",
+  "objective": "Done: Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-29T22:13:44Z",
+  "updatedAt": "2026-04-29T22:18:08Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T22:13:34Z",
-  "messageReceived": "2026-04-29T22:13:34Z",
+  "checkedAt": "2026-04-29T22:18:02Z",
+  "messageReceived": "2026-04-29T22:18:02Z",
   "steps": [
     {
-      "label": "Mission Control watchdog running",
+      "label": "Task: ops drift audit on J.A.I.N",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking JAIN button/approval status",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking Mission Control repo state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Checking button patch artifacts",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Resolving volatile Brain Feed merge state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Verifying Mission Control JSON after cleanup",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Reviewing skill-save decision",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Patching Mission Control skill with approval-timeout triage",
       "status": "done",
       "tool": "exec"
     },
@@ -22,17 +57,7 @@
       "tool": "exec"
     },
     {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Stopping Hermes Labyrinth reminder/watch",
+      "label": "Mission Control watchdog failed",
       "status": "done",
       "tool": "exec"
     }
