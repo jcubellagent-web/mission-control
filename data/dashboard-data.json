@@ -15,32 +15,32 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-29T23:05:19Z",
-    "objective": "Waiting for Mission Control deploy verification",
+    "messageReceived": "2026-04-29T23:18:29Z",
+    "objective": "Running heartbeat checks: email calendar mission-control health",
     "status": "active",
     "steps": [
       {
-        "label": "Waiting for Mission Control deploy verification",
+        "label": "Running heartbeat checks - email calendar mission-control health",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T23:13:21Z",
-    "checkedAt": "2026-04-29T23:13:21Z",
+    "updatedAt": "2026-04-29T23:18:57Z",
+    "checkedAt": "2026-04-29T23:18:57Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Waiting for Mission Control deploy verification",
-    "updatedAt": "2026-04-29T23:15:17Z"
+    "context": "Running heartbeat checks: email calendar mission-control health",
+    "updatedAt": "2026-04-29T23:20:17Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 46059,
+    "limitTokens": 272000,
+    "pct": 0.1693,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-29T23:15:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-29T23:20:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T23:15:17Z",
+    "updatedAt": "2026-04-29T23:20:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 8,
       "files": [
-        "data/agent-comms.json",
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-breaking-highlights.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "5b223c7de",
-      "updatedAt": "2026-04-29T23:15:17Z"
+      "head": "fc2bbf83d",
+      "updatedAt": "2026-04-29T23:20:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -200,7 +200,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 91% left [==========--]",
-        "Resets in 3h 44m",
+        "Resets in 3h 39m",
         "Weekly: 81% left [=========---]",
         "Pace: 6% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
@@ -211,15 +211,15 @@
       "weekly": "81% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 44m",
+      "sessionReset": "3h 39m",
       "weeklyReset": "5d 6h",
       "summary": "91% left \u00b7 wk 81% left"
     },
-    "updatedAt": "2026-04-29T23:15:19Z"
+    "updatedAt": "2026-04-29T23:20:19Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.432355,
+    "session": 0.025995,
+    "daily": 0.45835,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -236,7 +236,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.432355
+        "cost": 0.45835
       },
       {
         "name": "openai/gpt-5.5",
@@ -275,13 +275,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 75719,
-        "outputTokens": 320,
-        "totalTokens": 76039,
-        "sessionCost": 0.432355,
-        "dailyCost": 0.432355,
-        "weeklyCost": 0.432355,
-        "sessions": 3,
+        "inputTokens": 76338,
+        "outputTokens": 326,
+        "totalTokens": 76664,
+        "sessionCost": 0.45835,
+        "dailyCost": 0.45835,
+        "weeklyCost": 0.45835,
+        "sessions": 4,
         "isGemini": false,
         "costEstimated": false
       },
@@ -343,8 +343,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 256958705,
-        "dailyTokens": 120224609,
+        "totalTokens": 259028416,
+        "dailyTokens": 122294320,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T23:15:22Z",
+    "lastUpdated": "2026-04-29T23:20:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -408,8 +408,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.432355,
-      "total": 47.554968,
+      "daily": 0.45835,
+      "total": 47.580963,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -424,11 +424,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.489881,
-      "codexEquivalentDaily": 0.432355,
-      "codexEquivalentMonthlyProjection": 194.96,
-      "codexTokensWeekly": 365746455,
-      "codexTokensDaily": 120224609,
+      "codexEquivalentWeekly": 45.515876,
+      "codexEquivalentDaily": 0.45835,
+      "codexEquivalentMonthlyProjection": 195.07,
+      "codexTokensWeekly": 367816791,
+      "codexTokensDaily": 122294320,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -451,8 +451,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 194.96,
-        "codexTokensWeekly": 365746455,
+        "codexValueMonthly": 195.07,
+        "codexTokensWeekly": 367816791,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -462,7 +462,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.489881,
+            "weeklyCost": 45.515876,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -526,9 +526,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.489881,
-          "dailyEquivalent": 0.432355,
-          "tokensWeekly": 365746455,
+          "weeklyEquivalent": 45.515876,
+          "dailyEquivalent": 0.45835,
+          "tokensWeekly": 367816791,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -602,7 +602,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $194.96/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $195.07/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -622,7 +622,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T23:15:27Z",
+    "updatedAt": "2026-04-29T23:20:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -639,14 +639,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.7,
-      "cpu_user": 16.5,
-      "cpu_sys": 17.46,
-      "load1": 1.6,
-      "load5": 2.14,
-      "load15": 2.25,
+      "cpu_pct": 35.7,
+      "cpu_user": 18.19,
+      "cpu_sys": 17.54,
+      "load1": 2.98,
+      "load5": 2.42,
+      "load15": 2.32,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -654,14 +654,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 15.2,
-      "cpu_user": 3.78,
-      "cpu_sys": 11.36,
-      "load1": 1.88,
-      "load5": 2.04,
-      "load15": 1.99,
+      "cpu_pct": 12.8,
+      "cpu_user": 3.5,
+      "cpu_sys": 9.92,
+      "load1": 1.78,
+      "load5": 1.99,
+      "load15": 1.97,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -685,19 +685,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:15:17Z"
+      "lastChecked": "2026-04-29T23:20:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:15:17Z"
+      "lastChecked": "2026-04-29T23:20:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T23:15:17Z"
+      "lastChecked": "2026-04-29T23:20:17Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:15:27.642836+00:00"
+      "lastRun": "2026-04-29T23:20:27.921960+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T23:15:17.070583Z",
+    "checkedAt": "2026-04-29T23:20:17.411099Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1305,7 +1305,7 @@
     "status": "warn",
     "ok": false,
     "summary": "2 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-29T21:48:10Z",
+    "checkedAt": "2026-04-29T23:19:53Z",
     "counts": {
       "ok": 24,
       "warn": 2,
@@ -1407,18 +1407,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=44ms audit=0/0",
+        "detail": "gateway=True latency=47ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.26",
           "model": "gpt-5.5",
-          "percentUsed": 9
+          "percentUsed": 17
         }
       },
       {
         "name": "memory:main",
         "status": "ok",
         "ok": true,
-        "detail": "files=107 chunks=1209 dirty=False",
+        "detail": "files=107 chunks=1217 dirty=False",
         "meta": {}
       },
       {
@@ -1581,19 +1581,7 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0022",
-      "title": "Mission Control usage/spend kiosk redesign",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh requested a soup-to-nuts refresh of Mission Control usage/spend for the 24in kiosk display currently open. Scope: inspect current usage/spend data model and renderer, redesign the kiosk card for fit/readability, regenerate data, run local verification/visual canaries/screenshot checks, push/deploy, and verify GitHub Pages.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 18:55; updated 2026-04-29 18:57",
-      "requestedAt": "2026-04-29 18:55",
-      "updatedAt": "2026-04-29 18:57",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1622,16 +1610,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Waiting for Mission Control deploy verification",
+      "objective": "Running heartbeat checks: email calendar mission-control health",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T23:13:21Z",
-      "messageReceived": "2026-04-29T23:05:19Z",
+      "updatedAt": "2026-04-29T23:18:57Z",
+      "messageReceived": "2026-04-29T23:18:29Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Waiting for Mission Control deploy verification",
+          "label": "Running heartbeat checks - email calendar mission-control health",
           "status": "active",
           "tool": "exec"
         }
@@ -1659,42 +1647,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Task: fantasy weekly-lock automation upgrades",
-      "status": "active",
+      "objective": "Done: fantasy weekly-lock upgrades verified",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T23:13:27Z",
-      "messageReceived": "2026-04-29T23:13:27Z",
+      "updatedAt": "2026-04-29T23:18:31Z",
+      "messageReceived": "2026-04-29T23:18:29Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Step: checking JOSH 2.0 health",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: auditing Mission Control",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: checking Sorare and fantasy ops",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: verifying fantasy script path",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: review whether skill update is needed",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Task: audit fantasy league rules",
           "status": "done",
@@ -1717,7 +1680,32 @@
         },
         {
           "label": "Task: fantasy weekly-lock automation upgrades",
-          "status": "active",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: adding waiver impact scoring",
+          "status": "done",
+          "tool": "code"
+        },
+        {
+          "label": "Step: verifying fantasy automation",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control watchdog running",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Mission Control watchdog failed; collecting logs",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: final fantasy verification",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1725,12 +1713,11 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0",
       "J.A.I.N"
     ],
-    "activeCount": 3,
-    "primaryAgent": "JAIMES",
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
@@ -1738,85 +1725,20 @@
     ],
     "agents": [
       {
-        "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Task: fantasy weekly-lock automation upgrades",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T23:13:27Z",
-        "messageReceived": "2026-04-29T23:13:27Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Step: checking JOSH 2.0 health",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: auditing Mission Control",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: checking Sorare and fantasy ops",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: verifying fantasy script path",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review whether skill update is needed",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: audit fantasy league rules",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: pulling ESPN league settings",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: verifying fantasy weekly-lock patch",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: fantasy weekly-lock automation upgrades",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
         "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Waiting for Mission Control deploy verification",
+        "objective": "Running heartbeat checks: email calendar mission-control health",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T23:13:21Z",
-        "messageReceived": "2026-04-29T23:05:19Z",
+        "updatedAt": "2026-04-29T23:18:57Z",
+        "messageReceived": "2026-04-29T23:18:29Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Waiting for Mission Control deploy verification",
+            "label": "Running heartbeat checks - email calendar mission-control health",
             "status": "active",
             "tool": "exec"
           }
@@ -1841,34 +1763,99 @@
             "tool": "exec"
           }
         ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: fantasy weekly-lock upgrades verified",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:18:31Z",
+        "messageReceived": "2026-04-29T23:18:29Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Task: audit fantasy league rules",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: pulling ESPN league settings",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verifying fantasy weekly-lock patch",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update need",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: fantasy weekly-lock automation upgrades",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: adding waiver impact scoring",
+            "status": "done",
+            "tool": "code"
+          },
+          {
+            "label": "Step: verifying fantasy automation",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog running",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Mission Control watchdog failed; collecting logs",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: final fantasy verification",
+            "status": "done",
+            "tool": "exec"
+          }
+        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T23:15:22Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-29T23:20:22Z",
+      "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T23:15:19Z",
+      "time": "2026-04-29T23:20:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T23:15:19Z",
+      "time": "2026-04-29T23:20:19Z",
       "event": "CodexBar: 91% left \u00b7 wk 81% left"
     },
     {
-      "time": "2026-04-29T23:15:17Z",
+      "time": "2026-04-29T23:20:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T23:15:17Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-29T23:20:17Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T23:15:17Z",
+      "time": "2026-04-29T23:20:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T23:15:17Z"
+  "lastUpdated": "2026-04-29T23:20:17Z"
 }

@@ -1,41 +1,16 @@
 {
-  "active": true,
-  "objective": "Task: fantasy weekly-lock automation upgrades",
-  "status": "active",
-  "updatedAt": "2026-04-29T23:13:27Z",
+  "active": false,
+  "objective": "Done: fantasy weekly-lock upgrades verified",
+  "status": "idle",
+  "updatedAt": "2026-04-29T23:18:31Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:13:27Z",
-  "messageReceived": "2026-04-29T23:13:27Z",
+  "checkedAt": "2026-04-29T23:18:29Z",
+  "messageReceived": "2026-04-29T23:18:29Z",
   "steps": [
-    {
-      "label": "Step: checking JOSH 2.0 health",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: auditing Mission Control",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: checking Sorare and fantasy ops",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verifying fantasy script path",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review whether skill update is needed",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: audit fantasy league rules",
       "status": "done",
@@ -58,7 +33,32 @@
     },
     {
       "label": "Task: fantasy weekly-lock automation upgrades",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: adding waiver impact scoring",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Step: verifying fantasy automation",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog failed; collecting logs",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: final fantasy verification",
+      "status": "done",
       "tool": "exec"
     }
   ]
