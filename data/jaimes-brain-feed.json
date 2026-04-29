@@ -1,26 +1,16 @@
 {
   "active": false,
-  "objective": "Done: Sunday waiver + Monday final crons wired",
+  "objective": "Done: fantasy automation skill updated",
   "status": "idle",
-  "updatedAt": "2026-04-29T23:44:08Z",
+  "updatedAt": "2026-04-29T23:48:49Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-29T23:44:06Z",
-  "messageReceived": "2026-04-29T23:44:06Z",
+  "checkedAt": "2026-04-29T23:47:19Z",
+  "messageReceived": "2026-04-29T23:47:19Z",
   "steps": [
-    {
-      "label": "Task: fantasy exact lock + FA coverage upgrades",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspect ESPN FA stats fields",
-      "status": "done",
-      "tool": "web"
-    },
     {
       "label": "Step: patch exact MLB lock lookup + ESPN projections",
       "status": "done",
@@ -58,6 +48,16 @@
     },
     {
       "label": "Step: verify Sunday and Monday fantasy cron commands",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: tune fantasy cron reports + cleanup gate",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill updates after fantasy automation",
       "status": "done",
       "tool": "exec"
     }

@@ -15,31 +15,31 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": false,
-    "messageReceived": "2026-04-29T23:24:44Z",
-    "objective": "Done: approved async completion reported \u00b7 Awaiting further instruction",
+    "messageReceived": "2026-04-29T23:50:00Z",
+    "objective": "Done: explained auto-resolver command denial \u00b7 Awaiting further instruction",
     "status": "idle",
     "steps": [
       {
-        "label": "Done - approved async completion reported",
+        "label": "Done - explained auto-resolver command denial",
         "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T23:24:52Z",
-    "checkedAt": "2026-04-29T23:24:44Z",
+    "updatedAt": "2026-04-29T23:50:07Z",
+    "checkedAt": "2026-04-29T23:50:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last objective: Done: approved async completion reported \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T23:45:17Z"
+    "context": "Last objective: Done: explained auto-resolver command denial \u00b7 Awaiting further instruction",
+    "updatedAt": "2026-04-29T23:50:17Z"
   },
   "contextWindow": {
-    "usedTokens": 54539,
+    "usedTokens": 25027,
     "limitTokens": 272000,
-    "pct": 0.2005,
+    "pct": 0.092,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 7 source file(s) changed",
-        "time": "2026-04-29T23:45:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-29T23:50:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T23:45:17Z",
+    "updatedAt": "2026-04-29T23:50:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "7 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 7,
+      "dirtyCount": 8,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json",
-        "data/moltworld-data.json"
+        "data/modelUsage.json"
       ],
-      "head": "bce8dd3ba",
-      "updatedAt": "2026-04-29T23:45:17Z"
+      "head": "232d31a0b",
+      "updatedAt": "2026-04-29T23:50:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,38 +188,38 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/run_mission_control_watchdog.sh"
     ],
-    "codexbarStatus": "90% left \u00b7 wk 80% left",
+    "codexbarStatus": "89% left \u00b7 wk 80% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 90% left [==========--]",
-        "Resets in 3h 14m",
+        "Session: 89% left [==========--]",
+        "Resets in 3h 9m",
         "Weekly: 80% left [=========---]",
         "Pace: 5% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 5h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "90% left",
+      "session": "89% left",
       "weekly": "80% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 14m",
+      "sessionReset": "3h 9m",
       "weeklyReset": "5d 5h",
-      "summary": "90% left \u00b7 wk 80% left"
+      "summary": "89% left \u00b7 wk 80% left"
     },
-    "updatedAt": "2026-04-29T23:45:19Z"
+    "updatedAt": "2026-04-29T23:50:19Z"
   },
   "modelUsage": {
-    "session": 0.029227,
-    "daily": 0.461582,
+    "session": 0.016949,
+    "daily": 0.449304,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -236,7 +236,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.461582
+        "cost": 0.449304
       },
       {
         "name": "openai/gpt-5.5",
@@ -275,12 +275,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 76114,
-        "outputTokens": 326,
-        "totalTokens": 76440,
-        "sessionCost": 0.461582,
-        "dailyCost": 0.461582,
-        "weeklyCost": 0.461582,
+        "inputTokens": 76298,
+        "outputTokens": 381,
+        "totalTokens": 76679,
+        "sessionCost": 0.449304,
+        "dailyCost": 0.449304,
+        "weeklyCost": 0.449304,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -343,8 +343,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 259622538,
-        "dailyTokens": 122888442,
+        "totalTokens": 260608114,
+        "dailyTokens": 123874018,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -375,7 +375,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T23:45:22Z",
+    "lastUpdated": "2026-04-29T23:50:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -408,8 +408,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.461582,
-      "total": 47.584195,
+      "daily": 0.449304,
+      "total": 47.571917,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -424,11 +424,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.519108,
-      "codexEquivalentDaily": 0.461582,
-      "codexEquivalentMonthlyProjection": 195.08,
-      "codexTokensWeekly": 368410689,
-      "codexTokensDaily": 122888442,
+      "codexEquivalentWeekly": 45.50683,
+      "codexEquivalentDaily": 0.449304,
+      "codexEquivalentMonthlyProjection": 195.03,
+      "codexTokensWeekly": 369396504,
+      "codexTokensDaily": 123874018,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -451,8 +451,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 195.08,
-        "codexTokensWeekly": 368410689,
+        "codexValueMonthly": 195.03,
+        "codexTokensWeekly": 369396504,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -462,7 +462,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.519108,
+            "weeklyCost": 45.50683,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -526,9 +526,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.519108,
-          "dailyEquivalent": 0.461582,
-          "tokensWeekly": 368410689,
+          "weeklyEquivalent": 45.50683,
+          "dailyEquivalent": 0.449304,
+          "tokensWeekly": 369396504,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -602,7 +602,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $195.08/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $195.03/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -622,7 +622,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T23:45:27Z",
+    "updatedAt": "2026-04-29T23:50:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -639,14 +639,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.1,
-      "cpu_user": 19.24,
-      "cpu_sys": 16.81,
-      "load1": 2.59,
-      "load5": 2.27,
-      "load15": 2.2,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 45.0,
+      "cpu_user": 19.26,
+      "cpu_sys": 25.75,
+      "load1": 2.51,
+      "load5": 2.35,
+      "load15": 2.25,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -654,14 +654,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 22.6,
-      "cpu_user": 12.9,
-      "cpu_sys": 10.48,
-      "load1": 2.24,
-      "load5": 2.17,
-      "load15": 2.07,
+      "cpu_pct": 24.4,
+      "cpu_user": 13.82,
+      "cpu_sys": 10.56,
+      "load1": 2.51,
+      "load5": 2.24,
+      "load15": 2.11,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -685,19 +685,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:45:17Z"
+      "lastChecked": "2026-04-29T23:50:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T23:45:17Z"
+      "lastChecked": "2026-04-29T23:50:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T23:45:17Z"
+      "lastChecked": "2026-04-29T23:50:17Z"
     }
   ],
   "crons": [
@@ -714,7 +714,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T23:45:27.568794+00:00"
+      "lastRun": "2026-04-29T23:50:27.928030+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -729,7 +729,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-27T10:56:19.418413+00:00"
+      "lastRun": "2026-04-29T23:48:54.252979+00:00"
     },
     {
       "name": "Chiro Invite Sync",
@@ -1261,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T23:45:16.996810Z",
+    "checkedAt": "2026-04-29T23:50:17.385566Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1610,16 +1610,16 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Done: approved async completion reported \u00b7 Awaiting further instruction",
+      "objective": "Done: explained auto-resolver command denial \u00b7 Awaiting further instruction",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T23:24:52Z",
-      "messageReceived": "2026-04-29T23:24:44Z",
+      "updatedAt": "2026-04-29T23:50:07Z",
+      "messageReceived": "2026-04-29T23:50:00Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - approved async completion reported",
+          "label": "Done - explained auto-resolver command denial",
           "status": "done",
           "tool": "exec"
         }
@@ -1650,24 +1650,14 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Done: Sunday waiver + Monday final crons wired",
+      "objective": "Done: fantasy automation skill updated",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T23:44:08Z",
-      "messageReceived": "2026-04-29T23:44:06Z",
+      "updatedAt": "2026-04-29T23:48:49Z",
+      "messageReceived": "2026-04-29T23:47:19Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: fantasy exact lock + FA coverage upgrades",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: inspect ESPN FA stats fields",
-          "status": "done",
-          "tool": "web"
-        },
         {
           "label": "Step: patch exact MLB lock lookup + ESPN projections",
           "status": "done",
@@ -1707,6 +1697,16 @@
           "label": "Step: verify Sunday and Monday fantasy cron commands",
           "status": "done",
           "tool": "exec"
+        },
+        {
+          "label": "Task: tune fantasy cron reports + cleanup gate",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review skill updates after fantasy automation",
+          "status": "done",
+          "tool": "exec"
         }
       ]
     }
@@ -1741,28 +1741,38 @@
         ]
       },
       {
+        "agent": "JOSH 2.0",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: explained auto-resolver command denial \u00b7 Awaiting further instruction",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T23:50:07Z",
+        "messageReceived": "2026-04-29T23:50:00Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Done - explained auto-resolver command denial",
+            "status": "done",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
-        "objective": "Done: Sunday waiver + Monday final crons wired",
+        "objective": "Done: fantasy automation skill updated",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T23:44:08Z",
-        "messageReceived": "2026-04-29T23:44:06Z",
+        "updatedAt": "2026-04-29T23:48:49Z",
+        "messageReceived": "2026-04-29T23:47:19Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: fantasy exact lock + FA coverage upgrades",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: inspect ESPN FA stats fields",
-            "status": "done",
-            "tool": "web"
-          },
           {
             "label": "Step: patch exact MLB lock lookup + ESPN projections",
             "status": "done",
@@ -1802,24 +1812,14 @@
             "label": "Step: verify Sunday and Monday fantasy cron commands",
             "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: approved async completion reported \u00b7 Awaiting further instruction",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-29T23:24:52Z",
-        "messageReceived": "2026-04-29T23:24:44Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
+          },
           {
-            "label": "Done - approved async completion reported",
+            "label": "Task: tune fantasy cron reports + cleanup gate",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill updates after fantasy automation",
             "status": "done",
             "tool": "exec"
           }
@@ -1829,29 +1829,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T23:45:22Z",
-      "event": "Session spend: $0.03"
+      "time": "2026-04-29T23:50:22Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T23:45:19Z",
+      "time": "2026-04-29T23:50:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T23:45:19Z",
-      "event": "CodexBar: 90% left \u00b7 wk 80% left"
+      "time": "2026-04-29T23:50:19Z",
+      "event": "CodexBar: 89% left \u00b7 wk 80% left"
     },
     {
-      "time": "2026-04-29T23:45:17Z",
+      "time": "2026-04-29T23:50:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T23:45:17Z",
-      "event": "JOSHeX: Patch feed: 7 source file(s) changed"
+      "time": "2026-04-29T23:50:17Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T23:45:17Z",
+      "time": "2026-04-29T23:50:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T23:45:17Z"
+  "lastUpdated": "2026-04-29T23:50:17Z"
 }
