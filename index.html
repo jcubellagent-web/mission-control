@@ -3657,207 +3657,6 @@
             line-height: 1.35;
             padding-top: 2px;
         }
-        .memory-roadmap {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .memory-roadmap.compact {
-            gap: 8px;
-        }
-        .memory-roadmap-summary {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .memory-roadmap-summary-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            font-size: 6.5px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.68);
-            background: rgba(255,255,255,0.035);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .memory-roadmap-summary-pill.live {
-            color: #6ee7b7;
-            background: rgba(16,185,129,0.12);
-            border-color: rgba(16,185,129,0.24);
-        }
-        .memory-roadmap-summary-pill.warn {
-            color: rgba(253,224,71,0.92);
-            background: rgba(251,191,36,0.12);
-            border-color: rgba(251,191,36,0.22);
-        }
-        .memory-roadmap-compact-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-        .memory-roadmap-card {
-            min-width: 0;
-            min-height: 76px;
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.022);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            box-shadow: none;
-        }
-        .memory-roadmap-card.active {
-            border-color: rgba(56,189,248,0.26);
-            background: rgba(14,165,233,0.08);
-        }
-        .memory-roadmap-card.planned {
-            border-color: rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.02);
-        }
-        .memory-roadmap-card.future {
-            border-color: rgba(251,191,36,0.16);
-            background: rgba(251,191,36,0.06);
-        }
-        .memory-roadmap-card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 6px;
-        }
-        .memory-roadmap-card-week {
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.46);
-        }
-        .memory-roadmap-card-title {
-            font-size: 9px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.92);
-            line-height: 1.18;
-        }
-        .memory-roadmap-card-note {
-            font-size: 8px;
-            line-height: 1.24;
-            color: rgba(255,255,255,0.58);
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 1;
-            overflow: hidden;
-        }
-        .memory-roadmap-card-pill {
-            display: inline-flex;
-            align-items: center;
-            width: fit-content;
-            padding: 2px 6px;
-            border-radius: 999px;
-            font-size: 7px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.62);
-            border: 1px solid rgba(255,255,255,0.07);
-        }
-        .memory-roadmap-card.active .memory-roadmap-card-pill {
-            background: rgba(34,211,238,0.1);
-            color: #7dd3fc;
-            border-color: rgba(34,211,238,0.18);
-        }
-        .memory-roadmap-card.future .memory-roadmap-card-pill {
-            background: rgba(251,191,36,0.1);
-            color: rgba(253,224,71,0.92);
-            border-color: rgba(251,191,36,0.18);
-        }
-        .memory-roadmap-scale,
-        .memory-roadmap-track {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 6px;
-        }
-        .memory-roadmap-scale {
-            margin-bottom: 2px;
-        }
-        .memory-roadmap-week {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.44);
-            text-align: center;
-            padding-bottom: 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .memory-roadmap-week.current {
-            color: #7dd3fc;
-            border-bottom-color: rgba(125,211,252,0.45);
-        }
-        .memory-roadmap-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 10px 0;
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-        .memory-roadmap-row:first-of-type {
-            padding-top: 0;
-            border-top: 0;
-        }
-        .memory-roadmap-row-head {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .memory-roadmap-row-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .memory-roadmap-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: rgba(255,255,255,0.88);
-            letter-spacing: 0.01em;
-        }
-        .memory-roadmap-note {
-            font-size: 10px;
-            line-height: 1.35;
-            color: rgba(255,255,255,0.5);
-        }
-        .memory-roadmap-seg {
-            height: 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.05);
-        }
-        .memory-roadmap-seg.active {
-            border-color: rgba(56,189,248,0.55);
-            background: linear-gradient(90deg, rgba(14,165,233,0.95), rgba(45,212,191,0.92));
-            box-shadow: 0 0 14px rgba(34,211,238,0.22);
-        }
-        .memory-roadmap-seg.planned {
-            border-color: rgba(255,255,255,0.16);
-            background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.1));
-        }
-        .memory-roadmap-seg.future {
-            border-color: rgba(251,191,36,0.22);
-            background: linear-gradient(90deg, rgba(251,191,36,0.16), rgba(255,255,255,0.06));
-        }
-        .memory-roadmap-footer {
-            margin-top: 2px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            font-size: 10px;
-            line-height: 1.4;
-            color: rgba(255,255,255,0.46);
-        }
         .chat-bubble-row {
             display: flex;
             align-items: flex-end;
@@ -5888,8 +5687,7 @@
             letter-spacing: 0.14em;
         }
 
-        /* ── PHASE: memory-roadmap ──────────────────────────────── */
-        /* Move off cyan/amber palette, use neutral + blue-green accent for active week */
+        /* JOSHeX quick panel shell */
         .card-brain .agent-chat-section {
             padding: 12px;
             border: 1px solid var(--rv-line-soft);
@@ -5910,48 +5708,6 @@
         .card-brain .agent-chat-live-dot.live {
             background: var(--rv-ok);
             box-shadow: 0 0 0 2px rgba(74,222,128,0.15);
-        }
-        /* Roadmap cards: unify all to a single dark surface, use blue-green accent for active */
-        .memory-roadmap-card {
-            background: var(--rv-surface-2) !important;
-            border: 1px solid var(--rv-line-soft) !important;
-            border-radius: 8px !important;
-        }
-        .memory-roadmap-card.active {
-            border-color: rgba(34,211,238,0.26) !important;
-            background: rgba(34,211,238,0.05) !important;
-        }
-        .memory-roadmap-card.future {
-            border-color: var(--rv-line) !important;
-            background: var(--rv-surface-2) !important;
-        }
-        .memory-roadmap-card.active .memory-roadmap-card-pill {
-            background: rgba(34,211,238,0.12) !important;
-            color: #93c5fd !important;
-            border-color: rgba(34,211,238,0.22) !important;
-        }
-        .memory-roadmap-card.future .memory-roadmap-card-pill {
-            background: rgba(255,255,255,0.04) !important;
-            color: var(--rv-text-muted) !important;
-            border-color: var(--rv-line-soft) !important;
-        }
-        /* Flatten pill radii */
-        .memory-roadmap-summary-pill,
-        .memory-roadmap-card-pill { border-radius: 3px !important; padding: 2px 6px; }
-        /* Week scale: current week highlight uses accent cyan */
-        .memory-roadmap-week.current {
-            color: #93c5fd !important;
-            border-bottom-color: rgba(34,211,238,0.35) !important;
-        }
-        .memory-roadmap-summary-pill.live {
-            color: var(--rv-ok) !important;
-            background: rgba(74,222,128,0.10) !important;
-            border-color: rgba(74,222,128,0.22) !important;
-        }
-        .memory-roadmap-summary-pill.warn {
-            color: #fbbf24 !important;
-            background: rgba(245,158,11,0.08) !important;
-            border-color: rgba(245,158,11,0.20) !important;
         }
 
         /* ── PHASE: agent-chat / Activity & Agents ──────────────────── */
@@ -6389,13 +6145,6 @@
             body:not(.phone-mode) .card-brain .ua-log { gap: 5px !important; }
             body:not(.phone-mode) .card-brain .ua-item { padding: 6px 8px !important; gap: 4px !important; border-radius: 8px !important; }
             body:not(.phone-mode) .card-brain .ua-msg { font-size: 0.58rem !important; line-height: 1.18 !important; }
-            body:not(.phone-mode) .memory-roadmap-compact-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; }
-            body:not(.phone-mode) .memory-roadmap-card { min-height: 50px !important; padding: 6px !important; gap: 3px !important; }
-            body:not(.phone-mode) .memory-roadmap-card-note { display: none !important; }
-            body:not(.phone-mode) .memory-roadmap-card-title {
-                font-size: 8px !important; line-height: 1.12 !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-            }
-            body:not(.phone-mode) .memory-roadmap-summary { gap: 5px !important; margin-bottom: 6px !important; }
             body:not(.phone-mode) #today-jobs-card .tjob-category { margin-bottom: 7px !important; }
             body:not(.phone-mode) #today-jobs-card .tjob-row { padding: 4px 5px !important; gap: 6px !important; }
             body:not(.phone-mode) #today-jobs-card .tjob-name { font-size: 0.66rem !important; }
@@ -6667,6 +6416,20 @@
                                 <button class="module-action-btn" type="button" onclick="openModuleModal('usage')" aria-label="Expand model usage">↗</button>
                             </div>
                         </div>
+                        <section class="personal-codex-panel" id="personal-codex" aria-label="JOSHeX">
+                            <div>
+                                <div class="pc-kicker">JOSHeX</div>
+                                <div class="pc-title">Codex patch lane</div>
+                                <div class="pc-meta">
+                                    <span class="pc-pill" id="pc-status">loading</span>
+                                    <span class="pc-pill" id="pc-validation">validation pending</span>
+                                </div>
+                            </div>
+                            <div class="pc-list" id="pc-activity"></div>
+                            <div class="pc-list" id="pc-capabilities"></div>
+                        </section>
+
+
                         <!-- Top: Model Usage totals + per-provider breakdown -->
                         <div id="model-usage-card"></div>
                         <!-- Divider -->
@@ -6712,19 +6475,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <section class="personal-codex-panel" id="personal-codex" aria-label="JOSHeX">
-                            <div>
-                                <div class="pc-kicker">JOSHeX</div>
-                                <div class="pc-title">Local contribution lane</div>
-                                <div class="pc-meta">
-                                    <span class="pc-pill" id="pc-status">loading</span>
-                                    <span class="pc-pill" id="pc-validation">validation pending</span>
-                                </div>
-                            </div>
-                            <div class="pc-list" id="pc-activity"></div>
-                            <div class="pc-list" id="pc-capabilities"></div>
-                        </section>
 
                         <div id="ops-center-panel" class="ops-center-panel capability-stack" aria-label="Capability Stack">
                             <div class="capability-tile"><div class="capability-k">Canaries</div><div class="capability-v">loading</div><div class="capability-d">dashboard guardrails</div></div>
@@ -7597,7 +7347,7 @@
                 if (!bf) return;
                 const stale = isFeedStale(bf);
                 const isActive = bf.active === true && !stale && !bf.lowSignal && !isLowSignalBrainObjective(bf.objective);
-                const fullMsg = bf.objective || (isActive ? 'Processing…' : 'Standby');
+                const fullMsg = scrubLegacyDashboardCopy(bf.objective || (isActive ? 'Processing…' : 'Standby'));
                 const normalized = String(fullMsg || '').trim().toLowerCase();
                 const noisyIdle = !isActive && (
                     stale ||
@@ -7639,7 +7389,7 @@
                 return a.agentClass || 'agent';
             };
             for (const a of running.slice(0, 2)) {
-                const fullMsg = a.label || 'Running…';
+                const fullMsg = scrubLegacyDashboardCopy(a.label || 'Running…');
                 summaryItems.push({
                     agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
@@ -7653,7 +7403,7 @@
                 });
             }
             for (const a of recentAgents) {
-                const fullMsg = a.label || 'Done';
+                const fullMsg = scrubLegacyDashboardCopy(a.label || 'Done');
                 recentItems.push({
                     agentClass: inferAgentClass(a),
                     agentLabel: a.agentLabel || 'AGENT',
@@ -7674,7 +7424,7 @@
             for (const e of filteredComms) {
                 const dir = (e.direction || '').toLowerCase();
                 const agent = (e.agent || (dir.startsWith('jaimes') ? 'jaimes' : dir.startsWith('jain') ? 'jain' : 'josh')).toLowerCase();
-                const fullMsg = e.message || '';
+                const fullMsg = scrubLegacyDashboardCopy(e.message || '');
                 recentItems.push({
                     agentClass: agent === 'jaimes' ? 'jaimes' : agent === 'jain' ? 'jain' : 'josh',
                     agentLabel: agent === 'jaimes' ? 'JAIMES' : agent === 'jain' ? 'J.A.I.N' : 'JOSH 2.0',
@@ -7858,7 +7608,14 @@
         }
 
         function normalizeJoshexCopy(value) {
-            return String(value || '').replace(/Personal Codex/g, 'JOSHeX');
+            return String(value || '')
+                .replace(/Personal Codex/g, 'JOSHeX')
+                .replace(/live on GitHub Pages; dashboard fallback active/gi, 'Pages live; fallback ready')
+                .replace(/local contribution lane/gi, 'Codex patch lane')
+                .replace(/inspect Mission Control source/gi, 'inspect')
+                .replace(/edit local dashboard files/gi, 'edit')
+                .replace(/run regression checks/gi, 'verify')
+                .replace(/prepare Git patches/gi, 'patch');
         }
 
         function getJoshexData() {
@@ -7876,30 +7633,30 @@
             const rawActivity = Array.isArray(pc.recentActivity) ? pc.recentActivity : [];
             const activity = rawActivity.map(item => normalizeJoshexCopy(typeof item === 'string' ? item : (item.event || item.title || item.message || 'JOSHeX activity'))).filter(Boolean);
             const rawCapabilities = Array.isArray(pc.capabilities) ? pc.capabilities : [];
-            const capabilities = rawCapabilities.map(item => normalizeJoshexCopy(typeof item === 'string' ? item : (item.label || item.title || item.name || item))).filter(Boolean);
-            const topActivity = activity.slice(0, expanded ? 4 : 2);
-            const topCaps = capabilities.slice(0, expanded ? 6 : 4);
+            const capabilities = rawCapabilities.map(item => compactUiLabel(normalizeJoshexCopy(typeof item === 'string' ? item : (item.label || item.title || item.name || item)), 26)).filter(Boolean);
+            const topActivity = activity.slice(0, expanded ? 3 : 1);
+            const topCaps = capabilities.slice(0, expanded ? 4 : 3);
             const activityHtml = topActivity.length
-                ? topActivity.map(item => `<div class="jx-row"><span class="jx-key">ACT</span><span>${escapeHtml(item)}</span></div>`).join('')
-                : '<div class="jx-row"><span class="jx-key">ACT</span><span>Ready for local Codex handoffs</span></div>';
+                ? topActivity.map(item => `<div class="jx-row"><span class="jx-key">NOW</span><span>${escapeHtml(compactUiLabel(item, expanded ? 72 : 54))}</span></div>`).join('')
+                : '<div class="jx-row"><span class="jx-key">NOW</span><span>Ready for Codex handoffs</span></div>';
             const capsHtml = topCaps.length
                 ? topCaps.map(item => `<span class="jx-chip">${escapeHtml(item)}</span>`).join('')
-                : ['inspect source', 'edit dashboard', 'run checks', 'prepare patches'].map(item => `<span class="jx-chip">${escapeHtml(item)}</span>`).join('');
+                : ['inspect', 'edit', 'verify', 'patch'].map(item => `<span class="jx-chip">${escapeHtml(item)}</span>`).join('');
             const footer = expanded
-                ? '<div class="jx-note">JOSHeX is visibility only. It is not Brain Feed, not JAIMES, and not a live-agent slot.</div>'
+                ? '<div class="jx-note">Visibility only · not Brain Feed · not a live-agent slot</div>'
                 : '';
             return {
                 html: `<div class="joshex-quick ${expanded ? 'expanded' : 'compact'}">
                     <div class="jx-hero">
-                        <div><div class="jx-kicker">JOSHeX</div><div class="jx-title">Local Codex lane</div></div>
-                        <button class="jx-open" type="button" onclick="document.getElementById('personal-codex')?.scrollIntoView({behavior:'smooth',block:'center'})">Open panel</button>
+                        <div><div class="jx-kicker">JOSHeX</div><div class="jx-title">Codex patch lane</div></div>
+                        <button class="jx-open" type="button" onclick="document.getElementById('personal-codex')?.scrollIntoView({behavior:'smooth',block:'center'})">Open full</button>
                     </div>
                     <div class="jx-status-row"><span class="jx-pill ${isFresh ? 'live' : 'warn'}">${escapeHtml(status)}</span><span class="jx-pill">${escapeHtml(validation)}</span></div>
                     <div class="jx-activity">${activityHtml}</div>
                     <div class="jx-cap-row">${capsHtml}</div>
                     ${footer}
                 </div>`,
-                meta: isFresh ? 'JOSHeX ready' : 'JOSHeX stale',
+                meta: isFresh ? 'JOSHeX ready' : 'JOSHeX check',
                 live: isFresh,
             };
         }
@@ -8444,18 +8201,18 @@
                 status.textContent = safeStatus;
                 status.className = 'pc-pill pc-status-' + safeStatus.replace(/[^a-z0-9_-]/g, '-');
             }
-            if (validation) validation.textContent = pc.validation || 'validation pending';
-            const recent = Array.isArray(pc.recentActivity) ? pc.recentActivity.slice(0, 3) : [];
+            if (validation) validation.textContent = normalizeJoshexCopy(pc.validation || 'validation pending');
+            const recent = Array.isArray(pc.recentActivity) ? pc.recentActivity.slice(0, 2) : [];
             if (activity) {
                 activity.innerHTML = recent.length ? recent.map(item => {
                     const event = typeof item === 'string' ? item : (item.event || item.title || item.message || 'Codex activity');
-                    const displayEvent = String(event).replace(/Personal Codex/g, 'JOSHeX');
-                    return `<div class="pc-row"><strong>Activity</strong><span>${escapeHtml(displayEvent)}</span></div>`;
-                }).join('') : '<div class="pc-row"><strong>Activity</strong><span>No recent local patches</span></div>';
+                    const displayEvent = compactUiLabel(normalizeJoshexCopy(event), 64);
+                    return `<div class="pc-row"><strong>Now</strong><span>${escapeHtml(displayEvent)}</span></div>`;
+                }).join('') : '<div class="pc-row"><strong>Now</strong><span>Ready for Codex handoffs</span></div>';
             }
             const caps = Array.isArray(pc.capabilities) ? pc.capabilities.slice(0, 4) : [];
             if (capabilities) {
-                capabilities.innerHTML = caps.length ? caps.map(cap => `<div class="pc-row"><strong>Can</strong><span>${escapeHtml(cap)}</span></div>`).join('') : '<div class="pc-row"><strong>Can</strong><span>Inspect, edit, validate</span></div>';
+                capabilities.innerHTML = caps.length ? caps.map(cap => `<div class="pc-row"><strong>Can</strong><span>${escapeHtml(compactUiLabel(normalizeJoshexCopy(cap), 24))}</span></div>`).join('') : '<div class="pc-row"><strong>Can</strong><span>Inspect · edit · verify</span></div>';
             }
         }
 
@@ -9604,8 +9361,15 @@
             </div>`;
         }
 
+        function scrubLegacyDashboardCopy(value) {
+            return String(value || '')
+                .replace(/Memory Roadmap/gi, 'legacy panel')
+                .replace(/memory-roadmap/gi, 'legacy-panel')
+                .replace(/roadmap/gi, 'plan');
+        }
+
         function getBrainFeedObjectiveText(bf) {
-            return sanitizeLabel(bf?.objective || 'Processing...') || 'Processing...';
+            return scrubLegacyDashboardCopy(sanitizeLabel(bf?.objective || 'Processing...')) || 'Processing...';
         }
 
         function getBrainFeedObjectiveDetail(bf) {
@@ -9614,17 +9378,17 @@
             const pendingStep = steps.find(step => step.status === 'pending') || null;
             const recentDone = [...steps].reverse().find(step => step.status === 'done') || null;
             const parts = [];
-            if (activeStep?.label) parts.push(`Now: ${sanitizeLabel(activeStep.label)}`);
+            if (activeStep?.label) parts.push(`Now: ${scrubLegacyDashboardCopy(sanitizeLabel(activeStep.label))}`);
             else {
                 const liveStep = resolveBrainFeedStepLabel(bf);
-                if (liveStep) parts.push(`Now: ${liveStep}`);
+                if (liveStep) parts.push(`Now: ${scrubLegacyDashboardCopy(liveStep)}`);
             }
             if (pendingStep?.label && pendingStep.label !== activeStep?.label) {
-                parts.push(`Next: ${sanitizeLabel(pendingStep.label)}`);
+                parts.push(`Next: ${scrubLegacyDashboardCopy(sanitizeLabel(pendingStep.label))}`);
             } else if (recentDone?.label && recentDone.label !== activeStep?.label) {
-                parts.push(`Recent: ${sanitizeLabel(recentDone.label)}`);
+                parts.push(`Recent: ${scrubLegacyDashboardCopy(sanitizeLabel(recentDone.label))}`);
             }
-            return compactUiLabel(parts.join(' · '), 180) || resolveBrainFeedStepLabel(bf) || 'Working through the current objective.';
+            return compactUiLabel(parts.join(' · '), 180) || scrubLegacyDashboardCopy(resolveBrainFeedStepLabel(bf)) || 'Working through the current objective.';
         }
 
         function fitBrainFeedObjectiveViewport(brainFeedCard, fullText) {
@@ -10444,8 +10208,8 @@
             window._mcLastContextWindow = data.contextWindow || null;
             renderCtxHeaderInline(data.contextWindow || null);
             renderPersonalCodex(data);
-            // Memory Roadmap depends on dashboard context, not just agent comms.
-            // Re-render here so context/roadmap freshness updates every poll.
+            // JOSHeX quick panel depends on dashboard data, not just agent comms.
+            // Re-render here so quick-panel freshness updates every poll.
             renderAgentChatFeed(_uaComms || []);
             if (sectionChanged('activeAgents', data.activeAgents)) {
                 renderActiveAgents(data.activeAgents || []);

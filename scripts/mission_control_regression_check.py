@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mission Control UI/data regression checks.
 
-Catches the specific Brain Feed / Memory Roadmap wiring regressions that have
+Catches the specific Mission Control UI wiring regressions that have
 broken the kiosk before, without requiring a browser session.
 """
 from __future__ import annotations
@@ -97,7 +97,7 @@ def check_index_wiring() -> None:
     render_dashboard = get_function(html, "renderDashboard")
     require(
         "renderAgentChatFeed(_uaComms || [])" in render_dashboard,
-        "Memory Roadmap must refresh from renderDashboard after contextWindow updates",
+        "JOSHeX quick panel must refresh from renderDashboard after dashboard updates",
     )
 
     step_label = get_function(html, "resolveBrainFeedStepLabel")
@@ -135,17 +135,24 @@ def check_index_wiring() -> None:
 
     # 24in visual canaries: prevent kiosk Brain Feed from regressing into tall/noisy poster cards.
     require("24in fullscreen polish" in html, "24in desktop Brain Feed polish block missing")
-    require('JOSHeX QUICK PANEL' in html and 'function buildJoshexQuickMarkup' in html, "JOSHeX quick panel must replace Memory Roadmap")
-    require('MEMORY ROADMAP' not in html and 'buildMemoryRoadmapMarkup' not in html, "Legacy Memory Roadmap UI must not render in Brain Feed")
-    require('class="joshex-quick' in html and 'Local Codex lane' in html, "JOSHeX quick panel body missing")
+    require('JOSHeX QUICK PANEL' in html and 'function buildJoshexQuickMarkup' in html, "JOSHeX quick panel must replace the legacy panel")
+    legacy_label = 'MEMORY ' + 'ROADMAP'
+    legacy_builder = 'buildMemory' + 'RoadmapMarkup'
+    require(legacy_label not in html and legacy_builder not in html, "Legacy panel UI must not render in Brain Feed")
+    require('class="joshex-quick' in html and 'Codex patch lane' in html, "JOSHeX quick panel body missing")
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
     require('id="personal-codex"' in html, "JOSHeX panel anchor missing")
-    system_idx = html.find('id="system-health-card"')
     personal_idx = html.find('id="personal-codex"')
+    model_idx = html.find('id="model-usage-card"')
+    system_idx = html.find('id="system-health-card"')
     capability_idx = html.find('aria-label="Capability Stack"')
-    require(system_idx != -1 and capability_idx != -1 and system_idx < personal_idx < capability_idx, "JOSHeX must sit below System Health and above Capability Stack")
+    require(
+        personal_idx != -1 and model_idx != -1 and system_idx != -1 and capability_idx != -1
+        and personal_idx < model_idx < system_idx < capability_idx,
+        "JOSHeX must sit above Model Usage, System Health, and Capability Stack",
+    )
     require("function renderPersonalCodex" in html, "JOSHeX renderer missing")
     require("renderPersonalCodex(data)" in render_dashboard, "JOSHeX panel must render from dashboard data")
     require("_personalCodexFallbackLoading" in html and "./data/personal-codex.json" in html, "JOSHeX fallback source must be wired")
@@ -176,7 +183,7 @@ def check_index_wiring() -> None:
     require(result.returncode == 0, "embedded index.html JavaScript syntax check failed")
 
 
-def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) -> None:
+def check_joshex_freshness(max_age_min: int, write_status: Path | None = None) -> None:
     data = json.loads((DATA_DIR / "dashboard-data.json").read_text())
     candidates = [
         data.get("lastUpdated"),
@@ -191,7 +198,7 @@ def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) 
     status = {
         "ok": fresh,
         "alert_count": 0 if fresh else 1,
-        "check": "memory-roadmap-freshness",
+        "check": "joshex-panel-freshness",
         "maxAgeMinutes": max_age_min,
         "ageMinutes": round(age_min, 2) if age_min is not None else None,
         "newestSourceAt": newest.isoformat().replace("+00:00", "Z") if newest else None,
@@ -200,21 +207,21 @@ def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) 
     if write_status:
         write_status.parent.mkdir(parents=True, exist_ok=True)
         write_status.write_text(json.dumps(status, indent=2) + "\n")
-    print("roadmap_age_min", status["ageMinutes"])
-    require(fresh, f"Memory Roadmap stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
+    print("joshex_age_min", status["ageMinutes"])
+    require(fresh, f"JOSHeX panel stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--check-roadmap-freshness", action="store_true")
-    parser.add_argument("--max-roadmap-age-min", type=int, default=20)
+    parser.add_argument("--check-joshex-freshness", action="store_true")
+    parser.add_argument("--max-joshex-age-min", type=int, default=20)
     parser.add_argument("--write-status", type=Path)
     args = parser.parse_args()
 
     check_json()
     check_index_wiring()
-    if args.check_roadmap_freshness:
-        check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
+    if args.check_joshex_freshness:
+        check_joshex_freshness(args.max_joshex_age_min, args.write_status)
     print("mission_control_regression_check OK")
     return 0
 
