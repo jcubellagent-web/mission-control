@@ -16,24 +16,30 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "sent 4x sharpened full image plus three zoom panels",
+    "objective": "fix Mission Control bottom half cutoff",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T04:55:08Z",
-    "checkedAt": "2026-04-29T04:55:08Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "inspect"
+      }
+    ],
+    "currentTool": "inspect",
+    "updatedAt": "2026-04-29T04:55:51Z",
+    "checkedAt": "2026-04-29T04:55:51Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "sent 4x sharpened full image plus three zoom panels",
-    "updatedAt": "2026-04-29T04:55:18Z"
+    "context": "fix Mission Control bottom half cutoff",
+    "updatedAt": "2026-04-29T05:00:16Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
+    "usedTokens": 31746,
+    "limitTokens": 272000,
+    "pct": 0.1167,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -44,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 13 source file(s) changed",
-        "time": "2026-04-29T04:55:18Z"
+        "event": "Patch feed: 12 source file(s) changed",
+        "time": "2026-04-29T05:00:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T04:55:18Z",
+    "updatedAt": "2026-04-29T05:00:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "13 source file(s) changed",
+      "summary": "12 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 13,
+      "dirtyCount": 12,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-brain-feed.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json"
+        "data/mission-control-canaries.json",
+        "data/model-usage-accum.json",
+        "data/model-usage-tracker.json"
       ],
-      "head": "30e7be072",
-      "updatedAt": "2026-04-29T04:55:18Z"
+      "head": "114c5e570",
+      "updatedAt": "2026-04-29T05:00:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -182,10 +188,10 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 13,
+    "missionControlDirty": 11,
     "recentFiles": [
-      "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
+      "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/scripts/mission_control_screenshot_diff.py",
       "mission-control/docs/joshex-lane.md"
@@ -196,7 +202,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 85% left [==========--]",
-        "Resets in 1h 59m",
+        "Resets in 1h 54m",
         "Weekly: 87% left [==========--]",
         "Pace: On pace | Expected 14% used | Lasts until reset",
         "Resets in 6d",
@@ -207,17 +213,17 @@
       "weekly": "87% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 59m",
+      "sessionReset": "1h 54m",
       "weeklyReset": "6d",
       "summary": "85% left \u00b7 wk 87% left"
     },
-    "updatedAt": "2026-04-29T04:55:20Z"
+    "updatedAt": "2026-04-29T05:00:18Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.101903,
-    "weekly": 45.404657,
-    "monthly": 951.782077,
+    "session": 0.018942,
+    "daily": 0.120845,
+    "weekly": 45.406144,
+    "monthly": 951.783565,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -232,7 +238,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.20736299999999996
+        "cost": 0.22630499999999998
       },
       {
         "name": "openai/gpt-5.5",
@@ -267,12 +273,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 4089,
-        "outputTokens": 317,
-        "totalTokens": 4406,
-        "sessionCost": 0.20736299999999996,
-        "dailyCost": 0.10190300000000001,
-        "weeklyCost": 0.20736299999999996,
+        "inputTokens": 4731,
+        "outputTokens": 323,
+        "totalTokens": 5054,
+        "sessionCost": 0.22630499999999998,
+        "dailyCost": 0.12084500000000001,
+        "weeklyCost": 0.22630499999999998,
         "sessions": 9,
         "isGemini": false,
         "costEstimated": false
@@ -365,7 +371,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T04:55:23Z",
+    "lastUpdated": "2026-04-29T05:00:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -398,14 +404,14 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.101903,
-      "total": 47.329976,
-      "monthly": 951.782077
+      "daily": 0.120845,
+      "total": 47.348918,
+      "monthly": 951.783565
     },
     "weeklyRunRate": {
-      "total": 47.347431,
+      "total": 47.348918,
       "automation": 1.942774,
-      "interactive": 43.461883,
+      "interactive": 43.46337,
       "projectedMonthly": 202.92
     }
   },
@@ -423,7 +429,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T04:55:28Z",
+    "updatedAt": "2026-04-29T05:00:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -440,14 +446,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.4,
-      "cpu_user": 23.47,
-      "cpu_sys": 16.93,
-      "load1": 3.64,
-      "load5": 3.02,
+      "cpu_pct": 49.2,
+      "cpu_user": 28.44,
+      "cpu_sys": 20.75,
+      "load1": 2.87,
+      "load5": 2.81,
       "load15": 2.6,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "106Gi",
@@ -455,14 +461,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.8,
-      "cpu_user": 3.7,
-      "cpu_sys": 10.76,
-      "load1": 1.67,
-      "load5": 1.88,
-      "load15": 1.87,
+      "cpu_pct": 11.1,
+      "cpu_user": 2.38,
+      "cpu_sys": 9.52,
+      "load1": 2.12,
+      "load5": 2.0,
+      "load15": 1.91,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -486,19 +492,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T04:55:18Z"
+      "lastChecked": "2026-04-29T05:00:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T04:55:18Z"
+      "lastChecked": "2026-04-29T05:00:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T04:55:18Z"
+      "lastChecked": "2026-04-29T05:00:16Z"
     }
   ],
   "crons": [
@@ -515,7 +521,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T04:55:28.715426+00:00"
+      "lastRun": "2026-04-29T05:00:27.144087+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -560,7 +566,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T04:00:00.769033+00:00"
+      "lastRun": "2026-04-29T05:00:00.323135+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -590,7 +596,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T04:00:07.305203+00:00"
+      "lastRun": "2026-04-29T05:00:06.148210+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -1254,7 +1260,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T04:55:18.354240Z",
+    "checkedAt": "2026-04-29T05:00:16.844987Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1574,11 +1580,23 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260429-0001",
+      "title": "Fix Mission Control bottom-half cutoff",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Josh reported JAIMES could not fix the Mission Control brain-feed bottom-half override/cutoff. Inspect screen, patch Mission Control layout/rendering, verify visually, then push/update brain feed.",
+      "background": "owner: JOSH 2.0; updated 2026-04-29 00:55",
+      "requestedAt": null,
+      "updatedAt": "2026-04-29 00:55",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html",
+      "label": "Recently edited: mission-control/index.html, mission-control/scripts/mission_control_regression_check.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1603,14 +1621,20 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "sent 4x sharpened full image plus three zoom panels",
+      "objective": "fix Mission Control bottom half cutoff",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T04:55:08Z",
+      "updatedAt": "2026-04-29T04:55:51Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "inspect",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "inspect"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1710,14 +1734,20 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "sent 4x sharpened full image plus three zoom panels",
+        "objective": "fix Mission Control bottom half cutoff",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T04:55:08Z",
+        "updatedAt": "2026-04-29T04:55:51Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "inspect",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "inspect"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1802,29 +1832,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T04:55:23Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-29T05:00:22Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T04:55:20Z",
-      "event": "Coding: mission-control/scripts/mission_control_regression_check.py, mission-control/index.html"
+      "time": "2026-04-29T05:00:18Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/mission_control_regression_check.py"
     },
     {
-      "time": "2026-04-29T04:55:20Z",
+      "time": "2026-04-29T05:00:18Z",
       "event": "CodexBar: 85% left \u00b7 wk 87% left"
     },
     {
-      "time": "2026-04-29T04:55:18Z",
+      "time": "2026-04-29T05:00:16Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T04:55:18Z",
-      "event": "JOSHeX: Patch feed: 13 source file(s) changed"
+      "time": "2026-04-29T05:00:16Z",
+      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T04:55:18Z",
+      "time": "2026-04-29T05:00:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T04:55:18Z"
+  "lastUpdated": "2026-04-29T05:00:16Z"
 }
