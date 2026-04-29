@@ -1,70 +1,18 @@
 {
-  "agent": "JAIMES",
   "active": false,
-  "objective": "Mission Control watchdog clean",
+  "objective": "Standby",
   "status": "idle",
-  "updatedAt": "2026-04-29T08:17:42Z",
-  "checkedAt": "2026-04-29T08:17:32Z",
-  "source": "jaimes_bf_push",
-  "reportedActive": false,
-  "stale": false,
-  "currentTool": "exec",
-  "tool": "exec",
-  "model": "gpt-5.5",
-  "auth": "subscription",
-  "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
+  "updatedAt": "2026-04-29T08:25:04Z",
+  "model": "gpt-4.1",
+  "messageReceived": "2026-04-29T08:25:04Z",
   "steps": [
     {
-      "label": "Step: adding edit timeout wrapper/autorecovery",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: validating JOSH autorecovery script",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: final JOSH health verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: updating OpenClaw recovery skill",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: approved JOSH final hardening/test",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: checking JOSH Codex 5.5 state",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review memory and skills updates",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
+      "label": "Last: Sorare Canonical \u2014 sorare_canonical_reflector.py \u2014 done",
       "status": "done",
       "tool": "exec"
     }
   ],
-  "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T08:17:32Z"
+  "currentTool": "",
+  "checkedAt": "2026-04-29T08:25:04Z",
+  "agent": "JAIMES"
 }
