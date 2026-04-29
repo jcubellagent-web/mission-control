@@ -6613,9 +6613,9 @@
                             </div>
                         </div>
 
-                        <section class="personal-codex-panel" id="personal-codex" aria-label="Personal Codex">
+                        <section class="personal-codex-panel" id="personal-codex" aria-label="JOSHeX">
                             <div>
-                                <div class="pc-kicker">Personal Codex</div>
+                                <div class="pc-kicker">JOSHeX</div>
                                 <div class="pc-title">Local contribution lane</div>
                                 <div class="pc-meta">
                                     <span class="pc-pill" id="pc-status">loading</span>
@@ -10468,6 +10468,8 @@
             const voiceStatus = data.voiceRouter?.status || 'planned';
             const voicePill = `<div class="stat-pill" style="border-color:${voiceStatus === 'ready' ? 'rgba(74,222,128,0.22)' : 'rgba(251,191,36,0.25)'};"><span class="num">🎙</span><span class="label">Voice ${voiceStatus === 'ready' ? 'Ready' : 'Planned'}</span></div>`;
             const sorareMlPill = `<div class="stat-pill" style="border-color:rgba(167,139,250,0.24);"><span class="num" style="color:#a78bfa">ML</span><span class="label">JAIMES</span></div>`;
+            const personalCodex = data.personalCodex || window._personalCodexFallback || null;
+            const joshexPill = personalCodex ? `<div class="stat-pill" id="joshex-bubble" title="JOSHeX local Codex contribution lane" onclick="document.getElementById('personal-codex')?.scrollIntoView({behavior:'smooth', block:'center'})" style="cursor:pointer;border-color:rgba(34,211,238,0.30);background:rgba(34,211,238,0.08);"><span class="num" style="color:#67e8f9">CX</span><span class="label">JOSHeX</span></div>` : '';
             // Only show stats that have non-zero value or are actionable alerts
             statsRow.innerHTML = `
                 <div class="stat-pill" id="active-crons-bubble" style="cursor:pointer;"><span class="num">${enabledCrons}</span><span class="label">Active Crons</span></div>
@@ -10477,6 +10479,7 @@
                 ${canaryPill}
                 ${sorareMlPill}
                 ${voicePill}
+                ${joshexPill}
                 ${deviceAttention > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${deviceAttention}</span><span class="label">Device Alerts</span></div>` : ''}
                 ${errorCrons > 0 ? `<div class="stat-pill" style="border-color:var(--accent-red);"><span class="num" style="color:var(--accent-red);">${errorCrons}</span><span class="label">Cron Errors</span></div>` : ''}
                 <div class="stat-pill stat-pill-8s" id="eightsleep-bubble" title="Eight Sleep Controls" onclick="window.openEightSleepDashboard && window.openEightSleepDashboard()" style="cursor:pointer;">

@@ -140,28 +140,28 @@ def check_index_wiring() -> None:
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
-    require('id="personal-codex"' in html, "Personal Codex panel anchor missing")
+    require('id="personal-codex"' in html, "JOSHeX panel anchor missing")
     system_idx = html.find('id="system-health-card"')
     personal_idx = html.find('id="personal-codex"')
     capability_idx = html.find('aria-label="Capability Stack"')
-    require(system_idx != -1 and capability_idx != -1 and system_idx < personal_idx < capability_idx, "Personal Codex must sit below System Health and above Capability Stack")
-    require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
-    require("renderPersonalCodex(data)" in render_dashboard, "Personal Codex panel must render from dashboard data")
-    require("_personalCodexFallbackLoading" in html and "./data/personal-codex.json" in html, "Personal Codex fallback source must be wired")
+    require(system_idx != -1 and capability_idx != -1 and system_idx < personal_idx < capability_idx, "JOSHeX must sit below System Health and above Capability Stack")
+    require("function renderPersonalCodex" in html, "JOSHeX renderer missing")
+    require("renderPersonalCodex(data)" in render_dashboard, "JOSHeX panel must render from dashboard data")
+    require("_personalCodexFallbackLoading" in html and "./data/personal-codex.json" in html, "JOSHeX fallback source must be wired")
     require("window.openIntelHighlightsModal" in html and "_breakingHighlightsSource" in html, "Breaking Highlights modal/fresh-source guard must be wired")
 
     pc_path = DATA_DIR / "personal-codex.json"
     require(pc_path.exists(), "data/personal-codex.json missing")
     pc = json.loads(pc_path.read_text())
     require(isinstance(pc, dict), "personal-codex.json must be an object")
-    require(pc.get("agentSlot") is False, "Personal Codex must not be a live-agent slot")
-    require(pc.get("promoteToBrainFeed") is False, "Personal Codex must not promote into Brain Feed")
+    require(pc.get("agentSlot") is False, "JOSHeX must not be a live-agent slot")
+    require(pc.get("promoteToBrainFeed") is False, "JOSHeX must not promote into Brain Feed")
 
     dashboard_path = DATA_DIR / "dashboard-data.json"
     if dashboard_path.exists():
         dashboard = json.loads(dashboard_path.read_text())
         if "personalCodex" in dashboard:
-            require("personalCodex" not in (dashboard.get("agentBrainFeeds") or {}), "Personal Codex must not be in agentBrainFeeds")
+            require("personalCodex" not in (dashboard.get("agentBrainFeeds") or {}), "JOSHeX must not be in agentBrainFeeds")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))

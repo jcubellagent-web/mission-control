@@ -1,6 +1,6 @@
-# Personal Codex Lane
+# JOSHeX Lane
 
-Personal Codex is a local contribution-visibility lane for Mission Control.
+JOSHeX is a local contribution-visibility lane for Mission Control.
 It is not a JAIMES/Hermes live-agent slot and must not be promoted into the Brain Feed hero.
 
 ## Source data
@@ -32,8 +32,8 @@ It is not a JAIMES/Hermes live-agent slot and must not be promoted into the Brai
 
 - Keep `agentSlot` false.
 - Keep `promoteToBrainFeed` false.
-- Do not add Personal Codex to `agentBrainFeeds`.
-- High-signal items may be prefixed as `Personal Codex:` in:
+- Do not add JOSHeX to `agentBrainFeeds`.
+- High-signal items may be prefixed as `JOSHeX:` in:
   - Action Required
   - Recent Activity
   - Capability Stack
