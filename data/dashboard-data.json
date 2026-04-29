@@ -16,19 +16,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "Completed cron memory sync to J.A.I.N and verified remote manifest, files, permissions, and backup record presence",
+    "objective": "heartbeat check",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T12:02:56Z",
-    "checkedAt": "2026-04-29T12:02:56Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "heartbeat"
+      }
+    ],
+    "currentTool": "heartbeat",
+    "updatedAt": "2026-04-29T12:39:00Z",
+    "checkedAt": "2026-04-29T12:39:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Completed cron memory sync to J.A.I.N and verified remote manifest, files, permissions, and backup record presence",
-    "updatedAt": "2026-04-29T12:35:18Z"
+    "context": "heartbeat check",
+    "updatedAt": "2026-04-29T12:40:17Z"
   },
   "contextWindow": {
     "usedTokens": 35786,
@@ -44,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T12:35:18Z"
+        "event": "Patch feed: 12 source file(s) changed",
+        "time": "2026-04-29T12:40:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T12:35:18Z",
+    "updatedAt": "2026-04-29T12:40:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "12 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 12,
       "files": [
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-accum.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-accum.json"
       ],
-      "head": "0ae4c778c",
-      "updatedAt": "2026-04-29T12:35:18Z"
+      "head": "3a752547a",
+      "updatedAt": "2026-04-29T12:40:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -182,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 11,
     "recentFiles": [],
     "codexbarStatus": "100% left \u00b7 wk 85% left",
     "codexbar": {
@@ -190,7 +196,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 19m",
+        "Resets in 4h 14m",
         "Weekly: 85% left [==========--]",
         "Pace: 4% in reserve | Expected 19% used | Lasts until reset",
         "Resets in 5d 16h",
@@ -201,11 +207,11 @@
       "weekly": "85% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 19m",
+      "sessionReset": "4h 14m",
       "weeklyReset": "5d 16h",
       "summary": "100% left \u00b7 wk 85% left"
     },
-    "updatedAt": "2026-04-29T12:35:20Z"
+    "updatedAt": "2026-04-29T12:40:19Z"
   },
   "modelUsage": {
     "session": 0.02071,
@@ -359,7 +365,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T12:35:23Z",
+    "lastUpdated": "2026-04-29T12:40:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -417,7 +423,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T12:35:28Z",
+    "updatedAt": "2026-04-29T12:40:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -434,14 +440,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.8,
-      "cpu_user": 17.33,
-      "cpu_sys": 17.49,
-      "load1": 2.61,
-      "load5": 2.33,
-      "load15": 2.22,
+      "cpu_pct": 35.6,
+      "cpu_user": 17.97,
+      "cpu_sys": 17.97,
+      "load1": 3.77,
+      "load5": 2.67,
+      "load15": 2.36,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "112Gi",
@@ -449,14 +455,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 2.29,
-      "cpu_sys": 10.68,
-      "load1": 2.06,
-      "load5": 2.07,
-      "load15": 2.1,
+      "cpu_pct": 12.0,
+      "cpu_user": 3.0,
+      "cpu_sys": 9.2,
+      "load1": 1.44,
+      "load5": 1.73,
+      "load15": 1.93,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -480,19 +486,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T12:35:18Z"
+      "lastChecked": "2026-04-29T12:40:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T12:35:18Z"
+      "lastChecked": "2026-04-29T12:40:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T12:35:18Z"
+      "lastChecked": "2026-04-29T12:40:17Z"
     }
   ],
   "crons": [
@@ -509,7 +515,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T12:35:28.587416+00:00"
+      "lastRun": "2026-04-29T12:40:27.985973+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1250,7 +1256,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T12:35:18.011181Z",
+    "checkedAt": "2026-04-29T12:40:17.044770Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1294,7 +1300,7 @@
     "status": "warn",
     "ok": false,
     "summary": "2 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-29T11:42:45Z",
+    "checkedAt": "2026-04-29T12:40:13Z",
     "counts": {
       "ok": 24,
       "warn": 2,
@@ -1396,18 +1402,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=44ms audit=0/0",
+        "detail": "gateway=True latency=45ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.26",
           "model": "gpt-5.5",
-          "percentUsed": 12
+          "percentUsed": 9
         }
       },
       {
         "name": "memory:main",
         "status": "ok",
         "ok": true,
-        "detail": "files=107 chunks=1191 dirty=False",
+        "detail": "files=107 chunks=1192 dirty=False",
         "meta": {}
       },
       {
@@ -1601,14 +1607,20 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Completed cron memory sync to J.A.I.N and verified remote manifest, files, permissions, and backup record presence",
+      "objective": "heartbeat check",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T12:02:56Z",
+      "updatedAt": "2026-04-29T12:39:00Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "heartbeat",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "heartbeat"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
@@ -1708,14 +1720,20 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Completed cron memory sync to J.A.I.N and verified remote manifest, files, permissions, and backup record presence",
+        "objective": "heartbeat check",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T12:02:56Z",
+        "updatedAt": "2026-04-29T12:39:00Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "heartbeat",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "heartbeat"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
@@ -1800,29 +1818,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T12:35:23Z",
+      "time": "2026-04-29T12:40:22Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-29T12:35:20Z",
+      "time": "2026-04-29T12:40:19Z",
       "event": "CodexBar: 100% left \u00b7 wk 85% left"
     },
     {
-      "time": "2026-04-29T12:35:18Z",
+      "time": "2026-04-29T12:40:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T12:35:18Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-29T12:40:17Z",
+      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-29T12:35:18Z",
+      "time": "2026-04-29T12:40:17Z",
       "event": "JOSHeX: Patch status feed added"
     },
     {
-      "time": "2026-04-29T12:35:18Z",
+      "time": "2026-04-29T12:40:17Z",
       "event": "JOSHeX: JOSHeX docs renamed"
     }
   ],
-  "lastUpdated": "2026-04-29T12:35:18Z"
+  "lastUpdated": "2026-04-29T12:40:17Z"
 }
