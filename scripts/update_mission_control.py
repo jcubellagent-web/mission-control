@@ -655,6 +655,16 @@ def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, A
     def is_live(feed: Dict[str, Any]) -> bool:
         return bool(feed.get("active") and is_recent_ts(feed.get("updatedAt"), hours=2))
 
+    def is_primary_operator_ready(feed: Dict[str, Any] | None) -> bool:
+        if not feed:
+            return False
+        if is_live(feed):
+            return True
+        objective = str(feed.get("objective") or "").strip()
+        if not objective or feed.get("stale"):
+            return False
+        return is_recent_ts(feed.get("updatedAt"), hours=12)
+
     def score(feed: Dict[str, Any]) -> tuple[int, float]:
         ts = iso_to_dt(feed.get("updatedAt"))
         return (1 if is_live(feed) else 0, ts.timestamp() if ts else 0.0)
@@ -662,7 +672,11 @@ def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, A
     ordered = sorted(agent_feeds.values(), key=score, reverse=True)
     active_agents = [feed["agent"] for feed in ordered if is_live(feed)]
     dual_pair: List[str] = []
-    if len(active_agents) >= 2:
+    josh_feed = next((feed for feed in agent_feeds.values() if feed.get("agent") == "JOSH 2.0"), None)
+    jaimes_feed = next((feed for feed in agent_feeds.values() if feed.get("agent") == "JAIMES"), None)
+    if is_live(josh_feed or {}) and is_primary_operator_ready(jaimes_feed):
+        dual_pair = ["JOSH 2.0", "JAIMES"]
+    elif len(active_agents) >= 2:
         remote = next((agent for agent in ["JAIMES", "J.A.I.N"] if agent in active_agents and agent != "JOSH 2.0"), None)
         if "JOSH 2.0" in active_agents and remote:
             dual_pair = ["JOSH 2.0", remote]
