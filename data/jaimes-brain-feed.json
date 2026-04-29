@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Verifying JOSH 2.0 progress fix",
-  "status": "active",
-  "updatedAt": "2026-04-29T16:45:01Z",
-  "checkedAt": "2026-04-29T16:45:01Z",
+  "active": false,
+  "objective": "Done: updated OpenClaw Telegram recovery skill",
+  "status": "idle",
+  "updatedAt": "2026-04-29T16:48:17Z",
+  "checkedAt": "2026-04-29T16:46:04Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,16 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: stale backup daily detected in ops audit",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "JOSH 2.0 detail issue: diagnosing active work visibility",
       "status": "done",
@@ -61,10 +51,20 @@
     },
     {
       "label": "Verifying JOSH 2.0 progress fix",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hardening JOSH brain-feed wrapper",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: JOSH 2.0 progress fix",
+      "status": "done",
       "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T16:45:01Z"
+  "messageReceived": "2026-04-29T16:46:04Z"
 }

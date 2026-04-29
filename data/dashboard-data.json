@@ -20,13 +20,13 @@
     "status": "idle",
     "steps": [
       {
-        "label": "Done",
+        "label": "Done - active-work detail patch installed",
         "status": "done",
-        "tool": "active-work detail patch installed"
+        "tool": "exec"
       }
     ],
-    "currentTool": "active-work detail patch installed",
-    "updatedAt": "2026-04-29T16:45:15Z",
+    "currentTool": "exec",
+    "updatedAt": "2026-04-29T16:45:42Z",
     "checkedAt": "2026-04-29T16:44:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Verifying JOSH 2.0 progress fix",
-    "updatedAt": "2026-04-29T16:45:18Z"
+    "updatedAt": "2026-04-29T16:50:18Z"
   },
   "contextWindow": {
     "usedTokens": 39946,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 10 source file(s) changed",
-        "time": "2026-04-29T16:45:18Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-29T16:50:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T16:45:18Z",
+    "updatedAt": "2026-04-29T16:50:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "10 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 10,
+      "dirtyCount": 9,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json"
+        "data/mission-control-canaries.json",
+        "data/model-usage-tracker.json"
       ],
-      "head": "195840859",
-      "updatedAt": "2026-04-29T16:45:18Z"
+      "head": "692b9c611",
+      "updatedAt": "2026-04-29T16:50:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,11 +188,11 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 9,
     "recentFiles": [
+      "scripts/josh_bf_push.sh",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/index.html",
-      "scripts/josh_bf_push.sh",
       "mission-control/scripts/update_and_push.sh",
       "mission-control/scripts/brain_feed_server.py",
       "scripts/send_josh_reply.py"
@@ -203,7 +203,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 91% left [==========--]",
-        "Resets in 9m",
+        "Resets in 4m",
         "Weekly: 83% left [=========---]",
         "Pace: 4% in reserve | Expected 21% used | Lasts until reset",
         "Resets in 5d 12h",
@@ -214,11 +214,11 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "9m",
+      "sessionReset": "4m",
       "weeklyReset": "5d 12h",
       "summary": "91% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T16:45:20Z"
+    "updatedAt": "2026-04-29T16:50:20Z"
   },
   "modelUsage": {
     "session": 0.025382,
@@ -378,7 +378,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T16:45:23Z",
+    "lastUpdated": "2026-04-29T16:50:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -452,7 +452,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T16:45:28Z",
+    "updatedAt": "2026-04-29T16:50:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -469,14 +469,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 33.8,
-      "cpu_user": 16.82,
-      "cpu_sys": 16.95,
-      "load1": 2.91,
-      "load5": 2.56,
-      "load15": 2.43,
+      "cpu_pct": 35.9,
+      "cpu_user": 18.25,
+      "cpu_sys": 17.6,
+      "load1": 2.69,
+      "load5": 2.58,
+      "load15": 2.48,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -484,12 +484,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.8,
-      "cpu_user": 2.89,
-      "cpu_sys": 10.86,
-      "load1": 1.84,
-      "load5": 1.86,
-      "load15": 1.9,
+      "cpu_pct": 20.7,
+      "cpu_user": 10.48,
+      "cpu_sys": 10.48,
+      "load1": 2.57,
+      "load5": 2.15,
+      "load15": 2.0,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -515,19 +515,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:45:18Z"
+      "lastChecked": "2026-04-29T16:50:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T16:45:18Z"
+      "lastChecked": "2026-04-29T16:50:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T16:45:18Z"
+      "lastChecked": "2026-04-29T16:50:18Z"
     }
   ],
   "crons": [
@@ -544,7 +544,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T16:45:28.882548+00:00"
+      "lastRun": "2026-04-29T16:50:29.414722+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1091,12 +1091,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T16:45:18.677183Z",
+    "checkedAt": "2026-04-29T16:50:18.102695Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JAIMES', 'J.A.I.N']; live=3",
+        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
         "severity": "ok"
       },
       {
@@ -1427,7 +1427,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/index.html",
+      "label": "Recently edited: scripts/josh_bf_push.sh, mission-control/scripts/update_mission_control.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1455,15 +1455,15 @@
       "objective": "JOSH 2.0 idle \u00b7 JAIMES: Verifying JOSH 2.0 progress fix",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T16:45:15Z",
+      "updatedAt": "2026-04-29T16:45:42Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "active-work detail patch installed",
+      "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done",
+          "label": "Done - active-work detail patch installed",
           "status": "done",
-          "tool": "active-work detail patch installed"
+          "tool": "exec"
         }
       ]
     },
@@ -1489,27 +1489,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Verifying JOSH 2.0 progress fix",
-      "status": "active",
+      "objective": "Done: updated OpenClaw Telegram recovery skill",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T16:45:01Z",
-      "messageReceived": "2026-04-29T16:45:01Z",
+      "updatedAt": "2026-04-29T16:48:17Z",
+      "messageReceived": "2026-04-29T16:46:04Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Step: stale backup daily detected in ops audit",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control watchdog running",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "JOSH 2.0 detail issue: diagnosing active work visibility",
           "status": "done",
@@ -1547,7 +1537,17 @@
         },
         {
           "label": "Verifying JOSH 2.0 progress fix",
-          "status": "active",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Hardening JOSH brain-feed wrapper",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Skill review: JOSH 2.0 progress fix",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1555,40 +1555,46 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JAIMES",
-    "dualMode": true,
-    "dualAgents": [
-      "JAIMES",
-      "J.A.I.N"
-    ],
+    "activeCount": 1,
+    "primaryAgent": "J.A.I.N",
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Verifying JOSH 2.0 progress fix",
+        "objective": "memory sync to JAIN backup",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T16:45:01Z",
-        "messageReceived": "2026-04-29T16:45:01Z",
+        "updatedAt": "2026-04-29T16:01:02Z",
+        "messageReceived": "2026-04-23T04:25:02Z",
+        "currentTool": "memory-sync",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "memory-sync"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: updated OpenClaw Telegram recovery skill",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-29T16:48:17Z",
+        "messageReceived": "2026-04-29T16:46:04Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Step: stale backup daily detected in ops audit",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "JOSH 2.0 detail issue: diagnosing active work visibility",
             "status": "done",
@@ -1626,28 +1632,18 @@
           },
           {
             "label": "Verifying JOSH 2.0 progress fix",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "memory sync to JAIN backup",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-29T16:01:02Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "memory-sync",
-        "model": "GPT-5.5",
-        "steps": [
+          },
           {
-            "label": "exec",
-            "status": "active",
-            "tool": "memory-sync"
+            "label": "Hardening JOSH brain-feed wrapper",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Skill review: JOSH 2.0 progress fix",
+            "status": "done",
+            "tool": "exec"
           }
         ]
       },
@@ -1659,15 +1655,15 @@
         "objective": "JOSH 2.0 idle \u00b7 JAIMES: Verifying JOSH 2.0 progress fix",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T16:45:15Z",
+        "updatedAt": "2026-04-29T16:45:42Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "active-work detail patch installed",
+        "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Done",
+            "label": "Done - active-work detail patch installed",
             "status": "done",
-            "tool": "active-work detail patch installed"
+            "tool": "exec"
           }
         ]
       }
@@ -1675,29 +1671,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T16:45:23Z",
+      "time": "2026-04-29T16:50:24Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-29T16:45:20Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/index.html"
+      "time": "2026-04-29T16:50:20Z",
+      "event": "Coding: scripts/josh_bf_push.sh, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T16:45:20Z",
+      "time": "2026-04-29T16:50:20Z",
       "event": "CodexBar: 91% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T16:45:18Z",
+      "time": "2026-04-29T16:50:18Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T16:45:18Z",
-      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
+      "time": "2026-04-29T16:50:18Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-29T16:45:18Z",
+      "time": "2026-04-29T16:50:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T16:45:18Z"
+  "lastUpdated": "2026-04-29T16:50:18Z"
 }
