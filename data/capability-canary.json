@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "3 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-29T06:16:36Z",
+  "summary": "2 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-29T07:07:26Z",
   "counts": {
-    "ok": 23,
-    "warn": 3,
+    "ok": 24,
+    "warn": 2,
     "error": 0
   },
   "checks": [
@@ -102,20 +102,20 @@
     },
     {
       "name": "openclaw:status",
-      "status": "warn",
-      "ok": false,
-      "detail": "gateway=True latency=42ms audit=3/0",
+      "status": "ok",
+      "ok": true,
+      "detail": "gateway=True latency=53ms audit=0/0",
       "meta": {
         "runtimeVersion": "2026.4.26",
         "model": "gpt-5.5",
-        "percentUsed": 18
+        "percentUsed": 13
       }
     },
     {
       "name": "memory:main",
       "status": "ok",
       "ok": true,
-      "detail": "files=107 chunks=1185 dirty=False",
+      "detail": "files=107 chunks=1188 dirty=False",
       "meta": {}
     },
     {
