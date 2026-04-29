@@ -163,7 +163,7 @@ def check_index_wiring() -> None:
     pc = json.loads(pc_path.read_text())
     require(isinstance(pc, dict), "personal-codex.json must be an object")
     require(pc.get("agentSlot") is False, "JOSHeX must not be a live-agent slot")
-    require(pc.get("promoteToBrainFeed") is False, "JOSHeX must not promote into Brain Feed")
+    require("synthesizeJoshexBrainFeed" in html and "agent-joshex" in html, "JOSHeX must render as a Brain Feed objective card when data exists")
     require(isinstance(pc.get("patchStatus"), dict), "JOSHeX fallback patchStatus missing")
     require("patchStatus" in html and "Patch" in html, "JOSHeX patch status feed must render")
 

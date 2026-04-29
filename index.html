@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- BUILD:1777437991 -->
+    <!-- BUILD:1777440001 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -4718,6 +4718,12 @@
             border-top: 1px solid rgba(74,222,128,0.24);
             box-shadow: inset 4px 0 0 rgba(74,222,128,0.68), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 28px rgba(74,222,128,0.045);
         }
+        .bf-objective.agent-joshex {
+            --bf-agent-color: #67e8f9;
+            border-left-color: var(--bf-agent-color) !important;
+            border-top: 1px solid rgba(103,232,249,0.26);
+            box-shadow: inset 4px 0 0 rgba(103,232,249,0.70), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 28px rgba(103,232,249,0.05);
+        }
         .bf-objective {
             --bf-model-color: rgba(255,255,255,0.9);
             --bf-model-border: rgba(255,255,255,0.08);
@@ -6730,6 +6736,30 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
+            }
+            /* 24IN BRAIN FEED OBJECTIVE STACK: JOSH + JAIMES + JOSHeX */
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective {
+                min-height: clamp(126px, 15vh, 156px) !important;
+                padding: 10px 11px 9px !important;
+                gap: 7px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-text {
+                font-size: clamp(0.82rem, 0.9vw, 1.02rem) !important;
+                line-height: 1.18 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-text-wrap {
+                height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                min-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+                max-height: calc(1.02rem * 1.18 * 2 + 0.2rem) !important;
+            }
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-detail,
+            body:not(.phone-mode).kiosk-mode .bf-hero-grid.dual-live .bf-objective-submeta {
+                font-size: 0.55rem !important;
+                line-height: 1.15 !important;
             }
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-objective-provider,
             body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-agent-name,
@@ -10234,21 +10264,83 @@
             };
         }
 
-        function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
-            // The two hero panels are intentionally pinned when both are live:
-            // left = JOSH 2.0, right = JAIMES. J.A.I.N belongs in health/jobs.
-            // Do not split the hero for stale/idle feeds; that creates a crowded
-            // stale-looking layout and falsely advertises old work as live.
+        /* ============ BRAIN FEED MULTI-LIVE OBJECTIVES ============ */
+        function synthesizeJoshexBrainFeed() {
+            const pc = (typeof getJoshexData === 'function') ? getJoshexData() : ((window._latestDashboardData || window._mcLastDashData || {}).personalCodex || window._personalCodexFallback || null);
+            if (!pc || (!pc.objective && !pc.validation && !pc.patchStatus)) return null;
+            const patch = pc.patchStatus || {};
+            const status = String(patch.status || pc.status || 'ready').toLowerCase();
+            const objective = pc.objective || patch.summary || 'JOSHeX contribution lane ready';
+            const detailBits = [pc.validation, patch.detail, patch.summary].filter(Boolean);
+            const updatedAt = patch.updatedAt || pc.updatedAt || (window._latestDashboardData || window._mcLastDashData || {}).lastUpdated || new Date().toISOString();
+            return {
+                agent: 'JOSHeX',
+                active: true,
+                reportedActive: false,
+                lowSignal: false,
+                objective,
+                detail: detailBits.join(' · ') || 'Codex patch lane ready',
+                status: status === 'clean' ? 'ready' : status,
+                stale: false,
+                updatedAt,
+                currentTool: 'codex',
+                model: 'Codex',
+                steps: [{ label: patch.summary || pc.validation || objective, status: status === 'clean' ? 'done' : 'active', tool: 'codex' }],
+                joshexBacked: true,
+            };
+        }
+
+        function coerceOperatorObjectiveFeed(feed, agentLabel) {
+            if (!feed?.objective) return feed;
+            if (isRenderableLiveObjective({ bf: feed, agentLabel })) return feed;
+            return {
+                ...feed,
+                agent: agentLabel,
+                active: true,
+                reportedActive: feed.reportedActive || false,
+                lowSignal: false,
+                status: 'active',
+                stale: false,
+                currentTool: feed.currentTool || feed.tool || 'ops',
+                model: feed.model || 'GPT-5.5',
+                steps: Array.isArray(feed.steps) && feed.steps.length ? feed.steps : [{ label: feed.objective, status: 'active', tool: feed.currentTool || feed.tool || 'ops' }],
+                operatorPinned: true,
+            };
+        }
+
+        function pickBrainFeedObjectiveFeeds(joshBf, jainBf, jaimesBf) {
+            // Explicit operator view: JOSH 2.0, JAIMES, and JOSHeX all get
+            // objective slots when available. J.A.I.N stays out of hero space.
             const entries = [];
+            const seen = new Set();
+            const push = (entry, allowReady = false) => {
+                if (!entry?.bf) return;
+                const key = String(entry.agentLabel || entry.bf.agent || '').toUpperCase();
+                if (!key || seen.has(key)) return;
+                if (allowReady || isRenderableLiveObjective(entry)) {
+                    entries.push(entry);
+                    seen.add(key);
+                }
+            };
+            push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
+            push({ bf: coerceOperatorObjectiveFeed(jaimesBf, 'JAIMES'), agentLabel: 'JAIMES' }, true);
+            push({ bf: synthesizeJoshexBrainFeed(), agentLabel: 'JOSHeX' }, true);
+            return entries;
+        }
+
+        function pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf) {
+            // Back-compat for regression canaries and older call sites.
             const joshEntry = { bf: joshBf, agentLabel: 'JOSH 2.0' };
             const jaimesEntry = { bf: jaimesBf, agentLabel: 'JAIMES' };
+            const entries = [];
             if (isRenderableLiveObjective(joshEntry)) entries.push(joshEntry);
             if (isRenderableLiveObjective(jaimesEntry)) entries.push(jaimesEntry);
-            return entries.length === 2 ? entries : [];
+            return entries;
         }
 
         function brainFeedAgentClass(agentLabel) {
             const label = String(agentLabel || '').toUpperCase();
+            if (label.includes('JOSHEX') || label.includes('CODEX')) return 'agent-joshex';
             if (label.includes('JAIMES')) return 'agent-jaimes';
             if (label.includes('JOSH')) return 'agent-josh';
             return 'agent-generic';
@@ -10285,7 +10377,7 @@
             </div>`;
         }
 
-        function renderDualBrainFeed(entries) {
+        function renderObjectiveBrainFeed(entries) {
             const brainFeedCard = document.getElementById('brain-feed-card');
             if (!brainFeedCard || !entries.length) return;
             const primary = entries[0]?.bf || null;
@@ -10308,13 +10400,13 @@
             jainBf = synthesizeTaskBackedBrainFeed(jainBf, 'J.A.I.N');
             jaimesBf = synthesizeTaskBackedBrainFeed(jaimesBf, 'JAIMES');
             const primary = pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf);
-            const dualEntries = pickDualLiveObjectiveFeeds(joshBf, jainBf, jaimesBf);
+            const objectiveEntries = pickBrainFeedObjectiveFeeds(joshBf, jainBf, jaimesBf);
             const anyActive = !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
             if (brainCard) brainCard.classList.toggle('brain-active', anyActive);
             const old = document.getElementById('jain-status-bar');
             if (old) old.remove();
-            if (dualEntries.length === 2) {
-                renderDualBrainFeed(dualEntries);
+            if (objectiveEntries.length >= 2) {
+                renderObjectiveBrainFeed(objectiveEntries);
                 return;
             }
             if (primary?.bf) {
