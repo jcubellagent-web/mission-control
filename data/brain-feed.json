@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Mission Control cleanup/polish deployed: commit eaf95d53e live, canaries/regression/screenshot/Pages all green; X scripts no-op, crontab residue blocked by protected macOS write",
+  "objective": "run memory sync to JAIN and confirm success",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T14:59:56Z",
-  "checkedAt": "2026-04-29T14:59:56Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "memory-sync"
+    }
+  ],
+  "currentTool": "memory-sync",
+  "updatedAt": "2026-04-29T15:01:39Z",
+  "checkedAt": "2026-04-29T15:01:39Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
