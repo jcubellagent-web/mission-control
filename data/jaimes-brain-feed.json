@@ -1,44 +1,19 @@
 {
   "agent": "JAIMES",
-  "active": true,
-  "objective": "Mission Control: verifying JOSHeX Pages refresh",
-  "status": "active",
-  "updatedAt": "2026-04-29T01:58:49Z",
-  "checkedAt": "2026-04-29T01:58:49Z",
+  "active": false,
+  "objective": "Done: mission-control skill updated for JOSHeX",
+  "status": "idle",
+  "updatedAt": "2026-04-29T02:09:40Z",
+  "checkedAt": "2026-04-29T02:08:58Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
-  "currentTool": "web",
+  "currentTool": "exec",
   "tool": "exec",
   "model": "gpt-5.5",
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Mission Control: running Codex lane checks",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: validating Codex panel placement",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: publishing Codex placement fix",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: verifying Pages Codex lane",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Mission Control: publishing dashboard Codex data",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill update need",
       "status": "done",
@@ -61,10 +36,35 @@
     },
     {
       "label": "Mission Control: verifying JOSHeX Pages refresh",
-      "status": "active",
+      "status": "done",
       "tool": "web"
+    },
+    {
+      "label": "GW11 dry-run autosubmit: checking Champion/DNP",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: verify JOSHeX visibility now",
+      "status": "done",
+      "tool": "web"
+    },
+    {
+      "label": "Mission Control: reloading JOSH 2.0 to JOSHeX",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: verify stale local HTTP alert",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skills for JOSHeX workflow",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T01:58:49Z"
+  "messageReceived": "2026-04-29T02:08:58Z"
 }
