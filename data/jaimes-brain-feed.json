@@ -3,8 +3,8 @@
   "active": false,
   "objective": "Mission Control watchdog clean",
   "status": "idle",
-  "updatedAt": "2026-04-29T08:17:42Z",
-  "checkedAt": "2026-04-29T08:17:32Z",
+  "updatedAt": "2026-04-29T09:18:11Z",
+  "checkedAt": "2026-04-29T09:18:02Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: adding edit timeout wrapper/autorecovery",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: validating JOSH autorecovery script",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T08:17:32Z"
+  "messageReceived": "2026-04-29T09:18:02Z"
 }
