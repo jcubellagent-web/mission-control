@@ -15,32 +15,32 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": false,
-    "messageReceived": "2026-04-29T17:04:19Z",
-    "objective": "Done: fixed fantasy IL waiver alert rule \u00b7 Awaiting further instruction",
+    "messageReceived": "2026-04-29T17:05:50Z",
+    "objective": "Done: async completion event handled internally \u00b7 Awaiting further instruction",
     "status": "idle",
     "steps": [
       {
-        "label": "Done - fixed fantasy IL waiver alert rule",
+        "label": "Done - async completion event handled internally",
         "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T17:04:55Z",
-    "checkedAt": "2026-04-29T17:04:44Z",
+    "updatedAt": "2026-04-29T17:05:53Z",
+    "checkedAt": "2026-04-29T17:05:50Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last objective: Done: fixed fantasy IL waiver alert rule \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-29T17:05:17Z"
+    "context": "Last objective: Done: async completion event handled internally \u00b7 Awaiting further instruction",
+    "updatedAt": "2026-04-29T17:10:17Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 24822,
+    "limitTokens": 272000,
+    "pct": 0.0913,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-29T17:05:17Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-29T17:10:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T17:05:17Z",
+    "updatedAt": "2026-04-29T17:10:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "8 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 8,
+      "dirtyCount": 9,
       "files": [
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "1cfad8077",
-      "updatedAt": "2026-04-29T17:05:17Z"
+      "head": "3fe0fb0ef",
+      "updatedAt": "2026-04-29T17:10:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "scripts/josh_bf_push.sh",
       "mission-control/scripts/update_mission_control.py",
@@ -203,7 +203,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 100% left [============]",
-        "Resets in 4h 49m",
+        "Resets in 4h 44m",
         "Weekly: 83% left [=========---]",
         "Pace: 4% in reserve | Expected 21% used | Lasts until reset",
         "Resets in 5d 12h",
@@ -214,15 +214,15 @@
       "weekly": "83% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 49m",
+      "sessionReset": "4h 44m",
       "weeklyReset": "5d 12h",
       "summary": "100% left \u00b7 wk 83% left"
     },
-    "updatedAt": "2026-04-29T17:05:19Z"
+    "updatedAt": "2026-04-29T17:10:19Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.090309,
+    "session": 0.014364,
+    "daily": 0.104673,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -244,7 +244,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.090309
+        "cost": 0.104673
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -291,13 +291,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 1341,
-        "outputTokens": 86,
-        "totalTokens": 1427,
-        "sessionCost": 0.090309,
-        "dailyCost": 0.090309,
-        "weeklyCost": 0.090309,
-        "sessions": 3,
+        "inputTokens": 1715,
+        "outputTokens": 95,
+        "totalTokens": 1810,
+        "sessionCost": 0.104673,
+        "dailyCost": 0.104673,
+        "weeklyCost": 0.104673,
+        "sessions": 4,
         "isGemini": false,
         "costEstimated": false
       },
@@ -346,8 +346,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 215706204,
-        "dailyTokens": 78972108,
+        "totalTokens": 216047297,
+        "dailyTokens": 79313201,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -378,7 +378,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T17:05:23Z",
+    "lastUpdated": "2026-04-29T17:10:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -411,8 +411,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.090309,
-      "total": 47.212922,
+      "daily": 0.104673,
+      "total": 47.227286,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -427,11 +427,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.147835,
-      "codexEquivalentDaily": 0.090309,
-      "codexEquivalentMonthlyProjection": 193.49,
-      "codexTokensWeekly": 324419342,
-      "codexTokensDaily": 78972108,
+      "codexEquivalentWeekly": 45.162199,
+      "codexEquivalentDaily": 0.104673,
+      "codexEquivalentMonthlyProjection": 193.55,
+      "codexTokensWeekly": 324760818,
+      "codexTokensDaily": 79313201,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -452,7 +452,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T17:05:28Z",
+    "updatedAt": "2026-04-29T17:10:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -469,14 +469,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 42.9,
-      "cpu_user": 17.74,
-      "cpu_sys": 25.11,
-      "load1": 3.12,
-      "load5": 2.92,
-      "load15": 2.63,
+      "cpu_pct": 33.1,
+      "cpu_user": 16.32,
+      "cpu_sys": 16.73,
+      "load1": 3.14,
+      "load5": 2.6,
+      "load15": 2.52,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -484,12 +484,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.0,
-      "cpu_user": 12.8,
-      "cpu_sys": 11.2,
-      "load1": 2.4,
-      "load5": 2.37,
-      "load15": 2.19,
+      "cpu_pct": 22.6,
+      "cpu_user": 11.29,
+      "cpu_sys": 11.29,
+      "load1": 2.47,
+      "load5": 2.29,
+      "load15": 2.18,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -515,19 +515,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T17:05:17Z"
+      "lastChecked": "2026-04-29T17:10:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T17:05:17Z"
+      "lastChecked": "2026-04-29T17:10:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T17:05:17Z"
+      "lastChecked": "2026-04-29T17:10:17Z"
     }
   ],
   "crons": [
@@ -544,7 +544,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T17:05:28.311215+00:00"
+      "lastRun": "2026-04-29T17:10:28.554978+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -988,7 +988,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming"
+      "runStatus": "due"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -1004,7 +1004,7 @@
       "lastError": null,
       "lastHistoricalError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
       "lastHistoricalErrorAt": "2026-04-24T13:00:56.665646-04:00",
-      "runStatus": "upcoming"
+      "runStatus": "missed"
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
@@ -1091,7 +1091,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T17:05:17.119285Z",
+    "checkedAt": "2026-04-29T17:10:17.286131Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1452,16 +1452,16 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Done: fixed fantasy IL waiver alert rule \u00b7 Awaiting further instruction",
+      "objective": "Done: async completion event handled internally \u00b7 Awaiting further instruction",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T17:04:55Z",
-      "messageReceived": "2026-04-29T17:04:19Z",
+      "updatedAt": "2026-04-29T17:05:53Z",
+      "messageReceived": "2026-04-29T17:05:50Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - fixed fantasy IL waiver alert rule",
+          "label": "Done - async completion event handled internally",
           "status": "done",
           "tool": "exec"
         }
@@ -1587,16 +1587,16 @@
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
-        "objective": "Done: fixed fantasy IL waiver alert rule \u00b7 Awaiting further instruction",
+        "objective": "Done: async completion event handled internally \u00b7 Awaiting further instruction",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T17:04:55Z",
-        "messageReceived": "2026-04-29T17:04:19Z",
+        "updatedAt": "2026-04-29T17:05:53Z",
+        "messageReceived": "2026-04-29T17:05:50Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Done - fixed fantasy IL waiver alert rule",
+            "label": "Done - async completion event handled internally",
             "status": "done",
             "tool": "exec"
           }
@@ -1671,29 +1671,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T17:05:23Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-29T17:10:23Z",
+      "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-04-29T17:05:19Z",
+      "time": "2026-04-29T17:10:19Z",
       "event": "Coding: scripts/josh_bf_push.sh, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T17:05:19Z",
+      "time": "2026-04-29T17:10:19Z",
       "event": "CodexBar: 100% left \u00b7 wk 83% left"
     },
     {
-      "time": "2026-04-29T17:05:17Z",
+      "time": "2026-04-29T17:10:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-29T17:05:17Z",
-      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
+      "time": "2026-04-29T17:10:17Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-29T17:05:17Z",
+      "time": "2026-04-29T17:10:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T17:05:17Z"
+  "lastUpdated": "2026-04-29T17:10:17Z"
 }
