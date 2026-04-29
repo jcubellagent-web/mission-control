@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Heartbeat restart doctor check completed: doctor ran, heartbeat sources read, self-maintenance clean, canary only expected low-severity warnings",
+  "objective": "notify restart success and continue pending work",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T05:59:32Z",
-  "checkedAt": "2026-04-29T05:59:32Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "notify"
+    }
+  ],
+  "currentTool": "notify",
+  "updatedAt": "2026-04-29T05:59:59Z",
+  "checkedAt": "2026-04-29T05:59:59Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
