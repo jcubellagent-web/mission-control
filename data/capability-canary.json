@@ -1,0 +1,199 @@
+{
+  "status": "warn",
+  "ok": false,
+  "summary": "5 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-29T01:52:51Z",
+  "counts": {
+    "ok": 21,
+    "warn": 5,
+    "error": 0
+  },
+  "checks": [
+    {
+      "name": "binary:openclaw",
+      "status": "ok",
+      "ok": true,
+      "detail": "/Users/josh2.0/bin/openclaw",
+      "meta": {}
+    },
+    {
+      "name": "binary:gog",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/gog",
+      "meta": {}
+    },
+    {
+      "name": "binary:gh",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/gh",
+      "meta": {}
+    },
+    {
+      "name": "binary:git",
+      "status": "ok",
+      "ok": true,
+      "detail": "/usr/bin/git",
+      "meta": {}
+    },
+    {
+      "name": "binary:jq",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/jq",
+      "meta": {}
+    },
+    {
+      "name": "binary:rg",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/rg",
+      "meta": {}
+    },
+    {
+      "name": "binary:codexbar",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/codexbar",
+      "meta": {}
+    },
+    {
+      "name": "binary:node",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/node",
+      "meta": {}
+    },
+    {
+      "name": "binary:python3",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/python3",
+      "meta": {}
+    },
+    {
+      "name": "binary:agent-browser",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/agent-browser",
+      "meta": {}
+    },
+    {
+      "name": "binary:agent-device",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/agent-device",
+      "meta": {}
+    },
+    {
+      "name": "binary:whisper",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/whisper",
+      "meta": {}
+    },
+    {
+      "name": "binary:sag",
+      "status": "ok",
+      "ok": true,
+      "detail": "/opt/homebrew/bin/sag",
+      "meta": {}
+    },
+    {
+      "name": "openclaw:status",
+      "status": "ok",
+      "ok": true,
+      "detail": "gateway=True latency=44ms audit=0/0",
+      "meta": {
+        "runtimeVersion": "2026.4.26",
+        "model": "gpt-5.5",
+        "percentUsed": 33
+      }
+    },
+    {
+      "name": "memory:main",
+      "status": "ok",
+      "ok": true,
+      "detail": "files=105 chunks=1174 dirty=False",
+      "meta": {}
+    },
+    {
+      "name": "github:auth",
+      "status": "ok",
+      "ok": true,
+      "detail": "authenticated",
+      "meta": {}
+    },
+    {
+      "name": "google:calendar",
+      "status": "ok",
+      "ok": true,
+      "detail": "read ok",
+      "meta": {}
+    },
+    {
+      "name": "google:gmail",
+      "status": "ok",
+      "ok": true,
+      "detail": "search ok",
+      "meta": {}
+    },
+    {
+      "name": "google:drive",
+      "status": "warn",
+      "ok": false,
+      "detail": "Google API error (403 insufficientPermissions): Request had insufficient authentication scopes.",
+      "meta": {}
+    },
+    {
+      "name": "jain:ssh",
+      "status": "ok",
+      "ok": true,
+      "detail": "ok",
+      "meta": {}
+    },
+    {
+      "name": "browser:agent-browser",
+      "status": "ok",
+      "ok": true,
+      "detail": "about:blank opened",
+      "meta": {}
+    },
+    {
+      "name": "device:agent-device",
+      "status": "warn",
+      "ok": false,
+      "detail": "devices=0",
+      "meta": {}
+    },
+    {
+      "name": "env:AIRWEAVE_API_KEY",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing",
+      "meta": {}
+    },
+    {
+      "name": "env:AIRWEAVE_COLLECTION_ID",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing",
+      "meta": {}
+    },
+    {
+      "name": "env:ELEVENLABS_API_KEY",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing",
+      "meta": {}
+    },
+    {
+      "name": "env:GEMINI_API_KEY",
+      "status": "ok",
+      "ok": true,
+      "detail": "present",
+      "meta": {}
+    }
+  ]
+}

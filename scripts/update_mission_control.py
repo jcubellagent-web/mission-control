@@ -36,6 +36,7 @@ CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-stat
 CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
 CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
 TASKS_PATH = WORKSPACE_ROOT / "memory" / "tasks.md"
+CAPABILITY_CANARY_PATH = DATA_DIR / "capability-canary.json"
 
 CRON_TARGETS = [
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
@@ -2090,6 +2091,24 @@ def fetch_visual_canaries() -> Dict[str, Any]:
     }
 
 
+def fetch_capability_canary() -> Dict[str, Any]:
+    data = load_json_file(CAPABILITY_CANARY_PATH, {})
+    if isinstance(data, dict) and data:
+        checks = data.get("checks") if isinstance(data.get("checks"), list) else []
+        counts = data.get("counts") if isinstance(data.get("counts"), dict) else {}
+        data["checks"] = checks
+        data["counts"] = counts
+        return data
+    return {
+        "ok": False,
+        "status": "unknown",
+        "summary": "Capability canary pending",
+        "checkedAt": None,
+        "counts": {},
+        "checks": [],
+    }
+
+
 def fetch_sorare_ml_cockpit() -> Dict[str, Any]:
     artifacts = [
         Path("/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.json"),
@@ -2162,6 +2181,7 @@ def build_capability_stack(
     sorare_ml: Dict[str, Any],
     voice_router: Dict[str, Any],
     ops_inbox: Dict[str, Any],
+    capability_canary: Dict[str, Any] | None = None,
     personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
     stack = [
@@ -2194,6 +2214,17 @@ def build_capability_stack(
             "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
         },
     ]
+    capability = capability_canary or {}
+    if capability:
+        counts = capability.get("counts") or {}
+        stack.append({
+            "id": "capability-canary",
+            "name": "Capability Canary",
+            "status": capability.get("status") or "unknown",
+            "summary": capability.get("summary") or "OpenClaw capability drift check",
+            "detail": f"{counts.get('ok', 0)} ok · {counts.get('warn', 0)} warn · {counts.get('error', 0)} err",
+            "source": "capabilityCanary",
+        })
     pc = personal_codex or {}
     if pc:
         stack.append({
@@ -2951,6 +2982,7 @@ def main() -> None:
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
     dashboard["visualCanaries"] = fetch_visual_canaries()
+    dashboard["capabilityCanary"] = fetch_capability_canary()
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
@@ -2959,6 +2991,7 @@ def main() -> None:
         dashboard["sorareMlCockpit"],
         dashboard["voiceRouter"],
         dashboard["opsInbox"],
+        dashboard["capabilityCanary"],
         dashboard["personalCodex"],
     )
     dashboard["actionRequired"] = build_action_required(

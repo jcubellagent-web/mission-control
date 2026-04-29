@@ -1,17 +1,11 @@
 {
-  "actionRequired": [
-    {
-      "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed",
-      "url": "#calendar"
-    }
-  ],
+  "actionRequired": [],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+    "objective": "build capability canary",
     "status": "active",
     "steps": [
       {
@@ -21,20 +15,20 @@
       }
     ],
     "currentTool": "bf_step",
-    "updatedAt": "2026-04-29T01:43:11Z",
-    "checkedAt": "2026-04-29T01:43:11Z",
+    "updatedAt": "2026-04-29T01:48:24Z",
+    "checkedAt": "2026-04-29T01:48:24Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "run capability audit for Codex 5.5/OpenClaw enhancements",
-    "updatedAt": "2026-04-29T01:45:16Z"
+    "context": "build capability canary",
+    "updatedAt": "2026-04-29T01:53:01Z"
   },
   "contextWindow": {
-    "usedTokens": 37154,
+    "usedTokens": 90677,
     "limitTokens": 272000,
-    "pct": 0.1366,
+    "pct": 0.3334,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -54,7 +48,7 @@
       "run regression checks",
       "prepare Git patches"
     ],
-    "updatedAt": "2026-04-29T01:45:16Z",
+    "updatedAt": "2026-04-29T01:53:01Z",
     "agentSlot": false,
     "promoteToBrainFeed": false
   },
@@ -157,42 +151,43 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 13,
+    "missionControlDirty": 6,
     "recentFiles": [
+      "mission-control/scripts/update_and_push.sh",
+      "scripts/capability_canary.sh",
       "mission-control/scripts/update_mission_control.py",
-      "mission-control/scripts/mission_control_visual_canaries.py",
-      "mission-control/scripts/mission_control_regression_check.py",
       "mission-control/index.html",
-      "mission-control/docs/personal-codex-lane.md"
+      "mission-control/scripts/mission_control_visual_canaries.py",
+      "mission-control/scripts/mission_control_regression_check.py"
     ],
-    "codexbarStatus": "92% left \u00b7 wk 91% left",
+    "codexbarStatus": "91% left \u00b7 wk 91% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 92% left [===========-]",
-        "Resets in 9m",
+        "Session: 91% left [==========--]",
+        "Resets in 1m",
         "Weekly: 91% left [==========--]",
         "Pace: 3% in reserve | Expected 12% used | Lasts until reset",
         "Resets in 6d 3h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "92% left",
+      "session": "91% left",
       "weekly": "91% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "9m",
+      "sessionReset": "1m",
       "weeklyReset": "6d 3h",
-      "summary": "92% left \u00b7 wk 91% left"
+      "summary": "91% left \u00b7 wk 91% left"
     },
-    "updatedAt": "2026-04-29T01:45:18Z"
+    "updatedAt": "2026-04-29T01:53:03Z"
   },
   "modelUsage": {
-    "session": 0.156574,
-    "daily": 3.569064,
-    "weekly": 45.498831,
-    "monthly": 951.87625,
+    "session": 0.046423,
+    "daily": 3.458913,
+    "weekly": 45.38868,
+    "monthly": 951.766099,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -207,7 +202,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.31207299999999993
+        "cost": 0.20192199999999996
       },
       {
         "name": "openai/gpt-5.5",
@@ -242,12 +237,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 33403,
-        "outputTokens": 191,
-        "totalTokens": 33594,
-        "sessionCost": 0.31207299999999993,
-        "dailyCost": 0.31207299999999993,
-        "weeklyCost": 0.31207299999999993,
+        "inputTokens": 2958,
+        "outputTokens": 194,
+        "totalTokens": 3152,
+        "sessionCost": 0.20192199999999996,
+        "dailyCost": 0.20192199999999996,
+        "weeklyCost": 0.20192199999999996,
         "sessions": 7,
         "isGemini": false,
         "costEstimated": false
@@ -379,7 +374,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T01:45:22Z",
+    "lastUpdated": "2026-04-29T01:53:07Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -412,15 +407,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 3.569064,
-      "total": 47.441605,
-      "monthly": 951.87625
+      "daily": 3.458913,
+      "total": 47.331454,
+      "monthly": 951.766099
     },
     "weeklyRunRate": {
-      "total": 47.441605,
+      "total": 47.331454,
       "automation": 1.942774,
-      "interactive": 43.556057,
-      "projectedMonthly": 203.32
+      "interactive": 43.445906,
+      "projectedMonthly": 202.85
     }
   },
   "moltWorld": {
@@ -437,7 +432,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T01:45:27Z",
+    "updatedAt": "2026-04-29T01:53:12Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -454,29 +449,29 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 44.6,
-      "cpu_user": 22.95,
-      "cpu_sys": 21.63,
-      "load1": 3.51,
-      "load5": 2.82,
-      "load15": 2.47,
+      "cpu_pct": 45.2,
+      "cpu_user": 24.26,
+      "cpu_sys": 20.92,
+      "load1": 3.32,
+      "load5": 2.84,
+      "load15": 2.59,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "88Gi",
-      "disk_pct": 12,
+      "disk_avail": "107Gi",
+      "disk_pct": 10,
       "available": true
     },
     "jain": {
-      "cpu_pct": 27.4,
-      "cpu_user": 16.23,
-      "cpu_sys": 11.11,
-      "load1": 1.97,
-      "load5": 2.21,
-      "load15": 2.14,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "cpu_pct": 23.4,
+      "cpu_user": 7.81,
+      "cpu_sys": 15.62,
+      "load1": 2.4,
+      "load5": 2.3,
+      "load15": 2.19,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -485,8 +480,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed"
+    "status": "ok",
+    "message": "Connected"
   },
   "devices": [
     {
@@ -500,19 +495,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:45:16Z"
+      "lastChecked": "2026-04-29T01:53:01Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T01:45:16Z"
+      "lastChecked": "2026-04-29T01:53:01Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T01:45:16Z"
+      "lastChecked": "2026-04-29T01:53:01Z"
     }
   ],
   "crons": [
@@ -529,7 +524,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T01:45:16.830012+00:00"
+      "lastRun": "2026-04-29T01:50:30.102090+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1316,6 +1311,205 @@
       }
     ]
   },
+  "capabilityCanary": {
+    "status": "warn",
+    "ok": false,
+    "summary": "5 warning(s), 0 error(s)",
+    "checkedAt": "2026-04-29T01:52:51Z",
+    "counts": {
+      "ok": 21,
+      "warn": 5,
+      "error": 0
+    },
+    "checks": [
+      {
+        "name": "binary:openclaw",
+        "status": "ok",
+        "ok": true,
+        "detail": "/Users/josh2.0/bin/openclaw",
+        "meta": {}
+      },
+      {
+        "name": "binary:gog",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/gog",
+        "meta": {}
+      },
+      {
+        "name": "binary:gh",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/gh",
+        "meta": {}
+      },
+      {
+        "name": "binary:git",
+        "status": "ok",
+        "ok": true,
+        "detail": "/usr/bin/git",
+        "meta": {}
+      },
+      {
+        "name": "binary:jq",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/jq",
+        "meta": {}
+      },
+      {
+        "name": "binary:rg",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/rg",
+        "meta": {}
+      },
+      {
+        "name": "binary:codexbar",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/codexbar",
+        "meta": {}
+      },
+      {
+        "name": "binary:node",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/node",
+        "meta": {}
+      },
+      {
+        "name": "binary:python3",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/python3",
+        "meta": {}
+      },
+      {
+        "name": "binary:agent-browser",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/agent-browser",
+        "meta": {}
+      },
+      {
+        "name": "binary:agent-device",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/agent-device",
+        "meta": {}
+      },
+      {
+        "name": "binary:whisper",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/whisper",
+        "meta": {}
+      },
+      {
+        "name": "binary:sag",
+        "status": "ok",
+        "ok": true,
+        "detail": "/opt/homebrew/bin/sag",
+        "meta": {}
+      },
+      {
+        "name": "openclaw:status",
+        "status": "ok",
+        "ok": true,
+        "detail": "gateway=True latency=44ms audit=0/0",
+        "meta": {
+          "runtimeVersion": "2026.4.26",
+          "model": "gpt-5.5",
+          "percentUsed": 33
+        }
+      },
+      {
+        "name": "memory:main",
+        "status": "ok",
+        "ok": true,
+        "detail": "files=105 chunks=1174 dirty=False",
+        "meta": {}
+      },
+      {
+        "name": "github:auth",
+        "status": "ok",
+        "ok": true,
+        "detail": "authenticated",
+        "meta": {}
+      },
+      {
+        "name": "google:calendar",
+        "status": "ok",
+        "ok": true,
+        "detail": "read ok",
+        "meta": {}
+      },
+      {
+        "name": "google:gmail",
+        "status": "ok",
+        "ok": true,
+        "detail": "search ok",
+        "meta": {}
+      },
+      {
+        "name": "google:drive",
+        "status": "warn",
+        "ok": false,
+        "detail": "Google API error (403 insufficientPermissions): Request had insufficient authentication scopes.",
+        "meta": {}
+      },
+      {
+        "name": "jain:ssh",
+        "status": "ok",
+        "ok": true,
+        "detail": "ok",
+        "meta": {}
+      },
+      {
+        "name": "browser:agent-browser",
+        "status": "ok",
+        "ok": true,
+        "detail": "about:blank opened",
+        "meta": {}
+      },
+      {
+        "name": "device:agent-device",
+        "status": "warn",
+        "ok": false,
+        "detail": "devices=0",
+        "meta": {}
+      },
+      {
+        "name": "env:AIRWEAVE_API_KEY",
+        "status": "warn",
+        "ok": false,
+        "detail": "missing",
+        "meta": {}
+      },
+      {
+        "name": "env:AIRWEAVE_COLLECTION_ID",
+        "status": "warn",
+        "ok": false,
+        "detail": "missing",
+        "meta": {}
+      },
+      {
+        "name": "env:ELEVENLABS_API_KEY",
+        "status": "warn",
+        "ok": false,
+        "detail": "missing",
+        "meta": {}
+      },
+      {
+        "name": "env:GEMINI_API_KEY",
+        "status": "ok",
+        "ok": true,
+        "detail": "present",
+        "meta": {}
+      }
+    ]
+  },
   "sorareMlCockpit": {
     "status": "active",
     "owner": "JAIMES",
@@ -1340,9 +1534,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1376,9 +1570,17 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
+    },
+    {
+      "id": "capability-canary",
+      "name": "Capability Canary",
+      "status": "warn",
+      "summary": "5 warning(s), 0 error(s)",
+      "detail": "21 ok \u00b7 5 warn \u00b7 0 err",
+      "source": "capabilityCanary"
     },
     {
       "id": "personal-codex",
@@ -1391,14 +1593,14 @@
   ],
   "trackedTasks": [
     {
-      "id": "T-20260428-1022",
-      "title": "Run Codex 5.5/OpenClaw capability audit",
+      "id": "T-20260428-1023",
+      "title": "Build capability canary",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Auditing installed skills, auth/config state, gateway/task health, and high-value enhancement candidates. Early findings: GPT-5.5 OAuth lane healthy, gateway reachable, task audit clean, Google auth currently lists calendar scope only.",
-      "background": "owner: JOSH 2.0; updated 2026-04-28 21:43",
+      "notes": "Building `scripts/capability_canary.sh`, installing/search-checking `ripgrep` if needed, and wiring results into heartbeat/Mission Control as a low-noise drift signal.",
+      "background": "owner: JOSH 2.0; updated 2026-04-28 21:52",
       "requestedAt": null,
-      "updatedAt": "2026-04-28 21:43",
+      "updatedAt": "2026-04-28 21:52",
       "owner": "JOSH 2.0"
     },
     {
@@ -1416,7 +1618,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_visual_canaries.py",
+      "label": "Recently edited: mission-control/scripts/update_and_push.sh, scripts/capability_canary.sh",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1441,10 +1643,10 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+      "objective": "build capability canary",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:43:11Z",
+      "updatedAt": "2026-04-29T01:48:24Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1461,10 +1663,10 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+      "objective": "build capability canary",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T01:43:11Z",
+      "updatedAt": "2026-04-29T01:48:24Z",
       "messageReceived": "2026-04-23T04:25:02Z",
       "currentTool": "bf_step",
       "model": "GPT-5.5",
@@ -1478,65 +1680,20 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
-      "lowSignal": false,
-      "objective": "Mission Control: syncing JOSH 2.0 checkout",
-      "status": "active",
+      "active": false,
+      "reportedActive": false,
+      "lowSignal": true,
+      "objective": "Standby",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T01:39:48Z",
-      "messageReceived": "2026-04-29T01:39:48Z",
-      "currentTool": "exec",
-      "model": "gpt-5.5",
+      "updatedAt": "2026-04-29T01:51:19Z",
+      "messageReceived": "2026-04-29T01:51:19Z",
+      "currentTool": "",
+      "model": "gpt-4.1",
       "steps": [
         {
-          "label": "Mission Control: validating Codex lane source",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: running Codex lane checks",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: validating Codex panel placement",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: publishing Codex placement fix",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: verifying Pages Codex lane",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "Mission Control: publishing dashboard Codex data",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: review skill update need",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Task: refresh JOSH 2.0 Mission Control screen",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: checking live panel source",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "Mission Control: syncing JOSH 2.0 checkout",
-          "status": "active",
+          "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+          "status": "error",
           "tool": "exec"
         }
       ]
@@ -1545,15 +1702,14 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
-      "J.A.I.N",
-      "JAIMES"
+      "J.A.I.N"
     ],
-    "activeCount": 3,
+    "activeCount": 2,
     "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "JAIMES"
+      "J.A.I.N"
     ],
     "agents": [
       {
@@ -1561,10 +1717,10 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+        "objective": "build capability canary",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:43:11Z",
+        "updatedAt": "2026-04-29T01:48:24Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1581,10 +1737,10 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "run capability audit for Codex 5.5/OpenClaw enhancements",
+        "objective": "build capability canary",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T01:43:11Z",
+        "updatedAt": "2026-04-29T01:48:24Z",
         "messageReceived": "2026-04-23T04:25:02Z",
         "currentTool": "bf_step",
         "model": "GPT-5.5",
@@ -1598,65 +1754,20 @@
       },
       {
         "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Mission Control: syncing JOSH 2.0 checkout",
-        "status": "active",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": true,
+        "objective": "Standby",
+        "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T01:39:48Z",
-        "messageReceived": "2026-04-29T01:39:48Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
+        "updatedAt": "2026-04-29T01:51:19Z",
+        "messageReceived": "2026-04-29T01:51:19Z",
+        "currentTool": "",
+        "model": "gpt-4.1",
         "steps": [
           {
-            "label": "Mission Control: validating Codex lane source",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: running Codex lane checks",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: validating Codex panel placement",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: publishing Codex placement fix",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: verifying Pages Codex lane",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "Mission Control: publishing dashboard Codex data",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: review skill update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Task: refresh JOSH 2.0 Mission Control screen",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: checking live panel source",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "Mission Control: syncing JOSH 2.0 checkout",
-            "status": "active",
+            "label": "Sorare Canonical Sync \u2014 sorare_canonical_reflector.py \u2014 done",
+            "status": "error",
             "tool": "exec"
           }
         ]
@@ -1665,29 +1776,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T01:45:22Z",
-      "event": "Session spend: $0.16"
+      "time": "2026-04-29T01:53:07Z",
+      "event": "Session spend: $0.05"
     },
     {
-      "time": "2026-04-29T01:45:18Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, mission-control/scripts/mission_control_visual_canaries.py"
+      "time": "2026-04-29T01:53:03Z",
+      "event": "Coding: mission-control/scripts/update_and_push.sh, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-29T01:45:18Z",
-      "event": "CodexBar: 92% left \u00b7 wk 91% left"
+      "time": "2026-04-29T01:53:03Z",
+      "event": "CodexBar: 91% left \u00b7 wk 91% left"
     },
     {
-      "time": "2026-04-29T01:45:16Z",
+      "time": "2026-04-29T01:53:01Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T01:45:16Z",
+      "time": "2026-04-29T01:53:01Z",
       "event": "Personal Codex: Personal Codex lane scaffolded for local contribution visibility"
     },
     {
-      "time": "2026-04-29T01:45:16Z",
+      "time": "2026-04-29T01:53:01Z",
       "event": "42 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-04-29T01:45:16Z"
+  "lastUpdated": "2026-04-29T01:53:01Z"
 }
