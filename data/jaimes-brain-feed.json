@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
   "active": false,
-  "objective": "Done: JOSH hardening cleanup complete",
+  "objective": "Done: OpenClaw recovery skill updated",
   "status": "idle",
-  "updatedAt": "2026-04-29T06:29:48Z",
-  "checkedAt": "2026-04-29T06:29:30Z",
+  "updatedAt": "2026-04-29T06:32:08Z",
+  "checkedAt": "2026-04-29T06:31:50Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,16 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Step: probing JOSH session/logs",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspecting JOSH direct session state",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: recovering stuck JOSH direct session",
       "status": "done",
@@ -63,8 +53,18 @@
       "label": "Step: final JOSH health verification",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update need",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: updating OpenClaw recovery skill",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T06:29:30Z"
+  "messageReceived": "2026-04-29T06:31:50Z"
 }
