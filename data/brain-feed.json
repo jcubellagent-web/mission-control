@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Patched Josh Telegram send guard and verified dry-run/idempotency behavior",
+  "objective": "Fix mission control dashboard polish and remove X workflows",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T14:18:54Z",
-  "checkedAt": "2026-04-29T14:18:54Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "bf_step"
+    }
+  ],
+  "currentTool": "bf_step",
+  "updatedAt": "2026-04-29T14:22:13Z",
+  "checkedAt": "2026-04-29T14:22:13Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
