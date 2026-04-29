@@ -1,12 +1,18 @@
 {
   "active": true,
   "messageReceived": "2026-04-23T04:25:02Z",
-  "objective": "Mission Control latest update confirmed live; regression and Pages deploy passed",
+  "objective": "hard refresh Mission Control Chrome screen",
   "status": "active",
-  "steps": [],
-  "currentTool": "",
-  "updatedAt": "2026-04-29T05:14:18Z",
-  "checkedAt": "2026-04-29T05:14:18Z",
+  "steps": [
+    {
+      "label": "exec",
+      "status": "active",
+      "tool": "refresh"
+    }
+  ],
+  "currentTool": "refresh",
+  "updatedAt": "2026-04-29T05:14:48Z",
+  "checkedAt": "2026-04-29T05:14:48Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
   "model": "GPT-5.5"
 }
