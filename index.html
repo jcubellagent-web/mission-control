@@ -1223,6 +1223,110 @@
             font-size: 0.52rem;
             line-height: 1.3;
         }
+        .mu-refresh-shell { display: flex; flex-direction: column; gap: 8px; }
+        .mu-refresh-hero {
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.026);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .mu-refresh-hero-head {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: start;
+            gap: 10px;
+            margin-bottom: 9px;
+        }
+        .mu-refresh-kicker,
+        .mu-refresh-label {
+            display: block;
+            font-size: 0.48rem;
+            font-weight: 800;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.44);
+        }
+        .mu-refresh-total {
+            margin-top: 2px;
+            color: #fff;
+            font-size: 1.16rem;
+            font-weight: 850;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .mu-refresh-total span { margin-left: 3px; font-size: 0.58rem; color: rgba(255,255,255,0.45); }
+        .mu-refresh-sub { margin-top: 4px; color: rgba(255,255,255,0.62); font-size: 0.56rem; line-height: 1.25; }
+        .mu-refresh-live {
+            max-width: 132px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.034);
+            border-radius: 6px;
+            padding: 5px 7px;
+            text-align: right;
+        }
+        .mu-refresh-live strong {
+            display: block;
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #fff;
+            font-size: 0.62rem;
+        }
+        .mu-refresh-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+        .mu-refresh-kpi {
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.018);
+            border-radius: 6px;
+            padding: 6px 7px;
+        }
+        .mu-refresh-kpi strong {
+            display: block;
+            margin-top: 2px;
+            color: #fff;
+            font-size: 0.72rem;
+            line-height: 1.05;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mu-refresh-kpi small { display: block; margin-top: 3px; color: rgba(255,255,255,0.44); font-size: 0.50rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mu-refresh-insights { display: grid; gap: 5px; }
+        .mu-refresh-insight {
+            display: grid;
+            grid-template-columns: 6px minmax(0, 1fr);
+            gap: 7px;
+            align-items: start;
+            padding: 6px 8px;
+            border: 1px solid rgba(255,255,255,0.055);
+            background: rgba(255,255,255,0.018);
+            border-radius: 7px;
+            color: rgba(255,255,255,0.62);
+            font-size: 0.54rem;
+            line-height: 1.28;
+        }
+        .mu-refresh-insight::before { content: ''; width: 6px; height: 6px; margin-top: 4px; border-radius: 50%; background: rgba(74,222,128,0.75); }
+        .mu-refresh-lanes { display: flex; flex-direction: column; gap: 5px; }
+        .mu-refresh-lane {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            min-height: 48px;
+            padding: 7px 8px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+        }
+        .mu-refresh-lane-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+        .mu-refresh-lane-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--mu-lane-color, rgba(255,255,255,0.5)); }
+        .mu-refresh-lane-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,0.86); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
+        .mu-refresh-lane-meta { margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,0.46); font-size: 0.52rem; }
+        .mu-refresh-lane-spend { text-align: right; min-width: 74px; }
+        .mu-refresh-lane-spend strong { display: block; color: #fff; font-size: 0.68rem; font-variant-numeric: tabular-nums; }
+        .mu-refresh-lane-spend span { display: block; margin-top: 2px; color: rgba(255,255,255,0.42); font-size: 0.48rem; text-transform: uppercase; letter-spacing: 0.08em; }
         .mu-totals-section { margin-bottom: 5px; }
         .mu-totals-row { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; overflow: hidden; }
         .mu-total-cell { display: flex; align-items: center; gap: 3px; padding: 3px 5px; flex: 1; border-right: 1px solid rgba(255,255,255,0.06); min-width: 0; }
@@ -1365,6 +1469,18 @@
             color: #fff;
             line-height: 1.2;
         }
+        .mu-lane-auth {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 0.50rem;
+            line-height: 1.2;
+            color: rgba(255,255,255,0.38);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+        .mu-lane-auth span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .mu-lane-bar {
             position: relative;
             height: 6px;
@@ -1396,6 +1512,18 @@
             font-size: 0.52rem;
             color: rgba(255,255,255,0.42);
             line-height: 1.35;
+        }
+        .mu-spend-insights {
+            display: grid;
+            gap: 4px;
+            margin: 7px 0 5px;
+            padding: 7px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.025);
+            color: rgba(255,255,255,0.60);
+            font-size: 0.57rem;
+            line-height: 1.32;
         }
         .mu-active-hero {
             margin-bottom: 8px;
@@ -7196,6 +7324,24 @@
             }
         }
 
+        /* Model Usage & Spend: keep spend visible in the kiosk rail before health details. */
+        body:not(.phone-mode).kiosk-mode .card-model-health #model-usage-card {
+            flex: 1 1 190px !important;
+            min-height: 190px !important;
+            max-height: none !important;
+            overflow-y: auto !important;
+            padding-right: 3px !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-health-divider { margin: 8px 0 7px !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .system-health-body {
+            flex: 0 0 104px !important;
+            max-height: 104px !important;
+            overflow: hidden !important;
+            gap: 5px !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-model-health .sh-agent-row { padding: 5px 7px !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .sh-metrics { gap: 4px 8px !important; }
+
     </style>
 </head>
 <body>
@@ -11789,9 +11935,65 @@
                         meta,
                     };
                 });
-                const laneCardsHtml = laneRows.map(lane => {
-                    const fillPct = lane.key === 'local' ? 0 : Math.max(0, Math.min(100, (lane.projected / budgetCap) * 100));
-                    return `<div class="mu-lane-card ${lane.key === 'local' ? 'local' : ''}">
+                const backendLanes = Array.isArray(spend.lanes) ? spend.lanes : [];
+                const laneColors = {
+                    codex_subscription: '#a78bfa',
+                    openai_api: '#4ade80',
+                    realtime_research: '#f59e0b',
+                    gemini_automation: '#60a5fa',
+                    local_models: '#22c55e',
+                    other_metered: '#f472b6',
+                };
+                const laneTone = lane => {
+                    if (lane.billing === 'free' || lane.key === 'local_models') return { tone: 'good', short: 'free', long: 'No metered spend' };
+                    if (lane.billing === 'fixed' || lane.key === 'codex_subscription') return { tone: 'good', short: 'fixed', long: 'Covered by the subscription plan' };
+                    const projected = Number(lane.monthlyProjection || 0);
+                    if (projected <= 0.01) return { tone: 'good', short: 'idle', long: 'No meaningful tracked spend' };
+                    if (projected > budgetCap) return { tone: 'bad', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Can exceed the cap on its own' };
+                    if (projected > budgetTarget) return { tone: 'watch', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Above the target on its own' };
+                    return { tone: 'ok', short: `${Math.round((projected / budgetCap) * 100)}% cap`, long: 'Tracked but under target' };
+                };
+                const backendLaneRows = backendLanes.map(lane => {
+                    const projected = Number(lane.monthlyProjection || 0);
+                    const weekly = Number(lane.weeklyCost ?? lane.weeklyEquivalent ?? 0);
+                    const daily = Number(lane.dailyCost ?? lane.dailyEquivalent ?? 0);
+                    const topModels = Array.isArray(lane.models) ? lane.models.map(modelDisplayName).filter(Boolean).slice(0, 3) : [];
+                    const billingLabel = lane.billing === 'fixed' ? 'fixed' : lane.billing === 'free' ? 'free' : 'metered';
+                    const statusLabel = lane.status || (weekly > 0 ? 'active' : 'idle');
+                    const valueLine = lane.key === 'codex_subscription'
+                        ? `${fmtCost(fixedSubMonthly)}/mo fixed · ${codexValueText}`
+                        : lane.key === 'local_models'
+                            ? `${Number(lane.modelCount || 0)} local model${Number(lane.modelCount || 0) === 1 ? '' : 's'} · ${fmtCost(0)} metered`
+                            : projected > 0 ? `${fmtCost(projected)}/mo pace` : 'Idle';
+                    const detailLine = lane.key === 'codex_subscription'
+                        ? `${fmtCost(Number(lane.weeklyEquivalent || 0))}/wk equivalent · ${fmtTokensCompact(lane.tokensWeekly || codexTokensWeekly)} tokens/wk`
+                        : lane.key === 'local_models'
+                            ? (topModels.length ? `${topModels.join(', ')} · pressure-release lane` : 'No local models registered.')
+                            : `${fmtCost(weekly)}/wk · ${fmtCost(daily)} today${topModels.length ? ` · ${topModels.slice(0, 2).join(', ')}` : ''}`;
+                    return {
+                        key: lane.key || 'lane',
+                        name: lane.label || lane.key || 'Model lane',
+                        color: laneColors[lane.key] || '#94a3b8',
+                        authPath: lane.authPath || 'unknown',
+                        billing: billingLabel,
+                        status: statusLabel,
+                        modelCount: Number(lane.modelCount || topModels.length || 0),
+                        topModels,
+                        daily,
+                        weekly,
+                        projected,
+                        capPct: Math.max(0, Math.min(100, (projected / budgetCap) * 100)),
+                        impact: laneTone(lane),
+                        main: valueLine,
+                        meta: detailLine,
+                        note: lane.note || '',
+                    };
+                });
+                const visibleLaneRows = backendLaneRows.length ? backendLaneRows : laneRows;
+                const laneCardsHtml = visibleLaneRows.map(lane => {
+                    const isLocalLane = lane.key === 'local' || lane.key === 'local_models';
+                    const fillPct = isLocalLane ? 0 : Math.max(0, Math.min(100, (lane.projected / budgetCap) * 100));
+                    return `<div class="mu-lane-card ${isLocalLane ? 'local' : ''}">
                         <div class="mu-lane-head">
                             <div class="mu-lane-title">
                                 <span class="mu-lane-dot" style="background:${lane.color}"></span>
@@ -11800,15 +12002,19 @@
                             <span class="mu-lane-impact ${lane.impact.tone}" title="${escapeHtml(lane.impact.long)}">${escapeHtml(lane.impact.short)}</span>
                         </div>
                         <div class="mu-lane-main">${escapeHtml(lane.main)}</div>
+                        ${lane.authPath ? `<div class="mu-lane-auth"><span>${escapeHtml(lane.authPath)}</span><span>${escapeHtml(lane.billing)} · ${escapeHtml(lane.status)}</span></div>` : ''}
                         <div class="mu-lane-bar">
-                            <div class="mu-lane-fill" style="width:${fillPct.toFixed(1)}%;background:linear-gradient(90deg, ${lane.color}55, ${lane.color});"></div>
+                            <div class="mu-lane-fill" style="width:${fillPct.toFixed(1)}%;background:${lane.color};"></div>
                             <span class="mu-lane-threshold floor"></span>
                             <span class="mu-lane-threshold target"></span>
                         </div>
                         <div class="mu-lane-meta">${escapeHtml(lane.meta)}</div>
                     </div>`;
                 }).join('');
-                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Lane projection separates fixed subscription spend from metered API/BYOK/direct calls. CodexBar value is informative; local stays $0.</div>`;
+                const insightHtml = Array.isArray(spend.insights) && spend.insights.length
+                    ? `<div class="mu-spend-insights">${spend.insights.slice(0, 3).map(item => `<div>${escapeHtml(item)}</div>`).join('')}</div>`
+                    : '';
+                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div>${insightHtml}<div class="mu-lane-legend">Lane projection separates fixed subscription spend from metered API/BYOK/direct calls. CodexBar value is informative; local stays $0.</div>`;
                 const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">True outlay</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${fmtCost(fixedSubMonthly)} fixed + ${fmtCost(meteredMonthlyProjection)} metered projection</span></div>`;
 
                 const activeUsageHeroHtml = `<div class="mu-active-hero" style="--mu-accent:${activeModelVisual.color};--mu-accent-soft:${activeModelVisual.bg};--mu-accent-border:${activeModelVisual.border};">
@@ -11920,8 +12126,8 @@
                         <span style="font-size:0.6rem;color:#fff;">${elPct.toFixed(0)}% used</span>
                     </div>` : '';
 
-                const meteredLanes = laneRows.filter(lane => !['local', 'openai_codex'].includes(lane.key) && lane.projected > 0);
-                const leadLane = [...laneRows.filter(lane => lane.key !== 'local')].sort((a, b) => (b.projected || 0) - (a.projected || 0))[0] || null;
+                const meteredLanes = visibleLaneRows.filter(lane => !['local', 'local_models', 'openai_codex', 'codex_subscription'].includes(lane.key) && lane.projected > 0);
+                const leadLane = [...visibleLaneRows.filter(lane => !['local', 'local_models'].includes(lane.key))].sort((a, b) => (b.projected || 0) - (a.projected || 0))[0] || null;
                 const capPct = budgetCap > 0 ? Math.round((budgetProjected / budgetCap) * 100) : 0;
                 const targetPct = budgetTarget > 0 ? Math.round((budgetProjected / budgetTarget) * 100) : 0;
                 const budgetDelta = budgetProjected > budgetCap ? fmtCost(budgetProjected - budgetCap) : null;
@@ -11988,6 +12194,40 @@
                     </div>
                 </div>`;
 
+                const refreshLaneHtml = visibleLaneRows.slice(0, 5).map(lane => {
+                    const isFixed = lane.key === 'codex_subscription' || lane.billing === 'fixed';
+                    const spendLabel = isFixed ? 'fixed' : lane.billing === 'free' ? 'free' : 'metered';
+                    const spendValue = isFixed ? fmtCost(fixedSubMonthly) : lane.projected > 0 ? `${fmtCost(lane.projected)}/mo` : 'idle';
+                    return `<div class="mu-refresh-lane" style="--mu-lane-color:${lane.color}">
+                        <div>
+                            <div class="mu-refresh-lane-title"><span class="mu-refresh-lane-dot"></span><span class="mu-refresh-lane-name">${escapeHtml(lane.name)}</span></div>
+                            <div class="mu-refresh-lane-meta">${escapeHtml(lane.authPath || lane.meta || '')}</div>
+                        </div>
+                        <div class="mu-refresh-lane-spend"><strong>${escapeHtml(spendValue)}</strong><span>${escapeHtml(spendLabel)}</span></div>
+                    </div>`;
+                }).join('');
+                const refreshInsightHtml = Array.isArray(spend.insights) && spend.insights.length
+                    ? `<div class="mu-refresh-insights">${spend.insights.slice(0, 2).map(item => `<div class="mu-refresh-insight">${escapeHtml(item)}</div>`).join('')}</div>`
+                    : '';
+                const refreshCompactHtml = `<div class="mu-refresh-shell">
+                    <div class="mu-refresh-hero">
+                        <div class="mu-refresh-hero-head">
+                            <div>
+                                <span class="mu-refresh-kicker">True model outlay</span>
+                                <div class="mu-refresh-total">${fmtCost(effectiveMonthlyProjection)}<span>/mo</span></div>
+                                <div class="mu-refresh-sub">${fmtCost(fixedSubMonthly)} fixed Codex + ${fmtCost(meteredMonthlyProjection)} metered API/BYOK</div>
+                            </div>
+                            <div class="mu-refresh-live"><span class="mu-refresh-label">Live</span><strong>${escapeHtml(activeModelDisp || 'waiting')}</strong></div>
+                        </div>
+                        <div class="mu-refresh-kpis">
+                            <div class="mu-refresh-kpi"><span class="mu-refresh-label">Metered</span><strong>${fmtCost(meteredMonthlyProjection)}</strong><small>${fmtCost(meteredWeeklySpend)}/wk</small></div>
+                            <div class="mu-refresh-kpi"><span class="mu-refresh-label">Codex value</span><strong>${fmtCost(codexValueMonthly)}</strong><small>${fmtTokensCompact(codexTokensWeekly)} tokens/wk</small></div>
+                            <div class="mu-refresh-kpi"><span class="mu-refresh-label">Mix</span><strong>${Number(spend.codexModelCount || 0)} / ${Number(spend.meteredModelCount || 0)} / ${Number(spend.localModelCount || 0)}</strong><small>Codex / API / local</small></div>
+                        </div>
+                    </div>
+                    <div class="mu-refresh-lanes">${refreshLaneHtml}</div>
+                    ${refreshInsightHtml}
+                </div>`;
                 const usageDetailHtml = spendCompactHtml + laneGridHtml + codexbarHtml + summaryHtml + runRateHtml + budgetHtml + breakdownHtml + elHtml;
                 const activeBus = (data.agentBus || []).filter(task => ['queued', 'retry', 'running', 'in_progress'].includes((task.status || '').toLowerCase()));
                 const jaimesQueue = activeBus.filter(task => (task.target_node || '').toUpperCase() === 'JAIMES').length;
@@ -12036,7 +12276,7 @@
                 window._moduleHealthHtml = healthDetailHtml;
                 window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
 
-                modelUsageCard.innerHTML = spendCompactHtml + laneGridHtml + breakdownHtml + elHtml;
+                modelUsageCard.innerHTML = refreshCompactHtml;
             modelUsageCard.classList.remove('section-updated');
             void modelUsageCard.offsetWidth;
             modelUsageCard.classList.add('section-updated');

@@ -1385,6 +1385,143 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         metered_monthly_projection = round(max(metered_weekly * (30 / 7), or_monthly, jain_api_monthly), 2)
         effective_monthly_projection = round(fixed_codex_monthly + metered_monthly_projection, 2)
         codex_value_projection = round(codex_equivalent_weekly * (30 / 7), 2)
+
+        def _row_weekly_total(rows: List[Dict[str, Any]]) -> float:
+            return round(sum(float(r.get("weeklyCost") or 0) for r in rows), 6)
+
+        def _row_daily_total(rows: List[Dict[str, Any]]) -> float:
+            return round(sum(float(r.get("dailyCost") or 0) for r in rows), 6)
+
+        def _row_token_total(rows: List[Dict[str, Any]]) -> int:
+            return int(sum(int(r.get("totalTokens") or 0) for r in rows))
+
+        def _row_models(rows: List[Dict[str, Any]], limit: int = 3) -> List[str]:
+            ordered = sorted(rows, key=lambda r: float(r.get("weeklyCost") or 0), reverse=True)
+            return [str(r.get("name") or "unknown") for r in ordered[:limit]]
+
+        def _monthly_from_weekly(weekly: float) -> float:
+            return round(float(weekly or 0) * (30 / 7), 2)
+
+        def _is_openai_api_row(row: Dict[str, Any]) -> bool:
+            name = str(row.get("name", "")).lower()
+            source = str(row.get("source", "")).lower()
+            if _is_local_row(row) or _is_codex_subscription_row(row):
+                return False
+            return name.startswith("openai/") or name.startswith("gpt-") or source == "openclaw"
+
+        def _is_gemini_row(row: Dict[str, Any]) -> bool:
+            name = str(row.get("name", "")).lower()
+            source = str(row.get("source", "")).lower()
+            return "gemini" in name or "google" in source or "gemini" in source
+
+        def _is_grok_or_router_row(row: Dict[str, Any]) -> bool:
+            name = str(row.get("name", "")).lower()
+            source = str(row.get("source", "")).lower()
+            return "grok" in name or "openrouter" in name or "xai" in source or "openrouter" in source
+
+        openai_api_rows = [r for r in metered_rows if _is_openai_api_row(r)]
+        gemini_rows = [r for r in metered_rows if _is_gemini_row(r)]
+        router_rows = [r for r in metered_rows if _is_grok_or_router_row(r)]
+        known_metered_ids = {id(r) for r in openai_api_rows + gemini_rows + router_rows}
+        other_metered_rows = [r for r in metered_rows if id(r) not in known_metered_ids]
+
+        spend_lanes = [
+            {
+                "key": "codex_subscription",
+                "label": "Codex subscription",
+                "authPath": "OpenAI OAuth / subscription",
+                "billing": "fixed",
+                "status": "covered",
+                "monthlyProjection": fixed_codex_monthly,
+                "weeklyEquivalent": codex_equivalent_weekly,
+                "dailyEquivalent": codex_equivalent_daily,
+                "tokensWeekly": codex_tokens_weekly,
+                "models": _row_models(codex_rows),
+                "modelCount": len(codex_rows),
+                "note": "Fixed subscription outlay; equivalent API value is informational only.",
+            },
+            {
+                "key": "openai_api",
+                "label": "OpenAI API",
+                "authPath": "API key / metered",
+                "billing": "metered",
+                "status": "active" if _row_weekly_total(openai_api_rows) > 0 else "idle",
+                "monthlyProjection": _monthly_from_weekly(_row_weekly_total(openai_api_rows)),
+                "weeklyCost": _row_weekly_total(openai_api_rows),
+                "dailyCost": _row_daily_total(openai_api_rows),
+                "tokensWeekly": _row_token_total(openai_api_rows),
+                "models": _row_models(openai_api_rows),
+                "modelCount": len(openai_api_rows),
+                "note": "Direct OpenAI API spend outside the subscription lane.",
+            },
+            {
+                "key": "realtime_research",
+                "label": "Grok / OpenRouter",
+                "authPath": "BYOK / direct API",
+                "billing": "metered",
+                "status": "active" if max(_row_weekly_total(router_rows), or_weekly) > 0 else "idle",
+                "monthlyProjection": round(max(_monthly_from_weekly(_row_weekly_total(router_rows)), or_monthly), 2),
+                "weeklyCost": round(max(_row_weekly_total(router_rows), or_weekly), 6),
+                "dailyCost": round(max(_row_daily_total(router_rows), or_daily), 6),
+                "tokensWeekly": _row_token_total(router_rows),
+                "models": _row_models(router_rows),
+                "modelCount": len(router_rows),
+                "note": "Freshness and realtime research lane; disabled when OpenRouter usage is unavailable.",
+            },
+            {
+                "key": "gemini_automation",
+                "label": "Gemini / automation",
+                "authPath": "Google API / J.A.I.N scripts",
+                "billing": "metered",
+                "status": "active" if max(_row_weekly_total(gemini_rows), jain_api.get("weekly", 0)) > 0 else "idle",
+                "monthlyProjection": round(max(_monthly_from_weekly(_row_weekly_total(gemini_rows)), jain_api_monthly), 2),
+                "weeklyCost": round(max(_row_weekly_total(gemini_rows), jain_api.get("weekly", 0)), 6),
+                "dailyCost": round(max(_row_daily_total(gemini_rows), jain_api_daily), 6),
+                "tokensWeekly": _row_token_total(gemini_rows),
+                "models": _row_models(gemini_rows),
+                "modelCount": len(gemini_rows),
+                "note": "Long-context and background analysis lane.",
+            },
+            {
+                "key": "local_models",
+                "label": "Local models",
+                "authPath": "on-device",
+                "billing": "free",
+                "status": "available" if local_rows else "missing",
+                "monthlyProjection": 0.0,
+                "weeklyCost": 0.0,
+                "dailyCost": 0.0,
+                "tokensWeekly": _row_token_total(local_rows),
+                "models": _row_models(local_rows),
+                "modelCount": len(local_rows),
+                "note": "No model bill; useful as a pressure-release lane when quality is enough.",
+            },
+        ]
+
+        if other_metered_rows:
+            spend_lanes.append({
+                "key": "other_metered",
+                "label": "Other metered",
+                "authPath": "mixed API",
+                "billing": "metered",
+                "status": "active",
+                "monthlyProjection": _monthly_from_weekly(_row_weekly_total(other_metered_rows)),
+                "weeklyCost": _row_weekly_total(other_metered_rows),
+                "dailyCost": _row_daily_total(other_metered_rows),
+                "tokensWeekly": _row_token_total(other_metered_rows),
+                "models": _row_models(other_metered_rows),
+                "modelCount": len(other_metered_rows),
+                "note": "Tracked metered usage that does not map cleanly to the primary lanes.",
+            })
+
+        posture = "calm"
+        if metered_monthly_projection > 75:
+            posture = "hot"
+        elif metered_monthly_projection > 25:
+            posture = "watch"
+        elif metered_monthly_projection > 1:
+            posture = "active"
+
         spend_overview = {
             "subscriptionMonthly": fixed_codex_monthly,
             "effectiveMonthlyProjection": effective_monthly_projection,
@@ -1400,6 +1537,13 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "meteredModelCount": len(metered_rows),
             "codexModelCount": len(codex_rows),
             "meteredSources": metered_source_totals,
+            "posture": posture,
+            "lanes": spend_lanes,
+            "insights": [
+                f"True projected outlay is ${effective_monthly_projection:.2f}/mo: ${fixed_codex_monthly:.0f} fixed Codex + ${metered_monthly_projection:.2f} metered.",
+                f"Codex subscription is absorbing roughly ${codex_value_projection:.2f}/mo of API-equivalent usage.",
+                f"Tracked metered spend is ${metered_weekly:.2f}/wk across {len(metered_rows)} metered model rows.",
+            ],
             "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription.",
         }
 

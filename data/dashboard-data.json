@@ -4,11 +4,6 @@
       "priority": "high",
       "title": "Mission Control canary issue: 1 canary issue(s)",
       "url": "#canaries"
-    },
-    {
-      "priority": "high",
-      "title": "Calendar auth needs refresh",
-      "url": "#calendar"
     }
   ],
   "activeNow": [],
@@ -16,25 +11,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-29T22:19:08Z",
-    "objective": "Verifying model usage UI with screenshot checks",
+    "objective": "Clearing incidental Calendar canary before final checks",
     "status": "active",
     "steps": [
       {
-        "label": "Verifying model usage UI with screenshot checks",
+        "label": "Clearing incidental Calendar canary before final checks",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-29T22:42:30Z",
-    "checkedAt": "2026-04-29T22:42:30Z",
+    "updatedAt": "2026-04-29T22:47:18Z",
+    "checkedAt": "2026-04-29T22:47:18Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Verifying model usage UI with screenshot checks",
-    "updatedAt": "2026-04-29T22:45:17Z"
+    "context": "Clearing incidental Calendar canary before final checks",
+    "updatedAt": "2026-04-29T22:47:30Z"
   },
   "contextWindow": {
     "usedTokens": 0,
@@ -50,8 +45,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T22:45:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-29T22:47:30Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +64,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T22:45:17Z",
+    "updatedAt": "2026-04-29T22:47:30Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 8,
       "files": [
-        "data/dashboard-data.json",
-        "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/newsfeed.json",
+        "index.html",
+        "scripts/__pycache__/update_mission_control.cpython-314.pyc"
       ],
-      "head": "e9e4c68f7",
-      "updatedAt": "2026-04-29T22:45:17Z"
+      "head": "8a898ce91",
+      "updatedAt": "2026-04-29T22:47:30Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +183,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py"
@@ -199,7 +194,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 96% left [===========-]",
-        "Resets in 4h 14m",
+        "Resets in 4h 12m",
         "Weekly: 82% left [=========---]",
         "Pace: 7% in reserve | Expected 25% used | Lasts until reset",
         "Resets in 5d 6h",
@@ -210,11 +205,11 @@
       "weekly": "82% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 14m",
+      "sessionReset": "4h 12m",
       "weeklyReset": "5d 6h",
       "summary": "96% left \u00b7 wk 82% left"
     },
-    "updatedAt": "2026-04-29T22:45:19Z"
+    "updatedAt": "2026-04-29T22:47:31Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -342,8 +337,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 236496834,
-        "dailyTokens": 99762738,
+        "totalTokens": 239452961,
+        "dailyTokens": 102718865,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -374,7 +369,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T22:45:22Z",
+    "lastUpdated": "2026-04-29T22:47:35Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -426,8 +421,8 @@
       "codexEquivalentWeekly": 45.452922,
       "codexEquivalentDaily": 0.395396,
       "codexEquivalentMonthlyProjection": 194.8,
-      "codexTokensWeekly": 345283580,
-      "codexTokensDaily": 99762738,
+      "codexTokensWeekly": 348239707,
+      "codexTokensDaily": 102718865,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -452,7 +447,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.452922,
           "dailyEquivalent": 0.395396,
-          "tokensWeekly": 345283580,
+          "tokensWeekly": 348239707,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -546,7 +541,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T22:45:27Z",
+    "updatedAt": "2026-04-29T22:47:40Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -563,14 +558,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.7,
-      "cpu_user": 17.44,
-      "cpu_sys": 17.28,
-      "load1": 1.99,
-      "load5": 2.25,
-      "load15": 2.32,
+      "cpu_pct": 40.9,
+      "cpu_user": 21.53,
+      "cpu_sys": 19.34,
+      "load1": 1.94,
+      "load5": 2.14,
+      "load15": 2.26,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "111Gi",
@@ -578,14 +573,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 2.4,
-      "cpu_sys": 10.4,
-      "load1": 2.19,
-      "load5": 2.18,
-      "load15": 2.09,
+      "cpu_pct": 31.7,
+      "cpu_user": 14.8,
+      "cpu_sys": 17.6,
+      "load1": 1.8,
+      "load5": 2.05,
+      "load15": 2.05,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -594,8 +589,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Calendar re-auth required"
+    "status": "ok",
+    "message": "Connected via local gog"
   },
   "devices": [
     {
@@ -609,19 +604,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:45:17Z"
+      "lastChecked": "2026-04-29T22:47:30Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T22:45:17Z"
+      "lastChecked": "2026-04-29T22:47:30Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T22:45:17Z"
+      "lastChecked": "2026-04-29T22:47:30Z"
     }
   ],
   "crons": [
@@ -638,7 +633,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T22:45:27.287634+00:00"
+      "lastRun": "2026-04-29T22:45:30.003472+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1185,7 +1180,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T22:45:17.174622Z",
+    "checkedAt": "2026-04-29T22:47:10.579463Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1448,9 +1443,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1484,9 +1479,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1546,16 +1541,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Verifying model usage UI with screenshot checks",
+      "objective": "Clearing incidental Calendar canary before final checks",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T22:42:30Z",
+      "updatedAt": "2026-04-29T22:47:18Z",
       "messageReceived": "2026-04-29T22:19:08Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Verifying model usage UI with screenshot checks",
+          "label": "Clearing incidental Calendar canary before final checks",
           "status": "active",
           "tool": "exec"
         }
@@ -1665,16 +1660,16 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Verifying model usage UI with screenshot checks",
+        "objective": "Clearing incidental Calendar canary before final checks",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T22:42:30Z",
+        "updatedAt": "2026-04-29T22:47:18Z",
         "messageReceived": "2026-04-29T22:19:08Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Verifying model usage UI with screenshot checks",
+            "label": "Clearing incidental Calendar canary before final checks",
             "status": "active",
             "tool": "exec"
           }
@@ -1769,29 +1764,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T22:45:22Z",
+      "time": "2026-04-29T22:47:35Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-29T22:45:19Z",
+      "time": "2026-04-29T22:47:31Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T22:45:19Z",
+      "time": "2026-04-29T22:47:31Z",
       "event": "CodexBar: 96% left \u00b7 wk 82% left"
     },
     {
-      "time": "2026-04-29T22:45:17Z",
+      "time": "2026-04-29T22:47:30Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T22:45:17Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-29T22:47:30Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-29T22:45:17Z",
+      "time": "2026-04-29T22:47:30Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T22:45:17Z"
+  "lastUpdated": "2026-04-29T22:47:30Z"
 }
