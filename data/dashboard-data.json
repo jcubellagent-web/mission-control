@@ -16,19 +16,25 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-23T04:25:02Z",
-    "objective": "handled async completion event quietly",
+    "objective": "Run memory sync backup to J.A.I.N and verify success",
     "status": "active",
-    "steps": [],
-    "currentTool": "",
-    "updatedAt": "2026-04-29T03:52:22Z",
-    "checkedAt": "2026-04-29T03:52:22Z",
+    "steps": [
+      {
+        "label": "exec",
+        "status": "active",
+        "tool": "bf_step"
+      }
+    ],
+    "currentTool": "bf_step",
+    "updatedAt": "2026-04-29T04:01:00Z",
+    "checkedAt": "2026-04-29T04:01:00Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "handled async completion event quietly",
-    "updatedAt": "2026-04-29T04:00:18Z"
+    "context": "Run memory sync backup to J.A.I.N and verify success",
+    "updatedAt": "2026-04-29T04:05:18Z"
   },
   "contextWindow": {
     "usedTokens": 187446,
@@ -44,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-29T04:00:18Z"
+        "event": "Patch feed: 13 source file(s) changed",
+        "time": "2026-04-29T04:05:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -63,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-29T04:00:18Z",
+    "updatedAt": "2026-04-29T04:05:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "13 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 13,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-brain-feed.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json",
-        "data/model-usage-accum.json",
-        "data/model-usage-tracker.json"
+        "data/mission-control-canaries.json"
       ],
-      "head": "e023adbb6",
-      "updatedAt": "2026-04-29T04:00:18Z"
+      "head": "1a4710874",
+      "updatedAt": "2026-04-29T04:05:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -182,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 13,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -197,7 +203,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 88% left [==========--]",
-        "Resets in 2h 54m",
+        "Resets in 2h 49m",
         "Weekly: 88% left [==========--]",
         "Pace: On pace | Expected 13% used | Lasts until reset",
         "Resets in 6d 1h",
@@ -208,17 +214,17 @@
       "weekly": "88% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 54m",
+      "sessionReset": "2h 49m",
       "weeklyReset": "6d 1h",
       "summary": "88% left \u00b7 wk 88% left"
     },
-    "updatedAt": "2026-04-29T04:00:20Z"
+    "updatedAt": "2026-04-29T04:05:20Z"
   },
   "modelUsage": {
     "session": 0.094812,
-    "daily": 0.0,
-    "weekly": 45.443536,
-    "monthly": 951.820955,
+    "daily": 0.030583,
+    "weekly": 45.456924,
+    "monthly": 951.834343,
     "topModels": [
       {
         "name": "gpt-5.4",
@@ -233,7 +239,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.263697
+        "cost": 0.27708499999999997
       },
       {
         "name": "openai/gpt-5.5",
@@ -268,12 +274,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 3603,
-        "outputTokens": 151,
-        "totalTokens": 3754,
-        "sessionCost": 0.263697,
-        "dailyCost": 0.0,
-        "weeklyCost": 0.263697,
+        "inputTokens": 3833,
+        "outputTokens": 320,
+        "totalTokens": 4153,
+        "sessionCost": 0.27708499999999997,
+        "dailyCost": 0.030583,
+        "weeklyCost": 0.27708499999999997,
         "sessions": 8,
         "isGemini": false,
         "costEstimated": false
@@ -366,7 +372,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-29T04:00:23Z",
+    "lastUpdated": "2026-04-29T04:05:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -399,15 +405,15 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.0,
-      "total": 47.38631,
-      "monthly": 951.820955
+      "daily": 0.030583,
+      "total": 47.399698,
+      "monthly": 951.834343
     },
     "weeklyRunRate": {
-      "total": 47.38631,
+      "total": 47.399698,
       "automation": 1.942774,
-      "interactive": 43.500762,
-      "projectedMonthly": 203.08
+      "interactive": 43.51415,
+      "projectedMonthly": 203.14
     }
   },
   "moltWorld": {
@@ -424,7 +430,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-29T04:00:28Z",
+    "updatedAt": "2026-04-29T04:05:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -441,14 +447,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 34.9,
-      "cpu_user": 17.66,
-      "cpu_sys": 17.2,
-      "load1": 2.59,
-      "load5": 2.57,
-      "load15": 2.48,
+      "cpu_pct": 34.3,
+      "cpu_user": 16.99,
+      "cpu_sys": 17.29,
+      "load1": 2.23,
+      "load5": 2.39,
+      "load15": 2.42,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "107Gi",
@@ -456,13 +462,13 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.5,
-      "cpu_user": 2.58,
-      "cpu_sys": 10.96,
-      "load1": 2.05,
-      "load5": 2.05,
-      "load15": 2.01,
-      "ram_used_gb": 15.0,
+      "cpu_pct": 12.1,
+      "cpu_user": 2.41,
+      "cpu_sys": 9.67,
+      "load1": 1.93,
+      "load5": 2.2,
+      "load15": 2.11,
+      "ram_used_gb": 14.0,
       "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
@@ -487,19 +493,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T04:00:18Z"
+      "lastChecked": "2026-04-29T04:05:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-29T04:00:18Z"
+      "lastChecked": "2026-04-29T04:05:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-29T04:00:18Z"
+      "lastChecked": "2026-04-29T04:05:18Z"
     }
   ],
   "crons": [
@@ -516,7 +522,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-29T04:00:28.930388+00:00"
+      "lastRun": "2026-04-29T04:05:28.054209+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1255,12 +1261,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-29T04:00:18.370145Z",
+    "checkedAt": "2026-04-29T04:05:18.105099Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'J.A.I.N']; live=3",
         "severity": "ok"
       },
       {
@@ -1604,38 +1610,50 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "handled async completion event quietly",
+      "objective": "Run memory sync backup to J.A.I.N and verify success",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T03:52:22Z",
+      "updatedAt": "2026-04-29T04:01:00Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jain": {
       "agent": "J.A.I.N",
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "handled async completion event quietly",
+      "objective": "Run memory sync backup to J.A.I.N and verify success",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-29T03:47:27Z",
+      "updatedAt": "2026-04-29T04:01:00Z",
       "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
+      "currentTool": "bf_step",
       "model": "GPT-5.5",
-      "steps": []
+      "steps": [
+        {
+          "label": "exec",
+          "status": "active",
+          "tool": "bf_step"
+        }
+      ]
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Task: Mission Control 24in spacing fix",
-      "status": "active",
+      "objective": "Done: Brain Feed realtime cards live",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-29T03:44:56Z",
+      "updatedAt": "2026-04-29T04:04:44Z",
       "messageReceived": "2026-04-29T03:44:56Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
@@ -1687,7 +1705,7 @@
         },
         {
           "label": "Task: Mission Control 24in spacing fix",
-          "status": "active",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1696,15 +1714,14 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
-      "J.A.I.N",
-      "JAIMES"
+      "J.A.I.N"
     ],
-    "activeCount": 3,
+    "activeCount": 2,
     "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
-      "JAIMES"
+      "J.A.I.N"
     ],
     "agents": [
       {
@@ -1712,38 +1729,50 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "handled async completion event quietly",
+        "objective": "Run memory sync backup to J.A.I.N and verify success",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T03:52:22Z",
+        "updatedAt": "2026-04-29T04:01:00Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "J.A.I.N",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "handled async completion event quietly",
+        "objective": "Run memory sync backup to J.A.I.N and verify success",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-29T03:47:27Z",
+        "updatedAt": "2026-04-29T04:01:00Z",
         "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
+        "currentTool": "bf_step",
         "model": "GPT-5.5",
-        "steps": []
+        "steps": [
+          {
+            "label": "exec",
+            "status": "active",
+            "tool": "bf_step"
+          }
+        ]
       },
       {
         "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
+        "active": false,
+        "reportedActive": false,
         "lowSignal": false,
-        "objective": "Task: Mission Control 24in spacing fix",
-        "status": "active",
+        "objective": "Done: Brain Feed realtime cards live",
+        "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-29T03:44:56Z",
+        "updatedAt": "2026-04-29T04:04:44Z",
         "messageReceived": "2026-04-29T03:44:56Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
@@ -1795,7 +1824,7 @@
           },
           {
             "label": "Task: Mission Control 24in spacing fix",
-            "status": "active",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1804,29 +1833,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-29T04:00:23Z",
+      "time": "2026-04-29T04:05:22Z",
       "event": "Session spend: $0.09"
     },
     {
-      "time": "2026-04-29T04:00:20Z",
+      "time": "2026-04-29T04:05:20Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-29T04:00:20Z",
+      "time": "2026-04-29T04:05:20Z",
       "event": "CodexBar: 88% left \u00b7 wk 88% left"
     },
     {
-      "time": "2026-04-29T04:00:18Z",
+      "time": "2026-04-29T04:05:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-29T04:00:18Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-29T04:05:18Z",
+      "event": "JOSHeX: Patch feed: 13 source file(s) changed"
     },
     {
-      "time": "2026-04-29T04:00:18Z",
+      "time": "2026-04-29T04:05:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-29T04:00:18Z"
+  "lastUpdated": "2026-04-29T04:05:18Z"
 }
