@@ -1,10 +1,10 @@
 {
   "agent": "JAIMES",
-  "active": false,
-  "objective": "Done: skill review updated Mission Control skill",
-  "status": "idle",
-  "updatedAt": "2026-04-29T03:21:04Z",
-  "checkedAt": "2026-04-29T03:20:32Z",
+  "active": true,
+  "objective": "Task: Mission Control 24in spacing fix",
+  "status": "active",
+  "updatedAt": "2026-04-29T03:44:56Z",
+  "checkedAt": "2026-04-29T03:44:56Z",
   "source": "jaimes_bf_push",
   "reportedActive": false,
   "stale": false,
@@ -14,11 +14,6 @@
   "auth": "subscription",
   "lastEvent": "Approved polish deployed; due/unverified noise suppressed",
   "steps": [
-    {
-      "label": "Task: replace Memory Roadmap with JOSHeX quick panel",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control: verifying live JOSHeX quick panel",
       "status": "done",
@@ -63,8 +58,13 @@
       "label": "Skill review: updating Mission Control workflow",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Task: Mission Control 24in spacing fix",
+      "status": "active",
+      "tool": "exec"
     }
   ],
   "modelAuth": "gpt-5.5 (subscription)",
-  "messageReceived": "2026-04-29T03:20:32Z"
+  "messageReceived": "2026-04-29T03:44:56Z"
 }
