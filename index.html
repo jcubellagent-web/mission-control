@@ -1276,7 +1276,7 @@
             gap: 8px;
             margin-bottom: 8px;
             padding: 8px 10px;
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.08);
             background: rgba(255,255,255,0.03);
         }
@@ -1301,17 +1301,17 @@
         .mu-lane-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            gap: 6px;
         }
         .mu-lane-card {
             background: rgba(255,255,255,0.035);
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 14px;
-            padding: 10px 11px;
+            border-radius: 8px;
+            padding: 8px 9px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            min-height: 96px;
+            gap: 5px;
+            min-height: 86px;
             min-width: 0;
         }
         .mu-lane-card.local {
@@ -1399,8 +1399,8 @@
         }
         .mu-active-hero {
             margin-bottom: 8px;
-            padding: 10px 11px;
-            border-radius: 14px;
+            padding: 9px 10px;
+            border-radius: 8px;
             border: 1px solid var(--mu-accent-border, rgba(255,255,255,0.08));
             background: linear-gradient(180deg, color-mix(in srgb, var(--mu-accent-soft, rgba(255,255,255,0.05)) 92%, rgba(255,255,255,0.03)), rgba(255,255,255,0.02));
         }
@@ -1489,8 +1489,8 @@
         }
         .mu-breakdown-panel {
             margin-top: 8px;
-            padding: 9px 10px;
-            border-radius: 14px;
+            padding: 8px 9px;
+            border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.07);
             background: rgba(255,255,255,0.02);
         }
@@ -11482,6 +11482,7 @@
                 const codexTokensDaily = Number(spend.codexTokensDaily ?? 0);
                 const meteredWeeklySpend = Number(spend.meteredWeekly ?? 0);
                 const meteredDailySpend = Number(spend.meteredDaily ?? 0);
+                const meteredSources = spend.meteredSources || {};
                 const fmtTokensCompact = value => {
                     const n = Number(value || 0);
                     if (n >= 1000000000) return `${(n / 1000000000).toFixed(1)}B`;
@@ -11620,12 +11621,16 @@
 
                 const spendRiskTone = meteredMonthlyProjection <= 1 ? 'good' : (meteredMonthlyProjection <= 25 ? 'ok' : (meteredMonthlyProjection <= 75 ? 'watch' : 'bad'));
                 const codexValueText = codexValueMonthly > 0 ? `${fmtCost(codexValueMonthly)}/mo value` : 'included usage';
+                const meteredSourceNoteParts = [];
+                if (Number(meteredSources.openrouterWeekly || 0) > 0) meteredSourceNoteParts.push(`OpenRouter ${fmtCost(meteredSources.openrouterWeekly)}/wk`);
+                if (Number(meteredSources.jainApiWeekly || 0) > 0) meteredSourceNoteParts.push(`J.A.I.N API ${fmtCost(meteredSources.jainApiWeekly)}/wk`);
+                const meteredSourceNote = meteredSourceNoteParts.length ? ` Metered source detail: ${meteredSourceNoteParts.join(' · ')}.` : '';
                 const spendCompactHtml = `
                 <div class="mu-spend-hero ${spendRiskTone}">
                     <div class="mu-spend-left">
-                        <div class="mu-spend-kicker">Model spend</div>
+                        <div class="mu-spend-kicker">True model outlay</div>
                         <div class="mu-spend-main">${fmtCost(effectiveMonthlyProjection)}<span>/mo</span></div>
-                        <div class="mu-spend-sub">${fmtCost(fixedSubMonthly)} Codex subscription + ${fmtCost(meteredMonthlyProjection)} projected metered</div>
+                        <div class="mu-spend-sub">${fmtCost(fixedSubMonthly)} fixed Codex + ${fmtCost(meteredMonthlyProjection)} projected API/BYOK</div>
                     </div>
                     <div class="mu-spend-right">
                         <div class="mu-spend-chip strong">${escapeHtml(activeModelDisp || 'No live model')}</div>
@@ -11654,7 +11659,7 @@
                         <small>Codex / metered / local</small>
                     </div>
                 </div>
-                <div class="mu-spend-note">CodexBar costs are subscription-equivalent value, not extra billing. True projected outlay is fixed Codex plan plus API/BYOK/direct calls.</div>`;
+                <div class="mu-spend-note">CodexBar is shown as subscription-equivalent value, not extra billing. Projected outlay is fixed Codex plan plus API/BYOK/direct calls.${escapeHtml(meteredSourceNote)}</div>`;
 
                 const breakdownModels = Array.isArray(mu.breakdown) ? mu.breakdown : [];
                 const isLocalModel = model => model.isLocal === true || ['ollama', 'local'].includes((model.source || '').toLowerCase()) || (model.name || '').toLowerCase().startsWith('local/');
@@ -11737,7 +11742,6 @@
                     const weekly = sumField(models, 'weeklyCost');
                     let projected = lane.key === 'local' ? 0 : projectedMonthlyForModels(models);
                     if (lane.key === 'openai_codex') projected = fixedSubMonthly;
-                    if (lane.key === 'openai_api') projected = Math.max(projected, meteredMonthlyProjection);
                     const impact = lane.key === 'openai_codex'
                         ? { tone: 'good', short: 'fixed', long: 'Covered by the Codex subscription' }
                         : laneBudgetImpact(projected, lane.key);
@@ -11804,7 +11808,7 @@
                         <div class="mu-lane-meta">${escapeHtml(lane.meta)}</div>
                     </div>`;
                 }).join('');
-                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Lane projection separates fixed subscription spend from metered API/BYOK/direct calls. Local stays $0.</div>`;
+                const laneGridHtml = `<div class="mu-lane-grid">${laneCardsHtml}</div><div class="mu-lane-legend">Lane projection separates fixed subscription spend from metered API/BYOK/direct calls. CodexBar value is informative; local stays $0.</div>`;
                 const budgetStripHtml = `<div class="mu-lane-budget-strip ${budgetTone}"><span class="mu-lane-budget-kicker">True outlay</span><strong>${fmtCost(budgetProjected)}/mo</strong><span class="mu-lane-budget-copy">${fmtCost(fixedSubMonthly)} fixed + ${fmtCost(meteredMonthlyProjection)} metered projection</span></div>`;
 
                 const activeUsageHeroHtml = `<div class="mu-active-hero" style="--mu-accent:${activeModelVisual.color};--mu-accent-soft:${activeModelVisual.bg};--mu-accent-border:${activeModelVisual.border};">
@@ -11916,7 +11920,7 @@
                         <span style="font-size:0.6rem;color:#fff;">${elPct.toFixed(0)}% used</span>
                     </div>` : '';
 
-                const meteredLanes = laneRows.filter(lane => lane.key !== 'local' && lane.projected > 0);
+                const meteredLanes = laneRows.filter(lane => !['local', 'openai_codex'].includes(lane.key) && lane.projected > 0);
                 const leadLane = [...laneRows.filter(lane => lane.key !== 'local')].sort((a, b) => (b.projected || 0) - (a.projected || 0))[0] || null;
                 const capPct = budgetCap > 0 ? Math.round((budgetProjected / budgetCap) * 100) : 0;
                 const targetPct = budgetTarget > 0 ? Math.round((budgetProjected / budgetTarget) * 100) : 0;
@@ -14089,6 +14093,48 @@
             }
             body:not(.phone-mode).kiosk-mode .card-brain .brain-feed-lower {
                 display: none !important;
+            }
+        }
+
+        /* Final Brain Feed readability override: keep JAIMES visible on the 24in kiosk layout. */
+        @media (min-width: 1180px) {
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-hero-grid.dual-live {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective {
+                padding: 9px 11px !important;
+                gap: 6px !important;
+                justify-content: flex-start !important;
+                --bf-objective-font-size: clamp(1.12rem, 1.32vw, 1.48rem) !important;
+                --bf-objective-line-height: 1.08 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-text-wrap {
+                flex: 0 0 auto !important;
+                display: block !important;
+                height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 3 + 0.14rem) !important;
+                min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 3 + 0.14rem) !important;
+                max-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 3 + 0.14rem) !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-text {
+                display: block !important;
+                -webkit-line-clamp: unset !important;
+                -webkit-box-orient: initial !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                font-size: var(--bf-objective-font-size) !important;
+                line-height: var(--bf-objective-line-height) !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective.agent-jaimes .bf-objective-text {
+                font-size: clamp(1.04rem, 1.22vw, 1.36rem) !important;
+                line-height: 1.1 !important;
+            }
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-detail,
+            body:not(.phone-mode).kiosk-mode .card-brain.brain-active #brain-feed-card:has(.bf-hero-grid.dual-live) .bf-objective-submeta {
+                font-size: 0.52rem !important;
+                line-height: 1.15 !important;
+                max-height: none !important;
             }
         }
 

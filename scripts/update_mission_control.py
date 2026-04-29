@@ -1368,18 +1368,20 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         codex_equivalent_daily = round(sum(float(r.get("dailyCost") or 0) for r in codex_rows), 6)
         codex_tokens_weekly = int(sum(int(r.get("totalTokens") or 0) for r in codex_rows))
         codex_tokens_daily = int(sum(int(r.get("dailyTokens") or 0) for r in codex_rows))
-        metered_weekly = round(
-            sum(float(r.get("weeklyCost") or 0) for r in metered_rows)
-            + or_weekly
-            + jain_api.get("weekly", 0),
-            6,
-        )
-        metered_daily = round(
-            sum(float(r.get("dailyCost") or 0) for r in metered_rows)
-            + or_daily
-            + jain_api_daily,
-            6,
-        )
+        # Metered rows already include synthetic OpenRouter and J.A.I.N API rows when
+        # those lanes report usage, so do not add their source totals a second time.
+        metered_weekly = round(sum(float(r.get("weeklyCost") or 0) for r in metered_rows), 6)
+        metered_daily = round(sum(float(r.get("dailyCost") or 0) for r in metered_rows), 6)
+        metered_source_totals = {
+            "openrouterWeekly": round(or_weekly, 6),
+            "openrouterDaily": round(or_daily, 6),
+            "openrouterMonthly": round(or_monthly, 6),
+            "jainApiWeekly": round(jain_api.get("weekly", 0), 6),
+            "jainApiDaily": round(jain_api_daily, 6),
+            "jainApiMonthly": round(jain_api_monthly, 6),
+            "trackedRowsWeekly": metered_weekly,
+            "trackedRowsDaily": metered_daily,
+        }
         metered_monthly_projection = round(max(metered_weekly * (30 / 7), or_monthly, jain_api_monthly), 2)
         effective_monthly_projection = round(fixed_codex_monthly + metered_monthly_projection, 2)
         codex_value_projection = round(codex_equivalent_weekly * (30 / 7), 2)
@@ -1397,6 +1399,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "localModelCount": len(local_rows),
             "meteredModelCount": len(metered_rows),
             "codexModelCount": len(codex_rows),
+            "meteredSources": metered_source_totals,
             "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription.",
         }
 
