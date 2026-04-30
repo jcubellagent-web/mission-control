@@ -1,21 +1,16 @@
 {
   "active": true,
-  "objective": "Mission Control: validating revamp patch",
+  "objective": "Mission Control: final validation before deploy",
   "status": "active",
-  "updatedAt": "2026-04-30T04:02:45Z",
+  "updatedAt": "2026-04-30T04:04:56Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "code",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:02:45Z",
-  "messageReceived": "2026-04-30T04:02:45Z",
+  "checkedAt": "2026-04-30T04:04:56Z",
+  "messageReceived": "2026-04-30T04:04:56Z",
   "steps": [
-    {
-      "label": "Task: contain JOSHeX Hermes status exposure",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: installing safe Hermes status wrapper",
       "status": "done",
@@ -58,6 +53,11 @@
     },
     {
       "label": "Mission Control: validating revamp patch",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: final validation before deploy",
       "status": "active",
       "tool": "code"
     }
