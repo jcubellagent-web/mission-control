@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "5 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-30T05:10:11Z",
+  "summary": "2 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-30T05:58:27Z",
   "counts": {
-    "ok": 21,
-    "warn": 5,
+    "ok": 24,
+    "warn": 2,
     "error": 0
   },
   "checks": [
@@ -104,11 +104,11 @@
       "name": "openclaw:status",
       "status": "ok",
       "ok": true,
-      "detail": "gateway=True latency=41ms audit=0/0",
+      "detail": "gateway=True latency=50ms audit=0/0",
       "meta": {
         "runtimeVersion": "2026.4.27",
         "model": "gpt-5.5",
-        "percentUsed": 9
+        "percentUsed": 22
       }
     },
     {
@@ -127,23 +127,23 @@
     },
     {
       "name": "google:calendar",
-      "status": "warn",
-      "ok": false,
-      "detail": "No auth for calendar jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services calendar\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gmail.com --key <service-account.json>",
+      "status": "ok",
+      "ok": true,
+      "detail": "read ok",
       "meta": {}
     },
     {
       "name": "google:gmail",
-      "status": "warn",
-      "ok": false,
-      "detail": "No auth for gmail jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services gmail\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gmail.com --key <service-account.json>",
+      "status": "ok",
+      "ok": true,
+      "detail": "search ok",
       "meta": {}
     },
     {
       "name": "google:drive",
-      "status": "warn",
-      "ok": false,
-      "detail": "No auth for drive jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services drive\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gma",
+      "status": "ok",
+      "ok": true,
+      "detail": "read ok",
       "meta": {}
     },
     {
