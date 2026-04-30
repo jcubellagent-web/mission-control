@@ -119,7 +119,7 @@ The freshest Supabase row wins over older JSON data for each agent. If Supabase 
 
 ## Privacy rule
 
-Never write secrets, raw private connector contents, tokens, account data, emails, sensitive OAuth details, or private customer/account content into:
+Never write secrets, raw private connector contents, API keys, passwords, tokens, credentials, account data, emails, sensitive OAuth details, cookies, or private customer/account content into:
 
 - Supabase Brain Feed rows
 - `brain-feed.json`

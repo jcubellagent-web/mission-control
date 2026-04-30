@@ -217,6 +217,66 @@ def check_index_wiring() -> None:
     require(result.returncode == 0, "embedded index.html JavaScript syntax check failed")
 
 
+
+def check_lane_routing_contract() -> None:
+    """Guard the Mission Control multi-agent Brain Feed lane contract."""
+    html = INDEX.read_text()
+    docs_path = ROOT / "docs" / "supabase-brain-feed.md"
+    require(docs_path.exists(), "Supabase Brain Feed lane-routing docs missing")
+    docs = docs_path.read_text()
+
+    expected_lanes = {
+        "josh": ["JOSH 2.0", "data/brain-feed.json"],
+        "jaimes": ["JAIMES", "data/jaimes-brain-feed.json"],
+        "jain": ["J.A.I.N", "data/jain-brain-feed.json"],
+        "joshex": ["JOSHeX", "data/personal-codex.json"],
+        "main": ["Legacy", "data/brain-feed.json"],
+    }
+    for lane, required_bits in expected_lanes.items():
+        require(f"`{lane}`" in docs, f"lane-routing docs must mention `{lane}` lane")
+        for bit in required_bits:
+            require(bit in docs, f"lane-routing docs for `{lane}` missing `{bit}`")
+
+    routing_examples = {
+        "josh": "--agent josh",
+        "jaimes": "--agent jaimes",
+        "jain": "--agent jain",
+        "joshex": "--agent joshex",
+    }
+    for lane, example in routing_examples.items():
+        require(example in docs, f"lane-routing docs missing publish example for `{lane}`")
+
+    require(
+        "does not update the JOSHeX card" in docs and "--agent joshex" in docs,
+        "docs must explicitly prevent routing JOSHeX through JOSH brain-feed fallback",
+    )
+    require("data/codex-jobs.json" in docs, "docs must preserve codex-jobs.json Today’s Jobs routing")
+    require("python3 scripts/update_mission_control.py" in docs, "docs must require dashboard regeneration after codex-jobs changes")
+    for forbidden in ["API keys", "tokens", "OAuth", "cookies", "credentials"]:
+        require(forbidden in docs, f"privacy rule missing `{forbidden}`")
+
+    publisher = ROOT / "scripts" / "supabase_brain_feed_publish.py"
+    publisher_src = publisher.read_text()
+    for lane in ["josh", "jain", "jaimes", "joshex"]:
+        require(f'"{lane}"' in publisher_src or f"'{lane}'" in publisher_src, f"publisher helper must accept `{lane}` lane")
+
+    poll = get_function(html, "fetchBrainFeedSupabase")
+    require(
+        "id=in.(main,josh,jain,jaimes,joshex)" in poll,
+        "frontend Supabase poll must include all named Brain Feed lanes",
+    )
+    apply_record = get_function(html, "applySupabaseBrainFeedRecord")
+    require("_supabaseAgentFeeds[agentId]" in apply_record, "frontend must store Supabase rows by agent id")
+    require("agentBrainFeeds" in apply_record, "frontend must expose named lanes through dashboard agentBrainFeeds")
+
+    require("synthesizeJoshexBrainFeed" in html, "JOSHeX lane must have a Brain Feed synthesis path")
+    require("agent-joshex" in html, "JOSHeX lane must have a visible agent card class")
+    require("data/personal-codex.json" in html, "JOSHeX JSON fallback path must remain wired")
+
+    update_src = (ROOT / "scripts" / "update_mission_control.py").read_text()
+    for sidecar in ["brain-feed.json", "jaimes-brain-feed.json", "jain-brain-feed.json", "personal-codex.json"]:
+        require(sidecar in html or sidecar in update_src, f"fallback sidecar `{sidecar}` must remain referenced")
+
 def check_joshex_freshness(max_age_min: int, write_status: Path | None = None) -> None:
     data = json.loads((DATA_DIR / "dashboard-data.json").read_text())
     candidates = [
@@ -254,6 +314,7 @@ def main() -> int:
 
     check_json()
     check_index_wiring()
+    check_lane_routing_contract()
     if args.check_joshex_freshness:
         check_joshex_freshness(args.max_joshex_age_min, args.write_status)
     print("mission_control_regression_check OK")
