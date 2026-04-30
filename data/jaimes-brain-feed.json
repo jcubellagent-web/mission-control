@@ -1,21 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: no pending approval action",
-  "status": "idle",
-  "updatedAt": "2026-04-30T00:03:43Z",
+  "active": true,
+  "objective": "Task: Mission Control usage/cost redesign + Brain Feed layout fix",
+  "status": "active",
+  "updatedAt": "2026-04-30T00:07:02Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:03:43Z",
-  "messageReceived": "2026-04-30T00:03:43Z",
+  "checkedAt": "2026-04-30T00:07:02Z",
+  "messageReceived": "2026-04-30T00:07:02Z",
   "steps": [
-    {
-      "label": "Task: assess ComfyUI skill relevance",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: wire fantasy planner pre-lock cron",
       "status": "done",
@@ -59,6 +54,11 @@
     {
       "label": "Task: acknowledge approval no pending action",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: Mission Control usage/cost redesign + Brain Feed layou",
+      "status": "active",
       "tool": "exec"
     }
   ]
