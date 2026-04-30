@@ -11,31 +11,31 @@
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-30T02:04:48Z",
-    "objective": "Deep capability audit: gathering runtime inventory",
+    "objective": "Deep capability audit: fixing runtime dependency drift",
     "status": "active",
     "steps": [
       {
-        "label": "Deep capability audit - gathering runtime inventory",
+        "label": "Deep capability audit - fixing runtime dependency drift",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T02:05:14Z",
-    "checkedAt": "2026-04-30T02:05:14Z",
+    "updatedAt": "2026-04-30T02:07:56Z",
+    "checkedAt": "2026-04-30T02:07:56Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Deep capability audit: gathering runtime inventory",
-    "updatedAt": "2026-04-30T02:05:17Z"
+    "context": "Deep capability audit: fixing runtime dependency drift",
+    "updatedAt": "2026-04-30T02:10:18Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 34062,
+    "limitTokens": 272000,
+    "pct": 0.1252,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -46,7 +46,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-30T02:05:17Z"
+        "time": "2026-04-30T02:10:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,7 +64,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T02:05:17Z",
+    "updatedAt": "2026-04-30T02:10:18Z",
     "patchStatus": {
       "status": "pending",
       "summary": "11 source file(s) changed",
@@ -74,12 +74,12 @@
         "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
+        "data/jain-brain-feed.json",
         "data/jain-newsfeed.json",
-        "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/mission-control-canaries.json"
       ],
-      "head": "7cdeaf4b2",
-      "updatedAt": "2026-04-30T02:05:17Z"
+      "head": "99fb7bb81",
+      "updatedAt": "2026-04-30T02:10:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,37 +183,37 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 10,
     "recentFiles": [
+      "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
       "scripts/capability_canary.sh",
       "scripts/answer_callback.py",
       "scripts/compact_tasks_state.py",
-      "scripts/openclaw_resiliency_watchdog.py",
-      "scripts/josh_bf_push.sh"
+      "scripts/openclaw_resiliency_watchdog.py"
     ],
-    "codexbarStatus": "77% left \u00b7 wk 78% left",
+    "codexbarStatus": "76% left \u00b7 wk 77% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 77% left [=========---]",
-        "Resets in 54m",
-        "Weekly: 78% left [=========---]",
-        "Pace: 5% in reserve | Expected 27% used | Lasts until reset",
+        "Session: 76% left [=========---]",
+        "Resets in 49m",
+        "Weekly: 77% left [=========---]",
+        "Pace: 4% in reserve | Expected 27% used | Lasts until reset",
         "Resets in 5d 3h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "77% left",
-      "weekly": "78% left",
+      "session": "76% left",
+      "weekly": "77% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "54m",
+      "sessionReset": "49m",
       "weeklyReset": "5d 3h",
-      "summary": "77% left \u00b7 wk 78% left"
+      "summary": "76% left \u00b7 wk 77% left"
     },
-    "updatedAt": "2026-04-30T02:05:19Z"
+    "updatedAt": "2026-04-30T02:10:20Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -341,8 +341,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 292343795,
-        "dailyTokens": 155609699,
+        "totalTokens": 294358294,
+        "dailyTokens": 157624198,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T02:05:22Z",
+    "lastUpdated": "2026-04-30T02:10:24Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -425,8 +425,8 @@
       "codexEquivalentWeekly": 45.537967,
       "codexEquivalentDaily": 0.480441,
       "codexEquivalentMonthlyProjection": 195.16,
-      "codexTokensWeekly": 401135222,
-      "codexTokensDaily": 155609699,
+      "codexTokensWeekly": 403149721,
+      "codexTokensDaily": 157624198,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -450,7 +450,7 @@
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
         "codexValueMonthly": 195.16,
-        "codexTokensWeekly": 401135222,
+        "codexTokensWeekly": 403149721,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -526,7 +526,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.537967,
           "dailyEquivalent": 0.480441,
-          "tokensWeekly": 401135222,
+          "tokensWeekly": 403149721,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T02:05:27Z",
+    "updatedAt": "2026-04-30T02:10:29Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,12 +637,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.7,
-      "cpu_user": 21.51,
-      "cpu_sys": 18.21,
-      "load1": 2.61,
-      "load5": 2.18,
-      "load15": 2.0,
+      "cpu_pct": 37.5,
+      "cpu_user": 19.72,
+      "cpu_sys": 17.77,
+      "load1": 3.49,
+      "load5": 2.7,
+      "load15": 2.25,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.4,
       "uptime": "",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 29.6,
-      "cpu_user": 18.4,
-      "cpu_sys": 11.2,
-      "load1": 2.49,
-      "load5": 2.78,
-      "load15": 2.98,
+      "cpu_pct": 28.1,
+      "cpu_user": 16.4,
+      "cpu_sys": 11.71,
+      "load1": 1.86,
+      "load5": 2.33,
+      "load15": 2.72,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T02:05:17Z"
+      "lastChecked": "2026-04-30T02:10:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T02:05:17Z"
+      "lastChecked": "2026-04-30T02:10:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T02:05:17Z"
+      "lastChecked": "2026-04-30T02:10:18Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T02:05:17.740704+00:00"
+      "lastRun": "2026-04-30T02:10:18.520562+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,12 +1259,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T02:05:17.739447Z",
+    "checkedAt": "2026-04-30T02:10:18.519131Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1585,17 +1585,17 @@
       "title": "Deep capability audit",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Auditing OpenClaw runtime, models, connectors, skills, devices, cron/heartbeat, security posture, local tools, and safe improvements.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 21:41; updated 2026-04-29 21:42",
+      "notes": "Continuing full capability audit after OpenClaw 2026.4.27/resiliency fixes. Current pass is checking runtime health, model/auth routing, connectors, skills, devices, cron/heartbeat, security posture, local tools, and safe improvements.",
+      "background": "owner: JOSH 2.0; requested 2026-04-29 21:41; updated 2026-04-29 22:05",
       "requestedAt": "2026-04-29 21:41",
-      "updatedAt": "2026-04-29 21:42",
+      "updatedAt": "2026-04-29 22:05",
       "owner": "JOSH 2.0"
     }
   ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/update_mission_control.py, scripts/capability_canary.sh",
+      "label": "Recently edited: mission-control/index.html, mission-control/scripts/update_mission_control.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1620,16 +1620,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Deep capability audit: gathering runtime inventory",
+      "objective": "Deep capability audit: fixing runtime dependency drift",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T02:05:14Z",
+      "updatedAt": "2026-04-30T02:07:56Z",
       "messageReceived": "2026-04-30T02:04:48Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Deep capability audit - gathering runtime inventory",
+          "label": "Deep capability audit - fixing runtime dependency drift",
           "status": "active",
           "tool": "exec"
         }
@@ -1640,16 +1640,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Repairing memory plugin runtime dependency path",
+      "objective": "Deep capability audit: checking connector/auth drift",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T01:43:31Z",
-      "messageReceived": "2026-04-30T01:41:09Z",
+      "updatedAt": "2026-04-30T02:06:48Z",
+      "messageReceived": "2026-04-30T02:04:48Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Repairing memory plugin runtime dependency path",
+          "label": "Deep capability audit - checking connector/auth drift",
           "status": "active",
           "tool": "exec"
         }
@@ -1724,8 +1724,8 @@
   "liveObjectives": {
     "activeAgents": [
       "JOSH 2.0",
-      "JAIMES",
-      "J.A.I.N"
+      "J.A.I.N",
+      "JAIMES"
     ],
     "activeCount": 3,
     "primaryAgent": "JOSH 2.0",
@@ -1740,16 +1740,36 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Deep capability audit: gathering runtime inventory",
+        "objective": "Deep capability audit: fixing runtime dependency drift",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-30T02:05:14Z",
+        "updatedAt": "2026-04-30T02:07:56Z",
         "messageReceived": "2026-04-30T02:04:48Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Deep capability audit - gathering runtime inventory",
+            "label": "Deep capability audit - fixing runtime dependency drift",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Deep capability audit: checking connector/auth drift",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-30T02:06:48Z",
+        "messageReceived": "2026-04-30T02:04:48Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Deep capability audit - checking connector/auth drift",
             "status": "active",
             "tool": "exec"
           }
@@ -1819,54 +1839,34 @@
             "tool": "code"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Repairing memory plugin runtime dependency path",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-30T01:43:31Z",
-        "messageReceived": "2026-04-30T01:41:09Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Repairing memory plugin runtime dependency path",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T02:05:22Z",
+      "time": "2026-04-30T02:10:24Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-30T02:05:19Z",
-      "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/capability_canary.sh"
+      "time": "2026-04-30T02:10:20Z",
+      "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-30T02:05:19Z",
-      "event": "CodexBar: 77% left \u00b7 wk 78% left"
+      "time": "2026-04-30T02:10:20Z",
+      "event": "CodexBar: 76% left \u00b7 wk 77% left"
     },
     {
-      "time": "2026-04-30T02:05:17Z",
+      "time": "2026-04-30T02:10:18Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T02:05:17Z",
+      "time": "2026-04-30T02:10:18Z",
       "event": "JOSHeX: Patch feed: 11 source file(s) changed"
     },
     {
-      "time": "2026-04-30T02:05:17Z",
+      "time": "2026-04-30T02:10:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T02:05:17Z"
+  "lastUpdated": "2026-04-30T02:10:18Z"
 }
