@@ -5023,7 +5023,54 @@
             flex-direction: column;
             justify-content: flex-start;
             gap: 11px;
+            position: relative;
+            overflow: hidden;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 24px color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 8%, transparent);
+        }
+        .bf-objective > * { position: relative; z-index: 1; }
+        .bf-objective::after {
+            content: '';
+            position: absolute;
+            inset: -35% -90%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            background:
+                linear-gradient(110deg,
+                    transparent 0%,
+                    transparent 42%,
+                    color-mix(in srgb, var(--bf-agent-color, #22d3ee) 28%, transparent) 48%,
+                    color-mix(in srgb, var(--bf-agent-color, #22d3ee) 10%, transparent) 53%,
+                    transparent 60%);
+            transform: translateX(-38%);
+        }
+        .bf-objective.state-live,
+        .bf-objective.is-flowing {
+            border-color: color-mix(in srgb, var(--bf-agent-color, #22d3ee) 48%, rgba(255,255,255,0.08));
+            box-shadow:
+                inset 4px 0 0 color-mix(in srgb, var(--bf-agent-color, #22d3ee) 78%, transparent),
+                inset 0 1px 0 rgba(255,255,255,0.07),
+                0 0 26px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 18%, transparent),
+                0 0 0 1px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 16%, transparent);
+        }
+        .bf-objective.state-live::after,
+        .bf-objective.is-flowing::after {
+            opacity: 1;
+            animation: bf-agent-flow 4.6s cubic-bezier(.37,0,.2,1) infinite;
+        }
+        .bf-objective.state-live .bf-agent-name::before,
+        .bf-objective.is-flowing .bf-agent-name::before {
+            animation: bf-agent-dot-flow 1.35s ease-in-out infinite;
+        }
+        @keyframes bf-agent-flow {
+            0% { transform: translateX(-44%); opacity: 0; }
+            15% { opacity: 0.78; }
+            64% { opacity: 0.42; }
+            100% { transform: translateX(44%); opacity: 0; }
+        }
+        @keyframes bf-agent-dot-flow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 72%, transparent); }
+            50% { transform: scale(1.34); box-shadow: 0 0 18px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 90%, transparent); }
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -5112,6 +5159,12 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .bf-objective-main {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 10px;
+        }
         .bf-objective-text-wrap {
             height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem);
             min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem);
@@ -5132,6 +5185,244 @@
             font-weight: 800;
             text-shadow: 0 0 24px color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 34%, transparent);
             will-change: transform;
+        }
+        .bf-agent-panel {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 8px;
+            padding: 9px;
+            border-radius: 13px;
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 20%, rgba(255,255,255,0.065));
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 8%, rgba(15,23,42,0.62)), rgba(3,8,13,0.54));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+        }
+        .bf-agent-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-width: 0;
+        }
+        .bf-agent-panel-title {
+            color: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 82%, #ffffff);
+            font-size: 0.52rem;
+            font-weight: 920;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .bf-agent-panel-summary {
+            min-width: 0;
+            color: rgba(226,232,240,0.54);
+            font-size: 0.55rem;
+            font-weight: 780;
+            letter-spacing: 0.04em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-agent-microgrid {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+        .bf-agent-tile {
+            min-width: 0;
+            display: grid;
+            gap: 3px;
+            align-content: start;
+            padding: 7px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.028);
+        }
+        .bf-agent-tile.primary {
+            border-color: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 28%, rgba(255,255,255,0.06));
+            background: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 7%, rgba(255,255,255,0.026));
+        }
+        .bf-agent-tile-label {
+            color: rgba(226,232,240,0.44);
+            font-size: 0.48rem;
+            font-weight: 900;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .bf-agent-tile-value {
+            min-width: 0;
+            color: rgba(248,250,252,0.90);
+            font-size: 0.68rem;
+            line-height: 1.12;
+            font-weight: 890;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-agent-tile-detail {
+            min-width: 0;
+            color: rgba(203,213,225,0.54);
+            font-size: 0.52rem;
+            line-height: 1.16;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .bf-live-actions {
+            min-height: 0;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 8px;
+            padding: 9px;
+            border-radius: 13px;
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 24%, rgba(255,255,255,0.065));
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 9%, rgba(15,23,42,0.66)), rgba(3,8,13,0.56));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.045);
+            overflow: hidden;
+        }
+        .bf-live-actions-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-width: 0;
+        }
+        .bf-live-actions-title {
+            color: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 84%, #ffffff);
+            font-size: 0.52rem;
+            font-weight: 920;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .bf-live-actions-summary {
+            min-width: 0;
+            color: rgba(226,232,240,0.54);
+            font-size: 0.55rem;
+            font-weight: 780;
+            letter-spacing: 0.04em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-live-action-meter {
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 10px minmax(0, 1fr);
+            gap: 9px;
+            position: relative;
+        }
+        .bf-live-action-rail {
+            position: relative;
+            width: 2px;
+            min-height: 100%;
+            justify-self: center;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+        .bf-live-action-rail::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--bf-agent-color, #22d3ee), rgba(255,255,255,0.08));
+            opacity: 0.42;
+        }
+        .bf-live-action-rail::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: -32%;
+            width: 8px;
+            height: 34%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bf-agent-color, #22d3ee) 82%, #ffffff), transparent);
+            box-shadow: 0 0 14px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 70%, transparent);
+            animation: bf-live-meter-scroll 3.2s ease-in-out infinite;
+        }
+        .bf-live-action-list {
+            min-height: 0;
+            display: grid;
+            gap: 6px;
+            align-content: stretch;
+            overflow: hidden;
+            mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+        }
+        .bf-live-action-row {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 8px;
+            align-items: start;
+            padding: 6px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.028);
+        }
+        .bf-live-action-row.active,
+        .bf-live-action-row.decision,
+        .bf-live-action-row.attention {
+            border-color: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 30%, rgba(255,255,255,0.06));
+            background: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 7%, rgba(255,255,255,0.026));
+        }
+        .bf-live-action-index {
+            width: 22px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: color-mix(in srgb, var(--bf-agent-color, #22d3ee) 84%, #ffffff);
+            background: color-mix(in srgb, var(--bf-agent-color, #22d3ee) 10%, rgba(255,255,255,0.04));
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, #22d3ee) 28%, rgba(255,255,255,0.06));
+            font-size: 0.46rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            font-variant-numeric: tabular-nums;
+        }
+        .bf-live-action-copy {
+            min-width: 0;
+            display: grid;
+            gap: 2px;
+        }
+        .bf-live-action-type {
+            color: rgba(226,232,240,0.44);
+            font-size: 0.47rem;
+            font-weight: 900;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bf-live-action-text {
+            min-width: 0;
+            color: rgba(248,250,252,0.90);
+            font-size: 0.64rem;
+            line-height: 1.12;
+            font-weight: 890;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .bf-live-action-detail {
+            min-width: 0;
+            color: rgba(203,213,225,0.54);
+            font-size: 0.51rem;
+            line-height: 1.16;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @keyframes bf-live-meter-scroll {
+            0% { transform: translateY(0); opacity: 0; }
+            16% { opacity: 1; }
+            72% { opacity: 0.78; }
+            100% { transform: translateY(420%); opacity: 0; }
         }
         .bf-objective-text.is-scrolling {
             animation: bf-objective-scroll var(--bf-scroll-duration, 18s) linear infinite;
@@ -7683,6 +7974,33 @@
                 0 0 0 1px rgba(34,211,238,0.12),
                 inset 0 1px 0 rgba(255,255,255,0.07) !important;
         }
+        body.kiosk-mode:not(.phone-mode) .card-brain.brain-active {
+            border-color: rgba(34, 211, 238, 0.72) !important;
+            box-shadow:
+                0 0 0 1px rgba(34,211,238,0.42),
+                0 0 38px rgba(34,211,238,0.24),
+                0 0 72px rgba(16,163,127,0.12),
+                inset 0 1px 0 rgba(255,255,255,0.09) !important;
+        }
+        body.kiosk-mode:not(.phone-mode) .card-brain.brain-active::before {
+            opacity: 1 !important;
+            background: conic-gradient(from 0deg,
+                transparent 0deg,
+                transparent 302deg,
+                rgba(34,211,238,0.20) 326deg,
+                rgba(34,211,238,0.78) 344deg,
+                #67e8f9 351deg,
+                #10a37f 356deg,
+                #22d3ee 360deg) !important;
+            animation: bf-laser-spin 1.8s linear infinite !important;
+        }
+        body.kiosk-mode:not(.phone-mode) .card-brain.brain-active::after {
+            inset: 3px !important;
+            border-radius: 15px !important;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(34,211,238,0.12), transparent 34%),
+                linear-gradient(180deg, rgba(4,16,21,0.972), rgba(2,8,12,0.992)) !important;
+        }
         body.kiosk-mode:not(.phone-mode) .card-brain .card-header {
             border-bottom: 0 !important;
             margin-bottom: 10px !important;
@@ -8048,6 +8366,49 @@
                 -webkit-box-orient: vertical !important;
                 overflow: hidden !important;
             }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-main {
+                min-height: 0 !important;
+                gap: 8px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-actions {
+                min-height: 0 !important;
+                padding: 8px !important;
+                gap: 7px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-meter {
+                gap: 8px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-list {
+                gap: 5px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-row {
+                padding: 5px 7px !important;
+                gap: 7px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-text {
+                font-size: 0.60rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-detail {
+                font-size: 0.48rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-panel {
+                min-height: 0 !important;
+                padding: 8px !important;
+                gap: 7px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-microgrid {
+                gap: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-tile {
+                padding: 6px 7px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-tile-value {
+                font-size: 0.62rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-tile-detail {
+                font-size: 0.49rem !important;
+                -webkit-line-clamp: 1 !important;
+            }
             body:not(.phone-mode) #brain-feed-card .bf-objective-detail {
                 display: -webkit-box !important;
                 -webkit-line-clamp: 2 !important;
@@ -8123,6 +8484,20 @@
             body:not(.phone-mode) #brain-feed-card .bf-objective-now-text {
                 -webkit-line-clamp: 1 !important;
                 font-size: 0.61rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-actions {
+                padding: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-live-action-row:nth-child(n+4),
+            body:not(.phone-mode) #brain-feed-card .bf-live-actions-summary {
+                display: none !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-panel {
+                padding: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-tile:nth-child(n+3),
+            body:not(.phone-mode) #brain-feed-card .bf-agent-panel-summary {
+                display: none !important;
             }
             body:not(.phone-mode) #brain-feed-card .bf-agent-insight,
             body:not(.phone-mode) #brain-feed-card .bf-context-meter {
@@ -12079,6 +12454,152 @@
             return 'Agent lane visible; monitor status, current objective, and last update.';
         }
 
+        function getAgentCronStats(agentLabel) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const label = String(agentLabel || '').toUpperCase();
+            const crons = Array.isArray(data.crons) ? data.crons : [];
+            const matches = crons.filter(cron => {
+                const agent = String(cron?.agent || cron?.sourceLabel || '').toUpperCase();
+                if (label.includes('JOSH')) return agent.includes('JOSH');
+                if (label.includes('JAIMES')) return agent.includes('JAIMES') || agent.includes('J.A.I.N') || agent.includes('JAIN');
+                if (label.includes('JOSHEX')) return agent.includes('JOSHEX') || agent.includes('CODEX');
+                return false;
+            });
+            const live = matches.filter(cron => String(cron.status || '').toLowerCase() !== 'paused').length;
+            const due = matches.filter(cron => ['due', 'due_unverified', 'missed'].includes(String(cron.runStatus || '').toLowerCase()) || cron.needsAttention || Number(cron.errors || 0) > 0).length;
+            const next = matches.find(cron => cron.runStatus === 'due' || cron.runStatus === 'due_unverified' || cron.needsAttention) || matches[0] || null;
+            return { total: matches.length, live, due, next };
+        }
+
+        function getAgentBusStats(agentLabel) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const label = String(agentLabel || '').toUpperCase().replace(/\s+/g, '_').replace(/\./g, '');
+            const bus = Array.isArray(data.agentBus) ? data.agentBus : [];
+            const openStates = new Set(['queued', 'retry', 'running', 'in_progress', 'pending']);
+            const rows = bus.filter(task => {
+                const target = String(task?.target_node || '').toUpperCase().replace(/\s+/g, '_').replace(/\./g, '');
+                const origin = String(task?.origin_node || '').toUpperCase().replace(/\s+/g, '_').replace(/\./g, '');
+                return target.includes(label.replace('JOSH_20', 'JOSH_2_0')) || origin.includes(label.replace('JOSH_20', 'JOSH_2_0'));
+            });
+            const open = rows.filter(task => openStates.has(String(task.status || '').toLowerCase()));
+            return { total: rows.length, open: open.length, latest: open[0] || rows[0] || null };
+        }
+
+        function formatMachineLoad(machine) {
+            if (!machine || !machine.available) return { value: 'Not reported', detail: 'No machine telemetry' };
+            const cpu = Number(machine.cpu_pct || 0);
+            const ramPct = machine.ram_total_gb ? Math.round((Number(machine.ram_used_gb || 0) / Number(machine.ram_total_gb || 1)) * 100) : null;
+            const detail = [
+                ramPct !== null ? `RAM ${ramPct}%` : '',
+                machine.disk_pct !== undefined ? `Disk ${machine.disk_pct}%` : '',
+                machine.load1 !== undefined ? `Load ${machine.load1}` : '',
+            ].filter(Boolean).join(' · ');
+            return { value: `CPU ${Math.round(cpu)}%`, detail: detail || 'System telemetry live' };
+        }
+
+        function getBrainFeedAgentDashboard(bf, agentLabel, state, contextSignal, metrics) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const label = String(agentLabel || '').toUpperCase();
+            const steps = Array.isArray(bf?.steps) ? bf.steps : [];
+            const activeStep = steps.find(step => String(step.status || '').toLowerCase() === 'active');
+            const pendingStep = steps.find(step => String(step.status || '').toLowerCase() === 'pending');
+            const recentStep = [...steps].reverse().find(step => step?.label);
+            const nextStep = sanitizeLabel(activeStep?.label || pendingStep?.label || recentStep?.label || bf?.detail || bf?.objective || 'Standing by');
+            const crons = getAgentCronStats(agentLabel);
+            const pc = label.includes('JOSHEX') && typeof getJoshexData === 'function' ? getJoshexData() : {};
+            const patch = pc?.patchStatus || {};
+            const dirtyCount = Number(patch.dirtyCount || 0) || 0;
+            const joshMachine = formatMachineLoad(data.machineHealth?.josh);
+            const actions = [];
+            const push = (kind, text, detail, tone = '') => {
+                const safeText = compactUiLabel(sanitizeLabel(text || ''), 62);
+                if (!safeText) return;
+                actions.push({
+                    kind: compactUiLabel(kind || 'Action', 28),
+                    text: safeText,
+                    detail: compactUiLabel(sanitizeLabel(detail || ''), 86),
+                    tone,
+                });
+            };
+            const pushStep = (step, fallbackTone = '') => {
+                if (!step?.label) return;
+                const tool = prettyToolLabel(step.tool || bf?.currentTool || metrics.currentTool || 'tool');
+                const stepStatus = String(step.status || state.cls || '').toLowerCase();
+                const tone = stepStatus === 'active' ? 'active' : stepStatus === 'pending' ? 'decision' : fallbackTone;
+                push(`Tool · ${tool}`, step.label, `Status ${stepStatus || state.label || 'reported'} · ${metrics.progressText}`, tone);
+            };
+            const recentSteps = [
+                activeStep,
+                pendingStep,
+                ...steps.filter(step => step !== activeStep && step !== pendingStep).slice(-3).reverse(),
+            ].filter(Boolean);
+
+            if (label.includes('JOSHEX')) {
+                const caps = Array.isArray(pc.capabilities) && pc.capabilities.length ? pc.capabilities.join(' · ') : 'Inspect · edit · validate · patch';
+                push('Decision', 'Use Live Actions trace', 'Use the open card space for tools and decisions, not static tiles', 'decision');
+                push('Tool · Codex', patch.summary || bf?.objective || 'Patch lane active', dirtyCount ? `${dirtyCount} changed file${dirtyCount === 1 ? '' : 's'} · ${patch.detail || 'Reviewing patch'}` : patch.detail || 'Patch lane ready', state.active ? 'active' : '');
+                push('Validation', pc.validation || 'Validation pending', 'Screenshot and regression checks drive deploy confidence', 'validation');
+                push('Capability', caps, 'Safe sidecar updates keep JOSHeX visible in Mission Control');
+                recentSteps.slice(0, 1).forEach(step => pushStep(step, 'active'));
+                return {
+                    summary: compactUiLabel(`Codex trace · ${contextSignal.label} · ${metrics.currentTool}`, 74),
+                    actions: actions.slice(0, 5),
+                };
+            }
+
+            if (label.includes('JAIMES')) {
+                const attention = /watchdog|failed|error|blocked|auth/i.test(`${bf?.objective || ''} ${bf?.detail || ''}`);
+                push('Decision', attention ? 'Verify watchdog before relying on automation' : 'Specialist lane can stay in standby', attention ? 'Mission Control watchdog is the current attention item' : `Updated ${bf?.updatedAt ? formatRelTime(bf.updatedAt) : 'unknown'}`, attention ? 'attention' : 'decision');
+                recentSteps.slice(0, 3).forEach(step => pushStep(step, attention ? 'attention' : ''));
+                push('Queue', crons.total ? `${crons.live}/${crons.total} scheduled jobs` : `${steps.length || 0} reported steps`, crons.due ? `${crons.due} jobs need review` : 'Hermes, reporting, fantasy, and Sorare lane');
+                push('Next', nextStep, metrics.progressText || 'No flow reported');
+                return {
+                    summary: compactUiLabel(`${attention ? 'Attention' : state.label} · tools/decisions · ${steps.length || 0} steps`, 74),
+                    actions: actions.slice(0, 5),
+                };
+            }
+
+            if (label.includes('JOSH')) {
+                recentSteps.slice(0, 3).forEach(step => pushStep(step, state.active ? 'active' : ''));
+                push('Decision', /defer|workaround|await|done/i.test(nextStep) ? 'Leave workaround deferred and wait' : 'Keep primary operator lane ready', nextStep, /defer|await/i.test(nextStep) ? 'decision' : '');
+                push('Tool · OpenClaw', crons.total ? `${crons.live}/${crons.total} scheduled jobs` : 'Front desk ready', crons.due ? `${crons.due} due or paused items` : 'Gateway and local execution fabric');
+                push('Machine', joshMachine.value, joshMachine.detail);
+                return {
+                    summary: compactUiLabel(`${state.label} · tools/decisions · ${contextSignal.label}`, 74),
+                    actions: actions.slice(0, 5),
+                };
+            }
+
+            recentSteps.slice(0, 4).forEach(step => pushStep(step));
+            push('Decision', state.label || 'Unknown', bf?.updatedAt ? `Updated ${formatRelTime(bf.updatedAt)}` : 'No update time');
+            push('Next', nextStep, metrics.progressText || 'Flow unavailable');
+            return { summary: compactUiLabel(`${state.label} · ${metrics.currentTool}`, 74), actions: actions.slice(0, 5) };
+        }
+
+        function renderBrainFeedAgentDashboard(deck) {
+            const actions = Array.isArray(deck?.actions) ? deck.actions.slice(0, 5) : [];
+            if (!actions.length) return '';
+            return `<div class="bf-live-actions">
+                <div class="bf-live-actions-head">
+                    <span class="bf-live-actions-title">Live Actions</span>
+                    <span class="bf-live-actions-summary">${escapeHtml(deck.summary || 'Tools and decisions trace')}</span>
+                </div>
+                <div class="bf-live-action-meter">
+                    <div class="bf-live-action-rail" aria-hidden="true"></div>
+                    <div class="bf-live-action-list">
+                        ${actions.map((action, index) => `<div class="bf-live-action-row ${escapeHtml(action.tone || '')}">
+                            <span class="bf-live-action-index">${String(index + 1).padStart(2, '0')}</span>
+                            <span class="bf-live-action-copy">
+                                <span class="bf-live-action-type">${escapeHtml(action.kind || 'Action')}</span>
+                                <span class="bf-live-action-text" title="${escapeHtml(action.text || '')}">${escapeHtml(action.text || '—')}</span>
+                                <span class="bf-live-action-detail" title="${escapeHtml(action.detail || '')}">${escapeHtml(action.detail || '')}</span>
+                            </span>
+                        </div>`).join('')}
+                    </div>
+                </div>
+            </div>`;
+        }
+
         function renderBrainFeedObjectiveCard(entry, compact = false) {
             const bf = entry?.bf || {};
             const heroAgentLabel = entry?.agentLabel || 'AGENT';
@@ -12095,7 +12616,8 @@
             const insight = getBrainFeedAgentInsight(bf, heroAgentLabel);
             const contextSignal = getAgentContextSignal(bf, heroAgentLabel);
             const contextWidth = contextSignal.pct === null ? 0 : contextSignal.pct;
-            return `<div class="bf-objective ${agentClass}${compact ? ' bf-objective-compact' : ''}" data-agent="${escapeHtml(heroAgentLabel)}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
+            const dashboardDeck = getBrainFeedAgentDashboard(bf, heroAgentLabel, state, contextSignal, metrics);
+            return `<div class="bf-objective ${agentClass} state-${state.cls}${state.active ? ' is-flowing' : ''}${compact ? ' bf-objective-compact' : ''}" data-agent="${escapeHtml(heroAgentLabel)}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                 <div class="bf-objective-meta">
                     <div class="bf-objective-live">
                         <span class="bf-fresh-dot" style="background:${state.active ? '#22d3ee' : 'rgba(255,255,255,0.2)'};${state.active ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(34,211,238,0.6)' : ''}"></span>
@@ -12104,7 +12626,10 @@
                     </div>
                     <span class="bf-last-updated">Updated ${escapeHtml(updatedLabel)}</span>
                 </div>
-                <div class="bf-objective-text-wrap"><div class="bf-objective-text" data-full-text="${escapeHtml(objectiveText)}" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</div></div>
+                <div class="bf-objective-main">
+                    <div class="bf-objective-text-wrap"><div class="bf-objective-text" data-full-text="${escapeHtml(objectiveText)}" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</div></div>
+                    ${renderBrainFeedAgentDashboard(dashboardDeck)}
+                </div>
                 <div class="bf-objective-now" title="${escapeHtml(objectiveDetail)}">
                     <span class="bf-objective-now-label">Now</span>
                     <span class="bf-objective-now-text">${escapeHtml(objectiveDetail)}</span>

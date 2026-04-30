@@ -24,6 +24,11 @@
   - Are canaries/calendar/voice/codex lanes healthy?
   - Are Sleep and MoltWorld controls reachable?
 - Brain Feed cards now answer the same glance questions for JOSH 2.0, JAIMES, and JOSHeX: status, current objective, latest step, tool, update age, lane insight, and context meter.
+- The soup-to-nuts Brain Feed pass should feel alive when an operator is active: the hero card laser frame returns, active agent panels get stronger flowing light, and the open middle space becomes a Live Actions trace instead of static dashboard tiles.
+- Each Live Actions trace should surface a scrolling tool/decision meter:
+  - JOSH 2.0: shell/OpenClaw steps, defer/await decisions, schedule pressure, machine signal.
+  - JAIMES: Hermes/specialist steps, watchdog decisions, queue pressure, next automation move.
+  - JOSHeX: OpenAI Codex patch steps, design decisions, validation state, visible capabilities.
 - JOSHeX is branded as the OpenAI Codex patch lane, with a green/black treatment and live sidecar polling from `data/personal-codex.json`.
 - The top control strip avoids initials and abbreviations; compact text is allowed, but labels and values should remain self-explanatory on the 24-inch kiosk.
 - The Model Usage JOSHeX strip must remain tall enough to show patch, now, and capability rows without clipping.
