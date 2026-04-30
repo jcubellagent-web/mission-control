@@ -1,25 +1,20 @@
 {
   "active": true,
-  "objective": "Step: generate fresh Calendar OAuth link",
+  "objective": "Calendar OAuth: verbose state mismatch diagnostic",
   "status": "active",
-  "updatedAt": "2026-04-30T01:44:35Z",
+  "updatedAt": "2026-04-30T01:49:50Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "web",
+  "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T01:44:35Z",
-  "messageReceived": "2026-04-30T01:44:35Z",
+  "checkedAt": "2026-04-30T01:49:50Z",
+  "messageReceived": "2026-04-30T01:49:50Z",
   "steps": [
     {
-      "label": "Step: sync JOSH Mission Control checkout",
+      "label": "Step: reset OAuth state and generate replacement link",
       "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify Calendar lane after install",
-      "status": "done",
-      "tool": "exec"
+      "tool": "web"
     },
     {
       "label": "Task: review skill save/update need",
@@ -27,39 +22,44 @@
       "tool": "exec"
     },
     {
-      "label": "Task: verify JOSH Calendar prompt completion",
+      "label": "Step: update Google Workspace OAuth skill",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Step: reopen JOSH Calendar auth helper",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Task: generate Calendar OAuth link for Josh MacBook",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Task: exchange Calendar OAuth callback",
+      "label": "Calendar OAuth: exchanging fresh callback",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Step: install secure file-keyring env",
+      "label": "Calendar OAuth: callback exchange attempted",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Step: exchange Calendar OAuth callback",
+      "label": "Calendar OAuth: inspecting remote pending state",
       "status": "done",
-      "tool": "web"
+      "tool": "exec"
     },
     {
-      "label": "Step: generate fresh Calendar OAuth link",
+      "label": "Calendar OAuth: checking gog manual exchange options",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Calendar OAuth: inspecting pending state schema",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Calendar OAuth: retrying exchange without shell URL parsing",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Calendar OAuth: verbose state mismatch diagnostic",
       "status": "active",
-      "tool": "web"
+      "tool": "exec"
     }
   ]
 }
