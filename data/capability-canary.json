@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "2 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-29T23:19:53Z",
+  "summary": "5 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-30T00:58:18Z",
   "counts": {
-    "ok": 24,
-    "warn": 2,
+    "ok": 21,
+    "warn": 5,
     "error": 0
   },
   "checks": [
@@ -104,18 +104,18 @@
       "name": "openclaw:status",
       "status": "ok",
       "ok": true,
-      "detail": "gateway=True latency=47ms audit=0/0",
+      "detail": "gateway=True latency=64ms audit=0/0",
       "meta": {
         "runtimeVersion": "2026.4.26",
         "model": "gpt-5.5",
-        "percentUsed": 17
+        "percentUsed": 16
       }
     },
     {
       "name": "memory:main",
       "status": "ok",
       "ok": true,
-      "detail": "files=107 chunks=1217 dirty=False",
+      "detail": "files=107 chunks=1230 dirty=False",
       "meta": {}
     },
     {
@@ -127,23 +127,23 @@
     },
     {
       "name": "google:calendar",
-      "status": "ok",
-      "ok": true,
-      "detail": "read ok",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
       "meta": {}
     },
     {
       "name": "google:gmail",
-      "status": "ok",
-      "ok": true,
-      "detail": "search ok",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
       "meta": {}
     },
     {
       "name": "google:drive",
-      "status": "ok",
-      "ok": true,
-      "detail": "read ok",
+      "status": "warn",
+      "ok": false,
+      "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
       "meta": {}
     },
     {

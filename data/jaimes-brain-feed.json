@@ -1,63 +1,63 @@
 {
   "active": true,
-  "objective": "Step: exchange fresh OAuth redirect on JOSH",
+  "objective": "Step: launch corrected-account Calendar auth listener",
   "status": "active",
-  "updatedAt": "2026-04-30T00:55:02Z",
+  "updatedAt": "2026-04-30T00:58:53Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:55:02Z",
-  "messageReceived": "2026-04-30T00:55:02Z",
+  "checkedAt": "2026-04-30T00:58:53Z",
+  "messageReceived": "2026-04-30T00:58:53Z",
   "steps": [
     {
-      "label": "Task: review skill save/update after Calendar auth flow",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: retry JOSH Google Calendar auth after keychain unlock",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify JOSH keychain still locked",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: unlock JOSH keychain and finish Calendar auth",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: exchange Calendar OAuth code after unlock",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: try file keyring OAuth exchange",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: generate fresh Calendar auth URL after keyring repair",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review whether OAuth/keyring workflow needs skill upda",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: exchange fresh JOSH Calendar OAuth redirect",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
       "label": "Step: exchange fresh OAuth redirect on JOSH",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: retry exchange with generated state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: inspect JOSH gog pending state files",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: retry exchange with encoded OCR URL",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: retry exchange without services flag",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: retrieve exact Safari callback URL from JOSH history",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: manual OAuth token exchange variants",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: launch live localhost Calendar auth listener on JOSH",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verify JOSH Calendar auth account state",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: launch corrected-account Calendar auth listener",
       "status": "active",
       "tool": "exec"
     }
