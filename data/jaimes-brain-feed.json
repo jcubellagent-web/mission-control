@@ -1,41 +1,16 @@
 {
-  "active": true,
-  "objective": "Mission Control: validating calendar status card",
-  "status": "active",
-  "updatedAt": "2026-04-30T02:05:03Z",
+  "active": false,
+  "objective": "Done: explained JOSH screenshot permission blocker",
+  "status": "idle",
+  "updatedAt": "2026-04-30T02:13:54Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "code",
+  "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T02:05:03Z",
-  "messageReceived": "2026-04-30T02:05:03Z",
+  "checkedAt": "2026-04-30T02:13:54Z",
+  "messageReceived": "2026-04-30T02:13:54Z",
   "steps": [
-    {
-      "label": "Calendar OAuth: retrying with matching force-consent",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Calendar OAuth: verifying token storage",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Calendar OAuth: backing up corrupted file keyring",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Calendar OAuth: generating fresh post-keyring-reset link",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review OAuth repair skill capture",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Calendar OAuth: exchanging fresh post-reset callback",
       "status": "done",
@@ -58,8 +33,33 @@
     },
     {
       "label": "Mission Control: validating calendar status card",
-      "status": "active",
+      "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Task: review skill save/update need",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: approved fantasy cleanup gate and JOSH display check",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: checking JOSH display capture permission",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: fantasy cleanup remains gated after first cron runs",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: explain JOSH Screen Recording permission",
+      "status": "done",
+      "tool": "exec"
     }
   ]
 }
