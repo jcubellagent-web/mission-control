@@ -85,6 +85,34 @@ def check_index_wiring() -> None:
         "hasRenderedHero" in apply_bf and ".bf-objective" in apply_bf,
         "applyBrainFeed must rerender when the Brain Feed DOM is empty even if hash is unchanged",
     )
+    require(
+        "isSupabaseFeedFresher('josh', normalized)" in apply_bf,
+        "applyBrainFeed must not let older JSON overwrite fresher Supabase JOSH rows",
+    )
+    require(
+        "source === 'supabase' ? `|${feedTimestampMs(normalized)}`" in apply_bf,
+        "Supabase Brain Feed updates must refresh timestamp-only cron heartbeats",
+    )
+
+    supabase_record = get_function(html, "applySupabaseBrainFeedRecord")
+    require(
+        "data.agentBrainFeeds" in supabase_record and "_supabaseAgentFeeds[agentId]" in supabase_record,
+        "Supabase realtime must handle multi-agent brain_feed rows",
+    )
+    require(
+        "`${bfContentHash(normalized)}|${feedTimestampMs(normalized)}`" in supabase_record,
+        "Supabase agent rows must treat newer heartbeats as fresh even when content is unchanged",
+    )
+    require(
+        "Supabase main row skipped" in supabase_record and "isSupabaseFeedFresher('josh', data)" in supabase_record,
+        "Supabase legacy main row must not repaint over a fresher named JOSH row",
+    )
+
+    supabase_poll = get_function(html, "fetchBrainFeedSupabase")
+    require(
+        "id=in.(main,josh,jain,jaimes,joshex)" in supabase_poll,
+        "Supabase poll must fetch all agent brain_feed rows",
+    )
 
     picker = get_function(html, "pickDualLiveObjectiveFeeds")
     require("isRenderableLiveObjective(joshEntry)" in picker, "JOSH hero must require live/renderable feed")
@@ -102,6 +130,9 @@ def check_index_wiring() -> None:
 
     step_label = get_function(html, "resolveBrainFeedStepLabel")
     require("safeSteps" in step_label, "resolveBrainFeedStepLabel must guard missing steps")
+
+    helper = ROOT / "scripts" / "supabase_brain_feed_publish.py"
+    require(helper.exists(), "missing Supabase Brain Feed publisher helper")
 
     render_bf = get_function(html, "renderBrainFeed")
     require(

@@ -9419,6 +9419,27 @@
         // source overwrite a higher-priority active state.
         // _bfSource: 'supabase' | 'local' — tracks who last wrote the active state
         let _bfSource = null;
+        let _supabaseAgentFeeds = {};
+        let _lastSupabaseAgentHashes = {};
+
+        function feedTimestampMs(feed) {
+            const raw = feed?.updatedAt || feed?.updated_at || feed?.timestamp || feed?.completedAt || feed?.createdAt || '';
+            const ms = raw ? new Date(raw).getTime() : 0;
+            return Number.isFinite(ms) ? ms : 0;
+        }
+
+        function isSupabaseFeedFresher(agentId, candidate) {
+            const live = _supabaseAgentFeeds?.[agentId];
+            if (!live) return false;
+            return feedTimestampMs(live) > feedTimestampMs(candidate);
+        }
+
+        function chooseSupabaseAgentFeed(agentId, fallback) {
+            const live = _supabaseAgentFeeds?.[agentId];
+            if (!live) return fallback || null;
+            if (!fallback) return live;
+            return feedTimestampMs(live) >= feedTimestampMs(fallback) ? live : fallback;
+        }
 
         function bfContentHash(bf) {
             // Only hash meaningful fields — ignore timestamps that change on every push
@@ -9435,10 +9456,14 @@
         function applyBrainFeed(bf, source) {
             if (!bf) return;
             const normalized = normalizeRemoteAgentFeed(bf, 2 * 60 * 60 * 1000) || bf;
+            if (source !== 'supabase' && isSupabaseFeedFresher('josh', normalized)) {
+                console.debug('[MC] brain-feed local/remote update skipped — Supabase JOSH row is fresher');
+                return;
+            }
             const current = window._mcLastBrainFeed;
-            // Priority: local server (⚡ sub-100ms, always fresh) > supabase > github pages
-            // Never block local updates — local IS the source of truth when available
-            // Only block github pages (remote) from overwriting a fresher local/supabase state
+            // Priority: freshest named agent feed wins. Local updates still win when
+            // newer, but stale JSON must not repaint over a live Supabase heartbeat.
+            // Also block GitHub Pages (remote) from overwriting a fresher state.
             if (source === 'remote' && current) {
                 const currentTs = current.updatedAt ? new Date(current.updatedAt).getTime() : 0;
                 const newTs = normalized.updatedAt ? new Date(normalized.updatedAt).getTime() : 0;
@@ -9447,13 +9472,14 @@
                     return;
                 }
             }
-            const newHash = bfContentHash(normalized);
+            const newHash = bfContentHash(normalized) + (source === 'supabase' ? `|${feedTimestampMs(normalized)}` : '');
             const brainFeedCard = document.getElementById('brain-feed-card');
             const hasRenderedHero = !!brainFeedCard?.querySelector('.bf-objective');
             if (newHash === lastBrainFeedHash && hasRenderedHero) return;
             lastBrainFeedHash = newHash;
             _bfSource = source;
             window._mcLastBrainFeed = normalized;
+            if (source === 'supabase') _supabaseAgentFeeds.josh = normalized;
             bfLastUpdatedTs = normalized.updatedAt ? new Date(normalized.updatedAt).getTime() : Date.now();
             _uaJoshBf = normalized;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
@@ -9583,6 +9609,10 @@
 
         function renderJainBrainFeed(bf) {
             const normalized = normalizeRemoteAgentFeed(bf);
+            if (isSupabaseFeedFresher('jain', normalized)) {
+                console.debug('[MC] J.A.I.N JSON update skipped — Supabase row is fresher');
+                return;
+            }
             _jainBrainFeed = normalized;
             _uaJainBf = normalized;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
@@ -9603,7 +9633,12 @@
             const hasRenderedHero = !!brainFeedCard?.querySelector('.bf-objective');
             if (h === lastJaimesBrainFeedHash && hasRenderedHero) return;
             lastJaimesBrainFeedHash = h;
-            _uaJaimesBf = normalizeRemoteAgentFeed(bf);
+            const normalized = normalizeRemoteAgentFeed(bf);
+            if (isSupabaseFeedFresher('jaimes', normalized)) {
+                console.debug('[MC] JAIMES JSON update skipped — Supabase row is fresher');
+                return;
+            }
+            _uaJaimesBf = normalized;
             renderCombinedBrainFeed(window._mcLastBrainFeed || null, _jainBrainFeed, _uaJaimesBf);
             renderUnifiedActivity();
             if (window._mcLastDashData) {
@@ -10131,9 +10166,9 @@
             renderAgentChatFeed(window._agentCommsEntries || _uaComms || []);
             const dashboardFeeds = data.agentBrainFeeds || {};
             renderCombinedBrainFeed(
-                dashboardFeeds.josh || window._mcLastBrainFeed || _uaJoshBf || null,
-                dashboardFeeds.jain || _jainBrainFeed,
-                dashboardFeeds.jaimes || _uaJaimesBf,
+                chooseSupabaseAgentFeed('josh', dashboardFeeds.josh || window._mcLastBrainFeed || _uaJoshBf || null),
+                chooseSupabaseAgentFeed('jain', dashboardFeeds.jain || _jainBrainFeed),
+                chooseSupabaseAgentFeed('jaimes', dashboardFeeds.jaimes || _uaJaimesBf),
             );
         }
 
@@ -11728,6 +11763,69 @@
         let _sbHeartbeatTimer = null;
         let _sbReconnectTimer = null;
 
+        function normalizeSupabaseAgentId(record) {
+            const raw = String(record?.id || record?.data?.agentId || record?.data?.agent || '').trim().toLowerCase();
+            if (raw.includes('joshex') || raw.includes('codex')) return 'joshex';
+            if (raw.includes('jaimes')) return 'jaimes';
+            if (raw.includes('j.a.i.n') || raw.includes('jain')) return 'jain';
+            if (raw.includes('josh')) return 'josh';
+            return raw || 'main';
+        }
+
+        function rerenderSupabaseAgentBoard() {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const dashboardFeeds = data.agentBrainFeeds || {};
+            renderCombinedBrainFeed(
+                chooseSupabaseAgentFeed('josh', dashboardFeeds.josh || window._mcLastBrainFeed || null),
+                chooseSupabaseAgentFeed('jain', dashboardFeeds.jain || _jainBrainFeed),
+                chooseSupabaseAgentFeed('jaimes', dashboardFeeds.jaimes || _uaJaimesBf),
+            );
+            renderUnifiedActivity();
+            if (window._mcLastDashData) {
+                renderJobsPanel(window._mcLastDashData, window._mcLastBrainFeed || _supabaseAgentFeeds.josh || null, _jainBrainFeed, _uaJaimesBf);
+                renderSystemHealth(window._mcLastDashData, window._mcLastBrainFeed || _supabaseAgentFeeds.josh || null, _jainBrainFeed, _uaJaimesBf);
+                renderOpsCenter(window._mcLastDashData);
+            }
+        }
+
+        function applySupabaseBrainFeedRecord(record) {
+            const data = record?.data;
+            if (!data || typeof data !== 'object') return;
+            if (data.agentBrainFeeds && typeof data.agentBrainFeeds === 'object') {
+                Object.entries(data.agentBrainFeeds).forEach(([agentId, feed]) => {
+                    applySupabaseBrainFeedRecord({ id: agentId, data: feed });
+                });
+                return;
+            }
+            const agentId = normalizeSupabaseAgentId(record);
+            if (agentId === 'main') {
+                if (isSupabaseFeedFresher('josh', data)) {
+                    console.debug('[MC] Supabase main row skipped — named JOSH row is fresher');
+                    return;
+                }
+                applyBrainFeed(data, 'supabase');
+                return;
+            }
+            const normalized = normalizeRemoteAgentFeed({ ...data, supabaseBacked: true }, 12 * 60 * 60 * 1000) || data;
+            const hash = `${bfContentHash(normalized)}|${feedTimestampMs(normalized)}`;
+            if (_lastSupabaseAgentHashes[agentId] === hash) return;
+            _lastSupabaseAgentHashes[agentId] = hash;
+            _supabaseAgentFeeds[agentId] = normalized;
+            if (agentId === 'josh') {
+                applyBrainFeed(normalized, 'supabase');
+                return;
+            }
+            if (agentId === 'jain') {
+                _jainBrainFeed = normalized;
+                _uaJainBf = normalized;
+            } else if (agentId === 'jaimes') {
+                _uaJaimesBf = normalized;
+            } else if (agentId === 'joshex') {
+                _supabaseAgentFeeds.joshex = normalized;
+            }
+            rerenderSupabaseAgentBoard();
+        }
+
         function initSupabaseRealtime() {
             if (_sbWs && (_sbWs.readyState === WebSocket.OPEN || _sbWs.readyState === WebSocket.CONNECTING)) return;
             const wsUrl = CONFIG.SUPABASE_URL.replace('https://', 'wss://') + '/realtime/v1/websocket?apikey=' + CONFIG.SUPABASE_KEY + '&vsn=1.0.0';
@@ -11771,7 +11869,7 @@
                     const record = payload?.data?.record || payload?.record || payload?.new;
                     if (record?.data) {
                         console.debug('[MC] Supabase RT brain feed update received');
-                        applyBrainFeed(record.data, 'supabase');
+                        applySupabaseBrainFeedRecord(record);
                     }
                 } catch(e) { console.warn('[MC] RT parse error', e); }
             };
@@ -11788,14 +11886,14 @@
         // Also do a direct REST poll as fallback when RT is up
         async function fetchBrainFeedSupabase() {
             try {
-                const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/brain_feed?id=eq.main&select=data,updated_at', {
+                const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/brain_feed?id=in.(main,josh,jain,jaimes,joshex)&select=id,data,updated_at&order=updated_at.desc', {
                     headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY },
                     signal: AbortSignal.timeout(3000)
                 });
                 if (!r.ok) return;
                 const rows = await r.json();
-                if (!rows || !rows[0]?.data) return;
-                applyBrainFeed(rows[0].data, 'supabase');
+                if (!Array.isArray(rows) || !rows.length) return;
+                rows.forEach(row => applySupabaseBrainFeedRecord(row));
             } catch(e) {}
         }
 
@@ -12370,7 +12468,7 @@
             };
             push({ bf: ensureOperatorBoardFeed(joshBf, 'JOSH 2.0', 'JOSH 2.0 lane standing by'), agentLabel: 'JOSH 2.0' }, true);
             push({ bf: ensureOperatorBoardFeed(jaimesBf, 'JAIMES', 'JAIMES lane standing by'), agentLabel: 'JAIMES' }, true);
-            push({ bf: synthesizeJoshexBrainFeed(), agentLabel: 'JOSHeX' }, true);
+            push({ bf: chooseSupabaseAgentFeed('joshex', synthesizeJoshexBrainFeed()), agentLabel: 'JOSHeX' }, true);
             return entries;
         }
 
@@ -13255,9 +13353,9 @@
             // promote JAIMES/J.A.I.N in the hero even when their feed sidecar is idle.
             const dashboardFeeds = data.agentBrainFeeds || {};
             renderCombinedBrainFeed(
-                dashboardFeeds.josh || window._mcLastBrainFeed || null,
-                dashboardFeeds.jain || _jainBrainFeed,
-                dashboardFeeds.jaimes || _uaJaimesBf,
+                chooseSupabaseAgentFeed('josh', dashboardFeeds.josh || window._mcLastBrainFeed || null),
+                chooseSupabaseAgentFeed('jain', dashboardFeeds.jain || _jainBrainFeed),
+                chooseSupabaseAgentFeed('jaimes', dashboardFeeds.jaimes || _uaJaimesBf),
             );
 
             // Action Required (diff-guarded)

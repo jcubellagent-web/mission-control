@@ -30,6 +30,7 @@
   - JAIMES: Hermes/specialist steps, watchdog decisions, queue pressure, next automation move.
   - JOSHeX: OpenAI Codex patch steps, design decisions, validation state, visible capabilities.
 - JOSHeX is branded as the OpenAI Codex patch lane, with a green/black treatment and live sidecar polling from `data/personal-codex.json`.
+- Supabase `brain_feed` rows (`josh`, `jaimes`, `jain`, `joshex`) are the low-latency live bus for Live Actions. JSON sidecars remain the fallback when Supabase is stale or unavailable.
 - The top control strip avoids initials and abbreviations; compact text is allowed, but labels and values should remain self-explanatory on the 24-inch kiosk.
 - The Model Usage JOSHeX strip must remain tall enough to show patch, now, and capability rows without clipping.
 
