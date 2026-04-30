@@ -15,26 +15,26 @@
   "upcomingEvents": [],
   "brainFeed": {
     "active": true,
-    "messageReceived": "2026-04-30T06:54:45Z",
-    "objective": "Running heartbeat maintenance checks",
+    "messageReceived": "2026-04-30T06:55:43Z",
+    "objective": "Handling async completion heartbeat",
     "status": "active",
     "steps": [
       {
-        "label": "Running heartbeat maintenance checks",
+        "label": "Handling async completion heartbeat",
         "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T06:54:59Z",
-    "checkedAt": "2026-04-30T06:54:59Z",
+    "updatedAt": "2026-04-30T06:55:43Z",
+    "checkedAt": "2026-04-30T06:55:43Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Running heartbeat maintenance checks",
-    "updatedAt": "2026-04-30T06:55:18Z"
+    "context": "Handling async completion heartbeat",
+    "updatedAt": "2026-04-30T07:00:17Z"
   },
   "contextWindow": {
     "usedTokens": 47040,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 10 source file(s) changed",
-        "time": "2026-04-30T06:55:18Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-30T07:00:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T06:55:18Z",
+    "updatedAt": "2026-04-30T07:00:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "10 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 10,
+      "dirtyCount": 9,
       "files": [
-        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "09c28a14c",
-      "updatedAt": "2026-04-30T06:55:18Z"
+      "head": "03700140e",
+      "updatedAt": "2026-04-30T07:00:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/docs/kiosk-control-panel-review.md",
@@ -196,32 +196,32 @@
       "mission-control/JOSHEX_HANDOFF.md",
       "mission-control/scripts/update_and_push.sh"
     ],
-    "codexbarStatus": "68% left \u00b7 wk 70% left",
+    "codexbarStatus": "66% left \u00b7 wk 70% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 68% left [========----]",
-        "Resets in 1h 12m",
+        "Session: 66% left [=======-----]",
+        "Resets in 1h 7m",
         "Weekly: 70% left [========----]",
         "Pace: On pace | Expected 29% used | Runs out in 4d 19h",
         "Resets in 4d 22h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "68% left",
+      "session": "66% left",
       "weekly": "70% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 12m",
+      "sessionReset": "1h 7m",
       "weeklyReset": "4d 22h",
-      "summary": "68% left \u00b7 wk 70% left"
+      "summary": "66% left \u00b7 wk 70% left"
     },
-    "updatedAt": "2026-04-30T06:55:19Z"
+    "updatedAt": "2026-04-30T07:00:19Z"
   },
   "modelUsage": {
     "session": 0.026292,
-    "daily": 0.111055,
+    "daily": 0.078563,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -236,14 +236,14 @@
         "cost": 7.387107749999999
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "window": "session",
-        "cost": 0.130057
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
         "cost": 0.122313
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "window": "session",
+        "cost": 0.097565
       },
       {
         "name": "codex/gpt-5.4-mini",
@@ -275,19 +275,6 @@
         "subscriptionIncluded": false
       },
       {
-        "name": "openai-codex/gpt-5.5",
-        "source": "openclaw",
-        "inputTokens": 2641,
-        "outputTokens": 166,
-        "totalTokens": 2807,
-        "sessionCost": 0.130057,
-        "dailyCost": 0.111055,
-        "weeklyCost": 0.130057,
-        "sessions": 5,
-        "isGemini": false,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
         "inputTokens": 18839,
@@ -297,6 +284,19 @@
         "dailyCost": 0.0,
         "weeklyCost": 0.122313,
         "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai-codex/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 2445,
+        "outputTokens": 82,
+        "totalTokens": 2527,
+        "sessionCost": 0.097565,
+        "dailyCost": 0.07856300000000001,
+        "weeklyCost": 0.097565,
+        "sessions": 5,
         "isGemini": false,
         "costEstimated": false
       },
@@ -345,8 +345,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 304164323,
-        "dailyTokens": 6775531,
+        "totalTokens": 304441620,
+        "dailyTokens": 7052828,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -377,7 +377,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T06:55:22Z",
+    "lastUpdated": "2026-04-30T07:00:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -410,8 +410,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.111055,
-      "total": 47.25267,
+      "daily": 0.078563,
+      "total": 47.220178,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -426,11 +426,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.187583,
-      "codexEquivalentDaily": 0.111055,
-      "codexEquivalentMonthlyProjection": 193.66,
-      "codexTokensWeekly": 412878841,
-      "codexTokensDaily": 6775531,
+      "codexEquivalentWeekly": 45.155091,
+      "codexEquivalentDaily": 0.078563,
+      "codexEquivalentMonthlyProjection": 193.52,
+      "codexTokensWeekly": 413155858,
+      "codexTokensDaily": 7052828,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -453,8 +453,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 193.66,
-        "codexTokensWeekly": 412878841,
+        "codexValueMonthly": 193.52,
+        "codexTokensWeekly": 413155858,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -464,7 +464,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.187583,
+            "weeklyCost": 45.155091,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -528,9 +528,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.187583,
-          "dailyEquivalent": 0.111055,
-          "tokensWeekly": 412878841,
+          "weeklyEquivalent": 45.155091,
+          "dailyEquivalent": 0.078563,
+          "tokensWeekly": 413155858,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -604,7 +604,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $193.66/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $193.52/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -624,7 +624,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T06:55:27Z",
+    "updatedAt": "2026-04-30T07:00:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -641,14 +641,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.8,
-      "cpu_user": 18.18,
-      "cpu_sys": 17.63,
-      "load1": 3.5,
-      "load5": 2.84,
-      "load15": 2.61,
+      "cpu_pct": 35.5,
+      "cpu_user": 17.66,
+      "cpu_sys": 17.8,
+      "load1": 3.56,
+      "load5": 2.82,
+      "load15": 2.62,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -656,12 +656,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.9,
-      "cpu_user": 2.85,
-      "cpu_sys": 10.0,
-      "load1": 2.18,
-      "load5": 1.81,
-      "load15": 1.88,
+      "cpu_pct": 14.7,
+      "cpu_user": 2.94,
+      "cpu_sys": 11.76,
+      "load1": 1.66,
+      "load5": 1.79,
+      "load15": 1.86,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.6,
       "uptime": "",
@@ -687,19 +687,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T06:55:18Z"
+      "lastChecked": "2026-04-30T07:00:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T06:55:18Z"
+      "lastChecked": "2026-04-30T07:00:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T06:55:18Z"
+      "lastChecked": "2026-04-30T07:00:17Z"
     }
   ],
   "crons": [
@@ -716,7 +716,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T06:55:28.089932+00:00"
+      "lastRun": "2026-04-30T07:00:28.058724+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -761,7 +761,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T06:00:00.912944+00:00"
+      "lastRun": "2026-04-30T07:00:00.691300+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -791,7 +791,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T06:00:06.738066+00:00"
+      "lastRun": "2026-04-30T07:00:05.835593+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -1262,7 +1262,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-30T06:55:17.861074Z",
+    "checkedAt": "2026-04-30T07:00:17.666515Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1611,16 +1611,16 @@
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Running heartbeat maintenance checks",
+      "objective": "Handling async completion heartbeat",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T06:54:59Z",
-      "messageReceived": "2026-04-30T06:54:45Z",
+      "updatedAt": "2026-04-30T06:55:43Z",
+      "messageReceived": "2026-04-30T06:55:43Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Running heartbeat maintenance checks",
+          "label": "Handling async completion heartbeat",
           "status": "active",
           "tool": "exec"
         }
@@ -1729,16 +1729,16 @@
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Running heartbeat maintenance checks",
+        "objective": "Handling async completion heartbeat",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-30T06:54:59Z",
-        "messageReceived": "2026-04-30T06:54:45Z",
+        "updatedAt": "2026-04-30T06:55:43Z",
+        "messageReceived": "2026-04-30T06:55:43Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Running heartbeat maintenance checks",
+            "label": "Handling async completion heartbeat",
             "status": "active",
             "tool": "exec"
           }
@@ -1833,29 +1833,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T06:55:22Z",
+      "time": "2026-04-30T07:00:22Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-30T06:55:19Z",
+      "time": "2026-04-30T07:00:19Z",
       "event": "Coding: mission-control/index.html, mission-control/docs/kiosk-control-panel-review.md"
     },
     {
-      "time": "2026-04-30T06:55:19Z",
-      "event": "CodexBar: 68% left \u00b7 wk 70% left"
+      "time": "2026-04-30T07:00:19Z",
+      "event": "CodexBar: 66% left \u00b7 wk 70% left"
     },
     {
-      "time": "2026-04-30T06:55:18Z",
+      "time": "2026-04-30T07:00:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T06:55:18Z",
-      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
+      "time": "2026-04-30T07:00:17Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-30T06:55:18Z",
+      "time": "2026-04-30T07:00:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T06:55:18Z"
+  "lastUpdated": "2026-04-30T07:00:17Z"
 }
