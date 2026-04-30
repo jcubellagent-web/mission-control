@@ -29,7 +29,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: confirmed keep-step-updates rule \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T03:50:17Z"
+    "updatedAt": "2026-04-30T03:55:17Z"
   },
   "contextWindow": {
     "usedTokens": 60961,
@@ -45,8 +45,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-30T03:50:17Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-30T03:55:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +64,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T03:50:17Z",
+    "updatedAt": "2026-04-30T03:55:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 10,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "29bee2a8b",
-      "updatedAt": "2026-04-30T03:50:17Z"
+      "head": "629778cb5",
+      "updatedAt": "2026-04-30T03:55:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,7 +183,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -198,7 +198,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 97% left [===========-]",
-        "Resets in 4h 17m",
+        "Resets in 4h 12m",
         "Weekly: 77% left [=========---]",
         "Pace: 5% in reserve | Expected 28% used | Lasts until reset",
         "Resets in 5d 1h",
@@ -209,11 +209,11 @@
       "weekly": "77% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 17m",
+      "sessionReset": "4h 12m",
       "weeklyReset": "5d 1h",
       "summary": "97% left \u00b7 wk 77% left"
     },
-    "updatedAt": "2026-04-30T03:50:19Z"
+    "updatedAt": "2026-04-30T03:55:19Z"
   },
   "modelUsage": {
     "session": 0.035993,
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T03:50:22Z",
+    "lastUpdated": "2026-04-30T03:55:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T03:50:27Z",
+    "updatedAt": "2026-04-30T03:55:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,12 +637,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.8,
-      "cpu_user": 20.72,
-      "cpu_sys": 19.9,
-      "load1": 2.52,
-      "load5": 2.14,
-      "load15": 2.14,
+      "cpu_pct": 39.3,
+      "cpu_user": 20.3,
+      "cpu_sys": 19.3,
+      "load1": 2.19,
+      "load5": 2.31,
+      "load15": 2.23,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 13.4,
-      "cpu_user": 2.45,
-      "cpu_sys": 11.47,
-      "load1": 1.59,
-      "load5": 1.85,
-      "load15": 1.99,
+      "cpu_pct": 20.2,
+      "cpu_user": 6.2,
+      "cpu_sys": 13.95,
+      "load1": 1.77,
+      "load5": 1.92,
+      "load15": 1.98,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:50:17Z"
+      "lastChecked": "2026-04-30T03:55:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:50:17Z"
+      "lastChecked": "2026-04-30T03:55:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T03:50:17Z"
+      "lastChecked": "2026-04-30T03:55:17Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:50:17.485638+00:00"
+      "lastRun": "2026-04-30T03:55:17.151542+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,12 +1259,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T03:50:17.484415Z",
+    "checkedAt": "2026-04-30T03:55:17.150457Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=J.A.I.N; dualAgents=none; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JAIMES', 'J.A.I.N']; live=3",
         "severity": "ok"
       },
       {
@@ -1657,20 +1657,65 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
-      "lowSignal": true,
-      "objective": "Standby",
-      "status": "idle",
+      "active": true,
+      "reportedActive": true,
+      "lowSignal": false,
+      "objective": "Task: review skill save/update need",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T03:50:28Z",
-      "messageReceived": "2026-04-30T03:50:28Z",
-      "currentTool": "",
-      "model": "gpt-4.1",
+      "updatedAt": "2026-04-30T03:51:12Z",
+      "messageReceived": "2026-04-30T03:51:12Z",
+      "currentTool": "exec",
+      "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Last: Sorare Canonical \u2014 sorare_canonical_reflector.py \u2014 done",
+          "label": "Step: checking SSH reachability details",
           "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: fix JAIMES LAN SSH path",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: testing JAIMES SSH from JOSH LAN",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review skill save/update need",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: contain JOSHeX Hermes status exposure",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: installing safe Hermes status wrapper",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: prepare JOSHeX reply after approval",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: grant JOSHeX operator access policy",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verifying operator grant package",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review skill save/update need",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1678,13 +1723,82 @@
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
       "J.A.I.N"
     ],
-    "activeCount": 1,
-    "primaryAgent": "J.A.I.N",
-    "dualMode": false,
-    "dualAgents": [],
+    "activeCount": 2,
+    "primaryAgent": "JAIMES",
+    "dualMode": true,
+    "dualAgents": [
+      "JAIMES",
+      "J.A.I.N"
+    ],
     "agents": [
+      {
+        "agent": "JAIMES",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Task: review skill save/update need",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-30T03:51:12Z",
+        "messageReceived": "2026-04-30T03:51:12Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Step: checking SSH reachability details",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: fix JAIMES LAN SSH path",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: testing JAIMES SSH from JOSH LAN",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update need",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: contain JOSHeX Hermes status exposure",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: installing safe Hermes status wrapper",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: prepare JOSHeX reply after approval",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: grant JOSHeX operator access policy",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verifying operator grant package",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review skill save/update need",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
       {
         "agent": "J.A.I.N",
         "active": true,
@@ -1701,26 +1815,6 @@
           {
             "label": "Deep capability audit - cleaning J.A.I.N task/session drift",
             "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": true,
-        "objective": "Standby",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-30T03:50:28Z",
-        "messageReceived": "2026-04-30T03:50:28Z",
-        "currentTool": "",
-        "model": "gpt-4.1",
-        "steps": [
-          {
-            "label": "Last: Sorare Canonical \u2014 sorare_canonical_reflector.py \u2014 done",
-            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1749,29 +1843,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T03:50:22Z",
+      "time": "2026-04-30T03:55:23Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T03:50:19Z",
+      "time": "2026-04-30T03:55:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-30T03:50:19Z",
+      "time": "2026-04-30T03:55:19Z",
       "event": "CodexBar: 97% left \u00b7 wk 77% left"
     },
     {
-      "time": "2026-04-30T03:50:17Z",
+      "time": "2026-04-30T03:55:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T03:50:17Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-30T03:55:17Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-30T03:50:17Z",
+      "time": "2026-04-30T03:55:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T03:50:17Z"
+  "lastUpdated": "2026-04-30T03:55:17Z"
 }
