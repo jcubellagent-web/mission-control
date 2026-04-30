@@ -1,41 +1,16 @@
 {
-  "active": true,
-  "objective": "Step: switch JOSH gog to file keyring for headless auth",
-  "status": "active",
-  "updatedAt": "2026-04-30T00:44:53Z",
+  "active": false,
+  "objective": "Done: updated Google Workspace skill with remote gog keychain pitfalls",
+  "status": "idle",
+  "updatedAt": "2026-04-30T00:47:26Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:44:53Z",
-  "messageReceived": "2026-04-30T00:44:53Z",
+  "checkedAt": "2026-04-30T00:47:03Z",
+  "messageReceived": "2026-04-30T00:47:03Z",
   "steps": [
-    {
-      "label": "Step: collect final approval-all verification summary",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: re-auth Google Calendar on JOSH",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspect JOSH gog auth flow",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: generate JOSH Google Calendar auth URL",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: skill review after Calendar re-auth workflow",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: parse Google OAuth redirect screenshot",
       "status": "done",
@@ -58,7 +33,32 @@
     },
     {
       "label": "Step: switch JOSH gog to file keyring for headless auth",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: restore JOSH gog keychain backend after file backend t",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: run JOSH auth exchange in GUI Terminal",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: retry OAuth exchange with OCR state case",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: open JOSH keychain unlock helper",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review skill save/update after Calendar auth flow",
+      "status": "done",
       "tool": "exec"
     }
   ]
