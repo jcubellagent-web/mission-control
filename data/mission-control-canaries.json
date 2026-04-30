@@ -1,8 +1,8 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "1 canary issue(s)",
-  "checkedAt": "2026-04-30T01:00:21.878397Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-04-30T01:30:16.380640Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -12,9 +12,9 @@
     },
     {
       "name": "Calendar tile",
-      "ok": false,
-      "detail": "Calendar re-auth required",
-      "severity": "medium"
+      "ok": true,
+      "detail": "Calendar fetch failed via local gog",
+      "severity": "ok"
     },
     {
       "name": "Today Jobs",

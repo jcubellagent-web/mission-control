@@ -1,31 +1,16 @@
 {
-  "active": true,
-  "objective": "Step: launch corrected-account Calendar auth listener",
-  "status": "active",
-  "updatedAt": "2026-04-30T00:58:53Z",
+  "active": false,
+  "objective": "Done: Calendar jcubell16 wiring pushed and verified",
+  "status": "idle",
+  "updatedAt": "2026-04-30T01:28:11Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:58:53Z",
-  "messageReceived": "2026-04-30T00:58:53Z",
+  "checkedAt": "2026-04-30T01:28:10Z",
+  "messageReceived": "2026-04-30T01:28:10Z",
   "steps": [
-    {
-      "label": "Step: exchange fresh OAuth redirect on JOSH",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: retry exchange with generated state",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: inspect JOSH gog pending state files",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: retry exchange with encoded OCR URL",
       "status": "done",
@@ -58,7 +43,22 @@
     },
     {
       "label": "Step: launch corrected-account Calendar auth listener",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: sync JOSH Mission Control checkout",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verify JOSH local Calendar generator",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: final Calendar Mission Control verification",
+      "status": "done",
       "tool": "exec"
     }
   ]
