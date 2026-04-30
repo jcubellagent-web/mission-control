@@ -647,6 +647,7 @@
         .ctx-inline-pct { font-size: 0.66rem; font-weight: 800; }
         .ctx-inline-track { width: 72px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
         .ctx-inline-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease, background 0.4s; }
+        body.kiosk-mode #ctx-header-inline { display: none !important; }
         /* Unified activity log */
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
@@ -2299,18 +2300,18 @@
         .capability-k { font-size: 0.5rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 3px; }
         .capability-v { font-size: 0.68rem; font-weight: 850; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .capability-d { margin-top: 3px; font-size: 0.54rem; line-height: 1.2; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .personal-codex-panel { display: none; margin: 0 0 10px; border: 1px solid rgba(96,165,250,0.22); background: linear-gradient(135deg, rgba(37,99,235,0.10), rgba(15,23,42,0.82)); border-radius: 14px; padding: 10px 12px; }
+        .personal-codex-panel { display: none; margin: 0 0 10px; border: 1px solid rgba(16,163,127,0.30); background: linear-gradient(135deg, rgba(16,163,127,0.12), rgba(3,7,18,0.90)); border-radius: 14px; padding: 10px 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 0 26px rgba(16,163,127,0.05); }
         .personal-codex-panel.visible { display: grid; grid-template-columns: minmax(180px,0.7fr) minmax(220px,1fr) minmax(180px,0.8fr); gap: 10px; align-items: stretch; }
-        .pc-kicker { font-size: 0.54rem; font-weight: 900; letter-spacing: 0.12em; color: rgba(147,197,253,0.78); text-transform: uppercase; }
+        .pc-kicker { font-size: 0.54rem; font-weight: 900; letter-spacing: 0.12em; color: rgba(16,163,127,0.92); text-transform: uppercase; }
         .pc-title { margin-top: 4px; font-size: 0.86rem; font-weight: 900; color: rgba(255,255,255,0.92); }
-        .pc-meta { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
-        .pc-pill { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); border-radius: 999px; padding: 3px 7px; font-size: 0.54rem; font-weight: 800; color: rgba(255,255,255,0.58); }
+        .pc-meta { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
+        .pc-pill { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); border-radius: 999px; padding: 3px 7px; font-size: 0.54rem; font-weight: 800; color: rgba(255,255,255,0.58); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pc-list { display: grid; gap: 4px; min-width: 0; }
         .pc-row { display: flex; gap: 6px; min-width: 0; font-size: 0.64rem; line-height: 1.25; color: rgba(255,255,255,0.72); }
-        .pc-row strong { color: rgba(147,197,253,0.9); font-size: 0.54rem; letter-spacing: 0.08em; text-transform: uppercase; flex: 0 0 auto; }
+        .pc-row strong { color: rgba(16,163,127,0.96); font-size: 0.54rem; letter-spacing: 0.08em; text-transform: uppercase; flex: 0 0 auto; }
         .pc-row span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         .pc-status-ready, .pc-status-ok { color: #4ade80; }
-        .pc-status-active { color: #93c5fd; }
+        .pc-status-active { color: #10a37f; }
         .pc-status-attention, .pc-status-warn { color: #fbbf24; }
         @media (max-width: 900px) { .personal-codex-panel.visible { grid-template-columns: 1fr; } }
         .sh-agent-row { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 8px 10px; }
@@ -5160,6 +5161,74 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
+        .bf-agent-signals {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 7px;
+            min-width: 0;
+        }
+        .bf-agent-insight {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 7px;
+            align-items: baseline;
+            min-width: 0;
+            padding: 7px 8px;
+            border-radius: 10px;
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 16%, rgba(255,255,255,0.06));
+            background: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 5%, rgba(255,255,255,0.018));
+        }
+        .bf-agent-insight-label,
+        .bf-context-meter-name {
+            color: rgba(255,255,255,0.48);
+            font-size: 0.54rem;
+            font-weight: 900;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .bf-agent-insight-text {
+            min-width: 0;
+            color: rgba(241,245,249,0.80);
+            font-size: 0.62rem;
+            line-height: 1.25;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .bf-context-meter {
+            display: grid;
+            gap: 5px;
+            min-width: 0;
+        }
+        .bf-context-meter-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .bf-context-meter-value {
+            color: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 84%, #ffffff);
+            font-size: 0.56rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .bf-context-meter-track {
+            height: 5px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.075);
+        }
+        .bf-context-meter-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 92%, #ffffff), rgba(255,255,255,0.72));
+            box-shadow: 0 0 12px color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 42%, transparent);
+        }
         .bf-objective.bf-objective-compact {
             --bf-objective-font-size: clamp(2.2rem, 3.25vw, 2.85rem);
             --bf-objective-line-height: 1.08;
@@ -7451,21 +7520,27 @@
 
         /* Model Usage & Spend: keep spend visible in the kiosk rail before health details. */
         body:not(.phone-mode).kiosk-mode .card-model-health .personal-codex-panel.visible {
-            grid-template-columns: minmax(120px, 0.45fr) minmax(180px, 1fr) minmax(150px, 0.85fr) !important;
+            grid-template-columns: minmax(126px, 0.50fr) minmax(190px, 1fr) minmax(160px, 0.88fr) !important;
             gap: 8px !important;
             margin-bottom: 8px !important;
-            padding: 7px 10px !important;
+            padding: 8px 10px !important;
             border-radius: 8px !important;
-            max-height: 76px !important;
-            overflow: hidden !important;
+            min-height: 82px !important;
+            max-height: none !important;
+            overflow: visible !important;
+            border-color: rgba(16,163,127,0.32) !important;
+            background: linear-gradient(135deg, rgba(16,163,127,0.13), rgba(3,7,18,0.92)) !important;
         }
-        body:not(.phone-mode).kiosk-mode .card-model-health .pc-title { margin-top: 2px !important; font-size: 0.72rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .pc-meta { margin-top: 4px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .pc-row { font-size: 0.56rem !important; line-height: 1.12 !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .pc-title { margin-top: 2px !important; font-size: 0.70rem !important; line-height: 1.15 !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .pc-meta { margin-top: 4px !important; flex-wrap: nowrap !important; overflow: hidden !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health #pc-status { flex: 0 0 auto !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health #pc-validation { flex: 1 1 auto !important; min-width: 0 !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .pc-row { font-size: 0.56rem !important; line-height: 1.18 !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .pc-row span { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
         body:not(.phone-mode).kiosk-mode .card-model-health #model-usage-card {
-            flex: 0 0 184px !important;
-            min-height: 184px !important;
-            max-height: 184px !important;
+            flex: 0 0 176px !important;
+            min-height: 176px !important;
+            max-height: 176px !important;
             overflow: hidden !important;
             padding-right: 0 !important;
         }
@@ -7943,7 +8018,7 @@
                 min-height: 0 !important;
                 min-width: 0 !important;
                 display: grid !important;
-                grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+                grid-template-rows: auto minmax(0, 1fr) auto auto auto !important;
                 gap: 7px !important;
                 overflow: hidden !important;
             }
@@ -7978,6 +8053,19 @@
             body:not(.phone-mode) #brain-feed-card .bf-objective-now-text {
                 -webkit-line-clamp: 2 !important;
             }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-signals {
+                gap: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-insight {
+                padding: 6px 7px !important;
+                gap: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-insight-text {
+                -webkit-line-clamp: 1 !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-context-meter-track {
+                height: 4px !important;
+            }
             body:not(.phone-mode) #brain-feed-card .bf-objective-meta {
                 flex-wrap: wrap !important;
                 gap: 5px !important;
@@ -7993,8 +8081,9 @@
                 max-width: 18ch !important;
             }
             body:not(.phone-mode) #brain-feed-card .agent-joshex {
-                border-color: rgba(168, 85, 247, 0.34) !important;
-                background: linear-gradient(180deg, rgba(31, 20, 54, 0.92), rgba(10, 10, 18, 0.98)) !important;
+                --bf-agent-color: #10a37f;
+                border-color: rgba(16, 163, 127, 0.34) !important;
+                background: linear-gradient(180deg, rgba(7, 34, 27, 0.92), rgba(4, 10, 8, 0.98)) !important;
             }
             body:not(.phone-mode) .card-brain .brain-feed-lower {
                 display: none !important;
@@ -8025,6 +8114,10 @@
             body:not(.phone-mode) #brain-feed-card .bf-objective-now-text {
                 -webkit-line-clamp: 1 !important;
                 font-size: 0.61rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-insight,
+            body:not(.phone-mode) #brain-feed-card .bf-context-meter {
+                display: none !important;
             }
             body:not(.phone-mode) #brain-feed-card .bf-objective-submeta {
                 font-size: 0.58rem !important;
@@ -8114,11 +8207,11 @@
                 min-width: 0;
                 min-height: 34px;
                 display: grid;
-                grid-template-columns: auto minmax(0, 1fr);
+                grid-template-columns: minmax(56px, auto) minmax(0, 1fr);
                 grid-template-rows: auto auto;
-                column-gap: 8px;
+                column-gap: 7px;
                 align-items: center;
-                padding: 6px 9px;
+                padding: 6px 7px;
                 border-radius: 12px;
                 border: 1px solid rgba(148,163,184,0.11);
                 background: linear-gradient(180deg, rgba(15,23,42,0.64), rgba(6,10,18,0.58));
@@ -8133,34 +8226,38 @@
             }
             body.kiosk-mode .control-tile-icon {
                 grid-row: 1 / 3;
-                width: 21px;
+                min-width: 0;
+                width: auto;
                 height: 21px;
+                padding: 0 7px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 999px;
                 background: rgba(148,163,184,0.10);
                 color: rgba(226,232,240,0.82);
-                font-size: 0.72rem;
+                font-size: 0.50rem;
                 font-weight: 900;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                white-space: nowrap;
             }
             body.kiosk-mode .control-tile-value {
                 min-width: 0;
                 color: rgba(248,250,252,0.92);
-                font-size: 0.72rem;
+                font-size: 0.64rem;
                 font-weight: 850;
-                letter-spacing: 0.03em;
+                letter-spacing: 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                text-transform: uppercase;
             }
             body.kiosk-mode .control-tile-label {
                 min-width: 0;
                 color: rgba(148,163,184,0.78);
-                font-size: 0.50rem;
+                font-size: 0.48rem;
                 font-weight: 760;
-                letter-spacing: 0.12em;
+                letter-spacing: 0.06em;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -8430,10 +8527,10 @@
                                 <button class="module-action-btn" type="button" onclick="openModuleModal('usage')" aria-label="Expand model usage">↗</button>
                             </div>
                         </div>
-                        <section class="personal-codex-panel" id="personal-codex" aria-label="JOSHeX">
+                        <section class="personal-codex-panel" id="personal-codex" aria-label="OpenAI Codex JOSHeX">
                             <div>
-                                <div class="pc-kicker">JOSHeX</div>
-                                <div class="pc-title">Codex patch lane</div>
+                                <div class="pc-kicker">OpenAI Codex</div>
+                                <div class="pc-title">JOSHeX patch lane</div>
                                 <div class="pc-meta">
                                     <span class="pc-pill" id="pc-status">loading</span>
                                     <span class="pc-pill" id="pc-validation">validation pending</span>
@@ -9638,9 +9735,40 @@
 
         function getJoshexData() {
             const data = window._latestDashboardData || window._mcLastDashData || {};
-            const live = data.personalCodex || {};
+            const dashboard = data.personalCodex || {};
+            const live = window._personalCodexLiveStatus || {};
             const fallback = window._personalCodexFallback || {};
-            return { ...fallback, ...live, patchStatus: live.patchStatus || fallback.patchStatus };
+            return { ...fallback, ...dashboard, ...live, patchStatus: live.patchStatus || dashboard.patchStatus || fallback.patchStatus };
+        }
+
+        function refreshJoshexLiveViews() {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            renderPersonalCodex({ ...data, personalCodex: getJoshexData() });
+            renderAgentChatFeed(window._agentCommsEntries || _uaComms || []);
+            const dashboardFeeds = data.agentBrainFeeds || {};
+            renderCombinedBrainFeed(
+                dashboardFeeds.josh || window._mcLastBrainFeed || _uaJoshBf || null,
+                dashboardFeeds.jain || _jainBrainFeed,
+                dashboardFeeds.jaimes || _uaJaimesBf,
+            );
+        }
+
+        function fetchJoshexLiveStatus(force = false) {
+            const now = Date.now();
+            if (window._personalCodexLiveStatusLoading) return;
+            if (!force && window._personalCodexLiveStatusFetchedAt && now - window._personalCodexLiveStatusFetchedAt < 7000) return;
+            window._personalCodexLiveStatusLoading = true;
+            window._personalCodexLiveStatusFetchedAt = now;
+            fetch('./data/personal-codex.json?ts=' + now, { cache: 'no-store' })
+                .then(r => r.ok ? r.json() : null)
+                .then(live => {
+                    if (!live) return;
+                    window._personalCodexLiveStatus = live;
+                    window._personalCodexFallback = live;
+                    refreshJoshexLiveViews();
+                })
+                .catch(() => {})
+                .finally(() => { window._personalCodexLiveStatusLoading = false; });
         }
 
         function ensureJoshexFallbackLoaded() {
@@ -9651,9 +9779,9 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(fallback => {
                     if (!fallback) return;
+                    window._personalCodexLiveStatus = fallback;
                     window._personalCodexFallback = fallback;
-                    renderPersonalCodex({ personalCodex: getJoshexData() });
-                    renderAgentChatFeed(window._agentCommsEntries || []);
+                    refreshJoshexLiveViews();
                 })
                 .catch(() => {})
                 .finally(() => { window._personalCodexFallbackLoading = false; });
@@ -10236,23 +10364,21 @@
 
 
         function renderPersonalCodex(data) {
-            const pc = data?.personalCodex || null;
+            if (data?.personalCodex) {
+                window._personalCodexFallback = { ...(window._personalCodexFallback || {}), ...data.personalCodex };
+            }
+            const pc = (typeof getJoshexData === 'function') ? getJoshexData() : (data?.personalCodex || null);
             const panel = document.getElementById('personal-codex');
             if (!panel) return;
-            if (!pc) {
+            const hasPc = pc && (pc.status || pc.objective || pc.validation || pc.patchStatus || (Array.isArray(pc.recentActivity) && pc.recentActivity.length));
+            if (!hasPc) {
                 panel.classList.remove('visible');
                 if (!window._personalCodexFallbackLoading) {
-                    window._personalCodexFallbackLoading = true;
-                    fetch('./data/personal-codex.json?ts=' + Date.now(), { cache: 'no-store' })
-                        .then(r => r.ok ? r.json() : null)
-                        .then(fallback => { if (fallback) renderPersonalCodex({ personalCodex: fallback }); })
-                        .catch(() => {})
-                        .finally(() => { window._personalCodexFallbackLoading = false; });
+                    fetchJoshexLiveStatus(true);
                 }
                 return;
             }
             panel.classList.add('visible');
-            window._personalCodexFallback = pc;
             const status = document.getElementById('pc-status');
             const validation = document.getElementById('pc-validation');
             const activity = document.getElementById('pc-activity');
@@ -11294,6 +11420,8 @@
             hydrateBuildShaBadge();
             restoreBrainActivityDrawer();
             fetchData();
+            fetchJoshexLiveStatus(true);
+            setInterval(fetchJoshexLiveStatus, 8000);
             // ── Brain feed: SUPABASE IS THE SINGLE SOURCE OF TRUTH ──
             // One initial REST fetch to populate immediately, then WebSocket takes over.
             // Local fast-poll is re-enabled as belt-and-suspenders — applyBrainFeed()
@@ -11803,7 +11931,8 @@
                 ? `${dirtyCount} file${dirtyCount === 1 ? '' : 's'} changed${patchFiles.length ? `: ${patchFiles.join(', ')}` : ''}`
                 : '';
             const detailBits = [patch.detail, fileSummary, pc.validation, patch.summary].filter(Boolean);
-            const updatedAt = patch.updatedAt || pc.updatedAt || (window._latestDashboardData || window._mcLastDashData || {}).lastUpdated || new Date().toISOString();
+            const dash = window._latestDashboardData || window._mcLastDashData || {};
+            const updatedAt = patch.updatedAt || pc.updatedAt || dash.lastUpdated || new Date().toISOString();
             return {
                 agent: 'JOSHeX',
                 active: hasPatchActivity,
@@ -11816,6 +11945,8 @@
                 updatedAt,
                 currentTool: 'codex',
                 model: 'openai-codex',
+                contextWindow: pc.contextWindow || dash.contextWindow || null,
+                contextPct: pc.contextPct ?? pc.contextWindow?.pct ?? dash.contextWindow?.pct ?? null,
                 steps: [{ label: fileSummary || patch.summary || pc.validation || objective, status: hasPatchActivity ? 'active' : 'done', tool: 'codex' }],
                 joshexBacked: true,
             };
@@ -11877,6 +12008,68 @@
             return 'agent-generic';
         }
 
+        function getAgentContextSignal(bf, agentLabel) {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const label = String(agentLabel || bf?.agent || '').toUpperCase();
+            const contextMap = data.agentContextWindows || data.agentContexts || {};
+            const key = label.includes('JOSHEX') ? 'joshex' : label.includes('JAIMES') ? 'jaimes' : label.includes('JOSH') ? 'josh' : '';
+            const mapped = contextMap[key] || contextMap[agentLabel] || {};
+            const pc = label.includes('JOSHEX') && typeof getJoshexData === 'function' ? getJoshexData() : {};
+            const candidates = [
+                bf?.contextPct, bf?.contextPercent, bf?.context?.pct, bf?.contextWindow?.pct,
+                mapped?.pct, mapped?.contextPct, mapped?.contextWindow?.pct,
+                pc?.contextPct, pc?.contextWindow?.pct,
+                label.includes('JOSH') || label.includes('JOSHEX') ? data.contextWindow?.pct : null,
+            ];
+            let pct = candidates.find(value => value !== undefined && value !== null && value !== '');
+            if (pct !== undefined && pct !== null && pct !== '') {
+                pct = Number(pct);
+                if (Number.isFinite(pct) && pct <= 1) pct *= 100;
+                pct = Math.max(0, Math.min(100, Math.round(pct)));
+            } else {
+                pct = null;
+            }
+            const used = bf?.contextUsed || bf?.context?.usedTokens || bf?.contextWindow?.usedTokens || mapped?.usedTokens || pc?.contextWindow?.usedTokens || (label.includes('JOSH') || label.includes('JOSHEX') ? data.contextWindow?.usedTokens : null);
+            const limit = bf?.contextLimit || bf?.context?.limitTokens || bf?.contextWindow?.limitTokens || mapped?.limitTokens || pc?.contextWindow?.limitTokens || (label.includes('JOSH') || label.includes('JOSHEX') ? data.contextWindow?.limitTokens : null);
+            const source = label.includes('JOSHEX') ? 'OpenAI Codex context' : label.includes('JAIMES') ? 'JAIMES context' : label.includes('JOSH') ? 'JOSH 2.0 context' : 'Agent context';
+            const status = pct === null ? 'not reported' : pct >= 85 ? 'high' : pct >= 60 ? 'watch' : 'healthy';
+            const tokenLabel = used && limit ? `${Math.round(Number(used) / 1000)}K / ${Math.round(Number(limit) / 1000)}K` : '';
+            return {
+                pct,
+                source,
+                status,
+                label: pct === null ? 'Not reported' : `${pct}% ${status}`,
+                title: [source, tokenLabel].filter(Boolean).join(' · '),
+            };
+        }
+
+        function getBrainFeedAgentInsight(bf, agentLabel) {
+            const label = String(agentLabel || '').toUpperCase();
+            const status = String(bf?.status || '').toLowerCase();
+            const objective = String(bf?.objective || '').toLowerCase();
+            const detail = String(bf?.detail || '').toLowerCase();
+            const pc = label.includes('JOSHEX') && typeof getJoshexData === 'function' ? getJoshexData() : {};
+            const dirtyCount = Number(pc?.patchStatus?.dirtyCount || 0) || 0;
+            if (label.includes('JOSHEX')) {
+                if (dirtyCount > 0) return `OpenAI Codex is actively shaping Mission Control; ${dirtyCount} changed file${dirtyCount === 1 ? '' : 's'} need validation before deploy.`;
+                if (/validat|patch|screenshot|review|polish/.test(`${objective} ${detail}`)) return 'OpenAI Codex is in the design and validation lane; watch for screenshot and regression results.';
+                return 'OpenAI Codex is ready for a fresh design, review, or patch handoff.';
+            }
+            if (label.includes('JAIMES')) {
+                if (/watchdog|failed|error|auth|blocked/.test(`${objective} ${detail}`)) return 'JAIMES needs attention; check the Hermes/watchdog lane before relying on scheduled automation.';
+                if (status === 'done') return 'JAIMES has finished the latest support pass and is standing by for specialist automation.';
+                if (bf?.active) return 'JAIMES is actively working the specialist automation lane.';
+                return 'JAIMES is idle; keep it visible for reporting, fantasy, and Hermes-side handoffs.';
+            }
+            if (label.includes('JOSH')) {
+                if (/auth|canary|warning|probe/.test(`${objective} ${detail}`)) return 'JOSH 2.0 completed the heartbeat but has a canary/auth signal worth reviewing.';
+                if (bf?.active) return 'JOSH 2.0 is the primary local operator lane; watch gateway and command actions here.';
+                if (status === 'done') return 'JOSH 2.0 finished its latest operator step and is waiting for the next instruction.';
+                return 'JOSH 2.0 is the front-desk operator lane for OpenClaw and local execution.';
+            }
+            return 'Agent lane visible; monitor status, current objective, and last update.';
+        }
+
         function renderBrainFeedObjectiveCard(entry, compact = false) {
             const bf = entry?.bf || {};
             const heroAgentLabel = entry?.agentLabel || 'AGENT';
@@ -11890,6 +12083,9 @@
             const metrics = getBrainFeedMetrics(bf);
             const state = getBrainFeedAgentState(bf);
             const updatedLabel = bf.updatedAt ? formatRelTime(bf.updatedAt) : 'unknown';
+            const insight = getBrainFeedAgentInsight(bf, heroAgentLabel);
+            const contextSignal = getAgentContextSignal(bf, heroAgentLabel);
+            const contextWidth = contextSignal.pct === null ? 0 : contextSignal.pct;
             return `<div class="bf-objective ${agentClass}${compact ? ' bf-objective-compact' : ''}" data-agent="${escapeHtml(heroAgentLabel)}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                 <div class="bf-objective-meta">
                     <div class="bf-objective-live">
@@ -11903,6 +12099,19 @@
                 <div class="bf-objective-now" title="${escapeHtml(objectiveDetail)}">
                     <span class="bf-objective-now-label">Now</span>
                     <span class="bf-objective-now-text">${escapeHtml(objectiveDetail)}</span>
+                </div>
+                <div class="bf-agent-signals">
+                    <div class="bf-agent-insight" title="${escapeHtml(insight)}">
+                        <span class="bf-agent-insight-label">Insight</span>
+                        <span class="bf-agent-insight-text">${escapeHtml(insight)}</span>
+                    </div>
+                    <div class="bf-context-meter" title="${escapeHtml(contextSignal.title || contextSignal.source)}">
+                        <div class="bf-context-meter-head">
+                            <span class="bf-context-meter-name">${escapeHtml(contextSignal.source)}</span>
+                            <span class="bf-context-meter-value">${escapeHtml(contextSignal.label)}</span>
+                        </div>
+                        <div class="bf-context-meter-track"><div class="bf-context-meter-fill" style="width:${contextWidth}%"></div></div>
+                    </div>
                 </div>
                 <div class="bf-objective-submeta">
                     <span><b>Tool</b><em>${escapeHtml(metrics.currentTool)}</em></span>
@@ -12558,7 +12767,7 @@
             const voiceStatus = data.voiceRouter?.status || 'planned';
             const voicePill = `<div class="stat-pill" style="border-color:${voiceStatus === 'ready' ? 'rgba(74,222,128,0.22)' : 'rgba(251,191,36,0.25)'};"><span class="num">🎙</span><span class="label">Voice ${voiceStatus === 'ready' ? 'Ready' : 'Planned'}</span></div>`;
             const sorareMlPill = `<div class="stat-pill" style="border-color:rgba(167,139,250,0.24);"><span class="num" style="color:#a78bfa">ML</span><span class="label">JAIMES</span></div>`;
-            const personalCodex = data.personalCodex || window._personalCodexFallback || null;
+            const personalCodex = (typeof getJoshexData === 'function') ? getJoshexData() : (data.personalCodex || window._personalCodexFallback || null);
             const joshexPill = personalCodex ? `<div class="stat-pill" id="joshex-bubble" title="JOSHeX local Codex contribution lane" onclick="document.getElementById('personal-codex')?.scrollIntoView({behavior:'smooth', block:'center'})" style="cursor:pointer;border-color:rgba(34,211,238,0.30);background:rgba(34,211,238,0.08);"><span class="num" style="color:#67e8f9">CX</span><span class="label">JOSHeX</span></div>` : '';
             const actionRequiredCount = Array.isArray(data.actionRequired) ? data.actionRequired.length : 0;
             const dueJobs = data.crons?.filter(c => ['due', 'due_unverified', 'missed'].includes(c.runStatus) || c.needsAttention).length || 0;
@@ -12577,15 +12786,15 @@
             `;
             statsRow.innerHTML = [
                 controlTile({
-                    icon: attentionCount ? '!' : 'OK',
+                    icon: 'System',
                     label: 'System Attention',
-                    value: attentionCount ? `${attentionCount} to review` : 'All clear',
+                    value: attentionCount ? `${attentionCount} items to review` : 'All clear',
                     state: criticalCount ? 'critical' : attentionCount ? 'warn' : 'good',
                     action: "document.getElementById('today-jobs-card')?.scrollIntoView({behavior:'smooth',block:'center'})",
                     title: 'Click to inspect jobs and visible system alerts',
                 }),
                 controlTile({
-                    icon: 'CR',
+                    icon: 'Cron',
                     label: 'Cron Fabric',
                     value: `${enabledCrons} live${pausedCrons ? ` / ${pausedCrons} paused` : ''}`,
                     state: errorCrons ? 'critical' : dueJobs ? 'warn' : 'good',
@@ -12593,47 +12802,47 @@
                     title: `${errorCrons} cron errors, ${dueJobs} due or missed jobs`,
                 }),
                 controlTile({
-                    icon: 'BF',
+                    icon: 'Agents',
                     label: 'Agent Lanes',
-                    value: '3 pinned',
+                    value: '3 lanes pinned',
                     state: 'good',
                     action: "document.querySelector('.card-brain')?.scrollIntoView({behavior:'smooth',block:'center'})",
                     title: 'JOSH 2.0, JAIMES, and JOSHeX remain visible in Brain Feed',
                 }),
                 controlTile({
-                    icon: 'CA',
-                    label: 'Canaries',
-                    value: canaryOk ? 'OK' : 'Watch',
+                    icon: 'Canaries',
+                    label: 'Canary Checks',
+                    value: canaryOk ? 'All passing' : 'Needs review',
                     state: canaryOk ? 'good' : 'warn',
                     action: "openModuleModal('health')",
                     title: 'Open device and canary health details',
                 }),
                 controlTile({
-                    icon: 'CAL',
+                    icon: 'Calendar',
                     label: 'Calendar',
-                    value: calendarOk ? 'Connected' : (calendarHealth.status || 'Check'),
+                    value: calendarOk ? 'Connected' : (calendarHealth.status === 'auth_expired' ? 'Reauth needed' : 'Check calendar'),
                     state: calendarOk ? 'good' : 'critical',
                     action: "window.openCalendarModal && window.openCalendarModal()",
                     title: calendarHealth.message || 'Calendar lane status',
                 }),
                 controlTile({
-                    icon: 'CX',
-                    label: 'JOSHeX',
-                    value: joshexDirty ? `${joshexDirty} file patch` : joshexStatus,
+                    icon: 'OpenAI',
+                    label: 'OpenAI Codex',
+                    value: joshexDirty ? `${joshexDirty} file${joshexDirty === 1 ? '' : 's'} changed` : joshexStatus,
                     state: joshexDirty ? 'warn' : 'good',
                     action: "openModuleModal('comms')",
                     title: 'Open local Codex visibility',
                 }),
                 controlTile({
-                    icon: 'SL',
-                    label: 'Sleep',
+                    icon: 'Sleep',
+                    label: 'Sleep Controls',
                     value: 'Ready',
                     state: 'good',
                     action: "window.openEightSleepDashboard && window.openEightSleepDashboard()",
                     title: 'Open Eight Sleep controls',
                 }),
                 controlTile({
-                    icon: 'MW',
+                    icon: 'MoltWorld',
                     label: 'MoltWorld',
                     value: 'Ready',
                     state: 'good',
