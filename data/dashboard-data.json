@@ -2,39 +2,39 @@
   "actionRequired": [
     {
       "priority": "high",
-      "title": "Calendar auth needs refresh",
+      "title": "Calendar issue: Calendar fetch failed via local gog",
       "url": "#calendar"
     }
   ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
-    "messageReceived": "2026-04-30T01:34:50Z",
-    "objective": "Stopping completed external upgrade launchd job",
-    "status": "active",
+    "active": false,
+    "messageReceived": "2026-04-30T01:38:49Z",
+    "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
+    "status": "idle",
     "steps": [
       {
-        "label": "Stopping completed external upgrade launchd job",
-        "status": "active",
+        "label": "Done - Watchdog run clean; no restart needed",
+        "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T01:35:09Z",
-    "checkedAt": "2026-04-30T01:35:09Z",
+    "updatedAt": "2026-04-30T01:39:02Z",
+    "checkedAt": "2026-04-30T01:38:49Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Stopping completed external upgrade launchd job",
-    "updatedAt": "2026-04-30T01:35:17Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
+    "updatedAt": "2026-04-30T01:40:17Z"
   },
   "contextWindow": {
-    "usedTokens": 33891,
+    "usedTokens": 78463,
     "limitTokens": 272000,
-    "pct": 0.1246,
+    "pct": 0.2885,
     "model": "gpt-5.5",
     "status": "green"
   },
@@ -45,8 +45,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-30T01:35:17Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-30T01:40:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +64,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T01:35:17Z",
+    "updatedAt": "2026-04-30T01:40:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "12 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 12,
+      "dirtyCount": 8,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/jain-brain-feed.json",
-        "data/jain-breaking-highlights.json",
-        "data/jain-newsfeed.json"
+        "data/mission-control-canaries.json",
+        "data/modelUsage.json",
+        "data/moltworld-data.json",
+        "data/newsfeed.json"
       ],
-      "head": "f71e94948",
-      "updatedAt": "2026-04-30T01:35:17Z"
+      "head": "a7b00e72b",
+      "updatedAt": "2026-04-30T01:40:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,7 +183,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 12,
+    "missionControlDirty": 7,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "scripts/capability_canary.sh",
@@ -192,32 +192,32 @@
       "scripts/openclaw_resiliency_watchdog.py",
       "scripts/josh_bf_push.sh"
     ],
-    "codexbarStatus": "80% left \u00b7 wk 78% left",
+    "codexbarStatus": "79% left \u00b7 wk 78% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 80% left [=========---]",
-        "Resets in 1h 24m",
+        "Session: 79% left [=========---]",
+        "Resets in 1h 19m",
         "Weekly: 78% left [=========---]",
         "Pace: 4% in reserve | Expected 26% used | Lasts until reset",
         "Resets in 5d 3h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "80% left",
+      "session": "79% left",
       "weekly": "78% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 24m",
+      "sessionReset": "1h 19m",
       "weeklyReset": "5d 3h",
-      "summary": "80% left \u00b7 wk 78% left"
+      "summary": "79% left \u00b7 wk 78% left"
     },
-    "updatedAt": "2026-04-30T01:35:19Z"
+    "updatedAt": "2026-04-30T01:40:19Z"
   },
   "modelUsage": {
-    "session": 0.020451,
-    "daily": 0.45287,
+    "session": 0.040559,
+    "daily": 0.472978,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -234,7 +234,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.45287
+        "cost": 0.472978
       },
       {
         "name": "openai/gpt-5.5",
@@ -273,12 +273,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 76672,
+        "inputTokens": 76188,
         "outputTokens": 173,
-        "totalTokens": 76845,
-        "sessionCost": 0.45287,
-        "dailyCost": 0.45287,
-        "weeklyCost": 0.45287,
+        "totalTokens": 76361,
+        "sessionCost": 0.472978,
+        "dailyCost": 0.472978,
+        "weeklyCost": 0.472978,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -341,8 +341,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 288574923,
-        "dailyTokens": 151840827,
+        "totalTokens": 290070479,
+        "dailyTokens": 153336383,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T01:35:22Z",
+    "lastUpdated": "2026-04-30T01:40:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -406,8 +406,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.45287,
-      "total": 47.575483,
+      "daily": 0.472978,
+      "total": 47.595591,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -422,11 +422,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.510396,
-      "codexEquivalentDaily": 0.45287,
-      "codexEquivalentMonthlyProjection": 195.04,
-      "codexTokensWeekly": 397363479,
-      "codexTokensDaily": 151840827,
+      "codexEquivalentWeekly": 45.530504,
+      "codexEquivalentDaily": 0.472978,
+      "codexEquivalentMonthlyProjection": 195.13,
+      "codexTokensWeekly": 398858551,
+      "codexTokensDaily": 153336383,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -449,8 +449,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 195.04,
-        "codexTokensWeekly": 397363479,
+        "codexValueMonthly": 195.13,
+        "codexTokensWeekly": 398858551,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -460,7 +460,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.510396,
+            "weeklyCost": 45.530504,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -524,9 +524,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.510396,
-          "dailyEquivalent": 0.45287,
-          "tokensWeekly": 397363479,
+          "weeklyEquivalent": 45.530504,
+          "dailyEquivalent": 0.472978,
+          "tokensWeekly": 398858551,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -600,7 +600,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $195.04/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $195.13/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T01:35:27Z",
+    "updatedAt": "2026-04-30T01:40:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,14 +637,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 28.3,
-      "cpu_user": 12.6,
-      "cpu_sys": 15.65,
-      "load1": 3.31,
-      "load5": 2.64,
-      "load15": 2.33,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 28.0,
+      "cpu_user": 12.31,
+      "cpu_sys": 15.71,
+      "load1": 1.25,
+      "load5": 1.98,
+      "load15": 2.14,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -655,9 +655,9 @@
       "cpu_pct": 24.2,
       "cpu_user": 13.7,
       "cpu_sys": 10.48,
-      "load1": 2.16,
+      "load1": 2.75,
       "load5": 2.6,
-      "load15": 2.48,
+      "load15": 2.5,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -668,8 +668,8 @@
     }
   },
   "calendarHealth": {
-    "status": "auth_expired",
-    "message": "Calendar re-auth required"
+    "status": "error",
+    "message": "Calendar fetch failed via local gog"
   },
   "devices": [
     {
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:35:17Z"
+      "lastChecked": "2026-04-30T01:40:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:35:17Z"
+      "lastChecked": "2026-04-30T01:40:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T01:35:17Z"
+      "lastChecked": "2026-04-30T01:40:17Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T01:35:27.508535+00:00"
+      "lastRun": "2026-04-30T01:40:27.305826+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,12 +1259,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T01:35:17.280132Z",
+    "checkedAt": "2026-04-30T01:40:17.132311Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JAIMES; dualAgents=none; live=3",
         "severity": "ok"
       },
       {
@@ -1579,19 +1579,7 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0031",
-      "title": "External OpenClaw upgrade",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Direct updater still refused inside gateway session; launched external launchd job `ai.openclaw.external-upgrade-20260429-2124` running `logs/run_openclaw_external_upgrade_20260429.sh`, logging to `logs/openclaw_external_upgrade_20260429_2124.log`; next poll result and verify gateway/patch behavior.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 21:22; updated 2026-04-29 21:25",
-      "requestedAt": "2026-04-29 21:22",
-      "updatedAt": "2026-04-29 21:25",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1617,20 +1605,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Stopping completed external upgrade launchd job",
-      "status": "active",
+      "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T01:35:09Z",
-      "messageReceived": "2026-04-30T01:34:50Z",
+      "updatedAt": "2026-04-30T01:39:02Z",
+      "messageReceived": "2026-04-30T01:38:49Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Stopping completed external upgrade launchd job",
-          "status": "active",
+          "label": "Done - Watchdog run clean; no restart needed",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1723,37 +1711,13 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JOSH 2.0",
       "JAIMES"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
-    "dualMode": true,
-    "dualAgents": [
-      "JOSH 2.0",
-      "JAIMES"
-    ],
+    "activeCount": 1,
+    "primaryAgent": "JAIMES",
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
-      {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Stopping completed external upgrade launchd job",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-30T01:35:09Z",
-        "messageReceived": "2026-04-30T01:34:50Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Stopping completed external upgrade launchd job",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
       {
         "agent": "JAIMES",
         "active": true,
@@ -1820,6 +1784,26 @@
         ]
       },
       {
+        "agent": "JOSH 2.0",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-30T01:39:02Z",
+        "messageReceived": "2026-04-30T01:38:49Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Done - Watchdog run clean; no restart needed",
+            "status": "done",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
         "agent": "J.A.I.N",
         "active": false,
         "reportedActive": false,
@@ -1843,29 +1827,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T01:35:22Z",
-      "event": "Session spend: $0.02"
+      "time": "2026-04-30T01:40:22Z",
+      "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T01:35:19Z",
+      "time": "2026-04-30T01:40:19Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-30T01:35:19Z",
-      "event": "CodexBar: 80% left \u00b7 wk 78% left"
+      "time": "2026-04-30T01:40:19Z",
+      "event": "CodexBar: 79% left \u00b7 wk 78% left"
     },
     {
-      "time": "2026-04-30T01:35:17Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-04-30T01:40:17Z",
+      "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T01:35:17Z",
-      "event": "JOSHeX: Patch feed: 12 source file(s) changed"
+      "time": "2026-04-30T01:40:17Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-30T01:35:17Z",
+      "time": "2026-04-30T01:40:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T01:35:17Z"
+  "lastUpdated": "2026-04-30T01:40:17Z"
 }
