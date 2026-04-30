@@ -12,6 +12,20 @@ else
   echo "mission-control: kiosk-dashboard missing; skipping model sync"
 fi
 cd "$ROOT_DIR"
+
+sync_branch() {
+  local phase="$1"
+  echo "mission-control: syncing origin/main (${phase})"
+  git fetch origin main
+  if ! git rebase --autostash origin/main; then
+    echo "mission-control: rebase failed during ${phase}; aborting publish so cron does not create another divergent commit" >&2
+    git rebase --abort >/dev/null 2>&1 || true
+    exit 1
+  fi
+}
+
+sync_branch "preflight"
+
 # Pull J.A.I.N / JAIMES brain feed and newsfeed from remote (non-blocking on failure)
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
@@ -62,7 +76,9 @@ else
 fi
 if [[ -n "$GH_TOKEN" ]]; then
   AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
+  sync_branch "pre-push"
   git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin HEAD:main
 else
+  sync_branch "pre-push"
   git push origin HEAD:main
 fi
