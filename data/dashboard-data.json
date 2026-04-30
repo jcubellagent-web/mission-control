@@ -1,13 +1,7 @@
 {
   "actionRequired": [],
   "activeNow": [],
-  "upcomingEvents": [
-    {
-      "time": "2026-04-29T16:30:00-04:00",
-      "title": "Chiropractor Appointment",
-      "source": "jcubell16@gmail.com"
-    }
-  ],
+  "upcomingEvents": [],
   "brainFeed": {
     "active": false,
     "messageReceived": "2026-04-30T03:31:54Z",
@@ -29,7 +23,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: confirmed keep-step-updates rule \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T03:55:17Z"
+    "updatedAt": "2026-04-30T04:00:17Z"
   },
   "contextWindow": {
     "usedTokens": 60961,
@@ -45,8 +39,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 10 source file(s) changed",
-        "time": "2026-04-30T03:55:17Z"
+        "event": "Patch feed: 9 source file(s) changed",
+        "time": "2026-04-30T04:00:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +58,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T03:55:17Z",
+    "updatedAt": "2026-04-30T04:00:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "10 source file(s) changed",
+      "summary": "9 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 10,
+      "dirtyCount": 9,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "629778cb5",
-      "updatedAt": "2026-04-30T03:55:17Z"
+      "head": "dc2482f08",
+      "updatedAt": "2026-04-30T04:00:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,7 +177,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 10,
+    "missionControlDirty": 8,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -192,32 +186,32 @@
       "scripts/compact_tasks_state.py",
       "scripts/openclaw_resiliency_watchdog.py"
     ],
-    "codexbarStatus": "97% left \u00b7 wk 77% left",
+    "codexbarStatus": "96% left \u00b7 wk 76% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 97% left [===========-]",
-        "Resets in 4h 12m",
-        "Weekly: 77% left [=========---]",
-        "Pace: 5% in reserve | Expected 28% used | Lasts until reset",
+        "Session: 96% left [===========-]",
+        "Resets in 4h 7m",
+        "Weekly: 76% left [=========---]",
+        "Pace: 4% in reserve | Expected 28% used | Lasts until reset",
         "Resets in 5d 1h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "97% left",
-      "weekly": "77% left",
+      "session": "96% left",
+      "weekly": "76% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 12m",
+      "sessionReset": "4h 7m",
       "weeklyReset": "5d 1h",
-      "summary": "97% left \u00b7 wk 77% left"
+      "summary": "96% left \u00b7 wk 76% left"
     },
-    "updatedAt": "2026-04-30T03:55:19Z"
+    "updatedAt": "2026-04-30T04:00:18Z"
   },
   "modelUsage": {
     "session": 0.035993,
-    "daily": 0.458813,
+    "daily": 0.0,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -277,7 +271,7 @@
         "outputTokens": 173,
         "totalTokens": 76856,
         "sessionCost": 0.458813,
-        "dailyCost": 0.458813,
+        "dailyCost": 0.0,
         "weeklyCost": 0.458813,
         "sessions": 5,
         "isGemini": false,
@@ -342,7 +336,7 @@
         "dailyCost": 0.0,
         "sessionCost": 0.0,
         "totalTokens": 297388792,
-        "dailyTokens": 160654696,
+        "dailyTokens": 0,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -373,7 +367,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T03:55:23Z",
+    "lastUpdated": "2026-04-30T04:00:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -406,7 +400,7 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.458813,
+      "daily": 0.0,
       "total": 47.581426,
       "monthly": 952.083148
     },
@@ -423,10 +417,10 @@
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
       "codexEquivalentWeekly": 45.516339,
-      "codexEquivalentDaily": 0.458813,
+      "codexEquivalentDaily": 0.0,
       "codexEquivalentMonthlyProjection": 195.07,
       "codexTokensWeekly": 406177359,
-      "codexTokensDaily": 160654696,
+      "codexTokensDaily": 0,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -525,7 +519,7 @@
           "status": "covered",
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.516339,
-          "dailyEquivalent": 0.458813,
+          "dailyEquivalent": 0.0,
           "tokensWeekly": 406177359,
           "models": [
             "gpt-5.4",
@@ -620,7 +614,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T03:55:28Z",
+    "updatedAt": "2026-04-30T04:00:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,14 +631,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 39.3,
-      "cpu_user": 20.3,
-      "cpu_sys": 19.3,
-      "load1": 2.19,
-      "load5": 2.31,
-      "load15": 2.23,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "cpu_pct": 37.2,
+      "cpu_user": 19.19,
+      "cpu_sys": 18.4,
+      "load1": 2.6,
+      "load5": 2.37,
+      "load15": 2.27,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -652,14 +646,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.2,
-      "cpu_user": 6.2,
-      "cpu_sys": 13.95,
-      "load1": 1.77,
-      "load5": 1.92,
-      "load15": 1.98,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.6,
+      "cpu_pct": 15.8,
+      "cpu_user": 3.5,
+      "cpu_sys": 12.28,
+      "load1": 2.29,
+      "load5": 2.01,
+      "load15": 1.99,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +677,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:55:17Z"
+      "lastChecked": "2026-04-30T04:00:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:55:17Z"
+      "lastChecked": "2026-04-30T04:00:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T03:55:17Z"
+      "lastChecked": "2026-04-30T04:00:17Z"
     }
   ],
   "crons": [
@@ -712,7 +706,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:55:17.151542+00:00"
+      "lastRun": "2026-04-30T04:00:17.182431+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -757,7 +751,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:00:01.090989+00:00"
+      "lastRun": "2026-04-30T04:00:00.829694+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -771,7 +765,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T17:00:01.109136+00:00"
     },
     {
@@ -787,7 +781,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:00:04.604392+00:00"
+      "lastRun": "2026-04-30T04:00:05.418486+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -836,56 +830,56 @@
             "time": "7:15 AM",
             "mode": "Weekday",
             "label": "Market open brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "10:00 AM",
             "mode": "Weekday",
             "label": "Mid-morning brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "12:00 PM",
             "mode": "Weekday",
             "label": "Midday brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "2:00 PM",
             "mode": "Weekday",
             "label": "Pulse brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
             "mode": "Daily",
             "label": "Close brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "6:00 PM",
             "mode": "Weekday",
             "label": "Evening brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
             "mode": "Daily",
             "label": "Late brief",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
             "mode": "Daily",
             "label": "Wrap brief",
-            "past": true,
+            "past": false,
             "done": false
           }
         ]
@@ -931,7 +925,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Log Rotation",
@@ -971,7 +965,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T02:01:16.072785-04:00"
     },
     {
@@ -986,7 +980,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Sorare Sheet Updater",
@@ -1000,7 +994,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T07:30:02.813925+00:00"
     },
     {
@@ -1015,7 +1009,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T13:00:18.813002+00:00"
     },
     {
@@ -1030,7 +1024,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T10:00:35.077629-04:00"
     },
     {
@@ -1045,7 +1039,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T11:02:16.705392-04:00"
     },
     {
@@ -1060,7 +1054,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T15:00:00.674322+00:00"
     },
     {
@@ -1156,7 +1150,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Waiver Review (Hermes)",
@@ -1167,12 +1161,11 @@
       "status": "paused",
       "source": "hermes",
       "sourceLabel": "Hermes",
-      "todayRelevant": true,
+      "todayRelevant": false,
       "errors": 0,
       "lastError": null,
       "lastHistoricalError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
-      "lastHistoricalErrorAt": "2026-04-24T13:00:56.665646-04:00",
-      "runStatus": "missed"
+      "lastHistoricalErrorAt": "2026-04-24T13:00:56.665646-04:00"
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
@@ -1238,7 +1231,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-04-29T05:50:48.357583-04:00"
     },
     {
@@ -1259,7 +1252,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T03:55:17.150457Z",
+    "checkedAt": "2026-04-30T04:00:17.181707Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1276,7 +1269,7 @@
       {
         "name": "Today Jobs",
         "ok": true,
-        "detail": "23 today-relevant; 0 active issue(s)",
+        "detail": "22 today-relevant; 0 active issue(s)",
         "severity": "ok"
       },
       {
@@ -1579,19 +1572,7 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0032",
-      "title": "Deep capability audit",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Continuing full capability audit after OpenClaw 2026.4.27/resiliency fixes. Current pass is checking runtime health, model/auth routing, connectors, skills, devices, cron/heartbeat, security posture, local tools, and safe improvements.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 21:41; updated 2026-04-29 22:05",
-      "requestedAt": "2026-04-29 21:41",
-      "updatedAt": "2026-04-29 22:05",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1843,29 +1824,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T03:55:23Z",
+      "time": "2026-04-30T04:00:22Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T03:55:19Z",
+      "time": "2026-04-30T04:00:18Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-30T03:55:19Z",
-      "event": "CodexBar: 97% left \u00b7 wk 77% left"
+      "time": "2026-04-30T04:00:18Z",
+      "event": "CodexBar: 96% left \u00b7 wk 76% left"
     },
     {
-      "time": "2026-04-30T03:55:17Z",
+      "time": "2026-04-30T04:00:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T03:55:17Z",
-      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
+      "time": "2026-04-30T04:00:17Z",
+      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-30T03:55:17Z",
+      "time": "2026-04-30T04:00:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T03:55:17Z"
+  "lastUpdated": "2026-04-30T04:00:17Z"
 }
