@@ -1645,7 +1645,10 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
 def _calendar_events_command() -> tuple[List[str], str]:
     account = os.environ.get("MC_CALENDAR_ACCOUNT", "jcubell16@gmail.com")
-    gog_bin = os.environ.get("GOG_BIN") or shutil.which("gog")
+    secure_gog = Path.home() / "scripts" / "gog_secure.sh"
+    gog_bin = os.environ.get("GOG_BIN") or (
+        str(secure_gog) if secure_gog.exists() and os.access(secure_gog, os.X_OK) else shutil.which("gog")
+    )
     args = [
         "calendar", "events", "primary",
         "--account", account,
@@ -1661,7 +1664,7 @@ def _calendar_events_command() -> tuple[List[str], str]:
     # Optional: allow a caller-provided keyring password without storing it here.
     # This is needed only when JOSH uses gog's file keyring in non-interactive jobs.
     if os.environ.get("GOG_KEYRING_PASSWORD"):
-        remote = "export GOG_KEYRING_PASSWORD=" + shlex.quote(os.environ["GOG_KEYRING_PASSWORD"]) + "; " + remote
+        remote = 'export GOG_KEYRING_PASSWORD=' + shlex.quote(os.environ['GOG_KEYRING_PASSWORD']) + "; " + remote
     return [
         "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
         "josh2.0@100.114.50.48", remote,
