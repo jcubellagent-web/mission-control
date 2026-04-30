@@ -54,6 +54,8 @@ def main() -> int:
     active_errors = [c for c in today if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("runStatus") == "missed")]
     action_required_raw = data.get("actionRequired") if isinstance(data.get("actionRequired"), list) else []
     personal_codex = data.get("personalCodex") if isinstance(data.get("personalCodex"), dict) else {}
+    agent_control = data.get("agentControl") if isinstance(data.get("agentControl"), dict) else {}
+    agent_control_summary = agent_control.get("summary") if isinstance(agent_control.get("summary"), dict) else {}
     action_required = []
     for item in action_required_raw:
         title = str(item.get("title", "")).lower()
@@ -62,11 +64,23 @@ def main() -> int:
         if "due/unverified" in title:
             continue
         action_required.append(item)
+    allowed_action_prefixes = (
+        "calendar issue:",
+        "personal codex:",
+        "shared layer needs attention:",
+    )
+    unknown_action_required = [
+        item for item in action_required
+        if not str(item.get("title", "")).lower().startswith(allowed_action_prefixes)
+    ]
 
     live_objectives_ok = bool(primary_agent) and not (
         jaimes_feed.get("active") and jaimes_feed.get("capabilityBacked")
     )
     calendar_detail = calendar.get("message") or calendar.get("status") or "missing"
+    objective_fn_start = html.find("function syncBrainFeedObjectiveScroller")
+    objective_fn_end = html.find("function pickPrimaryBrainFeed")
+    objective_fn = html[objective_fn_start:objective_fn_end] if objective_fn_start >= 0 and objective_fn_end > objective_fn_start else ""
     checks = [
         status(
             live_objectives_ok,
@@ -74,7 +88,10 @@ def main() -> int:
             f"primary={primary_agent or 'missing'}; dualAgents={dual_agents or 'none'}; live={len(live_agents)}",
         ),
         status(
-            calendar.get("status") == "ok" or "No auth" in str(calendar_detail) or "fetch failed" in str(calendar_detail).lower(),
+            calendar.get("status") == "ok"
+            or "No auth" in str(calendar_detail)
+            or "fetch failed" in str(calendar_detail).lower()
+            or "gog cli missing" in str(calendar_detail).lower(),
             "Calendar tile",
             calendar_detail,
             severity="medium",
@@ -85,10 +102,7 @@ def main() -> int:
             f"{len(today)} today-relevant; {len(active_errors)} active issue(s)",
         ),
         status(
-            not action_required or (
-                len(action_required) == 1
-                and "calendar" in str(action_required[0].get("title", "")).lower()
-            ),
+            not unknown_action_required and len(action_required) <= 4,
             "Action Required",
             "clear" if not action_required else f"{len(action_required)} visible alert(s)",
             severity="medium",
@@ -99,9 +113,33 @@ def main() -> int:
             "hero + ops renderers present" if html else "index.html missing",
         ),
         status(
+            "ops-glance-strip" in html and "opsGlance" in html and "Agent ecosystem glance status" in html,
+            "Ops glance strip",
+            "first-viewport agent attention strip present" if html else "index.html missing",
+            severity="medium",
+        ),
+        status(
             bool(personal_codex) and "personal-codex-panel" in html and "renderPersonalCodex" in html,
             "Personal Codex lane",
             f"status={personal_codex.get('status', 'missing')}",
+            severity="medium",
+        ),
+        status(
+            bool(agent_control_summary) and "agent-control-panel" in html and "renderAgentControlPanel" in html,
+            "Agent Control lane",
+            f"overall={agent_control_summary.get('overall', 'missing')}; ready={agent_control_summary.get('readyAgents', 0)}/{agent_control_summary.get('totalAgents', 0)}",
+            severity="medium",
+        ),
+        status(
+            "Mission Control alignment pass" in html
+            and "height: 66px;" in html
+            and "-webkit-line-clamp: 2 !important" in html
+            and "Mission Control alignment pass 2" in html
+            and "grid-template-columns: repeat(2, minmax(0, 1fr)) !important;" in html
+            and ".card-jobs-full .codex-job-title,\n        .card-jobs-full .codex-job-detail,\n        .card-jobs-full .shared-event-title" in html
+            and "setInterval(() =>" not in objective_fn,
+            "Alignment stability",
+            "stable text rails present; objective ticker disabled; dense grids capped" if html else "index.html missing",
             severity="medium",
         ),
     ]

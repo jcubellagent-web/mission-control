@@ -1,0 +1,71 @@
+{
+  "updatedAt": "2026-04-30T18:16:32Z",
+  "agents": [
+    {
+      "id": "joshex",
+      "label": "JOSHeX / Personal Codex",
+      "lane": "coordination",
+      "node": "MacBook / Codex session",
+      "privacyTier": "sensitive-coordinator",
+      "brainFeedAgent": "joshex",
+      "responsibilities": [
+        "Sensitive connector coordination",
+        "Mission Control and Agent Control code changes",
+        "Task routing and architecture decisions",
+        "Validation, docs, and handoffs",
+        "Gemini CLI brokering for approved dashboard-safe specialist tasks"
+      ],
+      "capabilities": ["repo-edit", "dashboard-validation", "connected-account-triage", "architecture", "agent-routing", "gemini-cli", "gemini-review", "gemini-long-context", "gemini-research"],
+      "safeTaskTypes": ["planning", "repo-patch", "dashboard-update", "decision-record", "handoff", "validation", "gemini-review", "gemini-long-context", "gemini-research", "model-fallback"],
+      "restrictedTaskTypes": ["raw-secret-handling", "destructive-git", "unapproved-account-mutation", "raw-private-data-forwarding"],
+      "preferredTools": ["agent_publish.py", "agent_task.py", "gemini_agent.py", "mission_control_regression_check.py"],
+      "artifactRoots": ["docs/", "data/", "scripts/"],
+      "updatedAt": "2026-04-30T18:16:32Z"
+    },
+    {
+      "id": "josh",
+      "label": "JOSH 2.0",
+      "lane": "host-ops",
+      "node": "josh2-lan",
+      "privacyTier": "worker-scoped",
+      "brainFeedAgent": "josh",
+      "responsibilities": ["Mission Control hosting", "OpenCLAW services", "Brain Feed server", "local health checks", "fast local ops"],
+      "capabilities": ["ssh-host", "mission-control-refresh", "openclaw", "ollama", "service-health", "gemini-cli-health"],
+      "safeTaskTypes": ["dashboard-refresh", "health-check", "service-status", "non-sensitive-log-review", "gemini-health-check"],
+      "restrictedTaskTypes": ["auth-cookie-refresh", "destructive-maintenance", "sensitive-account-action"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "artifactRoots": ["data/", "logs/", "docs/handoffs/"],
+      "updatedAt": "2026-04-30T15:37:41Z"
+    },
+    {
+      "id": "jaimes",
+      "label": "JAIMES",
+      "lane": "specialist",
+      "node": "jaimes-via-josh",
+      "privacyTier": "worker-scoped",
+      "brainFeedAgent": "jaimes",
+      "responsibilities": ["Hermes jobs", "Sorare ML", "fantasy workflows", "reports", "specialist background analysis"],
+      "capabilities": ["hermes", "ollama", "weaviate", "temporal", "report-generation", "ml-workflows", "gemini-evaluator"],
+      "safeTaskTypes": ["report", "model-analysis", "health-check", "specialist-summary", "non-sensitive-data-processing", "gemini-evaluation"],
+      "restrictedTaskTypes": ["browser-auth-workflow", "account-mutation", "raw-private-data-forwarding"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "artifactRoots": ["docs/", "reports/", "logs/"],
+      "updatedAt": "2026-04-30T15:37:41Z"
+    },
+    {
+      "id": "jain",
+      "label": "J.A.I.N",
+      "lane": "worker",
+      "node": "jaimes-via-josh",
+      "privacyTier": "worker-scoped",
+      "brainFeedAgent": "jain",
+      "responsibilities": ["Scheduled workers", "intelligence scans", "X/watchlist monitors", "cron-heavy automation"],
+      "capabilities": ["cron", "monitoring", "intelligence-scan", "watchlist", "background-worker", "gemini-scheduled-summary"],
+      "safeTaskTypes": ["monitor", "scan", "status-check", "log-summary", "worker-report", "scheduled-summary"],
+      "restrictedTaskTypes": ["posting-side-effect", "high-frequency-bulk-wrap", "sensitive-account-action"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "artifactRoots": ["logs/", "data/", "reports/"],
+      "updatedAt": "2026-04-30T15:37:41Z"
+    }
+  ]
+}

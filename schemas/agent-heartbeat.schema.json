@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Heartbeats",
+  "type": "object",
+  "required": ["updatedAt", "heartbeats"],
+  "properties": {
+    "updatedAt": {"type": "string"},
+    "staleAfterMinutes": {"type": "integer"},
+    "heartbeats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["agent", "node", "status", "updatedAt"],
+        "properties": {
+          "agent": {"type": "string"},
+          "node": {"type": "string"},
+          "status": {"type": "string"},
+          "summary": {"type": "string"},
+          "updatedAt": {"type": "string"},
+          "stale": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

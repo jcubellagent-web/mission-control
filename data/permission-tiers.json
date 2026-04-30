@@ -1,0 +1,35 @@
+{
+  "updatedAt": "2026-04-30T15:37:41Z",
+  "tiers": [
+    {
+      "id": "dashboard-safe",
+      "label": "Dashboard Safe",
+      "requiresApproval": false,
+      "description": "Operational summaries safe for Mission Control and Brain Feed."
+    },
+    {
+      "id": "agent-private",
+      "label": "Agent Private",
+      "requiresApproval": false,
+      "description": "Operational detail for agents; do not show raw private contents in dashboard."
+    },
+    {
+      "id": "josh-approval",
+      "label": "Josh Approval",
+      "requiresApproval": true,
+      "description": "Requires Josh approval before execution."
+    },
+    {
+      "id": "sensitive-account",
+      "label": "Sensitive Account",
+      "requiresApproval": true,
+      "description": "Minimum-necessary summaries only; no raw connector/account contents forwarded to workers."
+    },
+    {
+      "id": "destructive",
+      "label": "Destructive",
+      "requiresApproval": true,
+      "description": "Never execute without explicit approval."
+    }
+  ]
+}

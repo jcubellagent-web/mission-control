@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/shared-agent-event.schema.json",
+  "title": "Shared Agent Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "time", "agent", "type", "title", "status", "privacy"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 120
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "string",
+      "enum": ["josh", "jaimes", "jain", "joshex"]
+    },
+    "agentLabel": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "type": {
+      "type": "string",
+      "enum": ["status", "job", "decision", "handoff", "blocked", "complete", "note"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "done", "blocked", "error", "info"]
+    },
+    "tool": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "detail": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "privacy": {
+      "type": "string",
+      "enum": ["dashboard-safe", "agent-private", "josh-only"]
+    },
+    "links": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "url"],
+        "properties": {
+          "label": {"type": "string", "maxLength": 80},
+          "url": {"type": "string", "maxLength": 300}
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "null"]
+      }
+    }
+  }
+}

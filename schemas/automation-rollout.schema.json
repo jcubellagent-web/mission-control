@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Automation Rollout",
+  "type": "object",
+  "required": ["updatedAt", "rollouts"],
+  "properties": {
+    "updatedAt": {"type": "string"},
+    "rollouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "agent", "node", "title", "status", "updatedAt"],
+        "properties": {
+          "id": {"type": "string"},
+          "agent": {"type": "string"},
+          "node": {"type": "string"},
+          "title": {"type": "string"},
+          "match": {"type": "string"},
+          "status": {"type": "string"},
+          "backup": {"type": "string"},
+          "updatedAt": {"type": "string"}
+        }
+      }
+    }
+  }
+}

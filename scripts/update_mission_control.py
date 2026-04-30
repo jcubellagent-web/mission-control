@@ -27,6 +27,20 @@ MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
 PERSONAL_CODEX_PATH = ROOT.parent / "data" / "personal-codex.json"
+AGENT_CONTROL_STATUS_PATH = ROOT.parent / "data" / "agent-control-status.json"
+CODEX_JOBS_PATH = ROOT.parent / "data" / "codex-jobs.json"
+SHARED_EVENTS_PATH = ROOT.parent / "data" / "shared-events.json"
+DECISIONS_PATH = ROOT.parent / "data" / "decisions.json"
+KNOWLEDGE_INDEX_PATH = ROOT.parent / "data" / "knowledge-index.json"
+HANDOFF_QUEUE_PATH = ROOT.parent / "data" / "handoff-queue.json"
+DAILY_ROLLUP_PATH = ROOT.parent / "data" / "daily-rollup.json"
+SHARED_LAYER_ADOPTION_PATH = ROOT.parent / "data" / "shared-layer-adoption.json"
+AGENT_TASK_QUEUE_PATH = ROOT.parent / "data" / "agent-task-queue.json"
+AGENT_CAPABILITIES_PATH = ROOT.parent / "data" / "agent-capabilities.json"
+AGENT_ROUTING_POLICY_PATH = ROOT.parent / "data" / "agent-routing-policy.json"
+AGENT_HEARTBEATS_PATH = ROOT.parent / "data" / "agent-heartbeats.json"
+CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
+AUTOMATION_ROLLOUT_PATH = ROOT.parent / "data" / "automation-rollout.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -334,6 +348,171 @@ def fetch_tracked_tasks() -> List[Dict[str, Any]]:
     except Exception as exc:
         print(f"[warn] fetch_tracked_tasks failed: {exc}", file=sys.stderr)
         return []
+
+
+def fetch_codex_jobs(now_iso: str) -> List[Dict[str, Any]]:
+    """Load today's Personal Codex-triggered automations for the jobs panel."""
+    if not CODEX_JOBS_PATH.exists():
+        return []
+    try:
+        raw = json.loads(CODEX_JOBS_PATH.read_text())
+        entries = raw.get("jobs", raw) if isinstance(raw, dict) else raw
+        if not isinstance(entries, list):
+            return []
+
+        today_local = dt.datetime.now().strftime("%Y-%m-%d")
+        jobs: List[Dict[str, Any]] = []
+        for idx, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            ts = str(entry.get("time") or entry.get("updatedAt") or entry.get("startedAt") or now_iso)
+            if today_local not in ts and not ts.startswith(now_iso[:10]):
+                continue
+            title = str(entry.get("title") or entry.get("name") or "").strip()
+            if not title:
+                continue
+            status = str(entry.get("status") or "done").strip().lower()
+            jobs.append({
+                "id": entry.get("id") or f"codex-job-{idx}",
+                "title": title[:120],
+                "status": status[:32],
+                "time": ts,
+                "tool": str(entry.get("tool") or "codex")[:48],
+                "detail": str(entry.get("detail") or entry.get("summary") or "")[:220],
+                "owner": str(entry.get("owner") or "Personal Codex")[:64],
+            })
+
+        jobs.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+        return jobs[:10]
+    except Exception as exc:
+        print(f"[warn] fetch_codex_jobs failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
+    if not SHARED_EVENTS_PATH.exists():
+        return []
+    try:
+        raw = json.loads(SHARED_EVENTS_PATH.read_text())
+        entries = raw.get("events", raw) if isinstance(raw, dict) else raw
+        if not isinstance(entries, list):
+            return []
+        today = dt.datetime.now().strftime("%Y-%m-%d")
+        events: List[Dict[str, Any]] = []
+        for idx, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("privacy") != "dashboard-safe":
+                continue
+            ts = str(entry.get("time") or now_iso)
+            if today not in ts and not ts.startswith(now_iso[:10]):
+                continue
+            title = str(entry.get("title") or "").strip()
+            if not title:
+                continue
+            events.append({
+                "id": str(entry.get("id") or f"shared-event-{idx}")[:140],
+                "time": ts,
+                "agent": str(entry.get("agent") or "joshex")[:24],
+                "agentLabel": str(entry.get("agentLabel") or entry.get("agent") or "Agent")[:80],
+                "type": str(entry.get("type") or "status")[:32],
+                "title": title[:160],
+                "status": str(entry.get("status") or "info")[:32],
+                "tool": str(entry.get("tool") or "")[:80],
+                "detail": str(entry.get("detail") or "")[:240],
+            })
+        events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+        return events[:20]
+    except Exception as exc:
+        print(f"[warn] fetch_shared_events failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
+    decisions = load_json_file(DECISIONS_PATH, {"decisions": []}).get("decisions", [])
+    knowledge = load_json_file(KNOWLEDGE_INDEX_PATH, {"entries": []})
+    handoffs = load_json_file(HANDOFF_QUEUE_PATH, {"handoffs": []}).get("handoffs", [])
+    rollup = load_json_file(DAILY_ROLLUP_PATH, {})
+    adoption = load_json_file(SHARED_LAYER_ADOPTION_PATH, {})
+    task_queue = load_json_file(AGENT_TASK_QUEUE_PATH, {"tasks": []})
+    capability_registry = load_json_file(AGENT_CAPABILITIES_PATH, {"agents": []})
+    routing_policy = load_json_file(AGENT_ROUTING_POLICY_PATH, {"routes": []})
+    heartbeats_payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": [], "staleAfterMinutes": 30})
+    inventory = load_json_file(CAPABILITY_INVENTORY_PATH, {"nodes": []})
+    automation_rollout = load_json_file(AUTOMATION_ROLLOUT_PATH, {"rollouts": []})
+    events = fetch_shared_events(now_iso)
+    open_handoffs = [h for h in handoffs if h.get("privacy") == "dashboard-safe" and h.get("status") in {"open", "blocked"}]
+    blocked_events = [e for e in events if e.get("status") in {"blocked", "error"} or e.get("type") == "blocked"]
+    latest_event_at = events[0].get("time") if events else None
+    fresh = bool(latest_event_at and is_recent_ts(latest_event_at, hours=6))
+    status = "attention" if blocked_events or len(open_handoffs) > 0 else "ready" if fresh else "stale"
+    tasks = [task for task in task_queue.get("tasks", []) if isinstance(task, dict)]
+    active_statuses = {"queued", "accepted", "active", "blocked", "error"}
+    active_tasks = [task for task in tasks if task.get("status") in active_statuses]
+    blocked_tasks = [task for task in tasks if task.get("status") in {"blocked", "error"}]
+    approval_tasks = [task for task in tasks if task.get("approval") == "required" and task.get("status") not in {"done", "cancelled"}]
+    task_counts_by_owner: Dict[str, int] = {}
+    for task in active_tasks:
+        owner = str(task.get("owner") or "unknown")
+        task_counts_by_owner[owner] = task_counts_by_owner.get(owner, 0) + 1
+    heartbeat_rows = [row for row in heartbeats_payload.get("heartbeats", []) if isinstance(row, dict)]
+    stale_after = int(heartbeats_payload.get("staleAfterMinutes") or 30)
+    now_dt = dt.datetime.now(dt.timezone.utc)
+    stale_heartbeats = []
+    fresh_heartbeats = []
+    for row in heartbeat_rows:
+        stamp = iso_to_dt(row.get("updatedAt"))
+        stale = not bool(stamp and (now_dt - stamp) <= dt.timedelta(minutes=stale_after))
+        row["stale"] = stale
+        if stale:
+            stale_heartbeats.append(row)
+        else:
+            fresh_heartbeats.append(row)
+    rollout_rows = [row for row in automation_rollout.get("rollouts", []) if isinstance(row, dict)]
+    wrapped_rollouts = [row for row in rollout_rows if row.get("status") == "wrapped"]
+    if blocked_tasks or approval_tasks or stale_heartbeats:
+        status = "attention"
+    return {
+        "status": status,
+        "updatedAt": latest_event_at or now_iso,
+        "counts": {
+            "eventsToday": len(events),
+            "decisions": len([d for d in decisions if d.get("privacy") == "dashboard-safe"]),
+            "knowledgeEntries": len(knowledge.get("entries", [])) if isinstance(knowledge, dict) else 0,
+            "openHandoffs": len(open_handoffs),
+            "blocked": len(blocked_events),
+            "activeTasks": len(active_tasks),
+            "blockedTasks": len(blocked_tasks),
+            "approvalNeeded": len(approval_tasks),
+            "capabilityAgents": len(capability_registry.get("agents", [])) if isinstance(capability_registry, dict) else 0,
+            "routingRules": len(routing_policy.get("routes", [])) if isinstance(routing_policy, dict) else 0,
+            "freshHeartbeats": len(fresh_heartbeats),
+            "staleHeartbeats": len(stale_heartbeats),
+            "inventoryNodes": len(inventory.get("nodes", [])) if isinstance(inventory, dict) else 0,
+            "wrappedAutomations": len(wrapped_rollouts),
+        },
+        "latestEvents": events[:6],
+        "recentDecisions": [d for d in decisions if d.get("privacy") == "dashboard-safe"][:6],
+        "knowledgeEntries": (knowledge.get("entries", []) if isinstance(knowledge, dict) else [])[:8],
+        "openHandoffs": open_handoffs[:6],
+        "dailyRollup": rollup,
+        "adoption": adoption,
+        "tasks": {
+            "active": active_tasks[:8],
+            "blocked": blocked_tasks[:8],
+            "approvalNeeded": approval_tasks[:8],
+            "byOwner": task_counts_by_owner,
+        },
+        "capabilities": capability_registry,
+        "routingPolicy": routing_policy,
+        "heartbeats": {
+            "staleAfterMinutes": stale_after,
+            "fresh": fresh_heartbeats[:8],
+            "stale": stale_heartbeats[:8],
+        },
+        "capabilityInventory": inventory,
+        "automationRollout": automation_rollout,
+    }
 
 
 def normalize_node_slug(raw: Any) -> str:
@@ -2177,8 +2356,10 @@ def build_capability_stack(
     sorare_ml: Dict[str, Any],
     voice_router: Dict[str, Any],
     ops_inbox: Dict[str, Any],
+    agent_control: Dict[str, Any] | None = None,
     personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
+    agent_summary = agent_control.get("summary", {}) if isinstance(agent_control, dict) else {}
     stack = [
         {
             "id": "visual-canaries",
@@ -2209,6 +2390,18 @@ def build_capability_stack(
             "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
         },
     ]
+    if agent_summary:
+        ready = agent_summary.get("readyAgents", 0)
+        total = agent_summary.get("totalAgents", 0)
+        failed = agent_summary.get("failedQueues", 0)
+        dirty = agent_summary.get("dirtyRepos", 0)
+        stack.append({
+            "id": "agent-control",
+            "name": "Agent Control",
+            "status": agent_summary.get("overall") or "unknown",
+            "summary": f"{ready}/{total} agent nodes ready",
+            "detail": f"{failed} queue item(s) · {dirty} dirty repo(s)",
+        })
     if personal_codex and personal_codex.get("status") != "offline":
         stack.append({
             "id": "personal-codex",
@@ -2854,6 +3047,9 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
         "devices": [],
         "products": [],
         "crons": [],
+        "codexJobs": [],
+        "sharedEvents": [],
+        "sharedOperatingLayer": {},
         "recentActivity": [],
         "lastUpdated": now_iso,
     }
@@ -2934,16 +3130,25 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    dashboard["codexJobs"]      = fetch_codex_jobs(now_iso)
+    dashboard["sharedEvents"]   = fetch_shared_events(now_iso)
+    dashboard["sharedOperatingLayer"] = fetch_shared_operating_layer(now_iso)
     dashboard["visualCanaries"] = fetch_visual_canaries()
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
     dashboard["personalCodex"] = normalize_personal_codex(load_json_file(PERSONAL_CODEX_PATH, {}), now_iso)
+    dashboard["agentControl"] = load_json_file(AGENT_CONTROL_STATUS_PATH, {
+        "generatedAt": now_iso,
+        "summary": {"overall": "unknown"},
+        "agents": {},
+    })
     dashboard["capabilityStack"] = build_capability_stack(
         dashboard["visualCanaries"],
         dashboard["sorareMlCockpit"],
         dashboard["voiceRouter"],
         dashboard["opsInbox"],
+        dashboard["agentControl"],
         dashboard["personalCodex"],
     )
     dashboard["actionRequired"] = build_action_required(
@@ -2964,6 +3169,14 @@ def main() -> None:
             "priority": "high",
             "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
             "url": "#canaries",
+        })
+    shared_layer = dashboard.get("sharedOperatingLayer", {})
+    if shared_layer.get("status") == "attention":
+        counts = shared_layer.get("counts", {})
+        dashboard["actionRequired"].insert(0, {
+            "priority": "medium",
+            "title": f"Shared layer needs attention: {counts.get('openHandoffs', 0)} handoff(s), {counts.get('blocked', 0)} blocked event(s), {counts.get('blockedTasks', 0)} blocked task(s), {counts.get('approvalNeeded', 0)} approval(s), {counts.get('staleHeartbeats', 0)} stale heartbeat(s)",
+            "url": "#jobs",
         })
     dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     dashboard["trackedTasks"]   = fetch_tracked_tasks()

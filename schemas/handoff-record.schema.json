@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/handoff-record.schema.json",
+  "title": "Handoff Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "time", "from", "to", "title", "status", "privacy"],
+  "properties": {
+    "id": {"type": "string", "minLength": 8, "maxLength": 140},
+    "time": {"type": "string", "format": "date-time"},
+    "from": {"type": "string", "enum": ["josh", "jaimes", "jain", "joshex"]},
+    "fromLabel": {"type": "string", "maxLength": 80},
+    "to": {"type": "string", "maxLength": 80},
+    "title": {"type": "string", "minLength": 1, "maxLength": 180},
+    "status": {"type": "string", "enum": ["open", "accepted", "done", "blocked"]},
+    "detail": {"type": "string", "maxLength": 800},
+    "path": {"type": "string", "maxLength": 300},
+    "privacy": {"type": "string", "enum": ["dashboard-safe", "agent-private", "josh-only"]}
+  }
+}

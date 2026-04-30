@@ -319,6 +319,70 @@
         .alert-item a:hover { color: rgba(255,255,255,0.8); }
         .alert-item a:hover { text-decoration: underline; }
 
+        .ops-glance-strip {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.1fr) repeat(3, minmax(132px, 0.7fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .ops-glance-item {
+            height: 66px;
+            min-height: 66px;
+            padding: 9px 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.035);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 4px;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .ops-glance-item.attention {
+            border-color: rgba(248,113,113,0.34);
+            background: rgba(127,29,29,0.18);
+        }
+        .ops-glance-item.ready {
+            border-color: rgba(74,222,128,0.22);
+            background: rgba(20,83,45,0.13);
+        }
+        .ops-glance-kicker {
+            font-size: 0.56rem;
+            line-height: 1.05;
+            color: rgba(255,255,255,0.45);
+            text-transform: uppercase;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ops-glance-value {
+            font-size: 0.92rem;
+            line-height: 1.12;
+            color: rgba(255,255,255,0.9);
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ops-glance-detail {
+            font-size: 0.64rem;
+            line-height: 1.22;
+            color: rgba(255,255,255,0.5);
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        @media (max-width: 900px) {
+            .ops-glance-strip { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 520px) {
+            .ops-glance-strip { grid-template-columns: 1fr; }
+            .ops-glance-item { height: 62px; min-height: 62px; }
+        }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 10px; margin-bottom: 16px; }
         .hero-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr); gap: 10px; margin-bottom: 16px; align-items: stretch; }
         @media (max-width: 900px) {
@@ -392,6 +456,48 @@
             object-fit: contain;
             display: block;
             opacity: 0.8;
+        }
+
+        /* Alignment hardening: keep module chrome stable as live data changes. */
+        .card,
+        .card *,
+        .ops-glance-item,
+        .jobs-agent-chip,
+        .shared-os-metric,
+        .mu-lane-card,
+        .agent-control-node,
+        .pcx-metric {
+            min-width: 0;
+        }
+        .card-header {
+            min-height: 34px;
+            flex-shrink: 0;
+        }
+        .card-header h2 {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        .section-icon-image,
+        .card-header .icon {
+            flex: 0 0 auto;
+        }
+        .mc-text-rail,
+        .brain-title,
+        .bf-objective-text,
+        .bf-step-label,
+        .ua-msg,
+        .pcx-summary,
+        .pcx-activity-text,
+        .agent-control-title,
+        .agent-control-node-meta,
+        .mu-lane-meta,
+        .mu-budget-note,
+        .intel-hi-text,
+        .intel-hi-reason {
+            overflow-wrap: anywhere;
         }
 
         .active-task {
@@ -741,15 +847,20 @@
             z-index: 1;
         }
         .brain-title {
-            font-size: clamp(1.22rem, 2.2vw, 1.9rem);
-            line-height: 1.04;
+            font-size: 1.48rem;
+            line-height: 1.12;
             font-weight: 780;
             color: rgba(255,255,255,0.98);
             margin-bottom: 0;
-            max-width: 92%;
-            letter-spacing: -0.03em;
+            max-width: 100%;
             position: relative;
             z-index: 1;
+            min-height: calc(1.48rem * 1.12 * 2);
+            max-height: calc(1.48rem * 1.12 * 2);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .brain-signal-strip {
             display: flex;
@@ -2029,6 +2140,237 @@
         .capability-k { font-size: 0.5rem; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.36); margin-bottom: 3px; }
         .capability-v { font-size: 0.68rem; font-weight: 850; color: rgba(255,255,255,0.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .capability-d { margin-top: 3px; font-size: 0.54rem; line-height: 1.2; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .agent-control-panel {
+            margin-top: 8px;
+            padding: 9px;
+            border: 1px solid rgba(96,165,250,0.22);
+            border-radius: 8px;
+            background: rgba(15,23,42,0.34);
+            display: grid;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .agent-control-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+        }
+        .agent-control-kicker {
+            font-size: 0.5rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(96,165,250,0.78);
+        }
+        .agent-control-title {
+            margin-top: 2px;
+            font-size: 0.76rem;
+            font-weight: 850;
+            color: rgba(255,255,255,0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .agent-control-status {
+            font-size: 0.55rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.76);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 4px 7px;
+            white-space: nowrap;
+        }
+        .agent-control-status.ready { color: #4ade80; border-color: rgba(74,222,128,0.26); background: rgba(74,222,128,0.06); }
+        .agent-control-status.degraded,
+        .agent-control-status.unknown { color: #fbbf24; border-color: rgba(251,191,36,0.26); background: rgba(251,191,36,0.06); }
+        .agent-control-status.offline,
+        .agent-control-status.blocked { color: #f87171; border-color: rgba(248,113,113,0.26); background: rgba(248,113,113,0.06); }
+        .agent-control-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 5px;
+        }
+        .agent-control-metric {
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.025);
+            padding: 6px;
+        }
+        .agent-control-metric-k {
+            font-size: 0.47rem;
+            font-weight: 850;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.34);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .agent-control-metric-v {
+            margin-top: 2px;
+            font-size: 0.68rem;
+            font-weight: 850;
+            color: rgba(255,255,255,0.88);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .agent-control-metric-v.ok { color: #4ade80; }
+        .agent-control-metric-v.warn { color: #fbbf24; }
+        .agent-control-metric-v.err { color: #f87171; }
+        .agent-control-nodes {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px;
+        }
+        .agent-control-node {
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.025);
+            padding: 7px;
+        }
+        .agent-control-node-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+        .agent-control-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.18);
+            flex-shrink: 0;
+        }
+        .agent-control-dot.ready { background: #4ade80; box-shadow: 0 0 5px rgba(74,222,128,0.5); }
+        .agent-control-dot.degraded,
+        .agent-control-dot.unknown { background: #fbbf24; box-shadow: 0 0 5px rgba(251,191,36,0.42); }
+        .agent-control-dot.offline,
+        .agent-control-dot.blocked { background: #f87171; box-shadow: 0 0 5px rgba(248,113,113,0.42); }
+        .agent-control-node-name {
+            min-width: 0;
+            flex: 1;
+            font-size: 0.61rem;
+            font-weight: 850;
+            color: rgba(255,255,255,0.84);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .agent-control-node-meta {
+            margin-top: 4px;
+            font-size: 0.52rem;
+            line-height: 1.25;
+            color: rgba(255,255,255,0.44);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .agent-control-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .agent-control-detail-node {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.025);
+            padding: 10px;
+            min-width: 0;
+        }
+        .agent-control-detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .agent-control-detail-title {
+            font-size: 0.76rem;
+            font-weight: 850;
+            color: rgba(255,255,255,0.9);
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .agent-control-detail-status {
+            font-size: 0.52rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+        }
+        .agent-control-detail-status.ready { color: #4ade80; }
+        .agent-control-detail-status.degraded,
+        .agent-control-detail-status.unknown { color: #fbbf24; }
+        .agent-control-detail-status.offline,
+        .agent-control-detail-status.blocked { color: #f87171; }
+        .agent-control-service-list,
+        .agent-control-model-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .agent-control-service-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.58rem;
+            color: rgba(255,255,255,0.58);
+        }
+        .agent-control-service-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .agent-control-service-state {
+            font-weight: 850;
+            text-transform: uppercase;
+            font-size: 0.5rem;
+            letter-spacing: 0.06em;
+            color: rgba(255,255,255,0.5);
+        }
+        .agent-control-service-state.ready,
+        .agent-control-service-state.idle { color: #4ade80; }
+        .agent-control-service-state.auth_required { color: #60a5fa; }
+        .agent-control-service-state.degraded,
+        .agent-control-service-state.unknown { color: #fbbf24; }
+        .agent-control-service-state.offline,
+        .agent-control-service-state.blocked { color: #f87171; }
+        .agent-control-model-list {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .agent-control-model-chip {
+            max-width: 100%;
+            padding: 3px 6px;
+            border-radius: 8px;
+            background: rgba(96,165,250,0.08);
+            border: 1px solid rgba(96,165,250,0.12);
+            color: rgba(255,255,255,0.68);
+            font-size: 0.52rem;
+            font-weight: 750;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (max-width: 760px) {
+            .agent-control-metrics,
+            .agent-control-nodes,
+            .agent-control-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .personal-codex-panel {
             margin-top: 8px;
             padding: 10px;
@@ -3173,6 +3515,11 @@
             flex-direction: column;
             gap: 10px;
         }
+        .bf-objective-text-wrap {
+            min-height: calc(var(--bf-objective-font-size, 1.36rem) * var(--bf-objective-line-height, 1.12) * 2 + 0.2rem);
+            max-height: calc(var(--bf-objective-font-size, 1.36rem) * var(--bf-objective-line-height, 1.12) * 2 + 0.2rem);
+            overflow: hidden;
+        }
         .bf-objective-meta {
             display: flex;
             align-items: center;
@@ -3193,17 +3540,16 @@
             margin-bottom: 0;
         }
         .bf-objective-text {
-            font-size: clamp(1.34rem, 2.4vw, 2rem);
+            font-size: var(--bf-objective-font-size, 1.36rem);
             font-weight: 780;
             color: rgba(255,255,255,0.99);
-            line-height: 1.03;
-            letter-spacing: -0.035em;
+            line-height: var(--bf-objective-line-height, 1.12);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-shadow: 0 1px 14px rgba(0,0,0,0.32);
-            padding-bottom: 2px;
+            padding-bottom: 0;
         }
         .bf-signal-row {
             display: grid;
@@ -5581,6 +5927,183 @@
             margin-left: 2px;
         }
 
+        .card-jobs-full .codex-jobs-top {
+            margin: 0 0 12px;
+            padding: 8px;
+            border: 1px solid rgba(34,211,238,0.18);
+            border-radius: 8px;
+            background: rgba(34,211,238,0.045);
+        }
+        .card-jobs-full .codex-jobs-header {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 6px;
+        }
+        .card-jobs-full .codex-jobs-kicker {
+            font-size: 0.54rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: #67e8f9;
+        }
+        .card-jobs-full .codex-jobs-count {
+            margin-left: auto;
+            font-size: 0.54rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.58);
+            border: 1px solid rgba(34,211,238,0.16);
+            border-radius: 4px;
+            padding: 1px 6px;
+            background: rgba(34,211,238,0.07);
+        }
+        .card-jobs-full .codex-job-row {
+            display: grid;
+            grid-template-columns: 5px minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            padding: 5px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .card-jobs-full .codex-job-row:first-of-type { border-top: 0; }
+        .card-jobs-full .codex-job-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #67e8f9;
+            box-shadow: 0 0 5px rgba(103,232,249,0.45);
+        }
+        .card-jobs-full .codex-job-title {
+            font-size: 0.70rem;
+            color: var(--rv-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-jobs-full .codex-job-detail {
+            margin-top: 2px;
+            font-size: 0.56rem;
+            color: var(--rv-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-jobs-full .codex-job-meta {
+            font-size: 0.54rem;
+            color: rgba(255,255,255,0.44);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .card-jobs-full .shared-ledger-top {
+            margin: 0 0 12px;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.025);
+        }
+        .card-jobs-full .shared-ledger-header {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 6px;
+        }
+        .card-jobs-full .shared-ledger-kicker {
+            font-size: 0.54rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.70);
+        }
+        .card-jobs-full .shared-ledger-count {
+            margin-left: auto;
+            font-size: 0.54rem;
+            color: rgba(255,255,255,0.48);
+        }
+        .card-jobs-full .shared-event-row {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: baseline;
+            padding: 4px 0;
+            border-top: 1px solid rgba(255,255,255,0.045);
+        }
+        .card-jobs-full .shared-event-row:first-of-type { border-top: 0; }
+        .card-jobs-full .shared-event-agent {
+            font-size: 0.50rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.54);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            padding: 1px 5px;
+        }
+        .card-jobs-full .shared-event-title {
+            font-size: 0.64rem;
+            color: rgba(255,255,255,0.78);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-jobs-full .shared-event-meta {
+            font-size: 0.52rem;
+            color: rgba(255,255,255,0.36);
+            white-space: nowrap;
+        }
+        .card-jobs-full .shared-os-top {
+            margin: 0 0 12px;
+            padding: 8px;
+            border: 1px solid rgba(74,222,128,0.16);
+            border-radius: 8px;
+            background: rgba(74,222,128,0.035);
+        }
+        .card-jobs-full .shared-os-header {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 7px;
+        }
+        .card-jobs-full .shared-os-title {
+            font-size: 0.54rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: #86efac;
+        }
+        .card-jobs-full .shared-os-status {
+            margin-left: auto;
+            font-size: 0.54rem;
+            color: rgba(255,255,255,0.50);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .card-jobs-full .shared-os-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+        }
+        .card-jobs-full .shared-os-metric {
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            padding: 5px 6px;
+            background: rgba(0,0,0,0.12);
+        }
+        .card-jobs-full .shared-os-num {
+            display: block;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.86);
+            font-variant-numeric: tabular-nums;
+        }
+        .card-jobs-full .shared-os-label {
+            display: block;
+            margin-top: 1px;
+            font-size: 0.50rem;
+            color: rgba(255,255,255,0.40);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         /* Job rows: calmer, shorter */
         .card-jobs-full .tjob-row {
             padding: 6px 8px;
@@ -6425,6 +6948,294 @@
             body:not(.phone-mode) .card-model .mu-health-machine { padding: 4px 6px !important; }
         }
 
+        /* Mission Control alignment pass: stable rails, no clipped primary text. */
+        .brain-title {
+            font-size: 1.42rem !important;
+            line-height: 1.14 !important;
+            min-height: calc(1.42rem * 1.14 * 2) !important;
+            max-height: calc(1.42rem * 1.14 * 2) !important;
+            letter-spacing: 0 !important;
+        }
+        .bf-objective,
+        .bf-objective.bf-objective-compact {
+            --bf-objective-font-size: 1.36rem !important;
+            --bf-objective-line-height: 1.14 !important;
+            min-height: 128px !important;
+        }
+        .bf-objective-text-wrap,
+        .bf-hero-grid.dual-live .bf-objective-text-wrap {
+            height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem) !important;
+            min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem) !important;
+            max-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2 + 0.24rem) !important;
+            overflow: hidden !important;
+        }
+        .bf-objective-text {
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            min-height: 0 !important;
+            color: rgba(255,255,255,0.96) !important;
+            letter-spacing: 0 !important;
+            animation: none !important;
+            transform: none !important;
+            will-change: auto !important;
+        }
+        .bf-objective-detail,
+        .bf-hero-grid.dual-live .bf-objective-detail {
+            min-height: 2.8em !important;
+            max-height: 2.8em !important;
+            overflow: hidden !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            line-height: 1.4 !important;
+        }
+        .bf-signal-chip {
+            min-height: 62px;
+        }
+        .bf-signal-label,
+        .jobs-section-title,
+        .job-group-title,
+        .tjob-cat-name,
+        .shared-ledger-kicker,
+        .shared-os-title,
+        .ops-center-k,
+        .capability-k,
+        .agent-control-kicker,
+        .pcx-kicker {
+            letter-spacing: 0 !important;
+        }
+        .bf-step-label,
+        .ua-msg,
+        .chat-bubble-msg,
+        .intel-hi-text,
+        .intel-hi-reason {
+            hyphens: auto;
+        }
+        .card-jobs-full .codex-job-row,
+        .card-jobs-full .shared-event-row,
+        .jobs-cron-row,
+        .tjob-row,
+        .cron-row {
+            min-height: 28px;
+        }
+        .card-jobs-full .codex-job-title,
+        .card-jobs-full .codex-job-detail,
+        .card-jobs-full .shared-event-title,
+        .jobs-cron-name,
+        .tjob-name,
+        .tjob-subline,
+        .cron-name,
+        .cron-desc,
+        .jobs-agent-status {
+            line-height: 1.25;
+        }
+        .card-jobs-full .shared-os-metric,
+        .ops-center-tile,
+        .capability-tile,
+        .agent-control-metric,
+        .agent-control-node,
+        .pcx-metric {
+            min-height: 48px;
+            overflow: hidden;
+        }
+        .pcx-summary,
+        .pcx-activity-text,
+        .agent-control-node-meta,
+        .capability-d,
+        .mu-lane-meta,
+        .mu-budget-note,
+        .mu-codexbar-note {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            white-space: normal !important;
+            overflow: hidden !important;
+            line-height: 1.32;
+        }
+        .mu-lane-card {
+            min-height: 104px;
+        }
+        .mu-lane-head,
+        .mu-active-head,
+        .agent-control-top,
+        .pcx-top,
+        .shared-ledger-header,
+        .shared-os-header,
+        .codex-jobs-header {
+            min-height: 24px;
+        }
+        .mu-active-spend,
+        .jobs-cron-ts,
+        .shared-event-meta,
+        .codex-job-meta,
+        .tjob-schedule,
+        .tjob-status-label,
+        .ops-glance-value,
+        .ops-glance-detail {
+            font-variant-numeric: tabular-nums;
+        }
+        @media (min-width: 1180px) {
+            body:not(.phone-mode) .card-brain.brain-active .bf-objective {
+                --bf-objective-font-size: 1.34rem !important;
+                --bf-objective-line-height: 1.14 !important;
+                min-height: 126px !important;
+            }
+            body:not(.phone-mode) .card-brain.brain-active .bf-signal-row {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+            body:not(.phone-mode) .card-model .mu-lane-card {
+                min-height: 92px !important;
+            }
+        }
+        body.phone-mode .brain-title {
+            font-size: 1.16rem !important;
+            min-height: calc(1.16rem * 1.18 * 2) !important;
+            max-height: calc(1.16rem * 1.18 * 2) !important;
+            line-height: 1.18 !important;
+        }
+
+        /* Mission Control alignment pass 2: fixed gutters and reliable text rails. */
+        .card-header,
+        .card-model-health .card-header,
+        .card-jobs-full .card-header,
+        .card-brain .card-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        .card-header > div:first-child,
+        .card-model-health .card-header-main {
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+        }
+        .card-header-actions,
+        .card-model-health .card-header-actions,
+        .card-header .module-action-btn,
+        .card-header .refresh-btn {
+            flex: 0 0 auto !important;
+        }
+        .card-jobs-full .jobs-agents-row {
+            top: 46px !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 6px !important;
+        }
+        .jobs-agent-chip,
+        .card-jobs-full .jobs-agent-chip {
+            width: 100% !important;
+            min-height: 28px !important;
+            overflow: hidden !important;
+        }
+        .jobs-agent-name {
+            max-width: 42px !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        .jobs-agent-status {
+            display: block !important;
+            min-width: 0 !important;
+        }
+        .card-jobs-full .codex-job-row,
+        .card-jobs-full .shared-event-row {
+            grid-template-columns: 7px minmax(0, 1fr) minmax(44px, auto) !important;
+            align-items: center !important;
+        }
+        .card-jobs-full .codex-job-title,
+        .card-jobs-full .codex-job-detail,
+        .card-jobs-full .shared-event-title {
+            display: block !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        .card-jobs-full .codex-job-meta,
+        .card-jobs-full .shared-event-meta {
+            justify-self: end !important;
+            max-width: 86px !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        .card-jobs-full .shared-os-metrics,
+        .agent-control-metrics,
+        .pcx-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        .pcx-title,
+        .pcx-status,
+        .pcx-metric-k,
+        .pcx-metric-v,
+        .agent-control-title,
+        .agent-control-status,
+        .agent-control-metric-k,
+        .agent-control-metric-v,
+        .mu-lane-main,
+        .mu-breakdown-main,
+        .mu-active-main,
+        .mu-active-spend-val,
+        .mu-compact-name,
+        .mu-compact-cost {
+            min-width: 0 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        .pcx-status,
+        .agent-control-status,
+        .mu-active-spend,
+        .mu-breakdown-pill,
+        .mu-compact-cost {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+        }
+        .tjob-cat-header,
+        .codex-jobs-header,
+        .shared-ledger-header,
+        .shared-os-header,
+        .agent-control-top,
+        .pcx-top,
+        .mu-lane-head,
+        .mu-breakdown-head,
+        .mu-active-head {
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+        .tjob-cat-name,
+        .codex-jobs-kicker,
+        .shared-ledger-kicker,
+        .shared-os-title,
+        .mu-lane-name,
+        .mu-breakdown-kicker,
+        .mu-active-kicker {
+            min-width: 0 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+        .tjob-cat-count,
+        .codex-jobs-count,
+        .shared-ledger-count,
+        .shared-os-status {
+            flex: 0 0 auto !important;
+            white-space: nowrap !important;
+        }
+        @media (min-width: 1180px) {
+            body:not(.phone-mode) .card-model-health .mu-drill-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            }
+            body:not(.phone-mode) .card-model-health .mu-drill-card {
+                min-height: 96px !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode) .card-model-health .mu-drill-main,
+            body:not(.phone-mode) .card-model-health .mu-drill-sub {
+                display: -webkit-box !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode) .card-model-health .mu-drill-main { -webkit-line-clamp: 2 !important; }
+            body:not(.phone-mode) .card-model-health .mu-drill-sub { -webkit-line-clamp: 1 !important; }
+        }
+
         @media (max-width: 520px) {
             #airpoint-toggle,
             #layout-mode-toggle,
@@ -6521,6 +7332,8 @@
             </div>
             <div class="alert-items" id="action-items"></div>
         </div>
+
+        <div class="ops-glance-strip" id="ops-glance-strip" aria-label="Agent ecosystem glance status"></div>
 
         <div class="stats-row" id="stats-row"></div>
 
@@ -6646,6 +7459,23 @@
                                     <span class="sh-metric"><span class="sh-ml">Tasks</span><span class="sh-mv" id="sh-jaimes-tasks">—</span></span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="agent-control-panel" class="agent-control-panel module-click-row" onclick="openModuleModal('health')" aria-label="Agent Control">
+                            <div class="agent-control-top">
+                                <div>
+                                    <div class="agent-control-kicker">Agent Control</div>
+                                    <div class="agent-control-title" id="agent-control-title">Loading ecosystem status</div>
+                                </div>
+                                <div class="agent-control-status unknown" id="agent-control-status">unknown</div>
+                            </div>
+                            <div class="agent-control-metrics">
+                                <div class="agent-control-metric"><div class="agent-control-metric-k">Ready</div><div class="agent-control-metric-v" id="agent-control-ready">—</div></div>
+                                <div class="agent-control-metric"><div class="agent-control-metric-k">Queue</div><div class="agent-control-metric-v" id="agent-control-queues">—</div></div>
+                                <div class="agent-control-metric"><div class="agent-control-metric-k">Repos</div><div class="agent-control-metric-v" id="agent-control-repos">—</div></div>
+                                <div class="agent-control-metric"><div class="agent-control-metric-k">Models</div><div class="agent-control-metric-v" id="agent-control-models">—</div></div>
+                            </div>
+                            <div class="agent-control-nodes" id="agent-control-nodes"></div>
                         </div>
 
                         <div id="personal-codex-panel" class="personal-codex-panel" aria-label="Personal Codex">
@@ -8334,8 +9164,157 @@
             if (badge && f.generatedAt) badge.title = 'Last: ' + formatRelTime(f.generatedAt);
         }
 
+        function normalizeAgentControlStatus(status) {
+            const raw = String(status || 'unknown').toLowerCase().replace(/\s+/g, '_');
+            if (['ready', 'degraded', 'blocked', 'offline', 'unknown', 'auth_required', 'idle'].includes(raw)) return raw;
+            return 'unknown';
+        }
+
+        function agentControlStatusClass(status) {
+            const raw = normalizeAgentControlStatus(status);
+            return raw === 'auth_required' || raw === 'idle' ? 'ready' : raw;
+        }
+
+        function getAgentControlAgents(agentControl) {
+            const agents = agentControl && agentControl.agents && typeof agentControl.agents === 'object'
+                ? Object.entries(agentControl.agents).map(([id, agent]) => ({ id, ...(agent || {}) }))
+                : [];
+            return agents.sort((a, b) => {
+                const order = { josh2: 0, jaimes: 1, jain: 2 };
+                return (order[a.id] ?? 9) - (order[b.id] ?? 9);
+            });
+        }
+
+        function countAgentControlDirtyRepos(agent) {
+            return (Array.isArray(agent?.repos) ? agent.repos : []).filter(repo => Number(repo?.dirtyCount || 0) > 0).length;
+        }
+
+        function renderAgentControlPanel(data) {
+            const panel = document.getElementById('agent-control-panel');
+            if (!panel) return;
+            const agentControl = data?.agentControl || {};
+            const summary = agentControl.summary || {};
+            const agents = getAgentControlAgents(agentControl);
+            const overall = normalizeAgentControlStatus(summary.overall || (agents.length ? 'ready' : 'unknown'));
+            const ready = Number(summary.readyAgents || 0);
+            const total = Number(summary.totalAgents || agents.length || 0);
+            const failedQueues = Number(summary.failedQueues || 0);
+            const dirtyRepos = Number(summary.dirtyRepos || 0);
+            const localModels = Number(summary.localModels || agents.reduce((sum, agent) => sum + (Array.isArray(agent.models) ? agent.models.length : 0), 0));
+            const authRequired = Number(summary.authRequiredServices || 0);
+
+            const statusEl = document.getElementById('agent-control-status');
+            const titleEl = document.getElementById('agent-control-title');
+            const readyEl = document.getElementById('agent-control-ready');
+            const queuesEl = document.getElementById('agent-control-queues');
+            const reposEl = document.getElementById('agent-control-repos');
+            const modelsEl = document.getElementById('agent-control-models');
+            const nodesEl = document.getElementById('agent-control-nodes');
+
+            if (statusEl) {
+                statusEl.textContent = overall.replace('_', ' ');
+                statusEl.className = `agent-control-status ${agentControlStatusClass(overall)}`;
+            }
+            if (titleEl) {
+                titleEl.textContent = total ? `${ready}/${total} nodes ready${authRequired ? ' · ' + authRequired + ' auth surfaces' : ''}` : 'Waiting for agentctl snapshot';
+            }
+            if (readyEl) {
+                readyEl.textContent = total ? `${ready}/${total}` : '—';
+                readyEl.className = `agent-control-metric-v ${ready === total && total ? 'ok' : total ? 'warn' : ''}`;
+            }
+            if (queuesEl) {
+                queuesEl.textContent = String(failedQueues);
+                queuesEl.className = `agent-control-metric-v ${failedQueues ? 'warn' : 'ok'}`;
+            }
+            if (reposEl) {
+                reposEl.textContent = String(dirtyRepos);
+                reposEl.className = `agent-control-metric-v ${dirtyRepos ? 'warn' : 'ok'}`;
+            }
+            if (modelsEl) {
+                modelsEl.textContent = String(localModels);
+                modelsEl.className = 'agent-control-metric-v ok';
+            }
+            if (nodesEl) {
+                nodesEl.innerHTML = agents.length ? agents.map(agent => {
+                    const services = Array.isArray(agent.services) ? agent.services : [];
+                    const readyServices = services.filter(service => ['ready', 'idle', 'auth_required'].includes(normalizeAgentControlStatus(service.status))).length;
+                    const serviceCount = services.length;
+                    const queueCount = Number(agent?.queues?.failedDeliveryCount || 0);
+                    const dirtyCount = countAgentControlDirtyRepos(agent);
+                    const modelCount = Array.isArray(agent.models) ? agent.models.length : 0;
+                    const status = normalizeAgentControlStatus(agent.status);
+                    return `<div class="agent-control-node">
+                        <div class="agent-control-node-head">
+                            <span class="agent-control-dot ${agentControlStatusClass(status)}"></span>
+                            <span class="agent-control-node-name">${escapeHtml(agent.label || agent.id || 'Agent')}</span>
+                        </div>
+                        <div class="agent-control-node-meta">${readyServices}/${serviceCount} services · ${queueCount} queue · ${dirtyCount} repos · ${modelCount} models</div>
+                    </div>`;
+                }).join('') : '<div class="agent-control-node"><div class="agent-control-node-head"><span class="agent-control-dot unknown"></span><span class="agent-control-node-name">No snapshot yet</span></div><div class="agent-control-node-meta">Snapshot pending</div></div>';
+            }
+            window._moduleAgentControlHtml = buildAgentControlDetailHtml(agentControl);
+        }
+
+        function buildAgentControlDetailHtml(agentControl) {
+            const summary = agentControl?.summary || {};
+            const agents = getAgentControlAgents(agentControl);
+            const generatedAt = agentControl?.generatedAt ? formatRelTime(agentControl.generatedAt) : 'not generated';
+            const summaryRows = `
+                <div class="mu-arch-list">
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Overall</span><span class="mu-arch-list-val">${escapeHtml(summary.overall || 'unknown')}</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Ready nodes</span><span class="mu-arch-list-val">${Number(summary.readyAgents || 0)}/${Number(summary.totalAgents || agents.length || 0)}</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Auth-required surfaces</span><span class="mu-arch-list-val">${Number(summary.authRequiredServices || 0)}</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Failed queue items</span><span class="mu-arch-list-val">${Number(summary.failedQueues || 0)}</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Dirty repos</span><span class="mu-arch-list-val">${Number(summary.dirtyRepos || 0)} repos · ${Number(summary.dirtyRepoEntries || 0)} entries</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Local models</span><span class="mu-arch-list-val">${Number(summary.localModels || 0)}</span></div>
+                    <div class="mu-arch-list-row"><span class="mu-arch-list-key">Snapshot</span><span class="mu-arch-list-val">${escapeHtml(generatedAt)}</span></div>
+                </div>`;
+
+            const nodeCards = agents.map(agent => {
+                const status = normalizeAgentControlStatus(agent.status);
+                const services = Array.isArray(agent.services) ? agent.services : [];
+                const models = Array.isArray(agent.models) ? agent.models : [];
+                const queueCount = Number(agent?.queues?.failedDeliveryCount || 0);
+                const dirtyRepoCount = countAgentControlDirtyRepos(agent);
+                const serviceRows = services.slice(0, 10).map(service => {
+                    const serviceStatus = normalizeAgentControlStatus(service.status);
+                    return `<div class="agent-control-service-row">
+                        <span class="agent-control-service-name">${escapeHtml(service.label || service.id || 'service')}</span>
+                        <span class="agent-control-service-state ${serviceStatus}">${escapeHtml(serviceStatus.replace('_', ' '))}</span>
+                    </div>`;
+                }).join('');
+                const modelRows = models.slice(0, 8).map(model => `<span class="agent-control-model-chip" title="${escapeHtml(model.name || '')}">${escapeHtml(model.name || 'model')}</span>`).join('');
+                return `<div class="agent-control-detail-node">
+                    <div class="agent-control-detail-head">
+                        <div class="agent-control-detail-title">${escapeHtml(agent.label || agent.id || 'Agent')}</div>
+                        <div class="agent-control-detail-status ${agentControlStatusClass(status)}">${escapeHtml(status.replace('_', ' '))}</div>
+                    </div>
+                    <div class="mu-arch-list">
+                        <div class="mu-arch-list-row"><span class="mu-arch-list-key">Host</span><span class="mu-arch-list-val">${escapeHtml(agent.host || agent.sshTarget || 'unknown')}</span></div>
+                        <div class="mu-arch-list-row"><span class="mu-arch-list-key">Role</span><span class="mu-arch-list-val">${escapeHtml(agent.role || 'worker')}</span></div>
+                        <div class="mu-arch-list-row"><span class="mu-arch-list-key">Queue</span><span class="mu-arch-list-val">${queueCount} failed</span></div>
+                        <div class="mu-arch-list-row"><span class="mu-arch-list-key">Dirty repos</span><span class="mu-arch-list-val">${dirtyRepoCount}</span></div>
+                    </div>
+                    <div class="agent-control-service-list">${serviceRows || '<div class="agent-control-service-row"><span class="agent-control-service-name">No service probes</span><span class="agent-control-service-state unknown">unknown</span></div>'}</div>
+                    <div class="agent-control-model-list">${modelRows || '<span class="agent-control-model-chip">no local models</span>'}</div>
+                </div>`;
+            }).join('');
+
+            return `<div class="module-modal-stack">
+                <div class="module-modal-panel">
+                    <div class="module-modal-section-title">Agent Control Snapshot</div>
+                    ${summaryRows}
+                </div>
+                <div class="module-modal-panel">
+                    <div class="module-modal-section-title">Node detail</div>
+                    <div class="agent-control-detail-grid">${nodeCards || '<div class="agent-control-detail-node"><div class="agent-control-detail-title">No nodes reported</div></div>'}</div>
+                </div>
+            </div>`;
+        }
+
         // ── System Health Panel ───────────────────────────────────────────
         function renderSystemHealth(data, brainFeed, jainBf, jaimesBf) {
+            renderAgentControlPanel(data);
             // JOSH 2.0
             const joshDot = document.getElementById('sh-josh-dot');
             const joshGw = document.getElementById('sh-josh-gw');
@@ -9723,28 +10702,14 @@
                 const fullText = textEl.dataset.fullText || textEl.textContent || '';
                 textEl.classList.remove('is-scrolling');
                 textEl.style.opacity = '1';
-                requestAnimationFrame(() => {
-                    const fitState = fitBrainFeedObjectiveViewport(scope, fullText);
-                    if (fitState.fitted) {
-                        textEl.textContent = fullText;
-                        return;
-                    }
-                    const windows = buildBrainFeedObjectiveWindows(textEl, wrap, fullText);
-                    if (windows.length <= 1) {
-                        textEl.textContent = fullText;
-                        return;
-                    }
-                    let index = 0;
-                    textEl.textContent = windows[0];
-                    scope._objectiveTicker = setInterval(() => {
-                        index = (index + 1) % windows.length;
-                        textEl.style.opacity = '0';
-                        setTimeout(() => {
-                            textEl.textContent = windows[index];
-                            textEl.style.opacity = '1';
-                        }, 160);
-                    }, 4200);
-                });
+                textEl.textContent = fullText;
+                textEl.dataset.fullText = fullText;
+                textEl.style.removeProperty('font-size');
+                textEl.style.removeProperty('line-height');
+                textEl.style.removeProperty('min-height');
+                wrap.style.removeProperty('height');
+                wrap.style.removeProperty('min-height');
+                wrap.style.removeProperty('max-height');
             });
         }
 
@@ -10449,6 +11414,53 @@
                 actionBanner.classList.add('empty');
             } }
 
+            // Ops Glance — always visible in kiosk/phone modes
+            const opsGlance = document.getElementById('ops-glance-strip');
+            const sharedCounts = data.sharedOperatingLayer?.counts || {};
+            const heartbeatFresh = Number(sharedCounts.freshHeartbeats || 0);
+            const heartbeatStale = Number(sharedCounts.staleHeartbeats || 0);
+            const blockedEvents = Number(sharedCounts.blocked || 0);
+            const approvalNeeded = Number(sharedCounts.approvalNeeded || 0);
+            const activeTasks = Number(sharedCounts.activeTasks || 0);
+            const wrappedAutomations = Number(sharedCounts.wrappedAutomations || 0);
+            const visibleAlerts = Array.isArray(data.actionRequired) ? data.actionRequired.length : 0;
+            const topAlert = visibleAlerts ? (data.actionRequired[0]?.title || 'Review Action Required') : 'No action required';
+            const glanceItems = [
+                {
+                    kicker: visibleAlerts ? 'Action required' : 'All clear',
+                    value: visibleAlerts ? `${visibleAlerts} item${visibleAlerts === 1 ? '' : 's'}` : 'Clear',
+                    detail: topAlert,
+                    state: visibleAlerts ? 'attention' : 'ready',
+                },
+                {
+                    kicker: 'Agent heartbeat',
+                    value: heartbeatStale ? `${heartbeatStale} stale` : `${heartbeatFresh || 0} fresh`,
+                    detail: heartbeatStale ? 'Check agent freshness' : 'JOSHeX, Josh, JAIMES, J.A.I.N',
+                    state: heartbeatStale ? 'attention' : 'ready',
+                },
+                {
+                    kicker: 'Shared layer',
+                    value: blockedEvents || approvalNeeded ? 'Attention' : 'Ready',
+                    detail: `${blockedEvents} blocked · ${approvalNeeded} approval · ${activeTasks} active`,
+                    state: blockedEvents || approvalNeeded ? 'attention' : 'ready',
+                },
+                {
+                    kicker: 'Automation rollout',
+                    value: wrappedAutomations ? `${wrappedAutomations} wrapped` : 'Pending',
+                    detail: wrappedAutomations ? 'Wrapped jobs reporting' : 'Cron permission blocks install',
+                    state: wrappedAutomations ? 'ready' : 'attention',
+                },
+            ];
+            if (opsGlance && sectionChanged('opsGlance', glanceItems)) {
+                opsGlance.innerHTML = glanceItems.map(item => `
+                    <div class="ops-glance-item ${item.state}">
+                        <div class="ops-glance-kicker">${escapeHtml(item.kicker)}</div>
+                        <div class="ops-glance-value">${escapeHtml(item.value)}</div>
+                        <div class="ops-glance-detail" title="${escapeHtml(item.detail)}">${escapeHtml(item.detail)}</div>
+                    </div>
+                `).join('');
+            }
+
             // Stats Row (diff-guarded)
             const statsRow = document.getElementById('stats-row');
             const enabledCrons = data.crons?.filter(c => c.status !== 'paused').length || 0;
@@ -11026,13 +12038,14 @@
                             </div>
                         </div>
                     </div>`;
-                const healthDetailHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
+                const agentControlDetailHtml = buildAgentControlDetailHtml(data.agentControl || {});
+                const healthDetailHtml = `<div class="module-modal-stack">${agentControlDetailHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
                 const healthAlerts = [mhData.josh, mhData.jain].filter(mh => mh && mh.available && ((mh.cpu_pct || 0) > 80 || (mh.disk_pct || 0) > 85)).length;
                 const onlineNodes = [mhData.josh, mhData.jain].filter(mh => mh && mh.available).length;
                 window._moduleUsageStatsHtml = usageDetailHtml;
                 window._moduleArchitectureHtml = architectureHtml;
                 window._moduleHealthHtml = healthDetailHtml;
-                window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
+                window._moduleUsageHubHtml = `<div class="module-modal-stack"><div class="module-modal-panel"><div class="module-modal-section-title">Usage</div>${usageDetailHtml}</div>${architectureHtml}${agentControlDetailHtml}<div class="module-modal-panel"><div class="module-modal-section-title">Device health</div>${healthHtml}</div></div>`;
 
                 modelUsageCard.innerHTML = summaryHtml + runRateHtml + budgetStripHtml + laneGridHtml + breakdownHtml + elHtml;
             modelUsageCard.classList.remove('section-updated');
@@ -11088,9 +12101,15 @@
 
             // Today's Jobs (diff-guarded) — reskinned
             const todayCrons = (Array.isArray(data.crons) ? data.crons : []).filter(cron => cron.todayRelevant !== false);
+            const codexJobs = Array.isArray(data.codexJobs) ? data.codexJobs : [];
+            const sharedEvents = Array.isArray(data.sharedEvents) ? data.sharedEvents : [];
+            const sharedLayer = data.sharedOperatingLayer && typeof data.sharedOperatingLayer === 'object' ? data.sharedOperatingLayer : {};
             const todayJobsPayload = {
                 crons: todayCrons,
                 trackedTasks: Array.isArray(data.trackedTasks) ? data.trackedTasks : [],
+                codexJobs,
+                sharedEvents,
+                sharedLayer,
             };
             if (sectionChanged('todayJobs', todayJobsPayload)) {
             const todayJobsCard = document.getElementById('today-jobs-card');
@@ -11107,6 +12126,69 @@
             };
             const categoryOrder = ['Intelligence Feed', 'X Account', 'Sorare MLB', 'Fantasy Baseball', 'Maintenance', 'Appointments'];
             const trackedTasks = Array.isArray(data.trackedTasks) ? data.trackedTasks : [];
+
+            const codexJobsHtml = codexJobs.length ? `<div class="codex-jobs-top" id="codex-jobs-top">
+                <div class="codex-jobs-header">
+                    <span class="codex-jobs-kicker">CODEX AUTOMATIONS</span>
+                    <span class="codex-jobs-count">${codexJobs.length} today</span>
+                </div>
+                ${codexJobs.slice(0, 5).map(job => {
+                    const detail = [job.detail, job.tool, job.owner].filter(Boolean).join(' · ');
+                    const stamp = job.time ? formatRelTime(job.time) : '';
+                    const status = String(job.status || 'done').toLowerCase();
+                    const dot = status === 'active' || status === 'running' || status === 'working'
+                        ? '#60a5fa'
+                        : status === 'blocked' || status === 'error'
+                        ? '#f87171'
+                        : '#67e8f9';
+                    return `<div class="codex-job-row">
+                        <span class="codex-job-dot" style="background:${dot};box-shadow:0 0 5px ${dot}70"></span>
+                        <span style="min-width:0">
+                            <span class="codex-job-title">${escapeHtml(job.title || 'Codex automation')}</span>
+                            ${detail ? `<span class="codex-job-detail">${escapeHtml(detail)}</span>` : ''}
+                        </span>
+                        <span class="codex-job-meta">${escapeHtml(stamp)}</span>
+                    </div>`;
+                }).join('')}
+            </div>` : '';
+
+            const agentShort = (agent) => {
+                const a = String(agent || '').toLowerCase();
+                if (a === 'josh') return 'J2';
+                if (a === 'jaimes') return 'JM';
+                if (a === 'jain') return 'JN';
+                if (a === 'joshex') return 'CX';
+                return 'AG';
+            };
+            const sharedEventsHtml = sharedEvents.length ? `<div class="shared-ledger-top" id="shared-ledger-top">
+                <div class="shared-ledger-header">
+                    <span class="shared-ledger-kicker">SHARED LEDGER</span>
+                    <span class="shared-ledger-count">${sharedEvents.length} today</span>
+                </div>
+                ${sharedEvents.slice(0, 6).map(event => {
+                    const stamp = event.time ? formatRelTime(event.time) : '';
+                    const type = event.type ? ` · ${event.type}` : '';
+                    return `<div class="shared-event-row">
+                        <span class="shared-event-agent" title="${escapeHtml(event.agentLabel || event.agent || '')}">${escapeHtml(agentShort(event.agent))}</span>
+                        <span class="shared-event-title">${escapeHtml(event.title || 'Shared event')}</span>
+                        <span class="shared-event-meta">${escapeHtml(stamp + type)}</span>
+                    </div>`;
+                }).join('')}
+            </div>` : '';
+
+            const slCounts = sharedLayer.counts || {};
+            const sharedOsHtml = sharedLayer.status ? `<div class="shared-os-top" id="shared-os-top">
+                <div class="shared-os-header">
+                    <span class="shared-os-title">SHARED OS</span>
+                    <span class="shared-os-status">${escapeHtml(sharedLayer.status || 'unknown')}</span>
+                </div>
+                <div class="shared-os-metrics">
+                    <span class="shared-os-metric"><span class="shared-os-num">${Number(slCounts.activeTasks || 0)}</span><span class="shared-os-label">Tasks</span></span>
+                    <span class="shared-os-metric"><span class="shared-os-num">${Number(slCounts.approvalNeeded || 0)}</span><span class="shared-os-label">Approvals</span></span>
+                    <span class="shared-os-metric"><span class="shared-os-num">${Number(slCounts.capabilityAgents || 0)}</span><span class="shared-os-label">Agents</span></span>
+                    <span class="shared-os-metric"><span class="shared-os-num">${Number((sharedLayer.adoption && sharedLayer.adoption.summary && sharedLayer.adoption.summary.helpersReady) || 0)}/${Number((sharedLayer.adoption && sharedLayer.adoption.summary && sharedLayer.adoption.summary.nodesChecked) || 0)}</span><span class="shared-os-label">Adoption</span></span>
+                </div>
+            </div>` : '';
 
             const trackedHtml = trackedTasks.length ? `<div class="tjob-category" id="tjob-cat-active-work" data-cat="Active Work">
                 <div class="tjob-cat-header">
@@ -11389,9 +12471,9 @@
                 </div>`;
             }).join('');
 
-            todayJobsCard.innerHTML = (trackedHtml + cronHtml) || '<div class="empty-state">No scheduled jobs</div>';
+            todayJobsCard.innerHTML = (codexJobsHtml + sharedOsHtml + sharedEventsHtml + trackedHtml + cronHtml) || '<div class="empty-state">No scheduled jobs</div>';
             // Cache cron HTML for instant next-load
-            try { localStorage.setItem('mc_jobs_html', trackedHtml + cronHtml); } catch(e) {}
+            try { localStorage.setItem('mc_jobs_html', codexJobsHtml + sharedOsHtml + sharedEventsHtml + trackedHtml + cronHtml); } catch(e) {}
             } // end crons sectionChanged guard
 
             // Render the enhanced jobs panel with agent status + sections

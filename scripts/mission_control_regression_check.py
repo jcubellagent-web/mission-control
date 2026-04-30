@@ -143,6 +143,45 @@ def check_index_wiring() -> None:
     require('id="personal-codex-panel"' in html, "Personal Codex panel shell missing")
     require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
     require("renderPersonalCodex(data)" in html, "renderDashboard must render Personal Codex lane")
+    require('id="agent-control-panel"' in html, "Agent Control panel shell missing")
+    require("function renderAgentControlPanel" in html, "Agent Control renderer missing")
+    require("renderAgentControlPanel(data)" in html, "renderSystemHealth must render Agent Control lane")
+    require("agentControl" in html, "Agent Control dashboard payload key must be referenced")
+    require("codex-jobs-top" in html and "codexJobs" in html, "Today Jobs must expose Codex Automations")
+    require("shared-ledger-top" in html and "sharedEvents" in html, "Today Jobs must expose Shared Ledger events")
+    require("shared-os-top" in html and "sharedOperatingLayer" in html, "Today Jobs must expose Shared OS status")
+    require("activeTasks" in html and "approvalNeeded" in html and "capabilityAgents" in html, "Shared OS must expose task/capability summary")
+
+    agent_status_path = DATA_DIR / "agent-control-status.json"
+    if agent_status_path.exists():
+        agent_status = json.loads(agent_status_path.read_text())
+        require("summary" in agent_status and "agents" in agent_status, "Agent Control sidecar must include summary and agents")
+
+    shared_events_path = DATA_DIR / "shared-events.json"
+    if shared_events_path.exists():
+        shared_events = json.loads(shared_events_path.read_text())
+        require(isinstance(shared_events.get("events"), list), "Shared Events sidecar must include an events list")
+    for filename, key in [
+        ("decisions.json", "decisions"),
+        ("handoff-queue.json", "handoffs"),
+        ("knowledge-index.json", "entries"),
+        ("agent-task-queue.json", "tasks"),
+        ("agent-capabilities.json", "agents"),
+        ("agent-routing-policy.json", "routes"),
+        ("agent-heartbeats.json", "heartbeats"),
+        ("capability-inventory.json", "nodes"),
+        ("automation-rollout.json", "rollouts"),
+    ]:
+        path = DATA_DIR / filename
+        if path.exists():
+            payload = json.loads(path.read_text())
+            require(isinstance(payload.get(key), list), f"{filename} must include a {key} list")
+    gemini_path = DATA_DIR / "gemini-ecosystem.json"
+    if gemini_path.exists():
+        gemini = json.loads(gemini_path.read_text())
+        require((gemini.get("localCli") or {}).get("command") == "gemini", "Gemini sidecar must identify the local CLI command")
+        require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
+        require("raw emails" in " ".join(gemini.get("guardrails") or []).lower(), "Gemini sidecar must include privacy guardrails")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
