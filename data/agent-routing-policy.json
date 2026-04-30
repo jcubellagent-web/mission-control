@@ -1,0 +1,140 @@
+{
+  "updatedAt": "2026-04-30T18:16:32Z",
+  "defaultRequester": "joshex",
+  "approvalRequiredPrivacy": [
+    "josh-approval",
+    "sensitive-account",
+    "destructive"
+  ],
+  "approvalRequiredTaskTypes": [
+    "account-mutation",
+    "auth-cookie-refresh",
+    "browser-auth-workflow",
+    "destructive-maintenance",
+    "destructive-git",
+    "posting-side-effect",
+        "raw-private-data-forwarding",
+        "raw-secret-handling",
+        "sensitive-account-action",
+        "unapproved-account-mutation",
+        "gemini-private-context",
+        "gemini-raw-connector-data"
+  ],
+  "routes": [
+    {
+      "agent": "joshex",
+      "priority": 100,
+      "taskTypes": [
+        "planning",
+        "repo-patch",
+        "dashboard-update",
+        "decision-record",
+        "handoff",
+        "validation",
+        "connected-account-triage",
+        "agent-routing",
+        "sensitive-coordination",
+        "gemini-review",
+        "gemini-long-context",
+        "gemini-research",
+        "model-fallback"
+      ],
+      "capabilities": [
+        "repo-edit",
+        "dashboard-validation",
+        "connected-account-triage",
+        "architecture",
+        "agent-routing",
+        "gemini-cli",
+        "gemini-review",
+        "gemini-long-context",
+        "gemini-research"
+      ],
+      "privacyTiers": [
+        "dashboard-safe",
+        "agent-private",
+        "josh-approval",
+        "sensitive-account",
+        "destructive"
+      ]
+    },
+    {
+      "agent": "josh",
+      "priority": 80,
+      "taskTypes": [
+        "dashboard-refresh",
+        "health-check",
+        "service-status",
+        "non-sensitive-log-review",
+        "host-maintenance",
+        "gemini-health-check"
+      ],
+      "capabilities": [
+        "ssh-host",
+        "mission-control-refresh",
+        "openclaw",
+        "ollama",
+        "service-health",
+        "gemini-cli-health"
+      ],
+      "privacyTiers": [
+        "dashboard-safe",
+        "agent-private"
+      ]
+    },
+    {
+      "agent": "jaimes",
+      "priority": 70,
+      "taskTypes": [
+        "report",
+        "model-analysis",
+        "health-check",
+        "specialist-summary",
+        "non-sensitive-data-processing",
+        "ml-workflows",
+        "gemini-evaluation"
+      ],
+      "capabilities": [
+        "hermes",
+        "ollama",
+        "weaviate",
+        "temporal",
+        "report-generation",
+        "ml-workflows",
+        "gemini-evaluator"
+      ],
+      "privacyTiers": [
+        "dashboard-safe",
+        "agent-private"
+      ]
+    },
+    {
+      "agent": "jain",
+      "priority": 60,
+      "taskTypes": [
+        "monitor",
+        "scan",
+        "status-check",
+        "log-summary",
+        "worker-report",
+        "background-worker",
+        "intelligence-scan",
+        "watchlist"
+        ,
+        "scheduled-summary"
+      ],
+      "capabilities": [
+        "cron",
+        "monitoring",
+        "intelligence-scan",
+        "watchlist",
+        "background-worker",
+        "gemini-scheduled-summary"
+      ],
+      "privacyTiers": [
+        "dashboard-safe",
+        "agent-private"
+      ]
+    }
+  ]
+}

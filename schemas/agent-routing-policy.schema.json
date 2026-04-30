@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Routing Policy",
+  "type": "object",
+  "required": ["updatedAt", "routes"],
+  "properties": {
+    "updatedAt": {"type": "string"},
+    "defaultRequester": {"type": "string"},
+    "approvalRequiredPrivacy": {"type": "array", "items": {"type": "string"}},
+    "approvalRequiredTaskTypes": {"type": "array", "items": {"type": "string"}},
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["agent", "priority", "taskTypes", "capabilities"],
+        "properties": {
+          "agent": {"type": "string"},
+          "priority": {"type": "integer"},
+          "taskTypes": {"type": "array", "items": {"type": "string"}},
+          "capabilities": {"type": "array", "items": {"type": "string"}},
+          "privacyTiers": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

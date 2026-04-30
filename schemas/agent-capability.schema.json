@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/agent-capability.schema.json",
+  "title": "Agent Capability Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "lane", "node", "privacyTier", "responsibilities", "capabilities", "safeTaskTypes", "restrictedTaskTypes"],
+  "properties": {
+    "id": {"type": "string", "enum": ["joshex", "josh", "jaimes", "jain"]},
+    "label": {"type": "string", "maxLength": 80},
+    "lane": {"type": "string", "maxLength": 40},
+    "node": {"type": "string", "maxLength": 120},
+    "privacyTier": {"type": "string", "enum": ["dashboard-safe", "agent-private", "sensitive-coordinator", "worker-scoped"]},
+    "responsibilities": {"type": "array", "items": {"type": "string", "maxLength": 120}, "maxItems": 16},
+    "capabilities": {"type": "array", "items": {"type": "string", "maxLength": 80}, "maxItems": 32},
+    "safeTaskTypes": {"type": "array", "items": {"type": "string", "maxLength": 80}, "maxItems": 24},
+    "restrictedTaskTypes": {"type": "array", "items": {"type": "string", "maxLength": 120}, "maxItems": 24},
+    "preferredTools": {"type": "array", "items": {"type": "string", "maxLength": 80}, "maxItems": 24},
+    "artifactRoots": {"type": "array", "items": {"type": "string", "maxLength": 180}, "maxItems": 12},
+    "brainFeedAgent": {"type": "string", "enum": ["joshex", "josh", "jaimes", "jain"]},
+    "updatedAt": {"type": "string", "format": "date-time"}
+  }
+}

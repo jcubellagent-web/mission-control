@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/agent-task.schema.json",
+  "title": "Agent Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "objective", "owner", "requester", "status", "priority", "privacy", "approval", "createdAt", "updatedAt"],
+  "properties": {
+    "id": {"type": "string", "minLength": 8, "maxLength": 140},
+    "title": {"type": "string", "minLength": 1, "maxLength": 160},
+    "objective": {"type": "string", "minLength": 1, "maxLength": 600},
+    "owner": {"type": "string", "enum": ["joshex", "josh", "jaimes", "jain"]},
+    "requester": {"type": "string", "enum": ["joshex", "josh", "jaimes", "jain", "josh-user"]},
+    "status": {"type": "string", "enum": ["queued", "accepted", "active", "blocked", "done", "cancelled", "error"]},
+    "priority": {"type": "string", "enum": ["low", "normal", "high", "urgent"]},
+    "privacy": {"type": "string", "enum": ["dashboard-safe", "agent-private", "josh-approval", "sensitive-account", "destructive"]},
+    "approval": {"type": "string", "enum": ["none", "required", "approved", "rejected"]},
+    "requiredCapabilities": {"type": "array", "items": {"type": "string", "maxLength": 80}, "maxItems": 16},
+    "dependencies": {"type": "array", "items": {"type": "string", "maxLength": 140}, "maxItems": 16},
+    "artifacts": {"type": "array", "items": {"type": "string", "maxLength": 240}, "maxItems": 16},
+    "notes": {"type": "array", "items": {"type": "object"}, "maxItems": 50},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "updatedAt": {"type": "string", "format": "date-time"},
+    "dueAt": {"type": ["string", "null"], "format": "date-time"},
+    "completedAt": {"type": ["string", "null"], "format": "date-time"},
+    "summary": {"type": "string", "maxLength": 800}
+  }
+}

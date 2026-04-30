@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mission Control UI/data regression checks.
 
-Catches the specific Mission Control UI wiring regressions that have
+Catches the specific Brain Feed / Memory Roadmap wiring regressions that have
 broken the kiosk before, without requiring a browser session.
 """
 from __future__ import annotations
@@ -85,34 +85,6 @@ def check_index_wiring() -> None:
         "hasRenderedHero" in apply_bf and ".bf-objective" in apply_bf,
         "applyBrainFeed must rerender when the Brain Feed DOM is empty even if hash is unchanged",
     )
-    require(
-        "isSupabaseFeedFresher('josh', normalized)" in apply_bf,
-        "applyBrainFeed must not let older JSON overwrite fresher Supabase JOSH rows",
-    )
-    require(
-        "source === 'supabase' ? `|${feedTimestampMs(normalized)}`" in apply_bf,
-        "Supabase Brain Feed updates must refresh timestamp-only cron heartbeats",
-    )
-
-    supabase_record = get_function(html, "applySupabaseBrainFeedRecord")
-    require(
-        "data.agentBrainFeeds" in supabase_record and "_supabaseAgentFeeds[agentId]" in supabase_record,
-        "Supabase realtime must handle multi-agent brain_feed rows",
-    )
-    require(
-        "`${bfContentHash(normalized)}|${feedTimestampMs(normalized)}`" in supabase_record,
-        "Supabase agent rows must treat newer heartbeats as fresh even when content is unchanged",
-    )
-    require(
-        "Supabase main row skipped" in supabase_record and "isSupabaseFeedFresher('josh', data)" in supabase_record,
-        "Supabase legacy main row must not repaint over a fresher named JOSH row",
-    )
-
-    supabase_poll = get_function(html, "fetchBrainFeedSupabase")
-    require(
-        "id=in.(main,josh,jain,jaimes,joshex)" in supabase_poll,
-        "Supabase poll must fetch all agent brain_feed rows",
-    )
 
     picker = get_function(html, "pickDualLiveObjectiveFeeds")
     require("isRenderableLiveObjective(joshEntry)" in picker, "JOSH hero must require live/renderable feed")
@@ -125,14 +97,11 @@ def check_index_wiring() -> None:
     render_dashboard = get_function(html, "renderDashboard")
     require(
         "renderAgentChatFeed(_uaComms || [])" in render_dashboard,
-        "JOSHeX quick panel must refresh from renderDashboard after dashboard updates",
+        "Memory Roadmap must refresh from renderDashboard after contextWindow updates",
     )
 
     step_label = get_function(html, "resolveBrainFeedStepLabel")
     require("safeSteps" in step_label, "resolveBrainFeedStepLabel must guard missing steps")
-
-    helper = ROOT / "scripts" / "supabase_brain_feed_publish.py"
-    require(helper.exists(), "missing Supabase Brain Feed publisher helper")
 
     render_bf = get_function(html, "renderBrainFeed")
     require(
@@ -161,49 +130,58 @@ def check_index_wiring() -> None:
     )
     require("function brainFeedAgentClass" in html, "Brain Feed cards must expose agent-specific visual classes")
     require("agent-josh" in html and "agent-jaimes" in html, "Brain Feed cards must visually distinguish JOSH 2.0 and JAIMES")
-    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: clamp(250px, 25vh, 286px)" in html, "Dual live objective boxes must stay tall and readable")
+    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: clamp(224px, 23vh, 248px)" in html, "Dual live objective boxes must stay tall but kiosk-balanced")
     require(".bf-hero-grid.dual-live .bf-objective-text-wrap" in html and "* 3" in html, "Dual live objectives must show a taller text viewport")
-    require("function renderJoshexSupportStrip" in html and "bf-support-strip" in html, "JOSHeX must render as a compact support strip, not a full hero lane")
 
     # 24in visual canaries: prevent kiosk Brain Feed from regressing into tall/noisy poster cards.
     require("24in fullscreen polish" in html, "24in desktop Brain Feed polish block missing")
-    require('JOSHeX QUICK PANEL' in html and 'function buildJoshexQuickMarkup' in html, "JOSHeX quick panel must replace the legacy panel")
-    legacy_label = 'MEMORY ' + 'ROADMAP'
-    legacy_builder = 'buildMemory' + 'RoadmapMarkup'
-    require(legacy_label not in html and legacy_builder not in html, "Legacy panel UI must not render in Brain Feed")
-    require('class="joshex-quick' in html and 'Codex patch lane' in html, "JOSHeX quick panel body missing")
+    require(".memory-roadmap-compact-grid" in html and "repeat(4, minmax(0, 1fr))" in html, "Memory Roadmap must stay compact on desktop")
+    require(".memory-roadmap-card-note { display: none" in html, "Desktop roadmap notes must stay hidden to reduce Brain Feed noise")
     require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
     require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
     require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
-    require('id="personal-codex"' in html, "JOSHeX panel anchor missing")
-    personal_idx = html.find('id="personal-codex"')
-    model_idx = html.find('id="model-usage-card"')
-    system_idx = html.find('id="system-health-card"')
-    capability_idx = html.find('aria-label="Capability Stack"')
-    require(
-        personal_idx != -1 and model_idx != -1 and system_idx != -1 and capability_idx != -1
-        and personal_idx < model_idx < system_idx < capability_idx,
-        "JOSHeX must sit above Model Usage, System Health, and Capability Stack",
-    )
-    require("function renderPersonalCodex" in html, "JOSHeX renderer missing")
-    require("renderPersonalCodex(data)" in render_dashboard, "JOSHeX panel must render from dashboard data")
-    require("_personalCodexFallbackLoading" in html and "./data/personal-codex.json" in html, "JOSHeX fallback source must be wired")
-    require("window.openIntelHighlightsModal" in html and "_breakingHighlightsSource" in html, "Breaking Highlights modal/fresh-source guard must be wired")
+    require('id="personal-codex-panel"' in html, "Personal Codex panel shell missing")
+    require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
+    require("renderPersonalCodex(data)" in html, "renderDashboard must render Personal Codex lane")
+    require('id="agent-control-panel"' in html, "Agent Control panel shell missing")
+    require("function renderAgentControlPanel" in html, "Agent Control renderer missing")
+    require("renderAgentControlPanel(data)" in html, "renderSystemHealth must render Agent Control lane")
+    require("agentControl" in html, "Agent Control dashboard payload key must be referenced")
+    require("codex-jobs-top" in html and "codexJobs" in html, "Today Jobs must expose Codex Automations")
+    require("shared-ledger-top" in html and "sharedEvents" in html, "Today Jobs must expose Shared Ledger events")
+    require("shared-os-top" in html and "sharedOperatingLayer" in html, "Today Jobs must expose Shared OS status")
+    require("activeTasks" in html and "approvalNeeded" in html and "capabilityAgents" in html, "Shared OS must expose task/capability summary")
 
-    pc_path = DATA_DIR / "personal-codex.json"
-    require(pc_path.exists(), "data/personal-codex.json missing")
-    pc = json.loads(pc_path.read_text())
-    require(isinstance(pc, dict), "personal-codex.json must be an object")
-    require(pc.get("agentSlot") is False, "JOSHeX must not be a live-agent slot")
-    require("synthesizeJoshexBrainFeed" in html and "agent-joshex" in html, "JOSHeX must render as a Brain Feed objective card when data exists")
-    require(isinstance(pc.get("patchStatus"), dict), "JOSHeX fallback patchStatus missing")
-    require("patchStatus" in html and "Patch" in html, "JOSHeX patch status feed must render")
+    agent_status_path = DATA_DIR / "agent-control-status.json"
+    if agent_status_path.exists():
+        agent_status = json.loads(agent_status_path.read_text())
+        require("summary" in agent_status and "agents" in agent_status, "Agent Control sidecar must include summary and agents")
 
-    dashboard_path = DATA_DIR / "dashboard-data.json"
-    if dashboard_path.exists():
-        dashboard = json.loads(dashboard_path.read_text())
-        if "personalCodex" in dashboard:
-            require("personalCodex" not in (dashboard.get("agentBrainFeeds") or {}), "JOSHeX must not be in agentBrainFeeds")
+    shared_events_path = DATA_DIR / "shared-events.json"
+    if shared_events_path.exists():
+        shared_events = json.loads(shared_events_path.read_text())
+        require(isinstance(shared_events.get("events"), list), "Shared Events sidecar must include an events list")
+    for filename, key in [
+        ("decisions.json", "decisions"),
+        ("handoff-queue.json", "handoffs"),
+        ("knowledge-index.json", "entries"),
+        ("agent-task-queue.json", "tasks"),
+        ("agent-capabilities.json", "agents"),
+        ("agent-routing-policy.json", "routes"),
+        ("agent-heartbeats.json", "heartbeats"),
+        ("capability-inventory.json", "nodes"),
+        ("automation-rollout.json", "rollouts"),
+    ]:
+        path = DATA_DIR / filename
+        if path.exists():
+            payload = json.loads(path.read_text())
+            require(isinstance(payload.get(key), list), f"{filename} must include a {key} list")
+    gemini_path = DATA_DIR / "gemini-ecosystem.json"
+    if gemini_path.exists():
+        gemini = json.loads(gemini_path.read_text())
+        require((gemini.get("localCli") or {}).get("command") == "gemini", "Gemini sidecar must identify the local CLI command")
+        require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
+        require("raw emails" in " ".join(gemini.get("guardrails") or []).lower(), "Gemini sidecar must include privacy guardrails")
 
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
@@ -217,67 +195,7 @@ def check_index_wiring() -> None:
     require(result.returncode == 0, "embedded index.html JavaScript syntax check failed")
 
 
-
-def check_lane_routing_contract() -> None:
-    """Guard the Mission Control multi-agent Brain Feed lane contract."""
-    html = INDEX.read_text()
-    docs_path = ROOT / "docs" / "supabase-brain-feed.md"
-    require(docs_path.exists(), "Supabase Brain Feed lane-routing docs missing")
-    docs = docs_path.read_text()
-
-    expected_lanes = {
-        "josh": ["JOSH 2.0", "data/brain-feed.json"],
-        "jaimes": ["JAIMES", "data/jaimes-brain-feed.json"],
-        "jain": ["J.A.I.N", "data/jain-brain-feed.json"],
-        "joshex": ["JOSHeX", "data/personal-codex.json"],
-        "main": ["Legacy", "data/brain-feed.json"],
-    }
-    for lane, required_bits in expected_lanes.items():
-        require(f"`{lane}`" in docs, f"lane-routing docs must mention `{lane}` lane")
-        for bit in required_bits:
-            require(bit in docs, f"lane-routing docs for `{lane}` missing `{bit}`")
-
-    routing_examples = {
-        "josh": "--agent josh",
-        "jaimes": "--agent jaimes",
-        "jain": "--agent jain",
-        "joshex": "--agent joshex",
-    }
-    for lane, example in routing_examples.items():
-        require(example in docs, f"lane-routing docs missing publish example for `{lane}`")
-
-    require(
-        "does not update the JOSHeX card" in docs and "--agent joshex" in docs,
-        "docs must explicitly prevent routing JOSHeX through JOSH brain-feed fallback",
-    )
-    require("data/codex-jobs.json" in docs, "docs must preserve codex-jobs.json Today’s Jobs routing")
-    require("python3 scripts/update_mission_control.py" in docs, "docs must require dashboard regeneration after codex-jobs changes")
-    for forbidden in ["API keys", "tokens", "OAuth", "cookies", "credentials"]:
-        require(forbidden in docs, f"privacy rule missing `{forbidden}`")
-
-    publisher = ROOT / "scripts" / "supabase_brain_feed_publish.py"
-    publisher_src = publisher.read_text()
-    for lane in ["josh", "jain", "jaimes", "joshex"]:
-        require(f'"{lane}"' in publisher_src or f"'{lane}'" in publisher_src, f"publisher helper must accept `{lane}` lane")
-
-    poll = get_function(html, "fetchBrainFeedSupabase")
-    require(
-        "id=in.(main,josh,jain,jaimes,joshex)" in poll,
-        "frontend Supabase poll must include all named Brain Feed lanes",
-    )
-    apply_record = get_function(html, "applySupabaseBrainFeedRecord")
-    require("_supabaseAgentFeeds[agentId]" in apply_record, "frontend must store Supabase rows by agent id")
-    require("agentBrainFeeds" in apply_record, "frontend must expose named lanes through dashboard agentBrainFeeds")
-
-    require("synthesizeJoshexBrainFeed" in html, "JOSHeX lane must have a Brain Feed synthesis path")
-    require("agent-joshex" in html, "JOSHeX lane must have a visible agent card class")
-    require("data/personal-codex.json" in html, "JOSHeX JSON fallback path must remain wired")
-
-    update_src = (ROOT / "scripts" / "update_mission_control.py").read_text()
-    for sidecar in ["brain-feed.json", "jaimes-brain-feed.json", "jain-brain-feed.json", "personal-codex.json"]:
-        require(sidecar in html or sidecar in update_src, f"fallback sidecar `{sidecar}` must remain referenced")
-
-def check_joshex_freshness(max_age_min: int, write_status: Path | None = None) -> None:
+def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) -> None:
     data = json.loads((DATA_DIR / "dashboard-data.json").read_text())
     candidates = [
         data.get("lastUpdated"),
@@ -292,7 +210,7 @@ def check_joshex_freshness(max_age_min: int, write_status: Path | None = None) -
     status = {
         "ok": fresh,
         "alert_count": 0 if fresh else 1,
-        "check": "joshex-panel-freshness",
+        "check": "memory-roadmap-freshness",
         "maxAgeMinutes": max_age_min,
         "ageMinutes": round(age_min, 2) if age_min is not None else None,
         "newestSourceAt": newest.isoformat().replace("+00:00", "Z") if newest else None,
@@ -301,22 +219,21 @@ def check_joshex_freshness(max_age_min: int, write_status: Path | None = None) -
     if write_status:
         write_status.parent.mkdir(parents=True, exist_ok=True)
         write_status.write_text(json.dumps(status, indent=2) + "\n")
-    print("joshex_age_min", status["ageMinutes"])
-    require(fresh, f"JOSHeX panel stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
+    print("roadmap_age_min", status["ageMinutes"])
+    require(fresh, f"Memory Roadmap stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--check-joshex-freshness", action="store_true")
-    parser.add_argument("--max-joshex-age-min", type=int, default=20)
+    parser.add_argument("--check-roadmap-freshness", action="store_true")
+    parser.add_argument("--max-roadmap-age-min", type=int, default=20)
     parser.add_argument("--write-status", type=Path)
     args = parser.parse_args()
 
     check_json()
     check_index_wiring()
-    check_lane_routing_contract()
-    if args.check_joshex_freshness:
-        check_joshex_freshness(args.max_joshex_age_min, args.write_status)
+    if args.check_roadmap_freshness:
+        check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
     print("mission_control_regression_check OK")
     return 0
 

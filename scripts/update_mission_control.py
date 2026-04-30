@@ -6,8 +6,6 @@ import datetime as dt
 import json
 import os
 import re
-import shlex
-import shutil
 import subprocess
 import sys
 import urllib.error
@@ -25,10 +23,24 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 
 DATA_DIR = ROOT.parent / "data"
 DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
-PERSONAL_CODEX_PATH = DATA_DIR / "personal-codex.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
+PERSONAL_CODEX_PATH = ROOT.parent / "data" / "personal-codex.json"
+AGENT_CONTROL_STATUS_PATH = ROOT.parent / "data" / "agent-control-status.json"
+CODEX_JOBS_PATH = ROOT.parent / "data" / "codex-jobs.json"
+SHARED_EVENTS_PATH = ROOT.parent / "data" / "shared-events.json"
+DECISIONS_PATH = ROOT.parent / "data" / "decisions.json"
+KNOWLEDGE_INDEX_PATH = ROOT.parent / "data" / "knowledge-index.json"
+HANDOFF_QUEUE_PATH = ROOT.parent / "data" / "handoff-queue.json"
+DAILY_ROLLUP_PATH = ROOT.parent / "data" / "daily-rollup.json"
+SHARED_LAYER_ADOPTION_PATH = ROOT.parent / "data" / "shared-layer-adoption.json"
+AGENT_TASK_QUEUE_PATH = ROOT.parent / "data" / "agent-task-queue.json"
+AGENT_CAPABILITIES_PATH = ROOT.parent / "data" / "agent-capabilities.json"
+AGENT_ROUTING_POLICY_PATH = ROOT.parent / "data" / "agent-routing-policy.json"
+AGENT_HEARTBEATS_PATH = ROOT.parent / "data" / "agent-heartbeats.json"
+CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
+AUTOMATION_ROLLOUT_PATH = ROOT.parent / "data" / "automation-rollout.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -38,7 +50,6 @@ CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-stat
 CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
 CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
 TASKS_PATH = WORKSPACE_ROOT / "memory" / "tasks.md"
-CAPABILITY_CANARY_PATH = DATA_DIR / "capability-canary.json"
 
 CRON_TARGETS = [
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
@@ -46,12 +57,13 @@ CRON_TARGETS = [
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Mission Control", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Sorare MLB", "agent": "JOSH 2.0"},
+    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Sorare MLB", "agent": "JOSH 2.0"},
+    {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Maintenance", "agent": "JOSH 2.0"},
 
     # ── J.A.I.N intelligence + maintenance ──────────────────────────────────
     {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
     {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "weekdayRuns": [
@@ -77,6 +89,41 @@ CRON_TARGETS = [
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "XMCP Boot", "pattern": "xmcp", "schedule": "On boot", "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
 
+    # ── X account engine ─────────────────────────────────────────────────────
+    {"name": "X Pre-Market", "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET", "description": "[Original] Futures and overnight setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Market Open", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "[Original] Market-open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Mover", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Hot Take", "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Contrarian take built to spark replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Quote Tweets", "pattern": "x_post_agent.py", "schedule": "Daily 1p/3p/6p/8p ET", "description": "[QT] Quotes breaking or viral posts with our angle", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+     "multiRun": {
+         "runs": [
+             {"time": "1:00 PM", "label": "Quote Tweet"},
+             {"time": "3:00 PM", "label": "Quote Tweet"},
+             {"time": "6:00 PM", "label": "Quote Tweet"},
+             {"time": "8:00 PM", "label": "Quote Tweet"},
+         ]
+     }},
+    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "[Original] Close wrap and next-day setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Prime Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "[Original] Prime-time flagship take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Nightcap", "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] Last sharp insight of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Strategic Replies", "pattern": "x_strategic_reply", "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)", "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies", "category": "X Account", "agent": "J.A.I.N", "jain": True,
+     "multiRun": {
+         "runs": [
+             {"time": "9:00 AM",  "label": "Strategic Reply"},
+             {"time": "10:00 AM", "label": "Strategic Reply"},
+             {"time": "11:00 AM", "label": "Strategic Reply"},
+             {"time": "1:00 PM",  "label": "Strategic Reply"},
+             {"time": "2:00 PM",  "label": "Strategic Reply"},
+             {"time": "3:00 PM",  "label": "Strategic Reply"},
+             {"time": "4:00 PM",  "label": "Strategic Reply"},
+             {"time": "5:00 PM",  "label": "Strategic Reply"},
+             {"time": "6:00 PM",  "label": "Strategic Reply"},
+             {"time": "7:00 PM",  "label": "Strategic Reply"},
+             {"time": "9:00 PM",  "label": "Strategic Reply"},
+             {"time": "11:00 PM", "label": "Strategic Reply"},
+         ]
+     }},
+
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
     {"name": "Sorare Nightly Claim", "pattern": "sorare_missions.py --claim-only --rarity limited", "schedule": "Daily 3:35 AM ET", "description": "LaunchAgent claim sweep for overnight Sorare rewards", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
@@ -96,9 +143,6 @@ CRON_TARGETS = [
     {"name": "Waiver Injury Alert", "pattern": "waiver_injury_alert.py", "schedule": "Daily 1:00 PM ET", "description": "Surfaces injured-player replacement opportunities", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
     {"name": "Fantasy Waiver Review (Hermes)", "pattern": "fantasy_waiver_scan.py", "schedule": "Wed/Fri 1:00 PM ET", "description": "Hermes waiver review lane that runs mid-week", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "fantasy-waiver-scan"},
     {"name": "Fantasy Waiver Scan (pre-game)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 7:00 AM ET", "description": "Final waiver review before first-pitch lineup lock", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Fantasy Results Fetch", "pattern": "fetch_fantasy_results.py", "schedule": "Mon 2:15 AM ET", "description": "Captures weekly matchup outcomes for fantasy model feedback", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
-    {"name": "Fantasy ML Prediction Build", "pattern": "fantasy_ml/cron/run_weekly_prediction.sh", "schedule": "Fri 7:00 PM ET", "description": "Builds the weekly fantasy matchup prediction report", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
-    {"name": "Fantasy ML Prediction Refresh", "pattern": "fantasy_ml/cron/run_weekly_prediction.sh", "schedule": "Sat 7:00 AM ET", "description": "Refreshes fantasy matchup predictions before weekend moves", "category": "Fantasy Baseball", "agent": "JAIMES", "jain": True},
 
     # ── JAIMES / Hermes maintenance ─────────────────────────────────────────
     {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Hermes daily system-health pass", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
@@ -304,6 +348,171 @@ def fetch_tracked_tasks() -> List[Dict[str, Any]]:
     except Exception as exc:
         print(f"[warn] fetch_tracked_tasks failed: {exc}", file=sys.stderr)
         return []
+
+
+def fetch_codex_jobs(now_iso: str) -> List[Dict[str, Any]]:
+    """Load today's Personal Codex-triggered automations for the jobs panel."""
+    if not CODEX_JOBS_PATH.exists():
+        return []
+    try:
+        raw = json.loads(CODEX_JOBS_PATH.read_text())
+        entries = raw.get("jobs", raw) if isinstance(raw, dict) else raw
+        if not isinstance(entries, list):
+            return []
+
+        today_local = dt.datetime.now().strftime("%Y-%m-%d")
+        jobs: List[Dict[str, Any]] = []
+        for idx, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            ts = str(entry.get("time") or entry.get("updatedAt") or entry.get("startedAt") or now_iso)
+            if today_local not in ts and not ts.startswith(now_iso[:10]):
+                continue
+            title = str(entry.get("title") or entry.get("name") or "").strip()
+            if not title:
+                continue
+            status = str(entry.get("status") or "done").strip().lower()
+            jobs.append({
+                "id": entry.get("id") or f"codex-job-{idx}",
+                "title": title[:120],
+                "status": status[:32],
+                "time": ts,
+                "tool": str(entry.get("tool") or "codex")[:48],
+                "detail": str(entry.get("detail") or entry.get("summary") or "")[:220],
+                "owner": str(entry.get("owner") or "Personal Codex")[:64],
+            })
+
+        jobs.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+        return jobs[:10]
+    except Exception as exc:
+        print(f"[warn] fetch_codex_jobs failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
+    if not SHARED_EVENTS_PATH.exists():
+        return []
+    try:
+        raw = json.loads(SHARED_EVENTS_PATH.read_text())
+        entries = raw.get("events", raw) if isinstance(raw, dict) else raw
+        if not isinstance(entries, list):
+            return []
+        today = dt.datetime.now().strftime("%Y-%m-%d")
+        events: List[Dict[str, Any]] = []
+        for idx, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("privacy") != "dashboard-safe":
+                continue
+            ts = str(entry.get("time") or now_iso)
+            if today not in ts and not ts.startswith(now_iso[:10]):
+                continue
+            title = str(entry.get("title") or "").strip()
+            if not title:
+                continue
+            events.append({
+                "id": str(entry.get("id") or f"shared-event-{idx}")[:140],
+                "time": ts,
+                "agent": str(entry.get("agent") or "joshex")[:24],
+                "agentLabel": str(entry.get("agentLabel") or entry.get("agent") or "Agent")[:80],
+                "type": str(entry.get("type") or "status")[:32],
+                "title": title[:160],
+                "status": str(entry.get("status") or "info")[:32],
+                "tool": str(entry.get("tool") or "")[:80],
+                "detail": str(entry.get("detail") or "")[:240],
+            })
+        events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
+        return events[:20]
+    except Exception as exc:
+        print(f"[warn] fetch_shared_events failed: {exc}", file=sys.stderr)
+        return []
+
+
+def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
+    decisions = load_json_file(DECISIONS_PATH, {"decisions": []}).get("decisions", [])
+    knowledge = load_json_file(KNOWLEDGE_INDEX_PATH, {"entries": []})
+    handoffs = load_json_file(HANDOFF_QUEUE_PATH, {"handoffs": []}).get("handoffs", [])
+    rollup = load_json_file(DAILY_ROLLUP_PATH, {})
+    adoption = load_json_file(SHARED_LAYER_ADOPTION_PATH, {})
+    task_queue = load_json_file(AGENT_TASK_QUEUE_PATH, {"tasks": []})
+    capability_registry = load_json_file(AGENT_CAPABILITIES_PATH, {"agents": []})
+    routing_policy = load_json_file(AGENT_ROUTING_POLICY_PATH, {"routes": []})
+    heartbeats_payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": [], "staleAfterMinutes": 30})
+    inventory = load_json_file(CAPABILITY_INVENTORY_PATH, {"nodes": []})
+    automation_rollout = load_json_file(AUTOMATION_ROLLOUT_PATH, {"rollouts": []})
+    events = fetch_shared_events(now_iso)
+    open_handoffs = [h for h in handoffs if h.get("privacy") == "dashboard-safe" and h.get("status") in {"open", "blocked"}]
+    blocked_events = [e for e in events if e.get("status") in {"blocked", "error"} or e.get("type") == "blocked"]
+    latest_event_at = events[0].get("time") if events else None
+    fresh = bool(latest_event_at and is_recent_ts(latest_event_at, hours=6))
+    status = "attention" if blocked_events or len(open_handoffs) > 0 else "ready" if fresh else "stale"
+    tasks = [task for task in task_queue.get("tasks", []) if isinstance(task, dict)]
+    active_statuses = {"queued", "accepted", "active", "blocked", "error"}
+    active_tasks = [task for task in tasks if task.get("status") in active_statuses]
+    blocked_tasks = [task for task in tasks if task.get("status") in {"blocked", "error"}]
+    approval_tasks = [task for task in tasks if task.get("approval") == "required" and task.get("status") not in {"done", "cancelled"}]
+    task_counts_by_owner: Dict[str, int] = {}
+    for task in active_tasks:
+        owner = str(task.get("owner") or "unknown")
+        task_counts_by_owner[owner] = task_counts_by_owner.get(owner, 0) + 1
+    heartbeat_rows = [row for row in heartbeats_payload.get("heartbeats", []) if isinstance(row, dict)]
+    stale_after = int(heartbeats_payload.get("staleAfterMinutes") or 30)
+    now_dt = dt.datetime.now(dt.timezone.utc)
+    stale_heartbeats = []
+    fresh_heartbeats = []
+    for row in heartbeat_rows:
+        stamp = iso_to_dt(row.get("updatedAt"))
+        stale = not bool(stamp and (now_dt - stamp) <= dt.timedelta(minutes=stale_after))
+        row["stale"] = stale
+        if stale:
+            stale_heartbeats.append(row)
+        else:
+            fresh_heartbeats.append(row)
+    rollout_rows = [row for row in automation_rollout.get("rollouts", []) if isinstance(row, dict)]
+    wrapped_rollouts = [row for row in rollout_rows if row.get("status") == "wrapped"]
+    if blocked_tasks or approval_tasks or stale_heartbeats:
+        status = "attention"
+    return {
+        "status": status,
+        "updatedAt": latest_event_at or now_iso,
+        "counts": {
+            "eventsToday": len(events),
+            "decisions": len([d for d in decisions if d.get("privacy") == "dashboard-safe"]),
+            "knowledgeEntries": len(knowledge.get("entries", [])) if isinstance(knowledge, dict) else 0,
+            "openHandoffs": len(open_handoffs),
+            "blocked": len(blocked_events),
+            "activeTasks": len(active_tasks),
+            "blockedTasks": len(blocked_tasks),
+            "approvalNeeded": len(approval_tasks),
+            "capabilityAgents": len(capability_registry.get("agents", [])) if isinstance(capability_registry, dict) else 0,
+            "routingRules": len(routing_policy.get("routes", [])) if isinstance(routing_policy, dict) else 0,
+            "freshHeartbeats": len(fresh_heartbeats),
+            "staleHeartbeats": len(stale_heartbeats),
+            "inventoryNodes": len(inventory.get("nodes", [])) if isinstance(inventory, dict) else 0,
+            "wrappedAutomations": len(wrapped_rollouts),
+        },
+        "latestEvents": events[:6],
+        "recentDecisions": [d for d in decisions if d.get("privacy") == "dashboard-safe"][:6],
+        "knowledgeEntries": (knowledge.get("entries", []) if isinstance(knowledge, dict) else [])[:8],
+        "openHandoffs": open_handoffs[:6],
+        "dailyRollup": rollup,
+        "adoption": adoption,
+        "tasks": {
+            "active": active_tasks[:8],
+            "blocked": blocked_tasks[:8],
+            "approvalNeeded": approval_tasks[:8],
+            "byOwner": task_counts_by_owner,
+        },
+        "capabilities": capability_registry,
+        "routingPolicy": routing_policy,
+        "heartbeats": {
+            "staleAfterMinutes": stale_after,
+            "fresh": fresh_heartbeats[:8],
+            "stale": stale_heartbeats[:8],
+        },
+        "capabilityInventory": inventory,
+        "automationRollout": automation_rollout,
+    }
 
 
 def normalize_node_slug(raw: Any) -> str:
@@ -564,52 +773,17 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
     }
 
 
-LOW_SIGNAL_BRAIN_OBJECTIVES = {
-    "sent mission control open link",
-    "mission control open link sent",
-    "opened mission control link",
-    "session startup completed",
-    "startup completed",
-    "standby",
-    "idle",
-    "heartbeat_ok",
-}
-
-LOW_SIGNAL_BRAIN_PREFIXES = (
-    "sent mission control open link",
-    "opened mission control",
-    "session startup",
-    "idle · last:",
-)
-
-
-def is_low_signal_brain_objective(objective: str) -> bool:
-    normalized = re.sub(r"\s+", " ", str(objective or "").strip().lower())
-    if not normalized:
-        return True
-    if normalized in LOW_SIGNAL_BRAIN_OBJECTIVES:
-        return True
-    return any(normalized.startswith(prefix) for prefix in LOW_SIGNAL_BRAIN_PREFIXES)
-
-
 def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
     raw = feed if isinstance(feed, dict) else {}
     updated_at = raw.get("updatedAt")
     reported_active = bool(raw.get("active"))
     stale = bool(updated_at) and not is_recent_ts(updated_at, hours=2)
-    objective = str(raw.get("objective") or "").strip()
-    low_signal = is_low_signal_brain_objective(objective)
-    active = reported_active and not stale and not low_signal
-    status = "stale" if stale and reported_active else str(raw.get("status") or "idle")
-    if low_signal and status == "active":
-        status = "idle"
     return {
         "agent": str(raw.get("agent") or fallback_agent),
-        "active": active,
+        "active": reported_active and not stale,
         "reportedActive": reported_active,
-        "lowSignal": low_signal,
-        "objective": objective,
-        "status": status,
+        "objective": str(raw.get("objective") or "").strip(),
+        "status": "stale" if stale and reported_active else str(raw.get("status") or "idle"),
         "stale": stale,
         "updatedAt": updated_at,
         "messageReceived": raw.get("messageReceived"),
@@ -623,16 +797,6 @@ def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, A
     def is_live(feed: Dict[str, Any]) -> bool:
         return bool(feed.get("active") and is_recent_ts(feed.get("updatedAt"), hours=2))
 
-    def is_primary_operator_ready(feed: Dict[str, Any] | None) -> bool:
-        if not feed:
-            return False
-        if is_live(feed):
-            return True
-        objective = str(feed.get("objective") or "").strip()
-        if not objective or feed.get("stale"):
-            return False
-        return is_recent_ts(feed.get("updatedAt"), hours=12)
-
     def score(feed: Dict[str, Any]) -> tuple[int, float]:
         ts = iso_to_dt(feed.get("updatedAt"))
         return (1 if is_live(feed) else 0, ts.timestamp() if ts else 0.0)
@@ -640,11 +804,7 @@ def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, A
     ordered = sorted(agent_feeds.values(), key=score, reverse=True)
     active_agents = [feed["agent"] for feed in ordered if is_live(feed)]
     dual_pair: List[str] = []
-    josh_feed = next((feed for feed in agent_feeds.values() if feed.get("agent") == "JOSH 2.0"), None)
-    jaimes_feed = next((feed for feed in agent_feeds.values() if feed.get("agent") == "JAIMES"), None)
-    if is_live(josh_feed or {}) and is_primary_operator_ready(jaimes_feed):
-        dual_pair = ["JOSH 2.0", "JAIMES"]
-    elif len(active_agents) >= 2:
+    if len(active_agents) >= 2:
         remote = next((agent for agent in ["JAIMES", "J.A.I.N"] if agent in active_agents and agent != "JOSH 2.0"), None)
         if "JOSH 2.0" in active_agents and remote:
             dual_pair = ["JOSH 2.0", remote]
@@ -840,7 +1000,6 @@ def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
                 for mb in day_entry.get("modelBreakdowns", []):
                     name = mb.get("modelName", "")
                     cost = float(mb.get("cost") or 0)
-                    tokens = int(mb.get("totalTokens") or 0)
                     if not name or should_exclude_model(name, source):
                         continue
                     if name not in by_model:
@@ -851,18 +1010,12 @@ def fetch_model_usage_from_codexbar() -> List[Dict[str, Any]]:
                             "dailyCost": 0.0,
                             "sessionCost": 0.0,
                             "totalTokens": 0,
-                            "dailyTokens": 0,
                             "costEstimated": False,
-                            "subscriptionIncluded": cost == 0 and source == "codex",
                         }
                     by_model[name]["weeklyCost"] += cost
                     by_model[name]["sessionCost"] += cost
-                    by_model[name]["totalTokens"] += tokens
                     if is_today:
                         by_model[name]["dailyCost"] += cost
-                        by_model[name]["dailyTokens"] += tokens
-                    if cost > 0:
-                        by_model[name]["subscriptionIncluded"] = False
 
         return list(by_model.values())
     except Exception as exc:
@@ -1345,248 +1498,6 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
         total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
 
-        fixed_codex_monthly = 200.0
-
-        def _is_local_row(row: Dict[str, Any]) -> bool:
-            src = str(row.get("source", "")).lower()
-            name = str(row.get("name", "")).lower()
-            return row.get("isLocal") is True or src in {"ollama", "local"} or name.startswith("local/")
-
-        def _is_codex_subscription_row(row: Dict[str, Any]) -> bool:
-            src = str(row.get("source", "")).lower()
-            name = str(row.get("name", "")).lower()
-            return (
-                src in {"codex", "codexbar"}
-                or "openai-codex" in name
-                or name.startswith("codex/")
-                or row.get("subscriptionIncluded") is True
-            )
-
-        codex_rows = [r for r in breakdown if _is_codex_subscription_row(r)]
-        local_rows = [r for r in breakdown if _is_local_row(r)]
-        metered_rows = [r for r in breakdown if not _is_local_row(r) and not _is_codex_subscription_row(r)]
-        codex_equivalent_weekly = round(sum(float(r.get("weeklyCost") or 0) for r in codex_rows), 6)
-        codex_equivalent_daily = round(sum(float(r.get("dailyCost") or 0) for r in codex_rows), 6)
-        codex_tokens_weekly = int(sum(int(r.get("totalTokens") or 0) for r in codex_rows))
-        codex_tokens_daily = int(sum(int(r.get("dailyTokens") or 0) for r in codex_rows))
-        # Metered rows already include synthetic OpenRouter and J.A.I.N API rows when
-        # those lanes report usage, so do not add their source totals a second time.
-        metered_weekly = round(sum(float(r.get("weeklyCost") or 0) for r in metered_rows), 6)
-        metered_daily = round(sum(float(r.get("dailyCost") or 0) for r in metered_rows), 6)
-        metered_source_totals = {
-            "openrouterWeekly": round(or_weekly, 6),
-            "openrouterDaily": round(or_daily, 6),
-            "openrouterMonthly": round(or_monthly, 6),
-            "jainApiWeekly": round(jain_api.get("weekly", 0), 6),
-            "jainApiDaily": round(jain_api_daily, 6),
-            "jainApiMonthly": round(jain_api_monthly, 6),
-            "trackedRowsWeekly": metered_weekly,
-            "trackedRowsDaily": metered_daily,
-        }
-        metered_monthly_projection = round(max(metered_weekly * (30 / 7), or_monthly, jain_api_monthly), 2)
-        effective_monthly_projection = round(fixed_codex_monthly + metered_monthly_projection, 2)
-        codex_value_projection = round(codex_equivalent_weekly * (30 / 7), 2)
-
-        def _row_weekly_total(rows: List[Dict[str, Any]]) -> float:
-            return round(sum(float(r.get("weeklyCost") or 0) for r in rows), 6)
-
-        def _row_daily_total(rows: List[Dict[str, Any]]) -> float:
-            return round(sum(float(r.get("dailyCost") or 0) for r in rows), 6)
-
-        def _row_token_total(rows: List[Dict[str, Any]]) -> int:
-            return int(sum(int(r.get("totalTokens") or 0) for r in rows))
-
-        def _row_models(rows: List[Dict[str, Any]], limit: int = 3) -> List[str]:
-            ordered = sorted(rows, key=lambda r: float(r.get("weeklyCost") or 0), reverse=True)
-            return [str(r.get("name") or "unknown") for r in ordered[:limit]]
-
-        def _monthly_from_weekly(weekly: float) -> float:
-            return round(float(weekly or 0) * (30 / 7), 2)
-
-        def _is_openai_api_row(row: Dict[str, Any]) -> bool:
-            name = str(row.get("name", "")).lower()
-            source = str(row.get("source", "")).lower()
-            if _is_local_row(row) or _is_codex_subscription_row(row):
-                return False
-            return name.startswith("openai/") or name.startswith("gpt-") or source == "openclaw"
-
-        def _is_gemini_row(row: Dict[str, Any]) -> bool:
-            name = str(row.get("name", "")).lower()
-            source = str(row.get("source", "")).lower()
-            return "gemini" in name or "google" in source or "gemini" in source
-
-        def _is_grok_or_router_row(row: Dict[str, Any]) -> bool:
-            name = str(row.get("name", "")).lower()
-            source = str(row.get("source", "")).lower()
-            return "grok" in name or "openrouter" in name or "xai" in source or "openrouter" in source
-
-        openai_api_rows = [r for r in metered_rows if _is_openai_api_row(r)]
-        gemini_rows = [r for r in metered_rows if _is_gemini_row(r)]
-        router_rows = [r for r in metered_rows if _is_grok_or_router_row(r)]
-        known_metered_ids = {id(r) for r in openai_api_rows + gemini_rows + router_rows}
-        other_metered_rows = [r for r in metered_rows if id(r) not in known_metered_ids]
-
-        spend_lanes = [
-            {
-                "key": "codex_subscription",
-                "label": "Codex subscription",
-                "authPath": "OpenAI OAuth / subscription",
-                "billing": "fixed",
-                "status": "covered",
-                "monthlyProjection": fixed_codex_monthly,
-                "weeklyEquivalent": codex_equivalent_weekly,
-                "dailyEquivalent": codex_equivalent_daily,
-                "tokensWeekly": codex_tokens_weekly,
-                "models": _row_models(codex_rows),
-                "modelCount": len(codex_rows),
-                "note": "Fixed subscription outlay; equivalent API value is informational only.",
-            },
-            {
-                "key": "openai_api",
-                "label": "OpenAI API",
-                "authPath": "API key / metered",
-                "billing": "metered",
-                "status": "active" if _row_weekly_total(openai_api_rows) > 0 else "idle",
-                "monthlyProjection": _monthly_from_weekly(_row_weekly_total(openai_api_rows)),
-                "weeklyCost": _row_weekly_total(openai_api_rows),
-                "dailyCost": _row_daily_total(openai_api_rows),
-                "tokensWeekly": _row_token_total(openai_api_rows),
-                "models": _row_models(openai_api_rows),
-                "modelCount": len(openai_api_rows),
-                "note": "Direct OpenAI API spend outside the subscription lane.",
-            },
-            {
-                "key": "realtime_research",
-                "label": "Grok / OpenRouter",
-                "authPath": "BYOK / direct API",
-                "billing": "metered",
-                "status": "active" if max(_row_weekly_total(router_rows), or_weekly) > 0 else "idle",
-                "monthlyProjection": round(max(_monthly_from_weekly(_row_weekly_total(router_rows)), or_monthly), 2),
-                "weeklyCost": round(max(_row_weekly_total(router_rows), or_weekly), 6),
-                "dailyCost": round(max(_row_daily_total(router_rows), or_daily), 6),
-                "tokensWeekly": _row_token_total(router_rows),
-                "models": _row_models(router_rows),
-                "modelCount": len(router_rows),
-                "note": "Freshness and realtime research lane; disabled when OpenRouter usage is unavailable.",
-            },
-            {
-                "key": "gemini_automation",
-                "label": "Gemini / automation",
-                "authPath": "Google API / J.A.I.N scripts",
-                "billing": "metered",
-                "status": "active" if max(_row_weekly_total(gemini_rows), jain_api.get("weekly", 0)) > 0 else "idle",
-                "monthlyProjection": round(max(_monthly_from_weekly(_row_weekly_total(gemini_rows)), jain_api_monthly), 2),
-                "weeklyCost": round(max(_row_weekly_total(gemini_rows), jain_api.get("weekly", 0)), 6),
-                "dailyCost": round(max(_row_daily_total(gemini_rows), jain_api_daily), 6),
-                "tokensWeekly": _row_token_total(gemini_rows),
-                "models": _row_models(gemini_rows),
-                "modelCount": len(gemini_rows),
-                "note": "Long-context and background analysis lane.",
-            },
-            {
-                "key": "local_models",
-                "label": "Local models",
-                "authPath": "on-device",
-                "billing": "free",
-                "status": "available" if local_rows else "missing",
-                "monthlyProjection": 0.0,
-                "weeklyCost": 0.0,
-                "dailyCost": 0.0,
-                "tokensWeekly": _row_token_total(local_rows),
-                "models": _row_models(local_rows),
-                "modelCount": len(local_rows),
-                "note": "No model bill; useful as a pressure-release lane when quality is enough.",
-            },
-        ]
-
-        if other_metered_rows:
-            spend_lanes.append({
-                "key": "other_metered",
-                "label": "Other metered",
-                "authPath": "mixed API",
-                "billing": "metered",
-                "status": "active",
-                "monthlyProjection": _monthly_from_weekly(_row_weekly_total(other_metered_rows)),
-                "weeklyCost": _row_weekly_total(other_metered_rows),
-                "dailyCost": _row_daily_total(other_metered_rows),
-                "tokensWeekly": _row_token_total(other_metered_rows),
-                "models": _row_models(other_metered_rows),
-                "modelCount": len(other_metered_rows),
-                "note": "Tracked metered usage that does not map cleanly to the primary lanes.",
-            })
-
-        posture = "calm"
-        if metered_monthly_projection > 75:
-            posture = "hot"
-        elif metered_monthly_projection > 25:
-            posture = "watch"
-        elif metered_monthly_projection > 1:
-            posture = "active"
-
-        active_metered_lanes = [
-            lane for lane in spend_lanes
-            if lane.get("billing") == "metered" and float(lane.get("monthlyProjection") or 0) > 0.01
-        ]
-        lead_metered_lane = max(
-            active_metered_lanes,
-            key=lambda lane: float(lane.get("monthlyProjection") or 0),
-            default=None,
-        )
-        lane_stack = [
-            {
-                "key": str(lane.get("key") or "lane"),
-                "label": str(lane.get("label") or "Lane"),
-                "billing": str(lane.get("billing") or "metered"),
-                "status": str(lane.get("status") or "idle"),
-                "monthlyProjection": round(float(lane.get("monthlyProjection") or 0), 2),
-                "weeklyCost": round(float(lane.get("weeklyCost") or lane.get("weeklyEquivalent") or 0), 6),
-                "modelCount": int(lane.get("modelCount") or 0),
-                "models": list(lane.get("models") or [])[:2],
-            }
-            for lane in spend_lanes
-        ]
-        kiosk_summary = {
-            "title": "Model spend cockpit",
-            "posture": posture,
-            "statusLabel": "Calm" if posture == "calm" else posture.title(),
-            "trueOutlayMonthly": effective_monthly_projection,
-            "fixedMonthly": fixed_codex_monthly,
-            "meteredMonthly": metered_monthly_projection,
-            "meteredWeekly": metered_weekly,
-            "codexValueMonthly": codex_value_projection,
-            "codexTokensWeekly": codex_tokens_weekly,
-            "activeMeteredLaneCount": len(active_metered_lanes),
-            "leadMeteredLane": lead_metered_lane.get("label") if lead_metered_lane else "Metered lanes idle",
-            "laneStack": lane_stack,
-            "mixLabel": f"{len(codex_rows)} Codex · {len(metered_rows)} API · {len(local_rows)} local",
-        }
-
-        spend_overview = {
-            "subscriptionMonthly": fixed_codex_monthly,
-            "effectiveMonthlyProjection": effective_monthly_projection,
-            "meteredMonthlyProjection": metered_monthly_projection,
-            "meteredWeekly": metered_weekly,
-            "meteredDaily": metered_daily,
-            "codexEquivalentWeekly": codex_equivalent_weekly,
-            "codexEquivalentDaily": codex_equivalent_daily,
-            "codexEquivalentMonthlyProjection": codex_value_projection,
-            "codexTokensWeekly": codex_tokens_weekly,
-            "codexTokensDaily": codex_tokens_daily,
-            "localModelCount": len(local_rows),
-            "meteredModelCount": len(metered_rows),
-            "codexModelCount": len(codex_rows),
-            "meteredSources": metered_source_totals,
-            "posture": posture,
-            "kioskSummary": kiosk_summary,
-            "lanes": spend_lanes,
-            "insights": [
-                f"True projected outlay is ${effective_monthly_projection:.2f}/mo: ${fixed_codex_monthly:.0f} fixed Codex + ${metered_monthly_projection:.2f} metered.",
-                f"Codex subscription is absorbing roughly ${codex_value_projection:.2f}/mo of API-equivalent usage.",
-                f"Tracked metered spend is ${metered_weekly:.2f}/wk across {len(metered_rows)} metered model rows.",
-            ],
-            "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription.",
-        }
-
         # ── Weekly Run Rate: automation baseline vs interactive ───────────────
         # automation = J.A.I.N scripts + OpenRouter background + JAIN API models
         # interactive = JOSH 2.0 chat sessions (Sonnet-driven, Josh-initiated)
@@ -1621,7 +1532,6 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 "monthly": total_monthly,
             },
             "weeklyRunRate": weekly_run_rate,
-            "spendOverview": spend_overview,
         }
         return payload
 
@@ -1643,63 +1553,35 @@ def fetch_model_usage() -> Dict[str, Any] | None:
     return normalize_model_usage_payload(fallback)
 
 
-def _calendar_events_command() -> tuple[List[str], str]:
-    account = os.environ.get("MC_CALENDAR_ACCOUNT", "jcubell16@gmail.com")
-    secure_gog = Path.home() / "scripts" / "gog_secure.sh"
-    gog_bin = os.environ.get("GOG_BIN") or (
-        str(secure_gog) if secure_gog.exists() and os.access(secure_gog, os.X_OK) else shutil.which("gog")
-    )
-    args = [
-        "calendar", "events", "primary",
-        "--account", account,
-        "--from", "today",
-        "--days", "3",
-        "--max", "10",
-        "-j", "--results-only",
-    ]
-    if gog_bin:
-        return [gog_bin, *args], "local gog"
-    # Mission Control often refreshes from JAIMES, while gog lives on JOSH 2.0.
-    # Prefer JOSH's secure wrapper so non-interactive jobs can read the file keyring
-    # password locally without exposing it over SSH or committing it to this repo.
-    remote_gog = os.environ.get("JOSH_GOG_BIN", "~/scripts/gog_secure.sh")
-    remote = " ".join([remote_gog, *[shlex.quote(str(part)) for part in args]])
-    return [
-        "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
-        "josh2.0@100.114.50.48", remote,
-    ], "JOSH 2.0 gog"
-
-
 def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
     fetch_upcoming_events._status = {"status": "unknown", "message": "Unknown"}  # type: ignore[attr-defined]
-    source = "unknown"
     try:
-        cmd, source = _calendar_events_command()
         result = subprocess.run(
-            cmd,
+            [
+                "gog", "calendar", "events", "primary",
+                "--account", "jcubellagent@gmail.com",
+                "--from", "today",
+                "--days", "3",
+                "--max", "10",
+                "-j", "--results-only",
+            ],
             capture_output=True,
             text=True,
             check=True,
-            timeout=18,
         )
-        fetch_upcoming_events._status = {"status": "ok", "message": f"Connected via {source}"}  # type: ignore[attr-defined]
-    except FileNotFoundError as exc:
-        fetch_upcoming_events._status = {"status": "unavailable", "message": f"Calendar CLI unavailable: {exc.filename or 'command missing'}"}  # type: ignore[attr-defined]
-        print(f"[warn] calendar command missing via {source}: {exc}", file=sys.stderr)
-        return []
-    except subprocess.TimeoutExpired:
-        fetch_upcoming_events._status = {"status": "timeout", "message": f"Calendar fetch timed out via {source}"}  # type: ignore[attr-defined]
-        print(f"[warn] calendar fetch timed out via {source}", file=sys.stderr)
+        fetch_upcoming_events._status = {"status": "ok", "message": "Connected"}  # type: ignore[attr-defined]
+    except FileNotFoundError:
+        fetch_upcoming_events._status = {"status": "unavailable", "message": "gog CLI missing"}  # type: ignore[attr-defined]
+        print("[warn] gog CLI missing; skipping calendar fetch", file=sys.stderr)
         return []
     except subprocess.CalledProcessError as exc:
-        err = ((exc.stderr or '') + '\n' + (exc.stdout or '')).strip()
-        lower = err.lower()
-        if 'no auth for calendar' in lower or 'invalid_grant' in lower or 'expired or revoked' in lower:
-            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Calendar re-auth required"}  # type: ignore[attr-defined]
-            print(f"[info] gog calendar auth needs re-login via {source}", file=sys.stderr)
+        err = (exc.stderr or '').strip()
+        if 'invalid_grant' in err or 'expired or revoked' in err:
+            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Re-auth required"}  # type: ignore[attr-defined]
+            print("[info] gog calendar auth needs re-login; skipping calendar fetch", file=sys.stderr)
             return []
-        fetch_upcoming_events._status = {"status": "error", "message": f"Calendar fetch failed via {source}"}  # type: ignore[attr-defined]
-        print(f"[warn] gog calendar list failed via {source}: {err}", file=sys.stderr)
+        fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
+        print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)
         return []
     try:
         raw = json.loads(result.stdout or "[]")
@@ -1804,7 +1686,7 @@ def fetch_crons() -> List[Dict[str, Any]]:
             josh_listing = result.stdout
         except (subprocess.CalledProcessError, OSError, PermissionError):
             josh_listing = ""
-    # J.A.I.N — single batched SSH call for crontab, Sorare tails, and Hermes jobs.
+    # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
     import datetime as _dt
     import re as _re
     from zoneinfo import ZoneInfo
@@ -1813,6 +1695,11 @@ def fetch_crons() -> List[Dict[str, Any]]:
     today_str = now_et.strftime('%Y-%m-%d')
 
     jain_listing = ""
+    x_log_lines_raw = ""
+    reply_state_raw = "{}"
+    x_log_runs: dict[str, str] = {}
+    x_log_hours: dict[str, list[int]] = {}
+    _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
     jain_verified_runs: dict[str, dict[str, Any]] = {}
     josh_verified_runs: dict[str, dict[str, Any]] = {}
@@ -1826,7 +1713,7 @@ jobs = {
     'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
-    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log',
+    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
     'J.A.I.N Medic': '/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log',
     'Sorare Cookie Auto-Refresh': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log',
 }
@@ -1859,7 +1746,7 @@ PY"""
                 'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
-                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log'),
+                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
                 'J.A.I.N Medic': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log'),
                 'Sorare Cookie Auto-Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log'),
             }
@@ -1875,8 +1762,12 @@ PY"""
     try:
         jain_batch_cmd = (
             "echo '===CRON==='; crontab -l 2>/dev/null || true; "
+            "echo '===XLOG==='; grep -E '[0-9]{2}:[0-9]{2}:[0-9]{2}.*X Post Agent|Posted' "
+            "  /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>/dev/null | tail -50 || true; "
+            "echo '===REPLY==='; cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo '{}'; "
             f"echo '===SORAREMISSIONS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_missions.log 2>/dev/null || echo ''; "
             f"echo '===SORARELINEUPS==='; tail -8 /Users/jc_agent/scripts/logs/sorare_lineups.log 2>/dev/null || echo ''; "
+            f"echo '===STRATEGICREPLIES==='; grep -E '^\\[([0-9]{{2}}):' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -20 || echo ''; "
             f"echo '===HERMESJOBS==='; cat /Users/jc_agent/.hermes/cron/jobs.json 2>/dev/null || echo '{{}}'"
         )
         r = subprocess.run(
@@ -1886,23 +1777,46 @@ PY"""
         )
         if r.returncode == 0:
             raw = r.stdout
-            parts = raw.split("===SORAREMISSIONS===")
+            parts = raw.split("===XLOG===")
             jain_listing = parts[0].replace("===CRON===", "").strip() if parts else ""
-            rest = parts[1] if len(parts) > 1 else ""
-            lineups_split = rest.split("===SORARELINEUPS===")
-            sorare_missions_tail = lineups_split[0].strip()
-            rest2 = lineups_split[1] if len(lineups_split) > 1 else ""
-            hermes_split = rest2.split("===HERMESJOBS===")
-            sorare_lineups_tail = hermes_split[0].strip()
-            hermes_jobs_raw = hermes_split[1].strip() if len(hermes_split) > 1 else "{}"
-            try:
-                _hdata = json.loads(hermes_jobs_raw)
-                for _hj in _hdata.get('jobs', []):
-                    _hname = _hj.get('name', '')
-                    if _hname:
-                        hermes_jobs[_hname] = _hj
-            except Exception:
-                pass
+            if len(parts) > 1:
+                reply_split = parts[1].split("===REPLY===")
+                x_log_lines_raw = reply_split[0].strip()
+                rest = reply_split[1] if len(reply_split) > 1 else ""
+                missions_split = rest.split("===SORAREMISSIONS===")
+                reply_state_raw = missions_split[0].strip()
+                if len(missions_split) > 1:
+                    lineups_split = missions_split[1].split("===SORARELINEUPS===")
+                    sorare_missions_tail = lineups_split[0].strip()
+                    rest2 = lineups_split[1] if len(lineups_split) > 1 else ""
+                    strategic_split = rest2.split("===STRATEGICREPLIES===")
+                    sorare_lineups_tail = strategic_split[0].strip()
+                    strategic_reply_log = strategic_split[1].strip() if len(strategic_split) > 1 else ""
+                    # Split out Hermes jobs JSON
+                    hermes_split = strategic_reply_log.split("===HERMESJOBS===")
+                    strategic_reply_log_clean = hermes_split[0].strip()
+                    hermes_jobs_raw = hermes_split[1].strip() if len(hermes_split) > 1 else "{}"
+                    # Parse strategic reply hours from log
+                    _strategic_reply_hours: list[int] = []
+                    for _srl in strategic_reply_log_clean.splitlines():
+                        _srm = _re.match(r'^\[(\d{2}):', _srl.strip())
+                        if _srm:
+                            _h = int(_srm.group(1))
+                            if _h <= now_et.hour:
+                                _strategic_reply_hours.append(_h)
+                    if _strategic_reply_hours:
+                        _jain_replies_today_from_log = _strategic_reply_hours
+                    else:
+                        _jain_replies_today_from_log = []
+                    # Parse Hermes jobs for JAIMES-agent last_run data
+                    try:
+                        _hdata = json.loads(hermes_jobs_raw)
+                        for _hj in _hdata.get('jobs', []):
+                            _hname = _hj.get('name', '')
+                            if _hname:
+                                hermes_jobs[_hname] = _hj
+                    except Exception:
+                        pass
     except Exception:
         pass
 
@@ -2005,6 +1919,66 @@ PY"""
     except Exception:
         pass
 
+    # Parse X post log for lastRun data (ET hours only, today only)
+    try:
+        log_lines = x_log_lines_raw.splitlines()
+        # Keys are ET hours (cron schedule hours) — log timestamps are also ET
+        hour_to_job = {
+            7:  "X Pre-Market",
+            8:  "X Market Open",
+            11: "X Mover",
+            12: "X Hot Take",
+            17: "X Market Close",
+            21: "X Prime Take",
+            22: "X Nightcap",
+            13: "X Quote Tweets",
+            15: "X Quote Tweets",
+            18: "X Quote Tweets",
+            20: "X Quote Tweets",
+        }
+        # We need date context — log lines don't include date so we only count if
+        # timestamp hour is plausible for today (hour <= now_et.hour + 1 guard)
+        for line in log_lines:
+            m = _re.match(r'\[(\d{2}):(\d{2}):\d{2}\] X Post Agent', line)
+            if m:
+                h = int(m.group(1))
+                # Only count hours that have already passed today (avoid yesterday bleed)
+                if h > now_et.hour:
+                    continue
+                job_name = hour_to_job.get(h)
+                if job_name:
+                    iso = f"{today_str}T{m.group(1)}:{m.group(2)}:00"
+                    x_log_runs[job_name] = iso
+                    x_log_hours.setdefault(job_name, []).append(h)
+    except Exception:
+        pass
+
+    # Parse strategic reply state
+    _jain_replies_today: list[int] = []
+    try:
+        reply_state_r_stdout = reply_state_raw
+        if True:  # keep indentation compatible with original code below
+            jain_rs = json.loads(reply_state_r_stdout.strip() or '{}')
+            for r_item in jain_rs.get('replies', []):
+                posted = r_item.get('posted_at', '')
+                try:
+                    dt_utc = _dt.datetime.fromisoformat(posted.replace('Z', '+00:00'))
+                    dt_et = dt_utc.astimezone(ZoneInfo("America/New_York"))
+                    if dt_et.strftime('%Y-%m-%d') == today_str:
+                        _jain_replies_today.append(dt_et.hour)
+                except Exception:
+                    pass
+            # Also merge log-based hours (more reliable than stale reply_state.json)
+            for _lh in _jain_replies_today_from_log:
+                if _lh not in _jain_replies_today:
+                    _jain_replies_today.append(_lh)
+            if _jain_replies_today:
+                x_log_runs["X Strategic Replies"] = f"{today_str}T{max(_jain_replies_today):02d}:00:00"
+    except Exception:
+        pass
+    fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
+
+
 
     def parse_schedule_time(schedule_str: str) -> tuple[int, int] | None:
         m = _re.search(r'(\d{1,2})(?::(\d{2}))?\s*(AM|PM)', schedule_str, _re.IGNORECASE)
@@ -2062,8 +2036,8 @@ PY"""
         # Compute runStatus for daily jobs
         sched = target.get('schedule', '')
         run_status = None  # 'done' | 'missed' | 'upcoming' | None
-        last_run = None
-        if hermes_job:
+        last_run = x_log_runs.get(target['name'])
+        if not last_run and hermes_job:
             _hlast = hermes_job.get('last_run_at')
             if _hlast and hermes_job.get('last_status') == 'ok':
                 last_run = _hlast
@@ -2102,6 +2076,12 @@ PY"""
                     run_status = 'upcoming'
         elif today_relevant and sched_meta.get('kind') in {'recurring', 'calendar_split'}:
             run_status = 'active' if present else 'due'
+        elif target['name'] == 'X Strategic Replies':
+            if last_run_today:
+                run_status = 'done'
+            elif now_et.hour >= 9:
+                run_status = 'upcoming'
+
         if source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
             row_status = 'paused'
         elif last_run_today or verified_today:
@@ -2151,18 +2131,88 @@ PY"""
             else:
                 runs = list(multi.get('weekendRuns', []))
 
-            for run in runs:
-                t_str = run['time']
-                try:
-                    t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
-                        year=now_et.year, month=now_et.month, day=now_et.day,
-                        tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
-                    )
-                    run['past'] = now_et >= t
-                    run['done'] = False
-                except Exception:
-                    run['past'] = False
-                    run['done'] = False
+            # For X Strategic Replies: mark slots done based on actual replies posted today
+            if target['name'] == 'X Strategic Replies':
+                # Collect reply timestamps from both machines
+                reply_hours_today: list[int] = []
+
+                def _utc_to_et_date_hour(posted_iso: str):
+                    """Convert UTC ISO timestamp to (ET_date_str, ET_hour). Returns (None, None) on error."""
+                    try:
+                        dt_utc = _dt.datetime.fromisoformat(posted_iso.replace('Z', '+00:00'))
+                        dt_et = dt_utc.astimezone(ZoneInfo("America/New_York"))
+                        return dt_et.strftime('%Y-%m-%d'), dt_et.hour
+                    except Exception:
+                        return None, None
+
+                for rs_path in [
+                    ROOT.parent / 'data' / 'x_reply_state.json',
+                ]:
+                    if rs_path.exists():
+                        try:
+                            rs_data = json.loads(rs_path.read_text())
+                            for r in rs_data.get('replies', []):
+                                posted = r.get('posted_at', '')
+                                et_date, et_hour = _utc_to_et_date_hour(posted)
+                                if et_date == today_str and et_hour is not None:
+                                    reply_hours_today.append(et_hour)
+                        except Exception:
+                            pass
+                # Also pull J.A.I.N replies (fetched above)
+                for rh in getattr(fetch_crons, '_jain_replies_today', []):
+                    reply_hours_today.append(rh)
+
+                # Slot schedule hours (ET)
+                slot_hours = [9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 21, 23]
+                replies_done = sorted(reply_hours_today)
+
+                # Greedily assign each reply to the earliest slot it could cover
+                assigned = [False] * len(slot_hours)
+                for rh in replies_done:
+                    for i, sh in enumerate(slot_hours):
+                        if not assigned[i] and rh >= sh:
+                            assigned[i] = True
+                            break
+
+                for i, run in enumerate(runs):
+                    run['done'] = assigned[i] if i < len(assigned) else False
+                if any(assigned):
+                    row['runStatus'] = 'done'
+                elif now_et.hour >= 9 and 'runStatus' not in row:
+                    row['runStatus'] = 'upcoming'
+            elif target['name'] == 'X Quote Tweets':
+                done_hours = set(x_log_hours.get(target['name'], []))
+                for run in runs:
+                    t_str = run['time']
+                    try:
+                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                            year=now_et.year, month=now_et.month, day=now_et.day,
+                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                        )
+                        run['past'] = now_et >= t
+                        run['done'] = t.hour in done_hours
+                    except Exception:
+                        run['past'] = False
+                        run['done'] = False
+                if any(run.get('done') for run in runs):
+                    row['runStatus'] = 'done'
+                elif any(run.get('past') for run in runs):
+                    row['runStatus'] = 'due'
+                elif 'runStatus' not in row:
+                    row['runStatus'] = 'upcoming'
+            else:
+                for run in runs:
+                    t_str = run['time']
+                    try:
+                        t = _dt.datetime.strptime(t_str, "%I:%M %p").replace(
+                            year=now_et.year, month=now_et.month, day=now_et.day,
+                            tzinfo=_dt.timezone(_dt.timedelta(hours=-4))
+                        )
+                        run['past'] = now_et >= t
+                        run['done'] = False
+                    except Exception:
+                        run['past'] = False
+                        run['done'] = False
             row['multiRun'] = {'runs': runs}
         rows.append(row)
     return rows
@@ -2180,24 +2230,6 @@ def fetch_visual_canaries() -> Dict[str, Any]:
         "status": "unknown",
         "summary": "Canary data pending",
         "checkedAt": None,
-        "checks": [],
-    }
-
-
-def fetch_capability_canary() -> Dict[str, Any]:
-    data = load_json_file(CAPABILITY_CANARY_PATH, {})
-    if isinstance(data, dict) and data:
-        checks = data.get("checks") if isinstance(data.get("checks"), list) else []
-        counts = data.get("counts") if isinstance(data.get("counts"), dict) else {}
-        data["checks"] = checks
-        data["counts"] = counts
-        return data
-    return {
-        "ok": False,
-        "status": "unknown",
-        "summary": "Capability canary pending",
-        "checkedAt": None,
-        "counts": {},
         "checks": [],
     }
 
@@ -2245,78 +2277,78 @@ def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[D
     }
 
 
-def fetch_joshex_patch_status(now_iso: str) -> Dict[str, Any]:
-    """Expose Mission Control patch state without creating a live-agent slot."""
-    try:
-        status = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=ROOT.parent,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=5,
-        ).stdout.splitlines()
-        head = subprocess.run(
-            ["git", "rev-parse", "--short", "HEAD"],
-            cwd=ROOT.parent,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=5,
-        ).stdout.strip()
-    except Exception as exc:
-        return {
-            "status": "unknown",
-            "summary": "Patch state unavailable",
-            "detail": str(exc)[:120],
-            "dirtyCount": 0,
-            "head": "unknown",
-            "updatedAt": now_iso,
-        }
-
-    volatile = {"data/jaimes-brain-feed.json"}
-    files = [line[3:] for line in status if len(line) >= 4]
-    source_files = [path for path in files if path not in volatile]
-    dirty_count = len(source_files)
-    state = "clean" if dirty_count == 0 else "pending"
-    summary = f"Clean at {head}" if dirty_count == 0 else f"{dirty_count} source file(s) changed"
-    return {
-        "status": state,
-        "summary": summary,
-        "detail": "Volatile brain telemetry ignored" if files and dirty_count == 0 else "Ready for validation" if dirty_count else "No source patch pending",
-        "dirtyCount": dirty_count,
-        "files": source_files[:6],
-        "head": head,
-        "updatedAt": now_iso,
-    }
+def normalize_priority(value: Any) -> str:
+    priority = str(value or "medium").lower()
+    if priority in {"high", "medium", "low"}:
+        return priority
+    return "medium"
 
 
-def fetch_personal_codex_status(now_iso: str) -> Dict[str, Any]:
-    """Load local JOSHeX visibility without promoting it as an agent."""
-    fallback: Dict[str, Any] = {
-        "status": "idle",
-        "objective": "JOSHeX contribution lane ready",
-        "validation": "pending",
-        "actionRequired": [],
-        "recentActivity": [],
-        "capabilities": ["inspect", "edit", "validate", "prepare patches"],
-        "updatedAt": now_iso,
-    }
-    raw = load_json_file(PERSONAL_CODEX_PATH, fallback)
+def normalize_personal_codex(raw: Any, now_iso: str) -> Dict[str, Any]:
+    """Load the local Personal Codex lane without requiring live-system access."""
     if not isinstance(raw, dict):
-        raw = fallback
-    data = {**fallback, **raw}
-    data["agentSlot"] = False
-    data["promoteToBrainFeed"] = False
-    data["updatedAt"] = data.get("updatedAt") or now_iso
-    data["patchStatus"] = fetch_joshex_patch_status(now_iso)
-    for key in ["actionRequired", "recentActivity", "capabilities"]:
-        if not isinstance(data.get(key), list):
-            data[key] = []
-    patch_summary = data["patchStatus"].get("summary")
-    if patch_summary:
-        data["recentActivity"] = [{"event": f"Patch feed: {patch_summary}", "time": now_iso}, *data["recentActivity"]]
-    return data
+        raw = {}
+
+    status = str(raw.get("status") or "offline").lower()
+    if status not in {"ready", "working", "blocked", "needs_josh", "offline"}:
+        status = "ready" if raw else "offline"
+
+    repo = raw.get("repo") if isinstance(raw.get("repo"), dict) else {}
+    validation = raw.get("validation") if isinstance(raw.get("validation"), dict) else {}
+    metrics = raw.get("metrics") if isinstance(raw.get("metrics"), dict) else {}
+    links = raw.get("links") if isinstance(raw.get("links"), list) else []
+
+    action_items: List[Dict[str, str]] = []
+    for item in raw.get("actionRequired", []) if isinstance(raw.get("actionRequired"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        if not title:
+            continue
+        action_items.append({
+            "priority": normalize_priority(item.get("priority")),
+            "title": title,
+            "url": str(item.get("url") or "#personal-codex"),
+        })
+
+    recent_items: List[Dict[str, str]] = []
+    for item in raw.get("recentActivity", []) if isinstance(raw.get("recentActivity"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        event = str(item.get("event") or item.get("title") or "").strip()
+        if not event:
+            continue
+        recent_items.append({
+            "time": str(item.get("time") or raw.get("updatedAt") or now_iso),
+            "event": event,
+        })
+
+    updated_at = raw.get("updatedAt") if is_valid_iso8601(raw.get("updatedAt")) else now_iso
+    return {
+        "status": status,
+        "objective": str(raw.get("objective") or ""),
+        "updatedAt": updated_at,
+        "summary": str(raw.get("summary") or "Personal Codex sidecar is not reporting yet."),
+        "mode": str(raw.get("mode") or "local"),
+        "repo": {
+            "path": str(repo.get("path") or ""),
+            "branch": str(repo.get("branch") or ""),
+            "dirty": bool(repo.get("dirty", False)),
+        },
+        "validation": {
+            "pyCompile": str(validation.get("pyCompile") or "unknown"),
+            "regression": str(validation.get("regression") or "unknown"),
+            "visualCanaries": str(validation.get("visualCanaries") or "unknown"),
+        },
+        "actionRequired": action_items[:5],
+        "recentActivity": recent_items[:5],
+        "metrics": {
+            "openQuestions": int(metrics.get("openQuestions") or 0),
+            "localChanges": int(metrics.get("localChanges") or 0),
+            "lastValidationMinutesAgo": int(metrics.get("lastValidationMinutesAgo") or 0),
+        },
+        "links": [link for link in links if isinstance(link, dict)][:5],
+    }
 
 
 def build_capability_stack(
@@ -2324,9 +2356,10 @@ def build_capability_stack(
     sorare_ml: Dict[str, Any],
     voice_router: Dict[str, Any],
     ops_inbox: Dict[str, Any],
-    capability_canary: Dict[str, Any] | None = None,
+    agent_control: Dict[str, Any] | None = None,
     personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
+    agent_summary = agent_control.get("summary", {}) if isinstance(agent_control, dict) else {}
     stack = [
         {
             "id": "visual-canaries",
@@ -2357,26 +2390,25 @@ def build_capability_stack(
             "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
         },
     ]
-    capability = capability_canary or {}
-    if capability:
-        counts = capability.get("counts") or {}
+    if agent_summary:
+        ready = agent_summary.get("readyAgents", 0)
+        total = agent_summary.get("totalAgents", 0)
+        failed = agent_summary.get("failedQueues", 0)
+        dirty = agent_summary.get("dirtyRepos", 0)
         stack.append({
-            "id": "capability-canary",
-            "name": "Capability Canary",
-            "status": capability.get("status") or "unknown",
-            "summary": capability.get("summary") or "OpenClaw capability drift check",
-            "detail": f"{counts.get('ok', 0)} ok · {counts.get('warn', 0)} warn · {counts.get('error', 0)} err",
-            "source": "capabilityCanary",
+            "id": "agent-control",
+            "name": "Agent Control",
+            "status": agent_summary.get("overall") or "unknown",
+            "summary": f"{ready}/{total} agent nodes ready",
+            "detail": f"{failed} queue item(s) · {dirty} dirty repo(s)",
         })
-    pc = personal_codex or {}
-    if pc:
+    if personal_codex and personal_codex.get("status") != "offline":
         stack.append({
             "id": "personal-codex",
-            "name": "JOSHeX",
-            "status": pc.get("status") or "idle",
-            "summary": pc.get("objective") or "Local Codex contribution visibility",
-            "detail": f"JOSHeX: {pc.get('validation') or 'validation pending'}",
-            "source": "personalCodex",
+            "name": "Personal Codex",
+            "status": personal_codex.get("status") or "ready",
+            "summary": personal_codex.get("summary"),
+            "detail": personal_codex.get("objective") or "Local Mission Control contribution lane",
         })
     return stack
 
@@ -2643,7 +2675,6 @@ def build_action_required(
     calendar_health: Dict[str, Any] | None,
     crons: List[Dict[str, Any]],
     moltworld_data: Dict[str, Any] | None,
-    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, str]]:
     """High-signal one-stop-shop alerts for Josh-facing ops health."""
     items: List[Dict[str, str]] = []
@@ -2700,20 +2731,6 @@ def build_action_required(
             title = f"MoltWorld status: {mw_status}"
         items.append({"priority": "medium", "title": title, "url": "#moltworld"})
 
-    for item in (personal_codex or {}).get("actionRequired") or []:
-        if isinstance(item, str):
-            title = item
-            priority = "medium"
-            url = "#personal-codex"
-        elif isinstance(item, dict):
-            title = str(item.get("title") or item.get("message") or "JOSHeX needs review")
-            priority = str(item.get("priority") or "medium")
-            url = str(item.get("url") or "#personal-codex")
-        else:
-            continue
-        if title.strip():
-            items.append({"priority": priority, "title": f"JOSHeX: {title.strip()}", "url": url})
-
     return items[:8]
 
 
@@ -2728,7 +2745,6 @@ def build_recent_activity(
     agent_bus_tasks: List[Dict[str, Any]] | None = None,
     coding_visibility: Dict[str, Any] | None = None,
     watchdog: Dict[str, Any] | None = None,
-    personal_codex: Dict[str, Any] | None = None,
 ) -> List[Dict[str, str]]:
     items: List[Dict[str, str]] = []
 
@@ -2792,18 +2808,6 @@ def build_recent_activity(
                 "time": coding_visibility.get("updatedAt") or now_iso,
                 "event": f"CodexBar: {coding_visibility.get('codexbarStatus')}",
             })
-
-    for activity in (personal_codex or {}).get("recentActivity") or []:
-        if isinstance(activity, str):
-            event = activity
-            when = (personal_codex or {}).get("updatedAt") or now_iso
-        elif isinstance(activity, dict):
-            event = str(activity.get("event") or activity.get("title") or activity.get("message") or "")
-            when = str(activity.get("time") or activity.get("updatedAt") or (personal_codex or {}).get("updatedAt") or now_iso)
-        else:
-            continue
-        if event.strip():
-            items.append({"time": when, "event": f"JOSHeX: {event.strip()}"})
 
     error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:
@@ -3043,6 +3047,9 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
         "devices": [],
         "products": [],
         "crons": [],
+        "codexJobs": [],
+        "sharedEvents": [],
+        "sharedOperatingLayer": {},
         "recentActivity": [],
         "lastUpdated": now_iso,
     }
@@ -3082,7 +3089,6 @@ def main() -> None:
     brain = fetch_brain_feed()
     dashboard["focus"] = brain or build_focus_fallback(dashboard["brainFeed"], now_iso)
     dashboard["contextWindow"] = fetch_context_window()
-    dashboard["personalCodex"] = fetch_personal_codex_status(now_iso)
     agent_bus_tasks = fetch_agent_bus_tasks()
     context_watchdog = fetch_context_watchdog_status()
     coding_visibility = fetch_coding_visibility()
@@ -3124,17 +3130,25 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    dashboard["codexJobs"]      = fetch_codex_jobs(now_iso)
+    dashboard["sharedEvents"]   = fetch_shared_events(now_iso)
+    dashboard["sharedOperatingLayer"] = fetch_shared_operating_layer(now_iso)
     dashboard["visualCanaries"] = fetch_visual_canaries()
-    dashboard["capabilityCanary"] = fetch_capability_canary()
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
+    dashboard["personalCodex"] = normalize_personal_codex(load_json_file(PERSONAL_CODEX_PATH, {}), now_iso)
+    dashboard["agentControl"] = load_json_file(AGENT_CONTROL_STATUS_PATH, {
+        "generatedAt": now_iso,
+        "summary": {"overall": "unknown"},
+        "agents": {},
+    })
     dashboard["capabilityStack"] = build_capability_stack(
         dashboard["visualCanaries"],
         dashboard["sorareMlCockpit"],
         dashboard["voiceRouter"],
         dashboard["opsInbox"],
-        dashboard["capabilityCanary"],
+        dashboard["agentControl"],
         dashboard["personalCodex"],
     )
     dashboard["actionRequired"] = build_action_required(
@@ -3142,14 +3156,29 @@ def main() -> None:
         dashboard["calendarHealth"],
         dashboard["crons"],
         moltworld_data,
-        dashboard["personalCodex"],
     )
+    for item in dashboard["personalCodex"].get("actionRequired", []):
+        dashboard["actionRequired"].append({
+            "priority": item.get("priority", "medium"),
+            "title": f"Personal Codex: {item.get('title')}",
+            "url": item.get("url") or "#personal-codex",
+        })
+    dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     if dashboard["visualCanaries"].get("status") == "attention":
         dashboard["actionRequired"].insert(0, {
             "priority": "high",
             "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
             "url": "#canaries",
         })
+    shared_layer = dashboard.get("sharedOperatingLayer", {})
+    if shared_layer.get("status") == "attention":
+        counts = shared_layer.get("counts", {})
+        dashboard["actionRequired"].insert(0, {
+            "priority": "medium",
+            "title": f"Shared layer needs attention: {counts.get('openHandoffs', 0)} handoff(s), {counts.get('blocked', 0)} blocked event(s), {counts.get('blockedTasks', 0)} blocked task(s), {counts.get('approvalNeeded', 0)} approval(s), {counts.get('staleHeartbeats', 0)} stale heartbeat(s)",
+            "url": "#jobs",
+        })
+    dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
@@ -3218,8 +3247,25 @@ def main() -> None:
         agent_bus_tasks,
         coding_visibility,
         context_watchdog,
-        dashboard["personalCodex"],
     )
+    if dashboard["personalCodex"].get("status") != "offline":
+        codex_activity = dashboard["personalCodex"].get("recentActivity") or [{
+            "time": dashboard["personalCodex"].get("updatedAt") or now_iso,
+            "event": f"Personal Codex: {dashboard['personalCodex'].get('status', 'ready')}",
+        }]
+        dashboard["recentActivity"] = [
+            {
+                "time": item.get("time") or dashboard["personalCodex"].get("updatedAt") or now_iso,
+                "event": item.get("event") if str(item.get("event", "")).startswith("Personal Codex:")
+                else f"Personal Codex: {item.get('event', dashboard['personalCodex'].get('summary', 'updated'))}",
+            }
+            for item in codex_activity[:2]
+        ] + dashboard["recentActivity"]
+        seen_activity: set[str] = set()
+        dashboard["recentActivity"] = [
+            item for item in dashboard["recentActivity"]
+            if not (item.get("event", "") in seen_activity or seen_activity.add(item.get("event", "")))
+        ][:6]
     dashboard["lastUpdated"] = now_iso
 
     # Final validation — fills any missing required fields with safe defaults
@@ -3234,6 +3280,100 @@ def main() -> None:
     print(f"Updated {MODEL_USAGE_PATH}")
     print(f"Updated {AGENT_COMMS_PATH}")
     print(f"Updated {ROOT.parent / 'data' / 'moltworld-data.json'}")
+
+    # ── Sync browser reply state into x-progress.json ──────────────────────
+    try:
+        xp_path = ROOT.parent / "data" / "x-progress.json"
+        reply_state_path = ROOT.parent / "data" / "x_reply_state.json"
+        if xp_path.exists():
+            xp = json.loads(xp_path.read_text())
+            total_browser_replies = 0
+            browser_recent = []
+            if reply_state_path.exists():
+                rs = json.loads(reply_state_path.read_text())
+                total_browser_replies = len(rs.get('replied_tweet_ids', []))
+                for r in rs.get('replies', [])[-10:]:
+                    browser_recent.append({
+                        'id': r.get('tweet_id', ''),
+                        'text': r.get('reply_text', ''),
+                        'type': 'engagement',
+                        'posted_at': r.get('posted_at', ''),
+                        'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
+                        'reply_to': f"@{r.get('tweet_author','')}",
+                    })
+
+            # Also pull reply state from J.A.I.N if available
+            try:
+                import subprocess as _sp
+                r2 = _sp.run(
+                    ['ssh', '-o', 'ConnectTimeout=5', '-o', 'BatchMode=yes',
+                     'jc_agent@100.121.89.84',
+                     'cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x_reply_state.json 2>/dev/null || echo "{}"'],
+                    capture_output=True, text=True, timeout=8
+                )
+                if r2.returncode == 0 and r2.stdout.strip().startswith('{'):
+                    jain_rs = json.loads(r2.stdout)
+                    jain_total = len(jain_rs.get('replied_tweet_ids', []))
+                    total_browser_replies = max(total_browser_replies, jain_total)
+                    # Add J.A.I.N replies to recent list
+                    for r in jain_rs.get('replies', [])[-10:]:
+                        browser_recent.append({
+                            'id': r.get('tweet_id', ''),
+                            'text': r.get('reply_text', ''),
+                            'type': 'engagement',
+                            'posted_at': r.get('posted_at', ''),
+                            'impressions': 0, 'likes': 0, 'retweets': 0, 'replies': 0,
+                            'reply_to': f"@{r.get('tweet_author','')}",
+                        })
+            except Exception:
+                pass
+
+            # Merge into recentPosts — deduplicate by id
+            existing_ids = {p.get('id', '') for p in xp.get('recentPosts', [])}
+            new_posts = [p for p in browser_recent if p.get('id') and p['id'] not in existing_ids]
+            merged_posts = new_posts + xp.get('recentPosts', [])
+            # Sort by posted_at desc, keep top 8
+            merged_posts.sort(key=lambda p: p.get('posted_at', ''), reverse=True)
+            xp['recentPosts'] = merged_posts[:8]
+
+            # Update lead metrics
+            lead = xp.setdefault('lead', {})
+            lead['total_replies_all_time'] = total_browser_replies
+
+            # Today's browser reply count
+            today_iso = now_iso[:10]
+            today_replies = [p for p in browser_recent if p.get('posted_at', '')[:10] == today_iso]
+            strategy = xp.setdefault('strategy', {})
+            strategy['replies_today'] = len(today_replies)
+            strategy['engagement_today'] = len(today_replies)
+
+            # 7-day reply count
+            import datetime as _dt
+            week_ago = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=7)).isoformat()
+            week_replies = [p for p in browser_recent if p.get('posted_at', '') >= week_ago]
+            strategy['replies_7d'] = len(week_replies)
+
+            # Top reply targets (most replied-to authors this week)
+            from collections import Counter as _Counter
+            author_counts = _Counter(p.get('reply_to', '').lstrip('@') for p in week_replies if p.get('reply_to'))
+            strategy['best_reply_targets'] = [a for a, _ in author_counts.most_common(5)]
+
+            # Brand voice + slot config (for dashboard display)
+            strategy['brand_voice'] = 'AI character — sharp, irreverent, owns AI identity'
+            strategy['reply_slots_per_day'] = 12
+            strategy['target_accounts_count'] = 23
+
+            # Update milestone for total replies
+            for ms in xp.get('milestones', []):
+                if ms.get('metric') == 'total_replies':
+                    ms['current'] = total_browser_replies
+                    ms['achieved'] = total_browser_replies >= ms.get('target', 9999)
+
+            xp['updatedAt'] = now_iso
+            xp_path.write_text(json.dumps(xp, indent=2, default=str))
+            print(f"Updated x-progress.json (replies={total_browser_replies})")
+    except Exception as _xe:
+        print(f"x-progress sync warning: {_xe}")
 
 
 if __name__ == "__main__":

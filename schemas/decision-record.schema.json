@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mission-control.local/schemas/decision-record.schema.json",
+  "title": "Decision Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "time", "agent", "title", "status", "privacy"],
+  "properties": {
+    "id": {"type": "string", "minLength": 8, "maxLength": 140},
+    "time": {"type": "string", "format": "date-time"},
+    "agent": {"type": "string", "enum": ["josh", "jaimes", "jain", "joshex"]},
+    "agentLabel": {"type": "string", "maxLength": 80},
+    "title": {"type": "string", "minLength": 1, "maxLength": 180},
+    "status": {"type": "string", "enum": ["accepted", "active", "superseded", "rejected"]},
+    "detail": {"type": "string", "maxLength": 800},
+    "privacy": {"type": "string", "enum": ["dashboard-safe", "agent-private", "josh-only"]},
+    "tags": {"type": "array", "items": {"type": "string", "maxLength": 40}, "maxItems": 12}
+  }
+}

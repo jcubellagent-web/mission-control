@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capability Inventory",
+  "type": "object",
+  "required": ["updatedAt", "nodes"],
+  "properties": {
+    "updatedAt": {"type": "string"},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["node", "agent", "checkedAt"],
+        "properties": {
+          "node": {"type": "string"},
+          "agent": {"type": "string"},
+          "checkedAt": {"type": "string"},
+          "platform": {"type": "string"},
+          "python": {"type": "string"},
+          "crontabAvailable": {"type": "boolean"},
+          "crontabCount": {"type": "integer"},
+          "wrappedCronLines": {"type": "integer"},
+          "ollamaModels": {"type": "array", "items": {"type": "string"}},
+          "services": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}
