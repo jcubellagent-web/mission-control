@@ -1,21 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: Calendar auth verified on JOSH and MC lane",
-  "status": "idle",
-  "updatedAt": "2026-04-30T01:54:57Z",
+  "active": true,
+  "objective": "Mission Control: validating calendar status card",
+  "status": "active",
+  "updatedAt": "2026-04-30T02:05:03Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "exec",
+  "currentTool": "code",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T01:54:36Z",
-  "messageReceived": "2026-04-30T01:54:36Z",
+  "checkedAt": "2026-04-30T02:05:03Z",
+  "messageReceived": "2026-04-30T02:05:03Z",
   "steps": [
-    {
-      "label": "Calendar OAuth: retrying with explicit default client",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Calendar OAuth: retrying with matching force-consent",
       "status": "done",
@@ -60,6 +55,11 @@
       "label": "Calendar OAuth: verifying Mission Control calendar lane",
       "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: validating calendar status card",
+      "status": "active",
+      "tool": "code"
     }
   ]
 }
