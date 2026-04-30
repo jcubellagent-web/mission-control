@@ -1,21 +1,16 @@
 {
   "active": false,
-  "objective": "Done: skill review saved reusable patterns",
+  "objective": "Done: MC bridge handoff recorded; watchdog resumed",
   "status": "idle",
-  "updatedAt": "2026-04-30T06:34:04Z",
+  "updatedAt": "2026-04-30T07:10:01Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T06:33:24Z",
-  "messageReceived": "2026-04-30T06:33:24Z",
+  "checkedAt": "2026-04-30T07:09:48Z",
+  "messageReceived": "2026-04-30T07:09:48Z",
   "steps": [
-    {
-      "label": "JOSHeX: Codex model unsupported, relaunching with supported ",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Memory review: checking durable preference from Mission Cont",
       "status": "done",
@@ -58,6 +53,11 @@
     },
     {
       "label": "Skill review: surveying saved workflows",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: received Supabase bridge handoff",
       "status": "done",
       "tool": "exec"
     }
