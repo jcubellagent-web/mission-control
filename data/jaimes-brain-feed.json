@@ -1,36 +1,16 @@
 {
-  "active": true,
-  "objective": "Step: fantasy weekly-lock dry-safe verification",
-  "status": "active",
-  "updatedAt": "2026-04-30T00:29:54Z",
+  "active": false,
+  "objective": "Done: approved all lanes audited; fantasy IL-drop fixed; blockers need Josh GUI auth",
+  "status": "idle",
+  "updatedAt": "2026-04-30T00:32:51Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:29:54Z",
-  "messageReceived": "2026-04-30T00:29:54Z",
+  "checkedAt": "2026-04-30T00:32:40Z",
+  "messageReceived": "2026-04-30T00:32:40Z",
   "steps": [
-    {
-      "label": "Mission Control: static validation after usage redesign",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control watchdog running",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: browser verification found Brain Feed grid ",
-      "status": "done",
-      "tool": "browser"
-    },
-    {
-      "label": "Mission Control: assess JOSH 2.0 screen access path",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: run local Mission Control anchor verification",
       "status": "done",
@@ -58,7 +38,27 @@
     },
     {
       "label": "Step: fantasy weekly-lock dry-safe verification",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verify fantasy IL-slot waiver fix",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: Calendar auth assessment local and JOSH",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: install and run JOSH screen capture helper",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: collect final approval-all verification summary",
+      "status": "done",
       "tool": "exec"
     }
   ]

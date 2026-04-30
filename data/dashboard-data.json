@@ -14,34 +14,34 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
-    "messageReceived": "2026-04-30T00:29:58Z",
-    "objective": "Auto-hooking Telegram work cards",
-    "status": "active",
+    "active": false,
+    "messageReceived": "2026-04-30T00:32:25Z",
+    "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: fantasy weekly-lock dry-safe verification",
+    "status": "idle",
     "steps": [
       {
-        "label": "Auto-hooking Telegram work cards",
-        "status": "active",
+        "label": "Done - session startup ready",
+        "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T00:29:58Z",
-    "checkedAt": "2026-04-30T00:29:58Z",
+    "updatedAt": "2026-04-30T00:32:49Z",
+    "checkedAt": "2026-04-30T00:32:35Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Auto-hooking Telegram work cards",
-    "updatedAt": "2026-04-30T00:30:16Z"
+    "status": "Brain Feed idle",
+    "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Step: fantasy weekly-lock dry-safe verification",
+    "updatedAt": "2026-04-30T00:35:16Z"
   },
   "contextWindow": {
-    "usedTokens": 131579,
+    "usedTokens": 42492,
     "limitTokens": 272000,
-    "pct": 0.4837,
+    "pct": 0.1562,
     "model": "gpt-5.5",
-    "status": "amber"
+    "status": "green"
   },
   "personalCodex": {
     "status": "ready",
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-30T00:30:16Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-30T00:35:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T00:30:16Z",
+    "updatedAt": "2026-04-30T00:35:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 8,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-brain-feed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "42b0f26c8",
-      "updatedAt": "2026-04-30T00:30:16Z"
+      "head": "3c2469bdc",
+      "updatedAt": "2026-04-30T00:35:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,8 +188,9 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 9,
+    "missionControlDirty": 8,
     "recentFiles": [
+      "scripts/josh_bf_push.sh",
       "scripts/josh_work_card.py",
       "mission-control/index.html",
       "mission-control/scripts/update_mission_control.py",
@@ -201,10 +202,10 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 85% left [==========--]",
-        "Resets in 2h 29m",
+        "Resets in 2h 24m",
         "Weekly: 79% left [=========---]",
         "Pace: 5% in reserve | Expected 26% used | Lasts until reset",
-        "Resets in 5d 5h",
+        "Resets in 5d 4h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
@@ -212,15 +213,15 @@
       "weekly": "79% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 29m",
-      "weeklyReset": "5d 5h",
+      "sessionReset": "2h 24m",
+      "weeklyReset": "5d 4h",
       "summary": "85% left \u00b7 wk 79% left"
     },
-    "updatedAt": "2026-04-30T00:30:18Z"
+    "updatedAt": "2026-04-30T00:35:18Z"
   },
   "modelUsage": {
-    "session": 0.068827,
-    "daily": 0.488734,
+    "session": 0.024288,
+    "daily": 0.444195,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -237,7 +238,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.488734
+        "cost": 0.444195
       },
       {
         "name": "openai/gpt-5.5",
@@ -276,12 +277,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 76154,
+        "inputTokens": 76155,
         "outputTokens": 226,
-        "totalTokens": 76380,
-        "sessionCost": 0.488734,
-        "dailyCost": 0.488734,
-        "weeklyCost": 0.488734,
+        "totalTokens": 76381,
+        "sessionCost": 0.444195,
+        "dailyCost": 0.444195,
+        "weeklyCost": 0.444195,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false
@@ -344,8 +345,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 274900153,
-        "dailyTokens": 138166057,
+        "totalTokens": 277434268,
+        "dailyTokens": 140700172,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -376,7 +377,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T00:30:22Z",
+    "lastUpdated": "2026-04-30T00:35:21Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -409,8 +410,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.488734,
-      "total": 47.611347,
+      "daily": 0.444195,
+      "total": 47.566808,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -425,11 +426,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.54626,
-      "codexEquivalentDaily": 0.488734,
-      "codexEquivalentMonthlyProjection": 195.2,
-      "codexTokensWeekly": 383688244,
-      "codexTokensDaily": 138166057,
+      "codexEquivalentWeekly": 45.501721,
+      "codexEquivalentDaily": 0.444195,
+      "codexEquivalentMonthlyProjection": 195.01,
+      "codexTokensWeekly": 386222360,
+      "codexTokensDaily": 140700172,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -452,8 +453,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 195.2,
-        "codexTokensWeekly": 383688244,
+        "codexValueMonthly": 195.01,
+        "codexTokensWeekly": 386222360,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -463,7 +464,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.54626,
+            "weeklyCost": 45.501721,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -527,9 +528,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.54626,
-          "dailyEquivalent": 0.488734,
-          "tokensWeekly": 383688244,
+          "weeklyEquivalent": 45.501721,
+          "dailyEquivalent": 0.444195,
+          "tokensWeekly": 386222360,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -603,7 +604,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $195.20/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $195.01/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -623,7 +624,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T00:30:27Z",
+    "updatedAt": "2026-04-30T00:35:26Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -640,14 +641,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.0,
-      "cpu_user": 20.76,
-      "cpu_sys": 19.23,
-      "load1": 2.6,
-      "load5": 2.33,
-      "load15": 2.25,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 27.1,
+      "cpu_user": 11.82,
+      "cpu_sys": 15.23,
+      "load1": 1.38,
+      "load5": 1.84,
+      "load15": 2.05,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 16.0,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -655,12 +656,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 32.6,
-      "cpu_user": 18.11,
-      "cpu_sys": 14.49,
-      "load1": 3.0,
-      "load5": 2.68,
-      "load15": 2.33,
+      "cpu_pct": 23.3,
+      "cpu_user": 13.17,
+      "cpu_sys": 10.7,
+      "load1": 2.13,
+      "load5": 2.37,
+      "load15": 2.29,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -686,19 +687,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T00:30:16Z"
+      "lastChecked": "2026-04-30T00:35:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T00:30:16Z"
+      "lastChecked": "2026-04-30T00:35:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T00:30:16Z"
+      "lastChecked": "2026-04-30T00:35:16Z"
     }
   ],
   "crons": [
@@ -715,7 +716,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T00:30:27.426384+00:00"
+      "lastRun": "2026-04-30T00:35:27.025003+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1262,12 +1263,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-30T00:30:16.574924Z",
+    "checkedAt": "2026-04-30T00:35:16.867745Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JAIMES; dualAgents=none; live=3",
         "severity": "ok"
       },
       {
@@ -1582,23 +1583,11 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260429-0027",
-      "title": "Auto-hook Telegram work cards",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "notes": "Josh approved auto-hooking work cards into the standard long-task path. Live work card message `12031` is active. Scope: patch `scripts/josh_bf_push.sh` so Brain Feed step pushes can optionally mirror to `scripts/josh_work_card.py` via env-gated variables, avoiding spam for trivial tasks. Verification planned: shell syntax, py_compile, dry-run/env canary, and live edit on message `12031`.",
-      "background": "owner: JOSH 2.0; requested 2026-04-29 20:29; updated 2026-04-29 20:31",
-      "requestedAt": "2026-04-29 20:29",
-      "updatedAt": "2026-04-29 20:31",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: scripts/josh_work_card.py, mission-control/index.html",
+      "label": "Recently edited: scripts/josh_bf_push.sh, scripts/josh_work_card.py",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -1620,20 +1609,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Auto-hooking Telegram work cards",
-      "status": "active",
+      "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: fantasy weekly-lock dry-safe verification",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T00:29:58Z",
-      "messageReceived": "2026-04-30T00:29:58Z",
+      "updatedAt": "2026-04-30T00:32:49Z",
+      "messageReceived": "2026-04-30T00:32:25Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Auto-hooking Telegram work cards",
-          "status": "active",
+          "label": "Done - session startup ready",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1646,7 +1635,7 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T00:28:06Z",
+      "updatedAt": "2026-04-30T00:32:50Z",
       "messageReceived": "2026-04-30T00:21:33Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
@@ -1660,37 +1649,17 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Step: fantasy weekly-lock dry-safe verification",
-      "status": "active",
+      "objective": "Done: approved all lanes audited; fantasy IL-drop fixed; blockers need Josh GUI auth",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T00:29:54Z",
-      "messageReceived": "2026-04-30T00:29:54Z",
+      "updatedAt": "2026-04-30T00:32:51Z",
+      "messageReceived": "2026-04-30T00:32:40Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Mission Control: static validation after usage redesign",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control watchdog running",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: browser verification found Brain Feed grid ",
-          "status": "done",
-          "tool": "browser"
-        },
-        {
-          "label": "Mission Control: assess JOSH 2.0 screen access path",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Step: run local Mission Control anchor verification",
           "status": "done",
@@ -1718,78 +1687,52 @@
         },
         {
           "label": "Step: fantasy weekly-lock dry-safe verification",
-          "status": "active",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verify fantasy IL-slot waiver fix",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: Calendar auth assessment local and JOSH",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: install and run JOSH screen capture helper",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: collect final approval-all verification summary",
+          "status": "done",
           "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
-    "activeAgents": [
-      "JOSH 2.0",
-      "JAIMES"
-    ],
-    "activeCount": 2,
-    "primaryAgent": "JOSH 2.0",
-    "dualMode": true,
-    "dualAgents": [
-      "JOSH 2.0",
-      "JAIMES"
-    ],
+    "activeAgents": [],
+    "activeCount": 0,
+    "primaryAgent": "JAIMES",
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
       {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Auto-hooking Telegram work cards",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-30T00:29:58Z",
-        "messageReceived": "2026-04-30T00:29:58Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Auto-hooking Telegram work cards",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
         "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
+        "active": false,
+        "reportedActive": false,
         "lowSignal": false,
-        "objective": "Step: fantasy weekly-lock dry-safe verification",
-        "status": "active",
+        "objective": "Done: approved all lanes audited; fantasy IL-drop fixed; blockers need Josh GUI auth",
+        "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-30T00:29:54Z",
-        "messageReceived": "2026-04-30T00:29:54Z",
+        "updatedAt": "2026-04-30T00:32:51Z",
+        "messageReceived": "2026-04-30T00:32:40Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Mission Control: static validation after usage redesign",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control watchdog running",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: browser verification found Brain Feed grid ",
-            "status": "done",
-            "tool": "browser"
-          },
-          {
-            "label": "Mission Control: assess JOSH 2.0 screen access path",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Step: run local Mission Control anchor verification",
             "status": "done",
@@ -1817,7 +1760,27 @@
           },
           {
             "label": "Step: fantasy weekly-lock dry-safe verification",
-            "status": "active",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verify fantasy IL-slot waiver fix",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: Calendar auth assessment local and JOSH",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: install and run JOSH screen capture helper",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: collect final approval-all verification summary",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1830,7 +1793,7 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-30T00:28:06Z",
+        "updatedAt": "2026-04-30T00:32:50Z",
         "messageReceived": "2026-04-30T00:21:33Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
@@ -1841,34 +1804,54 @@
             "tool": "exec"
           }
         ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: fantasy weekly-lock dry-safe verification",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-30T00:32:49Z",
+        "messageReceived": "2026-04-30T00:32:25Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Done - session startup ready",
+            "status": "done",
+            "tool": "exec"
+          }
+        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T00:30:22Z",
-      "event": "Session spend: $0.07"
+      "time": "2026-04-30T00:35:21Z",
+      "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-30T00:30:18Z",
-      "event": "Coding: scripts/josh_work_card.py, mission-control/index.html"
+      "time": "2026-04-30T00:35:18Z",
+      "event": "Coding: scripts/josh_bf_push.sh, scripts/josh_work_card.py"
     },
     {
-      "time": "2026-04-30T00:30:18Z",
+      "time": "2026-04-30T00:35:18Z",
       "event": "CodexBar: 85% left \u00b7 wk 79% left"
     },
     {
-      "time": "2026-04-30T00:30:16Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-04-30T00:35:16Z",
+      "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T00:30:16Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-30T00:35:16Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-30T00:30:16Z",
+      "time": "2026-04-30T00:35:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T00:30:16Z"
+  "lastUpdated": "2026-04-30T00:35:16Z"
 }
