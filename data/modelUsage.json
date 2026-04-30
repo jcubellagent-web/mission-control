@@ -1,6 +1,6 @@
 {
   "session": 0.035993,
-  "daily": 0.057783,
+  "daily": 0.083717,
   "weekly": 45.705728,
   "monthly": 952.083148,
   "topModels": [
@@ -15,14 +15,14 @@
       "cost": 7.387107749999999
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "window": "session",
+      "cost": 0.138712
+    },
+    {
       "name": "openai/gpt-5.5",
       "window": "session",
       "cost": 0.122313
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.112778
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -54,6 +54,19 @@
       "subscriptionIncluded": false
     },
     {
+      "name": "openai-codex/gpt-5.5",
+      "source": "openclaw",
+      "inputTokens": 3116,
+      "outputTokens": 162,
+      "totalTokens": 3278,
+      "sessionCost": 0.138712,
+      "dailyCost": 0.083717,
+      "weeklyCost": 0.138712,
+      "sessions": 5,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
       "inputTokens": 18839,
@@ -63,19 +76,6 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.122313,
       "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 2816,
-      "outputTokens": 75,
-      "totalTokens": 2891,
-      "sessionCost": 0.112778,
-      "dailyCost": 0.057783,
-      "weeklyCost": 0.112778,
-      "sessions": 5,
       "isGemini": false,
       "costEstimated": false
     },
@@ -156,7 +156,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-30T05:20:23Z",
+  "lastUpdated": "2026-04-30T05:25:22Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -189,8 +189,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.057783,
-    "total": 47.235391,
+    "daily": 0.083717,
+    "total": 47.261325,
     "monthly": 952.083148
   },
   "weeklyRunRate": {
@@ -205,10 +205,10 @@
     "meteredMonthlyProjection": 0.52,
     "meteredWeekly": 0.122313,
     "meteredDaily": 0.0,
-    "codexEquivalentWeekly": 45.170304,
-    "codexEquivalentDaily": 0.057783,
-    "codexEquivalentMonthlyProjection": 193.59,
-    "codexTokensWeekly": 408399761,
+    "codexEquivalentWeekly": 45.196238,
+    "codexEquivalentDaily": 0.083717,
+    "codexEquivalentMonthlyProjection": 193.7,
+    "codexTokensWeekly": 408400148,
     "codexTokensDaily": 2296367,
     "localModelCount": 2,
     "meteredModelCount": 2,
@@ -232,8 +232,8 @@
       "fixedMonthly": 200.0,
       "meteredMonthly": 0.52,
       "meteredWeekly": 0.122313,
-      "codexValueMonthly": 193.59,
-      "codexTokensWeekly": 408399761,
+      "codexValueMonthly": 193.7,
+      "codexTokensWeekly": 408400148,
       "activeMeteredLaneCount": 1,
       "leadMeteredLane": "OpenAI API",
       "laneStack": [
@@ -243,7 +243,7 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyCost": 45.170304,
+          "weeklyCost": 45.196238,
           "modelCount": 6,
           "models": [
             "gpt-5.4",
@@ -307,9 +307,9 @@
         "billing": "fixed",
         "status": "covered",
         "monthlyProjection": 200.0,
-        "weeklyEquivalent": 45.170304,
-        "dailyEquivalent": 0.057783,
-        "tokensWeekly": 408399761,
+        "weeklyEquivalent": 45.196238,
+        "dailyEquivalent": 0.083717,
+        "tokensWeekly": 408400148,
         "models": [
           "gpt-5.4",
           "gpt-5.4-mini",
@@ -383,7 +383,7 @@
     ],
     "insights": [
       "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-      "Codex subscription is absorbing roughly $193.59/mo of API-equivalent usage.",
+      "Codex subscription is absorbing roughly $193.70/mo of API-equivalent usage.",
       "Tracked metered spend is $0.12/wk across 2 metered model rows."
     ],
     "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
