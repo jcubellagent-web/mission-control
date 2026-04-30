@@ -1,26 +1,16 @@
 {
   "active": false,
-  "objective": "Mission Control watchdog failed",
+  "objective": "Done: Mission Control watchdog paused for JOSHeX audit",
   "status": "idle",
-  "updatedAt": "2026-04-30T06:18:19Z",
+  "updatedAt": "2026-04-30T06:21:22Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T06:17:58Z",
-  "messageReceived": "2026-04-30T06:17:58Z",
+  "checkedAt": "2026-04-30T06:21:15Z",
+  "messageReceived": "2026-04-30T06:21:15Z",
   "steps": [
-    {
-      "label": "Mission Control: syncing JOSH 2.0 screen with agent board",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Mission Control: closing stale preview server 8767",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control: launching JOSHeX handoff",
       "status": "done",
@@ -58,6 +48,16 @@
     },
     {
       "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Hermes/pretext + MC watchdog explanation",
+      "status": "done",
+      "tool": "model"
+    },
+    {
+      "label": "Mission Control: pausing watchdog pending JOSHeX audit",
       "status": "done",
       "tool": "exec"
     }
