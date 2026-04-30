@@ -2,20 +2,15 @@
   "active": false,
   "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-30T05:18:07Z",
+  "updatedAt": "2026-04-30T06:18:19Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T05:17:49Z",
-  "messageReceived": "2026-04-30T05:17:49Z",
+  "checkedAt": "2026-04-30T06:17:58Z",
+  "messageReceived": "2026-04-30T06:17:58Z",
   "steps": [
-    {
-      "label": "Mission Control: verifying live agent board deploy",
-      "status": "done",
-      "tool": "web"
-    },
     {
       "label": "Mission Control: syncing JOSH 2.0 screen with agent board",
       "status": "done",
@@ -53,6 +48,11 @@
     },
     {
       "label": "Skill review: patching Codex model-support pitfall",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
     },
