@@ -10,32 +10,32 @@
   ],
   "brainFeed": {
     "active": false,
-    "messageReceived": "2026-04-30T02:04:48Z",
-    "objective": "Done: Re-anchored Josh direct chat and ready \u00b7 Awaiting further instruction",
+    "messageReceived": "2026-04-30T03:26:45Z",
+    "objective": "Done: committed Telegram step-by-step transparency rule \u00b7 Awaiting further instruction",
     "status": "idle",
     "steps": [
       {
-        "label": "Done - Re-anchored Josh direct chat and ready",
+        "label": "Done - committed Telegram step-by-step transparency rule",
         "status": "done",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T03:15:08Z",
-    "checkedAt": "2026-04-30T03:14:41Z",
+    "updatedAt": "2026-04-30T03:28:37Z",
+    "checkedAt": "2026-04-30T03:28:20Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last objective: Done: Re-anchored Josh direct chat and ready \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T03:25:16Z"
+    "context": "Last objective: Done: committed Telegram step-by-step transparency rule \u00b7 Awaiting further instruction",
+    "updatedAt": "2026-04-30T03:30:17Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 200000,
-    "pct": 0.0,
-    "model": "",
+    "usedTokens": 60651,
+    "limitTokens": 272000,
+    "pct": 0.223,
+    "model": "gpt-5.5",
     "status": "green"
   },
   "personalCodex": {
@@ -46,7 +46,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-30T03:25:16Z"
+        "time": "2026-04-30T03:30:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,7 +64,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T03:25:16Z",
+    "updatedAt": "2026-04-30T03:30:17Z",
     "patchStatus": {
       "status": "pending",
       "summary": "9 source file(s) changed",
@@ -78,8 +78,8 @@
         "data/model-usage-tracker.json",
         "data/modelUsage.json"
       ],
-      "head": "5bef7f176",
-      "updatedAt": "2026-04-30T03:25:16Z"
+      "head": "08226dff0",
+      "updatedAt": "2026-04-30T03:30:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -198,7 +198,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 42m",
+        "Resets in 4h 37m",
         "Weekly: 77% left [=========---]",
         "Pace: 4% in reserve | Expected 27% used | Lasts until reset",
         "Resets in 5d 2h",
@@ -209,15 +209,15 @@
       "weekly": "77% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 42m",
+      "sessionReset": "4h 37m",
       "weeklyReset": "5d 2h",
       "summary": "98% left \u00b7 wk 77% left"
     },
-    "updatedAt": "2026-04-30T03:25:19Z"
+    "updatedAt": "2026-04-30T03:30:19Z"
   },
   "modelUsage": {
-    "session": 0.0,
-    "daily": 0.42282,
+    "session": 0.064395,
+    "daily": 0.487215,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -234,7 +234,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.42282000000000003
+        "cost": 0.487215
       },
       {
         "name": "openai/gpt-5.5",
@@ -273,13 +273,13 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 75498,
-        "outputTokens": 167,
-        "totalTokens": 75665,
-        "sessionCost": 0.42282000000000003,
-        "dailyCost": 0.42282000000000003,
-        "weeklyCost": 0.42282000000000003,
-        "sessions": 4,
+        "inputTokens": 83029,
+        "outputTokens": 173,
+        "totalTokens": 83202,
+        "sessionCost": 0.487215,
+        "dailyCost": 0.487215,
+        "weeklyCost": 0.487215,
+        "sessions": 5,
         "isGemini": false,
         "costEstimated": false
       },
@@ -341,8 +341,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 296111827,
-        "dailyTokens": 159377731,
+        "totalTokens": 297086235,
+        "dailyTokens": 160352139,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T03:25:22Z",
+    "lastUpdated": "2026-04-30T03:30:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -406,8 +406,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.42282,
-      "total": 47.545433,
+      "daily": 0.487215,
+      "total": 47.609828,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -422,11 +422,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.480346,
-      "codexEquivalentDaily": 0.42282,
-      "codexEquivalentMonthlyProjection": 194.92,
-      "codexTokensWeekly": 404899203,
-      "codexTokensDaily": 159377731,
+      "codexEquivalentWeekly": 45.544741,
+      "codexEquivalentDaily": 0.487215,
+      "codexEquivalentMonthlyProjection": 195.19,
+      "codexTokensWeekly": 405881148,
+      "codexTokensDaily": 160352139,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -449,8 +449,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 194.92,
-        "codexTokensWeekly": 404899203,
+        "codexValueMonthly": 195.19,
+        "codexTokensWeekly": 405881148,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -460,7 +460,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.480346,
+            "weeklyCost": 45.544741,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -524,9 +524,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.480346,
-          "dailyEquivalent": 0.42282,
-          "tokensWeekly": 404899203,
+          "weeklyEquivalent": 45.544741,
+          "dailyEquivalent": 0.487215,
+          "tokensWeekly": 405881148,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -600,7 +600,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $194.92/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $195.19/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T03:25:27Z",
+    "updatedAt": "2026-04-30T03:30:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,14 +637,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.7,
-      "cpu_user": 19.42,
-      "cpu_sys": 18.26,
-      "load1": 2.03,
-      "load5": 2.17,
-      "load15": 2.27,
+      "cpu_pct": 39.9,
+      "cpu_user": 21.16,
+      "cpu_sys": 18.72,
+      "load1": 2.68,
+      "load5": 2.35,
+      "load15": 2.3,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 11.7,
-      "cpu_user": 2.34,
-      "cpu_sys": 9.37,
-      "load1": 2.6,
-      "load5": 2.33,
-      "load15": 2.57,
+      "cpu_pct": 13.3,
+      "cpu_user": 3.33,
+      "cpu_sys": 10.0,
+      "load1": 2.0,
+      "load5": 2.11,
+      "load15": 2.39,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:25:16Z"
+      "lastChecked": "2026-04-30T03:30:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:25:16Z"
+      "lastChecked": "2026-04-30T03:30:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T03:25:16Z"
+      "lastChecked": "2026-04-30T03:30:17Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:25:16.769185+00:00"
+      "lastRun": "2026-04-30T03:30:17.410127+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,7 +1259,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T03:25:16.768177Z",
+    "checkedAt": "2026-04-30T03:30:17.408847Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1620,16 +1620,16 @@
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
-      "objective": "Done: Re-anchored Josh direct chat and ready \u00b7 Awaiting further instruction",
+      "objective": "Done: committed Telegram step-by-step transparency rule \u00b7 Awaiting further instruction",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T03:15:08Z",
-      "messageReceived": "2026-04-30T02:04:48Z",
+      "updatedAt": "2026-04-30T03:28:37Z",
+      "messageReceived": "2026-04-30T03:26:45Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - Re-anchored Josh direct chat and ready",
+          "label": "Done - committed Telegram step-by-step transparency rule",
           "status": "done",
           "tool": "exec"
         }
@@ -1663,8 +1663,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T03:25:13Z",
-      "messageReceived": "2026-04-30T03:25:13Z",
+      "updatedAt": "2026-04-30T03:30:16Z",
+      "messageReceived": "2026-04-30T03:30:16Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1713,8 +1713,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-30T03:25:13Z",
-        "messageReceived": "2026-04-30T03:25:13Z",
+        "updatedAt": "2026-04-30T03:30:16Z",
+        "messageReceived": "2026-04-30T03:30:16Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1730,16 +1730,16 @@
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
-        "objective": "Done: Re-anchored Josh direct chat and ready \u00b7 Awaiting further instruction",
+        "objective": "Done: committed Telegram step-by-step transparency rule \u00b7 Awaiting further instruction",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-30T03:15:08Z",
-        "messageReceived": "2026-04-30T02:04:48Z",
+        "updatedAt": "2026-04-30T03:28:37Z",
+        "messageReceived": "2026-04-30T03:26:45Z",
         "currentTool": "exec",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Done - Re-anchored Josh direct chat and ready",
+            "label": "Done - committed Telegram step-by-step transparency rule",
             "status": "done",
             "tool": "exec"
           }
@@ -1749,29 +1749,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T03:25:22Z",
-      "event": "Session spend: $0.00"
+      "time": "2026-04-30T03:30:22Z",
+      "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-04-30T03:25:19Z",
+      "time": "2026-04-30T03:30:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-30T03:25:19Z",
+      "time": "2026-04-30T03:30:19Z",
       "event": "CodexBar: 98% left \u00b7 wk 77% left"
     },
     {
-      "time": "2026-04-30T03:25:16Z",
+      "time": "2026-04-30T03:30:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T03:25:16Z",
+      "time": "2026-04-30T03:30:17Z",
       "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-30T03:25:16Z",
+      "time": "2026-04-30T03:30:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T03:25:16Z"
+  "lastUpdated": "2026-04-30T03:30:17Z"
 }
