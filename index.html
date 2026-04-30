@@ -11530,6 +11530,30 @@
             };
         }
 
+        function ensureOperatorBoardFeed(feed, agentLabel, fallbackObjective = 'Standing by') {
+            const data = window._latestDashboardData || window._mcLastDashData || {};
+            const activeTask = getActiveTrackedTaskByOwner(agentLabel);
+            const objective = feed?.objective || activeTask?.title || fallbackObjective;
+            const currentTool = feed?.currentTool || feed?.tool || (activeTask ? 'tracked task' : 'ops');
+            const status = feed?.status || (activeTask ? 'active' : 'idle');
+            const steps = Array.isArray(feed?.steps) && feed.steps.length
+                ? feed.steps
+                : [{ label: objective, status: activeTask ? 'active' : 'done', tool: currentTool }];
+            return {
+                ...(feed || {}),
+                agent: agentLabel,
+                objective,
+                active: !!feed?.active || !!activeTask,
+                reportedActive: feed?.reportedActive || false,
+                lowSignal: feed?.lowSignal || false,
+                status,
+                updatedAt: feed?.updatedAt || activeTask?.updatedAt || activeTask?.delegatedAt || data.lastUpdated || new Date().toISOString(),
+                currentTool,
+                model: feed?.model || '',
+                steps,
+            };
+        }
+
         /* ============ BRAIN FEED MULTI-LIVE OBJECTIVES ============ */
         function synthesizeJoshexBrainFeed() {
             const pc = (typeof getJoshexData === 'function') ? getJoshexData() : ((window._latestDashboardData || window._mcLastDashData || {}).personalCodex || window._personalCodexFallback || null);
@@ -11594,8 +11618,8 @@
                     seen.add(key);
                 }
             };
-            push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
-            push({ bf: coerceOperatorObjectiveFeed(jaimesBf, 'JAIMES'), agentLabel: 'JAIMES' }, true);
+            push({ bf: ensureOperatorBoardFeed(joshBf, 'JOSH 2.0', 'JOSH 2.0 lane standing by'), agentLabel: 'JOSH 2.0' }, true);
+            push({ bf: ensureOperatorBoardFeed(jaimesBf, 'JAIMES', 'JAIMES lane standing by'), agentLabel: 'JAIMES' }, true);
             push({ bf: synthesizeJoshexBrainFeed(), agentLabel: 'JOSHeX' }, true);
             return entries;
         }
@@ -11690,11 +11714,12 @@
             const card = document.getElementById('brain-feed-card');
             if (!card) return;
             const brainCard = card.closest('.card-brain');
+            joshBf = synthesizeTaskBackedBrainFeed(joshBf, 'JOSH 2.0');
             jainBf = synthesizeTaskBackedBrainFeed(jainBf, 'J.A.I.N');
             jaimesBf = synthesizeTaskBackedBrainFeed(jaimesBf, 'JAIMES');
             const primary = pickPrimaryBrainFeed(joshBf, jainBf, jaimesBf);
             const objectiveEntries = pickBrainFeedObjectiveFeeds(joshBf, jainBf, jaimesBf);
-            const anyActive = !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
+            const anyActive = objectiveEntries.some(entry => getBrainFeedAgentState(entry?.bf).active) || !!(joshBf?.active || jainBf?.active || jaimesBf?.active);
             if (brainCard) brainCard.classList.toggle('brain-active', anyActive);
             const old = document.getElementById('jain-status-bar');
             if (old) old.remove();

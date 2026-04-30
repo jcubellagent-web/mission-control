@@ -43,6 +43,22 @@ This pass kept the JAIMES cutoff fix intact and made the three real-time lanes e
 - Derived JOSHeX card activity from Personal Codex patch state, including changed-file summaries when present.
 - Updated desktop/mobile screenshot baselines for the intentional card hierarchy change.
 
+## Real-time collaboration preview
+Josh can watch UI edits without waiting for GitHub Pages by using the local JOSH 2.0 preview:
+- Preview worktree: `/Users/josh2.0/.openclaw/workspace/mission-control-joshex-live-preview`
+- Local URL: `http://127.0.0.1:8788/index.html?mode=kiosk&preview=joshex`
+- Server log: `/tmp/mission_control_preview_8788.log`
+
+Use this for live design sessions. Make preview edits there, refresh the Chrome tab, then copy/commit the final patch through the normal Mission Control branch.
+
+## Follow-up pinning fix
+The Brain Feed picker now keeps all three operator lanes pinned even when live feed data changes:
+- JOSH 2.0
+- JAIMES
+- JOSHeX
+
+This prevents a fresh runtime/publisher update from collapsing the hero into a two-card layout plus support strip.
+
 ## Desired improvements
 Do a conservative polish pass, not a full redesign:
 1. Make each agent card clearer at a glance:
