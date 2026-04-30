@@ -7716,7 +7716,7 @@
                 grid-row: 1 !important;
                 display: grid !important;
                 grid-template-columns: minmax(0, 1fr) !important;
-                grid-template-rows: minmax(230px, 1.78fr) minmax(126px, 0.72fr) !important;
+                grid-template-rows: minmax(280px, 2.1fr) minmax(96px, 0.52fr) !important;
                 gap: 10px !important;
                 margin-bottom: 0 !important;
                 min-height: 0 !important;
@@ -7774,7 +7774,12 @@
                 grid-template-rows: minmax(0, calc(100vh - 210px)) !important;
             }
             body:not(.phone-mode) .hero-grid {
-                grid-template-rows: minmax(230px, 1.75fr) minmax(126px, 0.72fr) !important;
+                grid-template-rows: minmax(276px, 2.2fr) minmax(80px, 0.45fr) !important;
+            }
+            body:not(.phone-mode) .card-brain .card-header {
+                min-height: 24px !important;
+                margin-bottom: 5px !important;
+                padding-bottom: 5px !important;
             }
             body:not(.phone-mode) .bf-objective,
             body:not(.phone-mode) .bf-objective.bf-objective-compact {
@@ -7795,6 +7800,118 @@
             body:not(.phone-mode) .sh-agent-row { padding: 5px 7px !important; }
             body:not(.phone-mode) .jobs-agent-chip { padding: 5px 8px !important; }
             body:not(.phone-mode) .tjob-category { padding: 5px !important; margin-bottom: 5px !important; }
+        }
+
+
+
+        /* ============ REALTIME AGENT BOARD CUTOFF FIX 2026-04-30 ============ */
+        /* Fixes the prior vertical crop: Brain Feed now dedicates its hero area to JOSH 2.0 / JAIMES / JOSHeX. */
+        @media (min-width: 980px) {
+            body:not(.phone-mode) .card-brain {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            body:not(.phone-mode) #brain-feed-card {
+                flex: 1 1 auto !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: hidden !important;
+                padding-right: 0 !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-container.bf-agent-board {
+                height: 100% !important;
+                min-height: 0 !important;
+                display: grid !important;
+                grid-template-rows: minmax(0, 1fr) !important;
+                gap: 0 !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-hero-grid.tri-live {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                grid-template-rows: minmax(0, 1fr) !important;
+                gap: 8px !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                align-items: stretch !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-hero-grid.dual-live {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                grid-template-rows: minmax(0, 1fr) !important;
+                gap: 8px !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                align-items: stretch !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective.bf-objective-compact {
+                height: 100% !important;
+                min-height: 0 !important;
+                min-width: 0 !important;
+                display: grid !important;
+                grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+                gap: 7px !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-text-wrap {
+                min-height: 0 !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-text {
+                display: -webkit-box !important;
+                -webkit-line-clamp: 3 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-detail {
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                min-height: 0 !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-meta {
+                flex-wrap: wrap !important;
+                gap: 5px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-provider {
+                max-width: 100% !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-agent-name {
+                font-size: 0.72rem !important;
+                letter-spacing: 0.10em !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .agent-joshex {
+                border-color: rgba(168, 85, 247, 0.34) !important;
+                background: linear-gradient(180deg, rgba(31, 20, 54, 0.92), rgba(10, 10, 18, 0.98)) !important;
+            }
+            body:not(.phone-mode) .card-brain .brain-feed-lower {
+                display: none !important;
+            }
+        }
+        @media (min-width: 980px) and (max-height: 700px) {
+            body:not(.phone-mode) #brain-feed-card .bf-hero-grid.tri-live,
+            body:not(.phone-mode) #brain-feed-card .bf-hero-grid.dual-live {
+                gap: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective.bf-objective-compact {
+                padding: 8px 9px !important;
+                gap: 5px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-text {
+                -webkit-line-clamp: 2 !important;
+                font-size: clamp(0.95rem, 1.45vw, 1.28rem) !important;
+                line-height: 1.04 !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-detail {
+                -webkit-line-clamp: 1 !important;
+                font-size: 0.66rem !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-submeta {
+                font-size: 0.58rem !important;
+            }
         }
 
     </style>
@@ -8132,7 +8249,7 @@
         // ============================================
         // CONFIGURATION - Edit these values
         // ============================================
-        const BUILD_ID = 'mc-soup-revamp-20260430';
+        const BUILD_ID = 'mc-agent-board-cutoff-fix-20260430';
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
@@ -11320,8 +11437,8 @@
         }
 
         function pickBrainFeedObjectiveFeeds(joshBf, jainBf, jaimesBf) {
-            // Hero space is reserved for the two primary operators. JOSHeX is
-            // visible as a support strip, not promoted to a third full card.
+            // Realtime operator board: Josh wants the three execution lanes visible
+            // at a glance, not buried in a drawer or clipped support strip.
             const entries = [];
             const seen = new Set();
             const push = (entry, allowReady = false) => {
@@ -11335,6 +11452,7 @@
             };
             push({ bf: joshBf, agentLabel: 'JOSH 2.0' });
             push({ bf: coerceOperatorObjectiveFeed(jaimesBf, 'JAIMES'), agentLabel: 'JAIMES' }, true);
+            push({ bf: synthesizeJoshexBrainFeed(), agentLabel: 'JOSHeX' }, true);
             return entries;
         }
 
@@ -11408,13 +11526,13 @@
             if (!brainFeedCard || !entries.length) return;
             const primary = entries[0]?.bf || null;
             window._mcLastRenderedBrainFeed = primary;
+            const gridClass = entries.length >= 3 ? 'tri-live' : 'dual-live';
             brainFeedCard.innerHTML = `
-                <div class="bf-container bf-shell">
-                    <div class="bf-hero-grid dual-live">
+                <div class="bf-container bf-shell bf-agent-board">
+                    <div class="bf-hero-grid ${gridClass}">
                         ${entries.map(entry => renderBrainFeedObjectiveCard(entry, true)).join('')}
                     </div>
-                    ${renderJoshexSupportStrip()}
-                    ${renderBrainFeedRealtimeDeck(primary)}
+                    ${entries.length >= 3 ? '' : renderJoshexSupportStrip()}
                 </div>
             `;
             syncBrainFeedObjectiveScroller(brainFeedCard);
