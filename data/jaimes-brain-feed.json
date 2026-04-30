@@ -1,36 +1,16 @@
 {
   "active": true,
-  "objective": "Mission Control: implement usage/cost redesign and Brain Feed layout fix",
+  "objective": "Mission Control: assess JOSH 2.0 screen access path",
   "status": "active",
-  "updatedAt": "2026-04-30T00:14:08Z",
+  "updatedAt": "2026-04-30T00:19:32Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "code",
+  "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:14:08Z",
-  "messageReceived": "2026-04-30T00:14:08Z",
+  "checkedAt": "2026-04-30T00:19:32Z",
+  "messageReceived": "2026-04-30T00:19:32Z",
   "steps": [
-    {
-      "label": "Task: review skill updates from fantasy cron work",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: wire Sunday waiver + Monday final fantasy crons",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify Sunday and Monday fantasy cron commands",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: tune fantasy cron reports + cleanup gate",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill updates after fantasy automation",
       "status": "done",
@@ -58,8 +38,28 @@
     },
     {
       "label": "Mission Control: implement usage/cost redesign and Brain Fee",
-      "status": "active",
+      "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Mission Control: static validation after usage redesign",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: browser verification found Brain Feed grid ",
+      "status": "done",
+      "tool": "browser"
+    },
+    {
+      "label": "Mission Control: assess JOSH 2.0 screen access path",
+      "status": "active",
+      "tool": "exec"
     }
   ]
 }
