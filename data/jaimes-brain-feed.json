@@ -1,26 +1,16 @@
 {
-  "active": false,
-  "objective": "Done: explained JOSH screenshot permission blocker",
-  "status": "idle",
-  "updatedAt": "2026-04-30T02:13:54Z",
+  "active": true,
+  "objective": "GW11 dry-run autosubmit: checking Champion/DNP",
+  "status": "active",
+  "updatedAt": "2026-04-30T02:18:27Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T02:13:54Z",
-  "messageReceived": "2026-04-30T02:13:54Z",
+  "checkedAt": "2026-04-30T02:18:27Z",
+  "messageReceived": "2026-04-30T02:18:27Z",
   "steps": [
-    {
-      "label": "Calendar OAuth: exchanging fresh post-reset callback",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Calendar OAuth: verifying JOSH token",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Calendar OAuth: verifying read-only calendar access",
       "status": "done",
@@ -59,6 +49,16 @@
     {
       "label": "Task: explain JOSH Screen Recording permission",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "GW11 dry-run autosubmit: checking Champion/DNP",
+      "status": "active",
       "tool": "exec"
     }
   ]
