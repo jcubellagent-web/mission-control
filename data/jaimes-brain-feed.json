@@ -1,26 +1,16 @@
 {
   "active": true,
-  "objective": "Mission Control: final validation before deploy",
+  "objective": "Mission Control: syncing JOSH 2.0 display",
   "status": "active",
-  "updatedAt": "2026-04-30T04:04:56Z",
+  "updatedAt": "2026-04-30T04:08:41Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "code",
+  "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:04:56Z",
-  "messageReceived": "2026-04-30T04:04:56Z",
+  "checkedAt": "2026-04-30T04:08:41Z",
+  "messageReceived": "2026-04-30T04:08:41Z",
   "steps": [
-    {
-      "label": "Step: installing safe Hermes status wrapper",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: prepare JOSHeX reply after approval",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: grant JOSHeX operator access policy",
       "status": "done",
@@ -58,8 +48,18 @@
     },
     {
       "label": "Mission Control: final validation before deploy",
-      "status": "active",
+      "status": "done",
       "tool": "code"
+    },
+    {
+      "label": "Mission Control: verifying live Pages deploy",
+      "status": "done",
+      "tool": "web"
+    },
+    {
+      "label": "Mission Control: syncing JOSH 2.0 display",
+      "status": "active",
+      "tool": "exec"
     }
   ]
 }
