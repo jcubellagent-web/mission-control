@@ -7376,25 +7376,37 @@
             padding-right: 0 !important;
         }
         body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-shell { gap: 4px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-cockpit { padding: 7px 9px 6px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-total { font-size: 1.18rem !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-cockpit {
+            padding: 6px 9px 5px !important;
+            border-radius: 7px !important;
+            background: rgba(255,255,255,0.018) !important;
+            border-color: rgba(255,255,255,0.07) !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-cockpit::before { display: none !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-topline { gap: 8px !important; align-items: center !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-total { font-size: 1.20rem !important; letter-spacing: 0 !important; }
         body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-sub { margin-top: 2px !important; font-size: 0.52rem !important; line-height: 1.12 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-status { min-width: 70px !important; padding: 4px 6px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-status strong { font-size: 0.60rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-split { display: none !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-livebar { min-height: 28px !important; padding: 4px 7px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-live-title { font-size: 0.62rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-live-meta { margin-top: 1px !important; font-size: 0.47rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-live-spend { font-size: 0.61rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-stack { gap: 4px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-tile { min-height: 44px !important; gap: 2px !important; padding: 4px 5px !important; border-radius: 6px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-name { font-size: 0.45rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-val { font-size: 0.60rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-meta { font-size: 0.43rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-bottom { gap: 4px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-kpi { padding: 4px 6px !important; border-radius: 6px !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-kpi strong { margin-top: 1px !important; font-size: 0.62rem !important; }
-        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-kpi small { display: none !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-status { min-width: 86px !important; max-width: 112px !important; padding: 4px 6px !important; border-radius: 6px !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-status strong { font-size: 0.55rem !important; line-height: 1.05 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-split,
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-livebar { display: none !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-stack { grid-template-columns: 1fr !important; gap: 2px !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-tile {
+            min-height: 0 !important;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            align-items: center !important;
+            gap: 5px !important;
+            padding: 3px 6px !important;
+            border-radius: 5px !important;
+            background: rgba(255,255,255,0.014) !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-head { min-width: 0 !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-dot { width: 5px !important; height: 5px !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-name { font-size: 0.46rem !important; letter-spacing: 0.07em !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-val { font-size: 0.58rem !important; text-align: right !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-lane-meta { display: none !important; }
+        body:not(.phone-mode).kiosk-mode .card-model-health .mu-refresh-bottom { display: none !important; }
         body:not(.phone-mode).kiosk-mode .card-model-health .mu-health-divider { margin: 6px 0 5px !important; }
         body:not(.phone-mode).kiosk-mode .card-model-health .system-health-body {
             flex: 0 0 88px !important;
@@ -7404,6 +7416,31 @@
         }
         body:not(.phone-mode).kiosk-mode .card-model-health .sh-agent-row { padding: 4px 7px !important; }
         body:not(.phone-mode).kiosk-mode .card-model-health .sh-metrics { gap: 3px 7px !important; }
+
+        /* Final kiosk guardrails for the photographed HP display: no crowded spend tiles, no objective word collisions. */
+        body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective {
+            min-height: 126px !important;
+            padding: 10px 12px !important;
+            gap: 6px !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text-wrap {
+            height: calc(1.34rem * 1.08 * 2 + 0.18rem) !important;
+            min-height: calc(1.34rem * 1.08 * 2 + 0.18rem) !important;
+            max-height: calc(1.34rem * 1.08 * 2 + 0.18rem) !important;
+        }
+        body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-text {
+            font-size: clamp(1.12rem, 1.28vw, 1.34rem) !important;
+            line-height: 1.08 !important;
+            letter-spacing: 0 !important;
+            overflow-wrap: break-word !important;
+            word-break: normal !important;
+            text-wrap: balance;
+        }
+        body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-detail,
+        body:not(.phone-mode).kiosk-mode .card-brain.brain-active .bf-hero-grid.dual-live .bf-objective-submeta {
+            font-size: 0.50rem !important;
+            line-height: 1.12 !important;
+        }
 
     </style>
 </head>
