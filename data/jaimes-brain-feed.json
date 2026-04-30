@@ -1,36 +1,16 @@
 {
   "active": true,
-  "objective": "Task: review skill save/update need",
+  "objective": "Mission Control: validating revamp patch",
   "status": "active",
-  "updatedAt": "2026-04-30T03:51:12Z",
+  "updatedAt": "2026-04-30T04:02:45Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "exec",
+  "currentTool": "code",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T03:51:12Z",
-  "messageReceived": "2026-04-30T03:51:12Z",
+  "checkedAt": "2026-04-30T04:02:45Z",
+  "messageReceived": "2026-04-30T04:02:45Z",
   "steps": [
-    {
-      "label": "Step: checking SSH reachability details",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: fix JAIMES LAN SSH path",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: testing JAIMES SSH from JOSH LAN",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill save/update need",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: contain JOSHeX Hermes status exposure",
       "status": "done",
@@ -58,8 +38,28 @@
     },
     {
       "label": "Task: review skill save/update need",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Mission Control: full revamp starting",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: auditing current UI and data",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: launching local preview",
+      "status": "done",
+      "tool": "browser"
+    },
+    {
+      "label": "Mission Control: validating revamp patch",
+      "status": "active",
+      "tool": "code"
     }
   ]
 }
