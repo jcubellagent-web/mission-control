@@ -1,64 +1,64 @@
 {
-  "active": false,
-  "objective": "Done: approved all lanes audited; fantasy IL-drop fixed; blockers need Josh GUI auth",
-  "status": "idle",
-  "updatedAt": "2026-04-30T00:32:51Z",
+  "active": true,
+  "objective": "Step: switch JOSH gog to file keyring for headless auth",
+  "status": "active",
+  "updatedAt": "2026-04-30T00:44:53Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:32:40Z",
-  "messageReceived": "2026-04-30T00:32:40Z",
+  "checkedAt": "2026-04-30T00:44:53Z",
+  "messageReceived": "2026-04-30T00:44:53Z",
   "steps": [
-    {
-      "label": "Step: run local Mission Control anchor verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: review skill updates after Mission Control handoff",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Task: approved all - Sorare Fantasy Calendar screen lanes",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: Sorare JAIMES lane audit and dry-run smokes",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: Sorare dry-run with project venv",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: fantasy weekly-lock dry-safe verification",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify fantasy IL-slot waiver fix",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: Calendar auth assessment local and JOSH",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: install and run JOSH screen capture helper",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Step: collect final approval-all verification summary",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: re-auth Google Calendar on JOSH",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: inspect JOSH gog auth flow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: generate JOSH Google Calendar auth URL",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: skill review after Calendar re-auth workflow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: parse Google OAuth redirect screenshot",
+      "status": "done",
+      "tool": "vision"
+    },
+    {
+      "label": "Step: exchange JOSH Google OAuth code",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: exchange OAuth redirect on JOSH",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: diagnose JOSH keychain auth blocker",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: switch JOSH gog to file keyring for headless auth",
+      "status": "active",
       "tool": "exec"
     }
   ]
