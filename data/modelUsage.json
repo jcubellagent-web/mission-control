@@ -1,6 +1,6 @@
 {
   "session": 0.026292,
-  "daily": 0.078563,
+  "daily": 0.081541,
   "weekly": 45.705728,
   "monthly": 952.083148,
   "topModels": [
@@ -22,7 +22,7 @@
     {
       "name": "openai-codex/gpt-5.5",
       "window": "session",
-      "cost": 0.097565
+      "cost": 0.10054300000000001
     },
     {
       "name": "codex/gpt-5.4-mini",
@@ -69,12 +69,12 @@
     {
       "name": "openai-codex/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 2445,
-      "outputTokens": 82,
-      "totalTokens": 2527,
-      "sessionCost": 0.097565,
-      "dailyCost": 0.07856300000000001,
-      "weeklyCost": 0.097565,
+      "inputTokens": 2669,
+      "outputTokens": 33,
+      "totalTokens": 2702,
+      "sessionCost": 0.10054300000000001,
+      "dailyCost": 0.081541,
+      "weeklyCost": 0.10054300000000001,
       "sessions": 5,
       "isGemini": false,
       "costEstimated": false
@@ -124,8 +124,8 @@
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
       "sessionCost": 0.0,
-      "totalTokens": 304441620,
-      "dailyTokens": 7052828,
+      "totalTokens": 304919827,
+      "dailyTokens": 7531035,
       "costEstimated": false,
       "subscriptionIncluded": true
     },
@@ -156,7 +156,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-04-30T07:00:22Z",
+  "lastUpdated": "2026-04-30T07:05:23Z",
   "jain": {
     "daily": 0.0,
     "session": 1.942774,
@@ -189,8 +189,8 @@
     "available": true
   },
   "aggregate": {
-    "daily": 0.078563,
-    "total": 47.220178,
+    "daily": 0.081541,
+    "total": 47.223156,
     "monthly": 952.083148
   },
   "weeklyRunRate": {
@@ -205,11 +205,11 @@
     "meteredMonthlyProjection": 0.52,
     "meteredWeekly": 0.122313,
     "meteredDaily": 0.0,
-    "codexEquivalentWeekly": 45.155091,
-    "codexEquivalentDaily": 0.078563,
-    "codexEquivalentMonthlyProjection": 193.52,
-    "codexTokensWeekly": 413155858,
-    "codexTokensDaily": 7052828,
+    "codexEquivalentWeekly": 45.158069,
+    "codexEquivalentDaily": 0.081541,
+    "codexEquivalentMonthlyProjection": 193.53,
+    "codexTokensWeekly": 413634240,
+    "codexTokensDaily": 7531035,
     "localModelCount": 2,
     "meteredModelCount": 2,
     "codexModelCount": 6,
@@ -232,8 +232,8 @@
       "fixedMonthly": 200.0,
       "meteredMonthly": 0.52,
       "meteredWeekly": 0.122313,
-      "codexValueMonthly": 193.52,
-      "codexTokensWeekly": 413155858,
+      "codexValueMonthly": 193.53,
+      "codexTokensWeekly": 413634240,
       "activeMeteredLaneCount": 1,
       "leadMeteredLane": "OpenAI API",
       "laneStack": [
@@ -243,7 +243,7 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyCost": 45.155091,
+          "weeklyCost": 45.158069,
           "modelCount": 6,
           "models": [
             "gpt-5.4",
@@ -307,9 +307,9 @@
         "billing": "fixed",
         "status": "covered",
         "monthlyProjection": 200.0,
-        "weeklyEquivalent": 45.155091,
-        "dailyEquivalent": 0.078563,
-        "tokensWeekly": 413155858,
+        "weeklyEquivalent": 45.158069,
+        "dailyEquivalent": 0.081541,
+        "tokensWeekly": 413634240,
         "models": [
           "gpt-5.4",
           "gpt-5.4-mini",
@@ -383,7 +383,7 @@
     ],
     "insights": [
       "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-      "Codex subscription is absorbing roughly $193.52/mo of API-equivalent usage.",
+      "Codex subscription is absorbing roughly $193.53/mo of API-equivalent usage.",
       "Tracked metered spend is $0.12/wk across 2 metered model rows."
     ],
     "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
