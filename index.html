@@ -5000,9 +5000,11 @@
             --bf-model-bg: rgba(255,255,255,0.04);
             --bf-objective-font-size: clamp(1.9rem, 2.8vw, 2.45rem);
             --bf-objective-line-height: 1.03;
-            background: linear-gradient(180deg, color-mix(in srgb, var(--bf-model-bg) 92%, rgba(255,255,255,0.02)), rgba(255,255,255,0.014));
-            border: 1px solid var(--bf-model-border);
-            border-left: 4px solid var(--bf-model-color);
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 12%, rgba(10,16,24,0.96)), rgba(5,8,13,0.985)),
+                linear-gradient(90deg, color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 10%, transparent), transparent);
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 28%, rgba(255,255,255,0.08));
+            border-left: 4px solid var(--bf-agent-color, var(--bf-model-color));
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 0;
@@ -5011,7 +5013,7 @@
             flex-direction: column;
             justify-content: flex-start;
             gap: 11px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 24px color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 8%, transparent);
         }
         .bf-objective-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .bf-objective-live { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -5020,6 +5022,43 @@
             font-size: 0.58rem;
             letter-spacing: 0.16em;
             color: var(--bf-model-color);
+        }
+        .bf-state-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.09);
+            background: rgba(255,255,255,0.035);
+            color: rgba(255,255,255,0.76);
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            font-variant-numeric: tabular-nums;
+        }
+        .bf-state-pill.state-live {
+            border-color: color-mix(in srgb, var(--bf-agent-color, #22d3ee) 56%, rgba(255,255,255,0.1));
+            background: color-mix(in srgb, var(--bf-agent-color, #22d3ee) 16%, rgba(255,255,255,0.025));
+            color: #dcfce7;
+            box-shadow: 0 0 14px color-mix(in srgb, var(--bf-agent-color, #22d3ee) 22%, transparent);
+        }
+        .bf-state-pill.state-stale {
+            border-color: rgba(245,158,11,0.45);
+            background: rgba(245,158,11,0.12);
+            color: #fde68a;
+        }
+        .bf-state-pill.state-done {
+            border-color: rgba(74,222,128,0.34);
+            background: rgba(74,222,128,0.09);
+            color: #bbf7d0;
+        }
+        .bf-state-pill.state-idle {
+            border-color: rgba(148,163,184,0.26);
+            background: rgba(148,163,184,0.07);
+            color: rgba(226,232,240,0.72);
         }
         .bf-agent-name {
             display: inline-flex;
@@ -5074,14 +5113,14 @@
         .bf-objective-text {
             font-size: var(--bf-objective-font-size);
             line-height: var(--bf-objective-line-height);
-            color: var(--bf-model-color);
+            color: color-mix(in srgb, #f8fafc 88%, var(--bf-agent-color, var(--bf-model-color)));
             display: block;
             min-height: calc(var(--bf-objective-font-size) * var(--bf-objective-line-height) * 2);
             overflow: visible;
             padding-right: 2px;
             padding-bottom: 1px;
             font-weight: 800;
-            text-shadow: 0 0 22px color-mix(in srgb, var(--bf-model-color) 38%, transparent);
+            text-shadow: 0 0 24px color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 34%, transparent);
             will-change: transform;
         }
         .bf-objective-text.is-scrolling {
@@ -5092,6 +5131,34 @@
             line-height: 1.35;
             color: color-mix(in srgb, var(--bf-model-color) 72%, rgba(255,255,255,0.76));
             padding-top: 2px;
+        }
+        .bf-objective-now {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 8px;
+            align-items: baseline;
+            min-height: 2.4em;
+            padding: 8px 9px;
+            border-radius: 10px;
+            border: 1px solid color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 18%, rgba(255,255,255,0.06));
+            background: color-mix(in srgb, var(--bf-agent-color, var(--bf-model-color)) 6%, rgba(255,255,255,0.025));
+        }
+        .bf-objective-now-label {
+            color: rgba(255,255,255,0.48);
+            font-size: 0.56rem;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .bf-objective-now-text {
+            min-width: 0;
+            color: color-mix(in srgb, #f8fafc 78%, var(--bf-agent-color, var(--bf-model-color)));
+            font-size: 0.66rem;
+            line-height: 1.28;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         .bf-objective.bf-objective-compact {
             --bf-objective-font-size: clamp(2.2rem, 3.25vw, 2.85rem);
@@ -5118,6 +5185,9 @@
             color: rgba(255,255,255,0.44);
         }
         .bf-objective-submeta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             padding: 4px 7px;
             border-radius: 999px;
             border: 1px solid rgba(255,255,255,0.06);
@@ -5126,6 +5196,30 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        .bf-objective-submeta b {
+            color: rgba(255,255,255,0.42);
+            font-size: 0.52rem;
+            letter-spacing: 0.12em;
+        }
+        .bf-objective-submeta em {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: rgba(241,245,249,0.80);
+            font-style: normal;
+            letter-spacing: 0.04em;
+        }
+        .bf-objective .bf-last-updated {
+            padding: 4px 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.028);
+            color: rgba(226,232,240,0.82);
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
         .bf-support-strip {
             display: flex;
@@ -7853,6 +7947,11 @@
                 gap: 7px !important;
                 overflow: hidden !important;
             }
+            body:not(.phone-mode) #brain-feed-card .bf-state-pill {
+                font-size: 0.58rem !important;
+                padding: 4px 7px !important;
+                min-width: 44px !important;
+            }
             body:not(.phone-mode) #brain-feed-card .bf-objective-text-wrap {
                 min-height: 0 !important;
                 height: auto !important;
@@ -7861,7 +7960,7 @@
             }
             body:not(.phone-mode) #brain-feed-card .bf-objective-text {
                 display: -webkit-box !important;
-                -webkit-line-clamp: 3 !important;
+                -webkit-line-clamp: 4 !important;
                 -webkit-box-orient: vertical !important;
                 overflow: hidden !important;
             }
@@ -7872,16 +7971,26 @@
                 overflow: hidden !important;
                 min-height: 0 !important;
             }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-now {
+                min-height: 0 !important;
+                padding: 7px 8px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-now-text {
+                -webkit-line-clamp: 2 !important;
+            }
             body:not(.phone-mode) #brain-feed-card .bf-objective-meta {
                 flex-wrap: wrap !important;
                 gap: 5px !important;
             }
-            body:not(.phone-mode) #brain-feed-card .bf-objective-provider {
-                max-width: 100% !important;
-            }
             body:not(.phone-mode) #brain-feed-card .bf-agent-name {
                 font-size: 0.72rem !important;
                 letter-spacing: 0.10em !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-submeta span {
+                max-width: 100% !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-submeta em {
+                max-width: 18ch !important;
             }
             body:not(.phone-mode) #brain-feed-card .agent-joshex {
                 border-color: rgba(168, 85, 247, 0.34) !important;
@@ -7909,8 +8018,20 @@
                 -webkit-line-clamp: 1 !important;
                 font-size: 0.66rem !important;
             }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-now {
+                padding: 5px 7px !important;
+                gap: 6px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-now-text {
+                -webkit-line-clamp: 1 !important;
+                font-size: 0.61rem !important;
+            }
             body:not(.phone-mode) #brain-feed-card .bf-objective-submeta {
                 font-size: 0.58rem !important;
+                gap: 4px !important;
+            }
+            body:not(.phone-mode) #brain-feed-card .bf-objective-submeta span {
+                padding: 3px 6px !important;
             }
         }
 
@@ -11032,6 +11153,19 @@
             return { doneCount, activeStep, totalCount, progressText, liveStep, currentTool };
         }
 
+        function getBrainFeedAgentState(bf) {
+            const status = String(bf?.status || '').toLowerCase();
+            const steps = Array.isArray(bf?.steps) ? bf.steps : [];
+            const latestStep = steps.length ? steps[steps.length - 1] : null;
+            if (!bf) return { label: 'IDLE', cls: 'idle', active: false };
+            if (bf.stale || isFeedStale(bf, 45 * 60 * 1000)) return { label: 'STALE', cls: 'stale', active: false };
+            if (bf.active) return { label: 'LIVE', cls: 'live', active: true };
+            if (status === 'done' || status === 'complete' || status === 'completed' || latestStep?.status === 'done') {
+                return { label: 'DONE', cls: 'done', active: false };
+            }
+            return { label: 'IDLE', cls: 'idle', active: false };
+        }
+
         function getModelLegendEntries() {
             return [
                 { key: 'openai_api', label: 'OpenAI API', color: '#4ade80' },
@@ -11188,6 +11322,10 @@
                 parts.push(`Recent: ${scrubLegacyDashboardCopy(sanitizeLabel(recentDone.label))}`);
             }
             return compactUiLabel(parts.join(' · '), 180) || scrubLegacyDashboardCopy(resolveBrainFeedStepLabel(bf)) || 'Working through the current objective.';
+        }
+
+        function getBrainFeedNowLine(bf) {
+            return getBrainFeedObjectiveDetail(bf).replace(/^Now:\s*/i, '') || 'Tracking current objective.';
         }
 
         function fitBrainFeedObjectiveViewport(brainFeedCard, fullText) {
@@ -11398,12 +11536,18 @@
             if (!pc || (!pc.objective && !pc.validation && !pc.patchStatus)) return null;
             const patch = pc.patchStatus || {};
             const status = String(patch.status || pc.status || 'ready').toLowerCase();
+            const dirtyCount = Number(patch.dirtyCount || 0) || 0;
+            const patchFiles = Array.isArray(patch.files) ? patch.files.filter(Boolean).slice(0, 3) : [];
+            const hasPatchActivity = dirtyCount > 0 || ['pending', 'working', 'needs_josh', 'blocked'].includes(status);
             const objective = pc.objective || patch.summary || 'JOSHeX contribution lane ready';
-            const detailBits = [pc.validation, patch.detail, patch.summary].filter(Boolean);
+            const fileSummary = dirtyCount
+                ? `${dirtyCount} file${dirtyCount === 1 ? '' : 's'} changed${patchFiles.length ? `: ${patchFiles.join(', ')}` : ''}`
+                : '';
+            const detailBits = [patch.detail, fileSummary, pc.validation, patch.summary].filter(Boolean);
             const updatedAt = patch.updatedAt || pc.updatedAt || (window._latestDashboardData || window._mcLastDashData || {}).lastUpdated || new Date().toISOString();
             return {
                 agent: 'JOSHeX',
-                active: true,
+                active: hasPatchActivity,
                 reportedActive: false,
                 lowSignal: false,
                 objective,
@@ -11412,8 +11556,8 @@
                 stale: false,
                 updatedAt,
                 currentTool: 'codex',
-                model: 'Codex',
-                steps: [{ label: patch.summary || pc.validation || objective, status: status === 'clean' ? 'done' : 'active', tool: 'codex' }],
+                model: 'openai-codex',
+                steps: [{ label: fileSummary || patch.summary || pc.validation || objective, status: hasPatchActivity ? 'active' : 'done', tool: 'codex' }],
                 joshexBacked: true,
             };
         }
@@ -11478,29 +11622,33 @@
             const bf = entry?.bf || {};
             const heroAgentLabel = entry?.agentLabel || 'AGENT';
             const agentClass = brainFeedAgentClass(heroAgentLabel);
-            const isActiveBf = !!bf.active;
             const modelLabel = bf.model ? formatModelLabel(bf.model) : '';
             const toolLabel = prettyToolLabel(bf?.currentTool || '');
             const modelVisual = getModelVisual(bf?.model || '', toolLabel || '');
             const providerLabel = modelLabel ? `${modelVisual.label} · ${modelLabel}` : modelVisual.label;
             const objectiveText = getBrainFeedObjectiveText(bf);
-            const objectiveDetail = getBrainFeedObjectiveDetail(bf);
+            const objectiveDetail = getBrainFeedNowLine(bf);
             const metrics = getBrainFeedMetrics(bf);
+            const state = getBrainFeedAgentState(bf);
+            const updatedLabel = bf.updatedAt ? formatRelTime(bf.updatedAt) : 'unknown';
             return `<div class="bf-objective ${agentClass}${compact ? ' bf-objective-compact' : ''}" data-agent="${escapeHtml(heroAgentLabel)}" style="--bf-model-color:${modelVisual.text};--bf-model-border:${modelVisual.border};--bf-model-bg:${modelVisual.bg};">
                 <div class="bf-objective-meta">
                     <div class="bf-objective-live">
-                        <span class="bf-fresh-dot" style="background:${isActiveBf ? '#22d3ee' : 'rgba(255,255,255,0.2)'};${isActiveBf ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(34,211,238,0.6)' : ''}"></span>
+                        <span class="bf-fresh-dot" style="background:${state.active ? '#22d3ee' : 'rgba(255,255,255,0.2)'};${state.active ? 'animation:pulse 1.5s infinite;box-shadow:0 0 5px rgba(34,211,238,0.6)' : ''}"></span>
                         <span class="bf-agent-name">${escapeHtml(heroAgentLabel)}</span>
-                        <span class="bf-objective-kicker">${isActiveBf ? 'LIVE OBJECTIVE' : 'LATEST'}</span>
+                        <span class="bf-state-pill state-${state.cls}">${escapeHtml(state.label)}</span>
                     </div>
-                    ${providerLabel ? `<span class="bf-objective-provider"><span>Model</span><span>${escapeHtml(providerLabel)}</span></span>` : ''}
-                    <span class="bf-last-updated">${bf.updatedAt ? formatRelTime(bf.updatedAt) : '-'}</span>
+                    <span class="bf-last-updated">Updated ${escapeHtml(updatedLabel)}</span>
                 </div>
                 <div class="bf-objective-text-wrap"><div class="bf-objective-text" data-full-text="${escapeHtml(objectiveText)}" title="${escapeHtml(objectiveText)}">${escapeHtml(objectiveText)}</div></div>
-                <div class="bf-objective-detail" title="${escapeHtml(objectiveDetail)}">${escapeHtml(objectiveDetail)}</div>
+                <div class="bf-objective-now" title="${escapeHtml(objectiveDetail)}">
+                    <span class="bf-objective-now-label">Now</span>
+                    <span class="bf-objective-now-text">${escapeHtml(objectiveDetail)}</span>
+                </div>
                 <div class="bf-objective-submeta">
-                    <span>Tool · ${escapeHtml(metrics.currentTool)}</span>
-                    <span>Flow · ${escapeHtml(metrics.progressText)}</span>
+                    <span><b>Tool</b><em>${escapeHtml(metrics.currentTool)}</em></span>
+                    <span><b>Flow</b><em>${escapeHtml(metrics.progressText)}</em></span>
+                    ${providerLabel ? `<span><b>Model</b><em>${escapeHtml(providerLabel)}</em></span>` : ''}
                 </div>
             </div>`;
         }
