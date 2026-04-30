@@ -3,27 +3,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-30T04:03:27Z",
-    "objective": "Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-30T04:14:31Z",
+    "objective": "Handling async command completion heartbeat",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - MEMORY snippet command result handled",
-        "status": "done",
+        "label": "Handling async command completion heartbeat",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T04:03:32Z",
-    "checkedAt": "2026-04-30T04:03:27Z",
+    "updatedAt": "2026-04-30T04:14:31Z",
+    "checkedAt": "2026-04-30T04:14:31Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T04:10:18Z"
+    "status": "Brain Feed live",
+    "context": "Handling async command completion heartbeat",
+    "updatedAt": "2026-04-30T04:15:17Z"
   },
   "contextWindow": {
     "usedTokens": 60961,
@@ -40,7 +40,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 12 source file(s) changed",
-        "time": "2026-04-30T04:10:18Z"
+        "time": "2026-04-30T04:15:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -58,7 +58,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T04:10:18Z",
+    "updatedAt": "2026-04-30T04:15:17Z",
     "patchStatus": {
       "status": "pending",
       "summary": "12 source file(s) changed",
@@ -66,14 +66,14 @@
       "dirtyCount": 12,
       "files": [
         "data/agent-comms.json",
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-brain-feed.json",
-        "data/jain-breaking-highlights.json",
         "data/jain-newsfeed.json"
       ],
-      "head": "4bfb72449",
-      "updatedAt": "2026-04-30T04:10:18Z"
+      "head": "2a6c290f6",
+      "updatedAt": "2026-04-30T04:15:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -186,32 +186,32 @@
       "scripts/answer_callback.py",
       "scripts/compact_tasks_state.py"
     ],
-    "codexbarStatus": "95% left \u00b7 wk 76% left",
+    "codexbarStatus": "93% left \u00b7 wk 76% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 95% left [===========-]",
-        "Resets in 3h 57m",
+        "Session: 93% left [===========-]",
+        "Resets in 3h 52m",
         "Weekly: 76% left [=========---]",
         "Pace: 4% in reserve | Expected 28% used | Lasts until reset",
         "Resets in 5d 1h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "95% left",
+      "session": "93% left",
       "weekly": "76% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "3h 57m",
+      "sessionReset": "3h 52m",
       "weeklyReset": "5d 1h",
-      "summary": "95% left \u00b7 wk 76% left"
+      "summary": "93% left \u00b7 wk 76% left"
     },
-    "updatedAt": "2026-04-30T04:10:20Z"
+    "updatedAt": "2026-04-30T04:15:19Z"
   },
   "modelUsage": {
     "session": 0.035993,
-    "daily": 0.041997,
+    "daily": 0.055918,
     "weekly": 45.705728,
     "monthly": 952.083148,
     "topModels": [
@@ -228,7 +228,7 @@
       {
         "name": "openai-codex/gpt-5.5",
         "window": "session",
-        "cost": 0.50081
+        "cost": 0.135213
       },
       {
         "name": "openai/gpt-5.5",
@@ -267,12 +267,12 @@
       {
         "name": "openai-codex/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 77426,
-        "outputTokens": 344,
-        "totalTokens": 77770,
-        "sessionCost": 0.50081,
-        "dailyCost": 0.041997,
-        "weeklyCost": 0.50081,
+        "inputTokens": 3301,
+        "outputTokens": 198,
+        "totalTokens": 3499,
+        "sessionCost": 0.135213,
+        "dailyCost": 0.055917999999999995,
+        "weeklyCost": 0.135213,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false
@@ -335,8 +335,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 298301545,
-        "dailyTokens": 912753,
+        "totalTokens": 299108706,
+        "dailyTokens": 1719914,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -367,7 +367,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T04:10:23Z",
+    "lastUpdated": "2026-04-30T04:15:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -400,8 +400,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.041997,
-      "total": 47.623423,
+      "daily": 0.055918,
+      "total": 47.257826,
       "monthly": 952.083148
     },
     "weeklyRunRate": {
@@ -416,11 +416,11 @@
       "meteredMonthlyProjection": 0.52,
       "meteredWeekly": 0.122313,
       "meteredDaily": 0.0,
-      "codexEquivalentWeekly": 45.558336,
-      "codexEquivalentDaily": 0.041997,
-      "codexEquivalentMonthlyProjection": 195.25,
-      "codexTokensWeekly": 407091026,
-      "codexTokensDaily": 912753,
+      "codexEquivalentWeekly": 45.192739,
+      "codexEquivalentDaily": 0.055918,
+      "codexEquivalentMonthlyProjection": 193.68,
+      "codexTokensWeekly": 407823916,
+      "codexTokensDaily": 1719914,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -443,8 +443,8 @@
         "fixedMonthly": 200.0,
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
-        "codexValueMonthly": 195.25,
-        "codexTokensWeekly": 407091026,
+        "codexValueMonthly": 193.68,
+        "codexTokensWeekly": 407823916,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -454,7 +454,7 @@
             "billing": "fixed",
             "status": "covered",
             "monthlyProjection": 200.0,
-            "weeklyCost": 45.558336,
+            "weeklyCost": 45.192739,
             "modelCount": 6,
             "models": [
               "gpt-5.4",
@@ -518,9 +518,9 @@
           "billing": "fixed",
           "status": "covered",
           "monthlyProjection": 200.0,
-          "weeklyEquivalent": 45.558336,
-          "dailyEquivalent": 0.041997,
-          "tokensWeekly": 407091026,
+          "weeklyEquivalent": 45.192739,
+          "dailyEquivalent": 0.055918,
+          "tokensWeekly": 407823916,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -594,7 +594,7 @@
       ],
       "insights": [
         "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-        "Codex subscription is absorbing roughly $195.25/mo of API-equivalent usage.",
+        "Codex subscription is absorbing roughly $193.68/mo of API-equivalent usage.",
         "Tracked metered spend is $0.12/wk across 2 metered model rows."
       ],
       "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
@@ -614,7 +614,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T04:10:28Z",
+    "updatedAt": "2026-04-30T04:15:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -631,14 +631,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.3,
-      "cpu_user": 20.14,
-      "cpu_sys": 18.16,
-      "load1": 2.63,
-      "load5": 2.29,
-      "load15": 2.28,
-      "ram_used_gb": 14.0,
-      "ram_total_gb": 15.0,
+      "cpu_pct": 35.7,
+      "cpu_user": 17.64,
+      "cpu_sys": 18.3,
+      "load1": 2.32,
+      "load5": 2.51,
+      "load15": 2.39,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -646,14 +646,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 14.7,
-      "cpu_user": 4.31,
-      "cpu_sys": 10.34,
-      "load1": 2.39,
-      "load5": 2.2,
-      "load15": 2.11,
+      "cpu_pct": 14.8,
+      "cpu_user": 4.51,
+      "cpu_sys": 10.32,
+      "load1": 2.0,
+      "load5": 2.25,
+      "load15": 2.17,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -677,19 +677,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T04:10:18Z"
+      "lastChecked": "2026-04-30T04:15:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T04:10:18Z"
+      "lastChecked": "2026-04-30T04:15:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T04:10:18Z"
+      "lastChecked": "2026-04-30T04:15:17Z"
     }
   ],
   "crons": [
@@ -706,7 +706,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T04:10:18.814780+00:00"
+      "lastRun": "2026-04-30T04:15:17.742735+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1252,12 +1252,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T04:10:18.813825Z",
+    "checkedAt": "2026-04-30T04:15:17.741713Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1295,11 +1295,11 @@
   "capabilityCanary": {
     "status": "warn",
     "ok": false,
-    "summary": "6 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-30T01:41:58Z",
+    "summary": "5 warning(s), 0 error(s)",
+    "checkedAt": "2026-04-30T04:12:48Z",
     "counts": {
-      "ok": 20,
-      "warn": 6,
+      "ok": 21,
+      "warn": 5,
       "error": 0
     },
     "checks": [
@@ -1398,18 +1398,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=50ms audit=0/0",
+        "detail": "gateway=True latency=45ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.27",
           "model": "gpt-5.5",
-          "percentUsed": 29
+          "percentUsed": 30
         }
       },
       {
         "name": "memory:main",
-        "status": "warn",
-        "ok": false,
-        "detail": "[openclaw] Failed to start CLI: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'chokidar' imported from /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/manager-jzSMQjEt.js\nDid you mean to import \"chokidar/index.js\"?\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:764:81)\n    at moduleResolve (node:internal/modules/esm/resolve:855:18)\n    at defaultResolve (node:internal/modules/esm/resolve:988:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:697:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:714:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:746:52)\n    at #resolve (node:internal/modules/esm/loader:679:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:599:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:628:32)\n    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)\n    at ModuleLoader.import (node:internal/modules/esm/loader:624:21)\n    at defaultImportModuleDynamicallyForModule (node:internal/modules/esm/utils:214:31)\n    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:278:12)\n    at Object.nativeImport (file:///opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/lib/jiti.mjs:8:37)\n    at jitiRequire (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:149978)\n    at import (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:158307)\n    at /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:9:60\n    at async loadMemoryCliRuntime (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:10:10)\n    at async runMemoryStatus (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:13:10)\n    at async Command.<anonymous> (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:50:5)",
+        "status": "ok",
+        "ok": true,
+        "detail": "files=108 chunks=1250 dirty=False",
         "meta": {}
       },
       {
@@ -1559,8 +1559,8 @@
       "id": "capability-canary",
       "name": "Capability Canary",
       "status": "warn",
-      "summary": "6 warning(s), 0 error(s)",
-      "detail": "20 ok \u00b7 6 warn \u00b7 0 err",
+      "summary": "5 warning(s), 0 error(s)",
+      "detail": "21 ok \u00b7 5 warn \u00b7 0 err",
       "source": "capabilityCanary"
     },
     {
@@ -1598,67 +1598,57 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Handling async command completion heartbeat",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T04:03:32Z",
-      "messageReceived": "2026-04-30T04:03:27Z",
+      "updatedAt": "2026-04-30T04:14:31Z",
+      "messageReceived": "2026-04-30T04:14:31Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - MEMORY snippet command result handled",
-          "status": "done",
+          "label": "Handling async command completion heartbeat",
+          "status": "active",
           "tool": "exec"
         }
       ]
     },
     "jain": {
       "agent": "J.A.I.N",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Heartbeat: reading live task routing files",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T04:03:32Z",
-      "messageReceived": "2026-04-30T04:03:27Z",
+      "updatedAt": "2026-04-30T04:11:27Z",
+      "messageReceived": "2026-04-30T04:11:10Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - MEMORY snippet command result handled",
-          "status": "done",
+          "label": "Heartbeat - reading live task routing files",
+          "status": "active",
           "tool": "exec"
         }
       ]
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Mission Control: syncing JOSH 2.0 display",
-      "status": "active",
+      "objective": "Done: Mission Control skill updated with full revamp workflow",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T04:08:41Z",
-      "messageReceived": "2026-04-30T04:08:41Z",
+      "updatedAt": "2026-04-30T04:13:05Z",
+      "messageReceived": "2026-04-30T04:12:34Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "Task: grant JOSHeX operator access policy",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: verifying operator grant package",
-          "status": "done",
-          "tool": "exec"
-        },
         {
           "label": "Task: review skill save/update need",
           "status": "done",
@@ -1696,7 +1686,17 @@
         },
         {
           "label": "Mission Control: syncing JOSH 2.0 display",
-          "status": "active",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: reviewing whether Mission Control workflow needs skill",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: updating Mission Control skill with revamp workflow",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1704,36 +1704,70 @@
   },
   "liveObjectives": {
     "activeAgents": [
+      "JOSH 2.0",
+      "J.A.I.N"
+    ],
+    "activeCount": 2,
+    "primaryAgent": "JOSH 2.0",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
       "JAIMES"
     ],
-    "activeCount": 1,
-    "primaryAgent": "JAIMES",
-    "dualMode": false,
-    "dualAgents": [],
     "agents": [
       {
-        "agent": "JAIMES",
+        "agent": "JOSH 2.0",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Mission Control: syncing JOSH 2.0 display",
+        "objective": "Handling async command completion heartbeat",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-30T04:08:41Z",
-        "messageReceived": "2026-04-30T04:08:41Z",
+        "updatedAt": "2026-04-30T04:14:31Z",
+        "messageReceived": "2026-04-30T04:14:31Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Handling async command completion heartbeat",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "J.A.I.N",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Heartbeat: reading live task routing files",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-30T04:11:27Z",
+        "messageReceived": "2026-04-30T04:11:10Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Heartbeat - reading live task routing files",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: Mission Control skill updated with full revamp workflow",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-30T04:13:05Z",
+        "messageReceived": "2026-04-30T04:12:34Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
-          {
-            "label": "Task: grant JOSHeX operator access policy",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: verifying operator grant package",
-            "status": "done",
-            "tool": "exec"
-          },
           {
             "label": "Task: review skill save/update need",
             "status": "done",
@@ -1771,46 +1805,16 @@
           },
           {
             "label": "Mission Control: syncing JOSH 2.0 display",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-30T04:03:32Z",
-        "messageReceived": "2026-04-30T04:03:27Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Done - MEMORY snippet command result handled",
             "status": "done",
             "tool": "exec"
-          }
-        ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: MEMORY snippet command result handled \u00b7 Awaiting further instruction",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-30T04:03:32Z",
-        "messageReceived": "2026-04-30T04:03:27Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
+          },
           {
-            "label": "Done - MEMORY snippet command result handled",
+            "label": "Task: reviewing whether Mission Control workflow needs skill",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: updating Mission Control skill with revamp workflow",
             "status": "done",
             "tool": "exec"
           }
@@ -1820,29 +1824,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T04:10:23Z",
+      "time": "2026-04-30T04:15:23Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T04:10:20Z",
+      "time": "2026-04-30T04:15:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-04-30T04:10:20Z",
-      "event": "CodexBar: 95% left \u00b7 wk 76% left"
+      "time": "2026-04-30T04:15:19Z",
+      "event": "CodexBar: 93% left \u00b7 wk 76% left"
     },
     {
-      "time": "2026-04-30T04:10:18Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-30T04:15:17Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T04:10:18Z",
+      "time": "2026-04-30T04:15:17Z",
       "event": "JOSHeX: Patch feed: 12 source file(s) changed"
     },
     {
-      "time": "2026-04-30T04:10:18Z",
+      "time": "2026-04-30T04:15:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T04:10:18Z"
+  "lastUpdated": "2026-04-30T04:15:17Z"
 }

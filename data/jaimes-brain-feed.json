@@ -1,26 +1,16 @@
 {
-  "active": true,
-  "objective": "Mission Control: syncing JOSH 2.0 display",
-  "status": "active",
-  "updatedAt": "2026-04-30T04:08:41Z",
+  "active": false,
+  "objective": "Done: Mission Control skill updated with full revamp workflow",
+  "status": "idle",
+  "updatedAt": "2026-04-30T04:13:05Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:08:41Z",
-  "messageReceived": "2026-04-30T04:08:41Z",
+  "checkedAt": "2026-04-30T04:12:34Z",
+  "messageReceived": "2026-04-30T04:12:34Z",
   "steps": [
-    {
-      "label": "Task: grant JOSHeX operator access policy",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verifying operator grant package",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill save/update need",
       "status": "done",
@@ -58,7 +48,17 @@
     },
     {
       "label": "Mission Control: syncing JOSH 2.0 display",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: reviewing whether Mission Control workflow needs skill",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: updating Mission Control skill with revamp workflow",
+      "status": "done",
       "tool": "exec"
     }
   ]

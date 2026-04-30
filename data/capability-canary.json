@@ -1,11 +1,11 @@
 {
   "status": "warn",
   "ok": false,
-  "summary": "6 warning(s), 0 error(s)",
-  "checkedAt": "2026-04-30T01:41:58Z",
+  "summary": "5 warning(s), 0 error(s)",
+  "checkedAt": "2026-04-30T04:12:48Z",
   "counts": {
-    "ok": 20,
-    "warn": 6,
+    "ok": 21,
+    "warn": 5,
     "error": 0
   },
   "checks": [
@@ -104,18 +104,18 @@
       "name": "openclaw:status",
       "status": "ok",
       "ok": true,
-      "detail": "gateway=True latency=50ms audit=0/0",
+      "detail": "gateway=True latency=45ms audit=0/0",
       "meta": {
         "runtimeVersion": "2026.4.27",
         "model": "gpt-5.5",
-        "percentUsed": 29
+        "percentUsed": 30
       }
     },
     {
       "name": "memory:main",
-      "status": "warn",
-      "ok": false,
-      "detail": "[openclaw] Failed to start CLI: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'chokidar' imported from /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/manager-jzSMQjEt.js\nDid you mean to import \"chokidar/index.js\"?\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:764:81)\n    at moduleResolve (node:internal/modules/esm/resolve:855:18)\n    at defaultResolve (node:internal/modules/esm/resolve:988:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:697:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:714:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:746:52)\n    at #resolve (node:internal/modules/esm/loader:679:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:599:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:628:32)\n    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)\n    at ModuleLoader.import (node:internal/modules/esm/loader:624:21)\n    at defaultImportModuleDynamicallyForModule (node:internal/modules/esm/utils:214:31)\n    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:278:12)\n    at Object.nativeImport (file:///opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/lib/jiti.mjs:8:37)\n    at jitiRequire (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:149978)\n    at import (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:158307)\n    at /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:9:60\n    at async loadMemoryCliRuntime (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:10:10)\n    at async runMemoryStatus (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:13:10)\n    at async Command.<anonymous> (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:50:5)",
+      "status": "ok",
+      "ok": true,
+      "detail": "files=108 chunks=1250 dirty=False",
       "meta": {}
     },
     {
