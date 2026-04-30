@@ -1,21 +1,16 @@
 {
   "active": false,
-  "objective": "Done: Codex skill updated with model-auth pitfall",
+  "objective": "Mission Control watchdog failed",
   "status": "idle",
-  "updatedAt": "2026-04-30T04:36:41Z",
+  "updatedAt": "2026-04-30T05:18:07Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:36:25Z",
-  "messageReceived": "2026-04-30T04:36:25Z",
+  "checkedAt": "2026-04-30T05:17:49Z",
+  "messageReceived": "2026-04-30T05:17:49Z",
   "steps": [
-    {
-      "label": "Step: updating Mission Control skill with revamp workflow",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Mission Control: verifying live agent board deploy",
       "status": "done",
@@ -58,6 +53,11 @@
     },
     {
       "label": "Skill review: patching Codex model-support pitfall",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
     }
