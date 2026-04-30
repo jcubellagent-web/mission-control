@@ -29,13 +29,13 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: Done: Re-anchored Josh direct chat and ready \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T03:20:17Z"
+    "updatedAt": "2026-04-30T03:25:16Z"
   },
   "contextWindow": {
-    "usedTokens": 80964,
-    "limitTokens": 272000,
-    "pct": 0.2977,
-    "model": "gpt-5.5",
+    "usedTokens": 0,
+    "limitTokens": 200000,
+    "pct": 0.0,
+    "model": "",
     "status": "green"
   },
   "personalCodex": {
@@ -46,7 +46,7 @@
     "recentActivity": [
       {
         "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-30T03:20:17Z"
+        "time": "2026-04-30T03:25:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,7 +64,7 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T03:20:17Z",
+    "updatedAt": "2026-04-30T03:25:16Z",
     "patchStatus": {
       "status": "pending",
       "summary": "9 source file(s) changed",
@@ -78,8 +78,8 @@
         "data/model-usage-tracker.json",
         "data/modelUsage.json"
       ],
-      "head": "41d8f1b7b",
-      "updatedAt": "2026-04-30T03:20:17Z"
+      "head": "5bef7f176",
+      "updatedAt": "2026-04-30T03:25:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -192,28 +192,28 @@
       "scripts/compact_tasks_state.py",
       "scripts/openclaw_resiliency_watchdog.py"
     ],
-    "codexbarStatus": "99% left \u00b7 wk 77% left",
+    "codexbarStatus": "98% left \u00b7 wk 77% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 99% left [===========-]",
-        "Resets in 4h 47m",
+        "Session: 98% left [===========-]",
+        "Resets in 4h 42m",
         "Weekly: 77% left [=========---]",
         "Pace: 4% in reserve | Expected 27% used | Lasts until reset",
         "Resets in 5d 2h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "99% left",
+      "session": "98% left",
       "weekly": "77% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 47m",
+      "sessionReset": "4h 42m",
       "weeklyReset": "5d 2h",
-      "summary": "99% left \u00b7 wk 77% left"
+      "summary": "98% left \u00b7 wk 77% left"
     },
-    "updatedAt": "2026-04-30T03:20:19Z"
+    "updatedAt": "2026-04-30T03:25:19Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T03:20:22Z",
+    "lastUpdated": "2026-04-30T03:25:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T03:20:27Z",
+    "updatedAt": "2026-04-30T03:25:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,14 +637,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 36.6,
-      "cpu_user": 18.9,
-      "cpu_sys": 18.48,
-      "load1": 1.98,
-      "load5": 2.24,
-      "load15": 2.34,
+      "cpu_pct": 37.7,
+      "cpu_user": 19.42,
+      "cpu_sys": 18.26,
+      "load1": 2.03,
+      "load5": 2.17,
+      "load15": 2.27,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.8,
-      "cpu_user": 3.2,
-      "cpu_sys": 9.6,
-      "load1": 1.76,
-      "load5": 2.18,
-      "load15": 2.67,
+      "cpu_pct": 11.7,
+      "cpu_user": 2.34,
+      "cpu_sys": 9.37,
+      "load1": 2.6,
+      "load5": 2.33,
+      "load15": 2.57,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:20:17Z"
+      "lastChecked": "2026-04-30T03:25:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T03:20:17Z"
+      "lastChecked": "2026-04-30T03:25:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T03:20:17Z"
+      "lastChecked": "2026-04-30T03:25:16Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T03:20:17.048402+00:00"
+      "lastRun": "2026-04-30T03:25:16.769185+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,7 +1259,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T03:20:17.047300Z",
+    "checkedAt": "2026-04-30T03:25:16.768177Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1663,8 +1663,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T03:20:10Z",
-      "messageReceived": "2026-04-30T03:20:10Z",
+      "updatedAt": "2026-04-30T03:25:13Z",
+      "messageReceived": "2026-04-30T03:25:13Z",
       "currentTool": "",
       "model": "gpt-4.1",
       "steps": [
@@ -1713,8 +1713,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-04-30T03:20:10Z",
-        "messageReceived": "2026-04-30T03:20:10Z",
+        "updatedAt": "2026-04-30T03:25:13Z",
+        "messageReceived": "2026-04-30T03:25:13Z",
         "currentTool": "",
         "model": "gpt-4.1",
         "steps": [
@@ -1749,29 +1749,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T03:20:22Z",
+      "time": "2026-04-30T03:25:22Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-30T03:20:19Z",
+      "time": "2026-04-30T03:25:19Z",
       "event": "Coding: mission-control/index.html, mission-control/scripts/update_mission_control.py"
     },
     {
-      "time": "2026-04-30T03:20:19Z",
-      "event": "CodexBar: 99% left \u00b7 wk 77% left"
+      "time": "2026-04-30T03:25:19Z",
+      "event": "CodexBar: 98% left \u00b7 wk 77% left"
     },
     {
-      "time": "2026-04-30T03:20:17Z",
+      "time": "2026-04-30T03:25:16Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T03:20:17Z",
+      "time": "2026-04-30T03:25:16Z",
       "event": "JOSHeX: Patch feed: 9 source file(s) changed"
     },
     {
-      "time": "2026-04-30T03:20:17Z",
+      "time": "2026-04-30T03:25:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T03:20:17Z"
+  "lastUpdated": "2026-04-30T03:25:16Z"
 }
