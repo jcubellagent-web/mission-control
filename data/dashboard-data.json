@@ -14,27 +14,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-30T06:02:42Z",
-    "objective": "Done: leaving Google People other-contacts workaround deferred \u00b7 Awaiting further instruction",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-30T06:54:45Z",
+    "objective": "Running heartbeat maintenance checks",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - leaving Google People other-contacts workaround deferred",
-        "status": "done",
+        "label": "Running heartbeat maintenance checks",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T06:02:53Z",
-    "checkedAt": "2026-04-30T06:02:42Z",
+    "updatedAt": "2026-04-30T06:54:59Z",
+    "checkedAt": "2026-04-30T06:54:59Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: Done: leaving Google People other-contacts workaround deferred \u00b7 Awaiting further instruction",
-    "updatedAt": "2026-04-30T06:50:18Z"
+    "status": "Brain Feed live",
+    "context": "Running heartbeat maintenance checks",
+    "updatedAt": "2026-04-30T06:55:18Z"
   },
   "contextWindow": {
     "usedTokens": 47040,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 9 source file(s) changed",
-        "time": "2026-04-30T06:50:18Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-30T06:55:18Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T06:50:18Z",
+    "updatedAt": "2026-04-30T06:55:18Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "9 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 9,
+      "dirtyCount": 10,
       "files": [
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json",
-        "data/modelUsage.json"
+        "data/model-usage-tracker.json"
       ],
-      "head": "11fe6668c",
-      "updatedAt": "2026-04-30T06:50:18Z"
+      "head": "09c28a14c",
+      "updatedAt": "2026-04-30T06:55:18Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 8,
+    "missionControlDirty": 9,
     "recentFiles": [
       "mission-control/index.html",
       "mission-control/docs/kiosk-control-panel-review.md",
@@ -196,28 +196,28 @@
       "mission-control/JOSHEX_HANDOFF.md",
       "mission-control/scripts/update_and_push.sh"
     ],
-    "codexbarStatus": "69% left \u00b7 wk 71% left",
+    "codexbarStatus": "68% left \u00b7 wk 70% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
-        "Session: 69% left [========----]",
-        "Resets in 1h 17m",
-        "Weekly: 71% left [========----]",
-        "Pace: On pace | Expected 29% used | Lasts until reset",
+        "Session: 68% left [========----]",
+        "Resets in 1h 12m",
+        "Weekly: 70% left [========----]",
+        "Pace: On pace | Expected 29% used | Runs out in 4d 19h",
         "Resets in 4d 22h",
         "Credits: 0 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "69% left",
-      "weekly": "71% left",
+      "session": "68% left",
+      "weekly": "70% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 17m",
+      "sessionReset": "1h 12m",
       "weeklyReset": "4d 22h",
-      "summary": "69% left \u00b7 wk 71% left"
+      "summary": "68% left \u00b7 wk 70% left"
     },
-    "updatedAt": "2026-04-30T06:50:20Z"
+    "updatedAt": "2026-04-30T06:55:19Z"
   },
   "modelUsage": {
     "session": 0.026292,
@@ -345,8 +345,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 304043572,
-        "dailyTokens": 6654780,
+        "totalTokens": 304164323,
+        "dailyTokens": 6775531,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -377,7 +377,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T06:50:23Z",
+    "lastUpdated": "2026-04-30T06:55:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -429,8 +429,8 @@
       "codexEquivalentWeekly": 45.187583,
       "codexEquivalentDaily": 0.111055,
       "codexEquivalentMonthlyProjection": 193.66,
-      "codexTokensWeekly": 412758090,
-      "codexTokensDaily": 6654780,
+      "codexTokensWeekly": 412878841,
+      "codexTokensDaily": 6775531,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -454,7 +454,7 @@
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
         "codexValueMonthly": 193.66,
-        "codexTokensWeekly": 412758090,
+        "codexTokensWeekly": 412878841,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -530,7 +530,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.187583,
           "dailyEquivalent": 0.111055,
-          "tokensWeekly": 412758090,
+          "tokensWeekly": 412878841,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -624,7 +624,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T06:50:28Z",
+    "updatedAt": "2026-04-30T06:55:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -641,12 +641,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 35.7,
-      "cpu_user": 18.26,
-      "cpu_sys": 17.44,
-      "load1": 2.45,
-      "load5": 2.43,
-      "load15": 2.46,
+      "cpu_pct": 35.8,
+      "cpu_user": 18.18,
+      "cpu_sys": 17.63,
+      "load1": 3.5,
+      "load5": 2.84,
+      "load15": 2.61,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.5,
       "uptime": "",
@@ -656,14 +656,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 12.0,
-      "cpu_user": 3.0,
-      "cpu_sys": 9.2,
-      "load1": 1.67,
-      "load5": 1.86,
-      "load15": 1.94,
+      "cpu_pct": 12.9,
+      "cpu_user": 2.85,
+      "cpu_sys": 10.0,
+      "load1": 2.18,
+      "load5": 1.81,
+      "load15": 1.88,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -687,19 +687,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T06:50:18Z"
+      "lastChecked": "2026-04-30T06:55:18Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T06:50:18Z"
+      "lastChecked": "2026-04-30T06:55:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T06:50:18Z"
+      "lastChecked": "2026-04-30T06:55:18Z"
     }
   ],
   "crons": [
@@ -716,7 +716,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T06:50:28.395434+00:00"
+      "lastRun": "2026-04-30T06:55:28.089932+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1262,12 +1262,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-30T06:50:18.481347Z",
+    "checkedAt": "2026-04-30T06:55:17.861074Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=none; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1306,7 +1306,7 @@
     "status": "warn",
     "ok": false,
     "summary": "2 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-30T05:58:27Z",
+    "checkedAt": "2026-04-30T06:55:16Z",
     "counts": {
       "ok": 24,
       "warn": 2,
@@ -1408,18 +1408,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=50ms audit=0/0",
+        "detail": "gateway=True latency=38ms audit=0/0",
         "meta": {
           "runtimeVersion": "2026.4.27",
           "model": "gpt-5.5",
-          "percentUsed": 22
+          "percentUsed": 31
         }
       },
       {
         "name": "memory:main",
         "status": "ok",
         "ok": true,
-        "detail": "files=109 chunks=1251 dirty=False",
+        "detail": "files=109 chunks=1254 dirty=False",
         "meta": {}
       },
       {
@@ -1608,20 +1608,20 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: leaving Google People other-contacts workaround deferred \u00b7 Awaiting further instruction",
-      "status": "idle",
+      "objective": "Running heartbeat maintenance checks",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T06:02:53Z",
-      "messageReceived": "2026-04-30T06:02:42Z",
+      "updatedAt": "2026-04-30T06:54:59Z",
+      "messageReceived": "2026-04-30T06:54:45Z",
       "currentTool": "exec",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Done - leaving Google People other-contacts workaround deferred",
-          "status": "done",
+          "label": "Running heartbeat maintenance checks",
+          "status": "active",
           "tool": "exec"
         }
       ]
@@ -1713,12 +1713,37 @@
     }
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
-    "primaryAgent": "JAIMES",
-    "dualMode": false,
-    "dualAgents": [],
+    "activeAgents": [
+      "JOSH 2.0"
+    ],
+    "activeCount": 1,
+    "primaryAgent": "JOSH 2.0",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
+      "JAIMES"
+    ],
     "agents": [
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Running heartbeat maintenance checks",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-30T06:54:59Z",
+        "messageReceived": "2026-04-30T06:54:45Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Running heartbeat maintenance checks",
+            "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
       {
         "agent": "JAIMES",
         "active": false,
@@ -1785,26 +1810,6 @@
         ]
       },
       {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": false,
-        "objective": "Done: leaving Google People other-contacts workaround deferred \u00b7 Awaiting further instruction",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-30T06:02:53Z",
-        "messageReceived": "2026-04-30T06:02:42Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Done - leaving Google People other-contacts workaround deferred",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
-      },
-      {
         "agent": "J.A.I.N",
         "active": false,
         "reportedActive": true,
@@ -1828,29 +1833,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T06:50:23Z",
+      "time": "2026-04-30T06:55:22Z",
       "event": "Session spend: $0.03"
     },
     {
-      "time": "2026-04-30T06:50:20Z",
+      "time": "2026-04-30T06:55:19Z",
       "event": "Coding: mission-control/index.html, mission-control/docs/kiosk-control-panel-review.md"
     },
     {
-      "time": "2026-04-30T06:50:20Z",
-      "event": "CodexBar: 69% left \u00b7 wk 71% left"
+      "time": "2026-04-30T06:55:19Z",
+      "event": "CodexBar: 68% left \u00b7 wk 70% left"
     },
     {
-      "time": "2026-04-30T06:50:18Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-30T06:55:18Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T06:50:18Z",
-      "event": "JOSHeX: Patch feed: 9 source file(s) changed"
+      "time": "2026-04-30T06:55:18Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-30T06:50:18Z",
+      "time": "2026-04-30T06:55:18Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T06:50:18Z"
+  "lastUpdated": "2026-04-30T06:55:18Z"
 }
