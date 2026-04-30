@@ -33,13 +33,23 @@ MISSION_CONTROL_SUPABASE_KEY=...
 Do not paste private service-role keys into chat. The helper does not print credential values.
 
 ## Cron Pattern
-For long jobs, publish at start and finish:
+For long jobs, publish at start and finish. Prefer the wrapper when wiring shell cron entries because it preserves the wrapped job's exit code and treats Brain Feed publish failures as non-fatal:
+
+```bash
+python3 scripts/cron_brain_feed_wrap.py \
+  --agent jaimes \
+  --cron "Sorare ML Training" \
+  --objective "Training Sorare mission model" \
+  --done-objective "Sorare mission model training complete" \
+  --start-step "Started training run" \
+  --done-step "Saved latest model artifacts" \
+  -- /opt/homebrew/bin/python3 /path/to/train.py
+```
+
+Use the direct helper for in-script progress points:
 
 ```bash
 python3 scripts/supabase_brain_feed_publish.py --agent jaimes --status active --tool cron --cron "Sorare ML Training" --objective "Training Sorare mission model" --step "Started training run"
-
-# run the job
-
 python3 scripts/supabase_brain_feed_publish.py --agent jaimes --status done --tool cron --cron "Sorare ML Training" --objective "Sorare mission model training complete" --step "Saved latest model artifacts"
 ```
 

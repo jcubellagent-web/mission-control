@@ -12,6 +12,25 @@ else
   echo "mission-control: kiosk-dashboard missing; skipping model sync"
 fi
 cd "$ROOT_DIR"
+publisher="${HOME}/scripts/mission_control_brain_feed_publish.py"
+
+publish_bf() {
+  local status="$1"
+  local objective="$2"
+  local step="$3"
+  if [[ -x "$publisher" || -f "$publisher" ]]; then
+    python3 "$publisher" \
+      --agent josh \
+      --status "$status" \
+      --tool cron \
+      --cron "Mission Control publisher" \
+      --objective "$objective" \
+      --step "$step" >/dev/null 2>&1 || true
+  fi
+}
+
+publish_bf active "Publishing Mission Control data" "Started dashboard refresh"
+trap 'rc=$?; if [[ $rc -ne 0 ]]; then publish_bf blocked "Mission Control publisher failed" "Refresh exited with code $rc"; fi' EXIT
 
 sync_branch() {
   local phase="$1"
@@ -63,6 +82,8 @@ ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
+  publish_bf done "Mission Control data current" "No dashboard changes to publish"
+  trap - EXIT
   exit 0
 fi
 git commit -m "dashboard: auto refresh $ts"
@@ -82,3 +103,5 @@ else
   sync_branch "pre-push"
   git push origin HEAD:main
 fi
+publish_bf done "Mission Control data published" "Pushed dashboard refresh to main"
+trap - EXIT
