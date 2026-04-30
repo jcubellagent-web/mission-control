@@ -1,26 +1,16 @@
 {
   "active": true,
-  "objective": "Task: Mission Control usage/cost redesign + Brain Feed layout fix",
+  "objective": "Mission Control: implement usage/cost redesign and Brain Feed layout fix",
   "status": "active",
-  "updatedAt": "2026-04-30T00:07:02Z",
+  "updatedAt": "2026-04-30T00:14:08Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "exec",
+  "currentTool": "code",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:07:02Z",
-  "messageReceived": "2026-04-30T00:07:02Z",
+  "checkedAt": "2026-04-30T00:14:08Z",
+  "messageReceived": "2026-04-30T00:14:08Z",
   "steps": [
-    {
-      "label": "Task: wire fantasy planner pre-lock cron",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: verify fantasy planner cron wiring",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill updates from fantasy cron work",
       "status": "done",
@@ -58,8 +48,18 @@
     },
     {
       "label": "Task: Mission Control usage/cost redesign + Brain Feed layou",
-      "status": "active",
+      "status": "done",
       "tool": "exec"
+    },
+    {
+      "label": "Step: inspect Mission Control usage/cost and Brain Feed layo",
+      "status": "done",
+      "tool": "code"
+    },
+    {
+      "label": "Mission Control: implement usage/cost redesign and Brain Fee",
+      "status": "active",
+      "tool": "code"
     }
   ]
 }
