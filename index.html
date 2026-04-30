@@ -648,6 +648,15 @@
         .ctx-inline-track { width: 72px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
         .ctx-inline-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease, background 0.4s; }
         body.kiosk-mode #ctx-header-inline { display: none !important; }
+        body.kiosk-mode:not(.phone-mode) .artifact-link-btn {
+            width: 26px !important;
+            min-width: 26px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+        }
+        body.kiosk-mode:not(.phone-mode) .artifact-link-btn .artifact-link-label {
+            display: none !important;
+        }
         /* Unified activity log */
         .ua-log { display: flex; flex-direction: column; gap: 8px; }
         .ua-item {
