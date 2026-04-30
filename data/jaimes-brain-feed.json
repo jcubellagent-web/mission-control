@@ -1,64 +1,64 @@
 {
-  "active": false,
-  "objective": "Done: updated Google Workspace skill with remote gog keychain pitfalls",
-  "status": "idle",
-  "updatedAt": "2026-04-30T00:47:26Z",
+  "active": true,
+  "objective": "Step: exchange fresh OAuth redirect on JOSH",
+  "status": "active",
+  "updatedAt": "2026-04-30T00:55:02Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T00:47:03Z",
-  "messageReceived": "2026-04-30T00:47:03Z",
+  "checkedAt": "2026-04-30T00:55:02Z",
+  "messageReceived": "2026-04-30T00:55:02Z",
   "steps": [
-    {
-      "label": "Step: parse Google OAuth redirect screenshot",
-      "status": "done",
-      "tool": "vision"
-    },
-    {
-      "label": "Step: exchange JOSH Google OAuth code",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: exchange OAuth redirect on JOSH",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: diagnose JOSH keychain auth blocker",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: switch JOSH gog to file keyring for headless auth",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: restore JOSH gog keychain backend after file backend t",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: run JOSH auth exchange in GUI Terminal",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: retry OAuth exchange with OCR state case",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Step: open JOSH keychain unlock helper",
-      "status": "done",
-      "tool": "exec"
-    },
     {
       "label": "Task: review skill save/update after Calendar auth flow",
       "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: retry JOSH Google Calendar auth after keychain unlock",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: verify JOSH keychain still locked",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: unlock JOSH keychain and finish Calendar auth",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: exchange Calendar OAuth code after unlock",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: try file keyring OAuth exchange",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: generate fresh Calendar auth URL after keyring repair",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: review whether OAuth/keyring workflow needs skill upda",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Task: exchange fresh JOSH Calendar OAuth redirect",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Step: exchange fresh OAuth redirect on JOSH",
+      "status": "active",
       "tool": "exec"
     }
   ]

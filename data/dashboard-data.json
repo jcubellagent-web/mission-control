@@ -34,7 +34,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Step: fantasy weekly-lock dry-safe verification",
-    "updatedAt": "2026-04-30T00:50:16Z"
+    "updatedAt": "2026-04-30T00:55:17Z"
   },
   "contextWindow": {
     "usedTokens": 42492,
@@ -50,8 +50,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 7 source file(s) changed",
-        "time": "2026-04-30T00:50:16Z"
+        "event": "Patch feed: 8 source file(s) changed",
+        "time": "2026-04-30T00:55:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -69,22 +69,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T00:50:16Z",
+    "updatedAt": "2026-04-30T00:55:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "7 source file(s) changed",
+      "summary": "8 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 7,
+      "dirtyCount": 8,
       "files": [
+        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/mission-control-canaries.json",
         "data/model-usage-tracker.json",
-        "data/modelUsage.json",
-        "data/moltworld-data.json"
+        "data/modelUsage.json"
       ],
-      "head": "1f63cc929",
-      "updatedAt": "2026-04-30T00:50:16Z"
+      "head": "79c10a55d",
+      "updatedAt": "2026-04-30T00:55:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -188,7 +188,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 8,
     "recentFiles": [
       "scripts/josh_bf_push.sh",
       "scripts/josh_work_card.py",
@@ -202,7 +202,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 84% left [==========--]",
-        "Resets in 2h 9m",
+        "Resets in 2h 4m",
         "Weekly: 79% left [=========---]",
         "Pace: 5% in reserve | Expected 26% used | Lasts until reset",
         "Resets in 5d 4h",
@@ -213,11 +213,11 @@
       "weekly": "79% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 9m",
+      "sessionReset": "2h 4m",
       "weeklyReset": "5d 4h",
       "summary": "84% left \u00b7 wk 79% left"
     },
-    "updatedAt": "2026-04-30T00:50:18Z"
+    "updatedAt": "2026-04-30T00:55:19Z"
   },
   "modelUsage": {
     "session": 0.024288,
@@ -377,7 +377,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T00:50:25Z",
+    "lastUpdated": "2026-04-30T00:55:22Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -406,7 +406,7 @@
     },
     "elevenlabs": {
       "chars_used": 0,
-      "chars_limit": 189219,
+      "chars_limit": 378438,
       "available": true
     },
     "aggregate": {
@@ -624,7 +624,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T00:50:30Z",
+    "updatedAt": "2026-04-30T00:55:27Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -641,14 +641,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 29.8,
-      "cpu_user": 14.19,
-      "cpu_sys": 15.61,
-      "load1": 1.85,
-      "load5": 1.74,
-      "load15": 1.78,
+      "cpu_pct": 45.1,
+      "cpu_user": 28.47,
+      "cpu_sys": 16.66,
+      "load1": 1.54,
+      "load5": 1.55,
+      "load15": 1.66,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "ram_total_gb": 15.3,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "110Gi",
@@ -656,12 +656,12 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.6,
-      "cpu_user": 14.17,
-      "cpu_sys": 10.44,
-      "load1": 3.03,
-      "load5": 2.5,
-      "load15": 2.34,
+      "cpu_pct": 27.1,
+      "cpu_user": 14.72,
+      "cpu_sys": 13.17,
+      "load1": 2.84,
+      "load5": 2.34,
+      "load15": 2.29,
       "ram_used_gb": 15.0,
       "ram_total_gb": 15.8,
       "uptime": "",
@@ -687,19 +687,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T00:50:16Z"
+      "lastChecked": "2026-04-30T00:55:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T00:50:16Z"
+      "lastChecked": "2026-04-30T00:55:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T00:50:16Z"
+      "lastChecked": "2026-04-30T00:55:17Z"
     }
   ],
   "crons": [
@@ -716,7 +716,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T00:50:30.994272+00:00"
+      "lastRun": "2026-04-30T00:55:27.395315+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1263,7 +1263,7 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-04-30T00:50:16.008520Z",
+    "checkedAt": "2026-04-30T00:55:17.194658Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1649,138 +1649,140 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
-      "reportedActive": false,
+      "active": true,
+      "reportedActive": true,
       "lowSignal": false,
-      "objective": "Done: updated Google Workspace skill with remote gog keychain pitfalls",
-      "status": "idle",
+      "objective": "Step: exchange fresh OAuth redirect on JOSH",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T00:47:26Z",
-      "messageReceived": "2026-04-30T00:47:03Z",
+      "updatedAt": "2026-04-30T00:55:02Z",
+      "messageReceived": "2026-04-30T00:55:02Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Step: parse Google OAuth redirect screenshot",
-          "status": "done",
-          "tool": "vision"
-        },
-        {
-          "label": "Step: exchange JOSH Google OAuth code",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: exchange OAuth redirect on JOSH",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: diagnose JOSH keychain auth blocker",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: switch JOSH gog to file keyring for headless auth",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: restore JOSH gog keychain backend after file backend t",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: run JOSH auth exchange in GUI Terminal",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: retry OAuth exchange with OCR state case",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Step: open JOSH keychain unlock helper",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
           "label": "Task: review skill save/update after Calendar auth flow",
           "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: retry JOSH Google Calendar auth after keychain unlock",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: verify JOSH keychain still locked",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: unlock JOSH keychain and finish Calendar auth",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: exchange Calendar OAuth code after unlock",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: try file keyring OAuth exchange",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: generate fresh Calendar auth URL after keyring repair",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: review whether OAuth/keyring workflow needs skill upda",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Task: exchange fresh JOSH Calendar OAuth redirect",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Step: exchange fresh OAuth redirect on JOSH",
+          "status": "active",
           "tool": "exec"
         }
       ]
     }
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JAIMES"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JAIMES",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
         "agent": "JAIMES",
-        "active": false,
-        "reportedActive": false,
+        "active": true,
+        "reportedActive": true,
         "lowSignal": false,
-        "objective": "Done: updated Google Workspace skill with remote gog keychain pitfalls",
-        "status": "idle",
+        "objective": "Step: exchange fresh OAuth redirect on JOSH",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-30T00:47:26Z",
-        "messageReceived": "2026-04-30T00:47:03Z",
+        "updatedAt": "2026-04-30T00:55:02Z",
+        "messageReceived": "2026-04-30T00:55:02Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Step: parse Google OAuth redirect screenshot",
-            "status": "done",
-            "tool": "vision"
-          },
-          {
-            "label": "Step: exchange JOSH Google OAuth code",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: exchange OAuth redirect on JOSH",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: diagnose JOSH keychain auth blocker",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: switch JOSH gog to file keyring for headless auth",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: restore JOSH gog keychain backend after file backend t",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: run JOSH auth exchange in GUI Terminal",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: retry OAuth exchange with OCR state case",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: open JOSH keychain unlock helper",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
             "label": "Task: review skill save/update after Calendar auth flow",
             "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: retry JOSH Google Calendar auth after keychain unlock",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: verify JOSH keychain still locked",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: unlock JOSH keychain and finish Calendar auth",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: exchange Calendar OAuth code after unlock",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: try file keyring OAuth exchange",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: generate fresh Calendar auth URL after keyring repair",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review whether OAuth/keyring workflow needs skill upda",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: exchange fresh JOSH Calendar OAuth redirect",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Step: exchange fresh OAuth redirect on JOSH",
+            "status": "active",
             "tool": "exec"
           }
         ]
@@ -1829,29 +1831,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T00:50:25Z",
+      "time": "2026-04-30T00:55:22Z",
       "event": "Session spend: $0.02"
     },
     {
-      "time": "2026-04-30T00:50:18Z",
+      "time": "2026-04-30T00:55:19Z",
       "event": "Coding: scripts/josh_bf_push.sh, scripts/josh_work_card.py"
     },
     {
-      "time": "2026-04-30T00:50:18Z",
+      "time": "2026-04-30T00:55:19Z",
       "event": "CodexBar: 84% left \u00b7 wk 79% left"
     },
     {
-      "time": "2026-04-30T00:50:16Z",
+      "time": "2026-04-30T00:55:17Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-04-30T00:50:16Z",
-      "event": "JOSHeX: Patch feed: 7 source file(s) changed"
+      "time": "2026-04-30T00:55:17Z",
+      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
     },
     {
-      "time": "2026-04-30T00:50:16Z",
+      "time": "2026-04-30T00:55:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T00:50:16Z"
+  "lastUpdated": "2026-04-30T00:55:17Z"
 }
