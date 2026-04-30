@@ -1,36 +1,16 @@
 {
-  "active": true,
-  "objective": "Mission Control: syncing JOSH 2.0 screen with agent board",
-  "status": "active",
-  "updatedAt": "2026-04-30T04:19:47Z",
+  "active": false,
+  "objective": "Done: JOSHeX copy-paste handoff packet prepared",
+  "status": "idle",
+  "updatedAt": "2026-04-30T04:24:15Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:19:47Z",
-  "messageReceived": "2026-04-30T04:19:47Z",
+  "checkedAt": "2026-04-30T04:23:18Z",
+  "messageReceived": "2026-04-30T04:23:18Z",
   "steps": [
-    {
-      "label": "Mission Control: auditing current UI and data",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Mission Control: launching local preview",
-      "status": "done",
-      "tool": "browser"
-    },
-    {
-      "label": "Mission Control: validating revamp patch",
-      "status": "done",
-      "tool": "code"
-    },
-    {
-      "label": "Mission Control: final validation before deploy",
-      "status": "done",
-      "tool": "code"
-    },
     {
       "label": "Mission Control: verifying live Pages deploy",
       "status": "done",
@@ -58,7 +38,27 @@
     },
     {
       "label": "Mission Control: syncing JOSH 2.0 screen with agent board",
-      "status": "active",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: closing stale preview server 8767",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mission Control: launching JOSHeX handoff",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: surveying prior Mission Control workflow",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "JOSHeX: Codex model unsupported, relaunching with supported ",
+      "status": "done",
       "tool": "exec"
     }
   ]
