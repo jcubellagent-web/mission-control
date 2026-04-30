@@ -7663,10 +7663,14 @@
                         </div>
 
                         <div id="ops-center-panel" class="ops-center-panel capability-stack" aria-label="Capability Stack">
+                            <div class="capability-tile calendar-live-tile" id="calendar-live-card" onclick="window.openCalendarModal && window.openCalendarModal()">
+                                <div class="capability-k">Calendar</div>
+                                <div class="capability-v" id="ops-calendar-val">checking</div>
+                                <div class="capability-d" id="ops-calendar-detail">jcubell16 read-only lane</div>
+                            </div>
                             <div class="capability-tile"><div class="capability-k">Canaries</div><div class="capability-v">loading</div><div class="capability-d">dashboard guardrails</div></div>
                             <div class="capability-tile"><div class="capability-k">Sorare ML</div><div class="capability-v">loading</div><div class="capability-d">JAIMES model cockpit</div></div>
                             <div class="capability-tile"><div class="capability-k">Voice</div><div class="capability-v">loading</div><div class="capability-d">Telegram intake</div></div>
-                            <div class="capability-tile"><div class="capability-k">Ops Inbox</div><div class="capability-v">loading</div><div class="capability-d">personal command queue</div></div>
                         </div>
                     </div>
 
@@ -7773,7 +7777,7 @@
         // ============================================
         // CONFIGURATION - Edit these values
         // ============================================
-        const BUILD_ID = '1777431982';
+        const BUILD_ID = '1777514684';
         const CONFIG = {
             PIN: '3699',  // Change this!
             DATA_URL: './data/dashboard-data.json',  // Path to your JSON file
@@ -9464,9 +9468,19 @@
                 el.textContent = text;
                 el.className = 'ops-center-v ' + (cls || '');
             };
+            const calendarOk = cal.status === 'ok';
+            const calendarMessage = compactUiLabel(cal.message || (calendarOk ? 'jcubell16 read-only connected' : 'Calendar attention'), 58);
             set('ops-alerts-val', alerts.length ? `${alerts.length} action item${alerts.length === 1 ? '' : 's'}` : 'clear', alerts.length ? 'warn' : 'ok');
             set('ops-jobs-val', `${active} active / ${paused} paused${due ? ' · ' + due + ' due' : ''}`, due ? 'warn' : 'ok');
-            set('ops-calendar-val', cal.status === 'ok' ? 'connected' : (cal.status || 'issue'), cal.status === 'ok' ? 'ok' : 'err');
+            set('ops-calendar-val', calendarOk ? 'connected' : (cal.status || 'issue'), calendarOk ? 'ok' : 'err');
+            const calendarDetail = document.getElementById('ops-calendar-detail');
+            if (calendarDetail) calendarDetail.textContent = calendarOk ? `${calendarMessage} · ${data?.upcomingEvents?.length || 0} upcoming` : calendarMessage;
+            const calendarCard = document.getElementById('calendar-live-card');
+            if (calendarCard) {
+                calendarCard.classList.toggle('ok', calendarOk);
+                calendarCard.classList.toggle('attention', !calendarOk);
+                calendarCard.title = calendarMessage;
+            }
             set('ops-molt-val', molt.stale ? 'stale' : (molt.status || 'unknown'), molt.stale ? 'warn' : (molt.status === 'online' ? 'ok' : 'warn'));
 
             const stack = document.getElementById('ops-center-panel');
@@ -9479,13 +9493,20 @@
                     if (['attention', 'warn', 'planned'].includes(s)) return 'attention';
                     return '';
                 };
-                stack.innerHTML = capabilities.length ? capabilities.map(item => `
+                const calendarTile = `
+                    <div class="capability-tile calendar-live-tile ${calendarOk ? 'ok' : 'attention'}" id="calendar-live-card" onclick="window.openCalendarModal && window.openCalendarModal()" title="${escapeHtml(calendarMessage)}">
+                        <div class="capability-k">Calendar</div>
+                        <div class="capability-v ops-center-v ${calendarOk ? 'ok' : 'err'}" id="ops-calendar-val">${escapeHtml(calendarOk ? 'connected' : (cal.status || 'issue'))}</div>
+                        <div class="capability-d" id="ops-calendar-detail">${escapeHtml(calendarOk ? `${calendarMessage} · ${data?.upcomingEvents?.length || 0} upcoming` : calendarMessage)}</div>
+                    </div>`;
+                const capabilityHtml = capabilities.length ? capabilities.slice(0, 3).map(item => `
                     <div class="capability-tile ${tone(item.status)}" title="${escapeHtml(normalizeJoshexCopy(item.summary || item.detail || ''))}">
                         <div class="capability-k">${escapeHtml(normalizeJoshexCopy(item.name || 'Capability'))}</div>
                         <div class="capability-v">${escapeHtml(item.status || 'unknown')}</div>
                         <div class="capability-d">${escapeHtml(normalizeJoshexCopy(item.detail || item.summary || ''))}</div>
                     </div>
                 `).join('') : '<div class="capability-tile"><div class="capability-k">Capabilities</div><div class="capability-v">pending</div><div class="capability-d">waiting for data</div></div>';
+                stack.innerHTML = calendarTile + capabilityHtml;
             }
         }
 
