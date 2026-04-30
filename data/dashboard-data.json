@@ -1,13 +1,13 @@
 {
-  "actionRequired": [
+  "actionRequired": [],
+  "activeNow": [],
+  "upcomingEvents": [
     {
-      "priority": "high",
-      "title": "Calendar issue: Calendar fetch failed via local gog",
-      "url": "#calendar"
+      "time": "2026-04-29T16:30:00-04:00",
+      "title": "Chiropractor Appointment",
+      "source": "jcubell16@gmail.com"
     }
   ],
-  "activeNow": [],
-  "upcomingEvents": [],
   "brainFeed": {
     "active": true,
     "messageReceived": "2026-04-30T01:41:09Z",
@@ -29,7 +29,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Repairing memory plugin runtime dependency path",
-    "updatedAt": "2026-04-30T01:50:16Z"
+    "updatedAt": "2026-04-30T01:55:17Z"
   },
   "contextWindow": {
     "usedTokens": 78463,
@@ -45,8 +45,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 11 source file(s) changed",
-        "time": "2026-04-30T01:50:16Z"
+        "event": "Patch feed: 10 source file(s) changed",
+        "time": "2026-04-30T01:55:17Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +64,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T01:50:16Z",
+    "updatedAt": "2026-04-30T01:55:17Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "11 source file(s) changed",
+      "summary": "10 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 11,
+      "dirtyCount": 10,
       "files": [
-        "data/agent-comms.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
         "data/jain-newsfeed.json",
         "data/mission-control-canaries.json",
-        "data/model-usage-tracker.json"
+        "data/model-usage-tracker.json",
+        "data/modelUsage.json"
       ],
-      "head": "bb16a67ea",
-      "updatedAt": "2026-04-30T01:50:16Z"
+      "head": "b2c55d990",
+      "updatedAt": "2026-04-30T01:55:17Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,7 +183,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 11,
+    "missionControlDirty": 10,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "scripts/capability_canary.sh",
@@ -198,7 +198,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 78% left [=========---]",
-        "Resets in 1h 9m",
+        "Resets in 1h 4m",
         "Weekly: 78% left [=========---]",
         "Pace: 4% in reserve | Expected 26% used | Lasts until reset",
         "Resets in 5d 3h",
@@ -209,11 +209,11 @@
       "weekly": "78% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 9m",
+      "sessionReset": "1h 4m",
       "weeklyReset": "5d 3h",
       "summary": "78% left \u00b7 wk 78% left"
     },
-    "updatedAt": "2026-04-30T01:50:18Z"
+    "updatedAt": "2026-04-30T01:55:19Z"
   },
   "modelUsage": {
     "session": 0.040559,
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T01:50:21Z",
+    "lastUpdated": "2026-04-30T01:55:23Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T01:50:26Z",
+    "updatedAt": "2026-04-30T01:55:28Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -637,14 +637,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.0,
-      "cpu_user": 19.51,
-      "cpu_sys": 18.51,
-      "load1": 2.77,
-      "load5": 1.73,
-      "load15": 1.83,
+      "cpu_pct": 40.2,
+      "cpu_user": 21.64,
+      "cpu_sys": 18.55,
+      "load1": 2.34,
+      "load5": 2.09,
+      "load15": 1.96,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.7,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 41.1,
-      "cpu_user": 24.19,
-      "cpu_sys": 16.93,
-      "load1": 2.72,
-      "load5": 2.72,
-      "load15": 2.59,
+      "cpu_pct": 37.8,
+      "cpu_user": 25.19,
+      "cpu_sys": 12.59,
+      "load1": 8.55,
+      "load5": 4.7,
+      "load15": 3.4,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.2,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -668,8 +668,8 @@
     }
   },
   "calendarHealth": {
-    "status": "error",
-    "message": "Calendar fetch failed via local gog"
+    "status": "ok",
+    "message": "Connected via local gog"
   },
   "devices": [
     {
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:50:16Z"
+      "lastChecked": "2026-04-30T01:55:17Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:50:16Z"
+      "lastChecked": "2026-04-30T01:55:17Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T01:50:16Z"
+      "lastChecked": "2026-04-30T01:55:17Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T01:50:26.947537+00:00"
+      "lastRun": "2026-04-30T01:55:17.567970+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1259,18 +1259,18 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T01:50:16.813407Z",
+    "checkedAt": "2026-04-30T01:55:17.566968Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
+        "detail": "primary=JOSH 2.0; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
         "name": "Calendar tile",
         "ok": true,
-        "detail": "Calendar fetch failed via local gog",
+        "detail": "Connected via local gog",
         "severity": "ok"
       },
       {
@@ -1282,7 +1282,7 @@
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "1 visible alert(s)",
+        "detail": "clear",
         "severity": "ok"
       },
       {
@@ -1522,9 +1522,9 @@
     ]
   },
   "opsInbox": {
-    "status": "attention",
+    "status": "clear",
     "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-    "calendar": "needs attention",
+    "calendar": "connected",
     "jobIssues": 0,
     "sources": [
       "calendar",
@@ -1558,9 +1558,9 @@
     {
       "id": "ops-inbox",
       "name": "Ops Inbox",
-      "status": "attention",
+      "status": "clear",
       "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-      "detail": "Calendar needs attention \u00b7 0 job issue(s)"
+      "detail": "Calendar connected \u00b7 0 job issue(s)"
     },
     {
       "id": "capability-canary",
@@ -1657,65 +1657,65 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
+      "active": false,
+      "reportedActive": false,
       "lowSignal": false,
-      "objective": "Calendar OAuth: verbose state mismatch diagnostic",
-      "status": "active",
+      "objective": "Done: Calendar auth verified on JOSH and MC lane",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-04-30T01:49:50Z",
-      "messageReceived": "2026-04-30T01:49:50Z",
+      "updatedAt": "2026-04-30T01:54:57Z",
+      "messageReceived": "2026-04-30T01:54:36Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Step: reset OAuth state and generate replacement link",
-          "status": "done",
-          "tool": "web"
-        },
-        {
-          "label": "Task: review skill save/update need",
+          "label": "Calendar OAuth: retrying with explicit default client",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: update Google Workspace OAuth skill",
+          "label": "Calendar OAuth: retrying with matching force-consent",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: exchanging fresh callback",
+          "label": "Calendar OAuth: verifying token storage",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: callback exchange attempted",
+          "label": "Calendar OAuth: backing up corrupted file keyring",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: inspecting remote pending state",
+          "label": "Calendar OAuth: generating fresh post-keyring-reset link",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: checking gog manual exchange options",
+          "label": "Task: review OAuth repair skill capture",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: inspecting pending state schema",
+          "label": "Calendar OAuth: exchanging fresh post-reset callback",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: retrying exchange without shell URL parsing",
+          "label": "Calendar OAuth: verifying JOSH token",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Calendar OAuth: verbose state mismatch diagnostic",
-          "status": "active",
+          "label": "Calendar OAuth: verifying read-only calendar access",
+          "status": "done",
+          "tool": "exec"
+        },
+        {
+          "label": "Calendar OAuth: verifying Mission Control calendar lane",
+          "status": "done",
           "tool": "exec"
         }
       ]
@@ -1723,82 +1723,16 @@
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JAIMES",
+    "activeCount": 1,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": true,
     "dualAgents": [
       "JOSH 2.0",
       "JAIMES"
     ],
     "agents": [
-      {
-        "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
-        "lowSignal": false,
-        "objective": "Calendar OAuth: verbose state mismatch diagnostic",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-04-30T01:49:50Z",
-        "messageReceived": "2026-04-30T01:49:50Z",
-        "currentTool": "exec",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "Step: reset OAuth state and generate replacement link",
-            "status": "done",
-            "tool": "web"
-          },
-          {
-            "label": "Task: review skill save/update need",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Step: update Google Workspace OAuth skill",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: exchanging fresh callback",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: callback exchange attempted",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: inspecting remote pending state",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: checking gog manual exchange options",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: inspecting pending state schema",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: retrying exchange without shell URL parsing",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Calendar OAuth: verbose state mismatch diagnostic",
-            "status": "active",
-            "tool": "exec"
-          }
-        ]
-      },
       {
         "agent": "JOSH 2.0",
         "active": true,
@@ -1815,6 +1749,71 @@
           {
             "label": "Repairing memory plugin runtime dependency path",
             "status": "active",
+            "tool": "exec"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "lowSignal": false,
+        "objective": "Done: Calendar auth verified on JOSH and MC lane",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-04-30T01:54:57Z",
+        "messageReceived": "2026-04-30T01:54:36Z",
+        "currentTool": "exec",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "Calendar OAuth: retrying with explicit default client",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: retrying with matching force-consent",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: verifying token storage",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: backing up corrupted file keyring",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: generating fresh post-keyring-reset link",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Task: review OAuth repair skill capture",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: exchanging fresh post-reset callback",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: verifying JOSH token",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: verifying read-only calendar access",
+            "status": "done",
+            "tool": "exec"
+          },
+          {
+            "label": "Calendar OAuth: verifying Mission Control calendar lane",
+            "status": "done",
             "tool": "exec"
           }
         ]
@@ -1843,29 +1842,29 @@
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T01:50:21Z",
+      "time": "2026-04-30T01:55:23Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T01:50:18Z",
+      "time": "2026-04-30T01:55:19Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-30T01:50:18Z",
+      "time": "2026-04-30T01:55:19Z",
       "event": "CodexBar: 78% left \u00b7 wk 78% left"
     },
     {
-      "time": "2026-04-30T01:50:16Z",
+      "time": "2026-04-30T01:55:17Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T01:50:16Z",
-      "event": "JOSHeX: Patch feed: 11 source file(s) changed"
+      "time": "2026-04-30T01:55:17Z",
+      "event": "JOSHeX: Patch feed: 10 source file(s) changed"
     },
     {
-      "time": "2026-04-30T01:50:16Z",
+      "time": "2026-04-30T01:55:17Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T01:50:16Z"
+  "lastUpdated": "2026-04-30T01:55:17Z"
 }

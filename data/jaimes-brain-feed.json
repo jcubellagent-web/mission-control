@@ -1,64 +1,64 @@
 {
-  "active": true,
-  "objective": "Calendar OAuth: verbose state mismatch diagnostic",
-  "status": "active",
-  "updatedAt": "2026-04-30T01:49:50Z",
+  "active": false,
+  "objective": "Done: Calendar auth verified on JOSH and MC lane",
+  "status": "idle",
+  "updatedAt": "2026-04-30T01:54:57Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T01:49:50Z",
-  "messageReceived": "2026-04-30T01:49:50Z",
+  "checkedAt": "2026-04-30T01:54:36Z",
+  "messageReceived": "2026-04-30T01:54:36Z",
   "steps": [
     {
-      "label": "Step: reset OAuth state and generate replacement link",
-      "status": "done",
-      "tool": "web"
-    },
-    {
-      "label": "Task: review skill save/update need",
+      "label": "Calendar OAuth: retrying with explicit default client",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Step: update Google Workspace OAuth skill",
+      "label": "Calendar OAuth: retrying with matching force-consent",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: exchanging fresh callback",
+      "label": "Calendar OAuth: verifying token storage",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: callback exchange attempted",
+      "label": "Calendar OAuth: backing up corrupted file keyring",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: inspecting remote pending state",
+      "label": "Calendar OAuth: generating fresh post-keyring-reset link",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: checking gog manual exchange options",
+      "label": "Task: review OAuth repair skill capture",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: inspecting pending state schema",
+      "label": "Calendar OAuth: exchanging fresh post-reset callback",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: retrying exchange without shell URL parsing",
+      "label": "Calendar OAuth: verifying JOSH token",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Calendar OAuth: verbose state mismatch diagnostic",
-      "status": "active",
+      "label": "Calendar OAuth: verifying read-only calendar access",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Calendar OAuth: verifying Mission Control calendar lane",
+      "status": "done",
       "tool": "exec"
     }
   ]
