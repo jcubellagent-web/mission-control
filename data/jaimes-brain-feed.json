@@ -1,21 +1,16 @@
 {
   "active": false,
-  "objective": "Done: JOSHeX copy-paste handoff packet prepared",
+  "objective": "Done: memory updated for JOSHeX handoff preference",
   "status": "idle",
-  "updatedAt": "2026-04-30T04:24:15Z",
+  "updatedAt": "2026-04-30T04:29:26Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T04:23:18Z",
-  "messageReceived": "2026-04-30T04:23:18Z",
+  "checkedAt": "2026-04-30T04:29:04Z",
+  "messageReceived": "2026-04-30T04:29:04Z",
   "steps": [
-    {
-      "label": "Mission Control: verifying live Pages deploy",
-      "status": "done",
-      "tool": "web"
-    },
     {
       "label": "Mission Control: syncing JOSH 2.0 display",
       "status": "done",
@@ -58,6 +53,11 @@
     },
     {
       "label": "JOSHeX: Codex model unsupported, relaunching with supported ",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Memory review: checking durable preference from Mission Cont",
       "status": "done",
       "tool": "exec"
     }
