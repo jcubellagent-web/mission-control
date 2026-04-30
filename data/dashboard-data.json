@@ -9,27 +9,27 @@
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": false,
-    "messageReceived": "2026-04-30T01:38:49Z",
-    "objective": "JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
-    "status": "idle",
+    "active": true,
+    "messageReceived": "2026-04-30T01:41:09Z",
+    "objective": "Repairing memory plugin runtime dependency path",
+    "status": "active",
     "steps": [
       {
-        "label": "Done - Watchdog run clean; no restart needed",
-        "status": "done",
+        "label": "Repairing memory plugin runtime dependency path",
+        "status": "active",
         "tool": "exec"
       }
     ],
     "currentTool": "exec",
-    "updatedAt": "2026-04-30T01:39:02Z",
-    "checkedAt": "2026-04-30T01:38:49Z",
+    "updatedAt": "2026-04-30T01:43:31Z",
+    "checkedAt": "2026-04-30T01:43:31Z",
     "idleUpdatedAt": "2026-03-28T03:55:01Z",
     "model": "GPT-5.5"
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last objective: JOSH 2.0 idle \u00b7 JAIMES: Step: verify local Calendar auth lane",
-    "updatedAt": "2026-04-30T01:40:17Z"
+    "status": "Brain Feed live",
+    "context": "Repairing memory plugin runtime dependency path",
+    "updatedAt": "2026-04-30T01:45:16Z"
   },
   "contextWindow": {
     "usedTokens": 78463,
@@ -45,8 +45,8 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "event": "Patch feed: 8 source file(s) changed",
-        "time": "2026-04-30T01:40:17Z"
+        "event": "Patch feed: 14 source file(s) changed",
+        "time": "2026-04-30T01:45:16Z"
       },
       {
         "event": "Patch status feed added"
@@ -64,22 +64,22 @@
       "verify",
       "patch"
     ],
-    "updatedAt": "2026-04-30T01:40:17Z",
+    "updatedAt": "2026-04-30T01:45:16Z",
     "patchStatus": {
       "status": "pending",
-      "summary": "8 source file(s) changed",
+      "summary": "14 source file(s) changed",
       "detail": "Ready for validation",
-      "dirtyCount": 8,
+      "dirtyCount": 14,
       "files": [
+        "data/agent-comms.json",
+        "data/capability-canary.json",
         "data/dashboard-data.json",
         "data/eight-sleep-data.json",
-        "data/mission-control-canaries.json",
-        "data/modelUsage.json",
-        "data/moltworld-data.json",
-        "data/newsfeed.json"
+        "data/jain-brain-feed.json",
+        "data/jain-breaking-highlights.json"
       ],
-      "head": "a7b00e72b",
-      "updatedAt": "2026-04-30T01:40:17Z"
+      "head": "1ab5e0fc8",
+      "updatedAt": "2026-04-30T01:45:16Z"
     },
     "agentSlot": false,
     "promoteToBrainFeed": false
@@ -183,7 +183,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 53,
-    "missionControlDirty": 7,
+    "missionControlDirty": 14,
     "recentFiles": [
       "mission-control/scripts/update_mission_control.py",
       "scripts/capability_canary.sh",
@@ -198,7 +198,7 @@
       "raw": [
         "== Codex 0.125.0 (codex-cli) ==",
         "Session: 79% left [=========---]",
-        "Resets in 1h 19m",
+        "Resets in 1h 14m",
         "Weekly: 78% left [=========---]",
         "Pace: 4% in reserve | Expected 26% used | Lasts until reset",
         "Resets in 5d 3h",
@@ -209,11 +209,11 @@
       "weekly": "78% left",
       "credits": "0 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "1h 19m",
+      "sessionReset": "1h 14m",
       "weeklyReset": "5d 3h",
       "summary": "79% left \u00b7 wk 78% left"
     },
-    "updatedAt": "2026-04-30T01:40:19Z"
+    "updatedAt": "2026-04-30T01:45:18Z"
   },
   "modelUsage": {
     "session": 0.040559,
@@ -341,8 +341,8 @@
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
-        "totalTokens": 290070479,
-        "dailyTokens": 153336383,
+        "totalTokens": 291175716,
+        "dailyTokens": 154441620,
         "costEstimated": false,
         "subscriptionIncluded": true
       },
@@ -373,7 +373,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T01:40:22Z",
+    "lastUpdated": "2026-04-30T01:45:21Z",
     "jain": {
       "daily": 0.0,
       "session": 1.942774,
@@ -425,8 +425,8 @@
       "codexEquivalentWeekly": 45.530504,
       "codexEquivalentDaily": 0.472978,
       "codexEquivalentMonthlyProjection": 195.13,
-      "codexTokensWeekly": 398858551,
-      "codexTokensDaily": 153336383,
+      "codexTokensWeekly": 399963788,
+      "codexTokensDaily": 154441620,
       "localModelCount": 2,
       "meteredModelCount": 2,
       "codexModelCount": 6,
@@ -450,7 +450,7 @@
         "meteredMonthly": 0.52,
         "meteredWeekly": 0.122313,
         "codexValueMonthly": 195.13,
-        "codexTokensWeekly": 398858551,
+        "codexTokensWeekly": 399963788,
         "activeMeteredLaneCount": 1,
         "leadMeteredLane": "OpenAI API",
         "laneStack": [
@@ -526,7 +526,7 @@
           "monthlyProjection": 200.0,
           "weeklyEquivalent": 45.530504,
           "dailyEquivalent": 0.472978,
-          "tokensWeekly": 398858551,
+          "tokensWeekly": 399963788,
           "models": [
             "gpt-5.4",
             "gpt-5.4-mini",
@@ -620,7 +620,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T01:40:27Z",
+    "updatedAt": "2026-04-30T01:45:26Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -638,13 +638,13 @@
   "machineHealth": {
     "josh": {
       "cpu_pct": 28.0,
-      "cpu_user": 12.31,
-      "cpu_sys": 15.71,
-      "load1": 1.25,
-      "load5": 1.98,
-      "load15": 2.14,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.8,
+      "cpu_user": 12.78,
+      "cpu_sys": 15.25,
+      "load1": 1.39,
+      "load5": 1.63,
+      "load15": 1.92,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "109Gi",
@@ -652,14 +652,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.2,
-      "cpu_user": 13.7,
-      "cpu_sys": 10.48,
-      "load1": 2.75,
-      "load5": 2.6,
-      "load15": 2.5,
+      "cpu_pct": 36.8,
+      "cpu_user": 26.5,
+      "cpu_sys": 10.92,
+      "load1": 2.71,
+      "load5": 2.55,
+      "load15": 2.49,
       "ram_used_gb": 15.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.4,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "45Gi",
@@ -683,19 +683,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:40:17Z"
+      "lastChecked": "2026-04-30T01:45:16Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T01:40:17Z"
+      "lastChecked": "2026-04-30T01:45:16Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T01:40:17Z"
+      "lastChecked": "2026-04-30T01:45:16Z"
     }
   ],
   "crons": [
@@ -712,7 +712,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T01:40:27.305826+00:00"
+      "lastRun": "2026-04-30T01:45:26.627292+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -1076,7 +1076,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-04-30T01:30:04.879164+00:00"
+      "lastRun": "2026-04-30T01:45:05.186136+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -1259,12 +1259,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T01:40:17.132311Z",
+    "checkedAt": "2026-04-30T01:45:16.492983Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=none; live=3",
+        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=3",
         "severity": "ok"
       },
       {
@@ -1302,11 +1302,11 @@
   "capabilityCanary": {
     "status": "warn",
     "ok": false,
-    "summary": "5 warning(s), 0 error(s)",
-    "checkedAt": "2026-04-30T00:58:18Z",
+    "summary": "6 warning(s), 0 error(s)",
+    "checkedAt": "2026-04-30T01:41:58Z",
     "counts": {
-      "ok": 21,
-      "warn": 5,
+      "ok": 20,
+      "warn": 6,
       "error": 0
     },
     "checks": [
@@ -1405,18 +1405,18 @@
         "name": "openclaw:status",
         "status": "ok",
         "ok": true,
-        "detail": "gateway=True latency=64ms audit=0/0",
+        "detail": "gateway=True latency=50ms audit=0/0",
         "meta": {
-          "runtimeVersion": "2026.4.26",
+          "runtimeVersion": "2026.4.27",
           "model": "gpt-5.5",
-          "percentUsed": 16
+          "percentUsed": 29
         }
       },
       {
         "name": "memory:main",
-        "status": "ok",
-        "ok": true,
-        "detail": "files=107 chunks=1230 dirty=False",
+        "status": "warn",
+        "ok": false,
+        "detail": "[openclaw] Failed to start CLI: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'chokidar' imported from /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/manager-jzSMQjEt.js\nDid you mean to import \"chokidar/index.js\"?\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:764:81)\n    at moduleResolve (node:internal/modules/esm/resolve:855:18)\n    at defaultResolve (node:internal/modules/esm/resolve:988:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:697:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:714:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:746:52)\n    at #resolve (node:internal/modules/esm/loader:679:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:599:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)\n    at ModuleJob.link (node:internal/modules/esm/module_job:245:17)\n    at new ModuleJob (node:internal/modules/esm/module_job:224:26)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:568:11)\n    at afterResolve (node:internal/modules/esm/loader:603:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:609:12)\n    at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:628:32)\n    at TracingChannel.tracePromise (node:diagnostics_channel:362:14)\n    at ModuleLoader.import (node:internal/modules/esm/loader:624:21)\n    at defaultImportModuleDynamicallyForModule (node:internal/modules/esm/utils:214:31)\n    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:278:12)\n    at Object.nativeImport (file:///opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/lib/jiti.mjs:8:37)\n    at jitiRequire (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:149978)\n    at import (/opt/homebrew/lib/node_modules/openclaw/node_modules/jiti/dist/jiti.cjs:1:158307)\n    at /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:9:60\n    at async loadMemoryCliRuntime (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:10:10)\n    at async runMemoryStatus (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:13:10)\n    at async Command.<anonymous> (/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/dist/cli-CJ5LOD0p.js:50:5)",
         "meta": {}
       },
       {
@@ -1430,21 +1430,21 @@
         "name": "google:calendar",
         "status": "warn",
         "ok": false,
-        "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
+        "detail": "No auth for calendar jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services calendar\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gmail.com --key <service-account.json>",
         "meta": {}
       },
       {
         "name": "google:gmail",
         "status": "warn",
         "ok": false,
-        "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
+        "detail": "No auth for gmail jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services gmail\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gmail.com --key <service-account.json>",
         "meta": {}
       },
       {
         "name": "google:drive",
         "status": "warn",
         "ok": false,
-        "detail": "missing --account (or set GOG_ACCOUNT, set default via `gog auth manage`, or store exactly one token)",
+        "detail": "No auth for drive jcubellagent@gmail.com.\n\nOAuth (browser flow):\n  gog auth add jcubellagent@gmail.com --services drive\n\nWorkspace service account (domain-wide delegation):\n  gog auth service-account set jcubellagent@gma",
         "meta": {}
       },
       {
@@ -1566,8 +1566,8 @@
       "id": "capability-canary",
       "name": "Capability Canary",
       "status": "warn",
-      "summary": "5 warning(s), 0 error(s)",
-      "detail": "21 ok \u00b7 5 warn \u00b7 0 err",
+      "summary": "6 warning(s), 0 error(s)",
+      "detail": "20 ok \u00b7 6 warn \u00b7 0 err",
       "source": "capabilityCanary"
     },
     {
@@ -1579,7 +1579,19 @@
       "source": "personalCodex"
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260429-0032",
+      "title": "Deep capability audit",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "notes": "Auditing OpenClaw runtime, models, connectors, skills, devices, cron/heartbeat, security posture, local tools, and safe improvements.",
+      "background": "owner: JOSH 2.0; requested 2026-04-29 21:41; updated 2026-04-29 21:42",
+      "requestedAt": "2026-04-29 21:41",
+      "updatedAt": "2026-04-29 21:42",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -1605,6 +1617,26 @@
   "agentBrainFeeds": {
     "josh": {
       "agent": "JOSH 2.0",
+      "active": true,
+      "reportedActive": true,
+      "lowSignal": false,
+      "objective": "Repairing memory plugin runtime dependency path",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-04-30T01:43:31Z",
+      "messageReceived": "2026-04-30T01:41:09Z",
+      "currentTool": "exec",
+      "model": "GPT-5.5",
+      "steps": [
+        {
+          "label": "Repairing memory plugin runtime dependency path",
+          "status": "active",
+          "tool": "exec"
+        }
+      ]
+    },
+    "jain": {
+      "agent": "J.A.I.N",
       "active": false,
       "reportedActive": false,
       "lowSignal": false,
@@ -1623,168 +1655,172 @@
         }
       ]
     },
-    "jain": {
-      "agent": "J.A.I.N",
-      "active": false,
-      "reportedActive": false,
-      "lowSignal": true,
-      "objective": "Standby",
-      "status": "idle",
-      "stale": false,
-      "updatedAt": "2026-04-30T01:33:31Z",
-      "messageReceived": "2026-04-30T00:55:36Z",
-      "currentTool": "exec",
-      "model": "GPT-5.5",
-      "steps": [
-        {
-          "label": "Done - health latency resiliency audit complete",
-          "status": "done",
-          "tool": "exec"
-        }
-      ]
-    },
     "jaimes": {
       "agent": "JAIMES",
       "active": true,
       "reportedActive": true,
       "lowSignal": false,
-      "objective": "Step: verify local Calendar auth lane",
+      "objective": "Step: generate fresh Calendar OAuth link",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-04-30T01:34:55Z",
-      "messageReceived": "2026-04-30T01:34:55Z",
-      "currentTool": "exec",
+      "updatedAt": "2026-04-30T01:44:35Z",
+      "messageReceived": "2026-04-30T01:44:35Z",
+      "currentTool": "web",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Task: approved Calendar runtime auth hardening",
+          "label": "Step: sync JOSH Mission Control checkout",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Task: review memory and skills for Calendar auth work",
+          "label": "Step: verify Calendar lane after install",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: inspect JOSH runtime auth state",
+          "label": "Task: review skill save/update need",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: verify secret via launchctl without printing",
+          "label": "Task: verify JOSH Calendar prompt completion",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: updating Google Workspace OAuth skill",
+          "label": "Step: reopen JOSH Calendar auth helper",
+          "status": "done",
+          "tool": "web"
+        },
+        {
+          "label": "Task: generate Calendar OAuth link for Josh MacBook",
+          "status": "done",
+          "tool": "web"
+        },
+        {
+          "label": "Task: exchange Calendar OAuth callback",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: inspect gog keyring/account commands",
+          "label": "Step: install secure file-keyring env",
           "status": "done",
           "tool": "exec"
         },
         {
-          "label": "Step: search for existing secret handles only",
+          "label": "Step: exchange Calendar OAuth callback",
           "status": "done",
-          "tool": "exec"
+          "tool": "web"
         },
         {
-          "label": "Step: inspect Mission Control calendar wiring",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Step: patch Calendar env forwarding bug",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Step: verify local Calendar auth lane",
+          "label": "Step: generate fresh Calendar OAuth link",
           "status": "active",
-          "tool": "exec"
+          "tool": "web"
         }
       ]
     }
   },
   "liveObjectives": {
     "activeAgents": [
+      "JAIMES",
+      "JOSH 2.0"
+    ],
+    "activeCount": 2,
+    "primaryAgent": "JAIMES",
+    "dualMode": true,
+    "dualAgents": [
+      "JOSH 2.0",
       "JAIMES"
     ],
-    "activeCount": 1,
-    "primaryAgent": "JAIMES",
-    "dualMode": false,
-    "dualAgents": [],
     "agents": [
       {
         "agent": "JAIMES",
         "active": true,
         "reportedActive": true,
         "lowSignal": false,
-        "objective": "Step: verify local Calendar auth lane",
+        "objective": "Step: generate fresh Calendar OAuth link",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-04-30T01:34:55Z",
-        "messageReceived": "2026-04-30T01:34:55Z",
-        "currentTool": "exec",
+        "updatedAt": "2026-04-30T01:44:35Z",
+        "messageReceived": "2026-04-30T01:44:35Z",
+        "currentTool": "web",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Task: approved Calendar runtime auth hardening",
+            "label": "Step: sync JOSH Mission Control checkout",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Task: review memory and skills for Calendar auth work",
+            "label": "Step: verify Calendar lane after install",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: inspect JOSH runtime auth state",
+            "label": "Task: review skill save/update need",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: verify secret via launchctl without printing",
+            "label": "Task: verify JOSH Calendar prompt completion",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: updating Google Workspace OAuth skill",
+            "label": "Step: reopen JOSH Calendar auth helper",
+            "status": "done",
+            "tool": "web"
+          },
+          {
+            "label": "Task: generate Calendar OAuth link for Josh MacBook",
+            "status": "done",
+            "tool": "web"
+          },
+          {
+            "label": "Task: exchange Calendar OAuth callback",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: inspect gog keyring/account commands",
+            "label": "Step: install secure file-keyring env",
             "status": "done",
             "tool": "exec"
           },
           {
-            "label": "Step: search for existing secret handles only",
+            "label": "Step: exchange Calendar OAuth callback",
             "status": "done",
-            "tool": "exec"
+            "tool": "web"
           },
           {
-            "label": "Step: inspect Mission Control calendar wiring",
-            "status": "done",
-            "tool": "code"
-          },
+            "label": "Step: generate fresh Calendar OAuth link",
+            "status": "active",
+            "tool": "web"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": true,
+        "reportedActive": true,
+        "lowSignal": false,
+        "objective": "Repairing memory plugin runtime dependency path",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-04-30T01:43:31Z",
+        "messageReceived": "2026-04-30T01:41:09Z",
+        "currentTool": "exec",
+        "model": "GPT-5.5",
+        "steps": [
           {
-            "label": "Step: patch Calendar env forwarding bug",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Step: verify local Calendar auth lane",
+            "label": "Repairing memory plugin runtime dependency path",
             "status": "active",
             "tool": "exec"
           }
         ]
       },
       {
-        "agent": "JOSH 2.0",
+        "agent": "J.A.I.N",
         "active": false,
         "reportedActive": false,
         "lowSignal": false,
@@ -1802,54 +1838,34 @@
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": false,
-        "reportedActive": false,
-        "lowSignal": true,
-        "objective": "Standby",
-        "status": "idle",
-        "stale": false,
-        "updatedAt": "2026-04-30T01:33:31Z",
-        "messageReceived": "2026-04-30T00:55:36Z",
-        "currentTool": "exec",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Done - health latency resiliency audit complete",
-            "status": "done",
-            "tool": "exec"
-          }
-        ]
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T01:40:22Z",
+      "time": "2026-04-30T01:45:21Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-04-30T01:40:19Z",
+      "time": "2026-04-30T01:45:18Z",
       "event": "Coding: mission-control/scripts/update_mission_control.py, scripts/capability_canary.sh"
     },
     {
-      "time": "2026-04-30T01:40:19Z",
+      "time": "2026-04-30T01:45:18Z",
       "event": "CodexBar: 79% left \u00b7 wk 78% left"
     },
     {
-      "time": "2026-04-30T01:40:17Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-04-30T01:45:16Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-04-30T01:40:17Z",
-      "event": "JOSHeX: Patch feed: 8 source file(s) changed"
+      "time": "2026-04-30T01:45:16Z",
+      "event": "JOSHeX: Patch feed: 14 source file(s) changed"
     },
     {
-      "time": "2026-04-30T01:40:17Z",
+      "time": "2026-04-30T01:45:16Z",
       "event": "JOSHeX: Patch status feed added"
     }
   ],
-  "lastUpdated": "2026-04-30T01:40:17Z"
+  "lastUpdated": "2026-04-30T01:45:16Z"
 }
