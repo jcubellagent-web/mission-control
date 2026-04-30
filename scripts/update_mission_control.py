@@ -6,6 +6,7 @@ import datetime as dt
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -1643,10 +1644,11 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
 
 def _calendar_events_command() -> tuple[List[str], str]:
+    account = os.environ.get("MC_CALENDAR_ACCOUNT", "jcubell16@gmail.com")
     gog_bin = os.environ.get("GOG_BIN") or shutil.which("gog")
     args = [
         "calendar", "events", "primary",
-        "--account", "jcubellagent@gmail.com",
+        "--account", account,
         "--from", "today",
         "--days", "3",
         "--max", "10",
@@ -1655,7 +1657,11 @@ def _calendar_events_command() -> tuple[List[str], str]:
     if gog_bin:
         return [gog_bin, *args], "local gog"
     # Mission Control often refreshes from JAIMES, while gog lives on JOSH 2.0.
-    remote = "gog " + " ".join(args)
+    remote = "gog " + " ".join(shlex.quote(str(part)) for part in args)
+    # Optional: allow a caller-provided keyring password without storing it here.
+    # This is needed only when JOSH uses gog's file keyring in non-interactive jobs.
+    if os.environ.get("GOG_KEYRING_PASSWORD"):
+        remote = "export GOG_KEYRING_PASSWORD=" + shlex.quote(os.environ["GOG_KEYRING_PASSWORD"]) + "; " + remote
     return [
         "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
         "josh2.0@100.114.50.48", remote,
