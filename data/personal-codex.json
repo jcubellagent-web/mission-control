@@ -1,34 +1,49 @@
 {
-  "status": "ready",
-  "objective": "JOSHeX can inspect, edit, validate, and stage Mission Control patches",
-  "validation": "Pages live; patch feed ready",
-  "patchStatus": {
-    "status": "clean",
-    "summary": "Patch feed ready",
-    "dirtyCount": 0,
-    "files": [],
-    "head": "fallback",
-    "updatedAt": null
+  "status": "completed",
+  "objective": "Phase 4A task queue and capability registry implementation",
+  "updatedAt": "2026-04-30T15:55:43Z",
+  "summary": "Phase 4A is complete: shared task queue, capability registry, permission tiers, task lifecycle helper, dashboard summary, remote shims, and smoke tests are installed across JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.",
+  "mode": "implementation",
+  "repo": {
+    "path": "/Users/joshcubell/Documents/New project/mission-control",
+    "branch": "main",
+    "dirty": true
+  },
+  "validation": {
+    "josh2Reachable": "pass",
+    "jaimesJainReachable": "pass",
+    "sharedLayer": "ready",
+    "adoption": "ready_unwrapped",
+    "knownFollowups": 2
   },
   "actionRequired": [],
   "recentActivity": [
     {
-      "event": "Patch status feed added"
+      "time": "2026-04-30T15:55:43Z",
+      "event": "Completed Phase 4A rollout and verified task lifecycle on JOSHeX, Josh 2.0, JAIMES, and J.A.I.N"
     },
     {
-      "event": "JOSHeX docs renamed"
+      "time": "2026-04-30T15:46:46Z",
+      "event": "Resumed Phase 4A execution and refreshed JOSHeX Brain Feed before final rollout steps"
     },
     {
-      "event": "Calendar fallback hardened"
+      "time": "2026-04-30T15:37:41Z",
+      "event": "Started Phase 4A implementation after Josh approved all next steps"
     }
   ],
-  "capabilities": [
-    "inspect",
-    "edit",
-    "verify",
-    "patch"
-  ],
-  "agentSlot": false,
-  "promoteToBrainFeed": false,
-  "updatedAt": null
+  "metrics": {
+    "openQuestions": 0,
+    "liveSourceMismatch": 0,
+    "joshexSupabaseFresh": 1
+  },
+  "links": [
+    {
+      "label": "Brain Feed",
+      "url": "#brain-feed"
+    },
+    {
+      "label": "Agent Control",
+      "url": "#agent-control"
+    }
+  ]
 }

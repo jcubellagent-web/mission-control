@@ -1,167 +1,74 @@
 {
-  "session": 0.026292,
-  "daily": 0.120323,
-  "weekly": 45.705728,
-  "monthly": 952.083148,
+  "session": 0.0,
+  "daily": 114.897894,
+  "weekly": 144.731106,
+  "monthly": 1051.108525,
   "topModels": [
+    {
+      "name": "gpt-5.5",
+      "window": "session",
+      "cost": 138.919338
+    },
     {
       "name": "gpt-5.4",
       "window": "session",
-      "cost": 37.670418749999996
+      "cost": 4.8065465000000005
     },
     {
       "name": "gpt-5.4-mini",
       "window": "session",
-      "cost": 7.387107749999999
+      "cost": 1.00522125
     },
     {
-      "name": "openai-codex/gpt-5.5",
-      "window": "session",
-      "cost": 0.139325
-    },
-    {
-      "name": "openai/gpt-5.5",
-      "window": "session",
-      "cost": 0.122313
-    },
-    {
-      "name": "codex/gpt-5.4-mini",
+      "name": "codex-auto-review",
       "window": "session",
       "cost": 0.0
     }
   ],
   "breakdown": [
     {
+      "name": "gpt-5.5",
+      "source": "codex",
+      "weeklyCost": 138.919338,
+      "dailyCost": 114.598538,
+      "sessionCost": 138.919338,
+      "totalTokens": 0,
+      "costEstimated": false
+    },
+    {
       "name": "gpt-5.4",
       "source": "codex",
-      "weeklyCost": 37.670418749999996,
+      "weeklyCost": 4.8065465000000005,
       "dailyCost": 0.0,
-      "sessionCost": 37.670418749999996,
-      "totalTokens": 74565154,
-      "dailyTokens": 0,
-      "costEstimated": false,
-      "subscriptionIncluded": false
+      "sessionCost": 4.8065465000000005,
+      "totalTokens": 0,
+      "costEstimated": false
     },
     {
       "name": "gpt-5.4-mini",
       "source": "codex",
-      "weeklyCost": 7.387107749999999,
-      "dailyCost": 0.0,
-      "sessionCost": 7.387107749999999,
-      "totalTokens": 34146557,
-      "dailyTokens": 0,
-      "costEstimated": false,
-      "subscriptionIncluded": false
-    },
-    {
-      "name": "openai-codex/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 3439,
-      "outputTokens": 39,
-      "totalTokens": 3478,
-      "sessionCost": 0.139325,
-      "dailyCost": 0.120323,
-      "weeklyCost": 0.139325,
-      "sessions": 6,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 18839,
-      "outputTokens": 357,
-      "totalTokens": 19196,
-      "sessionCost": 0.122313,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.122313,
-      "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "codex/gpt-5.4-mini",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
+      "weeklyCost": 1.00522125,
+      "dailyCost": 0.29935575000000003,
+      "sessionCost": 1.00522125,
       "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 3,
-      "isGemini": false,
       "costEstimated": false
     },
     {
-      "name": "openai/gpt-4.1",
-      "source": "openclaw",
-      "inputTokens": 167469,
-      "outputTokens": 2296,
-      "totalTokens": 169765,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 2,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "codex/gpt-5.4",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "gpt-5.5",
+      "name": "codex-auto-review",
       "source": "codex",
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
       "sessionCost": 0.0,
-      "totalTokens": 306524777,
-      "dailyTokens": 9135985,
-      "costEstimated": false,
-      "subscriptionIncluded": true
-    },
-    {
-      "name": "local/qwen2.5-coder:7b",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
       "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 4.68,
-      "loaded": false,
-      "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
-    },
-    {
-      "name": "local/nomic-embed-text:latest",
-      "source": "ollama",
-      "weeklyCost": 0.0,
-      "dailyCost": 0.0,
-      "sessionCost": 0.0,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "isLocal": true,
-      "sizeGb": 0.27,
-      "loaded": false,
-      "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
+      "costEstimated": false
     }
   ],
-  "lastUpdated": "2026-04-30T07:20:23Z",
+  "lastUpdated": "2026-04-30T15:56:28Z",
   "jain": {
-    "daily": 0.0,
-    "session": 1.942774,
-    "total": 1.942774,
-    "available": true
+    "daily": 0,
+    "session": 0,
+    "total": 0,
+    "available": false
   },
   "jainApi": {
     "daily": 0,
@@ -185,207 +92,18 @@
   },
   "elevenlabs": {
     "chars_used": 0,
-    "chars_limit": 378438,
-    "available": true
+    "chars_limit": 0,
+    "available": false
   },
   "aggregate": {
-    "daily": 0.120323,
-    "total": 47.261938,
-    "monthly": 952.083148
+    "daily": 114.897894,
+    "total": 144.731106,
+    "monthly": 1051.108525
   },
   "weeklyRunRate": {
-    "total": 47.648502,
-    "automation": 1.942774,
-    "interactive": 43.762954,
-    "projectedMonthly": 204.21
-  },
-  "spendOverview": {
-    "subscriptionMonthly": 200.0,
-    "effectiveMonthlyProjection": 200.52,
-    "meteredMonthlyProjection": 0.52,
-    "meteredWeekly": 0.122313,
-    "meteredDaily": 0.0,
-    "codexEquivalentWeekly": 45.196851,
-    "codexEquivalentDaily": 0.120323,
-    "codexEquivalentMonthlyProjection": 193.7,
-    "codexTokensWeekly": 415239966,
-    "codexTokensDaily": 9135985,
-    "localModelCount": 2,
-    "meteredModelCount": 2,
-    "codexModelCount": 6,
-    "meteredSources": {
-      "openrouterWeekly": 0.0,
-      "openrouterDaily": 0.0,
-      "openrouterMonthly": 0.0,
-      "jainApiWeekly": 0,
-      "jainApiDaily": 0,
-      "jainApiMonthly": 0,
-      "trackedRowsWeekly": 0.122313,
-      "trackedRowsDaily": 0.0
-    },
-    "posture": "calm",
-    "kioskSummary": {
-      "title": "Model spend cockpit",
-      "posture": "calm",
-      "statusLabel": "Calm",
-      "trueOutlayMonthly": 200.52,
-      "fixedMonthly": 200.0,
-      "meteredMonthly": 0.52,
-      "meteredWeekly": 0.122313,
-      "codexValueMonthly": 193.7,
-      "codexTokensWeekly": 415239966,
-      "activeMeteredLaneCount": 1,
-      "leadMeteredLane": "OpenAI API",
-      "laneStack": [
-        {
-          "key": "codex_subscription",
-          "label": "Codex subscription",
-          "billing": "fixed",
-          "status": "covered",
-          "monthlyProjection": 200.0,
-          "weeklyCost": 45.196851,
-          "modelCount": 6,
-          "models": [
-            "gpt-5.4",
-            "gpt-5.4-mini"
-          ]
-        },
-        {
-          "key": "openai_api",
-          "label": "OpenAI API",
-          "billing": "metered",
-          "status": "active",
-          "monthlyProjection": 0.52,
-          "weeklyCost": 0.122313,
-          "modelCount": 2,
-          "models": [
-            "openai/gpt-5.5",
-            "openai/gpt-4.1"
-          ]
-        },
-        {
-          "key": "realtime_research",
-          "label": "Grok / OpenRouter",
-          "billing": "metered",
-          "status": "idle",
-          "monthlyProjection": 0.0,
-          "weeklyCost": 0.0,
-          "modelCount": 0,
-          "models": []
-        },
-        {
-          "key": "gemini_automation",
-          "label": "Gemini / automation",
-          "billing": "metered",
-          "status": "idle",
-          "monthlyProjection": 0.0,
-          "weeklyCost": 0.0,
-          "modelCount": 0,
-          "models": []
-        },
-        {
-          "key": "local_models",
-          "label": "Local models",
-          "billing": "free",
-          "status": "available",
-          "monthlyProjection": 0.0,
-          "weeklyCost": 0.0,
-          "modelCount": 2,
-          "models": [
-            "local/qwen2.5-coder:7b",
-            "local/nomic-embed-text:latest"
-          ]
-        }
-      ],
-      "mixLabel": "6 Codex \u00b7 2 API \u00b7 2 local"
-    },
-    "lanes": [
-      {
-        "key": "codex_subscription",
-        "label": "Codex subscription",
-        "authPath": "OpenAI OAuth / subscription",
-        "billing": "fixed",
-        "status": "covered",
-        "monthlyProjection": 200.0,
-        "weeklyEquivalent": 45.196851,
-        "dailyEquivalent": 0.120323,
-        "tokensWeekly": 415239966,
-        "models": [
-          "gpt-5.4",
-          "gpt-5.4-mini",
-          "openai-codex/gpt-5.5"
-        ],
-        "modelCount": 6,
-        "note": "Fixed subscription outlay; equivalent API value is informational only."
-      },
-      {
-        "key": "openai_api",
-        "label": "OpenAI API",
-        "authPath": "API key / metered",
-        "billing": "metered",
-        "status": "active",
-        "monthlyProjection": 0.52,
-        "weeklyCost": 0.122313,
-        "dailyCost": 0.0,
-        "tokensWeekly": 188961,
-        "models": [
-          "openai/gpt-5.5",
-          "openai/gpt-4.1"
-        ],
-        "modelCount": 2,
-        "note": "Direct OpenAI API spend outside the subscription lane."
-      },
-      {
-        "key": "realtime_research",
-        "label": "Grok / OpenRouter",
-        "authPath": "BYOK / direct API",
-        "billing": "metered",
-        "status": "idle",
-        "monthlyProjection": 0.0,
-        "weeklyCost": 0,
-        "dailyCost": 0,
-        "tokensWeekly": 0,
-        "models": [],
-        "modelCount": 0,
-        "note": "Freshness and realtime research lane; disabled when OpenRouter usage is unavailable."
-      },
-      {
-        "key": "gemini_automation",
-        "label": "Gemini / automation",
-        "authPath": "Google API / J.A.I.N scripts",
-        "billing": "metered",
-        "status": "idle",
-        "monthlyProjection": 0.0,
-        "weeklyCost": 0,
-        "dailyCost": 0,
-        "tokensWeekly": 0,
-        "models": [],
-        "modelCount": 0,
-        "note": "Long-context and background analysis lane."
-      },
-      {
-        "key": "local_models",
-        "label": "Local models",
-        "authPath": "on-device",
-        "billing": "free",
-        "status": "available",
-        "monthlyProjection": 0.0,
-        "weeklyCost": 0.0,
-        "dailyCost": 0.0,
-        "tokensWeekly": 0,
-        "models": [
-          "local/qwen2.5-coder:7b",
-          "local/nomic-embed-text:latest"
-        ],
-        "modelCount": 2,
-        "note": "No model bill; useful as a pressure-release lane when quality is enough."
-      }
-    ],
-    "insights": [
-      "True projected outlay is $200.52/mo: $200 fixed Codex + $0.52 metered.",
-      "Codex subscription is absorbing roughly $193.70/mo of API-equivalent usage.",
-      "Tracked metered spend is $0.12/wk across 2 metered model rows."
-    ],
-    "note": "Codex subscription spend is fixed at $200/mo. CodexBar costs are shown as subscription-equivalent value, not extra metered spend; metered projection covers API/BYOK/direct model calls outside the subscription."
+    "total": 144.731106,
+    "automation": 0.0,
+    "interactive": 144.731106,
+    "projectedMonthly": 620.28
   }
 }

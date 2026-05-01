@@ -1,8 +1,8 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "1 canary issue(s)",
-  "checkedAt": "2026-04-30T07:20:18.036194Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-04-30T15:56:35.871636Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -12,14 +12,14 @@
     },
     {
       "name": "Calendar tile",
-      "ok": false,
-      "detail": "Calendar re-auth required",
-      "severity": "medium"
+      "ok": true,
+      "detail": "gog CLI missing",
+      "severity": "ok"
     },
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "22 today-relevant; 0 active issue(s)",
+      "detail": "32 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
@@ -37,7 +37,13 @@
     {
       "name": "Personal Codex lane",
       "ok": true,
-      "detail": "status=ready; brainFeed=no",
+      "detail": "status=ready",
+      "severity": "ok"
+    },
+    {
+      "name": "Agent Control lane",
+      "ok": true,
+      "detail": "overall=ready; ready=2/2",
       "severity": "ok"
     }
   ]

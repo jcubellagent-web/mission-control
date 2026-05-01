@@ -1,28 +1,18 @@
 {
   "active": false,
-  "objective": "Done: MC bridge handoff recorded; watchdog resumed",
+  "objective": "Done: updated Google Workspace skill for appointment triage",
   "status": "idle",
-  "updatedAt": "2026-04-30T07:10:01Z",
+  "updatedAt": "2026-04-30T19:29:04Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "exec",
   "agent": "JAIMES",
-  "checkedAt": "2026-04-30T07:09:48Z",
-  "messageReceived": "2026-04-30T07:09:48Z",
+  "checkedAt": "2026-04-30T19:28:28Z",
+  "messageReceived": "2026-04-30T19:28:28Z",
   "steps": [
     {
-      "label": "Memory review: checking durable preference from Mission Cont",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: surveying recent Mission Control workflow",
-      "status": "done",
-      "tool": "exec"
-    },
-    {
-      "label": "Skill review: patching Codex model-support pitfall",
+      "label": "Mission Control watchdog running",
       "status": "done",
       "tool": "exec"
     },
@@ -37,27 +27,37 @@
       "tool": "exec"
     },
     {
-      "label": "Hermes/pretext + MC watchdog explanation",
-      "status": "done",
-      "tool": "model"
-    },
-    {
-      "label": "Mission Control: pausing watchdog pending JOSHeX audit",
+      "label": "Email/calendar: checking chiropractor appointment",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Assessing Hermes pretext relevance",
-      "status": "done",
-      "tool": "model"
-    },
-    {
-      "label": "Skill review: surveying saved workflows",
+      "label": "Email/calendar: checking local mail auth",
       "status": "done",
       "tool": "exec"
     },
     {
-      "label": "Mission Control: received Supabase bridge handoff",
+      "label": "Email/calendar: checking JOSH 2.0 workspace auth",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "JOSH2 screenshot: checking calendar/email visually",
+      "status": "done",
+      "tool": "browser"
+    },
+    {
+      "label": "Calendar: querying today events on JOSH2",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Mail: querying Apple Mail for appointment terms",
+      "status": "done",
+      "tool": "exec"
+    },
+    {
+      "label": "Skill review: email/calendar triage workflow",
       "status": "done",
       "tool": "exec"
     }
