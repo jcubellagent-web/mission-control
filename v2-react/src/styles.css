@@ -863,13 +863,13 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  min-height: 76px;
+  min-height: 66px;
   border: 1px solid rgba(91, 209, 138, 0.18);
   border-radius: 12px;
   background:
     linear-gradient(135deg, rgba(8, 31, 44, 0.96), rgba(12, 20, 30, 0.98) 52%, rgba(18, 40, 48, 0.92)),
     var(--panel);
-  padding: 12px 16px;
+  padding: 8px 14px;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
 }
 
@@ -885,26 +885,28 @@ p {
 
 .brand-lockup {
   min-width: 0;
-  gap: 14px;
+  gap: 12px;
 }
 
 .brand-lockup img {
-  width: 52px;
-  height: 52px;
-  border: 1px solid rgba(91, 209, 138, 0.38);
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(91, 209, 138, 0.58);
   border-radius: 50%;
+  background: rgba(8, 18, 28, 0.9);
   object-fit: cover;
+  box-shadow: 0 0 0 4px rgba(91, 209, 138, 0.08);
 }
 
 .brand-lockup h1 {
-  font-size: 29px;
+  font-size: 24px;
   line-height: 1.05;
 }
 
 .brand-lockup p {
-  margin-top: 5px;
+  margin-top: 4px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .mission-actions {
@@ -920,19 +922,19 @@ p {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-height: 36px;
+  min-height: 32px;
   border: 1px solid rgba(89, 196, 232, 0.28);
   border-radius: 999px;
   background: rgba(14, 27, 38, 0.92);
   color: var(--text);
-  padding: 7px 12px;
+  padding: 6px 10px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .mission-actions button {
-  width: 38px;
+  width: 34px;
   padding: 0;
 }
 
@@ -1127,13 +1129,14 @@ p {
 
 .brain-context-grid {
   display: grid;
-  grid-template-columns: 0.88fr 1.12fr;
+  grid-template-columns: 0.9fr 1.05fr 0.85fr;
   gap: 10px;
   min-height: 138px;
 }
 
 .brain-context-grid .mission-health-card,
-.brain-context-grid .ecosystem-card {
+.brain-context-grid .ecosystem-card,
+.brain-context-grid .brain-cost-card {
   overflow: hidden;
   min-height: 0;
   padding: 10px;
@@ -1183,6 +1186,72 @@ p {
   width: 92px;
   min-height: 36px;
   padding: 6px;
+}
+
+.brain-cost-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(18, 25, 35, 0.96);
+}
+
+.cost-snapshot {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cost-snapshot article {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 7px;
+  background: rgba(7, 16, 25, 0.5);
+  padding: 7px;
+}
+
+.cost-snapshot span,
+.brain-model-list span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.cost-snapshot strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brain-model-list {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.brain-model-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding-bottom: 4px;
+}
+
+.brain-model-list article:last-child {
+  border-bottom: 0;
+}
+
+.brain-model-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brain-model-list strong {
+  color: var(--green);
+  font-size: 11px;
 }
 
 .mission-timeline {
@@ -1411,7 +1480,7 @@ p {
 
 .support-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.95fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   overflow: hidden;
 }

@@ -12,6 +12,8 @@ const AGENTS: Record<AgentId, { label: string; role: string }> = {
   jain: { label: "J.A.I.N", role: "Monitors" },
 };
 
+const JOSH_HEADSHOT_URL = new URL("../../assets/josh-headshot.jpg", import.meta.url).href;
+
 const EMPTY_STATE: MissionControlState = {
   source: "Loading",
   statuses: [],
@@ -76,7 +78,13 @@ function App() {
     <main className="app-shell hero-shell">
       <header className="mission-header">
         <div className="brand-lockup">
-          <img src="/assets/josh-headshot.jpg" alt="" />
+          <img
+            src={JOSH_HEADSHOT_URL}
+            alt="Josh 2.0"
+            onError={(event) => {
+              event.currentTarget.src = "/josh-headshot.jpg";
+            }}
+          />
           <div>
             <h1>Josh 2.0 | Mission Control</h1>
             <p>Brain Feed command view for the agent ecosystem</p>
@@ -105,7 +113,6 @@ function App() {
           <BrainHero state={state} statuses={statusByAgent} />
           <section className="support-grid">
             <SignalFeed signals={state.signals} />
-            <ModelUsageCard modelUsage={state.modelUsage} />
           </section>
         </section>
         <aside className="right-rail">
@@ -156,6 +163,7 @@ function BrainHero({
       <div className="brain-context-grid">
         <MissionHealthPanel state={state} />
         <AgentEcosystemMap statuses={statuses} />
+        <BrainCostCard modelUsage={state.modelUsage} />
       </div>
 
       <div className="brain-event-grid">
@@ -335,6 +343,40 @@ function AgentEcosystemMap({ statuses }: { statuses: Map<AgentId, AgentStatus> }
             </article>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["modelUsage"] }) {
+  const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
+  return (
+    <section className="brain-cost-card">
+      <div className="panel-title compact">
+        <h2>Model Cost</h2>
+        <span>{fmtCurrency(modelUsage?.daily)} daily</span>
+      </div>
+      <div className="cost-snapshot">
+        <article>
+          <span>Weekly</span>
+          <strong>{fmtCurrency(modelUsage?.weekly)}</strong>
+        </article>
+        <article>
+          <span>Monthly</span>
+          <strong>{fmtCurrency(modelUsage?.monthly)}</strong>
+        </article>
+        <article>
+          <span>Projected</span>
+          <strong>{fmtCurrency(modelUsage?.weeklyRunRate?.projectedMonthly)}</strong>
+        </article>
+      </div>
+      <div className="brain-model-list">
+        {topModels.slice(0, 3).map((model: any) => (
+          <article key={`${model.name}-${model.source || model.window || ""}`}>
+            <span>{model.name}</span>
+            <strong>{fmtCurrency(model.weeklyCost ?? model.cost)}</strong>
+          </article>
+        ))}
       </div>
     </section>
   );
