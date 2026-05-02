@@ -15,13 +15,13 @@ cd "$ROOT_DIR"
 publisher="${HOME}/scripts/mission_control_brain_feed_publish.py"
 
 publish_bf() {
-  local status="$1"
+  local bf_status="$1"
   local objective="$2"
   local step="$3"
   if [[ -x "$publisher" || -f "$publisher" ]]; then
     python3 "$publisher" \
       --agent josh \
-      --status "$status" \
+      --status "$bf_status" \
       --tool cron \
       --cron "Mission Control publisher" \
       --objective "$objective" \
@@ -35,6 +35,17 @@ trap 'rc=$?; if [[ $rc -ne 0 ]]; then publish_bf blocked "Mission Control publis
 sync_branch() {
   local phase="$1"
   echo "mission-control: syncing origin/main (${phase})"
+  # These generated sidecars may be marked skip-worktree on Josh 2.0.
+  # Make them visible so git rebase --autostash can protect them instead
+  # of aborting when origin/main changes the tracked copies.
+  git update-index --no-skip-worktree -- \
+    data/brain-feed.json \
+    data/dashboard-data.json \
+    data/jaimes-brain-feed.json \
+    data/mission-control-canaries.json \
+    data/modelUsage.json \
+    data/newsfeed.json \
+    data/personal-codex.json 2>/dev/null || true
   git fetch origin main
   if ! git rebase --autostash origin/main; then
     echo "mission-control: rebase failed during ${phase}; aborting publish so cron does not create another divergent commit" >&2
@@ -79,7 +90,7 @@ python3 scripts/update_mission_control.py
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
+git add --sparse data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
   publish_bf done "Mission Control data current" "No dashboard changes to publish"

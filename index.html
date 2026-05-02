@@ -7636,7 +7636,13 @@
         let updateTickerInterval;
 
         function getLayoutModeOverride() {
-            try { return localStorage.getItem('mc_layout_mode') || 'auto'; } catch(e) { return 'auto'; }
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const urlMode = params.get('layout') || params.get('mode');
+                if (urlMode === 'kiosk' || urlMode === '24in') return 'kiosk';
+                if (urlMode === 'phone') return 'phone';
+                return localStorage.getItem('mc_layout_mode') || 'auto';
+            } catch(e) { return 'auto'; }
         }
 
         function isKioskMode() {
@@ -10391,7 +10397,8 @@
                     // Supabase Realtime v2 format
                     const payload = msg.payload || {};
                     const record = payload?.data?.record || payload?.record || payload?.new;
-                    if (record?.data) {
+                    const rowId = String(record?.id || record?.data?.agentId || '').toLowerCase();
+                    if (record?.data && (!rowId || rowId === 'joshex' || rowId === 'main')) {
                         console.debug('[MC] Supabase RT brain feed update received');
                         applyBrainFeed(record.data, 'supabase');
                     }
@@ -10410,14 +10417,17 @@
         // Also do a direct REST poll as fallback when RT is up
         async function fetchBrainFeedSupabase() {
             try {
-                const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/brain_feed?id=eq.main&select=data,updated_at', {
+                const r = await fetch(CONFIG.SUPABASE_URL + '/rest/v1/brain_feed?id=in.(joshex,main)&select=id,data,updated_at', {
                     headers: { 'apikey': CONFIG.SUPABASE_KEY, 'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY },
                     signal: AbortSignal.timeout(3000)
                 });
                 if (!r.ok) return;
                 const rows = await r.json();
-                if (!rows || !rows[0]?.data) return;
-                applyBrainFeed(rows[0].data, 'supabase');
+                if (!rows || !rows.length) return;
+                const primary = rows.find(row => String(row?.id || '').toLowerCase() === 'joshex')
+                    || rows.find(row => String(row?.id || '').toLowerCase() === 'main');
+                if (!primary?.data) return;
+                applyBrainFeed(primary.data, 'supabase');
             } catch(e) {}
         }
 
