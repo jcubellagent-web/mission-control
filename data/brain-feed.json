@@ -1,33 +1,23 @@
 {
+  "agent": "JOSHeX",
   "active": true,
-  "messageReceived": "2026-04-30T15:55:43Z",
-  "objective": "Phase 4A: build task queue and capability registry",
-  "status": "done",
+  "reportedActive": false,
+  "objective": "Backup memory to J.A.I.N and confirm sync",
+  "status": "active",
+  "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL.",
   "steps": [
     {
-      "label": "Add schemas and seed registry/queue",
-      "status": "done",
-      "tool": "data"
-    },
-    {
-      "label": "Build task lifecycle helper",
-      "status": "done",
-      "tool": "agent_task.py"
-    },
-    {
-      "label": "Wire Mission Control task summary",
-      "status": "done",
-      "tool": "dashboard"
-    },
-    {
-      "label": "Remote install and smoke tests",
-      "status": "done",
-      "tool": "ssh"
+      "label": "Backup memory to J.A.I.N and confirm sync",
+      "status": "active",
+      "tool": "exec"
     }
   ],
-  "currentTool": "Phase 4A complete",
-  "updatedAt": "2026-04-30T15:55:43Z",
-  "checkedAt": "2026-04-30T15:55:43Z",
-  "idleUpdatedAt": "2026-04-30T15:10:23Z",
-  "model": "Personal Codex"
+  "currentTool": "exec",
+  "updatedAt": "2026-05-02T08:01:02Z",
+  "checkedAt": "2026-05-02T08:01:02Z",
+  "source": "shared-agent-event-ledger",
+  "agentId": "joshex",
+  "supabaseBacked": true,
+  "model": "GPT-5.5",
+  "messageReceived": "2026-05-02T08:01:02Z"
 }
