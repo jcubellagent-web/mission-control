@@ -1029,26 +1029,40 @@ p {
 .brain-agent-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .brain-hero .agent-hero-card {
-  min-height: 154px;
+  display: grid;
+  grid-template-rows: auto minmax(92px, auto) auto;
+  gap: 12px;
+  min-height: 196px;
   border-color: rgba(89, 196, 232, 0.24);
   background: rgba(10, 24, 35, 0.82);
-  padding: 13px;
+  padding: 16px;
+}
+
+.brain-hero .agent-hero-card header {
+  min-height: 28px;
 }
 
 .brain-hero .agent-hero-card h3 {
   display: -webkit-box;
   overflow: hidden;
   margin: 0;
-  min-height: 44px;
-  font-size: 18px;
-  line-height: 1.22;
+  min-height: 88px;
+  font-size: clamp(28px, 2vw, 38px);
+  line-height: 1.08;
   letter-spacing: 0;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
+}
+
+.brain-hero .agent-hero-card p {
+  -webkit-line-clamp: 1;
+  min-height: 18px;
+  font-size: 14px;
+  line-height: 1.3;
 }
 
 .brain-hero .agent-hero-card em {

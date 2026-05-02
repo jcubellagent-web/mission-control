@@ -174,10 +174,6 @@ function AgentHeroCard({ agent, status }: { agent: AgentId; status: AgentStatus 
       </header>
       <h3>{status.objective}</h3>
       <p>{status.detail || AGENTS[agent].role}</p>
-      <footer>
-        <span>{status.current_tool || "Brain Feed"}</span>
-        <time>{fmtTime(status.updated_at)}</time>
-      </footer>
     </article>
   );
 }
