@@ -160,11 +160,7 @@ function BrainHero({
         <span className="attention-chip">{events.length} total feed rows</span>
       </div>
 
-      <div className="brain-context-grid">
-        <MissionHealthPanel state={state} />
-        <AgentEcosystemMap statuses={statuses} />
-        <BrainCostCard modelUsage={state.modelUsage} />
-      </div>
+      <BrainInsightStrip state={state} />
 
       <div className="brain-event-grid">
         {featuredEvents.length ? featuredEvents.map((event) => (
@@ -297,6 +293,51 @@ function MissionHealthPanel({ state }: { state: MissionControlState }) {
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+function BrainInsightStrip({ state }: { state: MissionControlState }) {
+  const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
+  const riskJobs = state.jobs.filter((job) => job.status === "blocked" || job.status === "error").length;
+  const activeAgents = state.statuses.filter((row) => row.active || row.status === "active").length;
+  const lastUpdate = [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
+    .filter(Boolean)
+    .sort()
+    .pop();
+  const minutesSinceUpdate = lastUpdate ? (Date.now() - new Date(lastUpdate).getTime()) / 60000 : 999;
+  const freshness = minutesSinceUpdate <= 15 ? 100 : minutesSinceUpdate <= 60 ? 82 : 48;
+  const agentScore = Math.min(100, Math.round((activeAgents / 3) * 100));
+  const jobsScore = Math.max(40, 100 - riskJobs * 18);
+  const approvalScore = pendingApprovals ? 74 : 100;
+  const costScore = state.modelUsage?.daily && state.modelUsage.daily > 1 ? 82 : 96;
+  const overall = Math.round((freshness + agentScore + jobsScore + approvalScore + costScore) / 5);
+  const topModels = state.modelUsage?.breakdown?.length ? state.modelUsage.breakdown : state.modelUsage?.topModels || [];
+  const topModel = topModels[0];
+  const trackedAgents = Math.max(3, state.statuses.length);
+
+  return (
+    <section className="brain-insight-strip" aria-label="Brain Feed key insights">
+      <article>
+        <span>Mission Health</span>
+        <strong>{overall}%</strong>
+        <p>{riskJobs ? `${riskJobs} job risks` : "Jobs stable"} · {pendingApprovals ? `${pendingApprovals} approval pending` : "No blockers"}</p>
+      </article>
+      <article>
+        <span>Agent Coverage</span>
+        <strong>{activeAgents}/{trackedAgents} active</strong>
+        <p>{state.statuses.length ? state.statuses.map((row) => `${AGENTS[row.agent_id]?.label || row.agent_id}: ${row.status}`).join(" · ") : "Awaiting v2 status rows"}</p>
+      </article>
+      <article>
+        <span>Model Spend</span>
+        <strong>{fmtCurrency(state.modelUsage?.daily)} today</strong>
+        <p>{fmtCurrency(state.modelUsage?.weeklyRunRate?.projectedMonthly)} projected · {topModel?.name || "No model breakdown"}</p>
+      </article>
+      <article>
+        <span>Feed Freshness</span>
+        <strong>{fmtTime(lastUpdate)}</strong>
+        <p>{state.events.length} feed rows · {state.signals.length} signals</p>
+      </article>
     </section>
   );
 }

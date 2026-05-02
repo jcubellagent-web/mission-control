@@ -1127,6 +1127,54 @@ p {
   border-color: rgba(240, 196, 96, 0.34);
 }
 
+.brain-insight-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.brain-insight-strip article {
+  overflow: hidden;
+  min-height: 82px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 8px;
+  background: rgba(8, 18, 28, 0.68);
+  padding: 10px;
+}
+
+.brain-insight-strip span {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brain-insight-strip strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 7px;
+  font-size: 18px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brain-insight-strip p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 7px;
+  color: var(--soft);
+  font-size: 11px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .brain-context-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.05fr 0.85fr;
@@ -2029,6 +2077,7 @@ p {
   .mission-header,
   .kiosk-grid,
   .brain-agent-grid,
+  .brain-insight-strip,
   .brain-event-grid,
   .support-grid,
   .status-ribbon {
