@@ -123,7 +123,7 @@ function BrainHero({
     <section className="brain-hero" aria-label="Brain Feed">
       <div className="brain-hero-title">
         <div>
-          <p>Brain Feed</p>
+          <p>Live agent updates</p>
           <h2>Brain Feed</h2>
         </div>
         <span>{featuredEvents.length} recent updates</span>
@@ -141,7 +141,7 @@ function BrainHero({
           {pendingApprovals.length ? `${pendingApprovals.length} approvals pending` : "No approval blockers"}
         </span>
         <span className="attention-chip">{signals.length} signal rows</span>
-        <span className="attention-chip">Readable kiosk mode</span>
+        <span className="attention-chip">{events.length} total feed rows</span>
       </div>
 
       <div className="brain-event-grid">
@@ -246,23 +246,77 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
   );
 }
 
+type JobRow = MissionControlState["jobs"][number];
+
+const JOB_CATEGORY_RULES: Array<{ key: string; label: string; matcher: (job: JobRow, text: string) => boolean }> = [
+  { key: "mission-control", label: "Mission Control", matcher: (_job, text) => /mission control|dashboard|brain feed|react|kiosk|v2/.test(text) },
+  { key: "signals", label: "Signals & Inbox", matcher: (_job, text) => /signal|intelligence|inbox|approval|handoff|ledger/.test(text) },
+  { key: "sorare", label: "Sorare MLB", matcher: (_job, text) => /sorare|mlb|baseball/.test(text) },
+  { key: "fantasy", label: "Fantasy Ops", matcher: (_job, text) => /fantasy|lineup|waiver|roster|pitcher|player/.test(text) },
+  { key: "agent-control", label: "Agent Control", matcher: (_job, text) => /agent control|openclaw|hermes|jaimes|jain|josh 2/.test(text) },
+  { key: "automation", label: "Automation", matcher: (_job, text) => /cron|automation|monitor|watch|scheduled|job/.test(text) },
+];
+
+function jobCategory(job: JobRow) {
+  const text = `${job.title} ${job.detail} ${job.tool} ${job.agent_id}`.toLowerCase();
+  return JOB_CATEGORY_RULES.find((rule) => rule.matcher(job, text)) || { key: "other", label: "Other", matcher: () => true };
+}
+
+function groupedJobs(jobs: JobRow[]) {
+  const groups = new Map<string, { key: string; label: string; items: JobRow[] }>();
+  jobs.forEach((job) => {
+    const category = jobCategory(job);
+    if (!groups.has(category.key)) {
+      groups.set(category.key, { key: category.key, label: category.label, items: [] });
+    }
+    groups.get(category.key)!.items.push(job);
+  });
+  return Array.from(groups.values()).sort((a, b) => {
+    const aUrgent = a.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error");
+    const bUrgent = b.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error");
+    if (aUrgent !== bUrgent) return aUrgent ? -1 : 1;
+    return b.items.length - a.items.length;
+  });
+}
+
+function jobGroupSummary(items: JobRow[]) {
+  const active = items.filter((job) => job.status === "active" || job.status === "queued").length;
+  const risk = items.filter((job) => job.status === "blocked" || job.status === "error").length;
+  if (risk) return `${risk} need attention`;
+  if (active) return `${active} active`;
+  return `${items.length} tracked`;
+}
+
 function JobsRail({ jobs }: { jobs: MissionControlState["jobs"] }) {
+  const groups = groupedJobs(jobs);
   return (
     <aside className="jobs-rail">
       <div className="panel-title compact">
         <h2>Today's Jobs</h2>
-        <span>{jobs.length}</span>
+        <span>{jobs.length} jobs · {groups.length || 0} groups</span>
       </div>
       <div className="job-list">
-        {jobs.length ? jobs.slice(0, 9).map((job) => (
-          <article key={job.id} className="job-row">
-            <span className={`status-pill ${statusClass(job.status)}`}>{job.status}</span>
-            <div>
-              <strong>{job.title}</strong>
-              <p>{job.detail}</p>
+        {groups.length ? groups.map((group, index) => (
+          <details key={group.key} className="job-category" open={index < 4 || group.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error")}>
+            <summary>
+              <span>{group.label}</span>
+              <em>{jobGroupSummary(group.items)}</em>
+              <strong>{group.items.length}</strong>
+            </summary>
+            <div className="job-category-list">
+              {group.items.map((job) => (
+                <article key={job.id} className="job-row compact">
+                  <span className={`status-dot ${statusClass(job.status)}`} aria-hidden="true" />
+                  <div>
+                    <strong title={job.title}>{job.title}</strong>
+                    <p title={job.detail || job.tool}>{job.detail || job.tool || AGENTS[job.agent_id]?.label}</p>
+                  </div>
+                  <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
+                  <time>{fmtTime(job.updated_at)}</time>
+                </article>
+              ))}
             </div>
-            <time>{fmtTime(job.updated_at)}</time>
-          </article>
+          </details>
         )) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
       </div>
     </aside>
