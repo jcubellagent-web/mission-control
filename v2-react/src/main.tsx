@@ -124,7 +124,7 @@ function BrainHero({
       <div className="brain-hero-title">
         <div>
           <p>Brain Feed</p>
-          <h2>Current agent operating picture</h2>
+          <h2>Brain Feed</h2>
         </div>
         <span>{featuredEvents.length} recent updates</span>
       </div>
