@@ -2,24 +2,29 @@
   "agent": "JOSHeX",
   "active": true,
   "reportedActive": false,
-  "objective": "React v2 Mission Control restored on Josh 2.0",
+  "objective": "React v2 Mission Control layout repaired on Josh 2.0",
   "status": "done",
   "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL.",
   "steps": [
     {
-      "label": "React v2 kiosk",
+      "label": "Diagnosed grid collapse",
       "status": "done",
-      "tool": "Codex React kiosk recovery"
+      "tool": "Chrome DOM inspection"
     },
     {
-      "label": "Today Jobs rail verified",
+      "label": "Patched kiosk CSS",
       "status": "done",
-      "tool": "Chrome DOM check"
+      "tool": "React v2 styles"
+    },
+    {
+      "label": "Verified visible panels",
+      "status": "done",
+      "tool": "Chrome DOM dimensions"
     }
   ],
-  "currentTool": "Chrome DOM check",
-  "updatedAt": "2026-05-02T08:11:18Z",
-  "checkedAt": "2026-05-02T08:11:18Z",
+  "currentTool": "Chrome DOM dimensions",
+  "updatedAt": "2026-05-02T08:21:42Z",
+  "checkedAt": "2026-05-02T08:21:42Z",
   "source": "shared-agent-event-ledger",
   "agentId": "joshex",
   "supabaseBacked": true,
