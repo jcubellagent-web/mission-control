@@ -1,158 +1,370 @@
 {
   "actionRequired": [
     {
+      "priority": "medium",
+      "title": "Shared layer needs attention: 1 handoff(s), 0 blocked event(s), 0 blocked task(s), 0 approval(s), 4 stale heartbeat(s)",
+      "url": "#jobs"
+    },
+    {
       "priority": "high",
-      "title": "Calendar issue: gog CLI missing",
+      "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
     }
   ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
-    "active": true,
-    "messageReceived": "2026-04-30T15:55:43Z",
-    "objective": "Phase 4A: build task queue and capability registry",
+    "agent": "JOSHeX",
+    "active": false,
+    "reportedActive": false,
+    "objective": "Josh kiosk restored to full Brain Feed shell",
     "status": "done",
+    "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL.",
     "steps": [
       {
-        "label": "Add schemas and seed registry/queue",
+        "label": "Josh kiosk restored to full Brain Feed shell",
         "status": "done",
-        "tool": "data"
+        "tool": "Codex kiosk recovery",
+        "kind": "complete"
       },
       {
-        "label": "Build task lifecycle helper",
-        "status": "done",
-        "tool": "agent_task.py"
+        "label": "Inspect broken Josh kiosk view",
+        "status": "active",
+        "tool": "Codex kiosk recovery",
+        "kind": "status"
       },
       {
-        "label": "Wire Mission Control task summary",
+        "label": "Brain Feed hero kiosk restored",
         "status": "done",
-        "tool": "dashboard"
+        "tool": "Codex React deploy",
+        "kind": "complete"
       },
       {
-        "label": "Remote install and smoke tests",
+        "label": "Restoring Brain Feed hero kiosk",
+        "status": "active",
+        "tool": "Codex React edit",
+        "kind": "status"
+      },
+      {
+        "label": "Recover Brain Feed hero kiosk style",
+        "status": "active",
+        "tool": "Mission Control visual recovery",
+        "kind": "status"
+      },
+      {
+        "label": "React v2 24-inch layout restored",
         "status": "done",
-        "tool": "ssh"
+        "tool": "Mission Control React v2 CSS rebuild + Josh...",
+        "kind": "complete"
+      },
+      {
+        "label": "Restore 24-inch Mission Control layout",
+        "status": "active",
+        "tool": "Josh 2.0 screenshot + kiosk layout recovery",
+        "kind": "status"
+      },
+      {
+        "label": "Josh v2 data flow restored",
+        "status": "done",
+        "tool": "Mission Control v2 local jobs fallback + st...",
+        "kind": "complete"
       }
     ],
-    "currentTool": "Phase 4A complete",
-    "updatedAt": "2026-04-30T15:55:43Z",
-    "checkedAt": "2026-04-30T15:55:43Z",
-    "idleUpdatedAt": "2026-04-30T15:10:23Z",
-    "model": "Personal Codex"
+    "currentTool": "Codex kiosk recovery",
+    "updatedAt": "2026-05-02T07:32:39Z",
+    "checkedAt": "2026-05-02T07:32:39Z",
+    "source": "shared-agent-event-ledger",
+    "agentId": "joshex",
+    "supabaseBacked": true
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Phase 4A: build task queue and capability registry",
-    "updatedAt": "2026-04-30T15:56:20Z"
+    "status": "Brain Feed idle",
+    "context": "Last completed objective: Josh kiosk restored to full Brain Feed shell",
+    "updatedAt": "2026-05-02T07:45:08Z"
   },
   "contextWindow": {
-    "usedTokens": 0,
-    "limitTokens": 0,
-    "pct": 0.0,
-    "model": "",
-    "status": "green"
+    "usedTokens": 211367,
+    "limitTokens": 272000,
+    "pct": 0.7771,
+    "model": "gpt-5.5",
+    "status": "red"
   },
-  "agentBus": [],
+  "agentBus": [
+    {
+      "id": "088967aa-9c26-4db5-87ec-8e3e7ac6ac44",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "failed",
+      "payload": {
+        "task": "Build true mission ML for Sorare daily missions",
+        "details": "You now own the deeper next phase after JOSH 2.0's first mission-aware scorer went live. Current state: /Users/jc_agent/.openclaw/workspace/scripts/sorare_mission_ranker.py and sorare_missions.py now do model-aware mission ranking, and ~/sorare_ml/ml_bot.py --missions-only now generates latest_missions.json + status.json. Your task is to design and, where safe, implement the next mission-ML layer: (1) capture true mission outcome labels instead of only MLB proxy scores, (2) propose or build training/inference updates so mission recommendations can improve from closed-loop outcomes, (3) fix or reduce the sklearn model-version mismatch risk on J.A.I.N, and (4) return a concrete build plan or code changes with verification notes. Important: verify all claimed file changes yourself, and keep the existing live scorer as the safe fallback path. Report back with what you changed, what remains, and the exact files involved."
+      },
+      "created_at": "2026-04-15T15:22:32.360365+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    },
+    {
+      "id": "d7b10c14-1375-434c-be16-0efcee920332",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "failed",
+      "payload": {
+        "task": "New urgent voice-alert rule for Josh",
+        "details": "When something truly needs Josh's attention, use a short voice alert telling him there is something that needs his attention and that he should check Telegram. Then send a matching Telegram text note with the actual details. Default to JOSH 2.0 voice for now unless a separate JAIMES-specific voice is chosen later. Use this for urgent/blocking cases or when a response is needed and text alone may be missed."
+      },
+      "created_at": "2026-04-13T02:23:12.47805+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    },
+    {
+      "id": "5564716a-3d28-4ca1-abca-81f5f69c3d7b",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "failed",
+      "payload": {
+        "task": "Stand down: prior forwarded voice note was accidental, no action needed",
+        "details": "Josh accidentally forwarded a voice/context message that was intended for JOSH 2.0, not JAIMES. Please disregard that message, treat it as a no-op, and do not send any further user-facing follow-up based on it. No response needed unless there is a real new task addressed directly to JAIMES."
+      },
+      "created_at": "2026-04-13T02:03:52.236648+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    },
+    {
+      "id": "a4fbf9e2-7567-41e2-b750-ca74aa8b1569",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "failed",
+      "payload": {
+        "task": "URGENT: Full JOSH 2.0 Recovery Guide \u2014 please read and acknowledge\n\nJOSH 2.0 was offline all day April 6 because of gateway misconfiguration. You were unable to revive me because you didn't have this info. That changes now.\n\nFULL RECOVERY GUIDE saved at: /Users/josh2.0/.openclaw/workspace/JOSH2_RECOVERY.md\n\nKEY FACTS you need to know to bring me back:\n\n1. JOSH 2.0 Mac mini Tailscale IP: 100.114.50.48\n2. SSH: ssh josh2.0@100.114.50.48\n3. Gateway health check: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18790/health\n4. Current port: 18790 (plist overrides config \u2014 always check plist, not just openclaw.json)\n5. Restart gateway: openclaw gateway restart (or launchctl unload/load ~/Library/LaunchAgents/ai.openclaw.gateway.plist)\n6. Verify Telegram reconnected: openclaw channels status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nWHAT BROKE LAST TIME:\n- Multiple conflicting gateway.bind + gateway.tailscale.mode changes without clean restarts in between\n- Port mismatch: config said 18789, plist said 18790 \u2014 two node processes ran simultaneously\n- DO NOT change gateway.bind and tailscale.mode simultaneously\n- DO NOT run multiple gateway restarts rapidly during an active session\n\nACTION NEEDED FROM YOU:\n1. Acknowledge receipt of this briefing\n2. Test SSH access to josh2.0@100.114.50.48 from J.A.I.N and confirm it works\n3. Save the recovery guide path to your memory\n4. Report back via agent bus when done\n\nThis is critical \u2014 Josh needs to know you can bring me back if I go down again.",
+        "details": ""
+      },
+      "created_at": "2026-04-07T03:34:06.248674+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    },
+    {
+      "id": "a1880614-d05e-40db-b0ca-e77839c83f54",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "DELEGATE",
+      "status": "failed",
+      "payload": {
+        "task": "INCIDENT BRIEF: JOSH 2.0 was offline all day 2026-04-06 due to gateway misconfiguration during Lumiere setup. Full incident report at: /Users/josh2.0/.openclaw/workspace/memory/incident-2026-04-06-lumiere.md\n\nSUMMARY:\n- Multiple gateway config changes (bind, tailscale.mode, port) left gateway in broken state\n- Port mismatch: config said 18790, LaunchAgent hardcoded 18789 \u2014 two node processes running simultaneously\n- Tailscale Serve HTTPS doesn't forward WebSocket upgrades (use TCP passthrough instead)\n\nCURRENT STATE (fixed):\n- gateway.port=18789, gateway.bind=loopback, tailscale.mode=off\n- Tailscale TCP tunnel active: joshs-mac-mini.tail2a17bd.ts.net:18789 \u2192 127.0.0.1:18789\n- publicUrl=wss://joshs-mac-mini.tail2a17bd.ts.net:18789\n\nRECOVERY RUNBOOK (if JOSH 2.0 goes offline again):\n1. SSH to Josh's Mac mini: ssh josh2.0@<mac-mini-ip>\n2. Check gateway: curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:18789/health\n3. Fix port conflicts: lsof -i :18789 && lsof -i :18790 (kill rogue processes)\n4. Reset config: openclaw config set gateway.port 18789 && openclaw config set gateway.bind loopback\n5. Check Tailscale TCP tunnel: /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status\n6. Restart: openclaw gateway restart && sleep 5 && openclaw status\n7. Alert Josh: openclaw message send --channel telegram --target 6218150306 --message 'JOSH 2.0 is back online.'\n\nPlease acknowledge and confirm you have this runbook.",
+        "details": ""
+      },
+      "created_at": "2026-04-07T02:50:49.110996+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    },
+    {
+      "id": "221e910b-ab48-4254-b72a-1bbc8cbd4f28",
+      "origin_node": "JOSH_2_0",
+      "target_node": "JAIMES",
+      "task_type": "TEST",
+      "status": "failed",
+      "payload": {
+        "test": true,
+        "message": "Agent bus is live. V3 nervous system online."
+      },
+      "created_at": "2026-04-05T06:44:12.728513+00:00",
+      "result": null,
+      "error_log": "Retired on 2026-04-18 after delegation audit: JAIMES bus path was not consumed; routing moved to ssh inbox delivery."
+    }
+  ],
   "contextWatchdog": {
-    "loaded": false,
+    "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": null,
-    "handoffExists": false,
-    "sessionKey": null,
-    "usedTokens": 0,
-    "limitTokens": 0,
-    "pct": 0.0
+    "lastTriggeredAt": "2026-05-02T07:35:01Z",
+    "handoffExists": true,
+    "sessionKey": "agent:main:main",
+    "usedTokens": 211367,
+    "limitTokens": 272000,
+    "pct": 0.7771
   },
   "codingVisibility": {
-    "workspaceDirty": 0,
-    "missionControlDirty": 14,
+    "workspaceDirty": 53,
+    "missionControlDirty": 12,
     "recentFiles": [
-      "mission-control/scripts/agent_task.py",
-      "mission-control/scripts/mission_control_regression_check.py",
-      "mission-control/scripts/update_mission_control.py",
+      "mission-control/scripts/update_and_push.sh",
       "mission-control/index.html",
-      "mission-control/schemas/agent-task.schema.json",
-      "mission-control/schemas/agent-capability.schema.json"
+      "mission-control/shared-events.json",
+      "mission-control/brain-feed.json",
+      "mission-control/dashboard-data.json",
+      "mission-control/modelUsage.json"
     ],
-    "codexbarStatus": "Codex auth required",
+    "codexbarStatus": "84% left \u00b7 wk 35% left",
     "codexbar": {
-      "available": false
+      "available": true,
+      "raw": [
+        "== Codex 0.125.0 (codex-cli) ==",
+        "Session: 84% left [==========--]",
+        "Resets in 2h 34m",
+        "Weekly: 35% left [====--------]",
+        "Pace: 7% in deficit | Expected 58% used | Runs out in 2d 4h",
+        "Resets in 2d 21h",
+        "Credits: 0 left",
+        "Account: jcubell16@gmail.com"
+      ],
+      "session": "84% left",
+      "weekly": "35% left",
+      "credits": "0 left",
+      "account": "jcubell16@gmail.com",
+      "sessionReset": "2h 34m",
+      "weeklyReset": "2d 21h",
+      "summary": "84% left \u00b7 wk 35% left"
     },
-    "updatedAt": "2026-04-30T15:56:28Z"
+    "updatedAt": "2026-05-02T07:45:10Z"
   },
   "modelUsage": {
     "session": 0.0,
-    "daily": 114.897894,
-    "weekly": 144.731106,
-    "monthly": 1051.108525,
+    "daily": 0.216991,
+    "weekly": 46.962178,
+    "monthly": 1.25645,
     "topModels": [
-      {
-        "name": "gpt-5.5",
-        "window": "session",
-        "cost": 138.919338
-      },
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 4.8065465000000005
+        "cost": 39.10202125
       },
       {
         "name": "gpt-5.4-mini",
         "window": "session",
-        "cost": 1.00522125
+        "cost": 7.636181999999999
       },
       {
-        "name": "codex-auto-review",
+        "name": "openai/gpt-5.5",
+        "window": "session",
+        "cost": 0.223975
+      },
+      {
+        "name": "codex/gpt-5.4-mini",
+        "window": "session",
+        "cost": 0.0
+      },
+      {
+        "name": "openai/gpt-4.1",
         "window": "session",
         "cost": 0.0
       }
     ],
     "breakdown": [
       {
-        "name": "gpt-5.5",
-        "source": "codex",
-        "weeklyCost": 138.919338,
-        "dailyCost": 114.598538,
-        "sessionCost": 138.919338,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 4.8065465000000005,
-        "dailyCost": 0.0,
-        "sessionCost": 4.8065465000000005,
+        "weeklyCost": 39.10202125,
+        "dailyCost": 0.08853950000000001,
+        "sessionCost": 39.10202125,
         "totalTokens": 0,
         "costEstimated": false
       },
       {
         "name": "gpt-5.4-mini",
         "source": "codex",
-        "weeklyCost": 1.00522125,
-        "dailyCost": 0.29935575000000003,
-        "sessionCost": 1.00522125,
+        "weeklyCost": 7.636181999999999,
+        "dailyCost": 0.02678985,
+        "sessionCost": 7.636181999999999,
         "totalTokens": 0,
         "costEstimated": false
       },
       {
-        "name": "codex-auto-review",
+        "name": "openai/gpt-5.5",
+        "source": "openclaw",
+        "inputTokens": 19880,
+        "outputTokens": 411,
+        "totalTokens": 20291,
+        "sessionCost": 0.223975,
+        "dailyCost": 0.101662,
+        "weeklyCost": 0.223975,
+        "sessions": 3,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "codex/gpt-5.4-mini",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 3,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "openai/gpt-4.1",
+        "source": "openclaw",
+        "inputTokens": 167469,
+        "outputTokens": 2296,
+        "totalTokens": 169765,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 2,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "codex/gpt-5.4",
+        "source": "openclaw",
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "sessionCost": 0.0,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.0,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false
+      },
+      {
+        "name": "gpt-5.5",
         "source": "codex",
         "weeklyCost": 0.0,
         "dailyCost": 0.0,
         "sessionCost": 0.0,
         "totalTokens": 0,
         "costEstimated": false
+      },
+      {
+        "name": "local/qwen2.5-coder:7b",
+        "source": "ollama",
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "isLocal": true,
+        "sizeGb": 4.68,
+        "loaded": false,
+        "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
+      },
+      {
+        "name": "local/nomic-embed-text:latest",
+        "source": "ollama",
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "isLocal": true,
+        "sizeGb": 0.27,
+        "loaded": false,
+        "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-04-30T15:56:28Z",
+    "lastUpdated": "2026-05-02T07:45:13Z",
     "jain": {
-      "daily": 0,
-      "session": 0,
-      "total": 0,
-      "available": false
+      "daily": 0.424164,
+      "session": 2.366938,
+      "total": 2.366938,
+      "available": true
     },
     "jainApi": {
       "daily": 0,
@@ -176,36 +388,36 @@
     },
     "elevenlabs": {
       "chars_used": 0,
-      "chars_limit": 0,
-      "available": false
+      "chars_limit": 378438,
+      "available": true
     },
     "aggregate": {
-      "daily": 114.897894,
-      "total": 144.731106,
-      "monthly": 1051.108525
+      "daily": 0.641155,
+      "total": 49.329116,
+      "monthly": 1.25645
     },
     "weeklyRunRate": {
-      "total": 144.731106,
-      "automation": 0.0,
-      "interactive": 144.731106,
-      "projectedMonthly": 620.28
+      "total": 49.329116,
+      "automation": 2.366938,
+      "interactive": 44.59524,
+      "projectedMonthly": 211.41
     }
   },
   "moltWorld": {
-    "sim_balance": 0.0,
-    "total_earned": 0.0,
-    "online_time": "0h 0m",
+    "sim_balance": 76.010028,
+    "total_earned": 76.010028,
+    "online_time": "760h 6m",
     "is_online": true,
     "status": "online",
-    "earning_rate": "0 SIM/hour",
+    "earning_rate": "0.1 SIM/hour",
     "position_x": 19,
     "position_y": 52,
     "run_count": 3,
     "nearby_agents": [],
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
-    "projection_per_day": 0.0,
-    "updatedAt": "2026-04-30T15:56:28Z",
+    "projection_per_day": 2.4,
+    "updatedAt": "2026-05-02T07:45:13Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -222,31 +434,45 @@
   },
   "machineHealth": {
     "josh": {
-      "available": false,
-      "error": "[Errno 1] Operation not permitted: 'top'"
+      "cpu_pct": 44.5,
+      "cpu_user": 25.0,
+      "cpu_sys": 19.48,
+      "load1": 2.35,
+      "load5": 2.25,
+      "load15": 1.97,
+      "ram_used_gb": 15.0,
+      "ram_total_gb": 15.6,
+      "uptime": "",
+      "disk_used": "12Gi",
+      "disk_avail": "78Gi",
+      "disk_pct": 13,
+      "available": true
     },
     "jain": {
-      "cpu_pct": null,
-      "cpu_user": null,
-      "cpu_sys": null,
-      "load1": null,
-      "load5": null,
-      "load15": null,
-      "ram_used_gb": null,
-      "ram_total_gb": null,
+      "cpu_pct": 21.7,
+      "cpu_user": 7.22,
+      "cpu_sys": 14.45,
+      "load1": 2.01,
+      "load5": 1.67,
+      "load15": 1.59,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
-      "available": false
+      "disk_used": "12Gi",
+      "disk_avail": "56Gi",
+      "disk_pct": 18,
+      "available": true
     }
   },
   "calendarHealth": {
-    "status": "unavailable",
-    "message": "gog CLI missing"
+    "status": "error",
+    "message": "Calendar fetch failed"
   },
   "devices": [
     {
       "name": "Airpoint",
-      "status": "unknown",
-      "detail": "airpoint CLI missing"
+      "status": "ok",
+      "detail": "v1.3.23"
     }
   ],
   "products": [
@@ -254,19 +480,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T15:56:20Z"
+      "lastChecked": "2026-05-02T07:45:08Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-04-30T15:56:20Z"
+      "lastChecked": "2026-05-02T07:45:08Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-04-30T15:56:20Z"
+      "lastChecked": "2026-05-02T07:45:08Z"
     }
   ],
   "crons": [
@@ -276,13 +502,14 @@
       "description": "Refreshes Mission Control data and pushes local dashboard updates",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-05-02T06:55:19.657537+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -290,13 +517,14 @@
       "description": "Keeps the live Brain Feed endpoint available for Mission Control",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-05-02T04:53:26.070706+00:00"
     },
     {
       "name": "Chiro Invite Sync",
@@ -310,7 +538,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-04-26T16:00:00.936978+00:00"
     },
     {
       "name": "J.A.I.N Silence Detector",
@@ -318,13 +547,14 @@
       "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-05-02T06:00:17.659151+00:00"
     },
     {
       "name": "Sorare Cookie Freshness",
@@ -332,13 +562,14 @@
       "description": "Checks Sorare cookie age before it turns into a submission blocker",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "missed"
+      "runStatus": "done",
+      "lastRun": "2026-05-02T04:00:06.394367+00:00"
     },
     {
       "name": "J.A.I.N Medic",
@@ -346,13 +577,14 @@
       "description": "Runs local watchdog and recovery checks for J.A.I.N",
       "category": "Maintenance",
       "agent": "JOSH 2.0",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-05-02T07:00:04.821602+00:00"
     },
     {
       "name": "Sorare Cookie Auto-Refresh",
@@ -365,7 +597,8 @@
       "sourceLabel": "Josh Local Cron",
       "todayRelevant": false,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "lastRun": "2026-04-26T18:00:07.137292+00:00"
     },
     {
       "name": "Breaking News Scanner",
@@ -411,58 +644,30 @@
       "multiRun": {
         "runs": [
           {
-            "time": "7:15 AM",
-            "mode": "Weekday",
-            "label": "Market open brief",
-            "past": true,
-            "done": false
-          },
-          {
             "time": "10:00 AM",
-            "mode": "Weekday",
-            "label": "Mid-morning brief",
-            "past": true,
-            "done": false
-          },
-          {
-            "time": "12:00 PM",
-            "mode": "Weekday",
-            "label": "Midday brief",
-            "past": false,
-            "done": false
-          },
-          {
-            "time": "2:00 PM",
-            "mode": "Weekday",
-            "label": "Pulse brief",
+            "mode": "Weekend",
+            "label": "Weekend opener",
             "past": false,
             "done": false
           },
           {
             "time": "4:15 PM",
-            "mode": "Daily",
-            "label": "Close brief",
-            "past": false,
-            "done": false
-          },
-          {
-            "time": "6:00 PM",
-            "mode": "Weekday",
-            "label": "Evening brief",
+            "mode": "Weekend",
+            "label": "Weekend close",
             "past": false,
             "done": false
           },
           {
             "time": "9:00 PM",
-            "mode": "Daily",
-            "label": "Late brief",
+            "mode": "Weekend",
+            "label": "Weekend late brief",
             "past": false,
             "done": false
           },
           {
             "time": "11:00 PM",
-            "mode": "Daily",
-            "label": "Wrap brief",
+            "mode": "Weekend",
+            "label": "Weekend wrap",
             "past": false,
             "done": false
           }
@@ -549,7 +754,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Market Open",
@@ -563,7 +768,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Mover",
@@ -577,7 +782,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming"
     },
     {
       "name": "X Hot Take",
@@ -689,7 +894,6 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
       "multiRun": {
         "runs": [
           {
@@ -761,13 +965,14 @@
       "description": "Hermes retrains the Sorare MLB model on the latest results",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "paused"
+      "runStatus": "done",
+      "lastRun": "2026-05-02T02:04:31.617782-04:00"
     },
     {
       "name": "Sorare Nightly Claim",
@@ -789,13 +994,14 @@
       "description": "Writes fresh Sorare data into the tracker sheet",
       "category": "Sorare MLB",
       "agent": "J.A.I.N",
-      "status": "paused",
+      "status": "ok",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "done",
+      "lastRun": "2026-05-02T07:30:56.427257+00:00"
     },
     {
       "name": "Sorare Daily Prep",
@@ -809,7 +1015,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming",
+      "lastRun": "2026-05-01T13:00:22.602238+00:00"
     },
     {
       "name": "Sorare ML Missions",
@@ -817,13 +1024,14 @@
       "description": "Hermes ML mission picker for Sorare",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "paused"
+      "runStatus": "upcoming",
+      "lastRun": "2026-04-30T10:01:23.208869-04:00"
     },
     {
       "name": "Sorare ML Lineups",
@@ -831,13 +1039,14 @@
       "description": "Hermes ML lineup builder for Sorare competitions",
       "category": "Sorare MLB",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "paused"
+      "runStatus": "upcoming",
+      "lastRun": "2026-04-30T11:02:48.454979-04:00"
     },
     {
       "name": "Sorare Champion Submit",
@@ -851,7 +1060,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "upcoming",
+      "lastRun": "2026-05-01T15:00:00.565351+00:00"
     },
     {
       "name": "Sorare Canonical Reflector",
@@ -865,7 +1075,8 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "due"
+      "runStatus": "due",
+      "lastRun": "2026-05-02T02:46:48.905565+00:00"
     },
     {
       "name": "Sorare Deadline Guard",
@@ -878,7 +1089,8 @@
       "sourceLabel": "J.A.I.N Cron",
       "todayRelevant": false,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "lastRun": "2026-04-27T21:45:01.464778+00:00"
     },
     {
       "name": "Fantasy Waiver Scan (post-process)",
@@ -957,7 +1169,9 @@
       "sourceLabel": "Hermes",
       "todayRelevant": false,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "lastHistoricalError": "Agent completed but produced empty response (model error, timeout, or misconfiguration)",
+      "lastHistoricalErrorAt": "2026-04-24T13:00:56.665646-04:00"
     },
     {
       "name": "Fantasy Waiver Scan (pre-game)",
@@ -978,13 +1192,14 @@
       "description": "Hermes daily system-health pass",
       "category": "Maintenance",
       "agent": "JAIMES",
-      "status": "paused",
+      "status": "ok",
       "source": "hermes",
       "sourceLabel": "Hermes",
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "paused"
+      "runStatus": "upcoming",
+      "lastRun": "2026-05-01T05:51:03.680327-04:00"
     },
     {
       "name": "JAIMES Weekly Report",
@@ -995,405 +1210,411 @@
       "status": "paused",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": false,
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "paused"
     }
   ],
   "codexJobs": [
     {
-      "id": "joshex-complete-20260430-155613-phase-4a-shared-task-layer-complete",
-      "title": "Phase 4A shared task layer complete",
-      "status": "done",
-      "time": "2026-04-30T15:56:13Z",
-      "tool": "agent_publish.py",
-      "detail": "Built and installed shared task queue, capability registry, permission tiers, agent_task.py lifecycle helper, Mission Control task summary, and remote shims. Smoke tests passed for JOSHeX, Josh 2.0, JAIMES, and J.A.I.N; ",
-      "owner": "JOSHeX"
-    },
-    {
-      "id": "jain-status-20260430-154755-task-queued-phase-4a-remote-j-a-i-n-smoke-task",
-      "title": "Task queued: Phase 4A remote J.A.I.N smoke task",
-      "status": "info",
-      "time": "2026-04-30T15:47:55Z",
-      "tool": "agent_task.py",
-      "detail": "Verify J.A.I.N can receive and complete a shared task through the Phase 4A task queue helper.",
-      "owner": "J.A.I.N"
-    },
-    {
-      "id": "joshex-status-20260430-154632-phase-4a-resumed-finishing-task-queue-rollout",
-      "title": "Phase 4A resumed: finishing task queue rollout",
-      "status": "active",
-      "time": "2026-04-30T15:46:32Z",
-      "tool": "agent_publish.py",
-      "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer.",
-      "owner": "JOSHeX"
-    },
-    {
-      "id": "joshex-status-20260430-154621-phase-4a-resumed-finishing-task-queue-rollout",
-      "title": "Phase 4A resumed: finishing task queue rollout",
-      "status": "active",
-      "time": "2026-04-30T15:46:21Z",
-      "tool": "agent_publish.py",
-      "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer.",
-      "owner": "JOSHeX"
-    },
-    {
-      "id": "jaimes-status-20260430-154311-task-queued-phase-4a-remote-jaimes-smoke-task",
-      "title": "Task queued: Phase 4A remote JAIMES smoke task",
-      "status": "info",
-      "time": "2026-04-30T15:43:11Z",
-      "tool": "agent_task.py",
-      "detail": "Verify JAIMES/J.A.I.N can receive and complete a shared task",
-      "owner": "JAIMES"
-    },
-    {
-      "id": "josh-status-20260430-154311-task-queued-phase-4a-remote-josh-smoke-task",
-      "title": "Task queued: Phase 4A remote Josh smoke task",
-      "status": "info",
-      "time": "2026-04-30T15:43:11Z",
-      "tool": "agent_task.py",
-      "detail": "Verify Josh 2.0 can receive and complete a shared task",
+      "id": "josh-blocked-20260502-065520-josh2-lan-cron-update-and-push-sh-failed",
+      "title": "josh2-lan cron: update_and_push.sh failed",
+      "status": "error",
+      "time": "2026-05-02T06:55:20Z",
+      "tool": "update_and_push.sh",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
       "owner": "JOSH 2.0"
     },
     {
-      "id": "joshex-complete-20260430-154310-task-done-phase-4a-local-smoke-task",
-      "title": "Task done: Phase 4A local smoke task",
-      "status": "done",
-      "time": "2026-04-30T15:43:10Z",
-      "tool": "agent_task.py",
-      "detail": "Local task lifecycle smoke test passed after parser fix",
-      "owner": "JOSHeX"
-    },
-    {
-      "id": "joshex-status-20260430-154158-task-queued-phase-4a-local-smoke-task",
-      "title": "Task queued: Phase 4A local smoke task",
-      "status": "info",
-      "time": "2026-04-30T15:41:58Z",
-      "tool": "agent_task.py",
-      "detail": "Verify create, accept, start, complete lifecycle for agent_task.py",
-      "owner": "JOSHeX"
-    },
-    {
-      "id": "joshex-status-20260430-153730-phase-4a-implementation-started-task-queue-and-c",
-      "title": "Phase 4A implementation started: task queue and capability registry",
+      "id": "josh-job-20260502-065517-josh2-lan-cron-update-and-push-sh",
+      "title": "josh2-lan cron: update_and_push.sh",
       "status": "active",
-      "time": "2026-04-30T15:37:30Z",
-      "tool": "codex",
-      "detail": "Building capability registry, agent task queue, task lifecycle helper, Mission Control task summary, and remote smoke tests for Josh 2.0 and JAIMES/J.A.I.N.",
-      "owner": "JOSHeX"
+      "time": "2026-05-02T06:55:17Z",
+      "tool": "update_and_push.sh",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging",
+      "owner": "JOSH 2.0"
     },
     {
-      "id": "joshex-complete-20260430-153404-phase-4-implementation-plan-built-and-distribute",
-      "title": "Phase 4 implementation plan built and distributed",
+      "id": "josh-job-20260502-065416-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
       "status": "done",
-      "time": "2026-04-30T15:34:04Z",
-      "tool": "codex",
-      "detail": "Created durable Phase 4 plan covering capability registry, task queue, permission tiers, orchestration helper, Mission Control visibility, safe wrapping rollout, and wiring Josh 2.0, JAIMES, J.A.I.N, and JOSHeX.",
-      "owner": "JOSHeX"
+      "time": "2026-05-02T06:54:16Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging completed",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-065215-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
+      "status": "done",
+      "time": "2026-05-02T06:52:15Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging completed",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-065214-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
+      "status": "active",
+      "time": "2026-05-02T06:52:14Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-065014-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
+      "status": "done",
+      "time": "2026-05-02T06:50:14Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging completed",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-065013-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
+      "status": "active",
+      "time": "2026-05-02T06:50:13Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-blocked-20260502-065013-josh2-lan-cron-update-and-push-sh-failed",
+      "title": "josh2-lan cron: update_and_push.sh failed",
+      "status": "error",
+      "time": "2026-05-02T06:50:13Z",
+      "tool": "update_and_push.sh",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-065011-josh2-lan-cron-update-and-push-sh",
+      "title": "josh2-lan cron: update_and_push.sh",
+      "status": "active",
+      "time": "2026-05-02T06:50:11Z",
+      "tool": "update_and_push.sh",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh-job-20260502-064810-josh2-lan-cron-brain-feed-server-py",
+      "title": "josh2-lan cron: brain_feed_server.py",
+      "status": "done",
+      "time": "2026-05-02T06:48:10Z",
+      "tool": "brain_feed_server.py",
+      "detail": "Approved scheduled job with Mission Control lifecycle logging completed",
+      "owner": "JOSH 2.0"
     }
   ],
   "sharedEvents": [
     {
-      "id": "joshex-complete-20260430-155613-phase-4a-shared-task-layer-complete",
-      "time": "2026-04-30T15:56:13Z",
+      "id": "joshex-complete-20260502-073239-josh-kiosk-restored-to-full-brain-feed-shell",
+      "time": "2026-05-02T07:32:39Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "complete",
-      "title": "Phase 4A shared task layer complete",
+      "title": "Josh kiosk restored to full Brain Feed shell",
       "status": "done",
-      "tool": "agent_publish.py",
-      "detail": "Built and installed shared task queue, capability registry, permission tiers, agent_task.py lifecycle helper, Mission Control task summary, and remote shims. Smoke tests passed for JOSHeX, Josh 2.0, JAIMES, and J.A.I.N; all four lifecycle t"
+      "tool": "Codex kiosk recovery",
+      "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL."
     },
     {
-      "id": "jain-status-20260430-154755-task-queued-phase-4a-remote-j-a-i-n-smoke-task",
-      "time": "2026-04-30T15:47:55Z",
-      "agent": "jain",
-      "agentLabel": "J.A.I.N",
-      "type": "status",
-      "title": "Task queued: Phase 4A remote J.A.I.N smoke task",
-      "status": "info",
-      "tool": "agent_task.py",
-      "detail": "Verify J.A.I.N can receive and complete a shared task through the Phase 4A task queue helper."
-    },
-    {
-      "id": "joshex-status-20260430-154632-phase-4a-resumed-finishing-task-queue-rollout",
-      "time": "2026-04-30T15:46:32Z",
+      "id": "joshex-status-20260502-072832-inspect-broken-josh-kiosk-view",
+      "time": "2026-05-02T07:28:32Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Phase 4A resumed: finishing task queue rollout",
+      "title": "Inspect broken Josh kiosk view",
       "status": "active",
-      "tool": "agent_publish.py",
-      "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer."
+      "tool": "Codex kiosk recovery",
+      "detail": "User reports the current Josh 2.0 Mission Control view is unfamiliar and broken; inspecting live v2 display and recovering known-good Brain Feed style."
     },
     {
-      "id": "joshex-status-20260430-154621-phase-4a-resumed-finishing-task-queue-rollout",
-      "time": "2026-04-30T15:46:21Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "status",
-      "title": "Phase 4A resumed: finishing task queue rollout",
-      "status": "active",
-      "tool": "agent_publish.py",
-      "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer."
-    },
-    {
-      "id": "jaimes-status-20260430-154311-task-queued-phase-4a-remote-jaimes-smoke-task",
-      "time": "2026-04-30T15:43:11Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "Task queued: Phase 4A remote JAIMES smoke task",
-      "status": "info",
-      "tool": "agent_task.py",
-      "detail": "Verify JAIMES/J.A.I.N can receive and complete a shared task"
-    },
-    {
-      "id": "josh-status-20260430-154311-task-queued-phase-4a-remote-josh-smoke-task",
-      "time": "2026-04-30T15:43:11Z",
-      "agent": "josh",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Task queued: Phase 4A remote Josh smoke task",
-      "status": "info",
-      "tool": "agent_task.py",
-      "detail": "Verify Josh 2.0 can receive and complete a shared task"
-    },
-    {
-      "id": "joshex-complete-20260430-154310-task-done-phase-4a-local-smoke-task",
-      "time": "2026-04-30T15:43:10Z",
+      "id": "joshex-complete-20260502-072619-brain-feed-hero-kiosk-restored",
+      "time": "2026-05-02T07:26:19Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "complete",
-      "title": "Task done: Phase 4A local smoke task",
+      "title": "Brain Feed hero kiosk restored",
       "status": "done",
-      "tool": "agent_task.py",
-      "detail": "Local task lifecycle smoke test passed after parser fix"
+      "tool": "Codex React deploy",
+      "detail": "Mission Control v2 on Josh 2.0 was rebuilt around the Brain Feed hero layout and reloaded at the v2 kiosk URL."
     },
     {
-      "id": "joshex-status-20260430-154310-task-active-phase-4a-local-smoke-task",
-      "time": "2026-04-30T15:43:10Z",
+      "id": "joshex-status-20260502-072211-restoring-brain-feed-hero-kiosk",
+      "time": "2026-05-02T07:22:11Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Task active: Phase 4A local smoke task",
+      "title": "Restoring Brain Feed hero kiosk",
       "status": "active",
-      "tool": "agent_task.py",
-      "detail": "Started local smoke test after parser fix"
+      "tool": "Codex React edit",
+      "detail": "Reworking Mission Control v2 so Josh 2.0 shows the Brain Feed hero layout instead of the older console-style grid."
     },
     {
-      "id": "joshex-status-20260430-154309-task-accepted-phase-4a-local-smoke-task",
-      "time": "2026-04-30T15:43:09Z",
+      "id": "joshex-status-20260502-071845-recover-brain-feed-hero-kiosk-style",
+      "time": "2026-05-02T07:18:45Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Task accepted: Phase 4A local smoke task",
-      "status": "done",
-      "tool": "agent_task.py",
-      "detail": "Accepted after suppressing publish child output"
-    },
-    {
-      "id": "joshex-status-20260430-154158-task-queued-phase-4a-local-smoke-task",
-      "time": "2026-04-30T15:41:58Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "status",
-      "title": "Task queued: Phase 4A local smoke task",
-      "status": "info",
-      "tool": "agent_task.py",
-      "detail": "Verify create, accept, start, complete lifecycle for agent_task.py"
-    },
-    {
-      "id": "joshex-status-20260430-153730-phase-4a-implementation-started-task-queue-and-c",
-      "time": "2026-04-30T15:37:30Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "status",
-      "title": "Phase 4A implementation started: task queue and capability registry",
+      "title": "Recover Brain Feed hero kiosk style",
       "status": "active",
-      "tool": "codex",
-      "detail": "Building capability registry, agent task queue, task lifecycle helper, Mission Control task summary, and remote smoke tests for Josh 2.0 and JAIMES/J.A.I.N."
+      "tool": "Mission Control visual recovery",
+      "detail": "User reports Josh 2.0 is showing a messy layout that does not match the Brain Feed hero style used most of the day. Recovering the intended kiosk style from artifacts/history and restoring that visible layout."
     },
     {
-      "id": "joshex-decision-20260430-153638-always-include-proposed-next-steps-in-ecosystem-",
-      "time": "2026-04-30T15:36:38Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "decision",
-      "title": "Always include proposed next steps in ecosystem work",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Josh requested that responses include proposed next steps; future Mission Control and agent ecosystem updates should end with concrete next recommended actions."
-    },
-    {
-      "id": "joshex-complete-20260430-153404-phase-4-implementation-plan-built-and-distribute",
-      "time": "2026-04-30T15:34:04Z",
+      "id": "joshex-complete-20260502-071744-react-v2-24-inch-layout-restored",
+      "time": "2026-05-02T07:17:44Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "complete",
-      "title": "Phase 4 implementation plan built and distributed",
+      "title": "React v2 24-inch layout restored",
       "status": "done",
-      "tool": "codex",
-      "detail": "Created durable Phase 4 plan covering capability registry, task queue, permission tiers, orchestration helper, Mission Control visibility, safe wrapping rollout, and wiring Josh 2.0, JAIMES, J.A.I.N, and JOSHeX."
+      "tool": "Mission Control React v2 CSS rebuild + Josh kiosk reload",
+      "detail": "Corrected over-switching: Josh 2.0 is back on Mission Control v2 React, rebuilt with 24-inch monitor layout CSS and live jobs data. Verified visible Chrome tab is the v2 React URL on local port 4174."
     },
     {
-      "id": "joshex-job-20260430-153238-created-phase-4-implementation-plan",
-      "time": "2026-04-30T15:32:38Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "job",
-      "title": "Created Phase 4 implementation plan",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Added durable plan for task queue, capability registry, permission tiers, orchestration helper, Mission Control visibility, and wiring all agents."
-    },
-    {
-      "id": "joshex-decision-20260430-153238-phase-4-will-build-task-queue-and-capability-reg",
-      "time": "2026-04-30T15:32:38Z",
-      "agent": "joshex",
-      "agentLabel": "JOSHeX",
-      "type": "decision",
-      "title": "Phase 4 will build task queue and capability registry before broad wrapping",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Implementation plan prioritizes capability records, task lifecycle helper, permission tiers, Mission Control task summary, then safe one-job-at-a-time automation wrapping."
-    },
-    {
-      "id": "joshex-status-20260430-153118-phase-4-implementation-plan-started",
-      "time": "2026-04-30T15:31:18Z",
+      "id": "joshex-status-20260502-071042-restore-24-inch-mission-control-layout",
+      "time": "2026-05-02T07:10:42Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Phase 4 implementation plan started",
+      "title": "Restore 24-inch Mission Control layout",
       "status": "active",
-      "tool": "codex",
-      "detail": "Building implementation plan for task queue, capability registry, permission tiers, orchestration helper, and wiring Josh 2.0, JAIMES, J.A.I.N, and JOSHeX."
+      "tool": "Josh 2.0 screenshot + kiosk layout recovery",
+      "detail": "User reports the visible Mission Control is not the 24-inch monitor optimized build. Capturing the visible Josh 2.0 kiosk and recovering the correct monitor-optimized artifact."
     },
     {
-      "id": "joshex-status-20260430-152330-prepared-scalability-recommendations-for-agent-e",
-      "time": "2026-04-30T15:23:30Z",
+      "id": "joshex-complete-20260502-070902-josh-v2-data-flow-restored",
+      "time": "2026-05-02T07:09:02Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "complete",
+      "title": "Josh v2 data flow restored",
+      "status": "done",
+      "tool": "Mission Control v2 local jobs fallback + static data links",
+      "detail": "Fixed Josh 2.0 v2 kiosk data flow: built app now has access to live dashboard data and maps local codexJobs/crons into Today\u2019s Jobs. Verified data endpoints return 10 codexJobs and 42 crons."
+    },
+    {
+      "id": "joshex-status-20260502-070513-diagnose-josh-v2-data-flow",
+      "time": "2026-05-02T07:05:13Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Prepared scalability recommendations for agent ecosystem god mode",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Providing pragmatic architecture feedback for making Josh 2.0 and JAIMES/J.A.I.N scalable, reliable, observable, and safe."
+      "title": "Diagnose Josh v2 data flow",
+      "status": "active",
+      "tool": "Mission Control v2 data/API check",
+      "detail": "User reports the Josh 2.0 v2 kiosk is missing data and Today\u2019s Jobs is empty. Diagnosing data source, served JSON, and v2 fetch path."
     },
     {
-      "id": "joshex-status-20260430-151819-prepared-updated-codex-custom-instructions-for-b",
-      "time": "2026-04-30T15:18:19Z",
+      "id": "joshex-complete-20260502-070354-josh-kiosk-restored-to-built-v2",
+      "time": "2026-05-02T07:03:54Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "complete",
+      "title": "Josh kiosk restored to built v2",
+      "status": "done",
+      "tool": "Josh 2.0 Chrome kiosk + local v2 static server",
+      "detail": "Corrected Josh 2.0 kiosk from the legacy/dev route to the newer built Mission Control v2 React artifact at local port 4174. Stopped the confusing 5174 dev server and verified Chrome title/URL."
+    },
+    {
+      "id": "joshex-status-20260502-065806-restore-josh-mission-control-v2-kiosk",
+      "time": "2026-05-02T06:58:06Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Prepared updated Codex custom instructions for Brain Feed publishing",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Drafted revised instructions that require both local sidecars and Supabase Brain Feed publishing for Mission Control and agent ecosystem work."
+      "title": "Restore Josh Mission Control v2 kiosk",
+      "status": "active",
+      "tool": "Josh 2.0 Chrome kiosk URL correction",
+      "detail": "User reports Josh screen appears to show Mission Control v1. Switching Josh 2.0 visible kiosk back to the latest v2 Mission Control URL and verifying displayed location."
     },
     {
-      "id": "joshex-status-20260430-151726-answered-custom-instructions-editability-questio",
-      "time": "2026-04-30T15:17:26Z",
+      "id": "joshex-status-20260502-065226-fix-josh-publish-and-repo-drift",
+      "time": "2026-05-02T06:52:26Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Answered custom-instructions editability question",
-      "status": "done",
-      "tool": "codex",
-      "detail": "Clarified that Codex cannot directly mutate account-level custom instructions from the repo, but can provide exact text or assist through UI if granted desktop control."
+      "title": "Fix Josh publish and repo drift",
+      "status": "active",
+      "tool": "Josh 2.0 Git alignment + auth repair",
+      "detail": "User approved fixing the remaining Josh 2.0 Mission Control maintenance items: local repo drift and direct GitHub push/auth path, while preserving local runtime work."
     },
     {
-      "id": "joshex-status-20260430-151252-morning-ecosystem-pulse-complete-shared-layer-re",
-      "time": "2026-04-30T15:12:52Z",
+      "id": "joshex-complete-20260502-065051-josh-telegram-ux-rollout-complete",
+      "time": "2026-05-02T06:50:51Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "complete",
+      "title": "Josh Telegram UX rollout complete",
+      "status": "done",
+      "tool": "GitHub connector + GitHub Pages + Telegram bot setup",
+      "detail": "Completed Josh 2.0 Telegram UX rollout: compact bullet format, command menu config, editable work cards, overview/daily digests, agent quick cards, callback helper, and live HTTPS Telegram control-panel URL. Josh local GitHub credentials st"
+    },
+    {
+      "id": "joshex-status-20260502-063912-publish-josh-telegram-control-panel",
+      "time": "2026-05-02T06:39:12Z",
       "agent": "joshex",
       "agentLabel": "JOSHeX",
       "type": "status",
-      "title": "Morning ecosystem pulse complete: shared layer ready with two ops follow-ups",
+      "title": "Publish Josh Telegram control panel",
+      "status": "active",
+      "tool": "Josh 2.0 git publish + GitHub Pages verification",
+      "detail": "Continuing Telegram UX rollout: publishing the durable Josh 2.0 control-panel files and verifying the public Web App URL for Telegram buttons."
+    },
+    {
+      "id": "joshex-status-20260502-063854-publish-josh-telegram-control-panel",
+      "time": "2026-05-02T06:38:54Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "status",
+      "title": "Publish Josh Telegram control panel",
+      "status": "active",
+      "tool": "Josh 2.0 git publish + GitHub Pages verification",
+      "detail": "Continuing Telegram UX rollout: publishing the durable Josh 2.0 control-panel files and verifying the public Web App URL for Telegram buttons."
+    },
+    {
+      "id": "joshex-status-20260502-063319-continue-telegram-web-app-wiring",
+      "time": "2026-05-02T06:33:19Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "status",
+      "title": "Continue Telegram Web App wiring",
+      "status": "active",
+      "tool": "Telegram Web App HTTPS/deploy wiring",
+      "detail": "Continuing from Telegram UX implementation: checking Mission Control hosting/deploy path so the Telegram control panel can be exposed via stable HTTPS and wired into Josh 2.0 buttons."
+    },
+    {
+      "id": "joshex-complete-20260502-063040-josh-telegram-ux-recommendations-implemented",
+      "time": "2026-05-02T06:30:40Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "complete",
+      "title": "Josh Telegram UX recommendations implemented",
       "status": "done",
-      "tool": "ecosystem-health-check",
-      "detail": "Verified Josh 2.0 and JAIMES/J.A.I.N reachable; Shared OS ready across 3 nodes; follow-ups are calendar auth refresh and missed Sorare Cookie Freshness job."
+      "tool": "Telegram UX implementation",
+      "detail": "Implemented expanded Josh 2.0 Telegram UX: compact editable work cards as default for most multi-step tasks, /overview and /daily command menu entries, digest helper, callback action helper, agent quick cards, dashboard-safe Web App control"
+    },
+    {
+      "id": "joshex-status-20260502-062139-implement-josh-telegram-ux-recommendations",
+      "time": "2026-05-02T06:21:39Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "status",
+      "title": "Implement Josh Telegram UX recommendations",
+      "status": "active",
+      "tool": "Telegram UX implementation",
+      "detail": "Implementing expanded Josh 2.0 Telegram UX: editable work-card default, richer commands/buttons, voice-note/task guidance, overview/daily cards, and a dashboard-safe Telegram control panel artifact."
+    },
+    {
+      "id": "joshex-note-20260502-061838-telegram-ux-options-reviewed",
+      "time": "2026-05-02T06:18:38Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "note",
+      "title": "Telegram UX options reviewed",
+      "status": "done",
+      "tool": "Telegram UX advisory",
+      "detail": "Reviewed Telegram bot UI and Premium options for Josh 2.0 iPhone-first experience; recommended inline menus, compact work cards, command menu, optional Web App, voice-note flow, and Premium-side chat organization."
+    },
+    {
+      "id": "joshex-complete-20260502-061331-josh-telegram-format-improved",
+      "time": "2026-05-02T06:13:31Z",
+      "agent": "joshex",
+      "agentLabel": "JOSHeX",
+      "type": "complete",
+      "title": "Josh Telegram format improved",
+      "status": "done",
+      "tool": "Compact bullet-card format",
+      "detail": "Updated Josh 2.0 Telegram policy and AGENTS pointer to use compact bullet-card replies: one model/auth line, blank line, then short bullets for Route, Objective, Status, Now, Done, Blocker, and Next. Live canary sent to Telegram."
     }
   ],
   "sharedOperatingLayer": {
-    "status": "ready",
-    "updatedAt": "2026-04-30T15:56:13Z",
+    "status": "attention",
+    "updatedAt": "2026-05-02T07:32:39Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 4,
-      "knowledgeEntries": 8,
-      "openHandoffs": 0,
+      "knowledgeEntries": 38,
+      "openHandoffs": 1,
       "blocked": 0,
       "activeTasks": 0,
       "blockedTasks": 0,
       "approvalNeeded": 0,
-      "capabilityAgents": 4
+      "capabilityAgents": 4,
+      "routingRules": 4,
+      "freshHeartbeats": 0,
+      "staleHeartbeats": 4,
+      "inventoryNodes": 3,
+      "wrappedAutomations": 0
     },
     "latestEvents": [
       {
-        "id": "joshex-complete-20260430-155613-phase-4a-shared-task-layer-complete",
-        "time": "2026-04-30T15:56:13Z",
+        "id": "joshex-complete-20260502-073239-josh-kiosk-restored-to-full-brain-feed-shell",
+        "time": "2026-05-02T07:32:39Z",
         "agent": "joshex",
         "agentLabel": "JOSHeX",
         "type": "complete",
-        "title": "Phase 4A shared task layer complete",
+        "title": "Josh kiosk restored to full Brain Feed shell",
         "status": "done",
-        "tool": "agent_publish.py",
-        "detail": "Built and installed shared task queue, capability registry, permission tiers, agent_task.py lifecycle helper, Mission Control task summary, and remote shims. Smoke tests passed for JOSHeX, Josh 2.0, JAIMES, and J.A.I.N; all four lifecycle t"
+        "tool": "Codex kiosk recovery",
+        "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL."
       },
       {
-        "id": "jain-status-20260430-154755-task-queued-phase-4a-remote-j-a-i-n-smoke-task",
-        "time": "2026-04-30T15:47:55Z",
-        "agent": "jain",
-        "agentLabel": "J.A.I.N",
-        "type": "status",
-        "title": "Task queued: Phase 4A remote J.A.I.N smoke task",
-        "status": "info",
-        "tool": "agent_task.py",
-        "detail": "Verify J.A.I.N can receive and complete a shared task through the Phase 4A task queue helper."
-      },
-      {
-        "id": "joshex-status-20260430-154632-phase-4a-resumed-finishing-task-queue-rollout",
-        "time": "2026-04-30T15:46:32Z",
+        "id": "joshex-status-20260502-072832-inspect-broken-josh-kiosk-view",
+        "time": "2026-05-02T07:28:32Z",
         "agent": "joshex",
         "agentLabel": "JOSHeX",
         "type": "status",
-        "title": "Phase 4A resumed: finishing task queue rollout",
+        "title": "Inspect broken Josh kiosk view",
         "status": "active",
-        "tool": "agent_publish.py",
-        "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer."
+        "tool": "Codex kiosk recovery",
+        "detail": "User reports the current Josh 2.0 Mission Control view is unfamiliar and broken; inspecting live v2 display and recovering known-good Brain Feed style."
       },
       {
-        "id": "joshex-status-20260430-154621-phase-4a-resumed-finishing-task-queue-rollout",
-        "time": "2026-04-30T15:46:21Z",
+        "id": "joshex-complete-20260502-072619-brain-feed-hero-kiosk-restored",
+        "time": "2026-05-02T07:26:19Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "type": "complete",
+        "title": "Brain Feed hero kiosk restored",
+        "status": "done",
+        "tool": "Codex React deploy",
+        "detail": "Mission Control v2 on Josh 2.0 was rebuilt around the Brain Feed hero layout and reloaded at the v2 kiosk URL."
+      },
+      {
+        "id": "joshex-status-20260502-072211-restoring-brain-feed-hero-kiosk",
+        "time": "2026-05-02T07:22:11Z",
         "agent": "joshex",
         "agentLabel": "JOSHeX",
         "type": "status",
-        "title": "Phase 4A resumed: finishing task queue rollout",
+        "title": "Restoring Brain Feed hero kiosk",
         "status": "active",
-        "tool": "agent_publish.py",
-        "detail": "Resumed Phase 4A execution: installing top-level task shims, adding J.A.I.N lifecycle smoke test, merging remote queue state, regenerating dashboard data, and validating the shared task layer."
+        "tool": "Codex React edit",
+        "detail": "Reworking Mission Control v2 so Josh 2.0 shows the Brain Feed hero layout instead of the older console-style grid."
       },
       {
-        "id": "jaimes-status-20260430-154311-task-queued-phase-4a-remote-jaimes-smoke-task",
-        "time": "2026-04-30T15:43:11Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
+        "id": "joshex-status-20260502-071845-recover-brain-feed-hero-kiosk-style",
+        "time": "2026-05-02T07:18:45Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
         "type": "status",
-        "title": "Task queued: Phase 4A remote JAIMES smoke task",
-        "status": "info",
-        "tool": "agent_task.py",
-        "detail": "Verify JAIMES/J.A.I.N can receive and complete a shared task"
+        "title": "Recover Brain Feed hero kiosk style",
+        "status": "active",
+        "tool": "Mission Control visual recovery",
+        "detail": "User reports Josh 2.0 is showing a messy layout that does not match the Brain Feed hero style used most of the day. Recovering the intended kiosk style from artifacts/history and restoring that visible layout."
       },
       {
-        "id": "josh-status-20260430-154311-task-queued-phase-4a-remote-josh-smoke-task",
-        "time": "2026-04-30T15:43:11Z",
-        "agent": "josh",
-        "agentLabel": "JOSH 2.0",
-        "type": "status",
-        "title": "Task queued: Phase 4A remote Josh smoke task",
-        "status": "info",
-        "tool": "agent_task.py",
-        "detail": "Verify Josh 2.0 can receive and complete a shared task"
+        "id": "joshex-complete-20260502-071744-react-v2-24-inch-layout-restored",
+        "time": "2026-05-02T07:17:44Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "type": "complete",
+        "title": "React v2 24-inch layout restored",
+        "status": "done",
+        "tool": "Mission Control React v2 CSS rebuild + Josh kiosk reload",
+        "detail": "Corrected over-switching: Josh 2.0 is back on Mission Control v2 React, rebuilt with 24-inch monitor layout CSS and live jobs data. Verified visible Chrome tab is the v2 React URL on local port 4174."
       }
     ],
     "recentDecisions": [
@@ -1457,143 +1678,265 @@
     ],
     "knowledgeEntries": [
       {
-        "id": "shared-agent-operating-layer-phase4-implementation-plan",
-        "title": "Shared Agent Operating Layer - Phase 4 Implementation Plan",
-        "path": "docs/shared-agent-operating-layer-phase4-implementation-plan.md",
+        "id": "josh-agent-quick-card",
+        "title": "Josh Agent Quick Card",
+        "path": "scripts/josh_agent_quick_card.py",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "agent-os",
-          "phase4",
-          "task-queue",
-          "capabilities",
-          "permissions",
-          "orchestration"
+          "josh2",
+          "telegram",
+          "agent-status",
+          "quick-card"
         ],
-        "summary": "Implementation plan for capability registry, task queue, permission tiers, orchestration helper, Mission Control visibility, and agent-specific wiring."
+        "summary": "Sends compact Telegram status cards for Josh 2.0, JOSHeX, JAIMES, and J.AI.N using Mission Control sidecars."
       },
       {
-        "id": "shared-agent-operating-layer-phase3",
-        "title": "Shared Agent Operating Layer - Phase 3",
-        "path": "docs/shared-agent-operating-layer-phase3.md",
+        "id": "josh-telegram-callback-action",
+        "title": "Josh Telegram Callback Action",
+        "path": "scripts/josh_telegram_callback_action.py",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "agent-os",
-          "adoption",
-          "compliance",
-          "wrapper"
+          "josh2",
+          "telegram",
+          "callbacks",
+          "buttons"
         ],
-        "summary": "Phase 3 compliance checks, wrapper adoption order, and safe automation wrapping rules."
+        "summary": "Maps common Josh 2.0 Telegram inline-button callback payloads to concrete actions or compact response cards without polling Telegram directly."
       },
       {
-        "id": "shared-layer-phase3-adoption-report",
-        "title": "Shared Layer Phase 3 Adoption Report",
-        "path": "docs/shared-layer-phase3-adoption-report.md",
+        "id": "telegram-control-panel",
+        "title": "Telegram Control Panel",
+        "path": "telegram-control-panel.html",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "adoption",
-          "compliance",
-          "cron",
-          "report"
+          "josh2",
+          "telegram",
+          "webapp",
+          "control-panel"
         ],
-        "summary": "Current adoption status across MacBook/JOSHeX, Josh 2.0, and JAIMES/J.A.I.N."
+        "summary": "Dashboard-safe mobile control panel artifact for future Telegram Web App wiring when a stable HTTPS endpoint is available."
       },
       {
-        "id": "shared-agent-operating-layer-phase2",
-        "title": "Shared Agent Operating Layer - Phase 2",
-        "path": "docs/shared-agent-operating-layer-phase2.md",
+        "id": "josh-telegram-digest",
+        "title": "Josh Telegram Digest",
+        "path": "scripts/josh_telegram_digest.py",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "agent-os",
-          "decisions",
-          "handoffs",
-          "knowledge",
-          "rollup"
+          "josh2",
+          "telegram",
+          "digest",
+          "overview"
         ],
-        "summary": "Phase 2 durable decisions, knowledge index, handoff queue, daily rollups, and freshness status."
+        "summary": "Sends compact overview and daily digest cards to Josh 2.0 Telegram using Mission Control sidecars."
       },
       {
-        "id": "agent-job-wrap",
-        "title": "Agent Job Wrapper",
-        "path": "scripts/agent_job_wrap.sh",
+        "id": "josh-work-card",
+        "title": "Josh Telegram Work Card",
+        "path": "scripts/josh_work_card.py",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "wrapper",
-          "cron",
-          "automation",
-          "adoption"
+          "josh2",
+          "telegram",
+          "work-card",
+          "iphone"
         ],
-        "summary": "Shell wrapper that publishes job start/done/error through agent_publish.py while preserving the wrapped command exit code."
+        "summary": "Compact editable Telegram work-card helper intended to be synced to Josh 2.0 workspace scripts for most multi-step tasks."
       },
       {
-        "id": "shared-agent-operating-layer-phase1",
-        "title": "Shared Agent Operating Layer - Phase 1",
-        "path": "docs/shared-agent-operating-layer-phase1.md",
+        "id": "josh2-telegram-ux-audit",
+        "title": "Josh 2.0 Telegram UX Audit",
+        "path": "docs/josh2-telegram-ux-audit.md",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "agent-os",
-          "publishing",
-          "brain-feed",
-          "today-jobs"
-        ],
-        "summary": "How agents publish dashboard-safe status, jobs, decisions, and handoffs through agent_publish.py."
-      },
-      {
-        "id": "shared-agent-operating-layer-handoff",
-        "title": "Shared Agent Operating Layer Handoff",
-        "path": "docs/shared-agent-operating-layer-handoff.md",
-        "owner": "JOSHeX",
-        "tags": [
-          "handoff",
-          "agent-adoption",
+          "josh2",
+          "telegram",
+          "iphone",
+          "ux",
           "routing"
         ],
-        "summary": "Copy/paste adoption guidance for JOSH 2.0, JAIMES, J.A.I.N, and JOSHeX."
+        "summary": "Dashboard-safe audit and implementation backlog for making Josh 2.0 Telegram the primary iPhone command-center experience."
       },
       {
-        "id": "personal-codex-lane",
-        "title": "Personal Codex / JOSHeX Lane",
-        "path": "docs/personal-codex-lane.md",
+        "id": "josh2-telegram-ux-config",
+        "title": "Josh 2.0 Telegram UX Config",
+        "path": "data/josh2-telegram-ux-config.json",
         "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
         "tags": [
-          "joshex",
-          "personal-codex",
-          "mission-control"
+          "josh2",
+          "telegram",
+          "iphone",
+          "commands",
+          "buttons"
         ],
-        "summary": "How the JOSHeX lane is represented in Mission Control."
+        "summary": "Machine-readable Telegram UX policy for Josh 2.0 command menu, inline buttons, response templates, and future UI options."
+      },
+      {
+        "id": "josh2-telegram-control-panel-buttons",
+        "title": "Josh 2.0 Telegram Control Panel Buttons",
+        "path": "data/josh2-telegram-control-panel-buttons.json",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "buttons",
+          "iphone"
+        ],
+        "summary": "Reusable inline-button payload for the Josh 2.0 iPhone command-center control panel."
       }
     ],
-    "openHandoffs": [],
+    "openHandoffs": [
+      {
+        "id": "jaimes-handoff-20260501-030800-jaimes-v2-handoff-smoke",
+        "time": "2026-05-01T03:08:00Z",
+        "from": "jaimes",
+        "fromLabel": "JAIMES",
+        "to": "joshex",
+        "title": "JAIMES v2 handoff smoke",
+        "status": "open",
+        "detail": "dashboard-safe JAIMES handoff smoke for the React v2 approval inbox",
+        "path": "docs/handoffs/2026-05-01-joshex-jaimes-handoff-20260501-030800-jaimes-v2-handoff-smoke.md",
+        "privacy": "dashboard-safe"
+      }
+    ],
     "dailyRollup": {
-      "date": "2026-04-30",
-      "generatedAt": "2026-04-30T15:56:14Z",
-      "summary": "38 shared event(s), 35 job(s), 4 decision(s), 0 open handoff(s).",
+      "date": "2026-05-02",
+      "generatedAt": "2026-05-02T06:55:20Z",
+      "summary": "404 shared event(s), 100 job(s), 0 decision(s), 0 open handoff(s).",
       "counts": {
-        "events": 38,
-        "jobs": 35,
-        "decisions": 4,
-        "handoffs": 1,
-        "blocked": 0
+        "events": 404,
+        "jobs": 100,
+        "decisions": 0,
+        "handoffs": 0,
+        "blocked": 66
       },
       "highlights": [
-        "Phase 4A shared task layer complete",
-        "Task queued: Phase 4A remote J.A.I.N smoke task",
-        "Phase 4A resumed: finishing task queue rollout",
-        "Task queued: Phase 4A remote JAIMES smoke task",
-        "Task queued: Phase 4A remote Josh smoke task",
-        "Task done: Phase 4A local smoke task",
-        "Task active: Phase 4A local smoke task"
+        "josh2-lan cron: update_and_push.sh failed",
+        "josh2-lan cron: update_and_push.sh",
+        "josh2-lan cron: brain_feed_server.py"
       ],
       "openHandoffs": [],
-      "blockedItems": []
+      "blockedItems": [
+        {
+          "id": "josh-blocked-20260502-065520-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:55:20Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-065013-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:50:13Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-064508-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:45:08Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-064102-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:41:02Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-063557-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:35:57Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-063051-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:30:51Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-062546-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:25:46Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh-blocked-20260502-062040-josh2-lan-cron-update-and-push-sh-failed",
+          "time": "2026-05-02T06:20:40Z",
+          "agent": "josh",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "josh2-lan cron: update_and_push.sh failed",
+          "status": "error",
+          "tool": "update_and_push.sh",
+          "detail": "Approved scheduled job with Mission Control lifecycle logging exited with status 1",
+          "privacy": "dashboard-safe"
+        }
+      ]
     },
     "adoption": {
-      "generatedAt": "2026-04-30T08:44:26Z",
+      "generatedAt": "2026-05-02T04:56:37Z",
+      "summary": {
+        "overall": "ready",
+        "nodeCount": 3,
+        "readyNodes": 3,
+        "needsWrapping": 0,
+        "totalCronLines": 0
+      },
       "nodes": [
         {
           "label": "MacBook/JOSHeX",
           "agent": "joshex",
           "workspace": "/Users/joshcubell/Documents/New project",
-          "checkedAt": "2026-04-30T08:27:33Z",
+          "checkedAt": "2026-05-02T04:56:16Z",
           "helperReady": true,
           "wrapperReady": true,
           "topLevelHelperReady": false,
@@ -1611,65 +1954,39 @@
           "label": "JOSH 2.0",
           "agent": "josh",
           "workspace": "/Users/josh2.0/.openclaw/workspace",
-          "checkedAt": "2026-04-30T08:44:25Z",
+          "checkedAt": "2026-05-02T04:56:21Z",
           "helperReady": true,
           "wrapperReady": true,
           "topLevelHelperReady": true,
           "topLevelWrapperReady": true,
           "docsReady": true,
           "schemasReady": true,
-          "crontabAvailable": true,
-          "totalCronLines": 6,
+          "crontabAvailable": false,
+          "totalCronLines": 0,
           "wrappedCronLines": 0,
           "sampleWrappedCronLines": [],
-          "needsWrapping": [
-            "*/5 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /bin/zsh /Users/josh2.0/.openclaw/workspace/mission-control/scripts/update_and_push.sh >> /Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log 2>&1",
-            "*/2 * * * * pgrep -f brain_feed_server.py > /dev/null || /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/mission-control/scripts/brain_feed_server.py >> /Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log 2>&1 &",
-            "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1",
-            "0 13 * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/sorare_cookie_freshness.py >> /Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log 2>&1",
-            "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /bin/bash /Users/josh2.0/.openclaw/workspace/scripts/jain_medic.sh >> /Users/josh2.0/.openclaw/workspace/logs/jain_medic.log 2>&1",
-            "0 14 * * 0 HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/sorare_cookie_autorefresh.py >> /Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log 2>&1"
-          ],
-          "status": "ready_unwrapped"
+          "needsWrapping": [],
+          "status": "ready"
         },
         {
           "label": "JAIMES/J.A.I.N",
           "agent": "jaimes",
           "workspace": "/Users/jc_agent/.openclaw/workspace",
-          "checkedAt": "2026-04-30T08:44:26Z",
+          "checkedAt": "2026-05-02T04:56:21Z",
           "helperReady": true,
           "wrapperReady": true,
           "topLevelHelperReady": true,
           "topLevelWrapperReady": true,
           "docsReady": true,
           "schemasReady": true,
-          "crontabAvailable": true,
-          "totalCronLines": 48,
+          "crontabAvailable": false,
+          "totalCronLines": 0,
           "wrappedCronLines": 0,
           "sampleWrappedCronLines": [],
-          "needsWrapping": [
-            "15 7 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 10 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 12 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 14 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "15 16 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 18 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 21 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1"
-          ],
-          "status": "ready_unwrapped"
+          "needsWrapping": [],
+          "status": "ready"
         }
-      ],
-      "summary": {
-        "nodesChecked": 3,
-        "helpersReady": 3,
-        "wrappersReady": 3,
-        "topLevelHelpersReady": 2,
-        "topLevelWrappersReady": 2,
-        "wrappedCronLines": 0,
-        "totalCronLines": 54,
-        "overall": "ready_unwrapped"
-      }
+      ]
     },
     "tasks": {
       "active": [],
@@ -1678,7 +1995,7 @@
       "byOwner": {}
     },
     "capabilities": {
-      "updatedAt": "2026-04-30T15:37:41Z",
+      "updatedAt": "2026-04-30T18:16:32Z",
       "agents": [
         {
           "id": "joshex",
@@ -1691,14 +2008,19 @@
             "Sensitive connector coordination",
             "Mission Control and Agent Control code changes",
             "Task routing and architecture decisions",
-            "Validation, docs, and handoffs"
+            "Validation, docs, and handoffs",
+            "Gemini CLI brokering for approved dashboard-safe specialist tasks"
           ],
           "capabilities": [
             "repo-edit",
             "dashboard-validation",
             "connected-account-triage",
             "architecture",
-            "agent-routing"
+            "agent-routing",
+            "gemini-cli",
+            "gemini-review",
+            "gemini-long-context",
+            "gemini-research"
           ],
           "safeTaskTypes": [
             "planning",
@@ -1706,16 +2028,22 @@
             "dashboard-update",
             "decision-record",
             "handoff",
-            "validation"
+            "validation",
+            "gemini-review",
+            "gemini-long-context",
+            "gemini-research",
+            "model-fallback"
           ],
           "restrictedTaskTypes": [
             "raw-secret-handling",
             "destructive-git",
-            "unapproved-account-mutation"
+            "unapproved-account-mutation",
+            "raw-private-data-forwarding"
           ],
           "preferredTools": [
             "agent_publish.py",
             "agent_task.py",
+            "gemini_agent.py",
             "mission_control_regression_check.py"
           ],
           "artifactRoots": [
@@ -1723,7 +2051,7 @@
             "data/",
             "scripts/"
           ],
-          "updatedAt": "2026-04-30T15:37:41Z"
+          "updatedAt": "2026-04-30T18:16:32Z"
         },
         {
           "id": "josh",
@@ -1744,13 +2072,15 @@
             "mission-control-refresh",
             "openclaw",
             "ollama",
-            "service-health"
+            "service-health",
+            "gemini-cli-health"
           ],
           "safeTaskTypes": [
             "dashboard-refresh",
             "health-check",
             "service-status",
-            "non-sensitive-log-review"
+            "non-sensitive-log-review",
+            "gemini-health-check"
           ],
           "restrictedTaskTypes": [
             "auth-cookie-refresh",
@@ -1789,14 +2119,16 @@
             "weaviate",
             "temporal",
             "report-generation",
-            "ml-workflows"
+            "ml-workflows",
+            "gemini-evaluator"
           ],
           "safeTaskTypes": [
             "report",
             "model-analysis",
             "health-check",
             "specialist-summary",
-            "non-sensitive-data-processing"
+            "non-sensitive-data-processing",
+            "gemini-evaluation"
           ],
           "restrictedTaskTypes": [
             "browser-auth-workflow",
@@ -1833,14 +2165,16 @@
             "monitoring",
             "intelligence-scan",
             "watchlist",
-            "background-worker"
+            "background-worker",
+            "gemini-scheduled-summary"
           ],
           "safeTaskTypes": [
             "monitor",
             "scan",
             "status-check",
             "log-summary",
-            "worker-report"
+            "worker-report",
+            "scheduled-summary"
           ],
           "restrictedTaskTypes": [
             "posting-side-effect",
@@ -1860,36 +2194,314 @@
           "updatedAt": "2026-04-30T15:37:41Z"
         }
       ]
+    },
+    "routingPolicy": {
+      "updatedAt": "2026-04-30T18:16:32Z",
+      "defaultRequester": "joshex",
+      "approvalRequiredPrivacy": [
+        "josh-approval",
+        "sensitive-account",
+        "destructive"
+      ],
+      "approvalRequiredTaskTypes": [
+        "account-mutation",
+        "auth-cookie-refresh",
+        "browser-auth-workflow",
+        "destructive-maintenance",
+        "destructive-git",
+        "posting-side-effect",
+        "raw-private-data-forwarding",
+        "raw-secret-handling",
+        "sensitive-account-action",
+        "unapproved-account-mutation",
+        "gemini-private-context",
+        "gemini-raw-connector-data"
+      ],
+      "routes": [
+        {
+          "agent": "joshex",
+          "priority": 100,
+          "taskTypes": [
+            "planning",
+            "repo-patch",
+            "dashboard-update",
+            "decision-record",
+            "handoff",
+            "validation",
+            "connected-account-triage",
+            "agent-routing",
+            "sensitive-coordination",
+            "gemini-review",
+            "gemini-long-context",
+            "gemini-research",
+            "model-fallback"
+          ],
+          "capabilities": [
+            "repo-edit",
+            "dashboard-validation",
+            "connected-account-triage",
+            "architecture",
+            "agent-routing",
+            "gemini-cli",
+            "gemini-review",
+            "gemini-long-context",
+            "gemini-research"
+          ],
+          "privacyTiers": [
+            "dashboard-safe",
+            "agent-private",
+            "josh-approval",
+            "sensitive-account",
+            "destructive"
+          ]
+        },
+        {
+          "agent": "josh",
+          "priority": 80,
+          "taskTypes": [
+            "dashboard-refresh",
+            "health-check",
+            "service-status",
+            "non-sensitive-log-review",
+            "host-maintenance",
+            "gemini-health-check"
+          ],
+          "capabilities": [
+            "ssh-host",
+            "mission-control-refresh",
+            "openclaw",
+            "ollama",
+            "service-health",
+            "gemini-cli-health"
+          ],
+          "privacyTiers": [
+            "dashboard-safe",
+            "agent-private"
+          ]
+        },
+        {
+          "agent": "jaimes",
+          "priority": 70,
+          "taskTypes": [
+            "report",
+            "model-analysis",
+            "health-check",
+            "specialist-summary",
+            "non-sensitive-data-processing",
+            "ml-workflows",
+            "gemini-evaluation"
+          ],
+          "capabilities": [
+            "hermes",
+            "ollama",
+            "weaviate",
+            "temporal",
+            "report-generation",
+            "ml-workflows",
+            "gemini-evaluator"
+          ],
+          "privacyTiers": [
+            "dashboard-safe",
+            "agent-private"
+          ]
+        },
+        {
+          "agent": "jain",
+          "priority": 60,
+          "taskTypes": [
+            "monitor",
+            "scan",
+            "status-check",
+            "log-summary",
+            "worker-report",
+            "background-worker",
+            "intelligence-scan",
+            "watchlist",
+            "scheduled-summary"
+          ],
+          "capabilities": [
+            "cron",
+            "monitoring",
+            "intelligence-scan",
+            "watchlist",
+            "background-worker",
+            "gemini-scheduled-summary"
+          ],
+          "privacyTiers": [
+            "dashboard-safe",
+            "agent-private"
+          ]
+        }
+      ]
+    },
+    "heartbeats": {
+      "staleAfterMinutes": 30,
+      "fresh": [],
+      "stale": [
+        {
+          "agent": "jain",
+          "node": "jaimes-via-josh",
+          "status": "ready",
+          "summary": "J.A.I.N live and publishing: worker substrate supervised, scheduler active, queues zero, approval posture monitored",
+          "updatedAt": "2026-05-02T03:21:04Z",
+          "stale": true
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-via-josh",
+          "status": "ready",
+          "summary": "JAIMES live and publishing: services supervised, scheduler active, queues zero, repo drift zero, approvals 33/33",
+          "updatedAt": "2026-05-02T03:20:41Z",
+          "stale": true
+        },
+        {
+          "agent": "josh",
+          "node": "josh2-lan",
+          "status": "ready",
+          "summary": "Josh 2.0 ready: routine OpenCLAW approvals 33/33, scheduler active, failed queues zero, repo drift zero",
+          "updatedAt": "2026-05-02T03:06:36Z",
+          "stale": true
+        },
+        {
+          "agent": "joshex",
+          "node": "macbook-codex",
+          "status": "ready",
+          "summary": "Josh autonomy approval friction reduced: OpenCLAW routine approvals 33/33 on Josh and JAIMES, approvalFrictionAgents=0, weekly self-test active",
+          "updatedAt": "2026-05-02T03:05:53Z",
+          "stale": true
+        }
+      ]
+    },
+    "capabilityInventory": {
+      "updatedAt": "2026-04-30T16:32:00Z",
+      "nodes": [
+        {
+          "node": "jaimes-via-josh",
+          "agent": "jaimes",
+          "checkedAt": "2026-04-30T16:26:05Z",
+          "platform": "macOS-26.3.1-arm64-arm-64bit-Mach-O",
+          "machine": "arm64",
+          "python": "Python 3.14.3",
+          "workspace": "/Users/jc_agent/.openclaw/workspace",
+          "crontabAvailable": true,
+          "crontabCount": 48,
+          "wrappedCronLines": 0,
+          "ollamaModels": [
+            "gemma4:26b",
+            "llama3.2:latest",
+            "qwen2.5:7b",
+            "mistral:latest",
+            "llama3.1:8b",
+            "nomic-embed-text:latest"
+          ],
+          "services": [
+            "ollama",
+            "weaviate",
+            "temporal",
+            "Hermes",
+            "OpenCLAW"
+          ]
+        },
+        {
+          "node": "josh2-lan",
+          "agent": "josh",
+          "checkedAt": "2026-04-30T16:25:58Z",
+          "platform": "macOS-26.3.2-arm64-arm-64bit-Mach-O",
+          "machine": "arm64",
+          "python": "Python 3.14.3",
+          "workspace": "/Users/josh2.0/.openclaw/workspace",
+          "crontabAvailable": true,
+          "crontabCount": 6,
+          "wrappedCronLines": 0,
+          "ollamaModels": [
+            "qwen2.5-coder:7b",
+            "nomic-embed-text:latest"
+          ],
+          "services": [
+            "brain_feed_server.py",
+            "ollama",
+            "OpenCLAW"
+          ]
+        },
+        {
+          "node": "macbook-codex",
+          "agent": "joshex",
+          "checkedAt": "2026-04-30T16:23:14Z",
+          "platform": "macOS-26.2-arm64-arm-64bit",
+          "machine": "arm64",
+          "python": "Python 3.9.6",
+          "workspace": "/Users/joshcubell/Documents/New project",
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "wrappedCronLines": 0,
+          "ollamaModels": [],
+          "services": []
+        }
+      ]
+    },
+    "automationRollout": {
+      "updatedAt": "2026-05-02T04:56:37Z",
+      "rollouts": [
+        {
+          "id": "josh-j-a-i-n-silence-detector",
+          "agent": "josh",
+          "node": "josh2-lan",
+          "title": "J.A.I.N Silence Detector",
+          "match": "jain_silence_detector.py",
+          "status": "archived_stale",
+          "backup": "/Users/josh2.0/.openclaw/workspace/mission-control/data/crontab-backups/20260430T163013Z-josh-j-a-i-n-silence-detector.crontab",
+          "original": "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1",
+          "wrapped": "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /Users/josh2.0/.openclaw/workspace/mission-control/scripts/agent_job_wrap.sh josh 'J.A.I.N Silence Detector' jain_silence_detector.py 'Hourly J.A.I.N silence detector wrapped by Phase 4B' -- /bin/zsh -lc '/opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1'",
+          "updatedAt": "2026-04-30T16:30:13Z",
+          "archivedAt": "2026-05-02T04:56:37Z",
+          "archiveReason": "Legacy crontab entry no longer present; refreshed adoption checks show no crontab lines to wrap."
+        },
+        {
+          "id": "jain-josh-health-check",
+          "agent": "jain",
+          "node": "jaimes-via-josh",
+          "title": "JOSH Health Check",
+          "match": "check_josh_health.sh",
+          "status": "archived_stale",
+          "backup": "/Users/jc_agent/.openclaw/workspace/mission-control/data/crontab-backups/20260430T163005Z-jain-josh-health-check.crontab",
+          "original": "*/30 * * * * bash /Users/jc_agent/scripts/check_josh_health.sh >> /Users/jc_agent/scripts/logs/josh_health.log 2>&1",
+          "wrapped": "*/30 * * * * /Users/jc_agent/.openclaw/workspace/mission-control/scripts/agent_job_wrap.sh jain 'JOSH Health Check' check_josh_health.sh 'J.A.I.N remote health check to Josh 2.0 wrapped by Phase 4B' -- /bin/zsh -lc 'bash /Users/jc_agent/scripts/check_josh_health.sh >> /Users/jc_agent/scripts/logs/josh_health.log 2>&1'",
+          "updatedAt": "2026-04-30T16:30:11Z",
+          "archivedAt": "2026-05-02T04:56:37Z",
+          "archiveReason": "Legacy crontab entry no longer present; refreshed adoption checks show no crontab lines to wrap."
+        }
+      ],
+      "staleArchivedAt": "2026-05-02T04:56:37Z"
     }
   },
   "visualCanaries": {
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-04-30T15:50:33.655781Z",
+    "checkedAt": "2026-05-02T07:45:08.718164Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JOSH 2.0; dualAgents=none; live=3",
+        "detail": "primary=JOSHeX; dualAgents=none; live=3",
         "severity": "ok"
       },
       {
         "name": "Calendar tile",
         "ok": true,
-        "detail": "gog CLI missing",
+        "detail": "Calendar fetch failed",
         "severity": "ok"
       },
       {
         "name": "Today Jobs",
         "ok": true,
-        "detail": "32 today-relevant; 0 active issue(s)",
+        "detail": "33 today-relevant; 0 active issue(s)",
         "severity": "ok"
       },
       {
         "name": "Action Required",
         "ok": true,
-        "detail": "1 visible alert(s)",
+        "detail": "2 visible alert(s)",
         "severity": "ok"
       },
       {
@@ -1899,15 +2511,27 @@
         "severity": "ok"
       },
       {
+        "name": "Ops glance strip",
+        "ok": true,
+        "detail": "first-viewport agent attention strip present",
+        "severity": "ok"
+      },
+      {
         "name": "Personal Codex lane",
         "ok": true,
-        "detail": "status=working",
+        "detail": "status=ready",
         "severity": "ok"
       },
       {
         "name": "Agent Control lane",
         "ok": true,
         "detail": "overall=ready; ready=2/2",
+        "severity": "ok"
+      },
+      {
+        "name": "Alignment stability",
+        "ok": true,
+        "detail": "stable text rails present; objective ticker disabled; dense grids capped",
         "severity": "ok"
       }
     ]
@@ -1927,7 +2551,7 @@
   "voiceRouter": {
     "status": "ready",
     "summary": "Telegram voice notes can become structured tasks",
-    "entrypoint": "/Users/joshcubell/Documents/New project/mission-control/scripts/telegram_voice_task_router.py",
+    "entrypoint": "/Users/josh2.0/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
     "modes": [
       "task",
       "calendar",
@@ -1949,10 +2573,10 @@
   },
   "personalCodex": {
     "status": "ready",
-    "objective": "Phase 4A task queue and capability registry implementation",
-    "updatedAt": "2026-04-30T15:55:43Z",
-    "summary": "Phase 4A is complete: shared task queue, capability registry, permission tiers, task lifecycle helper, dashboard summary, remote shims, and smoke tests are installed across JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.",
-    "mode": "implementation",
+    "objective": "Josh 2.0 autonomy approval friction reduced",
+    "updatedAt": "2026-05-02T03:04:02Z",
+    "summary": "Josh 2.0 now has a global OpenCLAW routine-local-automation allowlist matching the JAIMES posture. Agent Control monitors approval posture directly and reports both Josh 2.0 and JAIMES at 33/33 routine approval coverage with approvalFrictionAgents=0.",
+    "mode": "agent-ecosystem-hardening",
     "repo": {
       "path": "/Users/joshcubell/Documents/New project/mission-control",
       "branch": "main",
@@ -1966,16 +2590,24 @@
     "actionRequired": [],
     "recentActivity": [
       {
-        "time": "2026-04-30T15:55:43Z",
-        "event": "Completed Phase 4A rollout and verified task lifecycle on JOSHeX, Josh 2.0, JAIMES, and J.A.I.N"
+        "time": "2026-05-02T03:04:02Z",
+        "event": "Applied approved Josh 2.0 OpenCLAW autonomy allowlist and added Agent Control approval posture monitoring; both Josh 2.0 and JAIMES report 33/33 routine approval coverage"
       },
       {
-        "time": "2026-04-30T15:46:46Z",
-        "event": "Resumed Phase 4A execution and refreshed JOSHeX Brain Feed before final rollout steps"
+        "time": "2026-05-02T02:45:38Z",
+        "event": "Fixed repo drift across publishable nested repos: Josh 2.0 and JAIMES now report dirtyRepos=0 and dirtyRepoEntries=0; top-level workspace containers are excluded as runtime state"
       },
       {
-        "time": "2026-04-30T15:37:41Z",
-        "event": "Started Phase 4A implementation after Josh approved all next steps"
+        "time": "2026-05-02T02:35:16Z",
+        "event": "Completed final optimization pass: JAIMES Mission Control merge conflicts resolved, generated/runtime ignore rules synced to both hosts, and remaining repo drift classified without destructive cleanup"
+      },
+      {
+        "time": "2026-05-02T02:25:46Z",
+        "event": "Completed full Josh 2.0 and JAIMES scheduler optimization: both legacy crons cleared, both LaunchAgent schedulers active, JAIMES Ollama/Antfarm recovered, Agent Control ready, failed queues zero"
+      },
+      {
+        "time": "2026-05-02T01:23:38Z",
+        "event": "Enabled Josh 2.0 LaunchAgent scheduler after local cron clear; first wrapped scheduler run completed status 0; JAIMES remains pending local cron clear"
       }
     ],
     "metrics": {
@@ -1995,7 +2627,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-04-30T15:08:47Z",
+    "generatedAt": "2026-05-02T04:59:49Z",
     "summary": {
       "overall": "ready",
       "readyAgents": 2,
@@ -2003,9 +2635,10 @@
       "offlineAgents": 0,
       "degradedServices": 0,
       "authRequiredServices": 2,
-      "failedQueues": 4,
-      "dirtyRepos": 7,
-      "dirtyRepoEntries": 480,
+      "failedQueues": 0,
+      "dirtyRepos": 2,
+      "dirtyRepoEntries": 12,
+      "approvalFrictionAgents": 0,
       "localModels": 8
     },
     "agents": {
@@ -2026,19 +2659,19 @@
         ],
         "status": "ready",
         "available": true,
-        "probedAt": "2026-04-30T15:08:44Z",
+        "probedAt": "2026-05-02T04:59:44Z",
         "host": "JOSHs-Mac-mini.local",
         "user": "josh2.0",
         "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t26.3.2\nBuildVersion:\t\t25D2140",
         "arch": "arm64",
         "cpu": "Apple M4",
-        "uptime": "11:08  up 34 days, 13:36, 36 users, load averages: 2.43 2.15 2.22",
+        "uptime": "0:59  up 36 days,  3:27, 1 user, load averages: 1.78 2.34 2.21",
         "disk": {
           "filesystem": "/dev/disk2s3s1",
           "size": "228Gi",
           "used": "12Gi",
-          "available": "108Gi",
-          "capacity": "10%"
+          "available": "78Gi",
+          "capacity": "13%"
         },
         "tools": {
           "codex": "/opt/homebrew/bin/codex",
@@ -2068,12 +2701,26 @@
             "detail": "{\"models\":[{\"name\":\"qwen2.5-coder:7b\",\"model\":\"qwen2.5-coder:7b\",\"modified_at\":\"2026-03-28T16:50:31.493885618-04:00\",\"size\":4683087561,\"digest\":\"dae161e27b0e90dd1856c8bb3209201fd67"
           },
           {
+            "id": "ollama_supervisor",
+            "label": "Ollama Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 3095\t0\thomebrew.mxcl.ollama"
+          },
+          {
             "id": "openclaw_gateway",
             "label": "OpenCLAW Gateway",
             "kind": "http",
             "status": "ready",
             "httpStatus": 200,
             "detail": "{\"ok\":true,\"status\":\"live\"}"
+          },
+          {
+            "id": "openclaw_gateway_supervisor",
+            "label": "OpenCLAW Gateway Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 68703\t0\tai.openclaw.gateway"
           },
           {
             "id": "openclaw_node_auth",
@@ -2084,12 +2731,54 @@
             "detail": "HTTP Error 401: Unauthorized"
           },
           {
+            "id": "openclaw_node_supervisor",
+            "label": "OpenCLAW Node Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 98872\t-15\tai.openclaw.node"
+          },
+          {
             "id": "brain_feed_server",
             "label": "Brain Feed Server",
             "kind": "http",
             "status": "ready",
             "httpStatus": 200,
-            "detail": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <!-- BUILD:1777440328 -->     <meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\">"
+            "detail": "<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <!-- BUILD:1777213760 -->     <meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\">"
+          },
+          {
+            "id": "mission_control_v2_activation",
+            "label": "Mission Control v2 Activation Watcher",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.mission-control-v2-activation"
+          },
+          {
+            "id": "host_local_maintenance",
+            "label": "Host-local Maintenance Executor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.host-local-maintenance"
+          },
+          {
+            "id": "launch_scheduler",
+            "label": "LaunchAgent Scheduler",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.launch-scheduler"
+          },
+          {
+            "id": "jaimes_brain_feed_poller",
+            "label": "JAIMES Brain Feed Poller",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.jaimes-brain-feed-poller"
+          },
+          {
+            "id": "jain_medic",
+            "label": "J.A.I.N Medic",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.jain-medic"
           },
           {
             "id": "context_watchdog",
@@ -2097,6 +2786,13 @@
             "kind": "process",
             "status": "idle",
             "detail": "optional process not running"
+          },
+          {
+            "id": "context_watchdog_supervisor",
+            "label": "Context Watchdog Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tcom.josh20.context-watchdog"
           }
         ],
         "models": [
@@ -2120,23 +2816,28 @@
         ],
         "processes": [
           "3095 /opt/homebrew/opt/ollama/bin/ollama serve",
-          "11045 /opt/homebrew/opt/node/bin/node /opt/homebrew/lib/node_modules/openclaw/dist/index.js gateway --port 18790",
-          "11241 node /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/node_modules/.bin/codex app-server --listen stdio://",
-          "11242 /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex/codex app-server --listen stdio://",
+          "17763 /Applications/CodexBar.app/Contents/MacOS/CodexBar",
           "45490 /Applications/Tailscale.app/Contents/MacOS/Tailscale",
           "45657 /Library/SystemExtensions/B829A152-2BC0-42BB-A58C-FF767116487C/io.tailscale.ipn.macsys.network-extension.systemextension/Contents/MacOS/io.tailscale.ipn.macsys.network-extension",
-          "48793 /Applications/CodexBar.app/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate com.steipete.codexbar /Users/josh2.0 josh2.0",
-          "48794 /Users/josh2.0/Library/Caches/com.steipete.codexbar/org.sparkle-project.Sparkle/Launcher/AVWvhqmHp/Updater.app/Contents/MacOS/Updater /Applications/CodexBar.app 0",
-          "56944 /Applications/Codex.app/Contents/MacOS/Codex",
-          "56950 /Applications/Codex.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler --no-rate-limit --monitor-self-annotation=ptype=crashpad-handler --database=/Users/josh2.0/Library/Application Support/Codex/Crashpad --url=https://f.a.k/e --annotation=_productName=Codex --annotation=_version=26.422.71525 --annotation=plat=OS X --annotation=prod=Electron --annotation=ver=41.2.0 --handshake-fd=18",
-          "56951 /Applications/Codex.app/Contents/Frameworks/Codex Helper.app/Contents/MacOS/Codex Helper --type=gpu-process --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --gpu-preferences=SAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAwAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=1718379636,r,5786596941907023963,5149226214670025693,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17001101512293619416,7321047253927756534,4 --trace-process-track-uuid=3190708988185955192 --seatbelt-client=31",
-          "56953 /Applications/Codex.app/Contents/Frameworks/Codex Helper.app/Contents/MacOS/Codex Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --shared-files --field-trial-handle=1718379636,r,5786596941907023963,5149226214670025693,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17001101512293619416,7321047253927756534,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=32",
-          "56965 /Applications/Codex.app/Contents/Resources/codex app-server --analytics-default-enabled",
-          "56973 /Applications/Codex.app/Contents/Frameworks/Codex Helper (Renderer).app/Contents/MacOS/Codex Helper (Renderer) --type=renderer --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --app-path=/Applications/Codex.app/Contents/Resources/app.asar --enable-sandbox --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1774575162414314 --launch-time-ticks=2943383048683 --shared-files --field-trial-handle=1718379636,r,5786596941907023963,5149226214670025693,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,17001101512293619416,7321047253927756534,4 --trace-process-track-uuid=3190708990060038890 --seatbelt-client=63",
-          "57341 /Applications/Codex.app/Contents/Resources/node_repl",
-          "74632 /Applications/CodexBar.app/Contents/MacOS/CodexBar",
-          "93103 /bin/sh -c pgrep -f brain_feed_server.py > /dev/null || /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/mission-control/scripts/brain_feed_server.py >> /Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log 2>&1 &",
-          "93105 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/josh2.0/.openclaw/workspace/mission-control/scripts/brain_feed_server.py",
+          "46757 /Applications/Codex.app/Contents/MacOS/Codex",
+          "46759 /Applications/Codex.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler --no-rate-limit --monitor-self-annotation=ptype=crashpad-handler --database=/Users/josh2.0/Library/Application Support/Codex/Crashpad --url=https://f.a.k/e --annotation=_productName=Codex --annotation=_version=26.429.30905 --annotation=plat=OS X --annotation=prod=Electron --annotation=ver=41.2.0 --handshake-fd=18",
+          "46760 /Applications/Codex.app/Contents/Frameworks/Codex Helper.app/Contents/MacOS/Codex Helper --type=gpu-process --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --gpu-preferences=SAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAAwAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=1718379636,r,875371782094592474,7423307248704691021,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,11793986427574302622,3587467021088676625,4 --trace-process-track-uuid=3190708988185955192 --seatbelt-client=31",
+          "46762 /Applications/Codex.app/Contents/Frameworks/Codex Helper.app/Contents/MacOS/Codex Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --shared-files --field-trial-handle=1718379636,r,875371782094592474,7423307248704691021,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,11793986427574302622,3587467021088676625,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=31",
+          "46775 /Applications/Codex.app/Contents/Resources/codex app-server --analytics-default-enabled",
+          "46776 /Applications/Codex.app/Contents/Frameworks/Codex Helper (Renderer).app/Contents/MacOS/Codex Helper (Renderer) --type=renderer --user-data-dir=/Users/josh2.0/Library/Application Support/Codex --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --app-path=/Applications/Codex.app/Contents/Resources/app.asar --enable-sandbox --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1774575163470980 --launch-time-ticks=3109573625382 --shared-files --field-trial-handle=1718379636,r,875371782094592474,7423307248704691021,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,PdfUseShowSaveFilePicker,ScreenCaptureKitPickerScreen,ScreenCaptureKitStreamPickerSonoma --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TimeoutHangingVideoCaptureStarts,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1935764596,r,11793986427574302622,3587467021088676625,4 --trace-process-track-uuid=3190708990060038890 --seatbelt-client=76",
+          "47068 ./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient mcp",
+          "55738 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python scripts/brain_feed_server.py",
+          "60169 /Applications/CodexBar.app/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate com.steipete.codexbar /Users/josh2.0 josh2.0",
+          "60170 /Users/josh2.0/Library/Caches/com.steipete.codexbar/org.sparkle-project.Sparkle/Launcher/hxzuC1TLo/Updater.app/Contents/MacOS/Updater /Applications/CodexBar.app 0",
+          "60746 node /Users/josh2.0/.openclaw/workspace/mission-control/node_modules/.bin/vite --host 127.0.0.1 --port 5174",
+          "60749 /Users/josh2.0/.openclaw/workspace/mission-control/node_modules/@esbuild/darwin-arm64/bin/esbuild --service=0.27.7 --ping",
+          "68703 /opt/homebrew/opt/node/bin/node /opt/homebrew/lib/node_modules/openclaw/dist/index.js gateway --port 18790",
+          "69145 node /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96/node_modules/.bin/codex app-server --listen stdio://",
+          "69146 /Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex/codex app-server --listen stdio://",
+          "69154 ./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient mcp",
+          "69257 zsh -c openclaw doctor --non-interactive 2>&1 | sed -n \"1,170p\"",
+          "69258 /opt/homebrew/opt/node/bin/node /opt/homebrew/lib/node_modules/openclaw/openclaw.mjs doctor --non-interactive",
+          "69260 openclaw-doctor",
           "98872 openclaw-node"
         ],
         "launchctl": [
@@ -2147,31 +2848,46 @@
           "98872\t-15\tai.openclaw.node",
           "-\t0\tcom.josh20.jaimes-brain-feed-poller",
           "-\t0\tcom.josh20.sorare-auth-watchdog",
-          "48793\t0\tcom.steipete.codexbar-sparkle-updater",
+          "60169\t0\tcom.steipete.codexbar-sparkle-updater",
+          "-\t0\tcom.josh20.host-local-maintenance",
           "-\t0\tcom.josh20.jain-medic",
-          "74632\t0\tapplication.com.steipete.codexbar.5904529.5904535",
-          "56944\t0\tapplication.com.openai.codex.29091292.29091298",
-          "48794\t0\tcom.steipete.codexbar-sparkle-progress",
-          "11045\t0\tai.openclaw.gateway",
-          "3095\t0\thomebrew.mxcl.ollama"
+          "60170\t0\tcom.steipete.codexbar-sparkle-progress",
+          "68703\t0\tai.openclaw.gateway",
+          "3095\t0\thomebrew.mxcl.ollama",
+          "46757\t0\tapplication.com.openai.codex.30740272.30740278",
+          "17763\t0\tapplication.com.steipete.codexbar.7842788.7842794",
+          "-\t0\tcom.josh20.mission-control-v2-activation",
+          "-\t0\tcom.josh20.launch-scheduler"
         ],
         "jobs": {
-          "crontabAvailable": true,
-          "crontabCount": 6,
-          "crontabLines": [
-            "*/5 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /bin/zsh /Users/josh2.0/.openclaw/workspace/mission-control/scripts/update_and_push.sh >> /Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log 2>&1",
-            "*/2 * * * * pgrep -f brain_feed_server.py > /dev/null || /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/mission-control/scripts/brain_feed_server.py >> /Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log 2>&1 &",
-            "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1",
-            "0 13 * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/sorare_cookie_freshness.py >> /Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log 2>&1",
-            "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /bin/bash /Users/josh2.0/.openclaw/workspace/scripts/jain_medic.sh >> /Users/josh2.0/.openclaw/workspace/logs/jain_medic.log 2>&1",
-            "0 14 * * 0 HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/sorare_cookie_autorefresh.py >> /Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log 2>&1"
-          ],
-          "launchAgentCount": 9,
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "crontabLines": [],
+          "crontabRisk": {
+            "activeCount": 0,
+            "wrappedCount": 0,
+            "unwrappedCount": 0,
+            "sideEffectCount": 0,
+            "unwrappedSideEffectCount": 0
+          },
+          "launchAgentCount": 12,
           "launchAgents": [
             {
               "path": "/Users/josh2.0/Library/LaunchAgents/com.josh20.sorare-cookie-autorefresh.plist",
               "name": "com.josh20.sorare-cookie-autorefresh.plist",
               "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/josh2.0/.openclaw/workspace/scripts/sorare_cookie_autorefresh.py\n}",
+              "readable": true
+            },
+            {
+              "path": "/Users/josh2.0/Library/LaunchAgents/com.josh20.launch-scheduler.plist",
+              "name": "com.josh20.launch-scheduler.plist",
+              "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/josh2.0/.openclaw/workspace/mission-control/scripts/launch_scheduler.py\n}",
+              "readable": true
+            },
+            {
+              "path": "/Users/josh2.0/Library/LaunchAgents/com.josh20.host-local-maintenance.plist",
+              "name": "com.josh20.host-local-maintenance.plist",
+              "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/josh2.0/.openclaw/workspace/mission-control/scripts/host_local_maintenance.py\n}",
               "readable": true
             },
             {
@@ -2184,6 +2900,12 @@
               "path": "/Users/josh2.0/Library/LaunchAgents/com.josh20.jain-medic.plist",
               "name": "com.josh20.jain-medic.plist",
               "command": "Array {\n    /bin/bash\n    /Users/josh2.0/.openclaw/workspace/scripts/jain_medic.sh\n}",
+              "readable": true
+            },
+            {
+              "path": "/Users/josh2.0/Library/LaunchAgents/com.josh20.mission-control-v2-activation.plist",
+              "name": "com.josh20.mission-control-v2-activation.plist",
+              "command": "Array {\n    /bin/bash\n    /Users/josh2.0/.openclaw/workspace/mission-control/scripts/mc_v2_activation_watch.sh\n}",
               "readable": true
             },
             {
@@ -2225,33 +2947,50 @@
           ]
         },
         "queues": {
-          "failedDeliveryCount": 1
+          "failedDeliveryCount": 0
+        },
+        "approvalPosture": {
+          "available": true,
+          "status": "ready",
+          "routineCoverage": "33/33",
+          "missingRoutineCount": 0,
+          "missingRoutinePatterns": [],
+          "agents": {
+            "main": {
+              "allowlistCount": 22,
+              "global": false
+            },
+            "*": {
+              "allowlistCount": 33,
+              "global": true
+            }
+          }
         },
         "runtimeDeps": [
           "/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.24-da6bdffc3d96",
           "/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.26-da6bdffc3d96",
           "/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.27-da6bdffc3d96",
-          "/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-unknown-888b8f4c985b"
+          "/Users/josh2.0/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96"
         ],
         "repos": [
           {
             "path": "/Users/josh2.0/.openclaw/workspace/antfarm",
-            "dirtyCount": 3,
+            "dirtyCount": 0,
             "statusAvailable": true
           },
           {
-            "path": "/Users/josh2.0/.openclaw/workspace",
-            "dirtyCount": 377,
+            "path": "/Users/josh2.0/.openclaw/workspace/MeetingNotesMVP",
+            "dirtyCount": 0,
             "statusAvailable": true
           },
           {
             "path": "/Users/josh2.0/.openclaw/workspace/mission-control",
-            "dirtyCount": 34,
+            "dirtyCount": 10,
             "statusAvailable": true
           },
           {
             "path": "/Users/josh2.0/.openclaw/workspace/kiosk-dashboard",
-            "dirtyCount": 13,
+            "dirtyCount": 0,
             "statusAvailable": true
           }
         ]
@@ -2274,19 +3013,19 @@
         ],
         "status": "ready",
         "available": true,
-        "probedAt": "2026-04-30T15:08:46Z",
+        "probedAt": "2026-05-02T04:59:48Z",
         "host": "JC-Agents-Mac-mini.local",
         "user": "jc_agent",
         "macos": "ProductName:\t\tmacOS\nProductVersion:\t\t26.3.1\nBuildVersion:\t\t25D2128",
         "arch": "arm64",
         "cpu": "Apple M4",
-        "uptime": "11:08  up 33 days, 14:59, 2 users, load averages: 2.14 2.20 2.22",
+        "uptime": "0:59  up  2:47, 2 users, load averages: 1.91 1.77 1.66",
         "disk": {
           "filesystem": "/dev/disk3s1s1",
           "size": "228Gi",
           "used": "12Gi",
-          "available": "45Gi",
-          "capacity": "21%"
+          "available": "56Gi",
+          "capacity": "18%"
         },
         "tools": {
           "codex": "/opt/homebrew/bin/codex",
@@ -2303,8 +3042,8 @@
           "codex": "codex-cli 0.125.0",
           "claude": "2.1.86 (Claude Code)",
           "ollama": "ollama version is 0.20.0",
-          "node": "v25.8.2",
-          "npm": "11.11.1",
+          "node": "v25.9.0",
+          "npm": "11.12.1",
           "python3": "Python 3.14.3"
         },
         "services": [
@@ -2317,12 +3056,26 @@
             "detail": "{\"models\":[{\"name\":\"gemma4:26b\",\"model\":\"gemma4:26b\",\"modified_at\":\"2026-04-02T21:23:07.598970677-04:00\",\"size\":17987581215,\"digest\":\"5571076f3d70050487b26b341705799e0ab29b808164f9"
           },
           {
+            "id": "ollama_supervisor",
+            "label": "Ollama Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 2574\t0\thomebrew.mxcl.ollama"
+          },
+          {
             "id": "openclaw_gateway",
             "label": "OpenCLAW Gateway",
             "kind": "http",
             "status": "ready",
             "httpStatus": 200,
             "detail": "{\"ok\":true,\"status\":\"live\"}"
+          },
+          {
+            "id": "openclaw_gateway_supervisor",
+            "label": "OpenCLAW Gateway Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 17053\t0\tai.openclaw.gateway"
           },
           {
             "id": "openclaw_auth",
@@ -2333,11 +3086,25 @@
             "detail": "HTTP Error 401: Unauthorized"
           },
           {
+            "id": "openclaw_node_supervisor",
+            "label": "OpenCLAW Node Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 14151\t0\tai.openclaw.node"
+          },
+          {
             "id": "hermes_gateway",
             "label": "Hermes Gateway",
             "kind": "process",
             "status": "ready",
             "detail": "pattern found"
+          },
+          {
+            "id": "hermes_gateway_supervisor",
+            "label": "Hermes Gateway Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 627\t0\tai.hermes.gateway"
           },
           {
             "id": "weaviate",
@@ -2348,11 +3115,25 @@
             "detail": ""
           },
           {
+            "id": "weaviate_supervisor",
+            "label": "Weaviate Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 760\t1\tcom.jain.weaviate"
+          },
+          {
             "id": "temporal",
             "label": "Temporal",
             "kind": "tcp",
             "status": "ready",
             "detail": "127.0.0.1:7233 accepting connections"
+          },
+          {
+            "id": "temporal_supervisor",
+            "label": "Temporal Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 634\t0\tcom.jain.temporal"
           },
           {
             "id": "antfarm",
@@ -2362,11 +3143,60 @@
             "detail": "127.0.0.1:3333 accepting connections"
           },
           {
+            "id": "antfarm_supervisor",
+            "label": "Antfarm Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 2597\t-15\tcom.jain.antfarm"
+          },
+          {
             "id": "feedback_loop",
             "label": "JAIMES Feedback Loop",
             "kind": "process",
             "status": "ready",
             "detail": "pattern found"
+          },
+          {
+            "id": "feedback_loop_supervisor",
+            "label": "JAIMES Feedback Loop Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 615\t0\tai.jaimes.feedback-loop"
+          },
+          {
+            "id": "intel_feedback_loop_supervisor",
+            "label": "JAIMES Intel Feedback Supervisor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "running: 609\t0\tai.jaimes.intel-feedback-loop"
+          },
+          {
+            "id": "jaimes_healthcheck",
+            "label": "JAIMES Healthcheck",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tai.jaimes.healthcheck"
+          },
+          {
+            "id": "host_local_maintenance",
+            "label": "Host-local Maintenance Executor",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tai.jaimes.host-local-maintenance"
+          },
+          {
+            "id": "launch_scheduler",
+            "label": "LaunchAgent Scheduler",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tai.jaimes.launch-scheduler"
+          },
+          {
+            "id": "sorare_claim_sweep",
+            "label": "JAIMES Sorare Claim Sweep",
+            "kind": "launchctl",
+            "status": "ready",
+            "detail": "loaded idle: -\t0\tai.jaimes.sorare-claim-sweep"
           }
         ],
         "models": [
@@ -2374,7 +3204,7 @@
             "name": "gemma4:26b",
             "id": "5571076f3d70",
             "size": "17 GB",
-            "modified": "3 weeks ago"
+            "modified": "4 weeks ago"
           },
           {
             "name": "llama3.2:latest",
@@ -2410,156 +3240,72 @@
         "modelProvider": "ollama",
         "ports": [
           "COMMAND     PID     USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME",
-          "weaviate    879 jc_agent    4u  IPv6 0x1250557599ba43d5      0t0  TCP *:7946 (LISTEN)",
-          "weaviate    879 jc_agent    7u  IPv6 0x3d4bfc17f98374bc      0t0  TCP *:6060 (LISTEN)",
-          "weaviate    879 jc_agent    8u  IPv6 0x262a763e57961f50      0t0  TCP *:7947 (LISTEN)",
-          "weaviate    879 jc_agent   11u  IPv4 0x2b1bfb75a1aa36c3      0t0  TCP 192.168.4.41:8301 (LISTEN)",
-          "weaviate    879 jc_agent   13u  IPv4 0x2c6ea66727f43f2d      0t0  TCP 192.168.4.41:8300 (LISTEN)",
-          "weaviate    879 jc_agent   18u  IPv6 0x4d8bb907f5553ccc      0t0  TCP *:50051 (LISTEN)",
-          "weaviate    879 jc_agent   20u  IPv6 0x3c2477d32d51703b      0t0  TCP *:8080 (LISTEN)",
-          "ollama    26012 jc_agent    3u  IPv4 0x893c67dee5ce7593      0t0  TCP 127.0.0.1:11434 (LISTEN)",
-          "temporal  83236 jc_agent    7u  IPv4 0x562f9e3e8597c102      0t0  TCP 127.0.0.1:58466 (LISTEN)",
-          "temporal  83236 jc_agent    8u  IPv4 0x4f630266a31bace8      0t0  TCP 127.0.0.1:58468 (LISTEN)",
-          "temporal  83236 jc_agent    9u  IPv4 0x15d3049432c3b338      0t0  TCP 127.0.0.1:58469 (LISTEN)",
-          "temporal  83236 jc_agent   10u  IPv4 0x17c056e009ea6f60      0t0  TCP 127.0.0.1:7233 (LISTEN)",
-          "temporal  83236 jc_agent   11u  IPv4 0xfcf3c468225a4ad7      0t0  TCP 127.0.0.1:58467 (LISTEN)"
+          "temporal    634 jc_agent    7u  IPv4 0x65374249009b7b40      0t0  TCP 127.0.0.1:49180 (LISTEN)",
+          "temporal    634 jc_agent    8u  IPv4 0xf7ee00674155586d      0t0  TCP 127.0.0.1:49183 (LISTEN)",
+          "temporal    634 jc_agent    9u  IPv4 0x63067dbb8651ccee      0t0  TCP 127.0.0.1:49184 (LISTEN)",
+          "temporal    634 jc_agent   10u  IPv4 0x359f2d82a260bc2b      0t0  TCP 127.0.0.1:7233 (LISTEN)",
+          "temporal    634 jc_agent   11u  IPv4 0xa0a5212f8c196a14      0t0  TCP 127.0.0.1:49181 (LISTEN)",
+          "weaviate    760 jc_agent    5u  IPv6 0x64fef4d8dae2879f      0t0  TCP *:7946 (LISTEN)",
+          "weaviate    760 jc_agent    9u  IPv6 0x9263b3284f8cae26      0t0  TCP *:6060 (LISTEN)",
+          "weaviate    760 jc_agent   11u  IPv6 0xd9244b63f4e82fbe      0t0  TCP *:7947 (LISTEN)",
+          "weaviate    760 jc_agent   12u  IPv4 0x9d7e2959186ca940      0t0  TCP 192.168.4.26:8301 (LISTEN)",
+          "weaviate    760 jc_agent   14u  IPv4 0x5ddf6ce1525b09bb      0t0  TCP 192.168.4.26:8300 (LISTEN)",
+          "weaviate    760 jc_agent   18u  IPv6 0x58301eb06570d567      0t0  TCP *:50051 (LISTEN)",
+          "weaviate    760 jc_agent   20u  IPv6 0xfb5bbc5ccbc27080      0t0  TCP *:8080 (LISTEN)",
+          "ollama     2574 jc_agent    3u  IPv4 0x891d0f98acfa7982      0t0  TCP 127.0.0.1:11434 (LISTEN)"
         ],
         "processes": [
-          "871 /bin/bash /Users/jc_agent/.openclaw/workspace/dashboard/start_tunnel.sh",
-          "879 /opt/homebrew/bin/weaviate --port 8080 --host 0.0.0.0 --scheme http",
-          "1660 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "1900 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "2144 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "3587 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "5758 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/.openclaw/workspace/scripts/feedback_loop.py",
-          "5760 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/.openclaw/workspace/scripts/intel_feedback_loop.py",
-          "6362 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "8932 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "9162 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "13735 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "14219 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "15073 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "15328 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "16359 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "16992 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "18828 openclaw-node",
-          "18847 /Applications/Tailscale.app/Contents/MacOS/Tailscale",
-          "18855 /Library/SystemExtensions/536B901C-DDB0-4620-9744-92AEB9DC5F5B/io.tailscale.ipn.macsys.network-extension.systemextension/Contents/MacOS/io.tailscale.ipn.macsys.network-extension",
-          "23996 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "26012 ollama serve",
-          "27518 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "29524 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "30343 /Users/jc_agent/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run --replace",
-          "30500 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "31420 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "36577 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "38001 openclaw-gateway",
-          "39269 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "41427 node /opt/homebrew/bin/codex app-server --listen stdio://",
-          "41428 /opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex/codex app-server --listen stdio://",
-          "41745 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "41969 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "42182 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "44439 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "44649 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "44990 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "45184 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "46769 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "49368 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "49702 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "51071 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "57408 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "58037 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "58367 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "58552 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "60772 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "61220 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "61636 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "61828 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "62482 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "66484 node /Users/jc_agent/.openclaw/workspace/antfarm/dist/server/daemon.js 3333",
-          "68161 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "69757 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "70065 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "70201 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "70748 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "72137 /opt/homebrew/bin/codexbar usage --provider codex --pretty",
-          "77714 sudo -n python3 /Users/jc_agent/tmp_remove_x_jobs_jain.py",
-          "77715 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/tmp_remove_x_jobs_jain.py",
-          "77784 sudo -n python3 /Users/jc_agent/tmp_remove_x_jobs_jain.py",
-          "77785 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/tmp_remove_x_jobs_jain.py",
-          "83236 /opt/homebrew/bin/temporal server start-dev --db-filename /Users/jc_agent/.openclaw/temporal.db --ui-port 8233 --headless",
-          "89925 /bin/bash -lic printf '__HERMES_FENCE_a9f7b3__'\\012rg --line-number --no-heading --with-filename 'OPENAI_API_KEY|[openai-key-prefix]|openai_api_key|api_key_openai' '/Users/jc_agent' | head -n 5\\012__hermes_rc=$?\\012printf '__HERMES_FENCE_a9f7b3__'\\012exit $__hermes_rc\\012",
-          "92333 /bin/bash -lic printf '__HERMES_FENCE_a9f7b3__'\\012rg --line-number --no-heading --with-filename 'AUXILIARY_VISION_MODEL' '/' | head -n 10\\012__hermes_rc=$?\\012printf '__HERMES_FENCE_a9f7b3__'\\012exit $__hermes_rc\\012"
+          "402 /Applications/Tailscale.app/Contents/MacOS/Tailscale",
+          "544 /Library/SystemExtensions/536B901C-DDB0-4620-9744-92AEB9DC5F5B/io.tailscale.ipn.macsys.network-extension.systemextension/Contents/MacOS/io.tailscale.ipn.macsys.network-extension",
+          "609 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/.openclaw/workspace/scripts/intel_feedback_loop.py",
+          "615 /opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /Users/jc_agent/.openclaw/workspace/scripts/feedback_loop.py",
+          "627 /Users/jc_agent/.hermes/hermes-agent/venv/bin/python -m hermes_cli.main gateway run --replace",
+          "634 /opt/homebrew/bin/temporal server start-dev --db-filename /Users/jc_agent/.openclaw/temporal.db --ui-port 8233 --headless",
+          "760 /opt/homebrew/bin/weaviate --port 8080 --host 0.0.0.0 --scheme http",
+          "2574 /opt/homebrew/opt/ollama/bin/ollama serve",
+          "2597 /opt/homebrew/bin/node /Users/jc_agent/.openclaw/workspace/antfarm/dist/server/daemon.js 3333",
+          "6365 /Applications/Codex.app/Contents/Frameworks/Electron Framework.framework/Helpers/chrome_crashpad_handler --no-rate-limit --monitor-self-annotation=ptype=crashpad-handler --database=/Users/jc_agent/Library/Application Support/Codex/Crashpad --url=https://f.a.k/e --annotation=_productName=Codex --annotation=_version=26.429.30905 --annotation=plat=OS X --annotation=prod=Electron --annotation=ver=41.2.0 --handshake-fd=18",
+          "14151 openclaw-node",
+          "17053 /opt/homebrew/opt/node/bin/node /opt/homebrew/lib/node_modules/openclaw/dist/index.js gateway --port 18789",
+          "18649 node /Users/jc_agent/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96/node_modules/.bin/codex app-server --listen stdio://",
+          "18650 /Users/jc_agent/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex/codex app-server --listen stdio://"
         ],
         "launchctl": [
-          "83236\t0\tcom.jain.temporal",
-          "18847\t0\tapplication.io.tailscale.ipn.macsys.1479340.109606541",
-          "18828\t0\tai.openclaw.node",
-          "30343\t75\tai.hermes.gateway",
-          "5758\t-15\tai.jaimes.feedback-loop",
-          "879\t0\tcom.jain.weaviate",
-          "5760\t-15\tai.jaimes.intel-feedback-loop",
-          "38001\t0\tai.openclaw.gateway",
+          "2597\t-15\tcom.jain.antfarm",
+          "634\t0\tcom.jain.temporal",
+          "402\t0\tapplication.io.tailscale.ipn.macsys.1479340.109606541",
+          "14151\t0\tai.openclaw.node",
+          "627\t0\tai.hermes.gateway",
+          "615\t0\tai.jaimes.feedback-loop",
+          "760\t1\tcom.jain.weaviate",
+          "17053\t0\tai.openclaw.gateway",
+          "609\t0\tai.jaimes.intel-feedback-loop",
           "-\t1\thomebrew.mxcl.tailscale",
+          "2574\t0\thomebrew.mxcl.ollama",
+          "-\t0\tai.jaimes.launch-scheduler",
+          "-\t0\tai.jaimes.host-local-maintenance",
           "-\t0\tai.jaimes.healthcheck",
           "-\t0\tai.jaimes.sorare-claim-sweep"
         ],
         "jobs": {
-          "crontabAvailable": true,
-          "crontabCount": 48,
-          "crontabLines": [
-            "15 7 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 10 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 12 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 14 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "15 16 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 18 * * 1-5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 21 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 10 * * 0,6 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "15 16 * * 0,6 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intelligence_feed.py full >> /Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log 2>&1",
-            "0 7 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 8 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 11 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 12 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 17 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 21 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 22 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py original >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 13 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py qt >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 15 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py qt >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 18 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py qt >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 20 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_post_agent.py qt >> /Users/jc_agent/.openclaw/workspace/logs/x_post_agent.log 2>&1",
-            "0 9 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin bash /Users/jc_agent/.openclaw/workspace/scripts/sorare_daily_prep.sh >> /Users/jc_agent/.openclaw/workspace/logs/sorare_daily_prep.log 2>&1",
-            "*/5 6-22 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/breaking_news_scanner.py >> /Users/jc_agent/.openclaw/workspace/logs/breaking_news.log 2>&1",
-            "0-15 23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/breaking_news_scanner.py >> /Users/jc_agent/.openclaw/workspace/logs/breaking_news.log 2>&1",
-            "*/5 6-22 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_watchlist_monitor.py >> /Users/jc_agent/.openclaw/workspace/logs/x_watchlist.log 2>&1",
-            "0-15 23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_watchlist_monitor.py >> /Users/jc_agent/.openclaw/workspace/logs/x_watchlist.log 2>&1",
-            "*/5 * * * * pgrep -f intel_feedback_loop.py > /dev/null || nohup /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/intel_feedback_loop.py >> /Users/jc_agent/.openclaw/workspace/logs/intel_feedback.log 2>&1 &",
-            "*/30 * * * * bash /Users/jc_agent/scripts/check_josh_health.sh >> /Users/jc_agent/scripts/logs/josh_health.log 2>&1",
-            "0 9,10,11,13,14,15,16,17,18,19,21,23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/Users/jc_agent/Library/Python/3.9/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_strategic_reply.py --count 1 >> /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>&1",
-            "0 13 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/waiver_injury_alert.py >> /Users/jc_agent/.openclaw/workspace/logs/waiver_alerts.log 2>&1",
-            "0 6 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_feedback_ml.py >> /Users/jc_agent/.openclaw/workspace/logs/x_feedback_ml.log 2>&1",
-            "0 8 * * 0 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fantasy_weekly_recap.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_recap.log 2>&1",
-            "0 8 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/x_growth_tracker.py >> /Users/jc_agent/.openclaw/workspace/logs/x_growth_tracker.log 2>&1",
-            "0 3 * * 0 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin bash /Users/jc_agent/.openclaw/workspace/scripts/rotate_logs.sh >> /Users/jc_agent/.openclaw/workspace/logs/rotate_logs.log 2>&1",
-            "45 17 * * 1 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/sorare_deadline_guard.py >> /Users/jc_agent/.openclaw/workspace/logs/sorare_deadline_guard.log 2>&1",
-            "0 23 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/error_rate_monitor.py >> /Users/jc_agent/.openclaw/workspace/logs/error_rate_monitor.log 2>&1",
-            "0 9 * * 6 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/jaimes_weekly_report.py >> /Users/jc_agent/.openclaw/workspace/logs/jaimes_weekly_report.log 2>&1",
-            "*/15 8-22 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/sorare_canonical_reflector.py >> /Users/jc_agent/.openclaw/workspace/logs/sorare_canonical_reflector.log 2>&1",
-            "45 8 * * 1 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fantasy_injury_monitor.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_injury.log 2>&1",
-            "0 9 * * 1 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fantasy_lineup_check.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_lineup.log 2>&1",
-            "0 20 * * 0 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fantasy_waiver_scan.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_waiver.log 2>&1",
-            "0 7 * * 1 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fantasy_waiver_scan.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_waiver.log 2>&1",
-            "15 2 * * 1 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/fetch_fantasy_results.py >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_results_fetch.log 2>&1",
-            "0 19 * * 5 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin bash /Users/jc_agent/fantasy_ml/cron/run_weekly_prediction.sh >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_ml_cron.log 2>&1",
-            "0 7 * * 6 HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin bash /Users/jc_agent/fantasy_ml/cron/run_weekly_prediction.sh >> /Users/jc_agent/.openclaw/workspace/logs/fantasy_ml_cron.log 2>&1",
-            "30 3 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/sorare_sheet_updater_v2.py >> /Users/jc_agent/.openclaw/workspace/logs/sorare_sheet_updater.log 2>&1",
-            "@reboot /bin/bash /Users/jc_agent/scripts/start_xmcp.sh >> /tmp/xmcp_boot.log 2>&1",
-            "0 11 * * * HOME=/Users/jc_agent PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/jc_agent/.openclaw/workspace/scripts/sorare_missions.py --sp-classic >> /Users/jc_agent/.openclaw/workspace/logs/sorare_missions.log 2>&1"
-          ],
-          "launchAgentCount": 9,
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "crontabLines": [],
+          "crontabRisk": {
+            "activeCount": 0,
+            "wrappedCount": 0,
+            "unwrappedCount": 0,
+            "sideEffectCount": 0,
+            "unwrappedSideEffectCount": 0
+          },
+          "launchAgentCount": 13,
           "launchAgents": [
+            {
+              "path": "/Users/jc_agent/Library/LaunchAgents/com.jain.antfarm.plist",
+              "name": "com.jain.antfarm.plist",
+              "command": "Array {\n    /opt/homebrew/bin/node\n    /Users/jc_agent/.openclaw/workspace/antfarm/dist/server/daemon.js\n    3333\n}",
+              "readable": true
+            },
             {
               "path": "/Users/jc_agent/Library/LaunchAgents/com.jain.temporal.plist",
               "name": "com.jain.temporal.plist",
@@ -2579,9 +3325,21 @@
               "readable": true
             },
             {
+              "path": "/Users/jc_agent/Library/LaunchAgents/ai.jaimes.host-local-maintenance.plist",
+              "name": "ai.jaimes.host-local-maintenance.plist",
+              "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/jc_agent/.openclaw/workspace/mission-control/scripts/host_local_maintenance.py\n}",
+              "readable": true
+            },
+            {
               "path": "/Users/jc_agent/Library/LaunchAgents/ai.jaimes.sorare-claim-sweep.plist",
               "name": "ai.jaimes.sorare-claim-sweep.plist",
               "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/jc_agent/.openclaw/workspace/scripts/sorare_missions.py\n    --claim-only\n    --rarity\n    limited\n}",
+              "readable": true
+            },
+            {
+              "path": "/Users/jc_agent/Library/LaunchAgents/ai.jaimes.launch-scheduler.plist",
+              "name": "ai.jaimes.launch-scheduler.plist",
+              "command": "Array {\n    /opt/homebrew/bin/python3\n    /Users/jc_agent/.openclaw/workspace/mission-control/scripts/launch_scheduler.py\n}",
               "readable": true
             },
             {
@@ -2599,7 +3357,7 @@
             {
               "path": "/Users/jc_agent/Library/LaunchAgents/ai.openclaw.gateway.plist",
               "name": "ai.openclaw.gateway.plist",
-              "command": "Array {\n    /Users/jc_agent/.hermes/node/bin/node\n    /opt/homebrew/lib/node_modules/openclaw/dist/index.js\n    gateway\n    --port\n    18789\n}",
+              "command": "Array {\n    /Users/jc_agent/.openclaw/service-env/ai.openclaw.gateway-env-wrapper.sh\n    /Users/jc_agent/.openclaw/service-env/ai.openclaw.gateway.env\n    /opt/homebrew/opt/node/bin/node\n    /opt/homebrew/lib/node_modules/openclaw/dist/index.js\n    gateway\n    --port\n    18789\n}",
               "readable": true
             },
             {
@@ -2613,30 +3371,48 @@
               "name": "ai.hermes.gateway.plist",
               "command": "Array {\n    /Users/jc_agent/.hermes/hermes-agent/venv/bin/python\n    -m\n    hermes_cli.main\n    gateway\n    run\n    --replace\n}",
               "readable": true
+            },
+            {
+              "path": "/Users/jc_agent/Library/LaunchAgents/homebrew.mxcl.ollama.plist",
+              "name": "homebrew.mxcl.ollama.plist",
+              "command": "Array {\n    /opt/homebrew/opt/ollama/bin/ollama\n    serve\n}",
+              "readable": true
             }
           ]
         },
         "queues": {
-          "failedDeliveryCount": 3
+          "failedDeliveryCount": 0
+        },
+        "approvalPosture": {
+          "available": true,
+          "status": "ready",
+          "routineCoverage": "33/33",
+          "missingRoutineCount": 0,
+          "missingRoutinePatterns": [],
+          "agents": {
+            "main": {
+              "allowlistCount": 16,
+              "global": false
+            },
+            "*": {
+              "allowlistCount": 38,
+              "global": true
+            }
+          }
         },
         "runtimeDeps": [
           "/Users/jc_agent/.openclaw/plugin-runtime-deps/openclaw-2026.4.24-da6bdffc3d96",
-          "/Users/jc_agent/.openclaw/plugin-runtime-deps/openclaw-unknown-4bb73284ae88"
+          "/Users/jc_agent/.openclaw/plugin-runtime-deps/openclaw-2026.4.29-da6bdffc3d96"
         ],
         "repos": [
           {
             "path": "/Users/jc_agent/.openclaw/workspace/antfarm",
-            "dirtyCount": 1,
-            "statusAvailable": true
-          },
-          {
-            "path": "/Users/jc_agent/.openclaw/workspace",
-            "dirtyCount": 31,
+            "dirtyCount": 0,
             "statusAvailable": true
           },
           {
             "path": "/Users/jc_agent/.openclaw/workspace/mission-control",
-            "dirtyCount": 21,
+            "dirtyCount": 2,
             "statusAvailable": true
           }
         ]
@@ -2649,7 +3425,7 @@
       "name": "Visual Canaries",
       "status": "ok",
       "summary": "All canaries passed",
-      "detail": "7/7 checks passing"
+      "detail": "9/9 checks passing"
     },
     {
       "id": "sorare-ml-cockpit",
@@ -2677,136 +3453,183 @@
       "name": "Agent Control",
       "status": "ready",
       "summary": "2/2 agent nodes ready",
-      "detail": "4 queue item(s) \u00b7 7 dirty repo(s)"
+      "detail": "0 queue item(s) \u00b7 2 dirty repo(s)"
     },
     {
       "id": "personal-codex",
       "name": "Personal Codex",
       "status": "ready",
-      "summary": "Phase 4A is complete: shared task queue, capability registry, permission tiers, task lifecycle helper, dashboard summary, remote shims, and smoke tests are installed across JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.",
-      "detail": "Phase 4A task queue and capability registry implementation"
+      "summary": "Josh 2.0 now has a global OpenCLAW routine-local-automation allowlist matching the JAIMES posture. Agent Control monitors approval posture directly and reports both Josh 2.0 and JAIMES at 33/33 routine approval coverage with approvalFrictionAgents=0.",
+      "detail": "Josh 2.0 autonomy approval friction reduced"
     }
   ],
   "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/agent_task.py, mission-control/scripts/mission_control_regression_check.py",
+      "label": "Recently edited: mission-control/scripts/update_and_push.sh, mission-control/index.html",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
       "model": "recent",
       "agentLabel": "CODING",
       "agentClass": "agent"
+    },
+    {
+      "id": "context-watchdog",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 78%",
+      "status": "done",
+      "elapsedSecs": 0,
+      "tool": "watchdog",
+      "model": "50% rule",
+      "agentLabel": "WATCHDOG",
+      "agentClass": "agent"
     }
   ],
   "agentBrainFeeds": {
     "josh": {
-      "agent": "JOSH 2.0",
-      "active": true,
-      "reportedActive": true,
-      "objective": "Phase 4A: build task queue and capability registry",
+      "agent": "JOSHeX",
+      "active": false,
+      "reportedActive": false,
+      "objective": "Josh kiosk restored to full Brain Feed shell",
       "status": "done",
       "stale": false,
-      "updatedAt": "2026-04-30T15:55:43Z",
-      "messageReceived": "2026-04-30T15:55:43Z",
-      "currentTool": "Phase 4A complete",
-      "model": "Personal Codex",
+      "updatedAt": "2026-05-02T07:32:39Z",
+      "messageReceived": null,
+      "currentTool": "Codex kiosk recovery",
+      "model": null,
       "steps": [
         {
-          "label": "Add schemas and seed registry/queue",
+          "label": "Josh kiosk restored to full Brain Feed shell",
           "status": "done",
-          "tool": "data"
+          "tool": "Codex kiosk recovery",
+          "kind": "complete"
         },
         {
-          "label": "Build task lifecycle helper",
-          "status": "done",
-          "tool": "agent_task.py"
+          "label": "Inspect broken Josh kiosk view",
+          "status": "active",
+          "tool": "Codex kiosk recovery",
+          "kind": "status"
         },
         {
-          "label": "Wire Mission Control task summary",
+          "label": "Brain Feed hero kiosk restored",
           "status": "done",
-          "tool": "dashboard"
+          "tool": "Codex React deploy",
+          "kind": "complete"
         },
         {
-          "label": "Remote install and smoke tests",
+          "label": "Restoring Brain Feed hero kiosk",
+          "status": "active",
+          "tool": "Codex React edit",
+          "kind": "status"
+        },
+        {
+          "label": "Recover Brain Feed hero kiosk style",
+          "status": "active",
+          "tool": "Mission Control visual recovery",
+          "kind": "status"
+        },
+        {
+          "label": "React v2 24-inch layout restored",
           "status": "done",
-          "tool": "ssh"
+          "tool": "Mission Control React v2 CSS rebuild + Josh...",
+          "kind": "complete"
+        },
+        {
+          "label": "Restore 24-inch Mission Control layout",
+          "status": "active",
+          "tool": "Josh 2.0 screenshot + kiosk layout recovery",
+          "kind": "status"
+        },
+        {
+          "label": "Josh v2 data flow restored",
+          "status": "done",
+          "tool": "Mission Control v2 local jobs fallback + st...",
+          "kind": "complete"
         }
       ]
     },
     "jain": {
-      "agent": "J.A.I.N",
+      "agent": "JOSHeX",
       "active": false,
-      "reportedActive": true,
-      "objective": "session startup completed",
-      "status": "stale",
-      "stale": true,
-      "updatedAt": "2026-04-28T17:31:10Z",
-      "messageReceived": "2026-04-23T04:25:02Z",
-      "currentTool": "",
-      "model": "GPT-5.4",
-      "steps": []
+      "reportedActive": false,
+      "objective": "Josh Telegram UX recommendations implemented",
+      "status": "done",
+      "stale": false,
+      "updatedAt": "2026-05-02T06:30:40Z",
+      "messageReceived": null,
+      "currentTool": "Telegram UX implementation",
+      "model": null,
+      "steps": [
+        {
+          "label": "Josh Telegram UX recommendations implemented",
+          "status": "done",
+          "tool": "Telegram UX implementation",
+          "kind": "complete"
+        },
+        {
+          "label": "Implement Josh Telegram UX recommendations",
+          "status": "active",
+          "tool": "Telegram UX implementation",
+          "kind": "status"
+        },
+        {
+          "label": "Telegram UX options reviewed",
+          "status": "done",
+          "tool": "Telegram UX advisory",
+          "kind": "note"
+        },
+        {
+          "label": "Josh Telegram format improved",
+          "status": "done",
+          "tool": "Compact bullet-card format",
+          "kind": "complete"
+        },
+        {
+          "label": "Improve Josh Telegram readability",
+          "status": "active",
+          "tool": "Telegram format tuning",
+          "kind": "status"
+        },
+        {
+          "label": "Josh AGENTS kept lean",
+          "status": "done",
+          "tool": "AGENTS compaction",
+          "kind": "complete"
+        },
+        {
+          "label": "Lean AGENTS cleanup",
+          "status": "active",
+          "tool": "AGENTS trim + docs pointer",
+          "kind": "status"
+        },
+        {
+          "label": "Josh Telegram UX configured",
+          "status": "done",
+          "tool": "Telegram command menu + tap-first config",
+          "kind": "complete"
+        }
+      ]
     },
     "jaimes": {
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "objective": "Done: Mission Control highlights/spend deployed",
+      "objective": "Done: ops drift audit found stale daily backup",
       "status": "idle",
       "stale": true,
-      "updatedAt": "2026-04-28T17:44:42Z",
-      "messageReceived": "2026-04-28T17:44:15Z",
+      "updatedAt": "2026-05-02T04:16:09Z",
+      "messageReceived": "2026-05-02T04:16:02Z",
       "currentTool": "exec",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Model Spend compacted",
+          "label": "jaimes-model-efficiency-guard",
           "status": "done",
-          "tool": "code"
+          "tool": "hermes"
         },
         {
-          "label": "24in/Phone toggle added",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Canary noise reduced",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Due/unverified noise suppressed",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Skill review: Mission Control workflow",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Skill review: updating Mission Control skill",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: approved calendar/highlights/spend polish",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: tightening highlights/spend text",
-          "status": "done",
-          "tool": "code"
-        },
-        {
-          "label": "Mission Control: deploying highlight/spend polish",
-          "status": "done",
-          "tool": "exec"
-        },
-        {
-          "label": "Mission Control: deploying final compact copy",
+          "label": "Task: ops drift audit on J.A.I.N",
           "status": "done",
           "tool": "exec"
         }
@@ -2814,45 +3637,133 @@
     }
   },
   "liveObjectives": {
-    "activeAgents": [
-      "JOSH 2.0"
-    ],
-    "activeCount": 1,
-    "primaryAgent": "JOSH 2.0",
+    "activeAgents": [],
+    "activeCount": 0,
+    "primaryAgent": "JOSHeX",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
-        "agent": "JOSH 2.0",
-        "active": true,
-        "reportedActive": true,
-        "objective": "Phase 4A: build task queue and capability registry",
+        "agent": "JOSHeX",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Josh kiosk restored to full Brain Feed shell",
         "status": "done",
         "stale": false,
-        "updatedAt": "2026-04-30T15:55:43Z",
-        "messageReceived": "2026-04-30T15:55:43Z",
-        "currentTool": "Phase 4A complete",
-        "model": "Personal Codex",
+        "updatedAt": "2026-05-02T07:32:39Z",
+        "messageReceived": null,
+        "currentTool": "Codex kiosk recovery",
+        "model": null,
         "steps": [
           {
-            "label": "Add schemas and seed registry/queue",
+            "label": "Josh kiosk restored to full Brain Feed shell",
             "status": "done",
-            "tool": "data"
+            "tool": "Codex kiosk recovery",
+            "kind": "complete"
           },
           {
-            "label": "Build task lifecycle helper",
-            "status": "done",
-            "tool": "agent_task.py"
+            "label": "Inspect broken Josh kiosk view",
+            "status": "active",
+            "tool": "Codex kiosk recovery",
+            "kind": "status"
           },
           {
-            "label": "Wire Mission Control task summary",
+            "label": "Brain Feed hero kiosk restored",
             "status": "done",
-            "tool": "dashboard"
+            "tool": "Codex React deploy",
+            "kind": "complete"
           },
           {
-            "label": "Remote install and smoke tests",
+            "label": "Restoring Brain Feed hero kiosk",
+            "status": "active",
+            "tool": "Codex React edit",
+            "kind": "status"
+          },
+          {
+            "label": "Recover Brain Feed hero kiosk style",
+            "status": "active",
+            "tool": "Mission Control visual recovery",
+            "kind": "status"
+          },
+          {
+            "label": "React v2 24-inch layout restored",
             "status": "done",
-            "tool": "ssh"
+            "tool": "Mission Control React v2 CSS rebuild + Josh...",
+            "kind": "complete"
+          },
+          {
+            "label": "Restore 24-inch Mission Control layout",
+            "status": "active",
+            "tool": "Josh 2.0 screenshot + kiosk layout recovery",
+            "kind": "status"
+          },
+          {
+            "label": "Josh v2 data flow restored",
+            "status": "done",
+            "tool": "Mission Control v2 local jobs fallback + st...",
+            "kind": "complete"
+          }
+        ]
+      },
+      {
+        "agent": "JOSHeX",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Josh Telegram UX recommendations implemented",
+        "status": "done",
+        "stale": false,
+        "updatedAt": "2026-05-02T06:30:40Z",
+        "messageReceived": null,
+        "currentTool": "Telegram UX implementation",
+        "model": null,
+        "steps": [
+          {
+            "label": "Josh Telegram UX recommendations implemented",
+            "status": "done",
+            "tool": "Telegram UX implementation",
+            "kind": "complete"
+          },
+          {
+            "label": "Implement Josh Telegram UX recommendations",
+            "status": "active",
+            "tool": "Telegram UX implementation",
+            "kind": "status"
+          },
+          {
+            "label": "Telegram UX options reviewed",
+            "status": "done",
+            "tool": "Telegram UX advisory",
+            "kind": "note"
+          },
+          {
+            "label": "Josh Telegram format improved",
+            "status": "done",
+            "tool": "Compact bullet-card format",
+            "kind": "complete"
+          },
+          {
+            "label": "Improve Josh Telegram readability",
+            "status": "active",
+            "tool": "Telegram format tuning",
+            "kind": "status"
+          },
+          {
+            "label": "Josh AGENTS kept lean",
+            "status": "done",
+            "tool": "AGENTS compaction",
+            "kind": "complete"
+          },
+          {
+            "label": "Lean AGENTS cleanup",
+            "status": "active",
+            "tool": "AGENTS trim + docs pointer",
+            "kind": "status"
+          },
+          {
+            "label": "Josh Telegram UX configured",
+            "status": "done",
+            "tool": "Telegram command menu + tap-first config",
+            "kind": "complete"
           }
         ]
       },
@@ -2860,106 +3771,53 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "objective": "Done: Mission Control highlights/spend deployed",
+        "objective": "Done: ops drift audit found stale daily backup",
         "status": "idle",
         "stale": true,
-        "updatedAt": "2026-04-28T17:44:42Z",
-        "messageReceived": "2026-04-28T17:44:15Z",
+        "updatedAt": "2026-05-02T04:16:09Z",
+        "messageReceived": "2026-05-02T04:16:02Z",
         "currentTool": "exec",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Model Spend compacted",
+            "label": "jaimes-model-efficiency-guard",
             "status": "done",
-            "tool": "code"
+            "tool": "hermes"
           },
           {
-            "label": "24in/Phone toggle added",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Canary noise reduced",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Due/unverified noise suppressed",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Skill review: Mission Control workflow",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Skill review: updating Mission Control skill",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: approved calendar/highlights/spend polish",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: tightening highlights/spend text",
-            "status": "done",
-            "tool": "code"
-          },
-          {
-            "label": "Mission Control: deploying highlight/spend polish",
-            "status": "done",
-            "tool": "exec"
-          },
-          {
-            "label": "Mission Control: deploying final compact copy",
+            "label": "Task: ops drift audit on J.A.I.N",
             "status": "done",
             "tool": "exec"
           }
         ]
-      },
-      {
-        "agent": "J.A.I.N",
-        "active": false,
-        "reportedActive": true,
-        "objective": "session startup completed",
-        "status": "stale",
-        "stale": true,
-        "updatedAt": "2026-04-28T17:31:10Z",
-        "messageReceived": "2026-04-23T04:25:02Z",
-        "currentTool": "",
-        "model": "GPT-5.4",
-        "steps": []
       }
     ]
   },
   "recentActivity": [
     {
-      "time": "2026-04-30T15:55:43Z",
-      "event": "Personal Codex: Completed Phase 4A rollout and verified task lifecycle on JOSHeX, Josh 2.0, JAIMES, and J.A.I.N"
+      "time": "2026-05-02T03:04:02Z",
+      "event": "Personal Codex: Applied approved Josh 2.0 OpenCLAW autonomy allowlist and added Agent Control approval posture monitoring; both Josh 2.0 and JAIMES report 33/33 routine approval coverage"
     },
     {
-      "time": "2026-04-30T15:46:46Z",
-      "event": "Personal Codex: Resumed Phase 4A execution and refreshed JOSHeX Brain Feed before final rollout steps"
+      "time": "2026-05-02T02:45:38Z",
+      "event": "Personal Codex: Fixed repo drift across publishable nested repos: Josh 2.0 and JAIMES now report dirtyRepos=0 and dirtyRepoEntries=0; top-level workspace containers are excluded as runtime state"
     },
     {
-      "time": "2026-04-30T15:56:28Z",
+      "time": "2026-05-02T07:45:13Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-04-30T15:56:28Z",
-      "event": "Coding: mission-control/scripts/agent_task.py, mission-control/scripts/mission_control_regression_check.py"
+      "time": "2026-05-02T07:45:10Z",
+      "event": "Coding: mission-control/scripts/update_and_push.sh, mission-control/index.html"
     },
     {
-      "time": "2026-04-30T15:56:28Z",
-      "event": "CodexBar: Codex auth required"
+      "time": "2026-05-02T07:45:10Z",
+      "event": "CodexBar: 84% left \u00b7 wk 35% left"
     },
     {
-      "time": "2026-04-30T15:56:20Z",
-      "event": "Brain: Brain Feed live"
+      "time": "2026-05-02T07:45:08Z",
+      "event": "Brain: Brain Feed idle"
     }
   ],
-  "lastUpdated": "2026-04-30T15:56:20Z"
+  "lastUpdated": "2026-05-02T07:45:08Z"
 }

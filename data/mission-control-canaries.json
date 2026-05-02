@@ -2,36 +2,42 @@
   "ok": true,
   "status": "ok",
   "summary": "All canaries passed",
-  "checkedAt": "2026-04-30T15:56:35.871636Z",
+  "checkedAt": "2026-05-02T07:45:08.718164Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JOSH 2.0; dualAgents=none; live=3",
+      "detail": "primary=JOSHeX; dualAgents=none; live=3",
       "severity": "ok"
     },
     {
       "name": "Calendar tile",
       "ok": true,
-      "detail": "gog CLI missing",
+      "detail": "Calendar fetch failed",
       "severity": "ok"
     },
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "32 today-relevant; 0 active issue(s)",
+      "detail": "33 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
       "name": "Action Required",
       "ok": true,
-      "detail": "1 visible alert(s)",
+      "detail": "2 visible alert(s)",
       "severity": "ok"
     },
     {
       "name": "Renderer wiring",
       "ok": true,
       "detail": "hero + ops renderers present",
+      "severity": "ok"
+    },
+    {
+      "name": "Ops glance strip",
+      "ok": true,
+      "detail": "first-viewport agent attention strip present",
       "severity": "ok"
     },
     {
@@ -44,6 +50,12 @@
       "name": "Agent Control lane",
       "ok": true,
       "detail": "overall=ready; ready=2/2",
+      "severity": "ok"
+    },
+    {
+      "name": "Alignment stability",
+      "ok": true,
+      "detail": "stable text rails present; objective ticker disabled; dense grids capped",
       "severity": "ok"
     }
   ]
