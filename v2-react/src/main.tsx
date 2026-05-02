@@ -148,8 +148,22 @@ function BrainHero({
   const heroAgents: AgentId[] = ["joshex", "josh", "jaimes"];
   const featuredEvents = events.slice(0, 6);
   const pendingApprovals = approvals.filter((row) => row.status === "pending");
+  const recentCutoff = Date.now() - 60 * 60 * 1000;
+  const recentActivity = events.filter((event) => timeValue(event.created_at) > recentCutoff).length;
+  const activeAgents = Array.from(statuses.values()).filter((row) => row.active || row.status === "active").length;
+  const activeJobs = state.jobs.filter((job) => job.status === "active" || job.status === "queued").length;
+  const activityScore = Math.min(10, activeAgents * 2 + activeJobs + pendingApprovals.length * 2 + recentActivity);
+  const laserSpeed = Math.max(5, 24 - activityScore * 1.9);
+  const laserOpacity = Math.min(1, 0.42 + activityScore * 0.06);
   return (
-    <section className="brain-hero" aria-label="Brain Feed">
+    <section
+      className="brain-hero"
+      aria-label="Brain Feed"
+      style={{
+        "--laser-speed": `${laserSpeed}s`,
+        "--laser-opacity": laserOpacity,
+      } as React.CSSProperties}
+    >
       <div className="brain-hero-title">
         <div>
           <p>Live agent updates</p>
