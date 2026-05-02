@@ -92,9 +92,10 @@ function App() {
 
       <section className="kiosk-grid">
         <section className="brain-hero-panel">
-          <BrainHero statuses={statusByAgent} events={state.events} approvals={state.approvals} signals={state.signals} />
+          <BrainHero statuses={statusByAgent} events={state.events} jobs={state.jobs} approvals={state.approvals} signals={state.signals} />
           <section className="support-grid">
-            <ApprovalInbox approvals={state.approvals} />
+            <MissionHealthPanel state={state} />
+            <AgentEcosystemMap statuses={statusByAgent} />
             <SignalFeed signals={state.signals} />
             <ModelUsageCard modelUsage={state.modelUsage} />
           </section>
@@ -108,11 +109,13 @@ function App() {
 function BrainHero({
   statuses,
   events,
+  jobs,
   approvals,
   signals,
 }: {
   statuses: Map<AgentId, AgentStatus>;
   events: MissionControlState["events"];
+  jobs: MissionControlState["jobs"];
   approvals: MissionControlState["approvals"];
   signals: MissionControlState["signals"];
 }) {
@@ -144,6 +147,8 @@ function BrainHero({
         <span className="attention-chip">{events.length} total feed rows</span>
       </div>
 
+      <MissionTimeline events={events} jobs={jobs} approvals={approvals} signals={signals} />
+
       <div className="brain-event-grid">
         {featuredEvents.length ? featuredEvents.map((event) => (
           <article key={event.id} className="brain-event-card">
@@ -159,6 +164,152 @@ function BrainHero({
             </footer>
           </article>
         )) : <EmptyRow title="No Brain Feed rows yet" detail="Dashboard-safe agent updates will appear here." />}
+      </div>
+    </section>
+  );
+}
+
+function MissionTimeline({
+  events,
+  jobs,
+  approvals,
+  signals,
+}: {
+  events: MissionControlState["events"];
+  jobs: MissionControlState["jobs"];
+  approvals: MissionControlState["approvals"];
+  signals: MissionControlState["signals"];
+}) {
+  const now = Date.now();
+  const windowMs = 24 * 60 * 60 * 1000;
+  const rows = [
+    ...events.map((event) => ({ id: event.id, time: event.created_at, type: "update", label: event.title })),
+    ...jobs.map((job) => ({ id: job.id, time: job.updated_at, type: job.status === "error" || job.status === "blocked" ? "risk" : "job", label: job.title })),
+    ...approvals.map((approval) => ({ id: approval.id, time: approval.created_at, type: "handoff", label: approval.title })),
+    ...signals.map((signal) => ({ id: signal.id, time: signal.time, type: "signal", label: signal.title })),
+  ]
+    .map((row) => ({ ...row, at: row.time ? new Date(row.time).getTime() : 0 }))
+    .filter((row) => Number.isFinite(row.at) && row.at > now - windowMs)
+    .sort((a, b) => a.at - b.at)
+    .slice(-28);
+
+  return (
+    <section className="mission-timeline" aria-label="Mission timeline last 24 hours">
+      <header>
+        <strong>24h Timeline</strong>
+        <span>{rows.length} events</span>
+      </header>
+      <div className="timeline-track">
+        {rows.map((row) => {
+          const left = Math.max(0, Math.min(100, ((row.at - (now - windowMs)) / windowMs) * 100));
+          return (
+            <span
+              key={`${row.type}-${row.id}`}
+              className={`timeline-mark is-${row.type}`}
+              style={{ left: `${left}%` }}
+              title={`${row.label} · ${fmtTime(row.time)}`}
+            />
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function MissionHealthPanel({ state }: { state: MissionControlState }) {
+  const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
+  const riskJobs = state.jobs.filter((job) => job.status === "blocked" || job.status === "error").length;
+  const activeAgents = state.statuses.filter((row) => row.active || row.status === "active").length;
+  const lastUpdate = [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
+    .filter(Boolean)
+    .sort()
+    .pop();
+  const minutesSinceUpdate = lastUpdate ? (Date.now() - new Date(lastUpdate).getTime()) / 60000 : 999;
+  const freshness = minutesSinceUpdate <= 15 ? 100 : minutesSinceUpdate <= 60 ? 82 : 48;
+  const agentScore = Math.min(100, Math.round((activeAgents / 3) * 100));
+  const jobsScore = Math.max(40, 100 - riskJobs * 18);
+  const approvalScore = pendingApprovals ? 74 : 100;
+  const costScore = state.modelUsage?.daily && state.modelUsage.daily > 1 ? 82 : 96;
+  const overall = Math.round((freshness + agentScore + jobsScore + approvalScore + costScore) / 5);
+  const rows = [
+    { label: "Freshness", value: freshness },
+    { label: "Agent heartbeat", value: agentScore },
+    { label: "Job health", value: jobsScore },
+    { label: "Cost signal", value: costScore },
+  ];
+
+  return (
+    <section className="mission-health-card">
+      <div className="panel-title compact">
+        <h2>Mission Health</h2>
+        <span>{overall}%</span>
+      </div>
+      <div className="health-overview">
+        <div className="health-gauge" style={{ "--score": overall } as React.CSSProperties}>
+          <strong>{overall}</strong>
+          <span>score</span>
+        </div>
+        <div className="health-alerts">
+          <strong>{riskJobs ? `${riskJobs} job risks` : "Jobs stable"}</strong>
+          <p>{pendingApprovals ? `${pendingApprovals} handoff pending` : "No approval blockers"}</p>
+          <small>Updated {fmtTime(lastUpdate)}</small>
+        </div>
+      </div>
+      <div className="health-bars">
+        {rows.map((row) => (
+          <article key={row.label}>
+            <span>{row.label}</span>
+            <strong>{row.value}%</strong>
+            <div><i style={{ width: `${row.value}%` }} /></div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AgentEcosystemMap({ statuses }: { statuses: Map<AgentId, AgentStatus> }) {
+  const nodes: Array<{ agent: AgentId; x: number; y: number }> = [
+    { agent: "joshex", x: 50, y: 24 },
+    { agent: "josh", x: 20, y: 68 },
+    { agent: "jaimes", x: 58, y: 72 },
+    { agent: "jain", x: 84, y: 46 },
+  ];
+  const links = [
+    ["joshex", "josh"],
+    ["joshex", "jaimes"],
+    ["jaimes", "jain"],
+  ] as Array<[AgentId, AgentId]>;
+  const byAgent = new Map(nodes.map((node) => [node.agent, node]));
+
+  return (
+    <section className="ecosystem-card">
+      <div className="panel-title compact">
+        <h2>Agent Map</h2>
+        <span><GitBranch size={14} />Live routing</span>
+      </div>
+      <div className="ecosystem-map" aria-label="Agent ecosystem routing map">
+        <svg viewBox="0 0 100 86" role="img">
+          {links.map(([from, to]) => {
+            const a = byAgent.get(from)!;
+            const b = byAgent.get(to)!;
+            return <line key={`${from}-${to}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} />;
+          })}
+        </svg>
+        {nodes.map((node) => {
+          const status = statuses.get(node.agent) || offlineStatus(node.agent);
+          return (
+            <article
+              key={node.agent}
+              className={`ecosystem-node ${statusClass(status.status)}`}
+              style={{ left: `${node.x}%`, top: `${node.y}%` }}
+            >
+              <span className={`dot ${statusClass(status.status)}`} />
+              <strong>{AGENTS[node.agent].label}</strong>
+              <em>{status.status}</em>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
