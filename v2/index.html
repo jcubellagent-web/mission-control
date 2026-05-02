@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mission Control v2</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>Mission Control v2</h1>
+        <p id="subtitle">Platform-backed agent operations console</p>
+      </div>
+      <div class="topbar-actions">
+        <button id="refreshButton" type="button">Refresh</button>
+        <a href="../index.html">Open v1</a>
+      </div>
+    </header>
+
+    <section class="status-strip" aria-label="System status">
+      <article>
+        <span>Source</span>
+        <strong id="sourceLabel">Loading</strong>
+      </article>
+      <article>
+        <span>Active Agents</span>
+        <strong id="activeCount">0</strong>
+      </article>
+      <article>
+        <span>Open Attention</span>
+        <strong id="attentionCount">0</strong>
+      </article>
+      <article>
+        <span>Last Update</span>
+        <strong id="lastUpdate">--</strong>
+      </article>
+    </section>
+
+    <section class="workbench">
+      <nav class="agent-rail" aria-label="Agents">
+        <button class="agent-tab selected" data-agent="joshex" type="button">
+          <span>JOSHeX</span>
+          <small>Private coordination</small>
+        </button>
+        <button class="agent-tab" data-agent="josh" type="button">
+          <span>Josh 2.0</span>
+          <small>Host operations</small>
+        </button>
+        <button class="agent-tab" data-agent="jaimes" type="button">
+          <span>JAIMES</span>
+          <small>Hermes reports</small>
+        </button>
+        <button class="agent-tab" data-agent="jain" type="button">
+          <span>J.A.I.N</span>
+          <small>Monitors</small>
+        </button>
+      </nav>
+
+      <section class="agent-panel" aria-live="polite">
+        <div class="panel-head">
+          <div>
+            <p class="label">Selected Agent</p>
+            <h2 id="agentName">JOSHeX</h2>
+          </div>
+          <span id="agentStatus" class="status-badge">loading</span>
+        </div>
+
+        <div class="objective-block">
+          <p class="label">Current Objective</p>
+          <h3 id="agentObjective">Loading agent state...</h3>
+          <p id="agentDetail"></p>
+        </div>
+
+        <div class="step-list" id="stepList"></div>
+      </section>
+
+      <aside class="side-panel">
+        <section>
+          <div class="section-head">
+            <h2>Approvals</h2>
+            <span id="approvalCount">0</span>
+          </div>
+          <div id="approvalList" class="compact-list"></div>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h2>Recent Events</h2>
+            <span id="eventCount">0</span>
+          </div>
+          <div id="eventList" class="compact-list"></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script src="config.local.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

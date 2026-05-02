@@ -2,7 +2,7 @@
 
 Phase 4B makes the shared layer operational for reliability work:
 
-- `scripts/agent_route.py` chooses an agent owner from task type, capabilities, privacy tier, and approval state.
+- `scripts/agent_route.py` chooses an agent owner from task type, capabilities, privacy tier, and approval state. It also emits an enforced `modelRoute`: dashboard-safe synthesis/review/digest work starts with Gemini, while execution, private context, approvals, repo edits, terminal actions, and final integration stay Codex/JOSHeX first.
 - `scripts/agent_heartbeat.py` writes heartbeat rows and can flag stale agents.
 - `scripts/capability_inventory.py` collects dashboard-safe node inventory, including local model names, cron counts, wrapped cron counts, and visible service hints.
 - `scripts/gemini_agent.py` checks the local Gemini CLI and can run dashboard-safe smoke prompts without writing raw prompts or model output into Mission Control sidecars.

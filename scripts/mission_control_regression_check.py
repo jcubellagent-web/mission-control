@@ -183,6 +183,52 @@ def check_index_wiring() -> None:
         require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
         require("raw emails" in " ".join(gemini.get("guardrails") or []).lower(), "Gemini sidecar must include privacy guardrails")
 
+    safe_route = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "agent_route.py"),
+            "--task-type",
+            "summary",
+            "--title",
+            "Regression safe summary",
+            "--objective",
+            "Summarize dashboard-safe agent activity",
+            "--privacy",
+            "dashboard-safe",
+            "--capability",
+            "gemini-review",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    require(safe_route.returncode == 0, f"agent_route safe summary failed: {safe_route.stderr.strip()}")
+    safe_payload = json.loads(safe_route.stdout)
+    require((safe_payload.get("modelRoute") or {}).get("firstStop") == "gemini", "dashboard-safe summaries must route Gemini-first")
+
+    private_route = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "agent_route.py"),
+            "--task-type",
+            "repo-patch",
+            "--title",
+            "Regression private execution",
+            "--objective",
+            "Patch a repository file",
+            "--privacy",
+            "agent-private",
+            "--capability",
+            "repo-edit",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    require(private_route.returncode == 0, f"agent_route private execution failed: {private_route.stderr.strip()}")
+    private_payload = json.loads(private_route.stdout)
+    require((private_payload.get("modelRoute") or {}).get("firstStop") == "codex", "private or execution work must stay Codex-first")
+
     scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
     TMP_JS.write_text("\n;\n".join(scripts))
     print("script_chunks", len(scripts))

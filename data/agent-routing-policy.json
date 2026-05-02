@@ -1,6 +1,46 @@
 {
-  "updatedAt": "2026-04-30T18:16:32Z",
+  "updatedAt": "2026-04-30T22:40:37Z",
   "defaultRequester": "joshex",
+  "modelRouting": {
+    "enforcedBy": "scripts/agent_route.py",
+    "default": "codex",
+    "geminiFirstPrivacy": [
+      "dashboard-safe"
+    ],
+    "geminiFirstTaskTypes": [
+      "summary",
+      "summarization",
+      "review",
+      "report",
+      "handoff",
+      "runbook",
+      "digest",
+      "log-summary",
+      "stale-task-compression",
+      "specialist-summary",
+      "model-analysis",
+      "gemini-review",
+      "gemini-long-context",
+      "gemini-evaluation",
+      "gemini-scheduled-summary"
+    ],
+    "codexOnly": [
+      "repo-patch",
+      "dashboard-update",
+      "validation",
+      "connected-account-triage",
+      "sensitive-coordination",
+      "account-mutation",
+      "auth-cookie-refresh",
+      "browser-auth-workflow",
+      "destructive-maintenance",
+      "destructive-git",
+      "posting-side-effect",
+      "raw-private-data-forwarding",
+      "raw-secret-handling"
+    ],
+    "guardrail": "Gemini receives sanitized dashboard-safe synthesis/review work only. Codex/JOSHeX owns execution, private connectors, approvals, repo edits, terminal actions, and final integration."
+  },
   "approvalRequiredPrivacy": [
     "josh-approval",
     "sensitive-account",
@@ -13,12 +53,12 @@
     "destructive-maintenance",
     "destructive-git",
     "posting-side-effect",
-        "raw-private-data-forwarding",
-        "raw-secret-handling",
-        "sensitive-account-action",
-        "unapproved-account-mutation",
-        "gemini-private-context",
-        "gemini-raw-connector-data"
+    "raw-private-data-forwarding",
+    "raw-secret-handling",
+    "sensitive-account-action",
+    "unapproved-account-mutation",
+    "gemini-private-context",
+    "gemini-raw-connector-data"
   ],
   "routes": [
     {
@@ -119,8 +159,7 @@
         "worker-report",
         "background-worker",
         "intelligence-scan",
-        "watchlist"
-        ,
+        "watchlist",
         "scheduled-summary"
       ],
       "capabilities": [

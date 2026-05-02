@@ -6,7 +6,9 @@ import argparse
 import datetime as dt
 import fcntl
 import json
+import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -261,6 +263,41 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
     )
 
 
+def should_publish_v2(args: argparse.Namespace) -> bool:
+    return bool(args.v2 or os.environ.get("MISSION_CONTROL_V2_DUAL_WRITE") in {"1", "true", "yes", "on"})
+
+
+def publish_v2(event: dict[str, Any], job: bool, handoff_to: str = "") -> dict[str, Any]:
+    status = event["status"]
+    if event["type"] == "complete":
+        status = "done"
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "mc_v2_publish.py"),
+        "--agent", event["agent"],
+        "--type", event["type"],
+        "--status", status,
+        "--title", event["title"],
+        "--tool", event.get("tool") or "agent_publish.py",
+        "--detail", event.get("detail") or event["title"],
+    ]
+    if job:
+        cmd.append("--job")
+    if handoff_to:
+        cmd.extend(["--handoff-to", handoff_to])
+    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return {
+            "ok": False,
+            "error": compact(result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}", 500),
+        }
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        payload = {"raw": compact(result.stdout, 500)}
+    return {"ok": True, "result": payload}
+
+
 def write_handoff(event: dict[str, Any], target: str) -> Path:
     HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
     safe_target = re.sub(r"[^a-zA-Z0-9_.-]+", "-", target.strip().lower())[:60] or "agent"
@@ -333,6 +370,7 @@ def main() -> int:
     parser.add_argument("--handoff-to", default="", help="Write a markdown handoff doc for this target")
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
+    parser.add_argument("--v2", action="store_true", help="Also publish dashboard-safe state to Mission Control v2 tables")
     args = parser.parse_args()
 
     agent = canonical_agent(args.agent)
@@ -369,8 +407,14 @@ def main() -> int:
             raise SystemExit(f"Event logged locally, but Brain Feed publish failed: {exc}") from exc
     if args.rollup:
         generate_daily_rollup()
+    v2_result = None
+    if should_publish_v2(args):
+        v2_result = publish_v2(event, args.job or args.type == "job", args.handoff_to)
 
-    print(json.dumps({"ok": True, "event": event}, indent=2))
+    response = {"ok": True, "event": event}
+    if v2_result is not None:
+        response["v2"] = v2_result
+    print(json.dumps(response, indent=2))
     return 0
 
 

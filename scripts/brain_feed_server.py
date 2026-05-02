@@ -8,6 +8,7 @@ Endpoints:
   GET  /index.html          — same
   GET  /data/*.json         — serve data files with no-cache headers
   GET  /assets/*            — serve static assets (CSS, JS, images)
+  GET  /v2/*                — serve Mission Control v2 static files
   GET  /brain-feed.json     — serve latest brain feed data (legacy compat)
   GET  /dashboard-data.json — serve dashboard data (legacy compat)
   GET  /jain-brain-feed.json— serve J.A.I.N brain feed (legacy compat)
@@ -198,6 +199,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if ".." not in rel:
                 asset_path = ROOT_DIR / "assets" / rel
                 return self._serve_file(asset_path)
+
+        # /v2/* — serve the additive Mission Control v2 operator surface
+        if path == "/v2":
+            return self._serve_file(ROOT_DIR / "v2" / "index.html", no_cache=True)
+        if path.startswith("/v2/"):
+            rel = path[len("/v2/"):] or "index.html"
+            if ".." not in rel and rel in {"index.html", "styles.css", "app.js", "config.example.js"}:
+                return self._serve_file(ROOT_DIR / "v2" / rel, no_cache=True)
 
         # /nightmode/state
         if path == "/nightmode/state":
