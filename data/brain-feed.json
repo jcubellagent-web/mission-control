@@ -1,23 +1,28 @@
 {
   "agent": "JOSHeX",
-  "active": false,
+  "active": true,
   "reportedActive": false,
-  "objective": "Done: Memory backup synced to J.A.I.N successfully \u00b7 Awaiting further instruction",
-  "status": "idle",
+  "objective": "React v2 Mission Control restored on Josh 2.0",
+  "status": "done",
   "detail": "Corrected the mistaken React route by serving the full Mission Control dashboard folder and loading Josh 2.0 at the 24in Brain Feed kiosk URL.",
   "steps": [
     {
-      "label": "Done - Memory backup synced to J.A.I.N successfully",
+      "label": "React v2 kiosk",
       "status": "done",
-      "tool": "exec"
+      "tool": "Codex React kiosk recovery"
+    },
+    {
+      "label": "Today Jobs rail verified",
+      "status": "done",
+      "tool": "Chrome DOM check"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-05-02T08:01:10Z",
-  "checkedAt": "2026-05-02T08:01:02Z",
+  "currentTool": "Chrome DOM check",
+  "updatedAt": "2026-05-02T08:11:18Z",
+  "checkedAt": "2026-05-02T08:11:18Z",
   "source": "shared-agent-event-ledger",
   "agentId": "joshex",
   "supabaseBacked": true,
   "model": "GPT-5.5",
-  "messageReceived": "2026-05-02T08:01:02Z"
+  "messageReceived": "2026-05-02T08:11:18Z"
 }
