@@ -4,10 +4,11 @@ Brain Feed Local Server — serves brain-feed.json + full dashboard + remote con
 Port 8765.
 
 Endpoints:
-  GET  /                    — serve Mission Control dashboard (index.html)
-  GET  /index.html          — same
+  GET  /                    — serve legacy static dashboard (index.html)
+  GET  /index.html          — same legacy static dashboard
   GET  /data/*.json         — serve data files with no-cache headers
   GET  /assets/*            — serve static assets (CSS, JS, images)
+  GET  /v2/*                — serve legacy static data-layer proof files
   GET  /brain-feed.json     — serve latest brain feed data (legacy compat)
   GET  /dashboard-data.json — serve dashboard data (legacy compat)
   GET  /jain-brain-feed.json— serve J.A.I.N brain feed (legacy compat)
@@ -182,7 +183,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path in LEGACY_JSON:
             return self._serve_file(LEGACY_JSON[path], no_cache=True)
 
-        # Dashboard root
+        # Legacy static dashboard root. Current Mission Control is the React kiosk
+        # served by Vite on Josh 2.0 at http://127.0.0.1:5174/.
         if path in ("/", "/index.html"):
             return self._serve_file(ROOT_DIR / "index.html", no_cache=False)
 
@@ -198,6 +200,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if ".." not in rel:
                 asset_path = ROOT_DIR / "assets" / rel
                 return self._serve_file(asset_path)
+
+        # /v2/* — serve the legacy static data-layer proof surface.
+        if path == "/v2":
+            return self._serve_file(ROOT_DIR / "v2" / "index.html", no_cache=True)
+        if path.startswith("/v2/"):
+            rel = path[len("/v2/"):] or "index.html"
+            if ".." not in rel and rel in {"index.html", "styles.css", "app.js", "config.example.js"}:
+                return self._serve_file(ROOT_DIR / "v2" / rel, no_cache=True)
 
         # /nightmode/state
         if path == "/nightmode/state":
@@ -293,6 +303,26 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         pass  # suppress access logs
+
+def _poll_jain_x_progress():
+    """Background thread: pull J.A.I.N x-progress.json via SSH every 60s for tight post feedback."""
+    import time
+    dest = DATA_DIR / "x-progress.json"
+    while True:
+        try:
+            result = subprocess.run(
+                ["ssh", "-o", "ConnectTimeout=3", "-o", "BatchMode=yes",
+                 "-o", "StrictHostKeyChecking=no",
+                 "jc_agent@100.121.89.84",
+                 "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json"],
+                capture_output=True, timeout=5
+            )
+            if result.returncode == 0 and result.stdout:
+                dest.write_bytes(result.stdout)
+        except Exception:
+            pass
+        time.sleep(60)
+
 
 def _poll_jain_brain_feed():
     """Background thread: pull J.A.I.N brain feed via SSH every 30s, completely independent of cron."""
@@ -423,6 +453,10 @@ if __name__ == "__main__":
     t = threading.Thread(target=_poll_jain_brain_feed, daemon=True)
     t.start()
     print("J.A.I.N brain feed poller started (30s interval)", flush=True)
+    t2 = threading.Thread(target=_poll_jain_x_progress, daemon=True)
+    t2.start()
+    print("J.A.I.N x-progress poller started (60s interval)", flush=True)
+
     t3 = threading.Thread(target=_poll_supabase_commands, daemon=True)
     t3.start()
     print("Supabase remote command poller started (3s interval)", flush=True)

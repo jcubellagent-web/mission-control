@@ -30,6 +30,20 @@ function fmtTime(value?: string | null) {
   return date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
+function missionText(value?: string | null) {
+  return String(value || "")
+    .replace(/React v2 Mission Control/gi, "current Mission Control")
+    .replace(/Mission Control v2/gi, "Mission Control")
+    .replace(/React v2/gi, "React Mission Control")
+    .replace(/v2 refresh/gi, "current refresh")
+    .replace(/v2 row/gi, "status row")
+    .replace(/v2 status\/events/gi, "status/events")
+    .replace(/v2 jobs/gi, "jobs")
+    .replace(/v2 state/gi, "status")
+    .replace(/JAIMES v2 job smoke/gi, "JAIMES job smoke")
+    .replace(/JAIMES v2 handoff smoke/gi, "JAIMES handoff smoke");
+}
+
 function statusClass(status?: string) {
   if (status === "active" || status === "queued") return "is-active";
   if (status === "blocked" || status === "error") return "is-risk";
@@ -96,7 +110,6 @@ function App() {
           <button type="button" onClick={refresh} aria-label="Refresh">
             <RefreshCw size={16} className={loading ? "spin" : ""} />
           </button>
-          <a href="/index.html">v1</a>
         </div>
       </header>
 
@@ -167,13 +180,13 @@ function BrainHero({
           <article key={event.id} className="brain-event-card">
             <header>
               <span className={`dot ${statusClass(event.status)}`} />
-              <strong>{event.title}</strong>
+              <strong>{missionText(event.title)}</strong>
               <time>{fmtTime(event.created_at)}</time>
             </header>
-            <p>{event.detail || event.tool || event.event_type}</p>
+            <p>{missionText(event.detail || event.tool || event.event_type)}</p>
             <footer>
               <span>{AGENTS[event.agent_id]?.label || event.agent_id}</span>
-              <span>{event.tool || event.event_type}</span>
+              <span>{missionText(event.tool || event.event_type)}</span>
             </footer>
           </article>
         )) : <EmptyRow title="No Brain Feed rows yet" detail="Dashboard-safe agent updates will appear here." />}
@@ -326,7 +339,7 @@ function BrainInsightStrip({ state }: { state: MissionControlState }) {
       <article>
         <span>Agent Coverage</span>
         <strong>{activeAgents}/{trackedAgents} active</strong>
-        <p>{state.statuses.length ? state.statuses.map((row) => `${AGENTS[row.agent_id]?.label || row.agent_id}: ${row.status}`).join(" · ") : "Awaiting v2 status rows"}</p>
+        <p>{state.statuses.length ? state.statuses.map((row) => `${AGENTS[row.agent_id]?.label || row.agent_id}: ${row.status}`).join(" · ") : "Awaiting agent status rows"}</p>
       </article>
       <article>
         <span>Model Spend</span>
@@ -431,8 +444,8 @@ function AgentHeroCard({ agent, status }: { agent: AgentId; status: AgentStatus 
         <strong>{AGENTS[agent].label}</strong>
         <em>{status.status}</em>
       </header>
-      <h3>{status.objective}</h3>
-      <p>{status.detail || AGENTS[agent].role}</p>
+      <h3>{missionText(status.objective)}</h3>
+      <p>{missionText(status.detail || AGENTS[agent].role)}</p>
     </article>
   );
 }
@@ -477,25 +490,25 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
       <div className="panel-title">
         <div>
           <p>Brain Feed</p>
-          <h2>{selectedStatus.objective}</h2>
+          <h2>{missionText(selectedStatus.objective)}</h2>
         </div>
         <span className={`status-pill ${statusClass(selectedStatus.status)}`}>{selectedStatus.status}</span>
       </div>
-      <p className="objective-detail">{selectedStatus.detail || "No detail reported."}</p>
+      <p className="objective-detail">{missionText(selectedStatus.detail || "No detail reported.")}</p>
       <div className="timeline">
         {events.slice(0, 10).map((event) => (
           <article key={event.id} className="timeline-row">
             <span className={`rail ${statusClass(event.status)}`} />
             <div>
               <header>
-                <strong>{event.title}</strong>
+                <strong>{missionText(event.title)}</strong>
                 <time>{fmtTime(event.created_at)}</time>
               </header>
-              <p>{event.detail || event.tool || event.event_type}</p>
+              <p>{missionText(event.detail || event.tool || event.event_type)}</p>
               <footer>
                 <span>{AGENTS[event.agent_id]?.label || event.agent_id}</span>
                 <span>{event.event_type}</span>
-                <span>{event.tool || "v2"}</span>
+                <span>{missionText(event.tool || "Mission Control")}</span>
               </footer>
             </div>
           </article>
@@ -605,18 +618,18 @@ function JobTimelineView({ jobs }: { jobs: JobRow[] }) {
             <div className="job-row-main">
               <span className={`status-dot ${statusClass(job.status)} ${agentClass(job.agent_id)}`} aria-hidden="true" />
               <div>
-                <strong title={job.title}>{job.title}</strong>
+                <strong title={missionText(job.title)}>{missionText(job.title)}</strong>
                 <p>{AGENTS[job.agent_id]?.label || job.agent_id} · {category.label}</p>
               </div>
               <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
             </div>
-            <div className="job-calendar-line" title={`${fmtTime(job.updated_at)} · ${job.detail || job.tool}`}>
+            <div className="job-calendar-line" title={`${fmtTime(job.updated_at)} · ${missionText(job.detail || job.tool)}`}>
               <span className={`job-window-fill ${agentClass(job.agent_id)}`} style={{ width: outsideWindow ? "2%" : `${left}%` }} />
               <i style={{ left: `${left}%` }} />
             </div>
           </article>
         );
-      }) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
+      }) : <EmptyRow title="No jobs yet" detail="Agent jobs will appear here." />}
     </section>
   );
 }
@@ -636,8 +649,8 @@ function JobCategoryView({ groups }: { groups: Array<{ key: string; label: strin
               <article key={job.id} className={`job-row compact ${agentClass(job.agent_id)} ${categoryClass(job)}`}>
                 <span className={`status-dot ${statusClass(job.status)} ${agentClass(job.agent_id)}`} aria-hidden="true" />
                 <div>
-                  <strong title={job.title}>{job.title}</strong>
-                  <p title={job.detail || job.tool}>{job.detail || job.tool || AGENTS[job.agent_id]?.label}</p>
+                  <strong title={missionText(job.title)}>{missionText(job.title)}</strong>
+                  <p title={missionText(job.detail || job.tool)}>{missionText(job.detail || job.tool || AGENTS[job.agent_id]?.label)}</p>
                 </div>
                 <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
                 <time>{fmtTime(job.updated_at)}</time>
@@ -645,7 +658,7 @@ function JobCategoryView({ groups }: { groups: Array<{ key: string; label: strin
             ))}
           </div>
         </details>
-      )) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
+      )) : <EmptyRow title="No jobs yet" detail="Agent jobs will appear here." />}
     </>
   );
 }
@@ -778,8 +791,8 @@ function offlineStatus(agent: AgentId): AgentStatus {
   return {
     agent_id: agent,
     status: "offline",
-    objective: "No v2 state has been published yet",
-    detail: "This agent has not reported a dashboard-safe v2 row.",
+    objective: "No current Mission Control status has been published yet",
+    detail: "This agent has not reported a dashboard-safe status row.",
     current_tool: "",
     active: false,
     updated_at: "",

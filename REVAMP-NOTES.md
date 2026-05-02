@@ -1,5 +1,7 @@
 # Mission Control UI/UX Revamp — `ui-revamp-2026-04-19`
 
+Historical note: this revamp applied to the legacy static `index.html` surface. Current Mission Control work means the Josh 2.0 React kiosk in `v2-react/` at `http://127.0.0.1:5174/`.
+
 One single-file HTML dashboard, 11.8k lines. All revamp changes land as a
 **CSS-only overlay layer** appended at the end of the main `<style>` block
 (search for `REVAMP LAYER — ui-revamp-2026-04-19`). The layer rides on top

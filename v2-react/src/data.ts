@@ -84,7 +84,7 @@ async function loadFromSupabase(): Promise<MissionControlState> {
   const normalizedStatuses = statuses.map((row) => normalizeStatus(row)).filter(Boolean) as AgentStatus[];
   const mergedJobs = mergeJobs(jobs, fallback.jobs);
   return {
-    source: jobs.length && fallback.jobs.length ? "Supabase v2 + local jobs" : jobs.length ? "Supabase v2" : "Local jobs fallback",
+    source: jobs.length && fallback.jobs.length ? "Supabase + local jobs" : jobs.length ? "Supabase" : "Local jobs fallback",
     statuses: normalizedStatuses.length ? mergeStatuses(normalizedStatuses, fallback.statuses) : fallback.statuses,
     events: events.length ? events : fallback.events,
     jobs: mergedJobs.length ? mergedJobs : fallback.jobs,
@@ -141,7 +141,7 @@ async function loadFallback(): Promise<MissionControlState> {
     created_at: dashboard?.generatedAt || "",
   }));
   return {
-    source: "Local v1 fallback",
+    source: "Local legacy fallback",
     statuses,
     events,
     jobs: buildFallbackJobs(dashboard),

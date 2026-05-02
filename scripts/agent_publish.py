@@ -6,7 +6,9 @@ import argparse
 import datetime as dt
 import fcntl
 import json
+import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -24,6 +26,11 @@ DECISIONS_PATH = DATA_DIR / "decisions.json"
 HANDOFF_QUEUE_PATH = DATA_DIR / "handoff-queue.json"
 DAILY_ROLLUP_PATH = DATA_DIR / "daily-rollup.json"
 HANDOFF_DIR = ROOT / "docs" / "handoffs"
+BRAIN_FEED_PATHS = {
+    "joshex": DATA_DIR / "brain-feed.json",
+    "jaimes": DATA_DIR / "jaimes-brain-feed.json",
+    "jain": DATA_DIR / "jain-brain-feed.json",
+}
 
 AGENTS = {
     "josh": "JOSH 2.0",
@@ -261,6 +268,74 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
     )
 
 
+def publish_local_brain_feed(event: dict[str, Any]) -> None:
+    path = BRAIN_FEED_PATHS.get(event["agent"])
+    if not path:
+        return
+    existing = read_json(path, {})
+    if not isinstance(existing, dict):
+        existing = {}
+    active = event["status"] in STATUS_TO_ACTIVE
+    step = {
+        "label": compact(event["title"], 180),
+        "status": "active" if active else event["status"],
+        "tool": compact(event.get("tool") or "agent_publish.py", 44),
+        "kind": event["type"],
+    }
+    payload = {
+        **existing,
+        "agent": agent_label(event["agent"]),
+        "agentId": event["agent"],
+        "active": active,
+        "reportedActive": active,
+        "objective": compact(event["title"], 220),
+        "status": "active" if active else event["status"],
+        "detail": compact(event.get("detail") or event["title"], 260),
+        "steps": [step] + list(existing.get("steps") or [])[:7],
+        "currentTool": compact(event.get("tool") or "agent_publish.py", 44),
+        "updatedAt": event["time"],
+        "checkedAt": event["time"],
+        "source": "shared-agent-event-ledger",
+        "supabaseBacked": True,
+    }
+    write_json(path, payload)
+
+
+def should_publish_v2(args: argparse.Namespace) -> bool:
+    return bool(args.v2 or os.environ.get("MISSION_CONTROL_V2_DUAL_WRITE") in {"1", "true", "yes", "on"})
+
+
+def publish_v2(event: dict[str, Any], job: bool, handoff_to: str = "") -> dict[str, Any]:
+    status = event["status"]
+    if event["type"] == "complete":
+        status = "done"
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "mc_v2_publish.py"),
+        "--agent", event["agent"],
+        "--type", event["type"],
+        "--status", status,
+        "--title", event["title"],
+        "--tool", event.get("tool") or "agent_publish.py",
+        "--detail", event.get("detail") or event["title"],
+    ]
+    if job:
+        cmd.append("--job")
+    if handoff_to:
+        cmd.extend(["--handoff-to", handoff_to])
+    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return {
+            "ok": False,
+            "error": compact(result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}", 500),
+        }
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        payload = {"raw": compact(result.stdout, 500)}
+    return {"ok": True, "result": payload}
+
+
 def write_handoff(event: dict[str, Any], target: str) -> Path:
     HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
     safe_target = re.sub(r"[^a-zA-Z0-9_.-]+", "-", target.strip().lower())[:60] or "agent"
@@ -333,6 +408,7 @@ def main() -> int:
     parser.add_argument("--handoff-to", default="", help="Write a markdown handoff doc for this target")
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
+    parser.add_argument("--v2", action="store_true", help="Also publish dashboard-safe state to Mission Control canonical tables")
     args = parser.parse_args()
 
     agent = canonical_agent(args.agent)
@@ -363,14 +439,21 @@ def main() -> int:
         append_event(event)
         append_handoff_record(event, target, handoff)
     if args.brain_feed:
+        publish_local_brain_feed(event)
         try:
             publish_brain_feed(event)
         except (urllib.error.URLError, TimeoutError) as exc:
             raise SystemExit(f"Event logged locally, but Brain Feed publish failed: {exc}") from exc
     if args.rollup:
         generate_daily_rollup()
+    v2_result = None
+    if should_publish_v2(args):
+        v2_result = publish_v2(event, args.job or args.type == "job", args.handoff_to)
 
-    print(json.dumps({"ok": True, "event": event}, indent=2))
+    response = {"ok": True, "event": event}
+    if v2_result is not None:
+        response["v2"] = v2_result
+    print(json.dumps(response, indent=2))
     return 0
 
 
