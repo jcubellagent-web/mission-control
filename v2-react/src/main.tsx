@@ -31,6 +31,20 @@ function fmtTime(value?: string | null) {
 }
 
 function missionText(value?: string | null) {
+  const scriptLabels: Record<string, string> = {
+    intel_feedback_loop: "intelligence feedback loop",
+    feedback_loop: "feedback loop",
+    check_josh_health: "Josh health check",
+    breaking_news_scanner: "breaking news scanner",
+    x_feedback_ml: "X feedback model check",
+    launch_scheduler: "launch scheduler",
+    host_local_maintenance: "host maintenance",
+    sorare_missions: "Sorare mission sweep",
+  };
+  const humanizeScript = (name: string) => {
+    const stem = name.split("/").pop()?.replace(/\.(py|sh|js|ts|tsx)$/i, "") || name;
+    return scriptLabels[stem] || stem.replace(/[_-]/g, " ");
+  };
   return String(value || "")
     .replace(/React v2 Mission Control/gi, "current Mission Control")
     .replace(/Mission Control v2/gi, "Mission Control")
@@ -41,7 +55,9 @@ function missionText(value?: string | null) {
     .replace(/v2 jobs/gi, "jobs")
     .replace(/v2 state/gi, "status")
     .replace(/JAIMES v2 job smoke/gi, "JAIMES job smoke")
-    .replace(/JAIMES v2 handoff smoke/gi, "JAIMES handoff smoke");
+    .replace(/JAIMES v2 handoff smoke/gi, "JAIMES handoff smoke")
+    .replace(/\b([a-z0-9_.-]+)\s+cron:\s+((?:\/[^ ]+\/)?[A-Za-z0-9_.-]+\.(?:py|sh|js|ts|tsx))/gi, (_, host, script) => `${host} scheduled: ${humanizeScript(script)}`)
+    .replace(/(?<![\w./-])((?:\/[^ ]+\/)?[A-Za-z0-9_-]+\.(?:py|sh|js|ts|tsx))(?![\w./-])/gi, (_, script) => humanizeScript(script));
 }
 
 function statusClass(status?: string) {

@@ -73,6 +73,58 @@ def compact(value: Any, limit: int = 220) -> str:
     return text[: max(0, limit - 1)].rstrip() + "..."
 
 
+SCRIPT_LABELS = {
+    "intel_feedback_loop": "intelligence feedback loop",
+    "feedback_loop": "feedback loop",
+    "check_josh_health": "Josh health check",
+    "breaking_news_scanner": "breaking news scanner",
+    "x_feedback_ml": "X feedback model check",
+    "launch_scheduler": "launch scheduler",
+    "host_local_maintenance": "host maintenance",
+    "sorare_missions": "Sorare mission sweep",
+    "sorare_lineups": "Sorare lineup check",
+}
+
+
+def humanize_token(token: str) -> str:
+    base = Path(token).name
+    stem = re.sub(r"\.(py|sh|js|ts|tsx|json|yaml|yml|md)$", "", base, flags=re.IGNORECASE)
+    label = SCRIPT_LABELS.get(stem, stem.replace("_", " ").replace("-", " "))
+    return " ".join(label.split()).strip()
+
+
+def dashboard_text(value: Any, limit: int = 220) -> str:
+    text = compact(value, limit * 2)
+    text = re.sub(
+        r"(?i)\b([a-z0-9_.-]+)\s+cron:\s+((?:/[^ ]+/)?[A-Za-z0-9_.-]+\.(?:py|sh|js|ts|tsx))",
+        lambda match: f"{match.group(1)} scheduled: {humanize_token(match.group(2))}",
+        text,
+    )
+    text = re.sub(
+        r"(?<![\w./-])((?:/[^ ]+/)?[A-Za-z0-9_-]+\.(?:py|sh|js|ts|tsx))(?![\w./-])",
+        lambda match: humanize_token(match.group(1)),
+        text,
+    )
+    text = re.sub(r"\s*(?:>>|2>&1|&&|\|\|)\s*.*$", "", text).strip()
+    return compact(text, limit)
+
+
+def dashboard_steps(rows: Any) -> list[dict[str, Any]]:
+    safe_rows: list[dict[str, Any]] = []
+    for row in list(rows or [])[:7]:
+        if not isinstance(row, dict):
+            continue
+        safe = dict(row)
+        if "label" in safe:
+            safe["label"] = dashboard_text(safe.get("label"), 180)
+        if "title" in safe:
+            safe["title"] = dashboard_text(safe.get("title"), 180)
+        if "tool" in safe:
+            safe["tool"] = dashboard_text(safe.get("tool"), 44)
+        safe_rows.append(safe)
+    return safe_rows
+
+
 def read_json(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text())
@@ -239,9 +291,9 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
     existing = fetch_existing_feed(url, key, agent)
     active = event["status"] in STATUS_TO_ACTIVE
     step = {
-        "label": compact(event["title"], 180),
+        "label": dashboard_text(event["title"], 180),
         "status": "active" if active else event["status"],
-        "tool": compact(event.get("tool") or "agent_publish.py", 44),
+        "tool": dashboard_text(event.get("tool") or "agent_publish.py", 44),
         "kind": event["type"],
     }
     payload = {
@@ -251,11 +303,11 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
         "active": active,
         "reportedActive": active,
         "status": "active" if active else event["status"],
-        "objective": compact(event["title"], 220),
-        "detail": compact(event.get("detail") or event["title"], 260),
+        "objective": dashboard_text(event["title"], 220),
+        "detail": dashboard_text(event.get("detail") or event["title"], 260),
         "updatedAt": event["time"],
-        "currentTool": compact(event.get("tool") or "agent_publish.py", 44),
-        "steps": [step] + list(existing.get("steps") or [])[:7],
+        "currentTool": dashboard_text(event.get("tool") or "agent_publish.py", 44),
+        "steps": [step] + dashboard_steps(existing.get("steps")),
         "source": "shared-agent-event-ledger",
         "supabaseBacked": True,
     }
@@ -280,9 +332,9 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
         existing = {}
     active = event["status"] in STATUS_TO_ACTIVE
     step = {
-        "label": compact(event["title"], 180),
+        "label": dashboard_text(event["title"], 180),
         "status": "active" if active else event["status"],
-        "tool": compact(event.get("tool") or "agent_publish.py", 44),
+        "tool": dashboard_text(event.get("tool") or "agent_publish.py", 44),
         "kind": event["type"],
     }
     payload = {
@@ -291,11 +343,11 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
         "agentId": event["agent"],
         "active": active,
         "reportedActive": active,
-        "objective": compact(event["title"], 220),
+        "objective": dashboard_text(event["title"], 220),
         "status": "active" if active else event["status"],
-        "detail": compact(event.get("detail") or event["title"], 260),
-        "steps": [step] + list(existing.get("steps") or [])[:7],
-        "currentTool": compact(event.get("tool") or "agent_publish.py", 44),
+        "detail": dashboard_text(event.get("detail") or event["title"], 260),
+        "steps": [step] + dashboard_steps(existing.get("steps")),
+        "currentTool": dashboard_text(event.get("tool") or "agent_publish.py", 44),
         "updatedAt": event["time"],
         "checkedAt": event["time"],
         "source": "shared-agent-event-ledger",
