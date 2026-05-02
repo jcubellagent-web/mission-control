@@ -1201,6 +1201,24 @@ p {
   text-transform: uppercase;
 }
 
+.brain-hero .agent-hero-card.is-aging {
+  border-color: rgba(240, 196, 96, 0.22);
+  background:
+    linear-gradient(180deg, rgba(30, 29, 22, 0.72), rgba(5, 18, 31, 0.82));
+}
+
+.brain-hero .agent-hero-card.is-stale {
+  opacity: 0.58;
+  border-color: rgba(140, 168, 184, 0.16);
+  background:
+    linear-gradient(180deg, rgba(10, 20, 29, 0.66), rgba(4, 11, 19, 0.8));
+}
+
+.brain-hero .agent-hero-card.is-stale h3,
+.brain-hero .agent-hero-card.is-stale p {
+  color: var(--muted);
+}
+
 .approval-strip {
   flex-wrap: wrap;
   gap: 8px;
@@ -1916,13 +1934,38 @@ p {
 .job-timeline-row {
   display: grid;
   gap: 5px;
-  min-height: 52px;
+  min-height: 46px;
   border: 1px solid rgba(85, 215, 255, 0.14);
   border-left-width: 3px;
   border-radius: 8px;
   background:
     linear-gradient(180deg, rgba(6, 23, 36, 0.68), rgba(3, 12, 22, 0.72));
-  padding: 7px 8px;
+  padding: 6px 8px;
+}
+
+.quiet-jobs-row {
+  display: grid;
+  gap: 2px;
+  min-height: 38px;
+  border: 1px dashed rgba(85, 215, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(4, 15, 26, 0.48);
+  padding: 7px 9px;
+}
+
+.quiet-jobs-row strong {
+  color: var(--soft);
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.quiet-jobs-row p {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .job-timeline-row.agent-joshex {

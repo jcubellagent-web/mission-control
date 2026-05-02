@@ -1,6 +1,7 @@
 import type { AgentEvent, AgentId, AgentJob, AgentStatus, Approval, MissionControlState, SignalItem } from "./types";
 
 const CONFIG = window.MC_V2_CONFIG || {};
+const REALTIME_TABLES = ["brain_feed", "mc_v2_agent_status", "mc_v2_events", "mc_v2_jobs", "mc_v2_approvals"];
 
 function normalizeStatus(row: any, fallbackAgent: AgentId = "joshex"): AgentStatus | null {
   if (!row) return null;
@@ -235,6 +236,67 @@ export async function loadMissionControl(): Promise<MissionControlState> {
     }
   }
   return loadFallback();
+}
+
+export function subscribeMissionControlRealtime(onChange: () => void, onState?: (state: "connected" | "polling") => void) {
+  if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey || typeof WebSocket === "undefined") {
+    onState?.("polling");
+    return () => {};
+  }
+  const url = `${CONFIG.supabaseUrl.replace(/^http/i, "ws")}/realtime/v1/websocket?apikey=${encodeURIComponent(CONFIG.supabaseKey)}&vsn=1.0.0`;
+  const socket = new WebSocket(url);
+  const topic = "realtime:mission-control";
+  let ref = 0;
+  let closed = false;
+  let heartbeat: number | undefined;
+  let pending = false;
+
+  const send = (event: string, payload: Record<string, unknown>, target = topic) => {
+    if (socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ topic: target, event, payload, ref: String(++ref) }));
+  };
+  const scheduleRefresh = () => {
+    if (pending) return;
+    pending = true;
+    window.setTimeout(() => {
+      pending = false;
+      onChange();
+    }, 250);
+  };
+
+  socket.addEventListener("open", () => {
+    if (closed) return;
+    send("phx_join", {
+      config: {
+        broadcast: { self: false },
+        presence: { key: "" },
+        postgres_changes: REALTIME_TABLES.map((table) => ({ event: "*", schema: "public", table })),
+      },
+      access_token: CONFIG.supabaseKey,
+    });
+    heartbeat = window.setInterval(() => send("heartbeat", {}, "phoenix"), 25_000);
+  });
+  socket.addEventListener("message", (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      if (message.event === "phx_reply" && message.payload?.status === "ok") onState?.("connected");
+      if (message.event === "postgres_changes") scheduleRefresh();
+    } catch {
+      // Ignore malformed realtime frames and keep polling as fallback.
+    }
+  });
+  socket.addEventListener("close", () => {
+    if (heartbeat) window.clearInterval(heartbeat);
+    if (!closed) onState?.("polling");
+  });
+  socket.addEventListener("error", () => onState?.("polling"));
+
+  return () => {
+    closed = true;
+    if (heartbeat) window.clearInterval(heartbeat);
+    if (socket.readyState === WebSocket.OPEN) send("phx_leave", {});
+    socket.close();
+  };
 }
 
 async function loadSidecars(): Promise<{ modelUsage?: MissionControlState["modelUsage"]; signals: SignalItem[] }> {

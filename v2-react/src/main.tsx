@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, DollarSign, GitBranch, Radio, RefreshCw, ShieldCheck, Timer, UserRoundCheck } from "lucide-react";
-import { loadMissionControl } from "./data";
+import { loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import type { AgentId, AgentStatus, MissionControlState } from "./types";
 import "./styles.css";
 
@@ -73,6 +73,28 @@ function timeValue(value?: string | null): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function ageMinutes(value?: string | null) {
+  const timestamp = timeValue(value);
+  return timestamp ? Math.max(0, Math.round((Date.now() - timestamp) / 60000)) : Number.POSITIVE_INFINITY;
+}
+
+function ageLabel(value?: string | null) {
+  const minutes = ageMinutes(value);
+  if (!Number.isFinite(minutes)) return "no update";
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(hours / 24)}d`;
+}
+
+function freshnessClass(value?: string | null) {
+  const minutes = ageMinutes(value);
+  if (!Number.isFinite(minutes) || minutes >= 30) return "is-stale";
+  if (minutes >= 5) return "is-aging";
+  return "is-fresh";
+}
+
 function agentClass(agent: AgentId) {
   return `agent-${agent}`;
 }
@@ -80,8 +102,9 @@ function agentClass(agent: AgentId) {
 function App() {
   const [state, setState] = useState<MissionControlState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
+  const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
 
-  async function refresh(showLoading = true) {
+  const refresh = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       const next = await loadMissionControl();
@@ -89,15 +112,22 @@ function App() {
     } finally {
       if (showLoading) setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     refresh();
     const timer = window.setInterval(() => {
       refresh(false).catch((error) => console.warn(error));
     }, 10_000);
-    return () => window.clearInterval(timer);
-  }, []);
+    const unsubscribe = subscribeMissionControlRealtime(
+      () => refresh(false).catch((error) => console.warn(error)),
+      setLiveMode,
+    );
+    return () => {
+      window.clearInterval(timer);
+      unsubscribe();
+    };
+  }, [refresh]);
 
   const statusByAgent = useMemo(() => {
     return new Map(state.statuses.map((row) => [row.agent_id, row]));
@@ -129,7 +159,7 @@ function App() {
         </div>
         <div className="mission-actions">
           <span className="source-chip"><ShieldCheck size={15} />{state.source}</span>
-          <span className="source-chip live-chip">Live • 10s</span>
+          <span className="source-chip live-chip">{liveMode === "connected" ? "Realtime" : "Live • 10s"}</span>
           <button type="button" onClick={refresh} aria-label="Refresh">
             <RefreshCw size={16} className={loading ? "spin" : ""} />
           </button>
@@ -474,12 +504,13 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
 }
 
 function AgentHeroCard({ agent, status }: { agent: AgentId; status: AgentStatus }) {
+  const freshness = freshnessClass(status.updated_at);
   return (
-    <article className="agent-hero-card">
+    <article className={`agent-hero-card ${freshness}`}>
       <header>
         <span className={`dot ${statusClass(status.status)}`} />
         <strong>{AGENTS[agent].label}</strong>
-        <em>{status.status}</em>
+        <em>{status.status} · {ageLabel(status.updated_at)}</em>
       </header>
       <h3>{missionText(status.objective)}</h3>
       <p>{missionText(status.detail || AGENTS[agent].role)}</p>
@@ -608,27 +639,42 @@ function jobGroupSummary(items: JobRow[]) {
   return `${items.length} tracked`;
 }
 
+function jobNeedsAttention(job: JobRow) {
+  return job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error";
+}
+
+function visibleTimelineJobs(jobs: JobRow[]) {
+  const now = Date.now();
+  const windowMs = 6 * 60 * 60 * 1000;
+  const recent = now - windowMs;
+  const rows = jobs.filter((job) => jobNeedsAttention(job) || timeValue(job.updated_at) >= recent);
+  return (rows.length ? rows : jobs.slice(0, 8)).slice(0, 14);
+}
+
 function JobsRail({ jobs }: { jobs: MissionControlState["jobs"] }) {
   const [view, setView] = useState<"timeline" | "categories">("timeline");
   const groups = groupedJobs(jobs, "category");
+  const visibleJobs = visibleTimelineJobs(jobs);
+  const quietCount = Math.max(0, jobs.length - visibleJobs.length);
+  const attentionJobs = jobs.filter(jobNeedsAttention).length;
   return (
     <aside className="jobs-rail">
       <div className="panel-title compact">
         <h2>Today's Jobs</h2>
-        <span>{jobs.length} jobs · {groups.length || 0} groups</span>
+        <span>{attentionJobs ? `${attentionJobs} need focus` : `${quietCount} quiet`}</span>
       </div>
       <div className="jobs-view-toggle" aria-label="Today jobs view">
-        <button type="button" className={view === "timeline" ? "selected" : ""} onClick={() => setView("timeline")}>6h timeline</button>
+        <button type="button" className={view === "timeline" ? "selected" : ""} onClick={() => setView("timeline")}>Focus</button>
         <button type="button" className={view === "categories" ? "selected" : ""} onClick={() => setView("categories")}>Categories</button>
       </div>
       <div className="job-list">
-        {view === "timeline" ? <JobTimelineView jobs={jobs} /> : <JobCategoryView groups={groups} />}
+        {view === "timeline" ? <JobTimelineView jobs={visibleJobs} quietCount={quietCount} /> : <JobCategoryView groups={groups} />}
       </div>
     </aside>
   );
 }
 
-function JobTimelineView({ jobs }: { jobs: JobRow[] }) {
+function JobTimelineView({ jobs, quietCount }: { jobs: JobRow[]; quietCount: number }) {
   const now = Date.now();
   const windowMs = 6 * 60 * 60 * 1000;
   const start = now - windowMs;
@@ -666,7 +712,13 @@ function JobTimelineView({ jobs }: { jobs: JobRow[] }) {
             </div>
           </article>
         );
-      }) : <EmptyRow title="No jobs yet" detail="Agent jobs will appear here." />}
+      }) : <EmptyRow title="No focus jobs" detail="Routine jobs are quiet." />}
+      {quietCount > 0 ? (
+        <article className="quiet-jobs-row">
+          <strong>{quietCount} routine jobs quiet</strong>
+          <p>Completed or low-signal runs are collapsed from the focus view.</p>
+        </article>
+      ) : null}
     </section>
   );
 }
