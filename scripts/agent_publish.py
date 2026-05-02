@@ -27,6 +27,7 @@ HANDOFF_QUEUE_PATH = DATA_DIR / "handoff-queue.json"
 DAILY_ROLLUP_PATH = DATA_DIR / "daily-rollup.json"
 HANDOFF_DIR = ROOT / "docs" / "handoffs"
 BRAIN_FEED_PATHS = {
+    "josh": DATA_DIR / "brain-feed.json",
     "joshex": DATA_DIR / "brain-feed.json",
     "jaimes": DATA_DIR / "jaimes-brain-feed.json",
     "jain": DATA_DIR / "jain-brain-feed.json",
@@ -54,9 +55,9 @@ AGENT_IDS = {
 }
 STATUS_TO_ACTIVE = {"active", "running", "working", "pending", "live"}
 SECRET_PATTERNS = [
-    re.compile(r"sk-[A-Za-z0-9_-]{16,}"),
-    re.compile(r"sb_secret_[A-Za-z0-9_-]+"),
-    re.compile(r"ghp_[A-Za-z0-9_]{20,}"),
+    re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}"),
+    re.compile(r"(?<![A-Za-z0-9])sb_secret_[A-Za-z0-9_-]+"),
+    re.compile(r"(?<![A-Za-z0-9])ghp_[A-Za-z0-9_]{20,}"),
     re.compile(r"(?i)(password|client_secret|access_token|refresh_token|authorization)\s*[:=]"),
 ]
 
@@ -270,6 +271,8 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
 
 def publish_local_brain_feed(event: dict[str, Any]) -> None:
     path = BRAIN_FEED_PATHS.get(event["agent"])
+    if event["agent"] == "josh" and Path.home().name != "josh2.0":
+        path = None
     if not path:
         return
     existing = read_json(path, {})
@@ -302,7 +305,12 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
 
 
 def should_publish_v2(args: argparse.Namespace) -> bool:
-    return bool(args.v2 or os.environ.get("MISSION_CONTROL_V2_DUAL_WRITE") in {"1", "true", "yes", "on"})
+    has_v2_key = bool(os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_SERVICE_KEY"))
+    return bool(
+        args.v2
+        or os.environ.get("MISSION_CONTROL_V2_DUAL_WRITE") in {"1", "true", "yes", "on"}
+        or (args.brain_feed and has_v2_key)
+    )
 
 
 def publish_v2(event: dict[str, Any], job: bool, handoff_to: str = "") -> dict[str, Any]:

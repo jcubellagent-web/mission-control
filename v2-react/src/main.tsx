@@ -65,15 +65,22 @@ function App() {
   const [state, setState] = useState<MissionControlState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
 
-  async function refresh() {
-    setLoading(true);
-    const next = await loadMissionControl();
-    setState(next);
-    setLoading(false);
+  async function refresh(showLoading = true) {
+    if (showLoading) setLoading(true);
+    try {
+      const next = await loadMissionControl();
+      setState(next);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
   }
 
   useEffect(() => {
     refresh();
+    const timer = window.setInterval(() => {
+      refresh(false).catch((error) => console.warn(error));
+    }, 10_000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const statusByAgent = useMemo(() => {

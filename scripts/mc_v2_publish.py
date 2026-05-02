@@ -42,9 +42,9 @@ ACTIVE_STATUSES = {"active", "queued", "accepted"}
 EVENT_TYPES = {"status", "job", "decision", "handoff", "blocked", "complete", "note", "heartbeat"}
 STATUSES = {"active", "queued", "accepted", "done", "blocked", "error", "info", "cancelled"}
 SECRET_PATTERNS = [
-    re.compile(r"sk-[A-Za-z0-9_-]{16,}"),
-    re.compile(r"sb_secret_[A-Za-z0-9_-]+"),
-    re.compile(r"ghp_[A-Za-z0-9_]{20,}"),
+    re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}"),
+    re.compile(r"(?<![A-Za-z0-9])sb_secret_[A-Za-z0-9_-]+"),
+    re.compile(r"(?<![A-Za-z0-9])ghp_[A-Za-z0-9_]{20,}"),
     re.compile(r"(?i)(password|client_secret|access_token|refresh_token|authorization)\s*[:=]"),
 ]
 

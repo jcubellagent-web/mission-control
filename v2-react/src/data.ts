@@ -17,6 +17,22 @@ function normalizeStatus(row: any, fallbackAgent: AgentId = "joshex"): AgentStat
   };
 }
 
+function normalizeBrainFeedRow(row: any): AgentStatus | null {
+  const data = row?.data;
+  if (!data || typeof data !== "object") return null;
+  const id = String(row.id || data.agentId || "").toLowerCase();
+  const fallbackAgent: AgentId = id === "main" ? "josh" : id === "josh2" ? "josh" : id as AgentId;
+  if (!["joshex", "josh", "jaimes", "jain"].includes(fallbackAgent)) return null;
+  return normalizeStatus(
+    {
+      ...data,
+      agent_id: data.agent_id || data.agentId || fallbackAgent,
+      updated_at: data.updated_at || data.updatedAt || row.updated_at,
+    },
+    fallbackAgent,
+  );
+}
+
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`${path}: ${response.status}`);
@@ -73,8 +89,9 @@ function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
 }
 
 async function loadFromSupabase(): Promise<MissionControlState> {
-  const [statuses, events, jobs, approvals, sidecars] = await Promise.all([
+  const [statuses, brainFeedRows, events, jobs, approvals, sidecars] = await Promise.all([
     supabaseFetch<AgentStatus[]>("mc_v2_agent_status?select=*&order=updated_at.desc"),
+    supabaseFetch<any[]>("brain_feed?select=id,data,updated_at&id=in.(joshex,josh,josh2,main,jaimes,jain)").catch(() => []),
     supabaseFetch<AgentEvent[]>("mc_v2_events?select=*&order=created_at.desc&limit=40"),
     supabaseFetch<AgentJob[]>("mc_v2_jobs?select=*&order=updated_at.desc&limit=24"),
     supabaseFetch<Approval[]>("mc_v2_approvals?select=*&risk_tier=eq.dashboard-safe&order=created_at.desc&limit=20"),
@@ -82,10 +99,13 @@ async function loadFromSupabase(): Promise<MissionControlState> {
   ]);
   const fallback = await loadFallback();
   const normalizedStatuses = statuses.map((row) => normalizeStatus(row)).filter(Boolean) as AgentStatus[];
+  const brainFeedStatuses = brainFeedRows.map((row) => normalizeBrainFeedRow(row)).filter(Boolean) as AgentStatus[];
   const mergedJobs = mergeJobs(jobs, fallback.jobs);
   return {
     source: jobs.length && fallback.jobs.length ? "Supabase + local jobs" : jobs.length ? "Supabase" : "Local jobs fallback",
-    statuses: normalizedStatuses.length ? mergeStatuses(normalizedStatuses, fallback.statuses) : fallback.statuses,
+    statuses: normalizedStatuses.length || brainFeedStatuses.length
+      ? mergeStatuses([...normalizedStatuses, ...brainFeedStatuses], fallback.statuses)
+      : fallback.statuses,
     events: events.length ? events : fallback.events,
     jobs: mergedJobs.length ? mergedJobs : fallback.jobs,
     approvals: approvals.length ? approvals : fallback.approvals,
@@ -101,8 +121,16 @@ async function loadFallback(): Promise<MissionControlState> {
     fetchJson<any>("/data/dashboard-data.json").catch(() => null),
     loadSidecars(),
   ]);
+  const brainAgent = String(brain?.agentId || brain?.agent_id || brain?.agent || "").toLowerCase();
+  const brainAgentId: AgentId = brainAgent.includes("josh") && !brainAgent.includes("joshex")
+    ? "josh"
+    : brainAgent.includes("jaimes")
+    ? "jaimes"
+    : brainAgent.includes("jain")
+    ? "jain"
+    : "joshex";
   const statuses = dedupeStatus([
-    normalizeStatus(brain, "joshex"),
+    normalizeStatus(brain, brainAgentId),
     normalizeStatus({
       agent_id: "joshex",
       status: personal?.status || "info",
