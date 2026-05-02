@@ -31,8 +31,18 @@ function fmtTime(value?: string | null) {
 function statusClass(status?: string) {
   if (status === "active" || status === "queued") return "is-active";
   if (status === "blocked" || status === "error") return "is-risk";
-  if (status === "done" || status === "ready" || status === "approved") return "is-done";
+  if (status === "done" || status === "ready" || status === "approved" || status === "ok") return "is-done";
   return "is-muted";
+}
+
+function timeValue(value?: string | null): number {
+  if (!value) return 0;
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function agentClass(agent: AgentId) {
+  return `agent-${agent}`;
 }
 
 function App() {
@@ -92,33 +102,29 @@ function App() {
 
       <section className="kiosk-grid">
         <section className="brain-hero-panel">
-          <BrainHero statuses={statusByAgent} events={state.events} jobs={state.jobs} approvals={state.approvals} signals={state.signals} />
+          <BrainHero state={state} statuses={statusByAgent} />
           <section className="support-grid">
-            <MissionHealthPanel state={state} />
-            <AgentEcosystemMap statuses={statusByAgent} />
             <SignalFeed signals={state.signals} />
             <ModelUsageCard modelUsage={state.modelUsage} />
           </section>
         </section>
-        <JobsRail jobs={state.jobs} />
+        <aside className="right-rail">
+          <MissionTimeline events={state.events} jobs={state.jobs} approvals={state.approvals} signals={state.signals} />
+          <JobsRail jobs={state.jobs} />
+        </aside>
       </section>
     </main>
   );
 }
 
 function BrainHero({
+  state,
   statuses,
-  events,
-  jobs,
-  approvals,
-  signals,
 }: {
+  state: MissionControlState;
   statuses: Map<AgentId, AgentStatus>;
-  events: MissionControlState["events"];
-  jobs: MissionControlState["jobs"];
-  approvals: MissionControlState["approvals"];
-  signals: MissionControlState["signals"];
 }) {
+  const { events, approvals, signals } = state;
   const heroAgents: AgentId[] = ["joshex", "josh", "jaimes"];
   const featuredEvents = events.slice(0, 6);
   const pendingApprovals = approvals.filter((row) => row.status === "pending");
@@ -147,7 +153,10 @@ function BrainHero({
         <span className="attention-chip">{events.length} total feed rows</span>
       </div>
 
-      <MissionTimeline events={events} jobs={jobs} approvals={approvals} signals={signals} />
+      <div className="brain-context-grid">
+        <MissionHealthPanel state={state} />
+        <AgentEcosystemMap statuses={statuses} />
+      </div>
 
       <div className="brain-event-grid">
         {featuredEvents.length ? featuredEvents.map((event) => (
@@ -182,36 +191,52 @@ function MissionTimeline({
 }) {
   const now = Date.now();
   const windowMs = 24 * 60 * 60 * 1000;
+  const scaleTicks = [
+    { label: "24h", left: 0 },
+    { label: "18h", left: 25 },
+    { label: "12h", left: 50 },
+    { label: "6h", left: 75 },
+    { label: "Now", left: 100 },
+  ];
   const rows = [
-    ...events.map((event) => ({ id: event.id, time: event.created_at, type: "update", label: event.title })),
-    ...jobs.map((job) => ({ id: job.id, time: job.updated_at, type: job.status === "error" || job.status === "blocked" ? "risk" : "job", label: job.title })),
-    ...approvals.map((approval) => ({ id: approval.id, time: approval.created_at, type: "handoff", label: approval.title })),
-    ...signals.map((signal) => ({ id: signal.id, time: signal.time, type: "signal", label: signal.title })),
+    ...events.map((event) => ({ id: event.id, time: event.created_at, type: "update", agent: event.agent_id, label: event.title })),
+    ...jobs.map((job) => ({ id: job.id, time: job.updated_at, type: job.status === "error" || job.status === "blocked" ? "risk" : "job", agent: job.agent_id, label: job.title })),
+    ...approvals.map((approval) => ({ id: approval.id, time: approval.created_at, type: "handoff", agent: approval.agent_id, label: approval.title })),
+    ...signals.map((signal) => ({ id: signal.id, time: signal.time, type: "signal", agent: "jain" as AgentId, label: signal.title })),
   ]
-    .map((row) => ({ ...row, at: row.time ? new Date(row.time).getTime() : 0 }))
+    .map((row) => ({ ...row, at: timeValue(row.time) }))
     .filter((row) => Number.isFinite(row.at) && row.at > now - windowMs)
     .sort((a, b) => a.at - b.at)
     .slice(-28);
 
   return (
-    <section className="mission-timeline" aria-label="Mission timeline last 24 hours">
+    <section className="mission-timeline calendar-card" aria-label="Mission timeline last 24 hours">
       <header>
-        <strong>24h Timeline</strong>
-        <span>{rows.length} events</span>
+        <strong>24h Calendar</strong>
+        <span>{jobs.length} jobs mapped · {rows.length} events</span>
       </header>
-      <div className="timeline-track">
+      <div className="calendar-scale" aria-hidden="true">
+        {scaleTicks.map((tick) => <span key={tick.label} style={{ left: `${tick.left}%` }}>{tick.label}</span>)}
+      </div>
+      <div className="timeline-track calendar-track">
         {rows.map((row) => {
           const left = Math.max(0, Math.min(100, ((row.at - (now - windowMs)) / windowMs) * 100));
           return (
             <span
               key={`${row.type}-${row.id}`}
-              className={`timeline-mark is-${row.type}`}
+              className={`timeline-mark is-${row.type} ${agentClass(row.agent)}`}
               style={{ left: `${left}%` }}
               title={`${row.label} · ${fmtTime(row.time)}`}
             />
           );
         })}
       </div>
+      <footer>
+        <span><i className="agent-joshex" />JOSHeX</span>
+        <span><i className="agent-josh" />Josh</span>
+        <span><i className="agent-jaimes" />JAIMES</span>
+        <span><i className="agent-jain" />J.A.I.N</span>
+      </footer>
     </section>
   );
 }
@@ -408,12 +433,18 @@ const JOB_CATEGORY_RULES: Array<{ key: string; label: string; matcher: (job: Job
   { key: "automation", label: "Automation", matcher: (_job, text) => /cron|automation|monitor|watch|scheduled|job/.test(text) },
 ];
 
+const JOB_CATEGORY_ORDER = [...JOB_CATEGORY_RULES.map((rule) => rule.key), "other"];
+
 function jobCategory(job: JobRow) {
   const text = `${job.title} ${job.detail} ${job.tool} ${job.agent_id}`.toLowerCase();
   return JOB_CATEGORY_RULES.find((rule) => rule.matcher(job, text)) || { key: "other", label: "Other", matcher: () => true };
 }
 
-function groupedJobs(jobs: JobRow[]) {
+function categoryClass(job: JobRow) {
+  return `category-${jobCategory(job).key}`;
+}
+
+function groupedJobs(jobs: JobRow[], mode: "urgency" | "category" = "urgency") {
   const groups = new Map<string, { key: string; label: string; items: JobRow[] }>();
   jobs.forEach((job) => {
     const category = jobCategory(job);
@@ -422,6 +453,12 @@ function groupedJobs(jobs: JobRow[]) {
     }
     groups.get(category.key)!.items.push(job);
   });
+  groups.forEach((group) => {
+    group.items.sort((a, b) => timeValue(b.updated_at) - timeValue(a.updated_at));
+  });
+  if (mode === "category") {
+    return Array.from(groups.values()).sort((a, b) => JOB_CATEGORY_ORDER.indexOf(a.key) - JOB_CATEGORY_ORDER.indexOf(b.key));
+  }
   return Array.from(groups.values()).sort((a, b) => {
     const aUrgent = a.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error");
     const bUrgent = b.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error");
@@ -439,38 +476,94 @@ function jobGroupSummary(items: JobRow[]) {
 }
 
 function JobsRail({ jobs }: { jobs: MissionControlState["jobs"] }) {
-  const groups = groupedJobs(jobs);
+  const [view, setView] = useState<"timeline" | "categories">("timeline");
+  const groups = groupedJobs(jobs, "category");
   return (
     <aside className="jobs-rail">
       <div className="panel-title compact">
         <h2>Today's Jobs</h2>
         <span>{jobs.length} jobs · {groups.length || 0} groups</span>
       </div>
+      <div className="jobs-view-toggle" aria-label="Today jobs view">
+        <button type="button" className={view === "timeline" ? "selected" : ""} onClick={() => setView("timeline")}>6h timeline</button>
+        <button type="button" className={view === "categories" ? "selected" : ""} onClick={() => setView("categories")}>Categories</button>
+      </div>
       <div className="job-list">
-        {groups.length ? groups.map((group, index) => (
-          <details key={group.key} className="job-category" open={index < 4 || group.items.some((job) => job.status === "active" || job.status === "queued" || job.status === "blocked" || job.status === "error")}>
-            <summary>
-              <span>{group.label}</span>
-              <em>{jobGroupSummary(group.items)}</em>
-              <strong>{group.items.length}</strong>
-            </summary>
-            <div className="job-category-list">
-              {group.items.map((job) => (
-                <article key={job.id} className="job-row compact">
-                  <span className={`status-dot ${statusClass(job.status)}`} aria-hidden="true" />
-                  <div>
-                    <strong title={job.title}>{job.title}</strong>
-                    <p title={job.detail || job.tool}>{job.detail || job.tool || AGENTS[job.agent_id]?.label}</p>
-                  </div>
-                  <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
-                  <time>{fmtTime(job.updated_at)}</time>
-                </article>
-              ))}
-            </div>
-          </details>
-        )) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
+        {view === "timeline" ? <JobTimelineView jobs={jobs} /> : <JobCategoryView groups={groups} />}
       </div>
     </aside>
+  );
+}
+
+function JobTimelineView({ jobs }: { jobs: JobRow[] }) {
+  const now = Date.now();
+  const windowMs = 6 * 60 * 60 * 1000;
+  const start = now - windowMs;
+  const ticks = [
+    { label: "-6h", left: 0 },
+    { label: "-4h", left: 33.3 },
+    { label: "-2h", left: 66.6 },
+    { label: "Now", left: 100 },
+  ];
+  const ordered = [...jobs].sort((a, b) => timeValue(b.updated_at) - timeValue(a.updated_at));
+
+  return (
+    <section className="job-timeline-view">
+      <div className="job-calendar-header">
+        {ticks.map((tick) => <span key={tick.label} style={{ left: `${tick.left}%` }}>{tick.label}</span>)}
+      </div>
+      {ordered.length ? ordered.map((job) => {
+        const at = timeValue(job.updated_at);
+        const left = Math.max(0, Math.min(100, ((at - start) / windowMs) * 100));
+        const category = jobCategory(job);
+        const outsideWindow = at < start;
+        return (
+          <article key={job.id} className={`job-timeline-row ${agentClass(job.agent_id)} ${categoryClass(job)}`}>
+            <div className="job-row-main">
+              <span className={`status-dot ${statusClass(job.status)} ${agentClass(job.agent_id)}`} aria-hidden="true" />
+              <div>
+                <strong title={job.title}>{job.title}</strong>
+                <p>{AGENTS[job.agent_id]?.label || job.agent_id} · {category.label}</p>
+              </div>
+              <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
+            </div>
+            <div className="job-calendar-line" title={`${fmtTime(job.updated_at)} · ${job.detail || job.tool}`}>
+              <span className={`job-window-fill ${agentClass(job.agent_id)}`} style={{ width: outsideWindow ? "2%" : `${left}%` }} />
+              <i style={{ left: `${left}%` }} />
+            </div>
+          </article>
+        );
+      }) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
+    </section>
+  );
+}
+
+function JobCategoryView({ groups }: { groups: Array<{ key: string; label: string; items: JobRow[] }> }) {
+  return (
+    <>
+      {groups.length ? groups.map((group) => (
+        <details key={group.key} className="job-category" open>
+          <summary>
+            <span>{group.label}</span>
+            <em>{jobGroupSummary(group.items)}</em>
+            <strong>{group.items.length}</strong>
+          </summary>
+          <div className="job-category-list">
+            {group.items.map((job) => (
+              <article key={job.id} className={`job-row compact ${agentClass(job.agent_id)} ${categoryClass(job)}`}>
+                <span className={`status-dot ${statusClass(job.status)} ${agentClass(job.agent_id)}`} aria-hidden="true" />
+                <div>
+                  <strong title={job.title}>{job.title}</strong>
+                  <p title={job.detail || job.tool}>{job.detail || job.tool || AGENTS[job.agent_id]?.label}</p>
+                </div>
+                <span className={`job-status ${statusClass(job.status)}`}>{job.status}</span>
+                <time>{fmtTime(job.updated_at)}</time>
+              </article>
+            ))}
+          </div>
+        </details>
+      )) : <EmptyRow title="No v2 jobs yet" detail="JAIMES jobs will appear here." />}
+    </>
   );
 }
 
