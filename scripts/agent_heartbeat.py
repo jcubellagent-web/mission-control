@@ -102,7 +102,7 @@ def main() -> int:
     write_p.add_argument("--summary", default="")
     write_p.add_argument("--stale-after", type=int, default=30)
     write_p.add_argument("--brain-feed", action="store_true")
-    write_p.add_argument("--v2", action="store_true", help="Also mirror heartbeat status to Mission Control v2 through agent_publish.py")
+    write_p.add_argument("--v2", action="store_true", help="Also mirror heartbeat status to dashboard-safe Mission Control tables through agent_publish.py")
     check_p = sub.add_parser("check")
     check_p.add_argument("--stale-after", type=int, default=30)
     args = parser.parse_args()

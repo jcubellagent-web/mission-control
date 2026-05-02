@@ -1,5 +1,9 @@
 {
   "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5174",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4174",
+    "kiosk": "scripts/open_mission_control_kiosk.sh",
     "dev:v2": "vite --host 127.0.0.1 --port 5174",
     "build:v2": "vite build",
     "preview:v2": "vite preview --host 127.0.0.1 --port 4174"

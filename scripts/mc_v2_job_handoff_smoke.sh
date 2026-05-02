@@ -40,7 +40,7 @@ HANDOFF_TITLE="JAIMES v2 handoff smoke"
   --status done \
   --title "$JOB_TITLE" \
   --tool "mc_v2_job_handoff_smoke.sh" \
-  --detail "dashboard-safe JAIMES job row smoke for the React v2 jobs rail" \
+  --detail "dashboard-safe JAIMES job row smoke for the current Mission Control jobs rail" \
   --brain-feed \
   --job \
   --v2
@@ -51,7 +51,7 @@ HANDOFF_TITLE="JAIMES v2 handoff smoke"
   --status active \
   --title "$HANDOFF_TITLE" \
   --tool "mc_v2_job_handoff_smoke.sh" \
-  --detail "dashboard-safe JAIMES handoff smoke for the React v2 approval inbox" \
+  --detail "dashboard-safe JAIMES handoff smoke for the current Mission Control approval path" \
   --handoff-to joshex \
   --brain-feed \
   --v2

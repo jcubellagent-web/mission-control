@@ -4,11 +4,11 @@ Brain Feed Local Server — serves brain-feed.json + full dashboard + remote con
 Port 8765.
 
 Endpoints:
-  GET  /                    — serve Mission Control dashboard (index.html)
-  GET  /index.html          — same
+  GET  /                    — serve legacy static dashboard (index.html)
+  GET  /index.html          — same legacy static dashboard
   GET  /data/*.json         — serve data files with no-cache headers
   GET  /assets/*            — serve static assets (CSS, JS, images)
-  GET  /v2/*                — serve Mission Control v2 static files
+  GET  /v2/*                — serve legacy static data-layer proof files
   GET  /brain-feed.json     — serve latest brain feed data (legacy compat)
   GET  /dashboard-data.json — serve dashboard data (legacy compat)
   GET  /jain-brain-feed.json— serve J.A.I.N brain feed (legacy compat)
@@ -183,7 +183,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path in LEGACY_JSON:
             return self._serve_file(LEGACY_JSON[path], no_cache=True)
 
-        # Dashboard root
+        # Legacy static dashboard root. Current Mission Control is the React kiosk
+        # served by Vite on Josh 2.0 at http://127.0.0.1:5174/.
         if path in ("/", "/index.html"):
             return self._serve_file(ROOT_DIR / "index.html", no_cache=False)
 
@@ -200,7 +201,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 asset_path = ROOT_DIR / "assets" / rel
                 return self._serve_file(asset_path)
 
-        # /v2/* — serve the additive Mission Control v2 operator surface
+        # /v2/* — serve the legacy static data-layer proof surface.
         if path == "/v2":
             return self._serve_file(ROOT_DIR / "v2" / "index.html", no_cache=True)
         if path.startswith("/v2/"):

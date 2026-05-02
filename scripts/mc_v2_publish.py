@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish dashboard-safe Mission Control v2 state to Supabase."""
+"""Publish dashboard-safe Mission Control canonical state to Supabase."""
 from __future__ import annotations
 
 import argparse
@@ -201,7 +201,7 @@ def build_payload(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Publish dashboard-safe Mission Control v2 state.")
+    parser = argparse.ArgumentParser(description="Publish dashboard-safe Mission Control canonical state.")
     parser.add_argument("--agent", required=True, help="josh, jaimes, jain, or joshex")
     parser.add_argument("--type", default="status", choices=sorted(EVENT_TYPES))
     parser.add_argument("--status", default="active", choices=sorted(STATUSES))
@@ -229,9 +229,9 @@ def main() -> int:
             upsert(url, key, "mc_v2_approvals", [payload["approval"]])
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", "replace")
-        raise SystemExit(f"Mission Control v2 publish failed: HTTP {exc.code} {body}") from exc
+        raise SystemExit(f"Mission Control canonical publish failed: HTTP {exc.code} {body}") from exc
     except urllib.error.URLError as exc:
-        raise SystemExit(f"Mission Control v2 publish failed: {exc}") from exc
+        raise SystemExit(f"Mission Control canonical publish failed: {exc}") from exc
 
     print(json.dumps({"ok": True, **payload}, indent=2))
     return 0

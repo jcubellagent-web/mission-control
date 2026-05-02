@@ -97,7 +97,7 @@ async function loadFallback() {
     normalizeStatus(dashboard?.jaimesBrainFeed && { ...dashboard.jaimesBrainFeed, agent_id: "jaimes" }),
     normalizeStatus(dashboard?.jainBrainFeed && { ...dashboard.jainBrainFeed, agent_id: "jain" }),
   ].filter(Boolean);
-  state.source = "Local v1 fallback";
+  state.source = "Local legacy fallback";
   state.statuses = dedupeStatus(rows);
   state.events = (dashboard?.recentActivity || []).slice(0, 12).map((event, index) => ({
     id: `fallback-${index}`,
@@ -139,7 +139,7 @@ function selectedStatus() {
     || {
       agent_id: state.selectedAgent,
       status: "offline",
-      objective: "No v2 state has been published yet",
+      objective: "No current Mission Control status has been published yet",
       detail: "Run scripts/mc_v2_publish.py after the v2 Supabase schema is installed.",
       current_tool: "",
       active: false,

@@ -38,9 +38,38 @@ async function supabaseFetch<T>(path: string): Promise<T> {
 function dedupeStatus(rows: Array<AgentStatus | null>): AgentStatus[] {
   const byAgent = new Map<AgentId, AgentStatus>();
   for (const row of rows) {
-    if (row && !byAgent.has(row.agent_id)) byAgent.set(row.agent_id, row);
+    if (!row) continue;
+    const existing = byAgent.get(row.agent_id);
+    if (!existing || timestampValue(row.updated_at) >= timestampValue(existing.updated_at)) {
+      byAgent.set(row.agent_id, row);
+    }
   }
   return [...byAgent.values()];
+}
+
+function timestampValue(value?: string | null): number {
+  if (!value) return 0;
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mergeStatuses(primary: AgentStatus[], fallback: AgentStatus[]): AgentStatus[] {
+  return dedupeStatus([...primary, ...fallback]).sort((a, b) => timestampValue(b.updated_at) - timestampValue(a.updated_at));
+}
+
+function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
+  const rows = new Map<string, AgentJob>();
+  for (const job of [...primary, ...fallback]) {
+    if (!job?.title) continue;
+    const key = job.id || `${job.agent_id}-${job.title}`;
+    const existing = rows.get(key);
+    if (!existing || timestampValue(job.updated_at) >= timestampValue(existing.updated_at)) {
+      rows.set(key, job);
+    }
+  }
+  return [...rows.values()]
+    .sort((a, b) => timestampValue(b.updated_at) - timestampValue(a.updated_at))
+    .slice(0, 24);
 }
 
 async function loadFromSupabase(): Promise<MissionControlState> {
@@ -51,14 +80,17 @@ async function loadFromSupabase(): Promise<MissionControlState> {
     supabaseFetch<Approval[]>("mc_v2_approvals?select=*&risk_tier=eq.dashboard-safe&order=created_at.desc&limit=20"),
     loadSidecars(),
   ]);
+  const fallback = await loadFallback();
+  const normalizedStatuses = statuses.map((row) => normalizeStatus(row)).filter(Boolean) as AgentStatus[];
+  const mergedJobs = mergeJobs(jobs, fallback.jobs);
   return {
-    source: "Supabase v2",
-    statuses: statuses.map((row) => normalizeStatus(row)).filter(Boolean) as AgentStatus[],
-    events,
-    jobs,
-    approvals,
-    modelUsage: sidecars.modelUsage,
-    signals: sidecars.signals,
+    source: jobs.length && fallback.jobs.length ? "Supabase + local jobs" : jobs.length ? "Supabase" : "Local jobs fallback",
+    statuses: normalizedStatuses.length ? mergeStatuses(normalizedStatuses, fallback.statuses) : fallback.statuses,
+    events: events.length ? events : fallback.events,
+    jobs: mergedJobs.length ? mergedJobs : fallback.jobs,
+    approvals: approvals.length ? approvals : fallback.approvals,
+    modelUsage: sidecars.modelUsage || fallback.modelUsage,
+    signals: sidecars.signals.length ? sidecars.signals : fallback.signals,
   };
 }
 
@@ -109,14 +141,61 @@ async function loadFallback(): Promise<MissionControlState> {
     created_at: dashboard?.generatedAt || "",
   }));
   return {
-    source: "Local v1 fallback",
+    source: "Local legacy fallback",
     statuses,
     events,
-    jobs: [],
+    jobs: buildFallbackJobs(dashboard),
     approvals,
     modelUsage: dashboard?.modelUsage || sidecars.modelUsage,
     signals: sidecars.signals,
   };
+}
+
+function ownerToAgentId(owner?: string): AgentId {
+  const text = String(owner || "").toLowerCase();
+  if (text.includes("jaimes")) return "jaimes";
+  if (text.includes("j.a.i.n") || text.includes("jain")) return "jain";
+  if (text.includes("joshex") || text.includes("codex")) return "joshex";
+  return "josh";
+}
+
+function buildFallbackJobs(dashboard: any): AgentJob[] {
+  const codexJobs = Array.isArray(dashboard?.codexJobs) ? dashboard.codexJobs : [];
+  const crons = Array.isArray(dashboard?.crons) ? dashboard.crons : [];
+  const rows: AgentJob[] = [];
+
+  for (const job of codexJobs) {
+    rows.push({
+      id: String(job.id || `${job.owner || "job"}-${job.title || rows.length}`),
+      agent_id: ownerToAgentId(job.owner || job.agent),
+      title: job.title || job.name || "Mission Control job",
+      status: job.status || "info",
+      detail: job.detail || job.description || job.tool || "",
+      tool: job.tool || "codex-jobs",
+      started_at: job.started_at || job.startedAt || null,
+      completed_at: job.completed_at || job.completedAt || null,
+      updated_at: job.updated_at || job.updatedAt || job.time || dashboard?.generatedAt || "",
+    });
+  }
+
+  for (const cron of crons.filter((item: any) => item?.todayRelevant).slice(0, 12)) {
+    rows.push({
+      id: `cron-${cron.name || rows.length}`,
+      agent_id: ownerToAgentId(cron.agent),
+      title: cron.name || "Scheduled job",
+      status: cron.status || cron.runStatus || "scheduled",
+      detail: cron.description || cron.schedule || "",
+      tool: cron.sourceLabel || cron.source || "scheduled job",
+      started_at: null,
+      completed_at: null,
+      updated_at: cron.lastRun || dashboard?.generatedAt || "",
+    });
+  }
+
+  return rows
+    .filter((row) => row.title)
+    .sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")))
+    .slice(0, 24);
 }
 
 export async function loadMissionControl(): Promise<MissionControlState> {

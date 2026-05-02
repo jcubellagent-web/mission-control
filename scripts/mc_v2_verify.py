@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify dashboard-safe Mission Control v2 rows are readable."""
+"""Verify dashboard-safe Mission Control canonical rows are readable."""
 from __future__ import annotations
 
 import argparse
@@ -42,7 +42,7 @@ def eq(value: str) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Verify Mission Control v2 readable state.")
+    parser = argparse.ArgumentParser(description="Verify Mission Control canonical readable state.")
     parser.add_argument("--agent", default="joshex", choices=sorted(AGENTS))
     parser.add_argument("--expect-title", default="", help="Optional exact objective/event title to verify")
     parser.add_argument("--expect-job-title", default="", help="Optional exact v2 job title to verify")
