@@ -19,6 +19,12 @@ TASKS_PATH = DATA_DIR / "agent-task-queue.json"
 CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 
 AGENTS = {"joshex", "josh", "jaimes", "jain"}
+AGENT_LABELS = {
+    "joshex": "JOSHeX",
+    "josh": "Josh 2.0",
+    "jaimes": "JAIMES",
+    "jain": "J.A.I.N",
+}
 REQUESTERS = AGENTS | {"josh-user"}
 STATUSES = {"queued", "accepted", "active", "blocked", "done", "cancelled", "error"}
 PRIORITIES = {"low", "normal", "high", "urgent"}
@@ -115,12 +121,19 @@ def add_note(task: dict[str, Any], agent: str, note: str, status: str | None = N
 
 
 def publish_event(agent: str, event_type: str, status: str, title: str, detail: str, brain_feed: bool, job: bool = False) -> None:
+    publish_status = (
+        "active"
+        if status in {"queued", "accepted", "active"}
+        else status
+        if status in {"done", "blocked", "error"}
+        else "info"
+    )
     cmd = [
         sys.executable,
         str(ROOT / "scripts" / "agent_publish.py"),
         "--agent", agent,
         "--type", event_type,
-        "--status", "done" if status == "accepted" else "active" if status == "active" else status if status in {"done", "blocked", "error"} else "info",
+        "--status", publish_status,
         "--title", compact(title, 150),
         "--tool", "agent_task.py",
         "--detail", compact(detail, 500),
@@ -177,6 +190,16 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
         return task
 
     result = locked_tasks(mutate)
+    if requester != owner:
+        publish_event(
+            requester,
+            "handoff",
+            "active",
+            f"Requesting {AGENT_LABELS[owner]}: {task['title']}",
+            f"Created task {task['id']} for {AGENT_LABELS[owner]}: {task['objective']}",
+            args.brain_feed,
+            args.job,
+        )
     publish_event(owner, "status", "queued", f"Task queued: {task['title']}", task["objective"], args.brain_feed, args.job)
     return result
 
