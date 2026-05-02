@@ -1,0 +1,198 @@
+{
+  "updatedAt": "2026-05-02T06:36:05Z",
+  "owner": "JOSHeX",
+  "privacy": "dashboard-safe",
+  "goal": "Make Josh 2.0 Telegram the iPhone-first command center with tap-first controls and clear activity visibility.",
+  "telegramCapabilities": {
+    "inlineKeyboards": {
+      "status": "active",
+      "useFor": [
+        "task approvals",
+        "routing choices",
+        "Mission Control checks",
+        "hold/pause choices",
+        "safe next-step execution"
+      ],
+      "rule": "Use single-column rows for important choices and max two buttons per row for compact secondary actions."
+    },
+    "callbackQueries": {
+      "status": "active",
+      "rule": "Every callback must answerCallbackQuery quickly so the Telegram spinner clears."
+    },
+    "botCommandMenu": {
+      "status": "configured",
+      "commands": [
+        "new",
+        "status",
+        "mc",
+        "models",
+        "route",
+        "joshex",
+        "jaimes",
+        "jain",
+        "help"
+      ]
+    },
+    "chatMenuButton": {
+      "status": "configured",
+      "type": "commands"
+    },
+    "replyKeyboard": {
+      "status": "available_not_default",
+      "rule": "Reserve persistent reply keyboards for a future dedicated control-panel mode. Inline buttons are less intrusive for normal chat."
+    },
+    "webApp": {
+      "status": "artifact_ready_needs_https",
+      "path": "telegram-control-panel.html",
+      "publicUrl": "https://jcubellagent-web.github.io/mission-control/telegram-control-panel.html",
+      "rule": "Use when Mission Control has a stable HTTPS URL; local file is ready and dashboard-safe."
+    },
+    "copyTextButtons": {
+      "status": "future_candidate",
+      "rule": "Use for commands, one-time codes, URLs, or handoff snippets that Josh may need to paste elsewhere."
+    },
+    "forceReply": {
+      "status": "future_candidate",
+      "rule": "Use for step-by-step forms when Josh must type a specific answer."
+    },
+    "editableWorkCards": {
+      "status": "default_for_most_tasks",
+      "rule": "Use scripts/josh_work_card.py for any user-requested task with more than one step, any task likely to exceed about 60 seconds, or any task that changes Mission Control/agent state."
+    },
+    "overviewDigest": {
+      "status": "available",
+      "commands": [
+        "overview",
+        "daily"
+      ],
+      "rule": "Use scripts/josh_telegram_digest.py overview|daily for compact ecosystem summaries."
+    },
+    "agentQuickCards": {
+      "status": "available",
+      "agents": [
+        "josh",
+        "joshex",
+        "jaimes",
+        "jain"
+      ],
+      "rule": "Use scripts/josh_agent_quick_card.py <agent> or agent:<agent> callbacks for compact agent-specific status cards."
+    }
+  },
+  "defaultInlineButtons": [
+    [
+      {
+        "text": "Run all safe steps",
+        "callback_data": "next:run_safe_steps",
+        "style": "success"
+      }
+    ],
+    [
+      {
+        "text": "Check Mission Control",
+        "callback_data": "next:check_mission_control"
+      }
+    ],
+    [
+      {
+        "text": "Route to JOSHeX",
+        "callback_data": "route:joshex"
+      }
+    ],
+    [
+      {
+        "text": "Route to JAIMES",
+        "callback_data": "route:jaimes"
+      }
+    ],
+    [
+      {
+        "text": "Daily digest",
+        "callback_data": "next:daily_digest"
+      }
+    ],
+    [
+      {
+        "text": "Open control panel",
+        "web_app": {
+          "url": "https://jcubellagent-web.github.io/mission-control/telegram-control-panel.html"
+        }
+      }
+    ],
+    [
+      {
+        "text": "Josh 2.0",
+        "callback_data": "agent:josh"
+      }
+    ],
+    [
+      {
+        "text": "JOSHeX",
+        "callback_data": "agent:joshex"
+      }
+    ],
+    [
+      {
+        "text": "JAIMES",
+        "callback_data": "agent:jaimes"
+      }
+    ],
+    [
+      {
+        "text": "J.AI.N",
+        "callback_data": "agent:jain"
+      }
+    ],
+    [
+      {
+        "text": "Hold",
+        "callback_data": "next:hold",
+        "style": "danger"
+      }
+    ]
+  ],
+  "statusTemplate": {
+    "messageStyle": "compact_bullet_card",
+    "rules": [
+      "Start with one plain Active Model/Auth line.",
+      "Leave one blank line after the model/auth line.",
+      "Use short hyphen bullets for Route, Objective, Status, Now, Done, Blocker, and Next.",
+      "Keep each bullet to one short mobile-readable sentence when possible.",
+      "Prefer semicolons or short fragments over long wrapped paragraphs.",
+      "Do not use dense paragraph labels for every field."
+    ],
+    "requiredLines": [
+      "<model> (<auth route>)",
+      "- Route: <owner/model> because <reason>",
+      "- Objective: <current objective>",
+      "- Status: <active|done|blocked|needs approval>",
+      "- Now: <current step>",
+      "- Done: <completed evidence>",
+      "- Blocker: <none or exact blocker>",
+      "- Next: <next action>"
+    ],
+    "example": "Codex 5.5 (openai-codex subscription)\n\n- Route: Josh 2.0 direct chat; foreground lane.\n- Objective: Test Telegram readability.\n- Status: Good; responsive.\n- Now: Using compact bullets.\n- Done: Brain Feed hook fired; direct chat path works.\n- Blocker: None.\n- Next: Tap a button or send the next task.",
+    "finalSections": [
+      "Objective Complete",
+      "Active Model/Auth",
+      "Route",
+      "TLDR",
+      "What changed",
+      "Verified",
+      "Challenges/Blockers",
+      "Next steps for approval"
+    ]
+  },
+  "commandMenu": [
+    { "command": "new", "description": "Reset the conversation" },
+    { "command": "status", "description": "Show agent and service status" },
+    { "command": "mc", "description": "Push and check Mission Control" },
+    { "command": "models", "description": "Show active model and fallbacks" },
+    { "command": "route", "description": "Pick the right agent/model" },
+    { "command": "joshex", "description": "Route to Codex/JOSHeX" },
+    { "command": "jaimes", "description": "Route to JAIMES/Hermes" },
+    { "command": "jain", "description": "Route to J.AI.N workers" },
+    { "command": "help", "description": "Show the command menu" },
+    { "command": "overview", "description": "Show ecosystem overview" },
+    { "command": "daily", "description": "Show daily agent digest" }
+  ]
+}
