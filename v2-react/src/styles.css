@@ -6371,3 +6371,295 @@ p {
     display: none;
   }
 }
+
+/* 2026-05-10 clarity pass: remove cramped text/overlap in Brain Feed + Control Tower */
+.brain-hero {
+  grid-template-rows: auto minmax(218px, 0.72fr) minmax(168px, auto) 0 auto minmax(108px, auto);
+  gap: 8px;
+}
+
+.brain-hero .agent-hero-card {
+  gap: 6px;
+  padding: 10px 12px 9px;
+}
+
+.brain-hero .agent-hero-card h3 {
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.brain-hero .agent-objective-text {
+  -webkit-line-clamp: 1;
+}
+
+.brain-hero .agent-hero-card p {
+  -webkit-line-clamp: 1;
+  font-size: 11.5px;
+}
+
+.agent-idle-readout {
+  grid-template-columns: minmax(0, 1fr) 74px;
+  gap: 5px;
+}
+
+.brain-hero .agent-idle-readout p {
+  min-height: 24px;
+  padding: 4px 6px;
+}
+
+.agent-flow-tower {
+  min-height: 168px;
+  overflow: visible;
+  padding: 9px;
+}
+
+.agent-flow-tower > header {
+  grid-template-columns: minmax(0, 1fr) 174px;
+  align-items: start;
+}
+
+.agent-flow-tower > header strong {
+  font-size: 13px;
+}
+
+.flow-tower-metrics span {
+  min-height: 24px;
+}
+
+.tower-ecosystem-map {
+  grid-template-columns: minmax(0, 1.18fr) 202px;
+  gap: 8px;
+}
+
+.tower-agent-rows {
+  gap: 6px;
+}
+
+.tower-agent-row {
+  grid-template-columns: 12px minmax(118px, 1fr) 104px 38px;
+  min-height: 30px;
+  padding: 5px 8px;
+}
+
+.tower-agent-row::before {
+  display: none;
+}
+
+.tower-agent-dot {
+  width: 9px;
+  height: 9px;
+}
+
+.tower-agent-main header {
+  grid-template-columns: minmax(72px, 0.75fr) minmax(58px, auto);
+}
+
+.tower-agent-main strong,
+.tower-agent-main em,
+.tower-agent-main p,
+.tower-agent-row small,
+.tower-agent-stats span {
+  text-overflow: clip;
+}
+
+.tower-agent-main strong {
+  font-size: 12px;
+}
+
+.tower-agent-main em {
+  font-size: 7.5px;
+}
+
+.tower-agent-main p {
+  color: #d0d6e0;
+  font-size: 9.2px;
+}
+
+.tower-agent-stats span {
+  padding: 3px 4px;
+  font-size: 7px;
+}
+
+.tower-agent-stats b {
+  font-size: 9px;
+}
+
+.tower-agent-row small {
+  color: #8a8f98;
+  font-family: var(--mono);
+  font-size: 8px;
+}
+
+.tower-flow-summary {
+  gap: 5px;
+}
+
+.agent-flow-tower .lifecycle-swimlanes {
+  gap: 5px;
+}
+
+.agent-flow-tower .lifecycle-stage {
+  min-height: 42px;
+  padding: 5px 4px;
+}
+
+.agent-flow-tower .lifecycle-stage span {
+  font-size: 6.7px;
+}
+
+.agent-flow-tower .lifecycle-stage strong {
+  font-size: 13px;
+}
+
+.agent-flow-tower .handoff-flow-row {
+  grid-template-columns: 18px 46px 14px 40px minmax(0, 1fr) 42px;
+  min-height: 34px;
+}
+
+.agent-flow-tower .handoff-flow-row span,
+.agent-flow-tower .handoff-flow-row strong,
+.agent-flow-tower .handoff-flow-row em {
+  text-overflow: clip;
+}
+
+.agent-flow-tower .latest-flow-line {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 5px;
+  font-size: 9px;
+  white-space: normal;
+}
+
+.agent-flow-tower .latest-flow-line b {
+  color: #8d9bff;
+  text-transform: uppercase;
+}
+
+/* The prior Last-60m strip visually collided with the tower at kiosk scale. */
+.activity-heat-strip {
+  display: none;
+}
+
+@media (max-width: 1160px) {
+  .tower-ecosystem-map {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-flow-tower {
+    min-height: 190px;
+  }
+}
+
+/* 2026-05-10 final kiosk fit: remove actual tower overflow into runtime */
+.brain-hero {
+  grid-template-rows: auto minmax(190px, 0.62fr) minmax(184px, auto) 0 auto minmax(112px, auto);
+}
+
+.brain-hero .agent-hero-card {
+  min-height: 0;
+}
+
+.agent-flow-tower {
+  min-height: 184px;
+  overflow: hidden;
+}
+
+.tower-agent-rows {
+  gap: 4px;
+}
+
+.tower-agent-row {
+  min-height: 26px;
+  grid-template-columns: 10px minmax(116px, 1fr) 98px 36px;
+  gap: 6px;
+  padding: 4px 7px;
+}
+
+.tower-agent-main p {
+  margin-top: 1px;
+  font-size: 8.8px;
+}
+
+.agent-flow-tower .handoff-flow-row {
+  min-height: 28px;
+}
+
+.runtime-capability-panel.is-simplified {
+  min-height: 108px;
+}
+
+/* Keep lower stack from collapsing/overlapping on the kiosk. */
+.brain-usage-strip {
+  display: none;
+}
+
+.runtime-capability-panel.is-simplified {
+  min-height: 86px;
+  overflow: hidden;
+}
+
+.runtime-capability-panel.is-simplified .runtime-capability-grid,
+.runtime-capability-panel.is-simplified footer {
+  display: none;
+}
+
+.runtime-snapshot-row article {
+  min-height: 38px;
+}
+
+/* Final anti-cutoff pass: allocate real row height and shorten metric labels. */
+.brain-hero {
+  grid-template-rows: auto minmax(180px, 0.56fr) minmax(202px, auto) 0 auto minmax(82px, auto);
+}
+
+.agent-flow-tower {
+  min-height: 202px;
+}
+
+.flow-tower-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tower-agent-row {
+  min-height: 32px;
+  grid-template-columns: 10px minmax(130px, 1fr) 106px 38px;
+}
+
+.tower-agent-main p {
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+.runtime-capability-panel.is-simplified {
+  min-height: 82px;
+}
+
+/* Final label-fit polish: no tiny-column cutoff in the tower summary. */
+.agent-flow-tower > header {
+  grid-template-columns: minmax(0, 1fr) 198px;
+}
+
+.agent-flow-tower .handoff-flow-row.is-quiet {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.agent-flow-tower .handoff-flow-row.is-quiet span,
+.agent-flow-tower .handoff-flow-row.is-quiet i {
+  display: none;
+}
+
+.agent-flow-tower .handoff-flow-row.is-quiet strong {
+  min-width: 0;
+  font-size: 9px;
+  text-overflow: clip;
+}
+
+.agent-flow-tower .handoff-flow-row.is-quiet em {
+  flex: 0 0 auto;
+}
+
+.runtime-capability-panel.is-simplified {
+  min-height: 92px;
+}

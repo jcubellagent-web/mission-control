@@ -1090,12 +1090,12 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
       <header>
         <div>
           <span><GitBranch size={13} />Control tower</span>
-          <strong>Jobs flowing across agents</strong>
+          <strong>Agent ecosystem map</strong>
         </div>
         <div className="flow-tower-metrics" aria-label="Flow metrics">
-          <span><b>{activeJobs}</b> running</span>
-          <span><b>{completedToday}</b> done today</span>
-          <span><b>{routingCount}</b> handoff beams</span>
+          <span><b>{activeJobs}</b> run</span>
+          <span><b>{completedToday}</b> done</span>
+          <span><b>{routingCount}</b> handoffs</span>
         </div>
       </header>
       <div className="tower-ecosystem-map">
@@ -1108,14 +1108,14 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
                   <strong>{AGENTS[lane.agent].label}</strong>
                   <em>{lane.activeCount ? `${lane.activeCount} running` : lane.readyCount ? `${lane.readyCount} queued` : "standing by"}</em>
                 </header>
-                <p>{lane.lastLabel}</p>
+                <p>{briefMissionText(lane.lastLabel, 28)}</p>
               </div>
               <div className="tower-agent-stats" aria-label={`${AGENTS[lane.agent].label} flow counts`}>
-                <span><b>{lane.lifecycleCounts.received}</b> rec</span>
-                <span><b>{lane.lifecycleCounts.working}</b> work</span>
-                <span><b>{lane.lifecycleCounts.done}</b> done</span>
+                <span><b>{lane.lifecycleCounts.received}</b> R</span>
+                <span><b>{lane.lifecycleCounts.working}</b> W</span>
+                <span><b>{lane.lifecycleCounts.done}</b> D</span>
               </div>
-              <small>{lane.freshness} · {compactText(lane.nextLabel, 32)}</small>
+              <small>{lane.freshness}</small>
             </article>
           ))}
         </div>
@@ -1123,7 +1123,7 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
           <div className="lifecycle-swimlanes" aria-label="Job lifecycle swimlanes">
             {lifecycleTotals.map((stage) => (
               <article key={stage.key} className={`lifecycle-stage is-${stage.key}`}>
-                <span>{stage.label}</span>
+                <span>{stage.key === "received" ? "Rec" : stage.key === "working" ? "Work" : stage.key === "waiting" ? "Wait" : stage.key === "blocked" ? "Block" : "Done"}</span>
                 <strong>{stage.count}</strong>
                 <i aria-hidden="true" style={{ "--stage-fill": `${Math.min(100, stage.count * 20)}%` } as React.CSSProperties} />
               </article>
@@ -1136,7 +1136,7 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
                 <span>{AGENTS[beam.from].label}</span>
                 <i aria-hidden="true" />
                 <span>{AGENTS[beam.to].label}</span>
-                <strong>{beam.detail || beam.label}</strong>
+                <strong>{briefMissionText(beam.detail || beam.label, 20)}</strong>
                 <em>{ageLabel(beam.time)}</em>
               </article>
             )) : (
@@ -1145,14 +1145,14 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
                 <span>Routing bus</span>
                 <i aria-hidden="true" />
                 <span>Owners</span>
-                <strong>No handoffs; work staying with owners.</strong>
+                <strong>Work stays with owners</strong>
                 <em>standby</em>
               </article>
             )}
           </div>
         </aside>
       </div>
-      {latestFlow ? <p className="latest-flow-line">Latest: {AGENTS[latestFlow.agent_id]?.label || latestFlow.agent_id} · {compactText(missionText(latestFlow.title), 72)}</p> : null}
+      {latestFlow ? <p className="latest-flow-line"><b>Latest</b> {AGENTS[latestFlow.agent_id]?.label || latestFlow.agent_id}: {briefMissionText(latestFlow.title, 36)}</p> : null}
     </section>
   );
 }
@@ -1984,10 +1984,11 @@ function AgentHeroCard({
   const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase()) && isFreshActiveTimestamp(status.updated_at);
   const activeFocus = activeWorkFresh || statusWorkingFresh;
   const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
-  const upNextText = idleContext.countdown
-    ? `Up next: ${idleContext.countdown} + ${idleContext.nextTitle}`
-    : `Up next: ${idleContext.nextTitle}`;
-  const focusText = compactText(activeFocus ? objectiveText : missionText(upNextText), activeFocus ? 86 : 72);
+  const nextBrief = briefMissionText(idleContext.nextTitle, 28);
+  const doneBrief = briefMissionText(idleContext.complete, 28);
+  const focusText = activeFocus
+    ? `Now · ${briefMissionText(objectiveText, 36)}`
+    : `Next · ${nextBrief}`;
   const currentStep = status.steps?.find((step) => step.label || step.title)?.label
     || status.steps?.find((step) => step.label || step.title)?.title
     || status.current_tool
@@ -2044,13 +2045,13 @@ function AgentHeroCard({
       <p>
         {activeFocus
           ? activeWorkDetail
-            ? `Now: ${compactText(missionText(activeWorkDetail.detail || activeWorkDetail.title), 82)}`
-            : `Now: ${compactText(missionText(currentStep), 82)}`
-          : `Done: ${compactText(idleContext.complete, 72)}`}
+            ? `Working · ${briefMissionText(activeWorkDetail.detail || activeWorkDetail.title, 34)}`
+            : `Working · ${briefMissionText(currentStep, 34)}`
+          : `Done · ${doneBrief}`}
       </p>
       <div className="agent-idle-readout" aria-label={`${AGENTS[agent].label} completion and next scheduled work`}>
-        <p><b>Done:</b> <span>{compactText(idleContext.complete, 56)}</span></p>
-        <p><b>Next:</b> <span>{compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 60)}</span></p>
+        <p><b>Done</b> <span>{doneBrief}</span></p>
+        <p><b>Next</b> <span>{idleContext.countdown ? `${idleContext.countdown}` : nextBrief}</span></p>
       </div>
       <footer className={`agent-response-sla is-${sla.tone}`}>
         <span>{sla.label}</span>
@@ -2240,8 +2241,34 @@ function compactText(value?: string | null, maxLength = 72) {
     .trim();
   if (!text) return "";
   if (text.length <= maxLength) return text;
-  const clipped = text.slice(0, maxLength - 3).replace(/\s+\S*$/, "").trim();
-  return `${clipped || text.slice(0, maxLength - 3).trim()}...`;
+  const clipped = text.slice(0, maxLength - 1).replace(/\s+\S*$/, "").trim();
+  return `${clipped || text.slice(0, maxLength - 1).trim()}…`;
+}
+
+function briefMissionText(value?: string | null, maxLength = 34) {
+  const raw = missionText(value || "");
+  let text = raw
+    .replace(/Mission Control:\s*/i, "")
+    .replace(/\bGmail Morning Inbox Triage\b/i, "Gmail triage")
+    .replace(/\bSignal Feed Refresh\b/i, "Signal refresh")
+    .replace(/\bSorare All-Rarity Claim Sweep\b/i, "Sorare claims")
+    .replace(/\bSorare ML Training\b/i, "Sorare ML")
+    .replace(/\bFantasy Waiver Watch\b/i, "Fantasy waivers")
+    .replace(/\bMemory sync backup to J\.A\.I\.N complete\b/i, "Memory backup")
+    .replace(/Telegram \/new Brain Feed contract reinforced/i, "Brain Feed contract")
+    .replace(/State visibility guard/i, "State guard")
+    .replace(/capturing final compact screenshot/i, "Screenshot proof")
+    .replace(/building compact ecosystem map/i, "Ecosystem map")
+    .replace(/fixing overlap and text cutoff/i, "Layout cleanup")
+    .replace(/reducing copy and removing truncation pressure/i, "Copy cleanup")
+    .replace(/^Up next:\s*/i, "")
+    .replace(/^Done:\s*/i, "")
+    .replace(/^Now:\s*/i, "")
+    .replace(/^t-[^+]+\+\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) text = "Standing by";
+  return compactText(text, maxLength);
 }
 
 function compactJobDetail(job: JobRow, fallback?: string, categoryLabel?: string) {
