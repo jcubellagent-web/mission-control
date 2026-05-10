@@ -67,6 +67,8 @@ type HandoffBeam = {
   detail?: string;
 };
 
+type LifecycleStage = "received" | "working" | "waiting" | "blocked" | "done";
+
 type AgentFlowLane = {
   agent: AgentId;
   state: AgentVisualState;
@@ -74,10 +76,19 @@ type AgentFlowLane = {
   readyCount: number;
   doneCount: number;
   handoffCount: number;
+  lifecycleCounts: Record<LifecycleStage, number>;
   lastLabel: string;
   nextLabel: string;
   freshness: string;
 };
+
+const LIFECYCLE_STAGES: Array<{ key: LifecycleStage; label: string }> = [
+  { key: "received", label: "Received" },
+  { key: "working", label: "Working" },
+  { key: "waiting", label: "Waiting" },
+  { key: "blocked", label: "Blocked" },
+  { key: "done", label: "Done" },
+];
 type SectionCueKey = "brain" | "jobs" | "signals" | "usage" | "system";
 type LiveCueState = {
   sections: Partial<Record<SectionCueKey, number>>;
@@ -417,6 +428,52 @@ function textMentionsAgent(text: string, agent: AgentId) {
   return /\bj\.?a\.?i\.?n\b|\bjain\b/.test(normalized);
 }
 
+function lifecycleStageFromJob(job: MissionControlState["jobs"][number]): LifecycleStage {
+  const value = String(job.runStatus || job.status || "").toLowerCase();
+  if (/blocked|error|missed|fail/.test(value)) return "blocked";
+  if (/waiting|approval|hold/.test(value)) return "waiting";
+  if (/active|running|queued|working/.test(value)) return "working";
+  if (/done|complete|completed|ok|ready/.test(value)) return "done";
+  return "received";
+}
+
+function emptyLifecycleCounts(): Record<LifecycleStage, number> {
+  return LIFECYCLE_STAGES.reduce((acc, stage) => {
+    acc[stage.key] = 0;
+    return acc;
+  }, {} as Record<LifecycleStage, number>);
+}
+
+function buildHandoffHistory(state: MissionControlState): HandoffBeam[] {
+  const beams = buildHandoffBeams(state);
+  const seen = new Set(beams.map((beam) => beam.id));
+  const rows = state.events
+    .filter((event) => {
+      const text = `${event.event_type} ${event.title} ${event.detail} ${event.tool} ${JSON.stringify(event.metadata || {})}`;
+      return /handoff|route|rout|delegate|delegat|assigned|requesting|accepted|returned/i.test(text);
+    })
+    .sort((a, b) => timeValue(b.created_at) - timeValue(a.created_at));
+  rows.forEach((event) => {
+    if (beams.length >= 6) return;
+    const text = `${event.title} ${event.detail} ${event.tool} ${JSON.stringify(event.metadata || {})}`;
+    const from = CONTROL_TOWER_AGENT_ORDER.includes(event.agent_id) ? event.agent_id : "joshex";
+    const to = CONTROL_TOWER_AGENT_ORDER.find((agent) => agent !== from && textMentionsAgent(text, agent)) || from;
+    const id = `${event.id || from}-${to}-${event.created_at}`;
+    if (seen.has(id)) return;
+    seen.add(id);
+    beams.push({
+      id,
+      from,
+      to,
+      label: from === to ? AGENTS[from].label : `${AGENTS[from].label} -> ${AGENTS[to].label}`,
+      tone: String(event.status || "").toLowerCase() === "blocked" ? "watch" : "active",
+      time: event.created_at,
+      detail: compactText(missionText(event.title || event.detail || "handoff"), 58),
+    });
+  });
+  return beams.sort((a, b) => timeValue(b.time) - timeValue(a.time)).slice(0, 6);
+}
+
 function buildHandoffBeams(state: MissionControlState): HandoffBeam[] {
   const cutoff = Date.now() - 90 * 60 * 1000;
   const rows = state.events
@@ -464,6 +521,9 @@ function buildAgentFlowLanes(state: MissionControlState, nowMs = Date.now()): Ag
       return stamp >= todayStart.getTime() && ["done", "completed", "ok", "ready"].includes(String(job.status || job.runStatus || "").toLowerCase());
     });
     const handoffCount = handoffs.filter((handoff) => handoff.from === agent || handoff.to === agent).length;
+    const lifecycleCounts = emptyLifecycleCounts();
+    jobs.forEach((job) => { lifecycleCounts[lifecycleStageFromJob(job)] += 1; });
+    if (status.active && !activeJobs.length) lifecycleCounts.working += 1;
     const lastEvent = state.events
       .filter((event) => event.agent_id === agent)
       .sort((a, b) => timeValue(b.created_at) - timeValue(a.created_at))[0];
@@ -477,6 +537,7 @@ function buildAgentFlowLanes(state: MissionControlState, nowMs = Date.now()): Ag
       readyCount: readyJobs.length,
       doneCount: doneJobs.length,
       handoffCount,
+      lifecycleCounts,
       lastLabel: compactText(missionText(lastEvent?.title || lastJob?.title || status.detail || "quiet"), 54),
       nextLabel: idle.countdown ? `${idle.countdown} + ${idle.nextTitle}` : idle.nextTitle,
       freshness: ageLabel(status.updated_at),
@@ -1013,6 +1074,11 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
   }, []);
   const lanes = buildAgentFlowLanes(state, nowMs);
   const beams = buildHandoffBeams(state);
+  const handoffHistory = buildHandoffHistory(state);
+  const lifecycleTotals = LIFECYCLE_STAGES.map((stage) => ({
+    ...stage,
+    count: lanes.reduce((sum, lane) => sum + lane.lifecycleCounts[stage.key], 0),
+  }));
   const activeJobs = state.jobs.filter((job) => ["active", "running", "queued"].includes(String(job.runStatus || job.status || "").toLowerCase())).length;
   const completedToday = lanes.reduce((sum, lane) => sum + lane.doneCount, 0);
   const routingCount = beams.length;
@@ -1032,6 +1098,15 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
           <span><b>{routingCount}</b> handoff beams</span>
         </div>
       </header>
+      <div className="lifecycle-swimlanes" aria-label="Job lifecycle swimlanes">
+        {lifecycleTotals.map((stage) => (
+          <article key={stage.key} className={`lifecycle-stage is-${stage.key}`}>
+            <span>{stage.label}</span>
+            <strong>{stage.count}</strong>
+            <i aria-hidden="true" style={{ "--stage-fill": `${Math.min(100, stage.count * 20)}%` } as React.CSSProperties} />
+          </article>
+        ))}
+      </div>
       <div className="flow-lane-grid">
         {lanes.map((lane) => (
           <article key={lane.agent} className={`flow-lane ${agentClass(lane.agent)} is-state-${lane.state}`}>
@@ -1069,6 +1144,17 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
           </article>
         )}
         {latestFlow ? <p className="latest-flow-line">Latest event: {AGENTS[latestFlow.agent_id]?.label || latestFlow.agent_id} · {missionText(latestFlow.title)}</p> : null}
+      </div>
+      <div className="handoff-replay" aria-label="Handoff history replay">
+        <span>Handoff replay</span>
+        {handoffHistory.length ? handoffHistory.slice(0, 5).map((beam, index) => (
+          <article key={`${beam.id}-replay`} className={`handoff-replay-step is-${beam.tone}`}>
+            <b>{String(index + 1).padStart(2, "0")}</b>
+            <strong>{beam.label}</strong>
+            <em>{beam.detail || "handoff logged"}</em>
+            <time>{ageLabel(beam.time)}</time>
+          </article>
+        )) : <p>No handoff replay yet.</p>}
       </div>
     </section>
   );
@@ -1904,7 +1990,7 @@ function AgentHeroCard({
   const upNextText = idleContext.countdown
     ? `Up next: ${idleContext.countdown} + ${idleContext.nextTitle}`
     : `Up next: ${idleContext.nextTitle}`;
-  const focusText = activeFocus ? objectiveText : missionText(upNextText);
+  const focusText = compactText(activeFocus ? objectiveText : missionText(upNextText), activeFocus ? 86 : 72);
   const currentStep = status.steps?.find((step) => step.label || step.title)?.label
     || status.steps?.find((step) => step.label || step.title)?.title
     || status.current_tool
@@ -1961,13 +2047,13 @@ function AgentHeroCard({
       <p>
         {activeFocus
           ? activeWorkDetail
-            ? `${workStateLabel(activeWorkDetail.state)}: ${missionText(activeWorkDetail.detail || activeWorkDetail.title)}`
-            : missionText(currentStep)
-          : `Standing by after: ${idleContext.complete}`}
+            ? `Now: ${compactText(missionText(activeWorkDetail.detail || activeWorkDetail.title), 82)}`
+            : `Now: ${compactText(missionText(currentStep), 82)}`
+          : `Done: ${compactText(idleContext.complete, 72)}`}
       </p>
       <div className="agent-idle-readout" aria-label={`${AGENTS[agent].label} completion and next scheduled work`}>
-        <p><b>Complete:</b> <span>{idleContext.complete}</span></p>
-        <p><b>Next:</b> <span>{idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle}</span></p>
+        <p><b>Done:</b> <span>{compactText(idleContext.complete, 56)}</span></p>
+        <p><b>Next:</b> <span>{compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 60)}</span></p>
       </div>
       <footer className={`agent-response-sla is-${sla.tone}`}>
         <span>{sla.label}</span>
