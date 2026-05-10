@@ -1098,64 +1098,61 @@ function AgentFlowTower({ state, liveCues }: { state: MissionControlState; liveC
           <span><b>{routingCount}</b> handoff beams</span>
         </div>
       </header>
-      <div className="lifecycle-swimlanes" aria-label="Job lifecycle swimlanes">
-        {lifecycleTotals.map((stage) => (
-          <article key={stage.key} className={`lifecycle-stage is-${stage.key}`}>
-            <span>{stage.label}</span>
-            <strong>{stage.count}</strong>
-            <i aria-hidden="true" style={{ "--stage-fill": `${Math.min(100, stage.count * 20)}%` } as React.CSSProperties} />
-          </article>
-        ))}
+      <div className="tower-ecosystem-map">
+        <div className="tower-agent-rows" aria-label="Agent ecosystem flow">
+          {lanes.map((lane) => (
+            <article key={lane.agent} className={`tower-agent-row ${agentClass(lane.agent)} is-state-${lane.state}`}>
+              <span className="tower-agent-dot" aria-hidden="true" />
+              <div className="tower-agent-main">
+                <header>
+                  <strong>{AGENTS[lane.agent].label}</strong>
+                  <em>{lane.activeCount ? `${lane.activeCount} running` : lane.readyCount ? `${lane.readyCount} queued` : "standing by"}</em>
+                </header>
+                <p>{lane.lastLabel}</p>
+              </div>
+              <div className="tower-agent-stats" aria-label={`${AGENTS[lane.agent].label} flow counts`}>
+                <span><b>{lane.lifecycleCounts.received}</b> rec</span>
+                <span><b>{lane.lifecycleCounts.working}</b> work</span>
+                <span><b>{lane.lifecycleCounts.done}</b> done</span>
+              </div>
+              <small>{lane.freshness} · {compactText(lane.nextLabel, 32)}</small>
+            </article>
+          ))}
+        </div>
+        <aside className="tower-flow-summary" aria-label="Flow summary">
+          <div className="lifecycle-swimlanes" aria-label="Job lifecycle swimlanes">
+            {lifecycleTotals.map((stage) => (
+              <article key={stage.key} className={`lifecycle-stage is-${stage.key}`}>
+                <span>{stage.label}</span>
+                <strong>{stage.count}</strong>
+                <i aria-hidden="true" style={{ "--stage-fill": `${Math.min(100, stage.count * 20)}%` } as React.CSSProperties} />
+              </article>
+            ))}
+          </div>
+          <div className="handoff-flow-strip" aria-label="Recent handoff flow">
+            {handoffHistory.length ? handoffHistory.slice(0, 2).map((beam, index) => (
+              <article key={`${beam.id}-replay`} className={`handoff-flow-row is-${beam.tone}`}>
+                <b>{String(index + 1).padStart(2, "0")}</b>
+                <span>{AGENTS[beam.from].label}</span>
+                <i aria-hidden="true" />
+                <span>{AGENTS[beam.to].label}</span>
+                <strong>{beam.detail || beam.label}</strong>
+                <em>{ageLabel(beam.time)}</em>
+              </article>
+            )) : (
+              <article className="handoff-flow-row is-quiet">
+                <b>--</b>
+                <span>Routing bus</span>
+                <i aria-hidden="true" />
+                <span>Owners</span>
+                <strong>No handoffs; work staying with owners.</strong>
+                <em>standby</em>
+              </article>
+            )}
+          </div>
+        </aside>
       </div>
-      <div className="flow-lane-grid">
-        {lanes.map((lane) => (
-          <article key={lane.agent} className={`flow-lane ${agentClass(lane.agent)} is-state-${lane.state}`}>
-            <span className="flow-lane-node" aria-hidden="true" />
-            <header>
-              <strong>{AGENTS[lane.agent].label}</strong>
-              <em>{lane.activeCount ? `${lane.activeCount} running` : lane.readyCount ? `${lane.readyCount} queued` : "standing by"}</em>
-            </header>
-            <div className="flow-lane-bars" aria-hidden="true">
-              <i className={lane.activeCount ? "is-hot" : ""} />
-              <i className={lane.handoffCount ? "is-handoff" : ""} />
-              <i className={lane.doneCount ? "is-done" : ""} />
-            </div>
-            <p>{lane.lastLabel}</p>
-            <small>{lane.freshness} · next: {lane.nextLabel}</small>
-          </article>
-        ))}
-      </div>
-      <div className="handoff-flow-strip" aria-label="Recent handoff flow">
-        {beams.length ? beams.slice(0, 4).map((beam) => (
-          <article key={beam.id} className={`handoff-flow-row is-${beam.tone}`}>
-            <span>{AGENTS[beam.from].label}</span>
-            <i aria-hidden="true" />
-            <span>{AGENTS[beam.to].label}</span>
-            <strong>{beam.detail || beam.label}</strong>
-            <em>{ageLabel(beam.time)}</em>
-          </article>
-        )) : (
-          <article className="handoff-flow-row is-quiet">
-            <span>Routing bus</span>
-            <i aria-hidden="true" />
-            <span>Agents</span>
-            <strong>No recent handoffs; jobs are staying with owners.</strong>
-            <em>standby</em>
-          </article>
-        )}
-        {latestFlow ? <p className="latest-flow-line">Latest event: {AGENTS[latestFlow.agent_id]?.label || latestFlow.agent_id} · {missionText(latestFlow.title)}</p> : null}
-      </div>
-      <div className="handoff-replay" aria-label="Handoff history replay">
-        <span>Handoff replay</span>
-        {handoffHistory.length ? handoffHistory.slice(0, 5).map((beam, index) => (
-          <article key={`${beam.id}-replay`} className={`handoff-replay-step is-${beam.tone}`}>
-            <b>{String(index + 1).padStart(2, "0")}</b>
-            <strong>{beam.label}</strong>
-            <em>{beam.detail || "handoff logged"}</em>
-            <time>{ageLabel(beam.time)}</time>
-          </article>
-        )) : <p>No handoff replay yet.</p>}
-      </div>
+      {latestFlow ? <p className="latest-flow-line">Latest: {AGENTS[latestFlow.agent_id]?.label || latestFlow.agent_id} · {compactText(missionText(latestFlow.title), 72)}</p> : null}
     </section>
   );
 }
