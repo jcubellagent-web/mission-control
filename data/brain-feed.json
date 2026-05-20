@@ -1,15 +1,22 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": true,
-  "reportedActive": true,
-  "status": "active",
-  "objective": "Full agent ecosystem audit approved; starting repair-oriented checks",
-  "detail": "Finished bash | completed checking /bin/zsh -lc 'openclaw tasks --help'",
-  "updatedAt": "2026-05-20T03:27:36Z",
-  "checkedAt": "2026-05-20T03:27:36Z",
-  "currentTool": "",
-  "steps": [],
+  "active": false,
+  "reportedActive": false,
+  "status": "done",
+  "objective": "Full agent ecosystem audit",
+  "detail": "Audit and approved safe repairs complete: disabled two broken local LaunchAgents, ran maintenance and visibility refresh, Mission Control build OK, JAIN reachable, OpenClaw healthy. Remaining warnings: 94 old lost task records, broad exec trust, missing Eleve...",
+  "updatedAt": "2026-05-20T03:29:58Z",
+  "checkedAt": "2026-05-20T03:29:58Z",
+  "currentTool": "codex",
+  "steps": [
+    {
+      "label": "Full agent ecosystem audit",
+      "status": "done",
+      "tool": "codex",
+      "kind": "complete"
+    }
+  ],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
