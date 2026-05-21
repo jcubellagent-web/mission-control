@@ -3,13 +3,19 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "active",
-  "objective": "Objective: fix Telegram final-card sequencing and clean leftover work-card code so completion templates only send after all work is actually done.",
-  "detail": "Objective, model route, and runbook confirmed",
-  "updatedAt": "2026-05-21T03:10:27Z",
-  "checkedAt": "2026-05-21T03:10:27Z",
-  "currentTool": "",
-  "steps": [],
+  "status": "done",
+  "objective": "Done: test Brain Feed mirror does not send final summary",
+  "detail": "Finished bash: completed sed -n '320,470p' mission-control/scripts/josh_work_card.py",
+  "updatedAt": "2026-05-21T03:11:48Z",
+  "checkedAt": "2026-05-21T03:11:48Z",
+  "currentTool": "test",
+  "steps": [
+    {
+      "label": "Done - test Brain Feed mirror does not send final summary",
+      "status": "done",
+      "tool": "test"
+    }
+  ],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
