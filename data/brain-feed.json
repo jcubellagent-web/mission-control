@@ -3,13 +3,19 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "active",
-  "objective": "Objective: make Telegram objectives specific and detailed by fixing generic objective fallback in the live work-card and fast-ack pipeline.",
-  "detail": "Finished bash: completed sed -n '620,735p' mission-control/scripts/josh_work_card.py",
-  "updatedAt": "2026-05-21T03:13:34Z",
-  "checkedAt": "2026-05-21T03:13:34Z",
-  "currentTool": "",
-  "steps": [],
+  "status": "done",
+  "objective": "Made Telegram work-card objectives specific and detailed",
+  "detail": "Running bash: mission-control/scripts/bf_push.sh \"Fixed Telegram final-template timing and cleaned work-card leftovers\" \"done:final",
+  "updatedAt": "2026-05-21T03:15:31Z",
+  "checkedAt": "2026-05-21T03:15:31Z",
+  "currentTool": "objective rules and UX instructions updated",
+  "steps": [
+    {
+      "label": "done",
+      "status": "done",
+      "tool": "objective rules and UX instructions updated"
+    }
+  ],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
