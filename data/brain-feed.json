@@ -4,12 +4,18 @@
   "active": true,
   "reportedActive": true,
   "status": "active",
-  "objective": "Josh requested self-update; determining current OpenClaw/package state before applying updates",
+  "objective": "Update JOSH 2.0 / OpenClaw self",
   "detail": "Objective confirmed; Codex - execution/private fit; skill: Telegram Task Flow; skill=Telegram Task Flow",
-  "updatedAt": "2026-05-20T23:33:10Z",
-  "checkedAt": "2026-05-20T23:33:10Z",
-  "currentTool": "",
-  "steps": [],
+  "updatedAt": "2026-05-21T00:02:40Z",
+  "checkedAt": "2026-05-21T00:02:40Z",
+  "currentTool": "exec",
+  "steps": [
+    {
+      "label": "Starting self-update check; will inspect installed versions, run safe update path, verify health, and publish completion.",
+      "status": "active",
+      "tool": "exec"
+    }
+  ],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.4-mini",
