@@ -3,19 +3,13 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "done",
-  "objective": "Fixed Telegram final-template timing and cleaned work-card leftovers",
-  "detail": "Running bash: sed -n '100,140p' mission-control/data/josh2-telegram-ux-config.json",
-  "updatedAt": "2026-05-21T03:13:05Z",
-  "checkedAt": "2026-05-21T03:13:05Z",
-  "currentTool": "final summary now terminal-only; Brain Feed mirror suppresses auto final card",
-  "steps": [
-    {
-      "label": "done",
-      "status": "done",
-      "tool": "final summary now terminal-only; Brain Feed mirror suppresses auto final card"
-    }
-  ],
+  "status": "active",
+  "objective": "Objective: make Telegram objectives specific and detailed by fixing generic objective fallback in the live work-card and fast-ack pipeline.",
+  "detail": "Finished bash: completed sed -n '620,735p' mission-control/scripts/josh_work_card.py",
+  "updatedAt": "2026-05-21T03:13:34Z",
+  "checkedAt": "2026-05-21T03:13:34Z",
+  "currentTool": "",
+  "steps": [],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
