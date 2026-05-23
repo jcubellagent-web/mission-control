@@ -2,22 +2,16 @@
   "agentId": "josh2",
   "agent": "JOSH 2.0",
   "active": true,
-  "reportedActive": true,
-  "status": "done",
-  "objective": "Fixed Telegram final-summary clarity and bogus approval buttons",
-  "detail": "Running bash: jq 'to_entries | .[-10:]' memory/telegram_approval_actions.json 2>/dev/null | sed -n '1,220p",
-  "updatedAt": "2026-05-21T03:22:19Z",
-  "checkedAt": "2026-05-21T03:22:19Z",
-  "currentTool": "parser ignores Context/n/a metadata and final wording is more explicit",
-  "steps": [
-    {
-      "label": "done",
-      "status": "done",
-      "tool": "parser ignores Context/n/a metadata and final wording is more explicit"
-    }
-  ],
+  "reportedActive": false,
+  "status": "active",
+  "objective": "wallet-check start: inspecting Phantom/Chrome visibility and read-only readiness for Venice/Warden",
+  "detail": "state visibility ok",
+  "updatedAt": "2026-05-23T20:39:27Z",
+  "checkedAt": "2026-05-23T20:39:27Z",
+  "currentTool": "",
+  "steps": [],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
-  "messageReceived": "2026-05-21T02:52:36Z"
+  "messageReceived": "2026-05-23T20:39:27Z"
 }
