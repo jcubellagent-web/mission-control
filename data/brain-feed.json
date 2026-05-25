@@ -4,20 +4,20 @@
   "active": true,
   "reportedActive": false,
   "status": "done",
-  "objective": "Investigated Telegram warning bubble",
-  "detail": "Session visibility contract loaded; future tasks publish objective, progress, and completion as josh2. Model: gpt-5.5",
-  "updatedAt": "2026-05-25T00:13:52Z",
-  "checkedAt": "2026-05-25T00:13:52Z",
-  "currentTool": "root cause was a bad wallet verification command using curl piped into a Python heredoc; added operating rule to prevent repeat raw tool-failure leaks.",
+  "objective": "Telegram warning bubble root cause fixed",
+  "detail": "Identified the raw warning as an internal failed verification command, added a guardrail against curl-to-Python-heredoc checks, and refreshed Mission Control data.",
+  "updatedAt": "2026-05-25T00:14:38Z",
+  "checkedAt": "2026-05-25T00:14:38Z",
+  "currentTool": "bad wallet verification command pattern identified; AGENTS guardrail added; Mission Control data refreshed.",
   "steps": [
     {
       "label": "done",
       "status": "done",
-      "tool": "root cause was a bad wallet verification command using curl piped into a Python heredoc; added operating rule to prevent repeat raw tool-failure leaks."
+      "tool": "bad wallet verification command pattern identified; AGENTS guardrail added; Mission Control data refreshed."
     }
   ],
   "source": "shared-agent-event-ledger",
   "supabaseBacked": true,
   "model": "GPT-5.5",
-  "messageReceived": "2026-05-24T22:23:38Z"
+  "messageReceived": "2026-05-25T00:14:38Z"
 }
