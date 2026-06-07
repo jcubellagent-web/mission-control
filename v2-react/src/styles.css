@@ -15627,3 +15627,32 @@ body > #root,
   margin-left: 30px !important;
   max-width: calc(100% - 30px) !important;
 }
+
+
+/* =====================================================================
+   LIVE WORK BOARD EDGE ALIGNMENT — JAIMES — 2026-06-07
+   Align the Live Work Board focus card edge with the Agent Flight Deck
+   cards below it, while preserving a readable text inset from the edge.
+   ===================================================================== */
+.activity-ledger .ledger-live-focus {
+  padding-inline: 0 !important;
+}
+
+.activity-ledger .ledger-focus-primary {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.ledger-focus-primary::before {
+  left: 16px !important;
+}
+
+.ledger-focus-primary .ledger-now-label,
+.ledger-focus-primary .ledger-now-title,
+.ledger-focus-primary .ledger-now-detail,
+.ledger-focus-primary footer {
+  margin-left: 30px !important;
+  max-width: calc(100% - 30px) !important;
+}
