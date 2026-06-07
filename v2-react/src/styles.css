@@ -14795,3 +14795,103 @@ html, body, #root, .app-shell {
   padding-bottom: 12px !important;
   margin-bottom: 16px !important;
 }
+
+/* =====================================================================
+   JAIMES CONTROL TOWER POLISH — 2026-06-07
+   Marker: CONTROL-TOWER-POLISH-20260607
+   Goal: minimalist + insightful, consistent branding, NO visible scrollbars.
+   Appended last so it authoritatively wins the cascade.
+   ===================================================================== */
+
+:root {
+  /* Brand tokens — promote stray one-off hexes to named tokens */
+  --jaimes: #54d6c7;            /* JAIMES agent tone (was hard-coded x9) */
+  --agent-jaimes: var(--jaimes);
+  --tint-red: #ffc3ca;          /* light red status text */
+  --tint-blue: #87c7d8;         /* light blue status text */
+  --surface-flat: #101b26;      /* flat panel surface */
+}
+
+/* ---------------------------------------------------------------------
+   1. KILL VISIBLE SCROLLBARS GLOBALLY (keep scroll function, hide the bar)
+   --------------------------------------------------------------------- */
+* {
+  scrollbar-width: none !important;        /* Firefox */
+  -ms-overflow-style: none !important;     /* old Edge/IE */
+}
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;                /* Chromium / WebKit */
+  background: transparent !important;
+}
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* ---------------------------------------------------------------------
+   2. NO PAGE-LEVEL OVERFLOW — board fits the kiosk viewport, never scrolls
+   --------------------------------------------------------------------- */
+html, body {
+  overflow: hidden !important;
+  max-height: 100vh !important;
+}
+body > #root,
+.app-shell,
+.hero-shell {
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+/* Inner scroll regions keep functional scroll but with hidden bars (handled by #1) */
+
+/* ---------------------------------------------------------------------
+   3. STOP HEADER TRUNCATION — let key titles wrap/shrink instead of ellipsis
+   --------------------------------------------------------------------- */
+.tower-command-strip h2,
+.activity-ledger > header h2,
+.panel-title h2,
+.panel-title h3 {
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+}
+/* Live Work Board hero title: wrap to 2 lines, shrink-to-fit, no clip */
+.ledger-focus-primary .ledger-now-title {
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  font-size: clamp(26px, 2.7vw, 50px) !important;
+  line-height: 1.02 !important;
+  max-height: unset !important;
+}
+
+/* ---------------------------------------------------------------------
+   4. APPLY BRAND TOKENS (replace stray hex references with named tokens)
+   --------------------------------------------------------------------- */
+.ledger-row.agent-jaimes .ledger-agent-dot,
+.calendar-legend i.agent-jaimes,
+.calendar-job-block.agent-jaimes { background: var(--jaimes) !important; }
+.calendar-next-brief.agent-jaimes,
+.calendar-job-block.agent-jaimes { border-left-color: var(--jaimes) !important; }
+
+/* ---------------------------------------------------------------------
+   5. RECLAIM DEAD SPACE — tighten the top summary strip for a denser,
+      more minimalist header (less empty void, same info)
+   --------------------------------------------------------------------- */
+.tower-command-strip {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  row-gap: 6px !important;
+  align-items: center !important;
+}
+.tower-command-strip > div {
+  margin-bottom: 0 !important;
+}
+.tower-command-strip article {
+  padding: 8px 12px !important;
+}
