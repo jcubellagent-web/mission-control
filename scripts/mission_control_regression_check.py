@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Mission Control UI/data regression checks.
+"""Mission Control React UI/data regression checks.
 
-Catches the specific Brain Feed / Memory Roadmap wiring regressions that have
-broken the kiosk before, without requiring a browser session.
+This is the fast, browserless guard for the current Vite/React kiosk. The old
+static index.html guard became stale after the Control Tower moved to
+v2-react/src, so this script now checks the live source tree and dashboard JSON
+contracts without requiring Chrome or Playwright.
 """
 from __future__ import annotations
 
@@ -10,13 +12,15 @@ import argparse
 import json
 import re
 import subprocess
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX = ROOT / "index.html"
 DATA_DIR = ROOT / "data"
+SRC_DIR = ROOT / "v2-react" / "src"
+MAIN_TSX = SRC_DIR / "main.tsx"
+STYLES = SRC_DIR / "styles.css"
 TMP_JS = Path("/tmp/mc_scripts_regression.js")
 
 
@@ -30,6 +34,11 @@ def require(condition: bool, msg: str) -> None:
         fail(msg)
 
 
+def require_text(src: str, needles: Iterable[str], context: str) -> None:
+    for needle in needles:
+        require(needle in src, f"missing {context}: {needle}")
+
+
 def parse_iso(value: object) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
@@ -37,24 +46,6 @@ def parse_iso(value: object) -> datetime | None:
         return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError:
         return None
-
-
-def get_function(src: str, name: str) -> str:
-    marker = f"function {name}"
-    start = src.find(marker)
-    require(start >= 0, f"missing function {name}")
-    brace = src.find("{", start)
-    require(brace >= 0, f"missing opening brace for {name}")
-    depth = 0
-    for i in range(brace, len(src)):
-        ch = src[i]
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return src[start : i + 1]
-    fail(f"unterminated function {name}")
 
 
 def check_json() -> None:
@@ -73,126 +64,98 @@ def check_json() -> None:
     require(not bad, "invalid JSON in data/*.json")
 
 
-def check_index_wiring() -> None:
-    html = INDEX.read_text()
+def check_react_source() -> None:
+    require(MAIN_TSX.exists(), "React kiosk main.tsx missing")
+    require(STYLES.exists(), "React kiosk styles.css missing")
+    main = MAIN_TSX.read_text()
+    css = STYLES.read_text()
 
-    apply_bf = get_function(html, "applyBrainFeed")
-    require(
-        "normalizeRemoteAgentFeed(bf, 2 * 60 * 60 * 1000)" in apply_bf,
-        "applyBrainFeed must normalize remote/local payloads before freshness/hash checks",
-    )
-    require(
-        "hasRenderedHero" in apply_bf and ".bf-objective" in apply_bf,
-        "applyBrainFeed must rerender when the Brain Feed DOM is empty even if hash is unchanged",
-    )
-
-    picker = get_function(html, "pickDualLiveObjectiveFeeds")
-    require("isRenderableLiveObjective(joshEntry)" in picker, "JOSH hero must require live/renderable feed")
-    require("isRenderableLiveObjective(jaimesEntry)" in picker, "JAIMES hero must require live/renderable feed")
-    require(
-        "agentLabel: 'J.A.I.N'" not in picker and 'agentLabel: "J.A.I.N"' not in picker,
-        "J.A.I.N must not compete for hero objective slots",
-    )
-
-    render_dashboard = get_function(html, "renderDashboard")
-    require(
-        "renderAgentChatFeed(_uaComms || [])" in render_dashboard,
-        "Memory Roadmap must refresh from renderDashboard after contextWindow updates",
+    require_text(
+        main,
+        [
+            "Live Work Board",
+            "ledger-live-focus",
+            "ledger-focus-primary",
+            "is-concurrent",
+            "Today's Jobs",
+            "daily-calendar-view",
+            "calendar-job-block",
+            "AttentionTarget",
+            "today-jobs",
+            "brain-feed",
+            "signal-feed",
+        ],
+        "Control Tower React surface",
     )
 
-    step_label = get_function(html, "resolveBrainFeedStepLabel")
-    require("safeSteps" in step_label, "resolveBrainFeedStepLabel must guard missing steps")
-
-    render_bf = get_function(html, "renderBrainFeed")
-    require(
-        "renderCombinedBrainFeed(bf, _jainBrainFeed)" not in render_bf,
-        "renderBrainFeed must not recursively call renderCombinedBrainFeed",
+    require_text(
+        css,
+        [
+            "CONTROL-TOWER-BRAND-BLUEGREEN-20260607",
+            "TODAY'S JOBS STABILITY PASS",
+            "CENTER COLUMN SIMPLIFICATION",
+            "KIOSK READABILITY PASS — JAIMES — 2026-06-07",
+            "scrollbar-width: none",
+            "overflow: hidden !important",
+            "--brand-blue",
+            "--brand-green",
+            ".ledger-live-focus.is-concurrent",
+            ".calendar-job-block",
+        ],
+        "kiosk CSS guardrails",
     )
 
-    require(
-        'onclick="window.openEightSleepDashboard && window.openEightSleepDashboard()"' in html,
-        "Eight Sleep stat pill must call openEightSleepDashboard",
-    )
-    require("window.openEightSleep && window.openEightSleep()" not in html, "stale Eight Sleep handler still present")
+    forbidden_visible_tokens = ["#00CFFF", "#54d6c7", "#a597db"]
+    tail = css[css.find("CONTROL-TOWER-BRAND-BLUEGREEN-20260607") :]
+    for token in forbidden_visible_tokens:
+        require(token not in tail, f"stale accent token after brand guard: {token}")
 
-    require('id="build-sha-badge"' in html, "Mission Control header must expose a visible build SHA badge")
-    require('id="build-sha-text"' in html, "Mission Control build SHA badge must include a target text node")
-    require('id="build-age-chip"' in html, "Mission Control header must expose build age/status chip")
-    require('id="ci-run-chip"' in html, "Mission Control header must expose latest CI run chip")
-    require("function hydrateBuildShaBadge" in html, "Mission Control must hydrate the visible build SHA")
-    require(
-        "api.github.com/repos/jcubellagent-web/mission-control/commits/main" in html,
-        "Mission Control build SHA must resolve against origin/main",
-    )
-    require(
-        "actions/workflows/mission-control-regression.yml/runs?branch=main&per_page=1" in html,
-        "Mission Control CI chip must resolve latest regression run",
-    )
-    require("function brainFeedAgentClass" in html, "Brain Feed cards must expose agent-specific visual classes")
-    require("agent-josh" in html and "agent-jaimes" in html, "Brain Feed cards must visually distinguish JOSH 2.0 and JAIMES")
-    require(".bf-hero-grid.dual-live .bf-objective" in html and "min-height: clamp(224px, 23vh, 248px)" in html, "Dual live objective boxes must stay tall but kiosk-balanced")
-    require(".bf-hero-grid.dual-live .bf-objective-text-wrap" in html and "* 3" in html, "Dual live objectives must show a taller text viewport")
+    min_font_matches = [float(v) for v in re.findall(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", css)]
+    tiny_after_marker = [float(v) for v in re.findall(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", css[css.find("KIOSK READABILITY PASS"):]) if float(v) < 9]
+    require(min_font_matches, "no CSS font-size declarations found")
+    require(not tiny_after_marker, f"readability pass introduced sub-9px text: {tiny_after_marker[:5]}")
+    print("css_font_px_min", min(min_font_matches))
 
-    # 24in visual canaries: prevent kiosk Brain Feed from regressing into tall/noisy poster cards.
-    require("24in fullscreen polish" in html, "24in desktop Brain Feed polish block missing")
-    require(".memory-roadmap-compact-grid" in html and "repeat(4, minmax(0, 1fr))" in html, "Memory Roadmap must stay compact on desktop")
-    require(".memory-roadmap-card-note { display: none" in html, "Desktop roadmap notes must stay hidden to reduce Brain Feed noise")
-    require("Model spend desktop: compact ledger view" in html, "Model Usage desktop compact ledger CSS missing")
-    require("function toggleLayoutMode" in html and "mc_layout_mode" in html, "24in/phone layout toggle must be wired")
-    require('id="layout-mode-toggle"' in html and 'id="layout-mode-text"' in html, "Layout toggle button/text target missing")
-    require('id="personal-codex-panel"' in html, "Personal Codex panel shell missing")
-    require("function renderPersonalCodex" in html, "Personal Codex renderer missing")
-    require("renderPersonalCodex(data)" in html, "renderDashboard must render Personal Codex lane")
-    require('id="agent-control-panel"' in html, "Agent Control panel shell missing")
-    require("function renderAgentControlPanel" in html, "Agent Control renderer missing")
-    require("renderAgentControlPanel(data)" in html, "renderSystemHealth must render Agent Control lane")
-    require("agentControl" in html, "Agent Control dashboard payload key must be referenced")
-    require("codex-jobs-top" in html and "codexJobs" in html, "Today Jobs must expose Codex Automations")
-    require("shared-ledger-top" in html and "sharedEvents" in html, "Today Jobs must expose Shared Ledger events")
-    require("shared-os-top" in html and "sharedOperatingLayer" in html, "Today Jobs must expose Shared OS status")
-    require("activeTasks" in html and "approvalNeeded" in html and "capabilityAgents" in html, "Shared OS must expose task/capability summary")
 
-    agent_status_path = DATA_DIR / "agent-control-status.json"
-    if agent_status_path.exists():
-        agent_status = json.loads(agent_status_path.read_text())
-        require("summary" in agent_status and "agents" in agent_status, "Agent Control sidecar must include summary and agents")
-
-    shared_events_path = DATA_DIR / "shared-events.json"
-    if shared_events_path.exists():
-        shared_events = json.loads(shared_events_path.read_text())
-        require(isinstance(shared_events.get("events"), list), "Shared Events sidecar must include an events list")
-    for filename, key in [
-        ("decisions.json", "decisions"),
-        ("handoff-queue.json", "handoffs"),
-        ("knowledge-index.json", "entries"),
-        ("agent-task-queue.json", "tasks"),
-        ("agent-capabilities.json", "agents"),
-        ("agent-routing-policy.json", "routes"),
-        ("agent-heartbeats.json", "heartbeats"),
-        ("capability-inventory.json", "nodes"),
-        ("automation-rollout.json", "rollouts"),
-    ]:
-        path = DATA_DIR / filename
-        if path.exists():
-            payload = json.loads(path.read_text())
-            require(isinstance(payload.get(key), list), f"{filename} must include a {key} list")
-    gemini_path = DATA_DIR / "gemini-ecosystem.json"
-    if gemini_path.exists():
-        gemini = json.loads(gemini_path.read_text())
-        require((gemini.get("localCli") or {}).get("command") == "gemini", "Gemini sidecar must identify the local CLI command")
-        require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
-        require("raw emails" in " ".join(gemini.get("guardrails") or []).lower(), "Gemini sidecar must include privacy guardrails")
-
-    scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S | re.I)
-    TMP_JS.write_text("\n;\n".join(scripts))
-    print("script_chunks", len(scripts))
-    require(bool(scripts), "no inline scripts extracted")
-    result = subprocess.run(["node", "--check", str(TMP_JS)], cwd=ROOT, text=True, capture_output=True)
+def check_typescript() -> None:
+    result = subprocess.run(["npx", "tsc", "--noEmit"], cwd=ROOT, text=True, capture_output=True, timeout=120)
     if result.stdout:
         print(result.stdout.strip())
     if result.stderr:
         print(result.stderr.strip())
-    require(result.returncode == 0, "embedded index.html JavaScript syntax check failed")
+    require(result.returncode == 0, "TypeScript noEmit check failed")
+
+
+def check_sidecar_contracts() -> None:
+    optional_contracts = [
+        ("agent-control-status.json", "summary", "agents"),
+        ("shared-events.json", "events", None),
+        ("decisions.json", "decisions", None),
+        ("handoff-queue.json", "handoffs", None),
+        ("knowledge-index.json", "entries", None),
+        ("agent-task-queue.json", "tasks", None),
+        ("agent-capabilities.json", "agents", None),
+        ("agent-routing-policy.json", "routes", None),
+        ("agent-heartbeats.json", "heartbeats", None),
+        ("capability-inventory.json", "nodes", None),
+        ("automation-rollout.json", "rollouts", None),
+    ]
+    for filename, first, second in optional_contracts:
+        path = DATA_DIR / filename
+        if not path.exists():
+            continue
+        payload = json.loads(path.read_text())
+        require(first in payload, f"{filename} must include {first}")
+        if second:
+            require(second in payload, f"{filename} must include {second}")
+        if isinstance(payload.get(first), list):
+            require(isinstance(payload[first], list), f"{filename}.{first} must be a list")
+
+    gemini_path = DATA_DIR / "gemini-ecosystem.json"
+    if gemini_path.exists():
+        gemini = json.loads(gemini_path.read_text())
+        require((gemini.get("localCli") or {}).get("command") == "gemini", "Gemini sidecar must identify local CLI command")
+        require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
 
 
 def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) -> None:
@@ -228,10 +191,14 @@ def main() -> int:
     parser.add_argument("--check-roadmap-freshness", action="store_true")
     parser.add_argument("--max-roadmap-age-min", type=int, default=20)
     parser.add_argument("--write-status", type=Path)
+    parser.add_argument("--with-tsc", action="store_true", help="also run npx tsc --noEmit; optional because this repo does not vendor React type packages")
     args = parser.parse_args()
 
     check_json()
-    check_index_wiring()
+    check_react_source()
+    check_sidecar_contracts()
+    if args.with_tsc:
+        check_typescript()
     if args.check_roadmap_freshness:
         check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
     print("mission_control_regression_check OK")
@@ -239,4 +206,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

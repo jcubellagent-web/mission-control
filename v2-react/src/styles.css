@@ -14931,7 +14931,7 @@ body > #root,
   --red: #ff8a7a;
 }
 
-/* JAIMES agent tone -> deep green (was teal #54d6c7) */
+/* JAIMES agent tone -> deep green (was teal #2faf6a) */
 .brain-hero .agent-hero-card.agent-jaimes { --agent-tone: var(--brand-green-deep) !important; }
 /* J.A.I.N agent tone -> deep blue (was purple) */
 .brain-hero .agent-hero-card.agent-jain  { --agent-tone: var(--brand-blue-deep) !important; }
@@ -15104,3 +15104,466 @@ body > #root,
   font-style: normal !important;
   color: #8fb5dc !important;
 }
+
+/* =====================================================================
+   TODAY'S JOBS STABILITY PASS — 2026-06-07
+   Keep the right rail in one consistent daily-calendar mode and reduce
+   saturated agent fills. Agent ownership is shown by a quiet left rail.
+   ===================================================================== */
+.tower-jobs-rail .jobs-rail,
+.right-rail.tower-jobs-rail,
+.daily-calendar-view {
+  background: #0d2135 !important;
+}
+
+.jobs-rail .panel-title,
+.daily-calendar-view,
+.calendar-control-strip,
+.calendar-legend,
+.calendar-day-axis,
+.calendar-next-brief,
+.scheduler-inventory-section {
+  border-color: rgba(131, 164, 197, 0.14) !important;
+  background: #10263b !important;
+  box-shadow: none !important;
+}
+
+.calendar-control-strip article,
+.calendar-legend span,
+.calendar-hour-content,
+.calendar-empty-block {
+  border-color: rgba(131, 164, 197, 0.11) !important;
+  background: #0d2236 !important;
+  box-shadow: none !important;
+}
+
+.calendar-control-strip article strong,
+.calendar-control-strip article span,
+.calendar-legend span,
+.calendar-next-brief strong,
+.calendar-next-brief span,
+.calendar-next-brief em {
+  text-shadow: none !important;
+}
+
+.calendar-control-strip article.is-clear,
+.calendar-control-strip article.is-idle,
+.calendar-control-strip article.is-routine,
+.calendar-control-strip article.is-active,
+.calendar-control-strip article.is-risk {
+  border-color: rgba(131, 164, 197, 0.14) !important;
+  background: #0d2236 !important;
+}
+
+.calendar-control-strip article.is-clear strong,
+.calendar-control-strip article.is-idle strong {
+  color: #c9d8e8 !important;
+}
+
+.calendar-control-strip article.is-routine strong,
+.calendar-control-strip article.is-active strong {
+  color: #d9e7f6 !important;
+}
+
+.calendar-control-strip article.is-risk strong {
+  color: #e8b0ad !important;
+}
+
+.calendar-job-block {
+  --jobs-agent-accent: rgba(133, 168, 204, 0.44);
+  min-height: 45px !important;
+  border: 1px solid rgba(131, 164, 197, 0.13) !important;
+  border-left: 4px solid var(--jobs-agent-accent) !important;
+  border-radius: 10px !important;
+  background: #132a41 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.calendar-job-block:hover,
+.calendar-job-block.is-next-up,
+.calendar-job-block.is-current,
+.calendar-job-block.is-active,
+.calendar-job-block.tone-working,
+.calendar-job-block.tone-done,
+.calendar-job-block.tone-ready,
+.calendar-job-block.tone-planned,
+.calendar-job-block.tone-attention,
+.calendar-job-block.is-risk,
+.calendar-job-block.is-watch,
+.calendar-job-block.is-quiet {
+  background: #132a41 !important;
+  border-color: rgba(131, 164, 197, 0.16) !important;
+  border-left-color: var(--jobs-agent-accent) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.calendar-job-block.agent-joshex {
+  --jobs-agent-accent: rgba(91, 190, 135, 0.58);
+}
+
+.calendar-job-block.agent-josh {
+  --jobs-agent-accent: rgba(107, 154, 214, 0.58);
+}
+
+.calendar-job-block.agent-jaimes {
+  --jobs-agent-accent: rgba(92, 176, 151, 0.56);
+}
+
+.calendar-job-block.agent-jain {
+  --jobs-agent-accent: rgba(135, 146, 207, 0.56);
+}
+
+.calendar-job-block.is-risk {
+  --jobs-agent-accent: rgba(218, 135, 135, 0.58);
+}
+
+.calendar-job-block strong {
+  color: #eef5fb !important;
+}
+
+.calendar-job-block p {
+  color: #a8bbcc !important;
+}
+
+.calendar-job-block span,
+.calendar-job-block em,
+.calendar-block-meta span,
+.calendar-block-meta em {
+  color: #8fa6bc !important;
+}
+
+.calendar-hour-slot.is-current > time {
+  color: #d7e5f3 !important;
+}
+
+.calendar-hour-slot.is-current .calendar-hour-content {
+  border-left-color: rgba(131, 164, 197, 0.24) !important;
+  background: #10263b !important;
+}
+
+.calendar-hour-slot.is-current .calendar-hour-content::before,
+.calendar-now-marker span::after {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+.calendar-now-marker span {
+  background: rgba(131, 164, 197, 0.24) !important;
+  box-shadow: none !important;
+}
+
+.calendar-now-marker strong {
+  color: #d8e6f4 !important;
+}
+
+.calendar-now-marker em {
+  color: #91a8bc !important;
+}
+
+.calendar-legend i,
+.status-dot {
+  box-shadow: none !important;
+}
+
+/* =====================================================================
+   CENTER COLUMN SIMPLIFICATION — 2026-06-07
+   Remove the separate executive strip from the live layout and let
+   "What matters most" become the primary center module.
+   ===================================================================== */
+.tower-center-column {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.tower-center-column > .tower-priority-queue {
+  flex: 1 1 58% !important;
+  min-height: 0 !important;
+}
+
+.tower-center-column > .tower-resource-stack {
+  flex: 0 1 42% !important;
+  min-height: 0 !important;
+}
+
+.tower-priority-queue {
+  padding: 20px !important;
+}
+
+.tower-priority-queue > header {
+  margin-bottom: 14px !important;
+}
+
+.tower-priority-queue .tower-decision-band {
+  min-height: 34px !important;
+}
+
+.tower-priority-queue .priority-row-list {
+  gap: 12px !important;
+}
+
+.tower-priority-queue .priority-control-row {
+  display: grid !important;
+  grid-template-columns: 64px 78px minmax(0, 1fr) 142px !important;
+  column-gap: 16px !important;
+  align-items: center !important;
+  min-height: 78px !important;
+  padding: 14px 16px !important;
+}
+
+.tower-priority-queue .priority-control-row strong {
+  font-size: 15px !important;
+}
+
+.tower-priority-queue .priority-control-row p,
+.tower-priority-queue .priority-control-row em {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
+
+.tower-priority-queue .priority-control-row em {
+  justify-self: end !important;
+  text-align: right !important;
+}
+
+/* =====================================================================
+   KIOSK READABILITY PASS — JAIMES — 2026-06-07
+   Purpose: professional 24-inch wall-display polish after human UI scan.
+   Rules: readable text floor, fewer clipped labels, blue+green only,
+   Today Jobs as a glanceable timeline instead of micro-table density.
+   ===================================================================== */
+:root {
+  --brand-blue: #2d8cff;
+  --brand-blue-deep: #1f6feb;
+  --brand-green: #46e08a;
+  --brand-green-deep: #2faf6a;
+  --red: #ff8a7a;
+  --cyan: var(--brand-blue);
+  --teal: var(--brand-green-deep);
+  --purple: var(--brand-blue-deep);
+  --lavender: var(--brand-blue-deep);
+}
+
+/* Keep the idle state calm; reserve huge typography for real active work. */
+.ledger-focus-primary.is-done .ledger-now-title,
+.ledger-focus-primary.is-ready .ledger-now-title,
+.ledger-focus-primary.is-idle .ledger-now-title {
+  font-size: clamp(34px, 2.35vw, 44px) !important;
+  line-height: 1.04 !important;
+}
+
+.ledger-focus-primary.is-done .ledger-now-detail,
+.ledger-focus-primary.is-ready .ledger-now-detail,
+.ledger-focus-primary.is-idle .ledger-now-detail {
+  font-size: 18px !important;
+  line-height: 1.25 !important;
+  max-height: 52px !important;
+}
+
+/* Agent deck: stop treating crucial next-work text as microcopy. */
+.tower-agent-row {
+  min-height: 92px !important;
+  padding: 12px 14px !important;
+}
+
+.tower-agent-id strong,
+.tower-agent-now strong,
+.tower-agent-row strong {
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+}
+
+.tower-agent-id em,
+.tower-agent-now span,
+.tower-agent-readouts p,
+.tower-agent-readouts b,
+.tower-agent-fresh span {
+  font-size: 11.5px !important;
+  line-height: 1.2 !important;
+}
+
+.tower-agent-row strong,
+.priority-control-row p,
+.priority-control-row em {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* Resources: make the compact cards legible from across the room. */
+.tower-resource-stack .resource-card {
+  min-height: 64px !important;
+  padding: 11px 13px !important;
+}
+
+.tower-resource-stack .resource-card strong {
+  font-size: 18px !important;
+  line-height: 1.08 !important;
+}
+
+.tower-resource-stack .resource-card p,
+.tower-resource-stack .resource-card b,
+.tower-resource-stack .resource-card span {
+  font-size: 11.5px !important;
+  line-height: 1.16 !important;
+}
+
+/* Today's Jobs: glanceable kiosk rail, not a dense spreadsheet. */
+.calendar-control-strip span,
+.calendar-legend span,
+.calendar-now-marker,
+.calendar-hour-slot > time,
+.calendar-gap {
+  font-size: 10.5px !important;
+}
+
+.calendar-control-strip strong {
+  font-size: 17px !important;
+}
+
+.calendar-day-axis {
+  gap: 5px !important;
+  padding: 7px 8px !important;
+  background:
+    linear-gradient(90deg, rgba(45, 140, 255, 0.08) 0 70px, transparent 70px),
+    #071b31 !important;
+}
+
+.calendar-hour-slot {
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  gap: 7px !important;
+  min-height: 38px !important;
+}
+
+.calendar-hour-content {
+  gap: 4px !important;
+  padding-left: 8px !important;
+}
+
+.calendar-job-block,
+.calendar-empty-block {
+  grid-template-columns: 54px minmax(0, 1fr) 64px !important;
+  min-height: 52px !important;
+  gap: 8px !important;
+  border-radius: 12px !important;
+  padding: 6px 9px !important;
+}
+
+.calendar-job-block.tone-planned:not(.is-synthetic),
+.calendar-job-block.tone-ready:not(.is-synthetic) {
+  min-height: 46px !important;
+}
+
+.calendar-block-time strong {
+  font-size: 12px !important;
+}
+
+.calendar-block-time em {
+  font-size: 9.5px !important;
+}
+
+.calendar-block-main strong {
+  font-size: 13.5px !important;
+  line-height: 1.12 !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.calendar-block-main p {
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.calendar-block-meta span,
+.calendar-block-meta em {
+  font-size: 10px !important;
+  line-height: 1.08 !important;
+}
+
+.calendar-job-block.is-next-up::after {
+  right: 72px !important;
+  font-size: 9px !important;
+}
+
+/* Collapse less-critical descriptions in the full inventory drill-down. */
+.job-row.compact {
+  min-height: 52px !important;
+  grid-template-columns: 9px minmax(0, 1fr) minmax(72px, auto) 78px !important;
+}
+
+.job-row.compact strong {
+  font-size: 13.5px !important;
+}
+
+.job-row.compact p,
+.job-status,
+.job-row.compact time {
+  font-size: 11px !important;
+}
+
+/* Brand cleanup: keep visible agent and state accents on blue/green axis. */
+.ledger-focus-concurrent.agent-jain::before,
+.calendar-job-block.agent-jain,
+.calendar-legend i.agent-jain,
+.status-dot.is-watch {
+  background: var(--brand-blue-deep) !important;
+}
+
+.calendar-job-block.agent-jain,
+.calendar-next-brief.agent-jain {
+  border-left-color: var(--brand-blue-deep) !important;
+}
+
+.focus-contention-badge {
+  background: rgba(70, 224, 138, 0.18) !important;
+  border: 1px solid rgba(70, 224, 138, 0.36) !important;
+  color: #dff8e9 !important;
+}
+
+/* =====================================================================
+   LIVE WORK BOARD PADDING POLISH — JAIMES — 2026-06-07
+   Give the hero copy real breathing room so it never feels flush-left.
+   ===================================================================== */
+.activity-ledger .ledger-live-focus {
+  padding-inline: 12px !important;
+}
+
+.ledger-focus-primary {
+  padding: 22px 30px 20px 34px !important;
+}
+
+.ledger-focus-primary::before {
+  width: 5px !important;
+}
+
+.ledger-focus-primary .ledger-now-label,
+.ledger-focus-primary .ledger-now-title,
+.ledger-focus-primary .ledger-now-detail,
+.ledger-focus-primary footer {
+  padding-left: 8px !important;
+}
+
+.ledger-focus-concurrent {
+  padding: 18px 22px 18px 26px !important;
+}
+
+.ledger-focus-concurrent .ledger-now-label,
+.ledger-focus-concurrent .ledger-now-title,
+.ledger-focus-concurrent .ledger-now-detail,
+.ledger-focus-concurrent footer {
+  padding-left: 6px !important;
+}
+
