@@ -15686,3 +15686,453 @@ body > #root,
   margin-left: 34px !important;
   max-width: calc(100% - 34px) !important;
 }
+
+/* =====================================================================
+   PROFESSIONAL CONTROL ROOM POLISH — JAIMES — 2026-06-07
+   GPT-5.5 dashboard pass: executive contrast, sharper module hierarchy,
+   calmer glass, hero-number sizing, kiosk-safe density, no visible scrollbars.
+   ===================================================================== */
+:root {
+  --tower-bg-0: #030a14;
+  --tower-bg-1: #071326;
+  --tower-bg-2: #0a1c33;
+  --tower-panel: rgba(8, 23, 42, 0.86);
+  --tower-panel-strong: rgba(10, 31, 54, 0.94);
+  --tower-line: rgba(115, 165, 216, 0.22);
+  --tower-line-strong: rgba(70, 224, 138, 0.30);
+  --tower-copy: #eaf5ff;
+  --tower-muted: rgba(211, 230, 246, 0.74);
+  --tower-faint: rgba(177, 203, 225, 0.55);
+  --tower-shadow: 0 20px 44px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba(65, 129, 194, 0.12);
+  --tower-shadow-raised: 0 28px 70px rgba(0, 0, 0, 0.52), 0 0 36px rgba(45, 140, 255, 0.08);
+}
+
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+html,
+body,
+#root {
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(45, 140, 255, 0.19), transparent 29%),
+    radial-gradient(circle at 84% 5%, rgba(70, 224, 138, 0.11), transparent 24%),
+    linear-gradient(135deg, var(--tower-bg-0) 0%, var(--tower-bg-1) 50%, #04101f 100%) !important;
+}
+
+body::before {
+  opacity: 0.24 !important;
+  background-image:
+    linear-gradient(rgba(70, 224, 138, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 140, 255, 0.045) 1px, transparent 1px) !important;
+  background-size: 46px 46px !important;
+}
+
+.control-tower-grid {
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+
+.tower-column,
+.right-rail,
+.tower-jobs-rail {
+  min-width: 0 !important;
+}
+
+.tower-command-strip,
+.tower-agent-deck,
+.activity-ledger,
+.tower-priority-queue,
+.tower-resource-stack,
+.tower-jobs-rail,
+.card,
+.tower-module {
+  background:
+    linear-gradient(180deg, rgba(16, 43, 72, 0.92), rgba(6, 18, 34, 0.90)) !important;
+  border: 1px solid var(--tower-line) !important;
+  box-shadow: var(--tower-shadow) !important;
+  backdrop-filter: blur(18px) saturate(128%) !important;
+}
+
+.activity-ledger,
+.tower-agent-deck,
+.tower-priority-queue,
+.tower-resource-stack,
+.tower-jobs-rail {
+  position: relative !important;
+  isolation: isolate !important;
+}
+
+.activity-ledger::after,
+.tower-agent-deck::after,
+.tower-priority-queue::after,
+.tower-resource-stack::after,
+.tower-jobs-rail::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  border-radius: inherit !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.075), transparent 34%) !important;
+  opacity: 0.52 !important;
+  z-index: -1 !important;
+}
+
+.activity-ledger { border-top: 2px solid rgba(70, 224, 138, 0.66) !important; }
+.tower-agent-deck { border-top: 2px solid rgba(45, 140, 255, 0.62) !important; }
+.tower-priority-queue { border-top: 2px solid rgba(70, 224, 138, 0.54) !important; }
+.tower-resource-stack { border-top: 2px solid rgba(45, 140, 255, 0.54) !important; }
+.tower-jobs-rail { border-top: 2px solid rgba(70, 224, 138, 0.50) !important; }
+
+.activity-ledger > header,
+.tower-agent-deck > header,
+.tower-priority-queue > header,
+.tower-resource-stack > header,
+.tower-jobs-rail > header,
+.calendar-control-strip {
+  border-bottom: 1px solid rgba(115, 165, 216, 0.14) !important;
+  padding-bottom: 10px !important;
+  margin-bottom: 12px !important;
+}
+
+.activity-ledger h2,
+.tower-agent-deck h2,
+.tower-priority-queue h2,
+.tower-resource-stack h2,
+.tower-jobs-rail h2,
+.calendar-control-strip strong {
+  color: var(--tower-copy) !important;
+  letter-spacing: -0.025em !important;
+  text-shadow: 0 0 20px rgba(45, 140, 255, 0.16) !important;
+}
+
+.activity-ledger > header p,
+.tower-agent-deck > header p,
+.tower-priority-queue > header p,
+.tower-resource-stack > header p,
+.tower-jobs-rail > header p,
+.calendar-control-strip span,
+.calendar-legend span {
+  color: var(--tower-muted) !important;
+}
+
+.ledger-focus-primary,
+.ledger-focus-concurrent {
+  background:
+    linear-gradient(135deg, rgba(9, 29, 54, 0.98), rgba(7, 23, 41, 0.96) 54%, rgba(8, 41, 44, 0.88)) !important;
+  border: 1px solid rgba(70, 224, 138, 0.30) !important;
+  box-shadow: var(--tower-shadow-raised) !important;
+}
+
+.ledger-focus-primary::before,
+.ledger-focus-concurrent::before {
+  background: linear-gradient(180deg, #46e08a, #2d8cff) !important;
+  box-shadow: 0 0 22px rgba(70, 224, 138, 0.38) !important;
+}
+
+.ledger-now-label,
+.ledger-now-detail,
+.ledger-focus-primary footer,
+.ledger-focus-concurrent footer,
+.ledger-row p,
+.tower-agent-now span,
+.priority-control-row p,
+.priority-control-row em,
+.resource-card p,
+.calendar-block-main p {
+  color: var(--tower-muted) !important;
+}
+
+.ledger-now-title,
+.ledger-focus-concurrent .ledger-now-title,
+.priority-control-row strong,
+.tower-agent-row strong,
+.resource-card strong,
+.calendar-block-main strong {
+  color: var(--tower-copy) !important;
+}
+
+.ledger-summary-card,
+.tower-command-strip article,
+.tower-agent-row,
+.priority-control-row,
+.resource-card,
+.calendar-job-block,
+.calendar-empty-block {
+  background:
+    linear-gradient(180deg, rgba(12, 35, 61, 0.76), rgba(6, 19, 35, 0.78)) !important;
+  border: 1px solid rgba(115, 165, 216, 0.17) !important;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28) !important;
+}
+
+.ledger-summary-card strong,
+.tower-command-strip article strong,
+.resource-card strong:first-of-type {
+  font-size: clamp(28px, 2.8vw, 56px) !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.055em !important;
+  color: #eafff3 !important;
+}
+
+.ledger-summary-card span,
+.tower-command-strip article span,
+.resource-card span:first-child,
+.resource-card b:first-child {
+  font-size: 10px !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: rgba(191, 220, 243, 0.68) !important;
+}
+
+.tower-agent-row {
+  border-left: 3px solid color-mix(in srgb, var(--agent-tone, #2d8cff) 72%, transparent) !important;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease !important;
+}
+.tower-agent-row.is-working,
+.tower-agent-row.is-active {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--agent-tone, #46e08a) 16%, transparent), rgba(6, 19, 35, 0.78)) !important;
+  border-color: color-mix(in srgb, var(--agent-tone, #46e08a) 72%, #ffffff 8%) !important;
+}
+
+.priority-control-row {
+  border-left: 3px solid rgba(70, 224, 138, 0.42) !important;
+}
+.priority-control-row.is-risk,
+.calendar-job-block.tone-risk,
+.calendar-job-block.is-missed,
+.calendar-job-block.is-error {
+  border-left-color: #ff9a86 !important;
+  background: linear-gradient(90deg, rgba(255, 138, 122, 0.12), rgba(7, 21, 38, 0.82)) !important;
+}
+
+.calendar-day-axis {
+  background:
+    linear-gradient(90deg, rgba(45, 140, 255, 0.10) 0 66px, transparent 66px),
+    linear-gradient(180deg, rgba(11, 34, 60, 0.82), rgba(6, 19, 35, 0.86)) !important;
+  border: 1px solid rgba(115, 165, 216, 0.14) !important;
+}
+
+.calendar-job-block {
+  border-left-width: 3px !important;
+}
+
+.calendar-block-time strong,
+.calendar-block-meta span,
+.calendar-block-meta em,
+.ledger-lane-pill,
+.status-chip,
+.tower-agent-fresh {
+  font-variant-numeric: tabular-nums !important;
+}
+
+@media (max-height: 760px) {
+  .control-tower-grid { gap: 14px !important; }
+  .tower-command-strip,
+  .activity-ledger,
+  .tower-agent-deck,
+  .tower-priority-queue,
+  .tower-resource-stack,
+  .tower-jobs-rail { padding-top: 14px !important; padding-bottom: 14px !important; }
+  .ledger-focus-primary { min-height: 176px !important; }
+  .tower-agent-row { min-height: 78px !important; }
+  .priority-control-row { min-height: 68px !important; }
+  .calendar-hour-slot { min-height: 34px !important; }
+}
+
+/* =====================================================================
+   TODAYS JOBS COMPACT HOUR RAIL — JAIMES — 2026-06-07
+   Use the right rail space for job content, not an oversized hour gutter.
+   ===================================================================== */
+.calendar-day-axis {
+  gap: 4px !important;
+  padding: 7px 7px !important;
+  background:
+    linear-gradient(90deg, rgba(45, 140, 255, 0.08) 0 42px, transparent 42px),
+    linear-gradient(180deg, rgba(11, 34, 60, 0.82), rgba(6, 19, 35, 0.86)) !important;
+}
+
+.calendar-hour-slot {
+  grid-template-columns: 38px minmax(0, 1fr) !important;
+  gap: 5px !important;
+  min-height: 34px !important;
+}
+
+.calendar-hour-slot > time {
+  font-size: 10px !important;
+  letter-spacing: 0.04em !important;
+  text-align: right !important;
+  padding-right: 4px !important;
+  opacity: 0.72 !important;
+}
+
+.calendar-hour-content {
+  padding-left: 6px !important;
+  gap: 4px !important;
+  border-left: 1px solid rgba(115, 165, 216, 0.16) !important;
+}
+
+.calendar-job-block,
+.calendar-empty-block {
+  grid-template-columns: 42px minmax(0, 1fr) 56px !important;
+  gap: 7px !important;
+  padding: 6px 8px !important;
+}
+
+.calendar-block-time strong {
+  font-size: 11.5px !important;
+}
+
+.calendar-block-time em {
+  font-size: 9px !important;
+}
+
+.calendar-block-main strong {
+  font-size: 13.8px !important;
+}
+
+.calendar-block-meta span,
+.calendar-block-meta em {
+  font-size: 9.5px !important;
+}
+
+.calendar-job-block.is-next-up::after {
+  right: 60px !important;
+}
+
+/* =====================================================================
+   MIDDLE COLUMN TYPOGRAPHY BALANCE — JAIMES — 2026-06-07
+   Normalize Priority Queue + Resources scale. Top cards were too small;
+   Resource values were too loud. Bring both sections into one dashboard rhythm.
+   ===================================================================== */
+.tower-center-column {
+  gap: 16px !important;
+}
+
+.tower-priority-queue,
+.tower-resource-stack {
+  padding: 18px !important;
+}
+
+.tower-priority-queue > header,
+.tower-resource-stack > header {
+  min-height: 42px !important;
+  margin-bottom: 12px !important;
+  padding-bottom: 9px !important;
+}
+
+.tower-priority-queue h2,
+.tower-resource-stack h2 {
+  font-size: clamp(20px, 1.18vw, 23px) !important;
+  line-height: 1.02 !important;
+}
+
+.tower-priority-queue > header p,
+.tower-resource-stack > header p {
+  font-size: 12px !important;
+  line-height: 1.18 !important;
+}
+
+.tower-priority-queue .tower-decision-band {
+  min-height: 42px !important;
+  padding: 10px 13px !important;
+}
+
+.tower-priority-queue .tower-decision-band strong {
+  font-size: 14px !important;
+  line-height: 1.14 !important;
+}
+
+.tower-priority-queue .tower-decision-band p {
+  font-size: 12px !important;
+  line-height: 1.18 !important;
+}
+
+.tower-priority-queue .priority-row-list {
+  gap: 10px !important;
+}
+
+.tower-priority-queue .priority-control-row {
+  grid-template-columns: 58px 72px minmax(0, 1.45fr) 116px !important;
+  min-height: 82px !important;
+  padding: 12px 13px !important;
+  column-gap: 12px !important;
+  align-items: center !important;
+}
+
+.tower-priority-queue .priority-control-row span {
+  font-size: 10.5px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.tower-priority-queue .priority-control-row strong {
+  font-size: 18px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.tower-priority-queue .priority-control-row p {
+  font-size: 12.8px !important;
+  line-height: 1.18 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.tower-priority-queue .priority-control-row em {
+  font-size: 11.5px !important;
+  line-height: 1.14 !important;
+  -webkit-line-clamp: 2 !important;
+  color: rgba(190, 244, 211, 0.82) !important;
+}
+
+.tower-resource-stack .resource-card-grid {
+  gap: 10px !important;
+}
+
+.tower-resource-stack .resource-card {
+  min-height: 76px !important;
+  padding: 12px 13px !important;
+  align-content: center !important;
+}
+
+.tower-resource-stack .resource-card span:first-child,
+.tower-resource-stack .resource-card b:first-child {
+  font-size: 10.5px !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1.05 !important;
+}
+
+.tower-resource-stack .resource-card strong,
+.tower-resource-stack .resource-card strong:first-of-type {
+  font-size: clamp(21px, 1.55vw, 28px) !important;
+  line-height: 1.0 !important;
+  letter-spacing: -0.035em !important;
+}
+
+.tower-resource-stack .resource-card p,
+.tower-resource-stack .resource-card b,
+.tower-resource-stack .resource-card span {
+  font-size: 12px !important;
+  line-height: 1.16 !important;
+}
+
+.tower-resource-stack .resource-card p {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+@media (max-height: 760px) {
+  .tower-priority-queue,
+  .tower-resource-stack { padding: 15px !important; }
+  .tower-priority-queue .priority-control-row { min-height: 74px !important; }
+  .tower-resource-stack .resource-card { min-height: 68px !important; }
+  .tower-resource-stack .resource-card strong,
+  .tower-resource-stack .resource-card strong:first-of-type { font-size: clamp(20px, 1.35vw, 25px) !important; }
+}
