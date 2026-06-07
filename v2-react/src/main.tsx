@@ -1519,9 +1519,13 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
       </header>
       <section className="ledger-live-focus" aria-label="Live ecosystem focus">
         <article className={`ledger-focus-primary ${primaryFocus ? `is-${primaryFocus.tone} ${agentClass(primaryFocus.agent)} ${activityIsRoutineFocus(primaryFocus) ? "is-routine-focus" : "is-priority-focus"}` : "is-done"}`}>
-          <span>{focusEyebrow(primaryFocus)}</span>
-          <h3 title={missionText(primaryFocus?.title)}>{primaryFocus ? primaryFocus.title : "No active work right now"}</h3>
-          <p title={missionText(primaryFocus?.detail)}>{primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}</p>
+          <span className="ledger-now-label">{focusEyebrow(primaryFocus)}</span>
+          <h3 className="ledger-now-title" title={missionText(primaryFocus?.title)}>
+            {primaryFocus ? primaryFocus.title : "No active work right now"}
+          </h3>
+          <p className="ledger-now-detail" title={missionText(primaryFocus?.detail)}>
+            {primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}
+          </p>
           <footer>
             <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
             <em>{primaryFocus?.time ? ageLabel(primaryFocus.time) : "live"}</em>

@@ -14230,3 +14230,55 @@ body::after,
   grid-row: 2 !important;
   order: -1 !important;
 }
+
+/* JAIMES CONTROL TOWER OBVIOUS NOW TOP-LEFT 2026-06-07 */
+.ledger-focus-primary {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  padding: 12px 17px 14px !important;
+}
+
+.ledger-focus-primary .ledger-now-label {
+  order: 1 !important;
+  align-self: flex-start !important;
+  margin: 0 !important;
+  color: #7dd3fc !important;
+  font-size: 13px !important;
+  letter-spacing: 0.1em !important;
+}
+
+.ledger-focus-primary .ledger-now-title {
+  order: 2 !important;
+  align-self: flex-start !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  width: 100% !important;
+  text-align: left !important;
+  color: #ffffff !important;
+  font-size: clamp(40px, 3.45vw, 58px) !important;
+  line-height: 0.92 !important;
+  max-height: 112px !important;
+}
+
+.ledger-focus-primary .ledger-now-detail {
+  order: 3 !important;
+  align-self: flex-start !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  width: 94% !important;
+  text-align: left !important;
+  color: rgba(220, 244, 255, 0.9) !important;
+  font-size: 17px !important;
+  line-height: 1.16 !important;
+  max-height: 44px !important;
+}
+
+.ledger-focus-primary footer {
+  order: 4 !important;
+  margin-top: auto !important;
+  align-self: stretch !important;
+  width: 100% !important;
+}
