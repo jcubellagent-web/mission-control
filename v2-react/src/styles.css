@@ -15656,3 +15656,33 @@ body > #root,
   margin-left: 30px !important;
   max-width: calc(100% - 30px) !important;
 }
+
+
+/* =====================================================================
+   LIVE WORK BOARD ROW-EDGE SNAP — JAIMES — 2026-06-07
+   Optically align the Live Work Board focus card glow/edge with the
+   Agent Flight Deck cards below; keep copy padded from the rail.
+   ===================================================================== */
+.activity-ledger .ledger-live-focus {
+  padding-inline: 0 !important;
+}
+
+.activity-ledger .ledger-focus-primary {
+  box-sizing: border-box !important;
+  width: calc(100% - 16px) !important;
+  max-width: calc(100% - 16px) !important;
+  margin-left: 8px !important;
+  margin-right: 8px !important;
+}
+
+.ledger-focus-primary::before {
+  left: 14px !important;
+}
+
+.ledger-focus-primary .ledger-now-label,
+.ledger-focus-primary .ledger-now-title,
+.ledger-focus-primary .ledger-now-detail,
+.ledger-focus-primary footer {
+  margin-left: 34px !important;
+  max-width: calc(100% - 34px) !important;
+}
