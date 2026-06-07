@@ -14282,3 +14282,155 @@ body::after,
   align-self: stretch !important;
   width: 100% !important;
 }
+
+/* JAIMES CONTROL TOWER LIVE WORK HERO TOP-LEFT SINGLE DISPLAY 2026-06-07
+   Live Work Board is the single hero source of truth: top-left, large, no
+   duplicate mini/current-work displays inside the board. */
+.control-tower-grid {
+  grid-template-columns: minmax(0, 1.28fr) minmax(360px, 0.72fr) minmax(500px, 0.88fr) !important;
+  grid-template-rows: minmax(275px, 0.42fr) minmax(0, 1fr) !important;
+  align-items: stretch !important;
+}
+
+.tower-center-stack {
+  grid-column: 1 / 3 !important;
+  grid-row: 1 !important;
+  min-height: 0 !important;
+}
+
+.tower-command {
+  grid-column: 1 / 3 !important;
+  grid-row: 2 !important;
+  grid-template-rows: minmax(74px, auto) minmax(178px, 0.42fr) minmax(112px, 0.24fr) minmax(0, 0.34fr) !important;
+  min-height: 0 !important;
+}
+
+.tower-jobs-rail {
+  grid-column: 3 !important;
+  grid-row: 1 / 3 !important;
+  min-height: 0 !important;
+}
+
+.activity-ledger {
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  padding: 12px !important;
+}
+
+.activity-ledger > header {
+  align-items: flex-start !important;
+  min-height: 38px !important;
+  padding-bottom: 4px !important;
+}
+
+.activity-ledger > header p {
+  color: #7dd3fc !important;
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.activity-ledger > header h2 {
+  color: #ffffff !important;
+  font-size: clamp(26px, 2vw, 36px) !important;
+  line-height: 0.92 !important;
+}
+
+.ledger-live-focus {
+  display: block !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.ledger-focus-secondary,
+.ledger-summary-strip,
+.ledger-system-summary,
+.ledger-row-list {
+  display: none !important;
+}
+
+.ledger-focus-primary {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 16px 20px 15px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #132f4b 0%, #0f263d 100%) !important;
+}
+
+.ledger-focus-primary .ledger-now-label {
+  color: #7dd3fc !important;
+  font-size: 14px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.ledger-focus-primary .ledger-now-title {
+  width: 96% !important;
+  font-size: clamp(52px, 5.1vw, 82px) !important;
+  line-height: 0.88 !important;
+  max-height: 152px !important;
+  text-align: left !important;
+}
+
+.ledger-focus-primary .ledger-now-detail {
+  width: 88% !important;
+  font-size: clamp(18px, 1.35vw, 24px) !important;
+  line-height: 1.08 !important;
+  max-height: 58px !important;
+  text-align: left !important;
+}
+
+@media (max-width: 1500px) {
+  .control-tower-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.7fr) minmax(420px, 0.9fr) !important;
+    grid-template-rows: minmax(245px, 0.42fr) minmax(0, 1fr) !important;
+  }
+
+  .ledger-focus-primary .ledger-now-title {
+    font-size: clamp(42px, 4.8vw, 62px) !important;
+    max-height: 126px !important;
+  }
+
+  .ledger-focus-primary .ledger-now-detail {
+    font-size: clamp(16px, 1.45vw, 20px) !important;
+  }
+}
+
+/* JAIMES CONTROL TOWER LIVE WORK HERO DEDUPE FIX 2026-06-07 */
+.activity-ledger .ledger-focus-secondary,
+.activity-ledger .ledger-summary-strip,
+.activity-ledger .ledger-system-summary,
+.activity-ledger .ledger-row-list,
+.activity-ledger .ledger-row-list.is-flat {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.activity-ledger .ledger-live-focus {
+  display: block !important;
+  height: calc(100% - 46px) !important;
+  min-height: 210px !important;
+}
+
+.activity-ledger .ledger-focus-primary {
+  display: flex !important;
+  height: 100% !important;
+  min-height: 210px !important;
+}
+
+.activity-ledger .ledger-focus-primary .ledger-now-title {
+  display: block !important;
+  flex: 0 0 auto !important;
+  min-height: 46px !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.activity-ledger .ledger-focus-primary .ledger-now-detail {
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+}
