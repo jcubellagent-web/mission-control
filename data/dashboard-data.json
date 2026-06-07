@@ -72,7 +72,7 @@
   "focus": {
     "status": "Brain Feed idle",
     "context": "Last completed objective: Heartbeat checks complete",
-    "updatedAt": "2026-06-07T04:17:13Z"
+    "updatedAt": "2026-06-07T04:22:58Z"
   },
   "contextWindow": {
     "usedTokens": 137739,
@@ -95,13 +95,13 @@
   },
   "codingVisibility": {
     "workspaceDirty": 54,
-    "missionControlDirty": 50,
+    "missionControlDirty": 5,
     "recentFiles": [
-      "mission-control/scripts/mission_control_visual_canaries.py",
-      "mission-control/dist/v2-react/assets/index-8-LQr3ny.css",
-      "mission-control/dist/v2-react/assets/index-Cn935BqH.js",
+      "mission-control/dist/v2-react/assets/index-D8yfjVYg.css",
+      "mission-control/dist/v2-react/assets/index-BUzLGHtu.js",
       "mission-control/dist/v2-react/index.html",
       "mission-control/v2-react/src/styles.css",
+      "mission-control/scripts/mission_control_visual_canaries.py",
       "mission-control/scripts/mission_control_runtime_layout_check.py"
     ],
     "codexbarStatus": "98% left \u00b7 wk 82% left",
@@ -110,7 +110,7 @@
       "raw": [
         "== Codex 0.137.0 (codex-cli) ==",
         "Session: 98% left [===========-]",
-        "Resets in 4h 40m",
+        "Resets in 4h 34m",
         "Weekly: 82% left [=========---]",
         "Pace: 27% in reserve | Expected 45% used | Lasts until reset",
         "Resets in 3d 20h",
@@ -121,81 +121,49 @@
       "weekly": "82% left",
       "credits": "444.72 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "4h 40m",
+      "sessionReset": "4h 34m",
       "weeklyReset": "3d 20h",
       "summary": "98% left \u00b7 wk 82% left"
     },
-    "updatedAt": "2026-06-07T04:17:16Z"
+    "updatedAt": "2026-06-07T04:23:00Z"
   },
   "modelUsage": {
     "session": 0.088917,
-    "daily": 0.742105,
+    "daily": 0.057034,
     "weekly": 375.120414,
     "monthly": 375.120414,
     "topModels": [
       {
-        "name": "gpt-5.5",
-        "window": "session",
-        "cost": 360.236045
-      },
-      {
-        "name": "gpt-5",
-        "window": "session",
-        "cost": 1.9870187500000003
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "window": "session",
-        "cost": 0.1568367
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.13572599999999999
+        "cost": 0.145951
       },
       {
         "name": "xai/grok-4.20-reasoning",
+        "window": "session",
+        "cost": 0.0
+      },
+      {
+        "name": "local/qwen2.5-coder:7b",
+        "window": "session",
+        "cost": 0.0
+      },
+      {
+        "name": "local/nomic-embed-text:latest",
         "window": "session",
         "cost": 0.0
       }
     ],
     "breakdown": [
       {
-        "name": "gpt-5.5",
-        "source": "codex",
-        "weeklyCost": 360.236045,
-        "dailyCost": 0.695296,
-        "sessionCost": 360.236045,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
-        "name": "gpt-5",
-        "source": "codex",
-        "weeklyCost": 1.9870187500000003,
-        "dailyCost": 0.0,
-        "sessionCost": 1.9870187500000003,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "source": "codex",
-        "weeklyCost": 0.1568367,
-        "dailyCost": 0.0,
-        "sessionCost": 0.1568367,
-        "totalTokens": 0,
-        "costEstimated": false
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 2224,
+        "inputTokens": 2477,
         "outputTokens": 465,
-        "totalTokens": 2689,
-        "sessionCost": 0.13572599999999999,
-        "dailyCost": 0.046808999999999996,
-        "weeklyCost": 0.13572599999999999,
+        "totalTokens": 2942,
+        "sessionCost": 0.145951,
+        "dailyCost": 0.057034,
+        "weeklyCost": 0.145951,
         "sessions": 3,
         "isGemini": false,
         "costEstimated": false
@@ -244,7 +212,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-06-07T04:17:19Z",
+    "lastUpdated": "2026-06-07T04:23:03Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -296,8 +264,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 0.742105,
-      "total": 362.515626,
+      "daily": 0.057034,
+      "total": 0.145951,
       "monthly": 375.120414
     },
     "weeklyRunRate": {
@@ -315,10 +283,10 @@
         "monthlyCapUsd": 0,
         "dailyCapUsd": 0,
         "remainingCreditUsd": null,
-        "lastModelUsed": "gpt-5.5",
+        "lastModelUsed": "openai/gpt-5.5",
         "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration.",
-        "dailySpendUsd": 0.742105,
-        "weeklySpendUsd": 362.515626,
+        "dailySpendUsd": 0.057034,
+        "weeklySpendUsd": 0.145951,
         "monthlySpendUsd": 0.0,
         "dailyUtilizationPct": 0.0,
         "monthlyUtilizationPct": 0.0,
@@ -327,7 +295,7 @@
         "keyPresent": null,
         "keySuffix": null,
         "lastTestStatus": null,
-        "lastSource": "codex",
+        "lastSource": "openclaw",
         "whyChosen": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
       },
       {
@@ -423,7 +391,7 @@
     }
   },
   "modelRouter": {
-    "updatedAt": "2026-06-07T04:17:13Z",
+    "updatedAt": "2026-06-07T04:22:58Z",
     "policy": {
       "defaultProvider": "codex",
       "reviewProvider": "gemini",
@@ -449,10 +417,10 @@
         "monthlyCapUsd": 0,
         "dailyCapUsd": 0,
         "remainingCreditUsd": null,
-        "lastModelUsed": "gpt-5.5",
+        "lastModelUsed": "openai/gpt-5.5",
         "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration.",
-        "dailySpendUsd": 0.742105,
-        "weeklySpendUsd": 362.515626,
+        "dailySpendUsd": 0.057034,
+        "weeklySpendUsd": 0.145951,
         "monthlySpendUsd": 0.0,
         "dailyUtilizationPct": 0.0,
         "monthlyUtilizationPct": 0.0,
@@ -461,7 +429,7 @@
         "keyPresent": null,
         "keySuffix": null,
         "lastTestStatus": null,
-        "lastSource": "codex",
+        "lastSource": "openclaw",
         "whyChosen": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
       },
       {
@@ -562,7 +530,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-07T04:17:19Z",
+    "updatedAt": "2026-06-07T04:23:03Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -579,14 +547,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 46.8,
-      "cpu_user": 27.85,
-      "cpu_sys": 18.92,
-      "load1": 2.93,
-      "load5": 2.07,
-      "load15": 1.9,
+      "cpu_pct": 36.6,
+      "cpu_user": 18.65,
+      "cpu_sys": 17.91,
+      "load1": 2.34,
+      "load5": 1.95,
+      "load15": 1.86,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "17Gi",
       "disk_avail": "46Gi",
@@ -594,14 +562,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 18.9,
-      "cpu_user": 6.66,
-      "cpu_sys": 12.22,
-      "load1": 2.38,
-      "load5": 2.34,
-      "load15": 2.2,
+      "cpu_pct": 14.7,
+      "cpu_user": 4.73,
+      "cpu_sys": 10.0,
+      "load1": 1.75,
+      "load5": 1.96,
+      "load15": 2.06,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.2,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "22Gi",
@@ -625,19 +593,19 @@
       "name": "Mission Control",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-07T04:17:13Z"
+      "lastChecked": "2026-06-07T04:22:58Z"
     },
     {
       "name": "Mission Control PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-07T04:17:13Z"
+      "lastChecked": "2026-06-07T04:22:58Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-07T04:17:13Z"
+      "lastChecked": "2026-06-07T04:22:58Z"
     }
   ],
   "crons": [
@@ -684,7 +652,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "active",
-      "lastRun": "2026-06-07T04:15:23.463634+00:00"
+      "lastRun": "2026-06-07T04:20:31.926359+00:00"
     },
     {
       "name": "Brain Feed Server",
@@ -2337,36 +2305,18 @@
       "fresh": [
         {
           "agent": "josh2",
-          "node": "josh2-brain-feed-publish",
+          "node": "josh2-lan",
           "status": "ok",
-          "summary": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
-          "updatedAt": "2026-06-07T04:17:05Z",
-          "stale": false,
-          "source": "agent_publish.py"
+          "summary": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+          "updatedAt": "2026-06-07T04:22:58Z",
+          "stale": false
         },
         {
           "agent": "jaimes",
           "node": "jaimes-live-poller",
           "status": "ok",
           "summary": "JAIMES live check: Standby.",
-          "updatedAt": "2026-06-07T04:16:38Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-brain-feed-publish",
-          "status": "ok",
-          "summary": "JAIMES live check: Standby.",
-          "updatedAt": "2026-06-07T04:09:17Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "josh2",
-          "node": "josh2-lan",
-          "status": "ok",
-          "summary": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
-          "updatedAt": "2026-06-07T04:07:28Z",
+          "updatedAt": "2026-06-07T04:22:57Z",
           "stale": false
         },
         {
@@ -2376,7 +2326,7 @@
           "stale": false,
           "status": "ok",
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-07T04:07:17Z"
+          "updatedAt": "2026-06-07T04:22:48Z"
         },
         {
           "agent": "jain",
@@ -2384,7 +2334,7 @@
           "stale": false,
           "status": "ok",
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-07T04:07:17Z"
+          "updatedAt": "2026-06-07T04:22:48Z"
         },
         {
           "agent": "jaimes",
@@ -2392,7 +2342,25 @@
           "stale": false,
           "status": "ok",
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
-          "updatedAt": "2026-06-07T04:07:14Z"
+          "updatedAt": "2026-06-07T04:22:45Z"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "source": "agent_publish.py",
+          "stale": false,
+          "status": "active",
+          "summary": "Restarting and visually checking raised modules",
+          "updatedAt": "2026-06-07T04:22:43Z"
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-brain-feed-publish",
+          "source": "agent_publish.py",
+          "stale": false,
+          "status": "ok",
+          "summary": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
+          "updatedAt": "2026-06-07T04:17:05Z"
         },
         {
           "agent": "joshex",
@@ -2419,7 +2387,7 @@
       "nodes": [
         {
           "agent": "jaimes",
-          "checkedAt": "2026-06-07T04:07:18Z",
+          "checkedAt": "2026-06-07T04:22:48Z",
           "codexCli": {
             "available": true,
             "path": "/opt/homebrew/bin/codex",
@@ -2549,7 +2517,7 @@
         },
         {
           "agent": "josh2",
-          "checkedAt": "2026-06-07T04:07:06Z",
+          "checkedAt": "2026-06-07T04:22:39Z",
           "codexCli": {
             "available": true,
             "path": "/opt/homebrew/bin/codex",
@@ -2840,7 +2808,7 @@
           "wrappedCronLines": 0
         }
       ],
-      "updatedAt": "2026-06-07T04:07:24Z"
+      "updatedAt": "2026-06-07T04:22:54Z"
     },
     "capabilityWatch": {
       "checkedAt": "2026-06-06T06:00:06Z",
@@ -3005,7 +2973,7 @@
           "hermesNodes": 1,
           "nodes": 4,
           "openclawNodes": 3,
-          "updatedAt": "2026-06-07T04:07:24Z"
+          "updatedAt": "2026-06-07T04:22:54Z"
         },
         "openclawLatestRelease": {
           "data": {
@@ -3993,8 +3961,8 @@
   },
   "runtimeLayout": {
     "ok": true,
-    "checkedAt": "2026-06-07T04:14:16.840Z",
-    "url": "http://127.0.0.1:5174/?mc_refresh=20260607T040806Z",
+    "checkedAt": "2026-06-07T04:19:17.025Z",
+    "url": "http://127.0.0.1:5174/?mc_refresh=20260607T041800Z&build=module-borders-upgrade",
     "title": "Josh 2.0 | Mission Control",
     "viewport": {
       "width": 1920,
@@ -4036,20 +4004,20 @@
         "height": 517.25
       },
       "priority": {
-        "top": 215.34,
+        "top": 253.34,
         "right": 1263.66,
-        "bottom": 584.48,
+        "bottom": 605.91,
         "left": 747.42,
         "width": 516.23,
-        "height": 369.14
+        "height": 352.56
       },
       "resources": {
-        "top": 600.48,
+        "top": 621.91,
         "right": 1263.66,
         "bottom": 1054.34,
         "left": 747.42,
         "width": 516.23,
-        "height": 453.86
+        "height": 432.44
       },
       "center": {
         "top": 99.34,
@@ -4068,18 +4036,18 @@
         "height": 421.75
       },
       "jobs": {
-        "top": 102.34,
-        "right": 1883.98,
-        "bottom": 1051.34,
-        "left": 1282.66,
-        "width": 601.33,
-        "height": 949
+        "top": 119.34,
+        "right": 1866.98,
+        "bottom": 1034.34,
+        "left": 1299.66,
+        "width": 567.33,
+        "height": 915
       }
     },
     "visibleCounts": {
       "agentRows": 4,
       "ledgerRows": 0,
-      "calendarBlocks": 13,
+      "calendarBlocks": 12,
       "resourceCards": 4
     },
     "textQuality": {
@@ -4087,8 +4055,8 @@
     },
     "issues": [],
     "target": {
-      "idHash": "f1e0f9ef1a06",
-      "url": "http://127.0.0.1:5174/?mc_refresh=20260607T040806Z",
+      "idHash": "c1dfc8f3cdde",
+      "url": "http://127.0.0.1:5174/?mc_refresh=20260607T041800Z&build=module-borders-upgrade",
       "title": "Josh 2.0 | Mission Control"
     },
     "status": "ok",
@@ -4169,7 +4137,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-07T04:17:13Z",
+    "generatedAt": "2026-06-07T04:22:58Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -4190,7 +4158,7 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-07T04:16:38Z",
+        "probedAt": "2026-06-07T04:22:57Z",
         "summary": "JAIMES live check: Standby.",
         "source": "live-heartbeats",
         "stale": false
@@ -4200,7 +4168,7 @@
         "label": "J.A.I.N",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-07T04:07:17Z",
+        "probedAt": "2026-06-07T04:22:48Z",
         "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
         "source": "live-heartbeats",
         "stale": false
@@ -4210,8 +4178,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-07T04:17:05Z",
-        "summary": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
+        "probedAt": "2026-06-07T04:22:58Z",
+        "summary": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -4919,7 +4887,7 @@
     "nodes": [
       {
         "agent": "jaimes",
-        "checkedAt": "2026-06-07T04:07:18Z",
+        "checkedAt": "2026-06-07T04:22:48Z",
         "codexCli": {
           "available": true,
           "path": "/opt/homebrew/bin/codex",
@@ -5049,7 +5017,7 @@
       },
       {
         "agent": "josh2",
-        "checkedAt": "2026-06-07T04:07:06Z",
+        "checkedAt": "2026-06-07T04:22:39Z",
         "codexCli": {
           "available": true,
           "path": "/opt/homebrew/bin/codex",
@@ -5340,7 +5308,7 @@
         "wrappedCronLines": 0
       }
     ],
-    "updatedAt": "2026-06-07T04:07:24Z"
+    "updatedAt": "2026-06-07T04:22:54Z"
   },
   "capabilityWatch": {
     "checkedAt": "2026-06-06T06:00:06Z",
@@ -5505,7 +5473,7 @@
         "hermesNodes": 1,
         "nodes": 4,
         "openclawNodes": 3,
-        "updatedAt": "2026-06-07T04:07:24Z"
+        "updatedAt": "2026-06-07T04:22:54Z"
       },
       "openclawLatestRelease": {
         "data": {
@@ -6084,7 +6052,7 @@
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/mission_control_visual_canaries.py, mission-control/dist/v2-react/assets/index-8-LQr3ny.css",
+      "label": "Recently edited: mission-control/dist/v2-react/assets/index-D8yfjVYg.css, mission-control/dist/v2-react/assets/index-BUzLGHtu.js",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -6170,25 +6138,18 @@
       "agent": "JOSH 2.0",
       "active": false,
       "reportedActive": false,
-      "objective": "Heartbeat checks complete",
-      "status": "done",
+      "objective": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+      "status": "ok",
       "stale": false,
-      "updatedAt": "2026-06-07T04:17:05Z",
-      "messageReceived": "2026-05-25T00:14:38Z",
-      "currentTool": "agent publish",
+      "updatedAt": "2026-06-07T04:22:58Z",
+      "messageReceived": null,
+      "currentTool": "status check",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Heartbeat checks complete",
-          "status": "done",
-          "tool": "agent publish",
-          "kind": "complete"
-        },
-        {
-          "label": "Heartbeat checks started",
-          "status": "active",
-          "tool": "agent publish",
-          "kind": "status"
+          "label": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+          "status": "ok",
+          "tool": "status check"
         },
         {
           "label": "Heartbeat checks complete",
@@ -6197,34 +6158,16 @@
           "kind": "complete"
         },
         {
-          "label": "Heartbeat checks started",
-          "status": "active",
-          "tool": "agent publish",
-          "kind": "status"
-        },
-        {
           "label": "Heartbeat checks complete",
           "status": "done",
           "tool": "agent publish",
           "kind": "complete"
         },
         {
-          "label": "Heartbeat checks started",
-          "status": "active",
-          "tool": "agent publish",
-          "kind": "status"
-        },
-        {
-          "label": "Heartbeat complete",
+          "label": "Heartbeat checks complete",
           "status": "done",
           "tool": "agent publish",
           "kind": "complete"
-        },
-        {
-          "label": "Heartbeat maintenance",
-          "status": "done",
-          "tool": "agent publish",
-          "kind": "status"
         }
       ]
     },
@@ -6235,7 +6178,7 @@
       "objective": "J.A.I.N is online and ready",
       "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-07T04:07:17Z",
+      "updatedAt": "2026-06-07T04:22:48Z",
       "messageReceived": "2026-04-30T07:10:36Z",
       "currentTool": "status check",
       "model": "GPT-5.5",
@@ -6247,6 +6190,12 @@
           "kind": "status"
         },
         {
+          "label": "J.A.I.N is online and ready",
+          "status": "ready",
+          "tool": "status check",
+          "kind": "status"
+        },
+        {
           "label": "Reset model cost baseline",
           "status": "done",
           "tool": "cron",
@@ -6262,12 +6211,6 @@
           "label": "Reset model cost baseline",
           "status": "active",
           "tool": "cron",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
           "kind": "status"
         },
         {
@@ -6297,8 +6240,8 @@
       "objective": "Standby",
       "status": "idle",
       "stale": false,
-      "updatedAt": "2026-06-07T04:16:38Z",
-      "messageReceived": "2026-06-07T04:16:38Z",
+      "updatedAt": "2026-06-07T04:22:57Z",
+      "messageReceived": "2026-06-07T04:22:57Z",
       "currentTool": null,
       "model": "GPT-5.5",
       "steps": [
@@ -6314,25 +6257,18 @@
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "objective": "Heartbeat checks complete",
-    "status": "done",
+    "objective": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+    "status": "ok",
     "stale": false,
-    "updatedAt": "2026-06-07T04:17:05Z",
-    "messageReceived": "2026-05-25T00:14:38Z",
-    "currentTool": "agent publish",
+    "updatedAt": "2026-06-07T04:22:58Z",
+    "messageReceived": null,
+    "currentTool": "status check",
     "model": "GPT-5.5",
     "steps": [
       {
-        "label": "Heartbeat checks complete",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "complete"
-      },
-      {
-        "label": "Heartbeat checks started",
-        "status": "active",
-        "tool": "agent publish",
-        "kind": "status"
+        "label": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+        "status": "ok",
+        "tool": "status check"
       },
       {
         "label": "Heartbeat checks complete",
@@ -6341,34 +6277,16 @@
         "kind": "complete"
       },
       {
-        "label": "Heartbeat checks started",
-        "status": "active",
-        "tool": "agent publish",
-        "kind": "status"
-      },
-      {
         "label": "Heartbeat checks complete",
         "status": "done",
         "tool": "agent publish",
         "kind": "complete"
       },
       {
-        "label": "Heartbeat checks started",
-        "status": "active",
-        "tool": "agent publish",
-        "kind": "status"
-      },
-      {
-        "label": "Heartbeat complete",
+        "label": "Heartbeat checks complete",
         "status": "done",
         "tool": "agent publish",
         "kind": "complete"
-      },
-      {
-        "label": "Heartbeat maintenance",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "status"
       }
     ]
   },
@@ -6379,7 +6297,7 @@
     "objective": "J.A.I.N is online and ready",
     "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-07T04:07:17Z",
+    "updatedAt": "2026-06-07T04:22:48Z",
     "messageReceived": "2026-04-30T07:10:36Z",
     "currentTool": "status check",
     "model": "GPT-5.5",
@@ -6391,6 +6309,12 @@
         "kind": "status"
       },
       {
+        "label": "J.A.I.N is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "kind": "status"
+      },
+      {
         "label": "Reset model cost baseline",
         "status": "done",
         "tool": "cron",
@@ -6406,12 +6330,6 @@
         "label": "Reset model cost baseline",
         "status": "active",
         "tool": "cron",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
         "kind": "status"
       },
       {
@@ -6441,8 +6359,8 @@
     "objective": "Standby",
     "status": "idle",
     "stale": false,
-    "updatedAt": "2026-06-07T04:16:38Z",
-    "messageReceived": "2026-06-07T04:16:38Z",
+    "updatedAt": "2026-06-07T04:22:57Z",
+    "messageReceived": "2026-06-07T04:22:57Z",
     "currentTool": null,
     "model": "GPT-5.5",
     "steps": [
@@ -6464,25 +6382,18 @@
         "agent": "JOSH 2.0",
         "active": false,
         "reportedActive": false,
-        "objective": "Heartbeat checks complete",
-        "status": "done",
+        "objective": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+        "status": "ok",
         "stale": false,
-        "updatedAt": "2026-06-07T04:17:05Z",
-        "messageReceived": "2026-05-25T00:14:38Z",
-        "currentTool": "agent publish",
+        "updatedAt": "2026-06-07T04:22:58Z",
+        "messageReceived": null,
+        "currentTool": "status check",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Heartbeat checks complete",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "complete"
-          },
-          {
-            "label": "Heartbeat checks started",
-            "status": "active",
-            "tool": "agent publish",
-            "kind": "status"
+            "label": "Josh 2.0 visibility heartbeat: gateway healthy, Telegram connected, model auth ok.",
+            "status": "ok",
+            "tool": "status check"
           },
           {
             "label": "Heartbeat checks complete",
@@ -6491,34 +6402,16 @@
             "kind": "complete"
           },
           {
-            "label": "Heartbeat checks started",
-            "status": "active",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
             "label": "Heartbeat checks complete",
             "status": "done",
             "tool": "agent publish",
             "kind": "complete"
           },
           {
-            "label": "Heartbeat checks started",
-            "status": "active",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
-            "label": "Heartbeat complete",
+            "label": "Heartbeat checks complete",
             "status": "done",
             "tool": "agent publish",
             "kind": "complete"
-          },
-          {
-            "label": "Heartbeat maintenance",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "status"
           }
         ]
       },
@@ -6529,8 +6422,8 @@
         "objective": "Standby",
         "status": "idle",
         "stale": false,
-        "updatedAt": "2026-06-07T04:16:38Z",
-        "messageReceived": "2026-06-07T04:16:38Z",
+        "updatedAt": "2026-06-07T04:22:57Z",
+        "messageReceived": "2026-06-07T04:22:57Z",
         "currentTool": null,
         "model": "GPT-5.5",
         "steps": [
@@ -6548,11 +6441,17 @@
         "objective": "J.A.I.N is online and ready",
         "status": "ready",
         "stale": false,
-        "updatedAt": "2026-06-07T04:07:17Z",
+        "updatedAt": "2026-06-07T04:22:48Z",
         "messageReceived": "2026-04-30T07:10:36Z",
         "currentTool": "status check",
         "model": "GPT-5.5",
         "steps": [
+          {
+            "label": "J.A.I.N is online and ready",
+            "status": "ready",
+            "tool": "status check",
+            "kind": "status"
+          },
           {
             "label": "J.A.I.N is online and ready",
             "status": "ready",
@@ -6575,12 +6474,6 @@
             "label": "Reset model cost baseline",
             "status": "active",
             "tool": "cron",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
             "kind": "status"
           },
           {
@@ -6673,25 +6566,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-07T04:17:19Z",
+      "time": "2026-06-07T04:23:03Z",
       "event": "Session spend: $0.09"
     },
     {
-      "time": "2026-06-07T04:17:16Z",
-      "event": "Coding: mission-control/scripts/mission_control_visual_canaries.py, mission-control/dist/v2-react/assets/index-8-LQr3ny.css"
+      "time": "2026-06-07T04:23:00Z",
+      "event": "Coding: mission-control/dist/v2-react/assets/index-D8yfjVYg.css, mission-control/dist/v2-react/assets/index-BUzLGHtu.js"
     },
     {
-      "time": "2026-06-07T04:17:16Z",
+      "time": "2026-06-07T04:23:00Z",
       "event": "CodexBar: 98% left \u00b7 wk 82% left"
     },
     {
-      "time": "2026-06-07T04:17:13Z",
+      "time": "2026-06-07T04:22:58Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-06-07T04:17:13Z",
+      "time": "2026-06-07T04:22:58Z",
       "event": "35 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-06-07T04:17:13Z"
+  "lastUpdated": "2026-06-07T04:22:58Z"
 }

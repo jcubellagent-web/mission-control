@@ -1122,8 +1122,6 @@ function activityFocusRows(model: ControlTowerModel) {
   const ordered = activityRankedRows([
     ...model.needsJosh,
     ...model.active,
-    ...model.planned,
-    ...model.complete.filter((row) => !activityIsRoutineSystem(row)),
   ]);
   const seen = new Set<string>();
   return ordered.filter((row) => {

@@ -14698,3 +14698,33 @@ html, body, #root, .app-shell {
 .control-tower-grid > .right-rail.tower-jobs-rail > header {
   margin-bottom: 12px !important;
 }
+
+/* JAIMES REFINEMENT: Raised look, subtle borders, no scrollbars */
+
+.tower-left-column > .tower-agent-deck,
+.tower-center-column > .tower-command-strip,
+.tower-center-column > .tower-priority-queue,
+.tower-center-column > .tower-resource-stack,
+.control-tower-grid > .right-rail.tower-jobs-rail {
+  border: 1px solid rgba(0, 207, 255, 0.2) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.tower-left-column > .activity-ledger,
+.control-tower-grid > .activity-ledger {
+  border: 1px solid rgba(0, 207, 255, 0.2) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important; /* Force hide scrollbars */
+}
+
+/* Ensure Live Work Board never scrolls and text stays clamped */
+.activity-ledger .ledger-live-focus,
+.activity-ledger .ledger-focus-primary {
+  overflow: hidden !important;
+}
+
+.ledger-focus-primary .ledger-now-title {
+  font-size: clamp(28px, 3vw, 56px) !important; /* Slightly scale down to guarantee fit */
+  max-height: unset !important; /* Let clamp do the work */
+}
+
