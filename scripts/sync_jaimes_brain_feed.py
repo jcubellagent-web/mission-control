@@ -94,8 +94,21 @@ def is_quiet_ok_job(job: dict) -> bool:
     return name in QUIET_OK_JOBS and status in OK_STATUSES
 
 
+LIVE_PUSH_HOLD_SECONDS = 180  # respect a live JAIMES push for this long before resuming synthesis
+
+
 def main() -> int:
     now = datetime.now(timezone.utc)
+
+    # LIVE OVERRIDE: if a real JAIMES agent push landed recently, do NOT overwrite it
+    # with cron-derived "Standby/Idle" synthesis. This is what makes the Live Work Board
+    # reflect what JAIMES is actually doing in real time instead of flapping back to idle.
+    existing = load_json(OUT_PATH)
+    live_ts = parse_ts(existing.get('liveAgentPush') or existing.get('liveAgentPushAt'))
+    if live_ts and (now - live_ts) <= timedelta(seconds=LIVE_PUSH_HOLD_SECONDS):
+        print(json.dumps({'deferred': True, 'reason': 'recent live JAIMES push', 'liveAgentPush': existing.get('liveAgentPush')}))
+        return 0
+
     jobs = load_json(JOBS_PATH).get('jobs', [])
     cfg = load_yaml(CONFIG_PATH)
 
