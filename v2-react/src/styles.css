@@ -14187,3 +14187,46 @@ body::after,
   justify-items: start !important;
   text-align: left !important;
 }
+
+/* JAIMES CONTROL TOWER STRONG TOP-LEFT HIERARCHY 2026-06-07 */
+.ledger-focus-primary {
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  padding-top: 14px !important;
+}
+
+.ledger-focus-primary h3 {
+  grid-row: 1 !important;
+  order: -2 !important;
+  align-self: start !important;
+  justify-self: start !important;
+  margin: 0 !important;
+  max-height: 96px !important;
+}
+
+.ledger-focus-primary > span {
+  grid-row: 2 !important;
+  order: -1 !important;
+  margin-top: 2px !important;
+}
+
+.ledger-focus-primary p {
+  grid-row: 3 !important;
+  align-self: start !important;
+  margin-top: 0 !important;
+}
+
+.ledger-focus-primary footer {
+  grid-row: 4 !important;
+}
+
+.ledger-focus-mini strong {
+  grid-row: 1 !important;
+  order: -2 !important;
+  align-self: start !important;
+  justify-self: start !important;
+}
+
+.ledger-focus-mini > span {
+  grid-row: 2 !important;
+  order: -1 !important;
+}
