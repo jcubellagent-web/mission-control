@@ -14155,3 +14155,35 @@ body::after,
     animation: none !important;
   }
 }
+
+/* JAIMES CONTROL TOWER TOP-LEFT LIVE TEXT 2026-06-07 */
+.ledger-focus-primary {
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  align-content: start !important;
+  justify-items: start !important;
+}
+
+.ledger-focus-primary h3 {
+  align-self: start !important;
+  justify-self: start !important;
+  text-align: left !important;
+  margin-top: 0 !important;
+  max-width: 100% !important;
+}
+
+.ledger-focus-primary p {
+  justify-self: start !important;
+  text-align: left !important;
+  max-width: 92% !important;
+}
+
+.ledger-focus-primary footer {
+  align-self: end !important;
+  width: 100% !important;
+}
+
+.ledger-focus-mini {
+  align-content: start !important;
+  justify-items: start !important;
+  text-align: left !important;
+}
