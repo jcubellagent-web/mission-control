@@ -1,25 +1,19 @@
 {
-  "agent": "JAIMES",
   "active": false,
-  "objective": "Done: ops drift audit found stale daily backup",
+  "objective": "Standby",
   "status": "idle",
-  "updatedAt": "2026-05-02T04:16:09Z",
-  "checkedAt": "2026-05-02T04:16:02Z",
-  "messageReceived": "2026-05-02T04:16:02Z",
-  "currentTool": "exec",
-  "model": "gpt-5.5",
-  "auth": "subscription",
+  "updatedAt": "2026-06-07T04:18:44Z",
+  "model": "GPT-5.5",
+  "messageReceived": "2026-06-07T04:18:44Z",
   "steps": [
     {
-      "label": "jaimes-model-efficiency-guard",
-      "status": "done",
-      "tool": "hermes"
-    },
-    {
-      "label": "Task: ops drift audit on J.A.I.N",
+      "label": "Sorare canonical sync complete",
       "status": "done",
       "tool": "exec"
     }
   ],
-  "modelAuth": "gpt-5.5 (subscription)"
+  "currentTool": "",
+  "checkedAt": "2026-06-07T04:18:44Z",
+  "agent": "JAIMES",
+  "source": "jaimes-live-poller"
 }

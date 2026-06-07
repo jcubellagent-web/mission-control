@@ -14,6 +14,19 @@ CONFIG_PATH = HOME / '.hermes' / 'config.yaml'
 OUT_PATH = ROOT / 'data' / 'jaimes-brain-feed.json'
 
 RUNNING_STATES = {'running', 'in_progress', 'executing', 'working', 'active'}
+QUIET_OK_JOBS = {
+    'jaimes brain feed self-test',
+    'jaimes brain feed stale alert',
+}
+OK_STATUSES = {'ok', 'done', 'success', 'passed', 'idle'}
+JOB_LABELS = {
+    'jaimes-brain-feed-self-test': 'JAIMES Brain Feed self-test',
+    'jaimes-brain-feed-stale-alert': 'JAIMES Brain Feed stale alert',
+    'jaimes-model-efficiency-guard': 'JAIMES model efficiency guard',
+    'jaimes-ops-drift-check': 'JAIMES ops drift check',
+    'sorare-daily-missions-watchdog': 'Sorare Daily Missions watchdog',
+    'sorare-canonical-reflector': 'Sorare canonical sync',
+}
 
 
 def load_json(path: Path) -> dict:
@@ -57,7 +70,28 @@ def normalize_model(provider: str, model: str) -> str:
 
 
 def job_display(job: dict) -> str:
-    return str(job.get('name') or 'JAIMES task').strip()
+    raw = str(job.get('name') or 'JAIMES task').strip()
+    key = raw.lower().replace('_', '-')
+    if key in JOB_LABELS:
+        return JOB_LABELS[key]
+    if '-' in raw or '_' in raw:
+        text = raw.replace('_', ' ').replace('-', ' ')
+        words = []
+        for word in text.split():
+            if word.lower() == 'jaimes':
+                words.append('JAIMES')
+            elif word.lower() in {'gw', 'ml', 'rp'}:
+                words.append(word.upper())
+            else:
+                words.append(word.capitalize())
+        return ' '.join(words)
+    return raw
+
+
+def is_quiet_ok_job(job: dict) -> bool:
+    name = job_display(job).lower()
+    status = str(job.get('last_status') or '').lower()
+    return name in QUIET_OK_JOBS and status in OK_STATUSES
 
 
 def main() -> int:
@@ -100,12 +134,14 @@ def main() -> int:
         active = False
         status = 'idle'
         if recent_jobs:
-            ts, job = recent_jobs[0]
+            meaningful = next((item for item in recent_jobs if not is_quiet_ok_job(item[1])), None)
+            ts, job = meaningful or recent_jobs[0]
             outcome = str(job.get('last_status') or 'ok')
-            objective = f"Idle · last: {job_display(job)} ({outcome})"
+            quiet_ok = is_quiet_ok_job(job)
+            objective = 'Ready · Brain Feed checks passed' if quiet_ok else f"Idle · last: {job_display(job)} ({outcome})"
             steps = [
                 {
-                    'label': job_display(job),
+                    'label': 'Brain Feed checks passed' if quiet_ok else job_display(job),
                     'status': 'done',
                     'tool': 'hermes',
                 }

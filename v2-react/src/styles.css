@@ -14656,3 +14656,45 @@ html, body, #root, .app-shell {
   line-height: 1.25 !important;
   max-height: 72px !important;
 }
+
+/* JAIMES: UNIFIED ECOSYSTEM BORDERS AND BRANDING */
+.tower-left-column > .tower-agent-deck,
+.tower-center-column > .tower-command-strip,
+.tower-center-column > .tower-priority-queue,
+.tower-center-column > .tower-resource-stack,
+.control-tower-grid > .right-rail.tower-jobs-rail {
+  background: linear-gradient(135deg, #122941 0%, #06111C 100%) !important;
+  border: 2px solid #00CFFF !important;
+  box-shadow: 0 4px 24px rgba(0, 207, 255, 0.1) !important;
+  border-radius: 16px !important;
+  padding: 18px !important;
+  overflow: hidden !important;
+}
+
+/* Harmonize Live Work Board background slightly so it matches */
+.tower-left-column > .activity-ledger,
+.control-tower-grid > .activity-ledger {
+  background: linear-gradient(135deg, #122941 0%, #06111C 100%) !important;
+  border-radius: 16px !important;
+  padding: 18px !important;
+}
+
+/* Inner elements styling to fit the new blue theme */
+.tower-agent-row, .priority-control-row, .resource-card {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid #235A8C !important;
+}
+.tower-agent-row:hover, .priority-control-row:hover {
+  border-color: #00CFFF !important;
+  background: rgba(0, 207, 255, 0.05) !important;
+}
+
+/* Ensure command strip text contrasts well */
+.tower-command-strip p, .tower-command-strip h2 {
+  color: #FFFFFF !important;
+}
+
+/* Fix Jobs rail internal spacing */
+.control-tower-grid > .right-rail.tower-jobs-rail > header {
+  margin-bottom: 12px !important;
+}

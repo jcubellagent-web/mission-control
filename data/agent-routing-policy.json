@@ -1,6 +1,142 @@
 {
-  "updatedAt": "2026-04-30T18:16:32Z",
+  "updatedAt": "2026-05-09T17:10:00Z",
   "defaultRequester": "joshex",
+  "deviceResourcePolicy": {
+    "summary": "JOSHeX is the trusted coordinator and private-Mac specialist, not the default execution host. Prefer Josh 2.0 or JAIMES for real ecosystem work unless the task requires MacBook-only local state.",
+    "joshexUseFor": [
+      "coordination",
+      "architecture",
+      "private-Mac-only work",
+      "personal account/browser/keychain/OAuth work",
+      "final review and integration"
+    ],
+    "offloadToJosh2": [
+      "Mission Control kiosk",
+      "OpenCLAW operations",
+      "device alerts on Josh 2.0",
+      "dashboard refreshes",
+      "service checks",
+      "browser automation that should not disturb the MacBook"
+    ],
+    "offloadToJaimes": [
+      "heavier compute",
+      "long-running work",
+      "scheduled jobs",
+      "Gemini/Grok specialist passes",
+      "Sorare operations",
+      "intelligence scans",
+      "durable Hermes workflows"
+    ]
+  },
+  "modelRouting": {
+    "enforcedBy": "scripts/agent_route.py",
+    "default": "codex",
+    "codexAllowanceMode": "normal",
+    "codexExhaustedMode": {
+      "activation": "Set model-provider-budgets.json policy.codexAllowanceMode to exhausted, or call scripts/agent_route.py with --codex-allowance exhausted.",
+      "geminiFirst": "dashboard-safe summaries, reviews, digests, reports, handoffs, runbooks, stale-task compression, and non-execution synthesis",
+      "xaiFirst": "public current-events, X-native research, outside critique, red-team review, and batch/config audits",
+      "openRouterFallback": "explicit non-sensitive provider fallback checks or outside-model comparisons",
+      "codexReserved": "repo edits, terminal actions, tests, deployment, authenticated browser work, private connectors, secrets, approvals, account mutation, and final integration"
+    },
+    "providerOrder": [
+      "codex",
+      "gemini",
+      "xai",
+      "openrouter"
+    ],
+    "providerRoles": {
+      "codex": "Default execution, private connectors, auth, terminal actions, repo edits, approvals, and final integration.",
+      "gemini": "Gemini-first dashboard-safe reviewer/evaluator/digest/long-context specialist; JAIMES should use Flash for routine safe work and Pro for explicit deeper compact evaluation before Codex when sufficient.",
+      "xai": "Current-events, X-native research, outside critique, and non-urgent batch audit specialist via host-local xAI API keys.",
+      "openrouter": "Fallback when a primary provider is unavailable or a specific outside model is needed."
+    },
+    "geminiFirstPrivacy": [
+      "dashboard-safe"
+    ],
+    "geminiFirstTaskTypes": [
+      "summary",
+      "summarization",
+      "review",
+      "ui-readability-review",
+      "dashboard-readability-review",
+      "decision-review",
+      "handoff-review",
+      "brain-feed-digest",
+      "report",
+      "handoff",
+      "runbook",
+      "digest",
+      "daily-digest",
+      "log-summary",
+      "stale-task-compression",
+      "specialist-summary",
+      "model-analysis",
+      "gemini-review",
+      "gemini-long-context",
+      "gemini-evaluation",
+      "gemini-scheduled-summary"
+    ],
+    "xaiFirstPrivacy": [
+      "dashboard-safe"
+    ],
+    "xaiFirstTaskTypes": [
+      "current-events",
+      "x-search",
+      "x-native-research",
+      "x-intelligence",
+      "public-news-monitor",
+      "outside-critique",
+      "red-team-review",
+      "model-red-team",
+      "batch-audit",
+      "config-drift-audit",
+      "agent-ecosystem-audit"
+    ],
+    "openRouterFallbackTaskTypes": [
+      "model-fallback",
+      "provider-fallback",
+      "outside-model-check"
+    ],
+    "codexOnly": [
+      "repo-patch",
+      "dashboard-update",
+      "validation",
+      "connected-account-triage",
+      "sensitive-coordination",
+      "account-mutation",
+      "auth-cookie-refresh",
+      "codex-keychain-alert",
+      "macos-keychain-alert",
+      "device-alert",
+      "browser-auth-workflow",
+      "destructive-maintenance",
+      "destructive-git",
+      "posting-side-effect",
+      "raw-private-data-forwarding",
+      "raw-secret-handling"
+    ],
+    "guardrail": "Codex/OpenAI remains default execution model, but JOSHeX on the personal MacBook is not the default execution host. Prefer Josh 2.0 or JAIMES for ecosystem execution and heavier work. Gemini, xAI, and OpenRouter receive sanitized dashboard-safe specialist work only. xAI calls should use store=false where available and must not receive secrets or raw private connector/account data. JOSHeX owns private-Mac-only work, coordination, approvals, and final review.",
+    "cookieKeychainDisambiguation": "A visible alert mentioning cookie.codex, Codex cookies, Keychain Not Found, or a keychain cannot be found means macOS/Codex keychain work on the device. It is not Sorare cookie freshness unless the user explicitly says Sorare.",
+    "dailyUtilizationPolicy": "Run at least two dashboard-safe Gemini specialist passes per day when quota is available: one daily digest/stale-task compression pass and one review/evaluator pass. Use scripts/gemini_specialist_pass.py --agent jaimes for JAIMES-owned passes so raw prompts and raw output are not stored. Keep Codex/Hermes as execution owner.",
+    "jaimesGeminiRoute": "JAIMES should use Gemini first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations. Use Gemini Flash for routine throughput and Gemini Pro for explicit deeper compact evaluation. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
+    "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth, include Route reason when Gemini, xAI, or OpenRouter is used or skipped, announce Codex exhausted/conserve mode when active, and announce any route switch before the result.",
+    "lastModeChangeAt": "2026-05-09T03:28:00Z",
+    "lastModeChangeReason": "add Gemini Pro lane for JAIMES deeper evaluation",
+    "skillPack": {
+      "source": "mission-control/agent-skills",
+      "inventory": "mission-control/data/agent-skill-inventory.json",
+      "policy": "Use matching shared skills before asking Josh for detailed procedural prompts. Skills reduce repeated prompting but do not override privacy, approval, or execution guardrails.",
+      "installedSkills": [
+        "mission-control-health",
+        "telegram-task-flow",
+        "jaimes-workhorse-route",
+        "sorare-ops",
+        "agent-state-visibility",
+        "handoff-to-joshex"
+      ]
+    }
+  },
   "approvalRequiredPrivacy": [
     "josh-approval",
     "sensitive-account",
@@ -13,12 +149,12 @@
     "destructive-maintenance",
     "destructive-git",
     "posting-side-effect",
-        "raw-private-data-forwarding",
-        "raw-secret-handling",
-        "sensitive-account-action",
-        "unapproved-account-mutation",
-        "gemini-private-context",
-        "gemini-raw-connector-data"
+    "raw-private-data-forwarding",
+    "raw-secret-handling",
+    "sensitive-account-action",
+    "unapproved-account-mutation",
+    "gemini-private-context",
+    "gemini-raw-connector-data"
   ],
   "routes": [
     {
@@ -34,10 +170,22 @@
         "connected-account-triage",
         "agent-routing",
         "sensitive-coordination",
+        "ui-readability-review",
+        "dashboard-readability-review",
+        "decision-review",
+        "handoff-review",
+        "brain-feed-digest",
+        "daily-digest",
         "gemini-review",
         "gemini-long-context",
         "gemini-research",
-        "model-fallback"
+        "model-fallback",
+        "provider-fallback",
+        "outside-critique",
+        "red-team-review",
+        "batch-audit",
+        "config-drift-audit",
+        "agent-ecosystem-audit"
       ],
       "capabilities": [
         "repo-edit",
@@ -45,10 +193,14 @@
         "connected-account-triage",
         "architecture",
         "agent-routing",
+        "gemini-scheduled-summary",
         "gemini-cli",
         "gemini-review",
         "gemini-long-context",
-        "gemini-research"
+        "gemini-research",
+        "xai-red-team",
+        "xai-batch-audit",
+        "openrouter-fallback"
       ],
       "privacyTiers": [
         "dashboard-safe",
@@ -67,14 +219,26 @@
         "service-status",
         "non-sensitive-log-review",
         "host-maintenance",
+        "repo-patch",
+        "dashboard-update",
+        "validation",
+        "connected-account-triage",
+        "codex-keychain-alert",
+        "macos-keychain-alert",
+        "device-alert",
         "gemini-health-check"
       ],
       "capabilities": [
         "ssh-host",
+        "repo-edit",
+        "dashboard-validation",
         "mission-control-refresh",
         "openclaw",
         "ollama",
         "service-health",
+        "connected-account-triage",
+        "macos-keychain",
+        "device-alert",
         "gemini-cli-health"
       ],
       "privacyTiers": [
@@ -84,14 +248,28 @@
     },
     {
       "agent": "jaimes",
-      "priority": 70,
+      "priority": 85,
       "taskTypes": [
+        "summary",
+        "summarization",
+        "digest",
+        "daily-digest",
+        "brain-feed-digest",
+        "log-summary",
         "report",
         "model-analysis",
+        "routing-review",
+        "dashboard-readability-review",
+        "decision-review",
+        "handoff-review",
+        "stale-task-compression",
         "health-check",
+        "connected-account-triage",
         "specialist-summary",
         "non-sensitive-data-processing",
         "ml-workflows",
+        "gemini-review",
+        "gemini-long-context",
         "gemini-evaluation"
       ],
       "capabilities": [
@@ -100,8 +278,14 @@
         "weaviate",
         "temporal",
         "report-generation",
+        "non-sensitive-log-review",
+        "gemini-cli",
+        "gemini-review",
+        "gemini-long-context",
+        "gemini-scheduled-summary",
         "ml-workflows",
-        "gemini-evaluator"
+        "gemini-evaluator",
+        "connected-account-triage"
       ],
       "privacyTiers": [
         "dashboard-safe",
@@ -119,9 +303,13 @@
         "worker-report",
         "background-worker",
         "intelligence-scan",
-        "watchlist"
-        ,
-        "scheduled-summary"
+        "watchlist",
+        "scheduled-summary",
+        "current-events",
+        "x-search",
+        "x-native-research",
+        "x-intelligence",
+        "public-news-monitor"
       ],
       "capabilities": [
         "cron",
@@ -129,7 +317,9 @@
         "intelligence-scan",
         "watchlist",
         "background-worker",
-        "gemini-scheduled-summary"
+        "gemini-scheduled-summary",
+        "xai-current-events",
+        "xai-x-search"
       ],
       "privacyTiers": [
         "dashboard-safe",

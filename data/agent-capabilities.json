@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-30T18:16:32Z",
+  "updatedAt": "2026-05-14T03:13:00Z",
   "agents": [
     {
       "id": "joshex",
@@ -15,12 +15,12 @@
         "Validation, docs, and handoffs",
         "Gemini CLI brokering for approved dashboard-safe specialist tasks"
       ],
-      "capabilities": ["repo-edit", "dashboard-validation", "connected-account-triage", "architecture", "agent-routing", "gemini-cli", "gemini-review", "gemini-long-context", "gemini-research"],
-      "safeTaskTypes": ["planning", "repo-patch", "dashboard-update", "decision-record", "handoff", "validation", "gemini-review", "gemini-long-context", "gemini-research", "model-fallback"],
+      "capabilities": ["repo-edit", "dashboard-validation", "connected-account-triage", "architecture", "agent-routing", "computer-use-gui", "peekaboo-gui", "gemini-cli", "gemini-review", "gemini-long-context", "gemini-research", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli", "codex-cloud-handoff"],
+      "safeTaskTypes": ["planning", "repo-patch", "dashboard-update", "decision-record", "handoff", "validation", "gui-computer-use", "gemini-review", "gemini-long-context", "gemini-research", "model-fallback", "docs-lookup", "browser-verification", "google-workspace-shared-inbox"],
       "restrictedTaskTypes": ["raw-secret-handling", "destructive-git", "unapproved-account-mutation", "raw-private-data-forwarding"],
-      "preferredTools": ["agent_publish.py", "agent_task.py", "gemini_agent.py", "mission_control_regression_check.py"],
+      "preferredTools": ["agent_publish.py", "agent_task.py", "gemini_agent.py", "mission_control_regression_check.py", "gog", "op", "codex mcp"],
       "artifactRoots": ["docs/", "data/", "scripts/"],
-      "updatedAt": "2026-04-30T18:16:32Z"
+      "updatedAt": "2026-05-14T03:13:00Z"
     },
     {
       "id": "josh",
@@ -30,12 +30,12 @@
       "privacyTier": "worker-scoped",
       "brainFeedAgent": "josh",
       "responsibilities": ["Mission Control hosting", "OpenCLAW services", "Brain Feed server", "local health checks", "fast local ops"],
-      "capabilities": ["ssh-host", "mission-control-refresh", "openclaw", "ollama", "service-health", "gemini-cli-health"],
-      "safeTaskTypes": ["dashboard-refresh", "health-check", "service-status", "non-sensitive-log-review", "gemini-health-check"],
+      "capabilities": ["ssh-host", "mission-control-refresh", "openclaw", "ollama", "service-health", "computer-use-gui", "peekaboo-gui", "gemini-cli-health", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli"],
+      "safeTaskTypes": ["dashboard-refresh", "health-check", "service-status", "non-sensitive-log-review", "gui-computer-use", "gemini-health-check", "docs-lookup", "browser-verification", "shared-google-workspace-status"],
       "restrictedTaskTypes": ["auth-cookie-refresh", "destructive-maintenance", "sensitive-account-action"],
-      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py", "gog", "op", "codex mcp"],
       "artifactRoots": ["data/", "logs/", "docs/handoffs/"],
-      "updatedAt": "2026-04-30T15:37:41Z"
+      "updatedAt": "2026-05-14T03:13:00Z"
     },
     {
       "id": "jaimes",
@@ -45,12 +45,12 @@
       "privacyTier": "worker-scoped",
       "brainFeedAgent": "jaimes",
       "responsibilities": ["Hermes jobs", "Sorare ML", "fantasy workflows", "reports", "specialist background analysis"],
-      "capabilities": ["hermes", "ollama", "weaviate", "temporal", "report-generation", "ml-workflows", "gemini-evaluator"],
-      "safeTaskTypes": ["report", "model-analysis", "health-check", "specialist-summary", "non-sensitive-data-processing", "gemini-evaluation"],
-      "restrictedTaskTypes": ["browser-auth-workflow", "account-mutation", "raw-private-data-forwarding"],
-      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "capabilities": ["hermes", "ollama", "weaviate", "temporal", "report-generation", "ml-workflows", "gemini-evaluator", "headless-browser-automation", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli"],
+      "safeTaskTypes": ["report", "model-analysis", "health-check", "specialist-summary", "non-sensitive-data-processing", "gemini-evaluation", "docs-lookup", "browser-verification", "shared-google-workspace-processing"],
+      "restrictedTaskTypes": ["gui-computer-use", "browser-auth-workflow", "account-mutation", "raw-private-data-forwarding"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py", "gog", "op", "codex mcp"],
       "artifactRoots": ["docs/", "reports/", "logs/"],
-      "updatedAt": "2026-04-30T15:37:41Z"
+      "updatedAt": "2026-05-14T03:13:00Z"
     },
     {
       "id": "jain",
@@ -60,12 +60,12 @@
       "privacyTier": "worker-scoped",
       "brainFeedAgent": "jain",
       "responsibilities": ["Scheduled workers", "intelligence scans", "X/watchlist monitors", "cron-heavy automation"],
-      "capabilities": ["cron", "monitoring", "intelligence-scan", "watchlist", "background-worker", "gemini-scheduled-summary"],
-      "safeTaskTypes": ["monitor", "scan", "status-check", "log-summary", "worker-report", "scheduled-summary"],
+      "capabilities": ["cron", "monitoring", "intelligence-scan", "watchlist", "background-worker", "gemini-scheduled-summary", "gog-cli", "onepassword-cli"],
+      "safeTaskTypes": ["monitor", "scan", "status-check", "log-summary", "worker-report", "scheduled-summary", "shared-google-workspace-monitor"],
       "restrictedTaskTypes": ["posting-side-effect", "high-frequency-bulk-wrap", "sensitive-account-action"],
-      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py"],
+      "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py", "gog", "op"],
       "artifactRoots": ["logs/", "data/", "reports/"],
-      "updatedAt": "2026-04-30T15:37:41Z"
+      "updatedAt": "2026-05-07T02:06:00Z"
     }
   ]
 }

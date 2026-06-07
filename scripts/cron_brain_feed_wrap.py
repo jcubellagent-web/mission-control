@@ -14,8 +14,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLISHER = ROOT / "scripts" / "supabase_brain_feed_publish.py"
-INSTALLED_PUBLISHER = Path.home() / "scripts" / "mission_control_brain_feed_publish.py"
+PUBLISHER = ROOT / "scripts" / "agent_publish.py"
+INSTALLED_PUBLISHER = Path.home() / "scripts" / "mission_control_agent_publish.py"
 
 
 def compact(value: str, limit: int = 220) -> str:
@@ -30,24 +30,27 @@ def publish(agent: str, status: str, cron: str, objective: str, step: str, tool:
     if not publisher.exists():
         print("mission-control heartbeat: publisher missing; continuing", file=sys.stderr)
         return
+    publish_status = status if status in {"active", "ready", "done", "blocked", "error", "info"} else "info"
+    publish_type = "blocked" if publish_status in {"blocked", "error"} else "job"
+    publish_detail = compact(" · ".join(part for part in [step, detail, f"Cron: {cron}"] if part), 500)
     cmd = [
         sys.executable,
         str(publisher),
         "--agent",
         agent,
+        "--type",
+        publish_type,
         "--status",
-        status,
+        publish_status,
         "--tool",
         tool,
-        "--cron",
-        compact(cron, 120),
-        "--objective",
+        "--title",
         compact(objective, 220),
-        "--step",
-        compact(step, 180),
+        "--detail",
+        publish_detail,
+        "--brain-feed",
+        "--job",
     ]
-    if detail:
-        cmd.extend(["--detail", compact(detail, 220)])
     try:
         subprocess.run(cmd, cwd=str(ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10, check=False)
     except Exception as exc:  # non-fatal by design

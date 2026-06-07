@@ -3,6 +3,12 @@ set -euo pipefail
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
+FORCE_RELOAD="${MISSION_CONTROL_FORCE_RELOAD:-0}"
+if [[ "${1:-}" == "--force" ]]; then
+  FORCE_RELOAD="1"
+  shift
+fi
+
 URL="${1:-http://127.0.0.1:5174/?mc_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
 PROFILE="/tmp/mission-control-kiosk-profile"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -22,7 +28,7 @@ except Exception:
     print("")
 ' || true)"
 
-if [[ "$current_url" == http://127.0.0.1:5174/* || "$current_url" == "http://127.0.0.1:5174/"* ]]; then
+if [[ "$FORCE_RELOAD" != "1" && "$current_url" == "$URL" ]]; then
   exit 0
 fi
 
@@ -34,6 +40,8 @@ exec "$CHROME" \
   --remote-debugging-port=9224 \
   --remote-allow-origins='*' \
   --no-first-run \
+  --use-mock-keychain \
+  --password-store=basic \
   --disable-session-crashed-bubble \
   --disable-infobars \
   --kiosk "$URL"

@@ -26,7 +26,7 @@ pull_json() {
   fi
 }
 
-pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json" "$DEST" '{"agent":"J.A.I.N","status":"unknown","active":false}'
+pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/jain-brain-feed.json" "$DEST" '{"agent":"J.A.I.N","status":"unknown","active":false}'
 
 # Also pull JAIN direct API cost tracker
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/jain-api-costs.json" "$(dirname "$0")/../data/jain-api-costs.json" '{"daily":0,"weekly":0,"monthly":0,"models":{},"available":false,"stale":true,"lastError":"fallback: source unavailable"}'

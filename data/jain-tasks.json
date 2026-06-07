@@ -1,6 +1,22 @@
 {
-  "updatedAt": "2026-04-13T17:02:00Z",
-  "active": [],
+  "updatedAt": "2026-05-20T11:08:30Z",
+  "active": [
+    {
+      "label": "echo JAIMES_ALIVE && hostname && date && df -h / | tail -1",
+      "context": "",
+      "target": "JAIMES",
+      "delivery": "hermes_chat",
+      "background": "pid 13166 on /Users/jc_agent/.openclaw/workspace/logs/jaimes-task-echo-jaimes-alive-hostname-date-df-h-tail-1-20260520T110819Z.log",
+      "delegatedAt": "2026-05-20T11:08:19Z"
+    },
+    {
+      "label": "morning-health",
+      "context": "echo RUN_ON_JAIN_OK && hostname && date",
+      "target": "J.A.I.N",
+      "background": "pid 13273 on /Users/jc_agent/.openclaw/workspace/logs/delegated-morning-health-20260520T110830Z.log",
+      "delegatedAt": "2026-05-20T11:08:30Z"
+    }
+  ],
   "idle_capabilities": [
     "Coding tasks & feature builds",
     "Intelligence feed pipeline",

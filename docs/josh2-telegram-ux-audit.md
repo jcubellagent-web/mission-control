@@ -45,11 +45,12 @@ Codex 5.5 (openai-codex subscription)
 
 Default buttons should be:
 
+- Use Gemini for review
 - Run all safe steps
-- Route to JOSHeX
-- Route to JAIMES
-- Check Mission Control
-- Hold
+- Ask JOSHeX on laptop
+- Send to JAIMES / Hermes
+- Use Josh 2.0 Mac tools
+- Hold / no action
 
 Common commands should be short and memorable:
 
@@ -68,10 +69,13 @@ Common commands should be short and memorable:
 ## Routing Defaults
 
 - Josh 2.0 owns device-local work, Telegram interaction, quick status, approvals, kiosk/Mission Control refresh, and light shell operations.
+- JOSHeX means the personal-laptop Codex coordinator lane. It is not the Josh 2.0 Mac.
 - JOSHeX owns architecture, repo changes, cross-agent coordination, sensitive connector work, and final decision records.
 - JAIMES owns heavier services, Hermes workflows, background services, and headless service checks.
 - J.AI.N owns worker/cron-style tasks and scheduled background jobs.
-- Gemini should be used for dashboard-safe synthesis, drafts, classification, and second-pass thinking when no secrets or private account contents are needed.
+- Gemini 3 Flash should be proposed heavily for dashboard-safe synthesis, drafts, classification, long-context reads, non-sensitive log review, planning, and second-pass thinking when no secrets or private account contents are needed.
+- Codex/GPT-5.5 should remain the execution lane for repo edits, private connectors, secrets/auth, device actions, approvals, and final integration.
+- Grok/xAI should be suggested only when public X/current-events, market/social narrative, breaking-news interpretation, or public sentiment context is central to the task.
 - OpenRouter should be fallback/specialist only unless explicitly selected.
 
 ## UX Rules
@@ -95,14 +99,16 @@ Use these options in this order:
 - Bot command menu: persistent low-friction entrypoint for `/status`, `/mc`, `/models`, `/route`, `/joshex`, `/jaimes`, `/jain`, `/new`, and `/help`.
 - Chat menu button: set to Telegram's commands menu for now; use a Web App later only if a true mobile control panel is needed.
 - Reply keyboards: keep available but not default; they are more intrusive than inline buttons.
-- Copy-text buttons: use later for handoff snippets, one-time commands, and URLs that Josh may need to paste.
-- ForceReply: use later for narrow forms where Josh must type one specific value.
+- Copy-text buttons: use later for handoff snippets, one-time commands, and URLs that Josh 2.0 may need to paste.
+- ForceReply: use later for narrow forms where Josh 2.0 must type one specific value.
 
 The active config lives in `data/josh2-telegram-ux-config.json`. Reapply Telegram bot settings with `scripts/josh_telegram_setup.py` from the Mission Control checkout on Josh 2.0.
 
 ## Implemented Helpers
 
 - `scripts/josh_work_card.py`: compact editable Telegram work cards. Use by default for most tasks requested through Josh 2.0 when the task has more than one step, might take more than about 60 seconds, or changes Mission Control/agent state.
+- `scripts/josh_telegram_fast_ack.py`: immediate direct-chat acknowledgement watcher. It watches OpenCLAW session metadata for `prompt.submitted`, sends a compact "received/working" work card, and avoids polling Telegram or reading Telegram message content.
+- `hooks/josh-new-session-startup/`: OpenCLAW `/new` internal hook. Replaces the terse default reset message with an informative compact startup card.
 - `scripts/josh_telegram_digest.py overview`: sends a compact ecosystem overview card.
 - `scripts/josh_telegram_digest.py daily`: sends a compact daily digest card.
 - `scripts/josh_agent_quick_card.py <agent>`: sends a compact quick card for Josh 2.0, JOSHeX, JAIMES, or J.AI.N.
@@ -146,9 +152,10 @@ P0:
 
 P1:
 
-- Add a single `Check Mission Control` button that both pushes status and verifies the visible row.
-- Add a `Route to JOSHeX` button for architecture/repo/coordinator tasks.
-- Add a `Route to JAIMES` button for headless service work.
+- Reserve `Force Mission Control sync` for diagnostics, stale dashboard recovery, or explicit user requests; normal task cards should update Mission Control automatically.
+- Add a `Ask JOSHeX on laptop` button for architecture/repo/coordinator tasks.
+- Add a `Send to JAIMES / Hermes` button for headless service work that discloses target, primary model/auth, Gemini first-pass option, Grok relevance rule, reason, and fallback before handoff.
+- Add `Use Gemini for review` and `Use Josh 2.0 Mac tools` buttons to default work cards; show `Use Grok for public/X context` only when public/current-events context is highly relevant.
 - Add concise failure templates for auth expired, gateway down, missing dependency, stale Mission Control, and approval required.
 - Verify the GitHub Pages Web App URL after publish, then keep the `Open control panel` inline button pointed at it.
 

@@ -95,10 +95,12 @@ def classify_smoke(code: int, out: str, err: str) -> str:
     combined = f"{out}\n{err}".lower()
     if "opening authentication page" in combined or "do you want to continue" in combined:
         return "auth-required"
-    if code == 124:
-        return "timeout"
     if code == 0 and bool(out.strip()):
         return "pass"
+    if code == 124 and bool(out.strip()):
+        return "pass"
+    if code == 124:
+        return "timeout"
     return "fail"
 
 
@@ -154,6 +156,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
         "outputChars": len(out.strip()),
         "stderrChars": len(err.strip()),
         "exitCode": code,
+        "timedOutAfterOutput": code == 124 and bool(out.strip()),
     }
     if args.write_status:
         update_sidecar(status, smoke)

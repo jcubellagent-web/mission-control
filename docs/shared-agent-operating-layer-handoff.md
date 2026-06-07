@@ -9,20 +9,22 @@ Mission Control now has a shared dashboard-safe operating ledger. Use it for imp
 Before meaningful work:
 
 ```bash
-python3 scripts/agent_publish.py --agent <josh|jaimes|jain|joshex> --type status --status active --title "..." --tool "..." --detail "..." --brain-feed
+python3 scripts/agent_publish.py --agent <josh2|jaimes|jain|joshex> --type status --status active --title "..." --tool "..." --detail "..." --brain-feed
 ```
 
 After meaningful work:
 
 ```bash
-python3 scripts/agent_publish.py --agent <josh|jaimes|jain|joshex> --type complete --status done --title "..." --tool "..." --detail "..." --brain-feed
+python3 scripts/agent_publish.py --agent <josh2|jaimes|jain|joshex> --type complete --status done --title "..." --tool "..." --detail "..." --brain-feed
 ```
 
 For automations or manual jobs that should appear in Today Jobs:
 
 ```bash
-python3 scripts/agent_publish.py --agent <lane> --type job --status done --title "..." --tool "..." --detail "..." --job
+python3 scripts/agent_publish.py --agent <lane> --type job --status done --title "..." --tool "..." --detail "..." --job --brain-feed
 ```
+
+For shared delegated tasks, use `scripts/agent_task.py` or `scripts/agent_delegate.py`. `agent_task.py` publishes to Brain Feed by default; use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
 
 Regenerate Mission Control after local ledger/job changes:
 

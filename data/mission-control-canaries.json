@@ -2,36 +2,42 @@
   "ok": true,
   "status": "ok",
   "summary": "All canaries passed",
-  "checkedAt": "2026-05-02T07:45:08.718164Z",
+  "checkedAt": "2026-06-07T04:05:54.855061Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JOSHeX; dualAgents=none; live=3",
+      "detail": "primary=JAIMES; dualAgents=none; live=4",
       "severity": "ok"
     },
     {
       "name": "Calendar tile",
       "ok": true,
-      "detail": "Calendar fetch failed",
+      "detail": "Local calendar helper sign-in optional",
       "severity": "ok"
     },
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "33 today-relevant; 0 active issue(s)",
+      "detail": "30 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
       "name": "Action Required",
       "ok": true,
-      "detail": "2 visible alert(s)",
+      "detail": "clear",
       "severity": "ok"
     },
     {
       "name": "Renderer wiring",
       "ok": true,
       "detail": "hero + ops renderers present",
+      "severity": "ok"
+    },
+    {
+      "name": "All-agent Brain Feed",
+      "ok": true,
+      "detail": "JOSHeX, Josh 2.0, JAIMES, and J.A.I.N all render as first-class Brain Feed cards",
       "severity": "ok"
     },
     {
@@ -49,13 +55,553 @@
     {
       "name": "Agent Control lane",
       "ok": true,
-      "detail": "overall=ready; ready=2/2",
+      "detail": "overall=attention; ready=3/4; source=live-heartbeats",
       "severity": "ok"
     },
     {
       "name": "Alignment stability",
       "ok": true,
-      "detail": "stable text rails present; objective ticker disabled; dense grids capped",
+      "detail": "stable text rails present; objective slow-scroll is contained; dense grids capped",
+      "severity": "ok"
+    },
+    {
+      "name": "Module separation",
+      "ok": true,
+      "detail": "top-level modules have visible shells, gutters, and header dividers",
+      "severity": "ok"
+    },
+    {
+      "name": "Blue support modules",
+      "ok": true,
+      "detail": "Today Jobs and Signal Feed have a distinct flat blue shell while Brain Feed stays glassy",
+      "severity": "ok"
+    },
+    {
+      "name": "Flat support module surfaces",
+      "ok": true,
+      "detail": "Today Jobs and Signal Feed use flat blue surfaces instead of gradient-heavy module shells",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed strip cleanup",
+      "ok": true,
+      "detail": "Last 60m and model usage strips are removed from Brain Feed",
+      "severity": "ok"
+    },
+    {
+      "name": "X intelligence-only jobs",
+      "ok": true,
+      "detail": "X posting/reply jobs are out of Today's Jobs; X Watchlist Monitor remains for intelligence",
+      "severity": "ok"
+    },
+    {
+      "name": "Kiosk self-healing watchdog",
+      "ok": true,
+      "detail": "Josh 2.0 watchdog can repair server, data, Signal Feed, Chrome kiosk drift, and keep live layout checks fresh",
+      "severity": "ok"
+    },
+    {
+      "name": "Local live sidecar watch",
+      "ok": true,
+      "detail": "kiosk live feed watches main agent, wallet, model, and Signal Feed sidecars",
+      "severity": "ok"
+    },
+    {
+      "name": "Data freshness guardrails",
+      "ok": true,
+      "detail": "Brain Feed surfaces stale jobs, agent coverage, and live kiosk display fit without treating optional news as a blocker",
+      "severity": "ok"
+    },
+    {
+      "name": "Josh heartbeat recovery publish",
+      "ok": true,
+      "detail": "healthy Josh 2.0 heartbeat recovery can clear stale status-check attention rows without overwriting real active work",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed heartbeat freshness",
+      "ok": true,
+      "detail": "idle agent cards prefer fresh heartbeat-backed check-ins over old sidecars",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed truth chip",
+      "ok": true,
+      "detail": "visible Brain Feed header separates clean, watch, and needs-review states in calm plain-English controls",
+      "severity": "ok"
+    },
+    {
+      "name": "Quiet maintenance jobs",
+      "ok": true,
+      "detail": "Today Jobs focus view keeps routine maintenance collapsed unless active, soon, or needing focus",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs calendar separation",
+      "ok": true,
+      "detail": "Today Jobs renders as a today-first daily calendar while the complete grouped list remains a quiet drill-down",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs plain-English empty hour",
+      "ok": true,
+      "detail": "empty current-hour and gap labels use plain assistant language instead of planner/debug wording",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs Next Up plain language",
+      "ok": true,
+      "detail": "Next Up card explains the next job in operator language instead of renderer/debug wording",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs Next Up countdown",
+      "ok": true,
+      "detail": "Next Up card uses the same countdown treatment as the top header and highlights the matching calendar block",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs readiness label",
+      "ok": true,
+      "detail": "daily readiness work uses operator-specific language instead of a generic health-check label",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs readiness detail",
+      "ok": true,
+      "detail": "Next Up explains what the readiness check does instead of describing the calendar renderer",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs time rail fit",
+      "ok": true,
+      "detail": "future calendar labels use compact weekday names and one-letter AM/PM markers so the time rail stays readable",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs row time fit",
+      "ok": true,
+      "detail": "calendar row times omit AM/PM because the hour rail already carries that context, preventing row-time ellipses",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs routine status label",
+      "ok": true,
+      "detail": "routine background checks read as normal background work instead of an alert-like checking state",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs header dedupe",
+      "ok": true,
+      "detail": "the Today Jobs title avoids duplicating the labeled running/focus metrics shown directly below it",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs current-hour count",
+      "ok": true,
+      "detail": "current calendar cluster uses a concise Now marker while the summary shows only what is actively running",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs active row fit",
+      "ok": true,
+      "detail": "the current job row prioritizes readable title space while keeping time and owner in compact lanes",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs grouped labels",
+      "ok": true,
+      "detail": "grouped calendar rows show check counts while the row title stays focused on the category or system-check group",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed stale-active guard",
+      "ok": true,
+      "detail": "old working rows age out before driving the green active state",
+      "severity": "ok"
+    },
+    {
+      "name": "Header live activity language",
+      "ok": true,
+      "detail": "top-right live chip combines dashboard-wide freshness and current activity using plain live-check language instead of scheduler jargon",
+      "severity": "ok"
+    },
+    {
+      "name": "Header live source plain language",
+      "ok": true,
+      "detail": "top-right source chip uses operator-friendly wording while preserving the raw source value in the tooltip",
+      "severity": "ok"
+    },
+    {
+      "name": "Header tracked jobs label",
+      "ok": true,
+      "detail": "top header labels the job count as tracked inventory in plain English, while running work stays in the live chip",
+      "severity": "ok"
+    },
+    {
+      "name": "Header action label",
+      "ok": true,
+      "detail": "clear state reads Decisions/Clear, while real pending reviews still call for Josh",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed active-work truth",
+      "ok": true,
+      "detail": "1 active scheduled job(s) can promote owning agent cards",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed routine check state",
+      "ok": true,
+      "detail": "routine background checks keep a short status label while the main headline explains that live status is staying current",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed active-detail classification",
+      "ok": true,
+      "detail": "signal/news refresh work stays described as signal work instead of generic kiosk verification",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed stale-active label guard",
+      "ok": true,
+      "detail": "stale active rows age out of working, while healthy idle agents stay Ready until the visibility SLA is actually missed",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed fresh check-in cue",
+      "ok": true,
+      "detail": "fresh agent check-ins get a subtle durable visual cue after refresh without adding more text or modules",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs stale-active guard",
+      "ok": true,
+      "detail": "historical job rows cannot inflate active counts or hide the scheduled inventory",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs header count",
+      "ok": true,
+      "detail": "top header owns tracked inventory while the Jobs rail avoids unlabeled duplicate header counts",
+      "severity": "ok"
+    },
+    {
+      "name": "Header next-up countdown",
+      "ok": true,
+      "detail": "top header labels scheduled focus separately from live active agent work while routine upkeep stays in the live sync chip",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed text rails",
+      "ok": true,
+      "detail": "agent panels keep objective, complete, next, and footer in fixed lanes",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed next-job context",
+      "ok": true,
+      "detail": "agent cards keep readable checks and output rows while next timing stays in the header and footer",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed status dedupe",
+      "ok": true,
+      "detail": "agent card headers keep only the state while the right-side freshness rail owns timing",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed freshness wording",
+      "ok": true,
+      "detail": "watch-level agent check-ins use refresh-due language instead of warning-like aging language",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed up-next countdown",
+      "ok": true,
+      "detail": "agent card Up Next pills show countdown plus clock time instead of static clock-only timing",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed countdown typography",
+      "ok": true,
+      "detail": "agent card countdown chips keep natural case while compact labels stay uppercase",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed idle fallback wording",
+      "ok": true,
+      "detail": "idle agent cards distinguish missing completion reports from true completed work in plain English",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed completion line readability",
+      "ok": true,
+      "detail": "agent cards keep a readable Last plus Next line without changing the card layout",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed latest completion truth",
+      "ok": true,
+      "detail": "idle agent Last lines preserve the newest completed local Brain Feed step, event, or job title instead of generic job-category summaries",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed active label polish",
+      "ok": true,
+      "detail": "active tool labels render as plain-English title case instead of raw lowercase source values",
+      "severity": "ok"
+    },
+    {
+      "name": "Brain Feed raw job label cleanup",
+      "ok": true,
+      "detail": "JAIMES scheduled job IDs render as plain-English work labels in code and current dashboard data",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed split",
+      "ok": true,
+      "detail": "10-row feed keeps live/breaking and newsletter-derived rows separated",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed duplicate suppression",
+      "ok": true,
+      "detail": "near-identical signal rows collapse before the five-row live/newsletter slots are filled",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed source/time scanability",
+      "ok": true,
+      "detail": "rows keep source, story age, and scan freshness distinct without reducing the 10-row view",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed readable row sizing",
+      "ok": true,
+      "detail": "10 visible rows use larger headline/detail text while preserving the first-screen table",
+      "severity": "ok"
+    },
+    {
+      "name": "Control Tower replacement",
+      "ok": true,
+      "detail": "Mission Control renders an executive control tower with active, needs-Josh, complete, and planned activity lanes",
+      "severity": "ok"
+    },
+    {
+      "name": "Control Tower agent coverage",
+      "ok": true,
+      "detail": "the replacement surface explicitly includes JOSHeX, Josh 2.0, JAIMES, and J.A.I.N as first-class rows",
+      "severity": "ok"
+    },
+    {
+      "name": "Control Tower center ledger",
+      "ok": true,
+      "detail": "the center tower uses a flat activity ledger instead of tall vertical lanes, while keeping active, needs-Josh, complete, and planned work prominent",
+      "severity": "ok"
+    },
+    {
+      "name": "Kiosk viewport composition",
+      "ok": true,
+      "detail": "24-inch layout keeps the agent deck, expanded activity ledger, resources, and Today's Jobs in the first view",
+      "severity": "ok"
+    },
+    {
+      "name": "Runtime kiosk layout guard",
+      "ok": true,
+      "detail": "watchdog measures the live Chrome viewport for module fit, row visibility, page overflow, and visible debug text",
+      "severity": "ok"
+    },
+    {
+      "name": "Runtime visible text quality",
+      "ok": true,
+      "detail": "live rendered Mission Control text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
+      "severity": "ok"
+    },
+    {
+      "name": "Runtime layout alert propagation",
+      "ok": true,
+      "detail": "watchdog refreshes dashboard data after runtime layout checks so display failures surface on Mission Control",
+      "severity": "ok"
+    },
+    {
+      "name": "Runtime layout dashboard surfacing",
+      "ok": true,
+      "detail": "live layout guard is carried into dashboard data and only becomes visible when the kiosk fit check needs attention",
+      "severity": "ok"
+    },
+    {
+      "name": "Watchdog dependency fallback",
+      "ok": true,
+      "detail": "screenshot diff stays optional at both the watchdog and helper level while live Chrome layout checks remain mandatory",
+      "severity": "ok"
+    },
+    {
+      "name": "Watchdog Brain Feed fallback",
+      "ok": true,
+      "detail": "scheduled Mission Control watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed optional source",
+      "ok": true,
+      "detail": "10 signal rows; 10 newsletter trend rows; health=attention; counts={'live': 10, 'newsletter': 0, 'total': 10, 'filteredLowQuality': 0, 'breakingSourceItems': 40, 'newsfeedSourceItems': 1, 'newsletterTrendItems': 10, 'publicRssFallbackItems': 16}",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed generic source filter",
+      "ok": true,
+      "detail": "generic official-source titles without event details no longer crowd out clearer breaking rows",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed category badges",
+      "ok": true,
+      "detail": "Signal Feed badges distinguish story domains instead of labeling almost every row as market",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed fallback semantics",
+      "ok": true,
+      "detail": "fresh public fallback rows render as Fresh and the section explains when J.A.I.N source coverage is being used",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed header freshness",
+      "ok": true,
+      "detail": "Signal Feed header distinguishes quiet-hours watch from feed refresh timing without terse scan jargon",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed newsletter freshness wording",
+      "ok": true,
+      "detail": "rows distinguish story age from source scan freshness without implying stale scanner state",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed duplicate story guard",
+      "ok": true,
+      "detail": "near-identical funding/valuation headlines share one story key before the top-five rows are selected",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed newsletter title dedupe",
+      "ok": true,
+      "detail": "newsletter rows remove repeated watch labels like Crypto watch: Crypto while preserving full source title in the tooltip",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed newsletter specificity",
+      "ok": true,
+      "detail": "newsletter titles avoid repeated generic labels like Crypto watch: Crypto or AI & Chips watch: AI",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed compact money headlines",
+      "ok": true,
+      "detail": "large dollar and verbose official-source headlines compress while preserving the full raw title in the tooltip",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed plain-English reasons",
+      "ok": true,
+      "detail": "newsletter summaries render digest trend language in both data and UI instead of machine-style cluster/item text",
+      "severity": "ok"
+    },
+    {
+      "name": "Agentic Crypto summary",
+      "ok": true,
+      "detail": "status=fresh; mode=read-only; 11 token rows; 3 chain rows; masked wallets present",
+      "severity": "ok"
+    },
+    {
+      "name": "Agentic Crypto plain-language controls",
+      "ok": true,
+      "detail": "wallet status and action controls avoid shouty uppercase labels while keeping the read-only approval guard visible",
+      "severity": "ok"
+    },
+    {
+      "name": "Agentic Crypto token rows",
+      "ok": true,
+      "detail": "wallet token rows keep marker, token amount, and value in distinct readable lanes",
+      "severity": "ok"
+    },
+    {
+      "name": "Agentic Crypto live cues",
+      "ok": true,
+      "detail": "wallet balance remains live-cued inside the compact Resources stack without exposing full wallet details in the first view",
+      "severity": "ok"
+    },
+    {
+      "name": "Signal Feed live cues",
+      "ok": true,
+      "detail": "Signal Feed section and story rows now flash subtly when live intelligence data changes",
+      "severity": "ok"
+    },
+    {
+      "name": "Module update sweep",
+      "ok": true,
+      "detail": "Brain Feed, Today's Jobs, Agentic Crypto, and Signal Feed show a thin top-edge sweep when their data changes",
+      "severity": "ok"
+    },
+    {
+      "name": "Priority Jobs config",
+      "ok": true,
+      "detail": "focused job grouping is config-driven instead of embedded in the rail",
+      "severity": "ok"
+    },
+    {
+      "name": "Typed data adapters",
+      "ok": true,
+      "detail": "Supabase and sidecar rows are normalized before rendering",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs inventory depth",
+      "ok": true,
+      "detail": "job merge keeps the full tracked ecosystem inventory instead of the old 24-row cap",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs live merge policy",
+      "ok": true,
+      "detail": "scheduled inventory stays authoritative while only recent live job rows are layered in",
+      "severity": "ok"
+    },
+    {
+      "name": "Stale blocker suppression",
+      "ok": true,
+      "detail": "old blocked live rows and stale Codex automation misses cannot keep Mission Control red after a newer clear result",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs view dedupe",
+      "ok": true,
+      "detail": "low-signal maintenance duplicates collapse while priority jobs stay itemized",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs current-hour routine grouping",
+      "ok": true,
+      "detail": "same-hour background system and calendar sync checks group into one compact row while priority and attention work stays itemized",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs grouped routine summaries",
+      "ok": true,
+      "detail": "grouped routine calendar rows use compact calendar summaries instead of raw internal job-name chains",
+      "severity": "ok"
+    },
+    {
+      "name": "Today Jobs live dedupe",
+      "ok": true,
+      "detail": "duplicate live maintenance rows collapse without merging separate scheduled jobs",
+      "severity": "ok"
+    },
+    {
+      "name": "React favicon",
+      "ok": true,
+      "detail": "kiosk has an explicit Mission Control icon and no default favicon.ico miss",
       "severity": "ok"
     }
   ]

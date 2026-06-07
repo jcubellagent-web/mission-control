@@ -1,23 +1,67 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": true,
+  "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Telegram warning bubble root cause fixed",
-  "detail": "Identified the raw warning as an internal failed verification command, added a guardrail against curl-to-Python-heredoc checks, and refreshed Mission Control data.",
-  "updatedAt": "2026-05-25T00:14:38Z",
-  "checkedAt": "2026-05-25T00:14:38Z",
-  "currentTool": "bad wallet verification command pattern identified; AGENTS guardrail added; Mission Control data refreshed.",
+  "objective": "Heartbeat checks complete",
+  "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
+  "updatedAt": "2026-06-07T04:17:05Z",
+  "checkedAt": "2026-06-07T04:17:05Z",
+  "currentTool": "agent publish",
   "steps": [
     {
-      "label": "done",
+      "label": "Heartbeat checks complete",
       "status": "done",
-      "tool": "bad wallet verification command pattern identified; AGENTS guardrail added; Mission Control data refreshed."
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Heartbeat checks started",
+      "status": "active",
+      "tool": "agent publish",
+      "kind": "status"
+    },
+    {
+      "label": "Heartbeat checks complete",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Heartbeat checks started",
+      "status": "active",
+      "tool": "agent publish",
+      "kind": "status"
+    },
+    {
+      "label": "Heartbeat checks complete",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Heartbeat checks started",
+      "status": "active",
+      "tool": "agent publish",
+      "kind": "status"
+    },
+    {
+      "label": "Heartbeat complete",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Heartbeat maintenance",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "status"
     }
   ],
-  "source": "shared-agent-event-ledger",
-  "supabaseBacked": true,
+  "source": "josh2-local-live-feed",
+  "supabaseBacked": false,
   "model": "GPT-5.5",
-  "messageReceived": "2026-05-25T00:14:38Z"
+  "messageReceived": "2026-05-25T00:14:38Z",
+  "localLiveFeed": true
 }

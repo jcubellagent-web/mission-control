@@ -1,9 +1,59 @@
 {
-  "updatedAt": "2026-05-02T06:36:05Z",
+  "updatedAt": "2026-05-08T00:00:00Z",
   "owner": "JOSHeX",
   "privacy": "dashboard-safe",
   "goal": "Make Josh 2.0 Telegram the iPhone-first command center with tap-first controls and clear activity visibility.",
   "telegramCapabilities": {
+    "aiBotRevolution": {
+      "status": "configured",
+      "source": "Telegram Bot API 10.0 / May 2026 AI bot feature release",
+      "policyPath": "mission-control/data/telegram-ai-bot-features.json",
+      "enabledFirst": [
+        "Inline Mode readiness for quick-pick status/routing results",
+        "Guest Mode readiness for Josh 2.0 and JAIMES",
+        "bot-to-bot handoffs with loop guards",
+        "streaming-style editable work cards",
+        "silent routine updates"
+      ],
+      "deferred": [
+        "profile chat automation except for a narrow manual pilot"
+      ],
+      "loopGuard": {
+        "maxHops": 3,
+        "dedupeWindowSeconds": 900,
+        "requireOriginTrace": true,
+        "suppressSelfReplies": true,
+        "requirePrivacyClass": true
+      },
+      "rule": "Use Telegram's new AI bot surfaces to reduce typing and improve visibility, but keep task queues plus Brain Feed as the durable record."
+    },
+    "inlineMode": {
+      "status": "telegram_enabled_gateway_live",
+      "handler": "mission-control/scripts/telegram_inline_results.py",
+      "actions": "mission-control/data/telegram-inline-actions.json",
+      "verified": {
+        "josh2": {
+          "username": "JCUBELL_bot",
+          "supports_inline_queries": true
+        },
+        "jaimes": {
+          "username": "Jaimes_claw_bot",
+          "supports_inline_queries": true
+        }
+      },
+      "runtimeHooks": {
+        "josh2": "OpenCLAW Telegram inline_query handler installed and gateway restarted.",
+        "jaimes": "Hermes Telegram InlineQueryHandler installed and gateway restarted.",
+        "jain": "OpenCLAW Telegram inline_query handler installed on the shared JAIMES/J.AI.N mini."
+      },
+      "useFor": [
+        "Quick-pick status cards",
+        "Mission Control overview snippets",
+        "Model/routing choices",
+        "Agent handoff templates"
+      ],
+      "rule": "Do not run a competing Telegram poller. Existing OpenCLAW/Hermes Telegram gateways call telegram_inline_results.py when they receive inline_query updates."
+    },
     "inlineKeyboards": {
       "status": "active",
       "useFor": [
@@ -49,15 +99,48 @@
     },
     "copyTextButtons": {
       "status": "future_candidate",
-      "rule": "Use for commands, one-time codes, URLs, or handoff snippets that Josh may need to paste elsewhere."
+      "rule": "Use for commands, one-time codes, URLs, or handoff snippets that Josh 2.0 may need to paste elsewhere."
     },
     "forceReply": {
       "status": "future_candidate",
-      "rule": "Use for step-by-step forms when Josh must type a specific answer."
+      "rule": "Use for step-by-step forms when Josh 2.0 must type a specific answer."
     },
     "editableWorkCards": {
       "status": "default_for_most_tasks",
-      "rule": "Use scripts/josh_work_card.py for any user-requested task with more than one step, any task likely to exceed about 60 seconds, or any task that changes Mission Control/agent state."
+      "rule": "Use scripts/josh_work_card.py for any user-requested task with more than one step, any task likely to exceed about 60 seconds, or any task that changes Mission Control/agent state. Use simple sections so Josh can immediately see what is happening, which tool is being used, what decision is being made, what evidence exists, and what comes next.",
+      "requiredFields": [
+        "Objective",
+        "Current step",
+        "Done so far",
+        "Issues",
+        "Next steps",
+        "Status",
+        "Route",
+        "Using",
+        "Updated"
+      ],
+      "updateRules": [
+        "Send or edit the work card at task start.",
+        "Edit the same card when the active step changes.",
+        "Edit the same card when blocked, waiting, done, or handed off.",
+        "Write Current step as Action, Tool, and Decision in plain language.",
+        "Never show raw shell fragments, jq selectors, JSON snippets, traceback noise, or internal refs unless Josh explicitly asks for raw output.",
+        "Use Done so far for short evidence bullets, not a running dump of every tool call.",
+        "Prefer inline buttons for common next actions instead of asking Josh 2.0 to type."
+      ]
+    },
+    "fastAcknowledgement": {
+      "status": "installed",
+      "script": "mission-control/scripts/josh_telegram_fast_ack.py",
+      "launchAgent": "com.josh20.telegram-fast-ack",
+      "rule": "For Josh 2.0 direct Telegram turns, watch OpenCLAW session metadata for prompt.submitted and send an immediate compact work card without polling Telegram or reading message content.",
+      "expectedBehavior": [
+        "User sends a Telegram task.",
+        "OpenCLAW records prompt.submitted for the direct Telegram session.",
+        "Fast-ack watcher sends a compact received/working card within a few seconds.",
+        "OpenCLAW continues the full GPT/tool response and can update or complete the card."
+      ],
+      "privacy": "No Telegram message text is read, stored, or published by the watcher."
     },
     "overviewDigest": {
       "status": "available",
@@ -76,9 +159,77 @@
         "jain"
       ],
       "rule": "Use scripts/josh_agent_quick_card.py <agent> or agent:<agent> callbacks for compact agent-specific status cards."
+    },
+    "modelRouteButtons": {
+      "status": "active",
+      "defaultPolicy": "Lean heavily on Gemini 3 Flash for dashboard-safe first-pass review, summaries, planning, log analysis, and second opinions. Keep Codex/GPT-5.5 for execution, private data, approvals, auth, repo edits, device actions, and final integration. Suggest Grok only when public/X/current-events, market/social narrative, or public sentiment context is central.",
+      "buttons": [
+        {
+          "text": "Use Gemini for review",
+          "callback_data": "model:gemini_flash",
+          "useWhen": "dashboard-safe review, summary, long-context read, log analysis, planning, or second opinion"
+        },
+        {
+          "text": "Use Grok for public/X context",
+          "callback_data": "model:grok",
+          "useWhen": "highly relevant public X/current-events/social sentiment/market narrative context"
+        },
+        {
+          "text": "Use Josh 2.0 Mac tools",
+          "callback_data": "model:codex",
+          "useWhen": "repo edits, private connectors, secrets/auth, device actions, approvals, final integration"
+        }
+      ],
+      "jaimesRouteDisclosure": {
+        "required": true,
+        "fields": [
+          "Target",
+          "Primary model/auth",
+          "Gemini first-pass option",
+          "Grok relevance rule",
+          "Reason",
+          "Fallback"
+        ]
+      }
     }
   },
   "defaultInlineButtons": [
+    [
+      {
+        "text": "Use Gemini for review",
+        "callback_data": "model:gemini_flash"
+      }
+    ],
+    [
+      {
+        "text": "Send to JAIMES / Hermes",
+        "callback_data": "route:jaimes"
+      }
+    ],
+    [
+      {
+        "text": "Ask agent council",
+        "callback_data": "route:agent_council"
+      }
+    ],
+    [
+      {
+        "text": "Use Josh 2.0 Mac tools",
+        "callback_data": "model:codex"
+      }
+    ],
+    [
+      {
+        "text": "Send to JOSHeX Cloud / repo-safe",
+        "callback_data": "route:joshex_cloud"
+      }
+    ],
+    [
+      {
+        "text": "Send to JOSHeX / private accounts",
+        "callback_data": "route:joshex"
+      }
+    ],
     [
       {
         "text": "Run all safe steps",
@@ -88,26 +239,14 @@
     ],
     [
       {
-        "text": "Check Mission Control",
-        "callback_data": "next:check_mission_control"
-      }
-    ],
-    [
-      {
-        "text": "Route to JOSHeX",
-        "callback_data": "route:joshex"
-      }
-    ],
-    [
-      {
-        "text": "Route to JAIMES",
-        "callback_data": "route:jaimes"
-      }
-    ],
-    [
-      {
         "text": "Daily digest",
         "callback_data": "next:daily_digest"
+      }
+    ],
+    [
+      {
+        "text": "Run health sweep",
+        "callback_data": "next:run_health_sweep"
       }
     ],
     [
@@ -126,14 +265,14 @@
     ],
     [
       {
-        "text": "JOSHeX",
-        "callback_data": "agent:joshex"
+        "text": "JAIMES",
+        "callback_data": "agent:jaimes"
       }
     ],
     [
       {
-        "text": "JAIMES",
-        "callback_data": "agent:jaimes"
+        "text": "JOSHeX",
+        "callback_data": "agent:joshex"
       }
     ],
     [
@@ -144,7 +283,13 @@
     ],
     [
       {
-        "text": "Hold",
+        "text": "Use Grok for public/X context",
+        "callback_data": "model:grok"
+      }
+    ],
+    [
+      {
+        "text": "Hold / no action",
         "callback_data": "next:hold",
         "style": "danger"
       }
@@ -153,46 +298,93 @@
   "statusTemplate": {
     "messageStyle": "compact_bullet_card",
     "rules": [
-      "Start with one plain Active Model/Auth line.",
-      "Leave one blank line after the model/auth line.",
-      "Use short hyphen bullets for Route, Objective, Status, Now, Done, Blocker, and Next.",
-      "Keep each bullet to one short mobile-readable sentence when possible.",
-      "Prefer semicolons or short fragments over long wrapped paragraphs.",
-      "Do not use dense paragraph labels for every field."
+      "Start with a plain headline: Josh 2.0 is working, Josh 2.0 is done, Josh 2.0 needs attention, or Josh 2.0 is paused.",
+      "Use separate readable sections for Objective, Current step, Done so far, Issues, and Next steps.",
+      "Objective must name the target system, concrete work, and intended outcome; avoid generic placeholders such as Sync agent ecosystem state.",
+      "Current step must include Action, Tool, and Decision bullets so Josh can understand the live work without reading logs.",
+      "Keep Status, Route, Using, and Updated as a short footer.",
+      "Do not duplicate Current step or Next steps inside Done so far.",
+      "Translate tool output into human-readable evidence. Do not expose raw command fragments like jq selectors or partial JSON.",
+      "Keep each line to one short mobile-readable sentence when possible.",
+      "For non-trivial tasks, send an editable work card first and keep that card current instead of sending repeated standalone paragraphs.",
+      "Only send the final Complete/What was done/Issues/Appropriate next steps/Approval needed template after all work is actually done, or when a blocker requires Josh's attention. Do not continue routine cleanup after the final template.",
+      "Final What was done bullets must be user-facing outcomes and verification, not noisy implementation trivia.",
+      "Only create Approval options buttons from real Approval needed bullets. Never create approval buttons from n/a, Context, status metadata, or no-action summaries."
+      ,
+      "When Codex allowance mode is conserve or exhausted, say that explicitly in the Route bullet and name the fallback provider before doing the work.",
+      "Suggest Gemini 3 Flash heavily for dashboard-safe first-pass work before Codex execution.",
+      "Suggest Grok only when public X/current-events, market/social narrative, or public sentiment context is central.",
+      "When routing to JAIMES, state the target model/auth and why before handoff.",
+      "When mentioning the remote Mac/agent, say Josh 2.0. Do not shorten it to Josh in operator-facing Telegram text.",
+      "When mentioning JOSHeX, clarify that it is the personal-laptop Codex coordinator lane and not the Josh 2.0 Mac.",
+      "If the user mentions cookie.codex, Codex cookies, Keychain Not Found, or a visible keychain alert, treat it as macOS/Codex keychain/device work. Do not treat it as Sorare cookie freshness unless the user explicitly says Sorare.",
+      "Mission Control publishing and dashboard regeneration should happen automatically during agent work. Do not show a routine refresh button on default task cards; reserve force-sync controls for diagnostics, stale dashboard recovery, or explicit user requests."
     ],
     "requiredLines": [
-      "<model> (<auth route>)",
-      "- Route: <owner/model> because <reason>",
-      "- Objective: <current objective>",
-      "- Status: <active|done|blocked|needs approval>",
-      "- Now: <current step>",
-      "- Done: <completed evidence>",
-      "- Blocker: <none or exact blocker>",
-      "- Next: <next action>"
+      "Josh 2.0 is <working|done|needs attention|paused>",
+      "Objective: <target system + concrete work + intended outcome>",
+      "Current step: Action: <current action>; Tool: <tool in use>; Decision: <current decision>",
+      "Done so far: <completed evidence bullets>",
+      "Issues: <none or exact issue bullets>",
+      "Next steps: <next action bullets>",
+      "Status: <working|done|needs attention|paused>",
+      "Route: <owner/model> because <reason>",
+      "Using: <model/auth route>",
+      "Updated: <local time>"
     ],
-    "example": "Codex 5.5 (openai-codex subscription)\n\n- Route: Josh 2.0 direct chat; foreground lane.\n- Objective: Test Telegram readability.\n- Status: Good; responsive.\n- Now: Using compact bullets.\n- Done: Brain Feed hook fired; direct chat path works.\n- Blocker: None.\n- Next: Tap a button or send the next task.",
+    "example": "Josh 2.0 is working\n\nObjective:\n- Test Telegram readability.\n\nCurrent step:\n- Action: validating the simpler work card format.\n- Tool: josh_work_card.py dry run.\n- Decision: keep raw command details out of the live card unless requested.\n\nDone so far:\n- Brain Feed hook fired.\n- Direct chat path works.\n\nIssues:\n- None\n\nNext steps:\n- No action needed.\n\nStatus: Working\nRoute: Josh 2.0 direct chat; foreground lane.\nUsing: Codex 5.5 / OpenCLAW session\nUpdated: 22:25 EDT",
     "finalSections": [
-      "Objective Complete",
-      "Active Model/Auth",
-      "Route",
-      "TLDR",
-      "What changed",
-      "Verified",
-      "Challenges/Blockers",
-      "Next steps for approval"
+      "Complete",
+      "What was done",
+      "Issues",
+      "Appropriate next steps",
+      "Approval needed"
     ]
   },
   "commandMenu": [
-    { "command": "new", "description": "Reset the conversation" },
-    { "command": "status", "description": "Show agent and service status" },
-    { "command": "mc", "description": "Push and check Mission Control" },
-    { "command": "models", "description": "Show active model and fallbacks" },
-    { "command": "route", "description": "Pick the right agent/model" },
-    { "command": "joshex", "description": "Route to Codex/JOSHeX" },
-    { "command": "jaimes", "description": "Route to JAIMES/Hermes" },
-    { "command": "jain", "description": "Route to J.AI.N workers" },
-    { "command": "help", "description": "Show the command menu" },
-    { "command": "overview", "description": "Show ecosystem overview" },
-    { "command": "daily", "description": "Show daily agent digest" }
+    {
+      "command": "new",
+      "description": "Reset the conversation"
+    },
+    {
+      "command": "status",
+      "description": "Show agent and service status"
+    },
+    {
+      "command": "mc",
+      "description": "Push and check Mission Control"
+    },
+    {
+      "command": "models",
+      "description": "Show active model and fallbacks"
+    },
+    {
+      "command": "route",
+      "description": "Pick the right agent/model"
+    },
+    {
+      "command": "joshex",
+      "description": "Route to Codex/JOSHeX"
+    },
+    {
+      "command": "jaimes",
+      "description": "Route to JAIMES/Hermes"
+    },
+    {
+      "command": "jain",
+      "description": "Route to J.AI.N workers"
+    },
+    {
+      "command": "help",
+      "description": "Show the command menu"
+    },
+    {
+      "command": "overview",
+      "description": "Show ecosystem overview"
+    },
+    {
+      "command": "daily",
+      "description": "Show daily agent digest"
+    }
   ]
 }

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -12,15 +13,43 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_PATH = ROOT / "data" / "eight-sleep-data.json"
 
-# Eight Sleep credentials
+# Eight Sleep proxy config
 AUTH_URL = "https://auth-api.8slp.net/v1/tokens"
 CLIENT_API = "https://client-api.8slp.net/v1"
-EMAIL = "jcubell16@gmail.com"
-PASSWORD = "Drakemaye123!!!"
-CLIENT_ID = "0894c7f33bb94800a03f1f4df13a4f38"
-CLIENT_SECRET = "f0954a3ed5763ba3d06834c73731a32f15f168f47d4f164751275def86db0c76"
-DEVICE_ID = "46765770c69adc8ab1f0b25401b0684e7b6f41a5"
-USER_ID = "c162f25b35354979ba76ed46d28f537b"
+SECRET_PATH = Path(
+    os.environ.get("EIGHT_SLEEP_SECRET_FILE", Path.home() / ".secrets" / "eightsleep.json")
+)
+_config_cache = None
+
+
+def config() -> dict:
+    global _config_cache
+    if _config_cache is not None:
+        return _config_cache
+
+    cfg = {}
+    if SECRET_PATH.exists():
+        cfg = json.loads(SECRET_PATH.read_text())
+
+    env_map = {
+        "email": "EIGHT_SLEEP_EMAIL",
+        "password": "EIGHT_SLEEP_PASSWORD",
+        "client_id": "EIGHT_SLEEP_CLIENT_ID",
+        "client_secret": "EIGHT_SLEEP_CLIENT_SECRET",
+        "device_id": "EIGHT_SLEEP_DEVICE_ID",
+        "user_id": "EIGHT_SLEEP_USER_ID",
+    }
+    for key, env_name in env_map.items():
+        if os.environ.get(env_name):
+            cfg[key] = os.environ[env_name]
+
+    required = ("email", "password", "client_id", "client_secret", "device_id", "user_id")
+    missing = [key for key in required if not cfg.get(key)]
+    if missing:
+        raise RuntimeError("Eight Sleep secret config missing required key(s): " + ", ".join(missing))
+
+    _config_cache = cfg
+    return cfg
 
 
 def _post(url: str, body: dict, headers: dict | None = None) -> dict:
@@ -43,12 +72,13 @@ def _get(url: str, token: str) -> dict:
 
 def authenticate() -> str:
     """Get access token from Eight Sleep auth API."""
+    cfg = config()
     resp = _post(AUTH_URL, {
         "grant_type": "password",
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "username": EMAIL,
-        "password": PASSWORD,
+        "client_id": cfg["client_id"],
+        "client_secret": cfg["client_secret"],
+        "username": cfg["email"],
+        "password": cfg["password"],
     })
     token = resp.get("session", {}).get("token") or resp.get("access_token") or resp.get("token")
     if not token:
@@ -63,7 +93,7 @@ def authenticate() -> str:
 
 
 def fetch_device(token: str) -> dict:
-    url = f"{CLIENT_API}/devices/{DEVICE_ID}"
+    url = f"{CLIENT_API}/devices/{config()['device_id']}"
     resp = _get(url, token)
     return resp.get("result", resp)
 
@@ -72,7 +102,7 @@ def fetch_trends(token: str, days: int = 7) -> list:
     today = dt.date.today()
     from_date = today - dt.timedelta(days=days)
     url = (
-        f"{CLIENT_API}/users/{USER_ID}/trends"
+        f"{CLIENT_API}/users/{config()['user_id']}/trends"
         f"?tz=America%2FNew_York"
         f"&from={from_date.isoformat()}"
         f"&to={today.isoformat()}"

@@ -19,6 +19,13 @@ TASKS_PATH = DATA_DIR / "agent-task-queue.json"
 CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 
 AGENTS = {"joshex", "josh", "jaimes", "jain"}
+AGENT_ALIASES = {
+    "codex": "joshex",
+    "josh2": "josh",
+    "josh2.0": "josh",
+    "josh 2.0": "josh",
+    "j.a.i.n": "jain",
+}
 AGENT_LABELS = {
     "joshex": "JOSHeX",
     "josh": "Josh 2.0",
@@ -82,16 +89,20 @@ def locked_tasks(fn):
 
 
 def validate_agent(agent: str) -> str:
-    value = str(agent or "").strip().lower()
+    value = " ".join(str(agent or "").strip().lower().replace("_", " ").split())
+    value = AGENT_ALIASES.get(value, value.replace(" ", ""))
     if value not in AGENTS:
-        raise SystemExit(f"Unknown agent '{agent}'. Use one of: {', '.join(sorted(AGENTS))}")
+        raise SystemExit(f"Unknown agent '{agent}'. Use joshex, josh2, jaimes, or jain.")
     return value
 
 
 def validate_requester(requester: str) -> str:
-    value = str(requester or "joshex").strip().lower()
+    raw = " ".join(str(requester or "joshex").strip().lower().replace("_", " ").split())
+    if raw == "josh-user":
+        return raw
+    value = AGENT_ALIASES.get(raw, raw.replace(" ", ""))
     if value not in REQUESTERS:
-        raise SystemExit(f"Unknown requester '{requester}'.")
+        raise SystemExit(f"Unknown requester '{requester}'. Use joshex, josh2, jaimes, jain, or josh-user.")
     return value
 
 
@@ -146,6 +157,11 @@ def publish_event(agent: str, event_type: str, status: str, title: str, detail: 
     subprocess.run(cmd, cwd=ROOT, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def publish_to_brain_feed(args: argparse.Namespace) -> bool:
+    """Brain Feed is mandatory for meaningful shared tasks unless explicitly suppressed."""
+    return not bool(getattr(args, "no_brain_feed", False))
+
+
 def task_summary(task: dict[str, Any]) -> str:
     return f"{task.get('id')} [{task.get('status')}] {task.get('owner')}: {task.get('title')}"
 
@@ -197,10 +213,10 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
             "active",
             f"Requesting {AGENT_LABELS[owner]}: {task['title']}",
             f"Created task {task['id']} for {AGENT_LABELS[owner]}: {task['objective']}",
-            args.brain_feed,
+            publish_to_brain_feed(args),
             args.job,
         )
-    publish_event(owner, "status", "queued", f"Task queued: {task['title']}", task["objective"], args.brain_feed, args.job)
+    publish_event(owner, "status", "queued", f"Task queued: {task['title']}", task["objective"], publish_to_brain_feed(args), args.job)
     return result
 
 
@@ -229,7 +245,7 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
     result = locked_tasks(mutate)
     title = f"Task {status}: {result['title']}"
     detail = args.summary or args.note or result.get("objective") or title
-    publish_event(result["owner"], "complete" if status == "done" else "blocked" if status in {"blocked", "error"} else "status", status, title, detail, args.brain_feed, args.job)
+    publish_event(result["owner"], "complete" if status == "done" else "blocked" if status in {"blocked", "error"} else "status", status, title, detail, publish_to_brain_feed(args), args.job)
     return result
 
 
@@ -262,7 +278,8 @@ def main() -> int:
     create_p.add_argument("--artifact", action="append", default=[])
     create_p.add_argument("--due-at", default=None)
     create_p.add_argument("--note", default="")
-    create_p.add_argument("--brain-feed", action="store_true")
+    create_p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
+    create_p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
     create_p.add_argument("--job", action="store_true")
 
     for name, status in [("accept", "accepted"), ("start", "active"), ("block", "blocked"), ("complete", "done"), ("error", "error"), ("cancel", "cancelled")]:
@@ -274,7 +291,8 @@ def main() -> int:
         p.add_argument("--note", default="")
         p.add_argument("--summary", default="")
         p.add_argument("--artifact", action="append", default=[])
-        p.add_argument("--brain-feed", action="store_true")
+        p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
+        p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
         p.add_argument("--job", action="store_true")
 
     handoff_p = sub.add_parser("handoff")
@@ -285,7 +303,8 @@ def main() -> int:
     handoff_p.add_argument("--note", default="")
     handoff_p.add_argument("--summary", default="")
     handoff_p.add_argument("--artifact", action="append", default=[])
-    handoff_p.add_argument("--brain-feed", action="store_true")
+    handoff_p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
+    handoff_p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
     handoff_p.add_argument("--job", action="store_true")
 
     list_p = sub.add_parser("list")

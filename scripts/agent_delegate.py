@@ -21,6 +21,13 @@ AGENT_LABELS = {
     "jain": "J.A.I.N",
     "joshex": "JOSHeX",
 }
+AGENT_ALIASES = {
+    "codex": "joshex",
+    "josh2": "josh",
+    "josh2.0": "josh",
+    "josh 2.0": "josh",
+    "j.a.i.n": "jain",
+}
 REMOTE_HOSTS = {
     "josh": {
         "ssh": "josh2-lan",
@@ -45,6 +52,14 @@ def compact(value: Any, limit: int = 500) -> str:
     if len(text) <= limit:
         return text
     return text[: max(0, limit - 1)].rstrip() + "..."
+
+
+def canonical_agent(value: str) -> str:
+    raw = " ".join(str(value or "").strip().lower().replace("_", " ").split())
+    agent = AGENT_ALIASES.get(raw, raw.replace(" ", ""))
+    if agent not in AGENT_LABELS:
+        raise SystemExit(f"Unknown agent '{value}'. Use joshex, josh2, jaimes, or jain.")
+    return agent
 
 
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -139,8 +154,8 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Delegate work with visible Mission Control Brain Feed updates.")
-    parser.add_argument("--to", required=True, choices=sorted(AGENT_LABELS))
-    parser.add_argument("--requester", default="joshex", choices=sorted(AGENT_LABELS))
+    parser.add_argument("--to", required=True)
+    parser.add_argument("--requester", default="joshex")
     parser.add_argument("--task-type", default="delegated-work")
     parser.add_argument("--title", required=True)
     parser.add_argument("--objective", required=True)
@@ -154,6 +169,8 @@ def main() -> int:
     parser.add_argument("--no-remote-receipt", action="store_true")
     parser.add_argument("--allow-offline", action="store_true")
     args = parser.parse_args()
+    args.to = canonical_agent(args.to)
+    args.requester = canonical_agent(args.requester)
 
     target_label = AGENT_LABELS[args.to]
     publish(

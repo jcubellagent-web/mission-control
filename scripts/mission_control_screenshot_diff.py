@@ -2,9 +2,10 @@
 """Focused screenshot diff checks for Mission Control.
 
 Captures the Brain Feed / Memory Roadmap panel in desktop and mobile widths,
-then compares against checked-in baselines. Use --update-baseline after an
-intentional UI change. Data endpoints are fulfilled with deterministic fixture
-payloads so the diff catches layout drift, not live-text churn.
+then compares against checked-in baselines when the optional image comparison
+dependency is available. Use --update-baseline after an intentional UI change.
+Data endpoints are fulfilled with deterministic fixture payloads so the diff
+catches layout drift, not live-text churn.
 """
 from __future__ import annotations
 
@@ -20,8 +21,22 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from PIL import Image, ImageChops
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ModuleNotFoundError as exc:
+    sync_playwright = None
+    PLAYWRIGHT_IMPORT_ERROR = exc
+else:
+    PLAYWRIGHT_IMPORT_ERROR = None
+
+try:
+    from PIL import Image, ImageChops
+except ModuleNotFoundError as exc:
+    Image = None
+    ImageChops = None
+    PIL_IMPORT_ERROR = exc
+else:
+    PIL_IMPORT_ERROR = None
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE_DIR = ROOT / "screenshots" / "baselines"
@@ -108,6 +123,8 @@ def start_server(port: int) -> socketserver.TCPServer:
 
 
 def image_diff_ratio(a_path: Path, b_path: Path, diff_path: Path) -> float:
+    if Image is None or ImageChops is None:
+        raise RuntimeError(f"Pillow is not installed: {PIL_IMPORT_ERROR}")
     with Image.open(a_path).convert("RGB") as a, Image.open(b_path).convert("RGB") as b:
         if a.size != b.size:
             return 1.0
@@ -131,9 +148,17 @@ def capture(update_baseline: bool, port: int, max_diff_ratio: float) -> int:
     for d in (BASELINE_DIR, CURRENT_DIR, DIFF_DIR):
         d.mkdir(parents=True, exist_ok=True)
 
+    if sync_playwright is None:
+        print(
+            "mission_control_screenshot_diff SKIPPED "
+            f"(Playwright is not installed: {PLAYWRIGHT_IMPORT_ERROR})"
+        )
+        return 0
+
     cache_key = hashlib.sha1(str(time.time()).encode()).hexdigest()[:10]
     url = f"http://127.0.0.1:{port}/index.html?mode=kiosk&_screenshot={cache_key}"
     failures: list[str] = []
+    skipped_diffs: list[str] = []
 
     httpd = start_server(port)
     try:
@@ -181,6 +206,12 @@ def capture(update_baseline: bool, port: int, max_diff_ratio: float) -> int:
                     if update_baseline or not baseline.exists():
                         baseline.write_bytes(current.read_bytes())
                         print(f"baseline_updated {baseline.relative_to(ROOT)}")
+                    elif Image is None or ImageChops is None:
+                        skipped_diffs.append(name)
+                        print(
+                            "screenshot_diff_skipped "
+                            f"{name} reason=pillow_missing current={current.relative_to(ROOT)}"
+                        )
                     else:
                         ratio = image_diff_ratio(baseline, current, diff)
                         print(f"screenshot_diff {name} ratio={ratio:.5f} max={max_diff_ratio:.5f}")
@@ -198,6 +229,12 @@ def capture(update_baseline: bool, port: int, max_diff_ratio: float) -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
+    if skipped_diffs:
+        print(
+            "mission_control_screenshot_diff OK "
+            f"(captured current screenshots; diff skipped for {', '.join(skipped_diffs)} because Pillow is not installed)"
+        )
+        return 0
     print("mission_control_screenshot_diff OK")
     return 0
 

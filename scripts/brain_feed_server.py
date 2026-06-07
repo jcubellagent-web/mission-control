@@ -26,16 +26,47 @@ Endpoints:
 import http.server, json, mimetypes, os, subprocess, sys, threading, urllib.error, urllib.request
 from pathlib import Path
 
-# ── Eight Sleep constants ──────────────────────────────────────────────────────
+# ── Eight Sleep proxy config ───────────────────────────────────────────────────
 _8S_AUTH_URL = "https://auth-api.8slp.net/v1/tokens"
 _8S_CLIENT_API = "https://client-api.8slp.net/v1"
-_8S_EMAIL = "jcubell16@gmail.com"
-_8S_PASSWORD = "Drakemaye123!!!"
-_8S_CLIENT_ID = "0894c7f33bb94800a03f1f4df13a4f38"
-_8S_CLIENT_SECRET = "f0954a3ed5763ba3d06834c73731a32f15f168f47d4f164751275def86db0c76"
-_8S_DEVICE_ID = "46765770c69adc8ab1f0b25401b0684e7b6f41a5"
-_8S_USER_ID = "c162f25b35354979ba76ed46d28f537b"
+_8S_SECRET_PATH = Path(
+    os.environ.get("EIGHT_SLEEP_SECRET_FILE", Path.home() / ".secrets" / "eightsleep.json")
+)
+_8s_config_cache = None
 _8s_token_cache: dict = {}  # {"token": str, "expires": float}
+
+
+def _8s_config() -> dict:
+    """Load Eight Sleep credentials from a host-local secret file or env."""
+    global _8s_config_cache
+    if _8s_config_cache is not None:
+        return _8s_config_cache
+
+    cfg = {}
+    if _8S_SECRET_PATH.exists():
+        cfg = json.loads(_8S_SECRET_PATH.read_text())
+
+    env_map = {
+        "email": "EIGHT_SLEEP_EMAIL",
+        "password": "EIGHT_SLEEP_PASSWORD",
+        "client_id": "EIGHT_SLEEP_CLIENT_ID",
+        "client_secret": "EIGHT_SLEEP_CLIENT_SECRET",
+        "device_id": "EIGHT_SLEEP_DEVICE_ID",
+        "user_id": "EIGHT_SLEEP_USER_ID",
+    }
+    for key, env_name in env_map.items():
+        if os.environ.get(env_name):
+            cfg[key] = os.environ[env_name]
+
+    required = ("email", "password", "client_id", "client_secret", "device_id")
+    missing = [key for key in required if not cfg.get(key)]
+    if missing:
+        raise RuntimeError(
+            "Eight Sleep secret config missing required key(s): " + ", ".join(missing)
+        )
+
+    _8s_config_cache = cfg
+    return cfg
 
 
 def _8s_authenticate() -> str:
@@ -44,12 +75,13 @@ def _8s_authenticate() -> str:
     now = time.time()
     if _8s_token_cache.get("token") and _8s_token_cache.get("expires", 0) > now + 60:
         return _8s_token_cache["token"]
+    cfg = _8s_config()
     body = json.dumps({
         "grant_type": "password",
-        "client_id": _8S_CLIENT_ID,
-        "client_secret": _8S_CLIENT_SECRET,
-        "username": _8S_EMAIL,
-        "password": _8S_PASSWORD,
+        "client_id": cfg["client_id"],
+        "client_secret": cfg["client_secret"],
+        "username": cfg["email"],
+        "password": cfg["password"],
     }).encode()
     req = urllib.request.Request(_8S_AUTH_URL, data=body, method="POST")
     req.add_header("Content-Type", "application/json")
@@ -220,7 +252,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         # /eightsleep/status — proxy live device state
         if path == "/eightsleep/status":
             try:
-                device = _8s_get(f"/devices/{_8S_DEVICE_ID}")
+                device = _8s_get(f"/devices/{_8s_config()['device_id']}")
                 result = device.get("result", device)
                 return self._json({"ok": True, "device": result})
             except Exception as e:
@@ -240,13 +272,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
         level = max(-100, min(100, level))
         try:
             if path == "/eightsleep/left":
-                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": level})
+                _8s_put(f"/devices/{_8s_config()['device_id']}", {"leftHeatingLevel": level})
                 return self._json({"ok": True, "side": "left", "level": level})
             elif path == "/eightsleep/right":
-                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"rightHeatingLevel": level})
+                _8s_put(f"/devices/{_8s_config()['device_id']}", {"rightHeatingLevel": level})
                 return self._json({"ok": True, "side": "right", "level": level})
             elif path == "/eightsleep/both":
-                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": level, "rightHeatingLevel": level})
+                _8s_put(f"/devices/{_8s_config()['device_id']}", {"leftHeatingLevel": level, "rightHeatingLevel": level})
                 return self._json({"ok": True, "side": "both", "level": level})
             else:
                 return self._json({"error": "not found"}, 404)
@@ -293,7 +325,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         elif path == "/eightsleep/off":
             try:
-                _8s_put(f"/devices/{_8S_DEVICE_ID}", {"leftHeatingLevel": 0, "rightHeatingLevel": 0})
+                _8s_put(f"/devices/{_8s_config()['device_id']}", {"leftHeatingLevel": 0, "rightHeatingLevel": 0})
                 self._json({"ok": True, "action": "off"})
             except Exception as e:
                 self._json({"ok": False, "error": str(e)}, 500)
@@ -334,7 +366,7 @@ def _poll_jain_brain_feed():
                 ["ssh", "-o", "ConnectTimeout=3", "-o", "BatchMode=yes",
                  "-o", "StrictHostKeyChecking=no",
                  "jc_agent@100.121.89.84",
-                 "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/brain-feed.json"],
+                 "cat /Users/jc_agent/.openclaw/workspace/mission-control/data/jain-brain-feed.json"],
                 capture_output=True, timeout=5
             )
             if result.returncode == 0 and result.stdout:
@@ -343,6 +375,10 @@ def _poll_jain_brain_feed():
             pass
         time.sleep(30)
 
+
+
+def supabase_command_polling_enabled() -> bool:
+    return os.environ.get("MISSION_CONTROL_SUPABASE_COMMANDS", "").lower() in {"1", "true", "yes", "on"}
 
 
 def _poll_supabase_commands():
@@ -457,9 +493,12 @@ if __name__ == "__main__":
     t2.start()
     print("J.A.I.N x-progress poller started (60s interval)", flush=True)
 
-    t3 = threading.Thread(target=_poll_supabase_commands, daemon=True)
-    t3.start()
-    print("Supabase remote command poller started (3s interval)", flush=True)
+    if supabase_command_polling_enabled():
+        t3 = threading.Thread(target=_poll_supabase_commands, daemon=True)
+        t3.start()
+        print("Supabase remote command poller started (3s interval)", flush=True)
+    else:
+        print("Supabase remote command poller disabled; local-first Brain Feed is active", flush=True)
 
     class BrainFeedThreadingServer(http.server.ThreadingHTTPServer):
         daemon_threads = True

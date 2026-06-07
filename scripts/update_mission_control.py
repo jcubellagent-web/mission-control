@@ -13,6 +13,10 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
+    tomllib = None  # type: ignore[assignment]
 
 ROOT = Path(__file__).resolve().parents[0]
 def utc_iso(delta: dt.timedelta | None = None) -> str:
@@ -27,6 +31,7 @@ MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
 PERSONAL_CODEX_PATH = ROOT.parent / "data" / "personal-codex.json"
+JOSHEX_BRAIN_FEED_PATH = ROOT.parent / "data" / "joshex-brain-feed.json"
 AGENT_CONTROL_STATUS_PATH = ROOT.parent / "data" / "agent-control-status.json"
 CODEX_JOBS_PATH = ROOT.parent / "data" / "codex-jobs.json"
 SHARED_EVENTS_PATH = ROOT.parent / "data" / "shared-events.json"
@@ -38,9 +43,22 @@ SHARED_LAYER_ADOPTION_PATH = ROOT.parent / "data" / "shared-layer-adoption.json"
 AGENT_TASK_QUEUE_PATH = ROOT.parent / "data" / "agent-task-queue.json"
 AGENT_CAPABILITIES_PATH = ROOT.parent / "data" / "agent-capabilities.json"
 AGENT_ROUTING_POLICY_PATH = ROOT.parent / "data" / "agent-routing-policy.json"
+MODEL_PROVIDER_BUDGETS_PATH = ROOT.parent / "data" / "model-provider-budgets.json"
+XAI_ECOSYSTEM_PATH = ROOT.parent / "data" / "xai-ecosystem.json"
+XAI_SPECIALIST_RUNS_PATH = ROOT.parent / "data" / "xai-specialist-runs.json"
+ECOSYSTEM_HEALTH_SWEEP_PATH = ROOT.parent / "data" / "ecosystem-health-sweep.json"
 AGENT_HEARTBEATS_PATH = ROOT.parent / "data" / "agent-heartbeats.json"
+AGENT_CONTEXT_REGISTRY_PATH = ROOT.parent / "data" / "agent-context-registry.json"
+AGENT_BRAIN_FEED_STALE_HOURS = 4
 CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
+CAPABILITY_WATCH_PATH = ROOT.parent / "data" / "capability-watch.json"
 AUTOMATION_ROLLOUT_PATH = ROOT.parent / "data" / "automation-rollout.json"
+RELIABILITY_UPGRADES_PATH = ROOT.parent / "data" / "reliability-upgrades.json"
+TELEGRAM_AI_BOT_FEATURES_PATH = ROOT.parent / "data" / "telegram-ai-bot-features.json"
+RUNTIME_LAYOUT_PATH = ROOT.parent / "data" / "mission-control-runtime-layout.json"
+CODEX_AUTOMATIONS_DIR = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "automations"
+CODEX_AUTOMATION_STATUS_PATH = DATA_DIR / "codex-automation-status.json"
+JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
@@ -50,21 +68,103 @@ CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-stat
 CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
 CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
 TASKS_PATH = WORKSPACE_ROOT / "memory" / "tasks.md"
+GOG_KEYRING_ENV_PATHS = [
+    Path.home() / ".openclaw" / "secrets" / "gog-keyring.env",
+    WORKSPACE_ROOT / "secrets" / "gog-keyring.env",
+]
+
+PLAIN_TEXT_REPLACEMENTS = {
+    "Heartbeat: josh2-lan": "Josh 2.0 is online and ready",
+    "Heartbeat: jaimes-via-josh": "JAIMES is online and ready",
+    "Heartbeat: macbook-codex": "JOSHeX is online and ready",
+    "agent_heartbeat.py": "status check",
+    "agent heartbeat": "status check",
+    "josh2-lan": "Josh 2.0",
+    "jaimes-via-josh": "JAIMES",
+    "macbook-codex": "JOSHeX",
+    "jaimes-ops-drift-check": "JAIMES ops drift check",
+    "jaimes-model-efficiency-guard": "JAIMES model efficiency guard",
+}
+SCRIPT_LABELS = {
+    "agent_heartbeat": "status check",
+    "intel_feedback_loop": "intelligence feedback loop",
+    "feedback_loop": "feedback loop",
+    "check_josh_health": "Josh health check",
+    "breaking_news_scanner": "breaking news scanner",
+    "x_feedback_ml": "X feedback model check",
+    "launch_scheduler": "launch scheduler",
+    "host_local_maintenance": "host maintenance",
+    "sorare_missions": "Sorare mission sweep",
+    "sorare_lineups": "Sorare lineup check",
+    "jaimes-ops-drift-check": "JAIMES ops drift check",
+    "jaimes-model-efficiency-guard": "JAIMES model efficiency guard",
+}
+
+
+def plain_dashboard_text(value: Any, limit: int = 220) -> str:
+    text = " ".join(str(value or "").split())
+    for raw, plain in PLAIN_TEXT_REPLACEMENTS.items():
+        text = re.sub(re.escape(raw), plain, text, flags=re.IGNORECASE)
+
+    def script_label(match: re.Match[str]) -> str:
+        token = match.group(1)
+        stem = Path(token).name
+        stem = re.sub(r"\.(py|sh|js|ts|tsx)$", "", stem, flags=re.IGNORECASE)
+        return SCRIPT_LABELS.get(stem, stem.replace("_", " ").replace("-", " "))
+
+    text = re.sub(
+        r"(?<![\w./-])((?:/[^ ]+/)?[A-Za-z0-9_-]+\.(?:py|sh|js|ts|tsx))(?![\w./-])",
+        script_label,
+        text,
+    )
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 1)].rstrip() + "..."
+
+
+def plain_dashboard_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return plain_dashboard_text(value, 500)
+    if isinstance(value, list):
+        return [plain_dashboard_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: plain_dashboard_value(item) for key, item in value.items()}
+    return value
+
+
+def load_env_file_values(paths: List[Path], env: Dict[str, str]) -> Dict[str, str]:
+    merged = dict(env)
+    for path in paths:
+        try:
+            rows = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except Exception:
+            continue
+        for row in rows:
+            stripped = row.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            key = key.replace("export ", "").strip()
+            if key and key not in merged:
+                merged[key] = value.strip().strip('"').strip("'")
+    return merged
 
 CRON_TARGETS = [
+    # ── Codex automations ───────────────────────────────────────────────────
+    {"name": "Gmail Morning Inbox Triage", "pattern": "gmail-morning-inbox-triage", "schedule": "Daily 8:30 AM ET", "description": "Reviews the last 24 hours of Personal Gmail, quiets low-signal mail, and surfaces anything that needs attention", "category": "Personal Inbox", "agent": "JOSHeX", "source": "codex_automation", "automationId": "gmail-morning-inbox-triage", "assumePresent": True},
+
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
     {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Mission Control data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "J.A.I.N Context Sync", "pattern": "com.josh20.mission-control-signal-refresh", "schedule": "Every 5 min", "description": "Keeps J.A.I.N alert state available for Telegram and agent context", "category": "Agent Context", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log"},
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Mission Control", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Freshness", "pattern": "sorare_cookie_freshness.py", "schedule": "Daily 9:00 AM ET", "description": "Checks Sorare cookie age before it turns into a submission blocker", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
-    {"name": "Sorare Cookie Auto-Refresh", "pattern": "sorare_cookie_autorefresh.py", "schedule": "Sun 2:00 PM ET", "description": "Weekly forced refresh for Sorare auth cookies", "category": "Maintenance", "agent": "JOSH 2.0"},
 
     # ── J.A.I.N intelligence + maintenance ──────────────────────────────────
-    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-signal alerts to @JAIN_BREAKING_BOT", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts for high-signal posts and routes urgent hits into the intelligence lane", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
-    {"name": "Intelligence Feed", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to Jain Intelligence", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True,
+    {"name": "Breaking News Scanner", "pattern": "breaking_news_scanner.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Scores breaking items and pushes high-priority alerts to @JAIN_BREAKING_BOT", "category": "J.A.I.N Alerts", "agent": "J.A.I.N", "jain": True},
+    {"name": "X Watchlist Monitor", "pattern": "x_watchlist_monitor.py", "schedule": "Every 5 min (6:00 AM–11:15 PM ET)", "description": "Watches priority X accounts and routes urgent hits into J.A.I.N alerts", "category": "J.A.I.N Alerts", "agent": "J.A.I.N", "jain": True},
+    {"name": "J.A.I.N Briefing", "pattern": "intelligence_feed.py", "schedule": "Weekdays 7:15a/10a/12p/2p/4:15p/6p/9p/11p · Weekends 10a/4:15p/9p/11p ET", "description": "AI, macro, crypto, and market briefings pushed to J.A.I.N Intelligence Telegram", "category": "J.A.I.N Alerts", "agent": "J.A.I.N", "jain": True,
      "multiRun": {
          "weekdayRuns": [
              {"time": "7:15 AM",  "mode": "Weekday", "label": "Market open brief"},
@@ -83,57 +183,27 @@ CRON_TARGETS = [
              {"time": "11:00 PM", "mode": "Weekend", "label": "Weekend wrap"},
          ]
      }},
-    {"name": "Intel Feedback Loop", "pattern": "intel_feedback_loop.py", "schedule": "Every 5 min (keepalive)", "description": "Restarts the persistent intelligence feedback loop if it drops", "category": "Intelligence Feed", "agent": "J.A.I.N", "jain": True},
+    {"name": "J.A.I.N Feedback Loop", "pattern": "intel_feedback_loop.py", "schedule": "Every 5 min (keepalive)", "description": "Restarts the persistent J.A.I.N Telegram feedback loop if it drops", "category": "J.A.I.N Alerts", "agent": "J.A.I.N", "jain": True},
     {"name": "JOSH Health Check", "pattern": "check_josh_health.sh", "schedule": "Every 30 min", "description": "Remote health check from J.A.I.N back to Josh 2.0", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "Error Rate Monitor", "pattern": "error_rate_monitor.py", "schedule": "Daily 11:00 PM ET", "description": "Nightly scan for elevated error rates across automations", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "XMCP Boot", "pattern": "xmcp", "schedule": "On boot", "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
 
-    # ── X account engine ─────────────────────────────────────────────────────
-    {"name": "X Pre-Market", "pattern": "x_post_agent.py", "schedule": "Daily 7:00 AM ET", "description": "[Original] Futures and overnight setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Market Open", "pattern": "x_post_agent.py", "schedule": "Daily 8:00 AM ET", "description": "[Original] Market-open macro take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Mover", "pattern": "x_post_agent.py", "schedule": "Daily 11:00 AM ET", "description": "[Original] Mid-morning mover or stat", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Hot Take", "pattern": "x_post_agent.py", "schedule": "Daily 12:00 PM ET", "description": "[Original] Contrarian take built to spark replies", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Quote Tweets", "pattern": "x_post_agent.py", "schedule": "Daily 1p/3p/6p/8p ET", "description": "[QT] Quotes breaking or viral posts with our angle", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "1:00 PM", "label": "Quote Tweet"},
-             {"time": "3:00 PM", "label": "Quote Tweet"},
-             {"time": "6:00 PM", "label": "Quote Tweet"},
-             {"time": "8:00 PM", "label": "Quote Tweet"},
-         ]
-     }},
-    {"name": "X Market Close", "pattern": "x_post_agent.py", "schedule": "Daily 5:00 PM ET", "description": "[Original] Close wrap and next-day setup", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Prime Take", "pattern": "x_post_agent.py", "schedule": "Daily 9:00 PM ET", "description": "[Original] Prime-time flagship take", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Nightcap", "pattern": "x_post_agent.py", "schedule": "Daily 10:00 PM ET", "description": "[Original] Last sharp insight of the day", "category": "X Account", "agent": "J.A.I.N", "jain": True},
-    {"name": "X Strategic Replies", "pattern": "x_strategic_reply", "schedule": "12x daily (9a/10a/11a/1p/2p/3p/4p/5p/6p/7p/9p/11p ET)", "description": "[Reply] Finds fresh target tweets and posts browser-based strategic replies", "category": "X Account", "agent": "J.A.I.N", "jain": True,
-     "multiRun": {
-         "runs": [
-             {"time": "9:00 AM",  "label": "Strategic Reply"},
-             {"time": "10:00 AM", "label": "Strategic Reply"},
-             {"time": "11:00 AM", "label": "Strategic Reply"},
-             {"time": "1:00 PM",  "label": "Strategic Reply"},
-             {"time": "2:00 PM",  "label": "Strategic Reply"},
-             {"time": "3:00 PM",  "label": "Strategic Reply"},
-             {"time": "4:00 PM",  "label": "Strategic Reply"},
-             {"time": "5:00 PM",  "label": "Strategic Reply"},
-             {"time": "6:00 PM",  "label": "Strategic Reply"},
-             {"time": "7:00 PM",  "label": "Strategic Reply"},
-             {"time": "9:00 PM",  "label": "Strategic Reply"},
-             {"time": "11:00 PM", "label": "Strategic Reply"},
-         ]
-     }},
+    # X is intelligence-only in Mission Control. Posting/reply automations stay
+    # out of Today's Jobs unless a human explicitly re-enables a posting lane.
 
     # ── Sorare MLB ──────────────────────────────────────────────────────────
     {"name": "Sorare ML Training", "pattern": "sorare_ml/train.py", "schedule": "Daily 2:00 AM ET", "description": "Hermes retrains the Sorare MLB model on the latest results", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-train-model"},
-    {"name": "Sorare Nightly Claim", "pattern": "sorare_missions.py --claim-only --rarity limited", "schedule": "Daily 3:35 AM ET", "description": "LaunchAgent claim sweep for overnight Sorare rewards", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Sheet Updater", "pattern": "sorare_sheet_updater_v2.py", "schedule": "Daily 3:30 AM ET", "description": "Writes fresh Sorare data into the tracker sheet", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Daily Prep", "pattern": "sorare_daily_prep.sh", "schedule": "Daily 9:00 AM ET", "description": "Raw prep pipeline before model-driven Sorare submissions", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare ML Missions", "pattern": "ml_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "Hermes ML mission picker for Sorare", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-missions"},
-    {"name": "Sorare ML Lineups", "pattern": "ml_bot.py --lineups-only", "schedule": "Daily 11:00 AM ET", "description": "Hermes ML lineup builder for Sorare competitions", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-lineups"},
-    {"name": "Sorare Champion Submit", "pattern": "sorare_missions.py --sp-classic", "schedule": "Daily 11:00 AM ET", "description": "Champion lineup submitter running from raw crontab", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Canonical Reflector", "pattern": "sorare_canonical_reflector.py", "schedule": "Every 15 min (8:00 AM–10:45 PM ET)", "description": "Keeps canonical Sorare state mirrored into Mission Control data", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
-    {"name": "Sorare Deadline Guard", "pattern": "sorare_deadline_guard.py", "schedule": "Mon 5:45 PM ET", "description": "Late lineup-deadline safety check for Sorare", "category": "Sorare MLB", "agent": "J.A.I.N", "jain": True},
+    {"name": "Sorare All-Rarity Claim Sweep", "pattern": "sorare_missions.py --claim-only", "schedule": "Daily 3:30 AM ET", "description": "JAIMES claim sweep for all available Sorare Daily Mission rewards across supported scarcities", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-all-rarity-claim-sweep"},
+    {"name": "Sorare Daily Missions", "pattern": "ml_bot.py --missions-only", "schedule": "Daily 10:00 AM ET", "description": "JAIMES / Hermes optimizes, submits, and verifies Daily Mission picks with same-day game-lock awareness", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-daily-missions-optimize-submit"},
+    {"name": "Sorare Daily Missions Late Refresh", "pattern": "sorare_missions.py --skip-claims --owner-override", "schedule": "Daily 4:30 PM ET", "description": "JAIMES revalidates Daily Missions after probable-starter, lineup, and bullpen context changes while preserving locked/in-progress games", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-daily-missions-late-refresh"},
+    {"name": "Sorare Daily Missions Final Refresh", "pattern": "sorare_missions.py --skip-claims --owner-override", "schedule": "Daily 6:30 PM ET", "description": "JAIMES performs a final lock-aware Daily Missions refresh for players whose games remain unstarted", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-daily-missions-final-refresh"},
+    {"name": "Sorare Limited GW Lineups", "pattern": "ml_bot.py --lineups-only", "schedule": "Daily 11:00 AM ET", "description": "JAIMES / Hermes builds limited game-week lineups for Sorare competitions", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "sorare-ml-lineups"},
+    {"name": "Sorare GW Draft Report", "pattern": "gw_pipeline/run_gw_pipeline.py", "schedule": "Daily 8:00 AM ET", "description": "JAIMES / Hermes builds the no-submit game-week draft report and asks for approval when action is needed", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "Sorare MLB GW draft report"},
+    {"name": "Sorare GW Evening First Submit", "pattern": "gw_evening_first_submit.py", "schedule": "Daily 8:30 PM ET", "description": "JAIMES submits the first version of open GW lineups the evening before lock when no slate is already populated", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "Sorare GW evening first submit"},
+    {"name": "Sorare Pre-Lock Monitor", "pattern": "gw_pipeline/run_gw_pipeline.py --artifacts-dir artifacts/gw_pipeline_prelock", "schedule": "Every 4 hours", "description": "JAIMES / Hermes reruns the strict GW validator and reports only actionable lock-window risks", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "Sorare MLB pre-lock monitor"},
+    {"name": "Sorare/Fantasy Fast Lane", "pattern": "jaimes_sorare_fast_lane.py", "schedule": "Every 2 hours", "description": "JAIMES refreshes read-only Sorare and fantasy cache so Telegram/Codex answers can be fast before deep optimization is needed", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "launchd", "logPath": "/Users/jc_agent/.openclaw/workspace/mission-control/logs/jaimes-sorare-fast-lane.out.log"},
+    {"name": "Sorare Edge Outcome Cycle", "pattern": "edge_outcome_cycle.py", "schedule": "Daily 11:20 PM ET", "description": "JAIMES / Hermes syncs Sorare outcome labels and retrains the shadow edge calibrator when useful", "category": "Sorare MLB", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "Sorare edge outcome cycle"},
 
     # ── Fantasy baseball ────────────────────────────────────────────────────
     {"name": "Fantasy Waiver Scan (post-process)", "pattern": "fantasy_waiver_scan.py", "schedule": "Sun 8:00 PM ET", "description": "Post-waiver scan right after the Sunday-night processing window", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
@@ -145,7 +215,7 @@ CRON_TARGETS = [
     {"name": "Fantasy Waiver Scan (pre-game)", "pattern": "fantasy_waiver_scan.py", "schedule": "Mon 7:00 AM ET", "description": "Final waiver review before first-pitch lineup lock", "category": "Fantasy Baseball", "agent": "J.A.I.N", "jain": True},
 
     # ── JAIMES / Hermes maintenance ─────────────────────────────────────────
-    {"name": "Daily Health Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Hermes daily system-health pass", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
+    {"name": "Daily Agent Readiness Check", "pattern": "daily_health_check.py", "schedule": "Daily 5:50 AM ET", "description": "Checks JAIMES/Hermes readiness and flags handoff or system issues", "category": "Maintenance", "agent": "JAIMES", "jain": True, "source": "hermes", "hermesName": "daily-health-check"},
     {"name": "JAIMES Weekly Report", "pattern": "jaimes_weekly_report.py", "schedule": "Sat 9:00 AM ET", "description": "Weekly JAIMES summary sent back to Josh", "category": "Maintenance", "agent": "JAIMES", "jain": True},
 ]
 
@@ -374,11 +444,11 @@ def fetch_codex_jobs(now_iso: str) -> List[Dict[str, Any]]:
             status = str(entry.get("status") or "done").strip().lower()
             jobs.append({
                 "id": entry.get("id") or f"codex-job-{idx}",
-                "title": title[:120],
+                "title": plain_dashboard_text(title, 120),
                 "status": status[:32],
                 "time": ts,
-                "tool": str(entry.get("tool") or "codex")[:48],
-                "detail": str(entry.get("detail") or entry.get("summary") or "")[:220],
+                "tool": plain_dashboard_text(entry.get("tool") or "codex", 48),
+                "detail": plain_dashboard_text(entry.get("detail") or entry.get("summary") or "", 220),
                 "owner": str(entry.get("owner") or "Personal Codex")[:64],
             })
 
@@ -416,10 +486,10 @@ def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
                 "agent": str(entry.get("agent") or "joshex")[:24],
                 "agentLabel": str(entry.get("agentLabel") or entry.get("agent") or "Agent")[:80],
                 "type": str(entry.get("type") or "status")[:32],
-                "title": title[:160],
+                "title": plain_dashboard_text(title, 160),
                 "status": str(entry.get("status") or "info")[:32],
-                "tool": str(entry.get("tool") or "")[:80],
-                "detail": str(entry.get("detail") or "")[:240],
+                "tool": plain_dashboard_text(entry.get("tool") or "", 80),
+                "detail": plain_dashboard_text(entry.get("detail") or "", 240),
             })
         events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
         return events[:20]
@@ -428,25 +498,129 @@ def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
         return []
 
 
+LOW_SIGNAL_SHARED_EVENT_PATTERNS = re.compile(
+    r"heartbeat checks complete|stale/persistent warnings|specialist pass|gemini .*auth|"
+    r"daily gemini routing audit|morning digest pass|smoke|receipt not confirmed|"
+    r"weekly autonomy self-test|remote probe|operation not permitted|"
+    r"repo write access|push permission|allowlist requires explicit approval|"
+    r"daily agent ecosystem health sweep|ecosystem health sweep|"
+    r"stale brain feed freshness guard|brain feed needs refresh",
+    re.IGNORECASE,
+)
+
+
+def is_actionable_shared_event(event: Dict[str, Any]) -> bool:
+    """Only promote current user-actionable shared-layer failures into alerts."""
+    text = " ".join(str(event.get(key) or "") for key in ("title", "detail", "tool", "type"))
+    if LOW_SIGNAL_SHARED_EVENT_PATTERNS.search(text):
+        return False
+    return True
+
+
+def shared_layer_attention_item(shared_layer: Dict[str, Any]) -> Dict[str, Any]:
+    """Return the single most useful Josh-facing shared-layer alert."""
+    counts = shared_layer.get("counts", {}) if isinstance(shared_layer.get("counts"), dict) else {}
+    blocked_events = shared_layer.get("blockedEvents", []) if isinstance(shared_layer.get("blockedEvents"), list) else []
+    attention_handoffs = shared_layer.get("attentionHandoffs", []) if isinstance(shared_layer.get("attentionHandoffs"), list) else []
+    blocked_tasks = (shared_layer.get("tasks", {}) or {}).get("blocked", []) if isinstance(shared_layer.get("tasks"), dict) else []
+    approval_tasks = (shared_layer.get("tasks", {}) or {}).get("approvalNeeded", []) if isinstance(shared_layer.get("tasks"), dict) else []
+
+    if blocked_events:
+        event = blocked_events[0]
+        title = plain_dashboard_text(event.get("title") or "Shared-layer follow-up needed", 96)
+        detail = plain_dashboard_text(event.get("detail") or "Review the latest shared event.", 180)
+        text = f"{title} {detail} {event.get('tool') or ''}".lower()
+        if "base mcp" in text:
+            title = "Base MCP login needed"
+            detail = "Base MCP is staged on Josh 2.0, but Base Account sign-in timed out. Fresh login/approval is needed before account-aware proposals are live."
+        return {
+            "priority": "medium",
+            "title": title,
+            "detail": detail,
+            "url": "#jobs",
+        }
+    if attention_handoffs:
+        handoff = attention_handoffs[0]
+        return {
+            "priority": "medium",
+            "title": plain_dashboard_text(handoff.get("title") or "Agent handoff needs attention", 96),
+            "detail": plain_dashboard_text(handoff.get("detail") or "A shared handoff is blocked.", 180),
+            "url": "#jobs",
+        }
+    if blocked_tasks:
+        task = blocked_tasks[0]
+        return {
+            "priority": "medium",
+            "title": plain_dashboard_text(task.get("title") or task.get("id") or "Shared task blocked", 96),
+            "detail": plain_dashboard_text(task.get("detail") or task.get("status") or "A shared task reported blocked.", 180),
+            "url": "#jobs",
+        }
+    if approval_tasks:
+        task = approval_tasks[0]
+        return {
+            "priority": "medium",
+            "title": plain_dashboard_text(task.get("title") or task.get("id") or "Approval needed", 96),
+            "detail": "A shared task is waiting for explicit approval before it continues.",
+            "url": "#jobs",
+        }
+    return {
+        "priority": "medium",
+        "title": "Shared layer needs attention",
+        "detail": f"{counts.get('attentionHandoffs', 0)} blocked handoff(s), {counts.get('blocked', 0)} blocked event(s), {counts.get('blockedTasks', 0)} blocked task(s), {counts.get('approvalNeeded', 0)} approval(s).",
+        "url": "#jobs",
+    }
+
+
 def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
     decisions = load_json_file(DECISIONS_PATH, {"decisions": []}).get("decisions", [])
     knowledge = load_json_file(KNOWLEDGE_INDEX_PATH, {"entries": []})
     handoffs = load_json_file(HANDOFF_QUEUE_PATH, {"handoffs": []}).get("handoffs", [])
-    rollup = load_json_file(DAILY_ROLLUP_PATH, {})
+    rollup = plain_dashboard_value(load_json_file(DAILY_ROLLUP_PATH, {}))
     adoption = load_json_file(SHARED_LAYER_ADOPTION_PATH, {})
     task_queue = load_json_file(AGENT_TASK_QUEUE_PATH, {"tasks": []})
     capability_registry = load_json_file(AGENT_CAPABILITIES_PATH, {"agents": []})
     routing_policy = load_json_file(AGENT_ROUTING_POLICY_PATH, {"routes": []})
-    heartbeats_payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": [], "staleAfterMinutes": 30})
+    heartbeats_payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": [], "staleAfterMinutes": 120})
     inventory = load_json_file(CAPABILITY_INVENTORY_PATH, {"nodes": []})
+    capability_watch = load_json_file(CAPABILITY_WATCH_PATH, {
+        "updatedAt": now_iso,
+        "status": "pending",
+        "summary": "Capability Watch has not run yet.",
+        "recommendations": [],
+    })
     automation_rollout = load_json_file(AUTOMATION_ROLLOUT_PATH, {"rollouts": []})
     events = fetch_shared_events(now_iso)
-    open_handoffs = [h for h in handoffs if h.get("privacy") == "dashboard-safe" and h.get("status") in {"open", "blocked"}]
-    blocked_events = [e for e in events if e.get("status") in {"blocked", "error"} or e.get("type") == "blocked"]
+    tasks = [task for task in task_queue.get("tasks", []) if isinstance(task, dict)]
+    terminal_task_statuses = {"done", "cancelled", "canceled", "superseded"}
+    task_status_by_id = {
+        str(task.get("id")): str(task.get("status") or "").lower()
+        for task in tasks
+        if task.get("id")
+    }
+
+    def handoff_points_to_closed_task(handoff: Dict[str, Any]) -> bool:
+        text = " ".join(
+            str(handoff.get(key) or "")
+            for key in ("id", "title", "detail", "path")
+        )
+        task_ids = re.findall(r"\btask-[a-z0-9-]+", text.lower())
+        return any(task_status_by_id.get(task_id) in terminal_task_statuses for task_id in task_ids)
+
+    open_handoffs = [
+        h for h in handoffs
+        if h.get("privacy") == "dashboard-safe"
+        and h.get("status") in {"open", "blocked"}
+        and not handoff_points_to_closed_task(h)
+    ]
+    attention_handoffs = [h for h in open_handoffs if h.get("status") == "blocked"]
+    blocked_events = [
+        e for e in events
+        if (e.get("status") in {"blocked", "error"} or e.get("type") == "blocked")
+        and is_actionable_shared_event(e)
+    ]
     latest_event_at = events[0].get("time") if events else None
     fresh = bool(latest_event_at and is_recent_ts(latest_event_at, hours=6))
-    status = "attention" if blocked_events or len(open_handoffs) > 0 else "ready" if fresh else "stale"
-    tasks = [task for task in task_queue.get("tasks", []) if isinstance(task, dict)]
+    status = "attention" if blocked_events or attention_handoffs else "ready" if fresh else "stale"
     active_statuses = {"queued", "accepted", "active", "blocked", "error"}
     active_tasks = [task for task in tasks if task.get("status") in active_statuses]
     blocked_tasks = [task for task in tasks if task.get("status") in {"blocked", "error"}]
@@ -456,7 +630,7 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
         owner = str(task.get("owner") or "unknown")
         task_counts_by_owner[owner] = task_counts_by_owner.get(owner, 0) + 1
     heartbeat_rows = [row for row in heartbeats_payload.get("heartbeats", []) if isinstance(row, dict)]
-    stale_after = int(heartbeats_payload.get("staleAfterMinutes") or 30)
+    stale_after = int(heartbeats_payload.get("staleAfterMinutes") or 120)
     now_dt = dt.datetime.now(dt.timezone.utc)
     stale_heartbeats = []
     fresh_heartbeats = []
@@ -470,7 +644,7 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
             fresh_heartbeats.append(row)
     rollout_rows = [row for row in automation_rollout.get("rollouts", []) if isinstance(row, dict)]
     wrapped_rollouts = [row for row in rollout_rows if row.get("status") == "wrapped"]
-    if blocked_tasks or approval_tasks or stale_heartbeats:
+    if blocked_tasks or approval_tasks:
         status = "attention"
     return {
         "status": status,
@@ -480,6 +654,7 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
             "decisions": len([d for d in decisions if d.get("privacy") == "dashboard-safe"]),
             "knowledgeEntries": len(knowledge.get("entries", [])) if isinstance(knowledge, dict) else 0,
             "openHandoffs": len(open_handoffs),
+            "attentionHandoffs": len(attention_handoffs),
             "blocked": len(blocked_events),
             "activeTasks": len(active_tasks),
             "blockedTasks": len(blocked_tasks),
@@ -492,9 +667,11 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
             "wrappedAutomations": len(wrapped_rollouts),
         },
         "latestEvents": events[:6],
+        "blockedEvents": blocked_events[:6],
         "recentDecisions": [d for d in decisions if d.get("privacy") == "dashboard-safe"][:6],
         "knowledgeEntries": (knowledge.get("entries", []) if isinstance(knowledge, dict) else [])[:8],
         "openHandoffs": open_handoffs[:6],
+        "attentionHandoffs": attention_handoffs[:6],
         "dailyRollup": rollup,
         "adoption": adoption,
         "tasks": {
@@ -511,7 +688,113 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
             "stale": stale_heartbeats[:8],
         },
         "capabilityInventory": inventory,
+        "capabilityWatch": capability_watch,
         "automationRollout": automation_rollout,
+    }
+
+
+def provider_from_model_name(name: str, source: str = "") -> str:
+    text = f"{name} {source}".lower()
+    if "openrouter" in text:
+        return "openrouter"
+    if "grok" in text or "xai" in text:
+        return "xai"
+    if "gemini" in text or "google/" in text:
+        return "gemini"
+    if "codex" in text or "openai" in text or "gpt-" in text:
+        return "codex"
+    if "ollama" in text:
+        return "ollama"
+    return "other"
+
+
+def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) -> Dict[str, Any]:
+    budgets = load_json_file(MODEL_PROVIDER_BUDGETS_PATH, {"providers": [], "policy": {}})
+    xai_ecosystem = load_json_file(XAI_ECOSYSTEM_PATH, {})
+    ecosystem_health = load_json_file(ECOSYSTEM_HEALTH_SWEEP_PATH, {})
+    rows = budgets.get("providers", []) if isinstance(budgets, dict) else []
+    breakdown = (model_usage or {}).get("breakdown", []) if isinstance(model_usage, dict) else []
+    spend_by_provider: Dict[str, Dict[str, float]] = {}
+    last_by_provider: Dict[str, Dict[str, str]] = {}
+    for item in breakdown if isinstance(breakdown, list) else []:
+        if not isinstance(item, dict):
+            continue
+        provider = provider_from_model_name(str(item.get("name") or ""), str(item.get("source") or ""))
+        bucket = spend_by_provider.setdefault(provider, {"daily": 0.0, "weekly": 0.0, "monthly": 0.0})
+        bucket["daily"] += float(item.get("dailyCost") or 0)
+        bucket["weekly"] += float(item.get("weeklyCost") or item.get("cost") or 0)
+        if provider not in last_by_provider:
+            last_by_provider[provider] = {
+                "model": str(item.get("name") or ""),
+                "source": str(item.get("source") or ""),
+            }
+    provider_rows = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        provider_id = str(row.get("id") or "")
+        spend = spend_by_provider.get(provider_id, {"daily": 0.0, "weekly": 0.0, "monthly": 0.0})
+        daily_cap = float(row.get("dailyCapUsd") or 0)
+        monthly_cap = float(row.get("monthlyCapUsd") or 0)
+        remaining = row.get("remainingCreditUsd")
+        reserve = float(row.get("reserveUsd") or 0)
+        if provider_id == "xai" and remaining is not None:
+            remaining = max(0.0, float(remaining) - spend["daily"])
+        daily_pct = round((spend["daily"] / daily_cap) * 100, 1) if daily_cap else 0.0
+        monthly_pct = round((spend["weekly"] / monthly_cap) * 100, 1) if monthly_cap else 0.0
+        xai_api = xai_ecosystem.get("api", {}) if provider_id == "xai" and isinstance(xai_ecosystem, dict) else {}
+        xai_key = xai_api.get("key", {}) if isinstance(xai_api, dict) else {}
+        xai_last_test = xai_ecosystem.get("lastTest", {}) if provider_id == "xai" and isinstance(xai_ecosystem, dict) else {}
+        host_xai_ok = False
+        if provider_id == "xai" and isinstance(ecosystem_health, dict):
+            hosts = ecosystem_health.get("hosts", [])
+            host_xai_ok = bool(hosts) and all(
+                isinstance(host, dict) and (host.get("checks") or {}).get("xaiApi") is True
+                for host in hosts
+                if isinstance(host, dict) and host.get("agent") in {"josh", "jaimes", "jain"}
+            )
+        xai_missing_key = provider_id == "xai" and not host_xai_ok and isinstance(xai_key, dict) and xai_key.get("present") is False
+        if xai_missing_key:
+            status = "missing-key"
+        elif daily_cap and spend["daily"] >= daily_cap:
+            status = "blocked"
+        elif remaining is not None and float(remaining) <= reserve:
+            status = "reserve"
+        elif daily_cap and daily_pct >= 80:
+            status = "watch"
+        else:
+            status = "ready"
+        last = last_by_provider.get(provider_id, {})
+        provider_rows.append({
+            **row,
+            "dailySpendUsd": round(spend["daily"], 6),
+            "weeklySpendUsd": round(spend["weekly"], 6),
+            "monthlySpendUsd": round(spend["monthly"], 6),
+            "dailyUtilizationPct": daily_pct,
+            "monthlyUtilizationPct": monthly_pct,
+            "remainingCreditUsd": None if remaining is None else round(float(remaining), 6),
+            "status": status,
+            "authStatus": "host-keys-ok" if provider_id == "xai" and host_xai_ok else "missing-key" if xai_missing_key else row.get("authStatus"),
+            "keyPresent": True if provider_id == "xai" and host_xai_ok else xai_key.get("present") if isinstance(xai_key, dict) else None,
+            "keySuffix": xai_key.get("suffix") if isinstance(xai_key, dict) else "",
+            "lastTestStatus": xai_last_test.get("status") if isinstance(xai_last_test, dict) else "",
+            "lastModelUsed": last.get("model") or row.get("lastModelUsed"),
+            "lastSource": last.get("source") or "",
+            "whyChosen": row.get("lastRouteReason") or row.get("role") or "",
+        })
+    policy = budgets.get("policy", {}) if isinstance(budgets, dict) else {}
+    codex_mode = str(policy.get("codexAllowanceMode") or "normal")
+    return {
+        "updatedAt": now_iso,
+        "policy": policy,
+        "codexAllowanceMode": codex_mode,
+        "providers": provider_rows,
+        "guardrails": budgets.get("guardrails", []) if isinstance(budgets, dict) else [],
+        "summary": (
+            "Codex exhausted mode active: Gemini/xAI/OpenRouter handle safe work; Codex/API spend is reserved for execution."
+            if codex_mode in {"conserve", "exhausted"}
+            else "Codex default; Gemini reviewer; xAI current-events/X-native specialist; OpenRouter fallback."
+        ),
     }
 
 
@@ -547,6 +830,75 @@ def is_recent_ts(value: Any, *, hours: int = 18) -> bool:
     if not stamp:
         return False
     return (dt.datetime.now(dt.timezone.utc) - stamp) <= dt.timedelta(hours=hours)
+
+
+def load_agent_control_status(now_iso: str) -> Dict[str, Any]:
+    payload = load_json_file(AGENT_CONTROL_STATUS_PATH, {})
+    generated_at = (payload.get("generatedAt") or payload.get("updatedAt")) if isinstance(payload, dict) else None
+    if isinstance(payload, dict) and payload.get("summary") and is_recent_ts(generated_at, hours=6):
+        return payload
+
+    heartbeats_payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": [], "staleAfterMinutes": 120})
+    capability_inventory = load_json_file(CAPABILITY_INVENTORY_PATH, {"nodes": []})
+    stale_after = int(heartbeats_payload.get("staleAfterMinutes") or 120)
+    now_dt = dt.datetime.now(dt.timezone.utc)
+    heartbeats = [row for row in heartbeats_payload.get("heartbeats", []) if isinstance(row, dict)]
+    nodes = [row for row in capability_inventory.get("nodes", []) if isinstance(row, dict)]
+    labels = {
+        "joshex": "JOSHeX",
+        "josh2": "Josh 2.0",
+        "jaimes": "JAIMES",
+        "jain": "J.A.I.N",
+    }
+    by_agent: Dict[str, list[Dict[str, Any]]] = {}
+    for row in heartbeats:
+        agent = normalize_node_slug(row.get("agent"))
+        by_agent.setdefault(agent, []).append(row)
+
+    agent_rows: Dict[str, Dict[str, Any]] = {}
+    tracked_agents = sorted(set(by_agent) | {normalize_node_slug(row.get("agent")) for row in nodes})
+    for agent in tracked_agents:
+        if agent == "system":
+            continue
+        rows = by_agent.get(agent, [])
+        latest = max(rows, key=lambda row: row.get("updatedAt") or "", default={})
+        stamp = iso_to_dt(latest.get("updatedAt"))
+        stale = not bool(stamp and (now_dt - stamp) <= dt.timedelta(minutes=stale_after))
+        status = str(latest.get("status") or "").lower()
+        ok = bool(rows) and not stale and status not in {"blocked", "error", "attention", "failed"}
+        node = next((row for row in nodes if normalize_node_slug(row.get("agent")) == agent), {})
+        agent_rows[agent] = {
+            "id": agent,
+            "label": labels.get(agent, agent.upper()),
+            "status": "ready" if ok else "attention",
+            "available": ok,
+            "probedAt": latest.get("updatedAt") or node.get("checkedAt") or now_iso,
+            "summary": plain_dashboard_text(latest.get("summary") or "No fresh heartbeat yet.", 180),
+            "source": "live-heartbeats",
+            "stale": stale,
+        }
+
+    ready_agents = sum(1 for row in agent_rows.values() if row.get("status") == "ready")
+    total_agents = len(agent_rows)
+    overall = "ready" if total_agents and ready_agents == total_agents else "attention"
+    return {
+        "generatedAt": now_iso,
+        "statusSource": "live-heartbeats",
+        "staleSourceSuppressed": bool(generated_at),
+        "summary": {
+            "overall": overall,
+            "readyAgents": ready_agents,
+            "totalAgents": total_agents,
+            "offlineAgents": max(0, total_agents - ready_agents),
+            "degradedServices": max(0, total_agents - ready_agents),
+            "authRequiredServices": 0,
+            "failedQueues": 0,
+            "dirtyRepos": 0,
+            "localModels": sum(len(row.get("ollamaModels") or []) for row in nodes),
+            "source": "live-heartbeats",
+        },
+        "agents": agent_rows,
+    }
 
 
 def canonicalize_timestamp(value: Any) -> str:
@@ -773,29 +1125,206 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
     }
 
 
+def agent_feed_is_ready_heartbeat(raw: Dict[str, Any]) -> bool:
+    """Detect health-check rows that mean ready, even if an old active flag remains."""
+    status = str(raw.get("status") or "").strip().lower()
+    text = " ".join(
+        str(raw.get(key) or "")
+        for key in ("objective", "detail", "currentTool", "source")
+    ).lower()
+    if status in {"ready", "ok", "done", "idle", "info"}:
+        return True
+    return any(
+        phrase in text
+        for phrase in (
+            "online and ready",
+            "no active queued worker tasks",
+            "not actively working",
+            "standing by",
+            "standby",
+        )
+    )
+
+
 def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
     raw = feed if isinstance(feed, dict) else {}
     updated_at = raw.get("updatedAt")
-    reported_active = bool(raw.get("active"))
-    stale = bool(updated_at) and not is_recent_ts(updated_at, hours=2)
+    ready_heartbeat = agent_feed_is_ready_heartbeat(raw)
+    reported_active = bool(raw.get("active")) and not ready_heartbeat
+    stale = bool(updated_at) and not is_recent_ts(updated_at, hours=AGENT_BRAIN_FEED_STALE_HOURS)
+    raw_status = str(raw.get("status") or "idle")
+    status = "ready" if ready_heartbeat and raw_status.lower() in {"active", "working", "running", "queued"} else raw_status
+    raw_steps = raw.get("steps") if isinstance(raw.get("steps"), list) else []
+    visible_steps = []
+    for step in raw_steps:
+        if not isinstance(step, dict):
+            continue
+        text = " ".join(str(step.get(key) or "") for key in ("label", "title", "tool", "status", "kind"))
+        if str(step.get("status") or "").lower() in {"blocked", "error"} and LOW_SIGNAL_SHARED_EVENT_PATTERNS.search(text):
+            continue
+        visible_steps.append(step)
     return {
-        "agent": str(raw.get("agent") or fallback_agent),
+        "agent": plain_dashboard_text(raw.get("agent") or fallback_agent, 80),
         "active": reported_active and not stale,
         "reportedActive": reported_active,
-        "objective": str(raw.get("objective") or "").strip(),
-        "status": "stale" if stale and reported_active else str(raw.get("status") or "idle"),
+        "objective": plain_dashboard_text(raw.get("objective") or "", 220),
+        "status": "stale" if stale and reported_active else status,
         "stale": stale,
         "updatedAt": updated_at,
-        "messageReceived": raw.get("messageReceived"),
-        "currentTool": raw.get("currentTool"),
+        "messageReceived": plain_dashboard_text(raw.get("messageReceived") or "", 220) or None,
+        "currentTool": plain_dashboard_text(raw.get("currentTool") or "", 80) or None,
         "model": raw.get("model"),
-        "steps": raw.get("steps") if isinstance(raw.get("steps"), list) else [],
+        "steps": [
+            {
+                **step,
+                "label": plain_dashboard_text(step.get("label") or step.get("title") or "", 180),
+                "tool": plain_dashboard_text(step.get("tool") or "", 80),
+            }
+            for step in visible_steps
+        ],
     }
+
+
+def agent_feed_key(feed: Dict[str, Any] | None) -> str:
+    if not isinstance(feed, dict):
+        return ""
+    text = " ".join(
+        str(feed.get(key) or "")
+        for key in ("agentId", "agent_id", "agent", "source")
+    ).lower()
+    if "joshex" in text or "codex" in text:
+        return "joshex"
+    if "jaimes" in text:
+        return "jaimes"
+    if "j.a.i.n" in text or "jain" in text:
+        return "jain"
+    if "josh" in text:
+        return "josh"
+    return ""
+
+
+HEARTBEAT_STATUS_LABELS = {
+    "ready": "online and ready",
+    "ok": "online and ready",
+    "active": "working now",
+    "queued": "queued",
+    "blocked": "needs attention",
+    "error": "needs attention",
+    "idle": "standing by",
+}
+
+
+def heartbeat_status_label(status: Any) -> str:
+    return HEARTBEAT_STATUS_LABELS.get(str(status or "").lower(), "checked in")
+
+
+def heartbeat_summary(row: Dict[str, Any], fallback_agent: str) -> str:
+    summary = str(row.get("summary") or "").strip()
+    if summary:
+        return summary
+    return f"{fallback_agent} is {heartbeat_status_label(row.get('status'))}"
+
+
+def heartbeat_brain_feed(agent_key: str, fallback_agent: str) -> Dict[str, Any]:
+    payload = load_json_file(AGENT_HEARTBEATS_PATH, {"heartbeats": []})
+    rows = payload.get("heartbeats", []) if isinstance(payload, dict) else []
+    aliases = {
+        "josh": {"josh", "josh2", "josh2.0", "josh 2.0"},
+        "josh2": {"josh", "josh2", "josh2.0", "josh 2.0"},
+        "joshex": {"joshex", "codex"},
+        "jaimes": {"jaimes"},
+        "jain": {"jain", "j.a.i.n"},
+    }.get(agent_key, {agent_key})
+    row = next(
+        (
+            item
+            for item in rows
+            if isinstance(item, dict) and str(item.get("agent") or "").lower() in aliases
+        ),
+        {},
+    )
+    if not row:
+        return normalize_agent_brain_feed({}, fallback_agent)
+    return normalize_agent_brain_feed(
+        {
+            "agent": fallback_agent,
+            "active": row.get("status") in {"ready", "ok", "active"},
+            "objective": heartbeat_summary(row, fallback_agent),
+            "status": row.get("status") or "idle",
+            "updatedAt": row.get("updatedAt"),
+            "currentTool": "status check",
+            "steps": [
+                {
+                    "label": heartbeat_summary(row, fallback_agent),
+                    "status": row.get("status") or "idle",
+                    "tool": "status check",
+                }
+            ],
+        },
+        fallback_agent,
+    )
+
+
+def agent_specific_brain_feed(
+    feed: Dict[str, Any] | None,
+    expected_key: str,
+    fallback_agent: str,
+) -> Dict[str, Any]:
+    heartbeat = heartbeat_brain_feed(expected_key, fallback_agent)
+    if agent_feed_key(feed) != expected_key:
+        return heartbeat
+
+    explicit = normalize_agent_brain_feed(feed, fallback_agent)
+    heartbeat_ts = iso_to_dt(heartbeat.get("updatedAt"))
+    explicit_ts = iso_to_dt(explicit.get("updatedAt"))
+    explicit_active = bool(explicit.get("active") or explicit.get("reportedActive"))
+
+    if explicit_active and is_recent_ts(explicit.get("updatedAt"), hours=AGENT_BRAIN_FEED_STALE_HOURS):
+        return explicit
+    if heartbeat_ts and (not explicit_ts or heartbeat_ts > explicit_ts):
+        prior_steps = [
+            step for step in explicit.get("steps", [])
+            if isinstance(step, dict) and str(step.get("status") or "").lower() in {"done", "complete", "completed", "ready", "ok"}
+        ][:3]
+        return {
+            **heartbeat,
+            "model": explicit.get("model") or heartbeat.get("model"),
+            "steps": [*(heartbeat.get("steps") or []), *prior_steps],
+        }
+    return explicit
+
+
+def personal_codex_brain_feed(personal_codex: Dict[str, Any], now_iso: str) -> Dict[str, Any]:
+    recent_activity = personal_codex.get("recentActivity") if isinstance(personal_codex.get("recentActivity"), list) else []
+    steps = []
+    for item in recent_activity[:4]:
+        if not isinstance(item, dict):
+            continue
+        steps.append({
+            "label": item.get("event") or item.get("title") or "JOSHeX update",
+            "status": personal_codex.get("status") or "ready",
+            "tool": personal_codex.get("mode") or "personal coordination",
+        })
+    return normalize_agent_brain_feed(
+        {
+            "agent": "JOSHeX",
+            "agentId": "joshex",
+            "active": False,
+            "reportedActive": False,
+            "objective": personal_codex.get("objective") or "JOSHeX visibility current; awaiting direct instruction",
+            "detail": personal_codex.get("summary") or "",
+            "status": personal_codex.get("status") or "ready",
+            "updatedAt": personal_codex.get("updatedAt") or now_iso,
+            "currentTool": personal_codex.get("mode") or "personal coordination",
+            "steps": steps,
+        },
+        "JOSHeX",
+    )
 
 
 def build_live_objectives(agent_feeds: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     def is_live(feed: Dict[str, Any]) -> bool:
-        return bool(feed.get("active") and is_recent_ts(feed.get("updatedAt"), hours=2))
+        return bool(feed.get("active") and is_recent_ts(feed.get("updatedAt"), hours=AGENT_BRAIN_FEED_STALE_HOURS))
 
     def score(feed: Dict[str, Any]) -> tuple[int, float]:
         ts = iso_to_dt(feed.get("updatedAt"))
@@ -831,7 +1360,7 @@ def apply_tracked_tasks_to_agent_feeds(
     sidecar briefly says Standby. The dashboard hero should reflect the
     ownership in memory/tasks.md, not only the last brain-feed writer.
     """
-    owner_to_key = {"JOSH 2.0": "josh", "J.A.I.N": "jain", "JAIMES": "jaimes"}
+    owner_to_key = {"JOSHeX": "joshex", "JOSH 2.0": "josh", "J.A.I.N": "jain", "JAIMES": "jaimes"}
     merged = {key: dict(value) for key, value in agent_feeds.items()}
     for task in tracked_tasks:
         if str(task.get("status") or "active").lower() != "active":
@@ -1274,6 +1803,117 @@ def fetch_jain_api_costs() -> Dict[str, Any]:
     return empty
 
 
+def _is_today_et(value: str) -> bool:
+    if not value:
+        return False
+    try:
+        parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        today_et = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=4)).strftime("%Y-%m-%d")
+        return (parsed.astimezone(dt.timezone.utc) - dt.timedelta(hours=4)).strftime("%Y-%m-%d") == today_et
+    except Exception:
+        return False
+
+
+def fetch_xai_specialist_usage() -> Dict[str, Any]:
+    """Read dashboard-safe xAI run metadata and expose it to Model Usage."""
+    empty = {
+        "daily": 0.0,
+        "weekly": 0.0,
+        "monthly": 0.0,
+        "callsToday": 0,
+        "callsWeekly": 0,
+        "callsMonthly": 0,
+        "okToday": 0,
+        "failedToday": 0,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "outputChars": 0,
+        "sourceCount": 0,
+        "lastModel": "",
+        "lastStatus": "",
+        "lastRunAt": "",
+        "available": False,
+    }
+    data = load_json_file(XAI_SPECIALIST_RUNS_PATH, {"runs": []})
+    runs = data.get("runs") if isinstance(data, dict) else []
+    if not isinstance(runs, list):
+        return empty
+    now = dt.datetime.now(dt.timezone.utc)
+    usage = dict(empty)
+    usage["available"] = True
+    monthly_cutoff = now - dt.timedelta(days=30)
+    weekly_cutoff = now - dt.timedelta(days=7)
+    for run in runs:
+        if not isinstance(run, dict):
+            continue
+        raw_time = str(run.get("time") or "")
+        try:
+            run_dt = dt.datetime.fromisoformat(raw_time.replace("Z", "+00:00"))
+            if run_dt.tzinfo is None:
+                run_dt = run_dt.replace(tzinfo=dt.timezone.utc)
+        except Exception:
+            run_dt = None
+        cost = float(run.get("costUsd") or 0.0)
+        is_today = _is_today_et(raw_time)
+        is_week = bool(run_dt and run_dt >= weekly_cutoff)
+        is_month = bool(run_dt and run_dt >= monthly_cutoff)
+        if is_today:
+            usage["daily"] += cost
+            usage["callsToday"] += 1
+            usage["okToday"] += 1 if run.get("ok") else 0
+            usage["failedToday"] += 0 if run.get("ok") else 1
+        if is_week:
+            usage["weekly"] += cost
+            usage["callsWeekly"] += 1
+        if is_month:
+            usage["monthly"] += cost
+            usage["callsMonthly"] += 1
+        usage["inputTokens"] += int(run.get("inputTokens") or 0)
+        usage["outputTokens"] += int(run.get("outputTokens") or 0)
+        usage["totalTokens"] += int(run.get("totalTokens") or 0)
+        usage["outputChars"] += int(run.get("outputChars") or 0)
+        usage["sourceCount"] += int(run.get("sourceCount") or 0)
+        if not usage["lastRunAt"] or raw_time > usage["lastRunAt"]:
+            usage["lastRunAt"] = raw_time
+            usage["lastModel"] = str(run.get("model") or "")
+            usage["lastStatus"] = str(run.get("status") or "")
+    for key in ("daily", "weekly", "monthly"):
+        usage[key] = round(float(usage[key]), 6)
+    return usage
+
+
+def inject_xai_usage_row(breakdown: List[Dict[str, Any]], xai_usage: Dict[str, Any]) -> None:
+    if not xai_usage.get("available"):
+        return
+    model = xai_usage.get("lastModel") or "grok-4.20-reasoning"
+    row_name = f"xai/{model}"
+    row = {
+        "name": row_name,
+        "source": "xai-specialist",
+        "weeklyCost": round(float(xai_usage.get("weekly") or 0.0), 6),
+        "dailyCost": round(float(xai_usage.get("daily") or 0.0), 6),
+        "sessionCost": round(float(xai_usage.get("weekly") or 0.0), 6),
+        "totalTokens": int(xai_usage.get("totalTokens") or 0),
+        "inputTokens": int(xai_usage.get("inputTokens") or 0),
+        "outputTokens": int(xai_usage.get("outputTokens") or 0),
+        "sessions": int(xai_usage.get("callsWeekly") or 0),
+        "callsToday": int(xai_usage.get("callsToday") or 0),
+        "callsWeekly": int(xai_usage.get("callsWeekly") or 0),
+        "lastStatus": xai_usage.get("lastStatus") or "",
+        "lastRunAt": xai_usage.get("lastRunAt") or "",
+        "costEstimated": False,
+        "_note": "xAI specialist broker usage; raw prompts and outputs are not stored.",
+    }
+    for existing in breakdown:
+        if str(existing.get("name") or "").lower() == row_name.lower():
+            existing.update(row)
+            return
+    breakdown.append(row)
+
+
 def fetch_ollama_usage() -> List[Dict[str, Any]]:
     """Fetch Ollama local model list and inject as $0 breakdown rows."""
     rows = []
@@ -1387,6 +2027,8 @@ def fetch_model_usage() -> Dict[str, Any] | None:
     session_rows = fetch_model_usage_from_sessions()
     codexbar_rows = fetch_model_usage_from_codexbar()
     breakdown = merge_model_rows(session_rows, codexbar_rows)
+    xai_usage = fetch_xai_specialist_usage()
+    inject_xai_usage_row(breakdown, xai_usage)
 
     if breakdown:
         # session_cost = sum of all weekly (all-time) — used for accumulator tracking only
@@ -1476,6 +2118,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         jain_monthly = jain.get("monthly", jain.get("total", 0))  # approximate from total if no monthly
         jain_api_daily   = jain_api.get("daily", 0.0) if jain_api.get("available") else 0.0
         jain_api_monthly = jain_api.get("monthly", 0.0) if jain_api.get("available") else 0.0
+        xai_weekly = xai_usage.get("weekly", 0.0) if xai_usage.get("available") else 0.0
 
         # Inject JAIN direct API models into breakdown (Gemini calls from scripts)
         jain_api_models = jain_api.get("models", {})
@@ -1502,7 +2145,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         # automation = J.A.I.N scripts + OpenRouter background + JAIN API models
         # interactive = JOSH 2.0 chat sessions (Sonnet-driven, Josh-initiated)
         automation_weekly = round(
-            jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0), 6
+            jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0) + xai_weekly, 6
         )
         interactive_weekly = round(max(0.0, weekly_cost - automation_weekly), 6)
         total_weekly_all   = round(weekly_cost + or_weekly + jain.get("total", 0) + jain_api.get("weekly", 0), 6)
@@ -1524,6 +2167,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "lastUpdated": utc_iso(),
             "jain": jain,
             "jainApi": jain_api,
+            "xai": xai_usage,
             "openrouter": openrouter,
             "elevenlabs": elevenlabs,
             "aggregate": {
@@ -1555,6 +2199,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
 def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
     fetch_upcoming_events._status = {"status": "unknown", "message": "Unknown"}  # type: ignore[attr-defined]
+    env = load_env_file_values(GOG_KEYRING_ENV_PATHS, dict(os.environ))
     try:
         result = subprocess.run(
             [
@@ -1568,6 +2213,7 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
             capture_output=True,
             text=True,
             check=True,
+            env=env,
         )
         fetch_upcoming_events._status = {"status": "ok", "message": "Connected"}  # type: ignore[attr-defined]
     except FileNotFoundError:
@@ -1576,9 +2222,17 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
         return []
     except subprocess.CalledProcessError as exc:
         err = (exc.stderr or '').strip()
+        if 'no auth for calendar' in err.lower() or 'gog auth add' in err.lower():
+            fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper not configured"}  # type: ignore[attr-defined]
+            print("[info] local calendar helper not configured; plugin-backed calendar checks remain available", file=sys.stderr)
+            return []
+        if 'no tty available for keyring' in err.lower() or 'gog_keyring_password' in err.lower():
+            fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper keyring locked"}  # type: ignore[attr-defined]
+            print("[info] local calendar helper keyring locked; skipping calendar fetch", file=sys.stderr)
+            return []
         if 'invalid_grant' in err or 'expired or revoked' in err:
-            fetch_upcoming_events._status = {"status": "auth_expired", "message": "Re-auth required"}  # type: ignore[attr-defined]
-            print("[info] gog calendar auth needs re-login; skipping calendar fetch", file=sys.stderr)
+            fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper sign-in optional"}  # type: ignore[attr-defined]
+            print("[info] local calendar helper sign-in is optional; skipping calendar fetch", file=sys.stderr)
             return []
         fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
         print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)
@@ -1620,7 +2274,11 @@ def airpoint_status() -> Dict[str, str]:
     except FileNotFoundError:
         return {"name": "Airpoint", "status": "unknown", "detail": "airpoint CLI missing"}
     except subprocess.CalledProcessError as exc:
-        return {"name": "Airpoint", "status": "attention", "detail": f"Status check failed ({exc.returncode})"}
+        return {
+            "name": "Airpoint",
+            "status": "optional",
+            "detail": f"Optional service offline ({exc.returncode})",
+        }
     except json.JSONDecodeError:
         return {"name": "Airpoint", "status": "attention", "detail": "Status JSON invalid"}
 
@@ -1686,6 +2344,23 @@ def fetch_crons() -> List[Dict[str, Any]]:
             josh_listing = result.stdout
         except (subprocess.CalledProcessError, OSError, PermissionError):
             josh_listing = ""
+    josh_launch_listing = ""
+    try:
+        result = subprocess.run(
+            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+             "josh2.0@100.114.50.48", "launchctl list 2>/dev/null || true"],
+            capture_output=True, text=True, timeout=8
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            josh_launch_listing = result.stdout
+    except (subprocess.CalledProcessError, OSError, PermissionError, subprocess.TimeoutExpired):
+        josh_launch_listing = ""
+    if not josh_launch_listing:
+        try:
+            result = subprocess.run(["launchctl", "list"], capture_output=True, text=True, check=False)
+            josh_launch_listing = result.stdout
+        except (subprocess.CalledProcessError, OSError, PermissionError):
+            josh_launch_listing = ""
     # J.A.I.N — single batched SSH call for crontab + x_post_agent log + reply state
     import datetime as _dt
     import re as _re
@@ -1708,8 +2383,9 @@ def fetch_crons() -> List[Dict[str, Any]]:
 import datetime as dt, json, pathlib
 from zoneinfo import ZoneInfo
 et = ZoneInfo('America/New_York')
-jobs = {
+    jobs = {
     'Mission Control Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
+    'J.A.I.N Context Sync': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log',
     'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
@@ -1743,6 +2419,7 @@ PY"""
             today_local = dt.datetime.now(et).strftime('%Y-%m-%d')
             local_jobs = {
                 'Mission Control Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
+                'J.A.I.N Context Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log'),
                 'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
@@ -1772,7 +2449,7 @@ PY"""
         )
         r = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jc_agent@100.121.89.84", jain_batch_cmd],
+             "jaimes-via-josh", jain_batch_cmd],
             capture_output=True, text=True, timeout=12
         )
         if r.returncode == 0:
@@ -1911,7 +2588,7 @@ print(json.dumps(out))
 PY"""
         vr = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jc_agent@100.121.89.84", jain_verify_cmd],
+             "jaimes-via-josh", jain_verify_cmd],
             capture_output=True, text=True, timeout=12
         )
         if vr.returncode == 0:
@@ -1979,6 +2656,57 @@ PY"""
     fetch_crons._jain_replies_today = _jain_replies_today  # type: ignore[attr-defined]
 
 
+    def codex_automation_state(target: Dict[str, Any]) -> Dict[str, Any]:
+        automation_id = str(target.get("automationId") or target.get("pattern") or "").strip()
+        path = CODEX_AUTOMATIONS_DIR / automation_id
+        toml_path = path / "automation.toml"
+        memory_path = path / "memory.md"
+        state: Dict[str, Any] = {
+            "present": bool(target.get("assumePresent")),
+            "active": bool(target.get("assumePresent")),
+            "lastRun": None,
+            "verifiedToday": False,
+        }
+        try:
+            status_data = load_json_file(CODEX_AUTOMATION_STATUS_PATH, {"automations": {}})
+            status_rows = status_data.get("automations") if isinstance(status_data, dict) else {}
+            status_row = status_rows.get(automation_id) if isinstance(status_rows, dict) else None
+            if isinstance(status_row, dict):
+                state["present"] = bool(status_row.get("present", state["present"]))
+                state["active"] = bool(status_row.get("active", state["active"]))
+                if status_row.get("lastRun"):
+                    latest = str(status_row.get("lastRun")).rstrip(".")
+                    state["lastRun"] = latest
+                    parsed = _dt.datetime.fromisoformat(latest.replace("Z", "+00:00"))
+                    state["verifiedToday"] = parsed.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d") == today_str
+        except Exception:
+            pass
+        try:
+            if toml_path.exists():
+                state["present"] = True
+                if tomllib is not None:
+                    with toml_path.open("rb") as fh:
+                        meta = tomllib.load(fh)
+                    status = str(meta.get("status") or "").upper()
+                    state["active"] = status == "ACTIVE"
+                else:
+                    text = toml_path.read_text(errors="ignore")
+                    state["active"] = 'status = "ACTIVE"' in text
+        except Exception:
+            pass
+        try:
+            if memory_path.exists():
+                text = memory_path.read_text(errors="ignore")
+                matches = _re.findall(r"Current run time:\s*([0-9T:Z+.-]+)", text)
+                if matches:
+                    latest = matches[-1].rstrip(".")
+                    state["lastRun"] = latest
+                    parsed = _dt.datetime.fromisoformat(latest.replace("Z", "+00:00"))
+                    state["verifiedToday"] = parsed.astimezone(ZoneInfo("America/New_York")).strftime("%Y-%m-%d") == today_str
+        except Exception:
+            pass
+        return state
+
 
     def parse_schedule_time(schedule_str: str) -> tuple[int, int] | None:
         m = _re.search(r'(\d{1,2})(?::(\d{2}))?\s*(AM|PM)', schedule_str, _re.IGNORECASE)
@@ -2025,18 +2753,28 @@ PY"""
         is_jain = target.get('jain', False)
         listing = jain_listing if is_jain else josh_listing
         source = target.get('source', 'cron')
+        codex_state = codex_automation_state(target) if source == 'codex_automation' else None
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
         jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
         josh_verified = josh_verified_runs.get(target['name']) if not is_jain else None
-        present = bool(hermes_job) if source == 'hermes' else target['pattern'] in listing
+        if source == 'hermes':
+            present = bool(hermes_job)
+        elif source == 'launchd':
+            present = target['pattern'] in josh_launch_listing
+        elif source == 'codex_automation':
+            present = bool(codex_state and codex_state.get("present"))
+        else:
+            present = target['pattern'] in listing
         sched_meta = schedule_today_meta(target.get('schedule', ''))
         today_relevant = bool(sched_meta.get('todayRelevant', True))
-        source_label = 'Hermes' if source == 'hermes' else 'J.A.I.N Cron' if is_jain else 'Josh Local Cron'
+        source_label = 'Codex Automation' if source == 'codex_automation' else 'Josh LaunchAgent' if source == 'launchd' else 'Hermes' if source == 'hermes' else 'J.A.I.N Cron' if is_jain else 'Josh Local Cron'
 
         # Compute runStatus for daily jobs
         sched = target.get('schedule', '')
         run_status = None  # 'done' | 'missed' | 'upcoming' | None
         last_run = x_log_runs.get(target['name'])
+        if not last_run and codex_state and codex_state.get("lastRun"):
+            last_run = str(codex_state.get("lastRun"))
         if not last_run and hermes_job:
             _hlast = hermes_job.get('last_run_at')
             if _hlast and hermes_job.get('last_status') == 'ok':
@@ -2052,7 +2790,15 @@ PY"""
                 last_run_today = _last_run_dt.strftime('%Y-%m-%d') == today_str
             except Exception:
                 last_run_today = False
+        hermes_next_run = hermes_job.get('next_run_at') if hermes_job else None
+        hermes_next_dt = None
+        if hermes_next_run:
+            try:
+                hermes_next_dt = _dt.datetime.fromisoformat(str(hermes_next_run).replace('Z', '+00:00')).astimezone(ZoneInfo("America/New_York"))
+            except Exception:
+                hermes_next_dt = None
         verified_today = bool(
+            (codex_state and codex_state.get('verifiedToday')) or
             (jain_verified and jain_verified.get('verifiedToday')) or
             (josh_verified and josh_verified.get('verifiedToday'))
         )
@@ -2070,6 +2816,8 @@ PY"""
                 elif is_jaimes_agent and not present:
                     # JAIMES jobs run via Hermes — show paused if no last_run confirmed today
                     run_status = 'paused'
+                elif hermes_next_dt is not None and hermes_next_dt > now_et:
+                    run_status = 'upcoming'
                 elif now_hour > sched_hour or (now_hour == sched_hour and now_min >= sched_min + 10):
                     run_status = 'missed' if can_verify_run else 'due'
                 else:
@@ -2082,12 +2830,17 @@ PY"""
             elif now_et.hour >= 9:
                 run_status = 'upcoming'
 
-        if source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
+        if source == 'codex_automation' and codex_state and not codex_state.get('active'):
+            row_status = 'paused'
+        elif source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
             row_status = 'paused'
         elif last_run_today or verified_today:
             row_status = 'ok'
         else:
             row_status = 'ok' if present else 'paused'
+
+        if row_status == 'paused' and run_status == 'due':
+            run_status = 'upcoming'
 
         # Hermes persists the last job result until the next scheduled run. Treat
         # old failures as historical context, not active Mission Control cron
@@ -2121,6 +2874,8 @@ PY"""
             row['runStatus'] = run_status
         if last_run:
             row['lastRun'] = last_run
+        if hermes_next_run:
+            row['nextRun'] = hermes_next_run
 
         if target.get('multiRun'):
             multi = target['multiRun']
@@ -2234,6 +2989,28 @@ def fetch_visual_canaries() -> Dict[str, Any]:
     }
 
 
+def fetch_runtime_layout_status() -> Dict[str, Any]:
+    data = load_json_file(RUNTIME_LAYOUT_PATH, {})
+    if isinstance(data, dict) and data:
+        issues = data.get("issues") if isinstance(data.get("issues"), list) else []
+        return {
+            **data,
+            "status": "ok" if data.get("ok") and not issues else "attention",
+            "summary": (
+                "Live kiosk layout fits the 24-inch screen"
+                if data.get("ok") and not issues
+                else f"Live kiosk layout needs attention: {plain_dashboard_text('; '.join(map(str, issues)) or 'check layout', 160)}"
+            ),
+        }
+    return {
+        "ok": False,
+        "status": "unknown",
+        "checkedAt": None,
+        "summary": "Live kiosk layout check has not run yet.",
+        "issues": [],
+    }
+
+
 def fetch_sorare_ml_cockpit() -> Dict[str, Any]:
     artifacts = [
         Path("/Users/jc_agent/sorare_ml/artifacts/segment_scoring_policy_backtest_2026-04-28.json"),
@@ -2266,12 +3043,48 @@ def fetch_voice_router_status() -> Dict[str, Any]:
 
 
 def fetch_ops_inbox_status(calendar_health: Dict[str, Any] | None, crons: List[Dict[str, Any]]) -> Dict[str, Any]:
-    cal_ok = (calendar_health or {}).get("status") == "ok"
-    due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "missed"]
+    cal = calendar_health or {}
+    cal_status = str(cal.get("status") or "").lower()
+    cal_message = str(cal.get("message") or "").lower()
+    cal_optional = (
+        cal_status in {"unavailable", "unknown", "optional"}
+        or "gog cli missing" in cal_message
+        or "local calendar helper" in cal_message
+    )
+    cal_ok = cal_status == "ok"
+    cal_clear = cal_ok or cal_optional
+    gmail = load_json_file(JOSH_OPS_GMAIL_STATUS_PATH, {})
+    gmail_status = str(gmail.get("status") or "planned").lower() if isinstance(gmail, dict) else "planned"
+    gmail_ok = gmail_status == "done"
+    checked_at = gmail.get("checkedAt") if isinstance(gmail, dict) else None
+
+    def checked_today(value: Any) -> bool:
+        try:
+            parsed = _dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+            return parsed.astimezone(ZoneInfo("America/New_York")).date() == _dt.datetime.now(ZoneInfo("America/New_York")).date()
+        except Exception:
+            return False
+
+    def actionable_due(row: Dict[str, Any]) -> bool:
+        if not (row.get("todayRelevant") and row.get("status") != "paused" and row.get("runStatus") == "missed"):
+            return False
+        text = f"{row.get('name', '')} {row.get('description', '')}".lower()
+        if row.get("source") == "codex_automation":
+            return False
+        if gmail_ok and checked_today(checked_at) and ("gmail" in text or "inbox" in text):
+            return False
+        return True
+
+    due = [c for c in crons if actionable_due(c)]
     return {
-        "status": "clear" if cal_ok and not due else "attention",
-        "summary": "Unified Gmail/Calendar/Drive/Tasks command queue foundation",
-        "calendar": "connected" if cal_ok else "needs attention",
+        "status": "clear" if cal_clear and gmail_ok and not due else "attention",
+        "summary": "Shared Gmail/Calendar/Drive/Tasks command queue foundation",
+        "calendar": "connected" if cal_ok else "optional helper skipped" if cal_optional else "needs attention",
+        "sharedGmail": "monitored" if gmail_ok else ("blocked" if gmail_status == "blocked" else "needs setup"),
+        "sharedGmailAccount": "jcubellagent@gmail.com",
+        "sharedGmailCheckedAt": checked_at,
+        "sharedGmailUnreadBefore": gmail.get("unreadBeforeCapped") if isinstance(gmail, dict) else None,
+        "sharedGmailMarkedRead": gmail.get("markedRead") if isinstance(gmail, dict) else None,
         "jobIssues": len(due),
         "sources": ["calendar", "gmail", "drive", "tasks"],
     }
@@ -2351,6 +3164,109 @@ def normalize_personal_codex(raw: Any, now_iso: str) -> Dict[str, Any]:
     }
 
 
+def node_display_name(value: Any) -> str:
+    text = str(value or "").strip()
+    return {
+        "josh2-lan": "Josh 2.0",
+        "jaimes-via-josh": "JAIMES/J.A.I.N",
+        "joshex": "JOSHeX",
+        "macbook-codex": "JOSHeX",
+    }.get(text, text or "agent node")
+
+
+def capability_tool_ready(node: Dict[str, Any], key: str) -> bool:
+    tool = node.get(key)
+    return isinstance(tool, dict) and bool(tool.get("available")) and str(tool.get("status") or "ready") == "ready"
+
+
+def capability_version(node: Dict[str, Any], key: str) -> str:
+    tool = node.get(key)
+    if not isinstance(tool, dict):
+        return ""
+    return str(tool.get("version") or "").strip()
+
+
+def inventory_nodes(capability_inventory: Dict[str, Any] | None) -> List[Dict[str, Any]]:
+    if not isinstance(capability_inventory, dict):
+        return []
+    return [node for node in capability_inventory.get("nodes", []) if isinstance(node, dict)]
+
+
+def build_runtime_inventory_capability(capability_inventory: Dict[str, Any] | None) -> Dict[str, Any] | None:
+    nodes = inventory_nodes(capability_inventory)
+    if not nodes:
+        return None
+    openclaw_nodes = [node for node in nodes if capability_tool_ready(node, "openclawCli")]
+    hermes_nodes = [node for node in nodes if capability_tool_ready(node, "hermesCli")]
+    codex_nodes = [node for node in nodes if capability_tool_ready(node, "codexCli")]
+    gemini_nodes = [node for node in nodes if capability_tool_ready(node, "geminiCli")]
+    health_attention = [
+        node_display_name(node.get("node"))
+        for node in nodes
+        if isinstance(node.get("openclawHealth"), dict)
+        and node["openclawHealth"].get("available")
+        and node["openclawHealth"].get("status") not in {"ok", "ready"}
+    ]
+    versions = []
+    for node in openclaw_nodes[:4]:
+        version = capability_version(node, "openclawCli").replace("OpenClaw ", "")
+        if version:
+            versions.append(f"{node_display_name(node.get('node'))} {version}")
+    summary = (
+        f"{len(openclaw_nodes)} OpenCLAW · {len(hermes_nodes)} Hermes · "
+        f"{len(codex_nodes)} Codex · {len(gemini_nodes)} Gemini-ready"
+    )
+    return {
+        "id": "runtime-inventory",
+        "name": "Runtime Inventory",
+        "status": "attention" if health_attention else "ok",
+        "summary": summary,
+        "detail": "; ".join(versions[:3]) or f"{len(nodes)} node(s) inventoried",
+    }
+
+
+def build_task_ledger_capability(capability_inventory: Dict[str, Any] | None) -> Dict[str, Any] | None:
+    nodes = inventory_nodes(capability_inventory)
+    ledgers = [
+        (node_display_name(node.get("node")), node.get("openclawTaskLedger"))
+        for node in nodes
+        if isinstance(node.get("openclawTaskLedger"), dict) and node["openclawTaskLedger"].get("available")
+    ]
+    if not ledgers:
+        return None
+    total_errors = 0
+    total_warnings = 0
+    details: list[str] = []
+    for label, ledger in ledgers:
+        summary = ledger.get("summary") if isinstance(ledger.get("summary"), dict) else {}
+        errors = int(summary.get("errors") or 0)
+        warnings = int(summary.get("warnings") or 0)
+        total_errors += errors
+        total_warnings += warnings
+        details.append(f"{label}: {errors} errors / {warnings} warnings")
+    return {
+        "id": "task-ledger",
+        "name": "Task Ledger",
+        "status": "attention" if total_errors else "watch" if total_warnings else "ok",
+        "summary": f"{total_errors} active ledger error(s), {total_warnings} warning(s)",
+        "detail": " · ".join(details[:3]),
+    }
+
+
+def build_capability_watch_capability(capability_watch: Dict[str, Any] | None) -> Dict[str, Any] | None:
+    if not isinstance(capability_watch, dict):
+        return None
+    recommendations = capability_watch.get("recommendations") if isinstance(capability_watch.get("recommendations"), list) else []
+    attention = [row for row in recommendations if isinstance(row, dict) and row.get("status") in {"new", "upgrade", "attention"}]
+    return {
+        "id": "capability-watch",
+        "name": "Capability Watch",
+        "status": "watch" if attention else capability_watch.get("status") or "ok",
+        "summary": capability_watch.get("summary") or f"{len(recommendations)} recommendation(s) tracked",
+        "detail": f"Updated {plain_dashboard_text(capability_watch.get('checkedAt') or capability_watch.get('updatedAt') or 'pending', 80)}",
+    }
+
+
 def build_capability_stack(
     visual_canaries: Dict[str, Any],
     sorare_ml: Dict[str, Any],
@@ -2358,6 +3274,8 @@ def build_capability_stack(
     ops_inbox: Dict[str, Any],
     agent_control: Dict[str, Any] | None = None,
     personal_codex: Dict[str, Any] | None = None,
+    capability_inventory: Dict[str, Any] | None = None,
+    capability_watch: Dict[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
     agent_summary = agent_control.get("summary", {}) if isinstance(agent_control, dict) else {}
     stack = [
@@ -2387,7 +3305,11 @@ def build_capability_stack(
             "name": "Ops Inbox",
             "status": ops_inbox.get("status") or "planned",
             "summary": ops_inbox.get("summary"),
-            "detail": f"Calendar {ops_inbox.get('calendar')} · {ops_inbox.get('jobIssues', 0)} job issue(s)",
+            "detail": (
+                f"Calendar {ops_inbox.get('calendar')} · "
+                f"Shared Gmail {ops_inbox.get('sharedGmail')} · "
+                f"{ops_inbox.get('jobIssues', 0)} job issue(s)"
+            ),
         },
     ]
     if agent_summary:
@@ -2395,12 +3317,16 @@ def build_capability_stack(
         total = agent_summary.get("totalAgents", 0)
         failed = agent_summary.get("failedQueues", 0)
         dirty = agent_summary.get("dirtyRepos", 0)
+        live_heartbeat_source = (
+            agent_summary.get("source") == "live-heartbeats"
+            or (isinstance(agent_control, dict) and agent_control.get("statusSource") == "live-heartbeats")
+        )
         stack.append({
             "id": "agent-control",
             "name": "Agent Control",
             "status": agent_summary.get("overall") or "unknown",
-            "summary": f"{ready}/{total} agent nodes ready",
-            "detail": f"{failed} queue item(s) · {dirty} dirty repo(s)",
+            "summary": f"{ready}/{total} live lanes ready" if live_heartbeat_source else f"{ready}/{total} agent nodes ready",
+            "detail": "Fresh Brain Feed heartbeats from the tracked agents" if live_heartbeat_source else f"{failed} queue item(s) · {dirty} dirty repo(s)",
         })
     if personal_codex and personal_codex.get("status") != "offline":
         stack.append({
@@ -2410,6 +3336,13 @@ def build_capability_stack(
             "summary": personal_codex.get("summary"),
             "detail": personal_codex.get("objective") or "Local Mission Control contribution lane",
         })
+    for item in (
+        build_runtime_inventory_capability(capability_inventory),
+        build_task_ledger_capability(capability_inventory),
+        build_capability_watch_capability(capability_watch),
+    ):
+        if item:
+            stack.append(item)
     return stack
 
 
@@ -2448,6 +3381,8 @@ def build_products(now_iso: str) -> List[Dict[str, str]]:
 
 
 def fetch_agent_bus_tasks(limit: int = 12) -> List[Dict[str, Any]]:
+    if os.environ.get("MISSION_CONTROL_AGENT_BUS", "").lower() not in {"1", "true", "yes", "on"}:
+        return []
     query = urllib.parse.urlencode({
         "select": "id,origin_node,target_node,task_type,status,payload,created_at,result,error_log",
         "order": "created_at.desc",
@@ -2597,7 +3532,7 @@ def fetch_coding_visibility() -> Dict[str, Any]:
     except Exception:
         codexbar_summary = "Codex auth required"
 
-    recent_files = recent_code_files()
+    recent_files = [plain_dashboard_text(path, 120) for path in recent_code_files()]
     return {
         "workspaceDirty": git_dirty_count(WORKSPACE_ROOT),
         "missionControlDirty": git_dirty_count(WORKSPACE_ROOT / "mission-control"),
@@ -2682,11 +3617,22 @@ def build_action_required(
     cal = calendar_health or {}
     cal_status = str(cal.get("status") or "unknown").lower()
     cal_msg = str(cal.get("message") or "Calendar lane unavailable")
-    if cal_status not in {"ok", "green", "healthy"}:
+    local_calendar_optional = (
+        cal_status in {"unavailable", "unknown", "optional"}
+        or "gog cli missing" in cal_msg.lower()
+        or "local calendar helper" in cal_msg.lower()
+    )
+    if cal_status not in {"ok", "green", "healthy"} and not local_calendar_optional:
         title = "Calendar auth needs refresh" if "auth" in cal_msg.lower() else f"Calendar issue: {cal_msg}"
         items.append({"priority": "high", "title": title, "url": "#calendar"})
 
-    missed = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "missed"]
+    missed = [
+        c for c in crons
+        if c.get("todayRelevant")
+        and c.get("status") != "paused"
+        and c.get("runStatus") == "missed"
+        and c.get("source") != "codex_automation"
+    ]
     due = [c for c in crons if c.get("todayRelevant") and c.get("status") != "paused" and c.get("runStatus") == "due"]
     errored = [c for c in crons if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("status") == "error")]
     if missed:
@@ -2822,7 +3768,11 @@ def build_recent_activity(
         })
 
     if devices:
-        attention = [device for device in devices if device.get("status") not in (None, "ok")]
+        attention = [
+            device
+            for device in devices
+            if device.get("status") in {"attention", "blocked", "error"}
+        ]
         if attention:
             items.append({
                 "time": now_iso,
@@ -2855,7 +3805,7 @@ def load_brain_feed_file() -> Dict[str, Any] | None:
     """Load brainFeed state from the sidecar file written by the agent.
 
     READ-ONLY — does NOT write back to brain-feed.json.
-    Supabase is the source of truth for active state.
+    Josh 2.0 local live Brain Feed is the source of truth for active state.
     The cron must never overwrite an active brain feed.
     """
     if not BRAIN_FEED_PATH.exists():
@@ -3105,6 +4055,10 @@ def main() -> None:
         "lastUpdated": now_iso,
     }
     dashboard["modelUsage"] = model_usage
+    dashboard["modelRouter"] = build_model_router_status(model_usage, now_iso)
+    if isinstance(model_usage, dict):
+        model_usage["providerBudgets"] = dashboard["modelRouter"].get("providers", [])
+        model_usage["routerPolicy"] = dashboard["modelRouter"].get("policy", {})
 
     moltworld_data = fetch_moltworld_data()
     dashboard["moltWorld"] = moltworld_data
@@ -3134,14 +4088,40 @@ def main() -> None:
     dashboard["sharedEvents"]   = fetch_shared_events(now_iso)
     dashboard["sharedOperatingLayer"] = fetch_shared_operating_layer(now_iso)
     dashboard["visualCanaries"] = fetch_visual_canaries()
+    dashboard["runtimeLayout"] = fetch_runtime_layout_status()
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])
     dashboard["personalCodex"] = normalize_personal_codex(load_json_file(PERSONAL_CODEX_PATH, {}), now_iso)
-    dashboard["agentControl"] = load_json_file(AGENT_CONTROL_STATUS_PATH, {
+    dashboard["agentControl"] = load_agent_control_status(now_iso)
+    dashboard["agentContextRegistry"] = load_json_file(AGENT_CONTEXT_REGISTRY_PATH, {
         "generatedAt": now_iso,
-        "summary": {"overall": "unknown"},
+        "canonicalSource": "Mission Control shared sidecars plus Josh 2.0 local live Brain Feed lane.",
+        "privacy": "dashboard-safe summaries only",
+        "summary": {"status": "unknown", "agents": 0, "staleAgents": [], "openTasks": 0, "openHandoffs": 0},
         "agents": {},
+    })
+    dashboard["reliabilityUpgrades"] = load_json_file(RELIABILITY_UPGRADES_PATH, {
+        "updatedAt": now_iso,
+        "summary": "Reliability upgrade probes have not run yet.",
+        "items": [],
+        "metrics": [],
+    })
+    dashboard["capabilityInventory"] = load_json_file(CAPABILITY_INVENTORY_PATH, {
+        "updatedAt": now_iso,
+        "nodes": [],
+    })
+    dashboard["capabilityWatch"] = load_json_file(CAPABILITY_WATCH_PATH, {
+        "updatedAt": now_iso,
+        "status": "pending",
+        "summary": "Capability Watch has not run yet.",
+        "recommendations": [],
+    })
+    dashboard["telegramAiBotFeatures"] = load_json_file(TELEGRAM_AI_BOT_FEATURES_PATH, {
+        "updatedAt": now_iso,
+        "status": "unknown",
+        "summary": "Telegram AI bot feature policy has not been generated yet.",
+        "features": [],
     })
     dashboard["capabilityStack"] = build_capability_stack(
         dashboard["visualCanaries"],
@@ -3150,6 +4130,8 @@ def main() -> None:
         dashboard["opsInbox"],
         dashboard["agentControl"],
         dashboard["personalCodex"],
+        dashboard["capabilityInventory"],
+        dashboard["capabilityWatch"],
     )
     dashboard["actionRequired"] = build_action_required(
         now_iso,
@@ -3170,23 +4152,29 @@ def main() -> None:
             "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
             "url": "#canaries",
         })
+    if dashboard["runtimeLayout"].get("status") == "attention":
+        dashboard["actionRequired"].insert(0, {
+            "priority": "high",
+            "title": "Mission Control layout issue: live kiosk no longer fits cleanly",
+            "detail": dashboard["runtimeLayout"].get("summary") or "Check the Josh 2.0 display layout.",
+            "url": "#brain-feed",
+        })
     shared_layer = dashboard.get("sharedOperatingLayer", {})
     if shared_layer.get("status") == "attention":
-        counts = shared_layer.get("counts", {})
-        dashboard["actionRequired"].insert(0, {
-            "priority": "medium",
-            "title": f"Shared layer needs attention: {counts.get('openHandoffs', 0)} handoff(s), {counts.get('blocked', 0)} blocked event(s), {counts.get('blockedTasks', 0)} blocked task(s), {counts.get('approvalNeeded', 0)} approval(s), {counts.get('staleHeartbeats', 0)} stale heartbeat(s)",
-            "url": "#jobs",
-        })
+        dashboard["actionRequired"].insert(0, shared_layer_attention_item(shared_layer))
     dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)
 
-    josh_brain_feed = normalize_agent_brain_feed(dashboard["brainFeed"], "JOSH 2.0")
+    joshex_brain_feed = normalize_agent_brain_feed(load_json_file(JOSHEX_BRAIN_FEED_PATH, {}), "JOSHeX")
+    if not joshex_brain_feed.get("updatedAt"):
+        joshex_brain_feed = personal_codex_brain_feed(dashboard["personalCodex"], now_iso)
+    josh_brain_feed = agent_specific_brain_feed(dashboard["brainFeed"], "josh", "JOSH 2.0")
     jain_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jain-brain-feed.json", {}), "J.A.I.N")
     jaimes_brain_feed = normalize_agent_brain_feed(load_json_file(ROOT.parent / "data" / "jaimes-brain-feed.json", {}), "JAIMES")
     dashboard["agentBrainFeeds"] = apply_tracked_tasks_to_agent_feeds(
         {
+            "joshex": joshex_brain_feed,
             "josh": josh_brain_feed,
             "jain": jain_brain_feed,
             "jaimes": jaimes_brain_feed,
@@ -3218,6 +4206,9 @@ def main() -> None:
     josh_brain_feed = dashboard["agentBrainFeeds"].get("josh", josh_brain_feed)
     jain_brain_feed = dashboard["agentBrainFeeds"].get("jain", jain_brain_feed)
     jaimes_brain_feed = dashboard["agentBrainFeeds"].get("jaimes", jaimes_brain_feed)
+    dashboard["joshBrainFeed"] = josh_brain_feed
+    dashboard["jainBrainFeed"] = jain_brain_feed
+    dashboard["jaimesBrainFeed"] = jaimes_brain_feed
     dashboard["liveObjectives"] = build_live_objectives(dashboard["agentBrainFeeds"])
     agent_comms = build_agent_comms(
         load_json_file(AGENT_COMMS_PATH, []),

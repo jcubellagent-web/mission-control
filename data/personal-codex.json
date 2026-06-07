@@ -1,41 +1,46 @@
 {
-  "status": "completed",
-  "objective": "Phase 4A task queue and capability registry implementation",
-  "updatedAt": "2026-04-30T15:55:43Z",
-  "summary": "Phase 4A is complete: shared task queue, capability registry, permission tiers, task lifecycle helper, dashboard summary, remote shims, and smoke tests are installed across JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.",
-  "mode": "implementation",
-  "repo": {
-    "path": "/Users/joshcubell/Documents/New project/mission-control",
-    "branch": "main",
-    "dirty": true
-  },
-  "validation": {
-    "josh2Reachable": "pass",
-    "jaimesJainReachable": "pass",
-    "sharedLayer": "ready",
-    "adoption": "ready_unwrapped",
-    "knownFollowups": 2
-  },
   "actionRequired": [],
-  "recentActivity": [
+  "agentSlot": false,
+  "capabilities": [
+    "Coordinate Mission Control work",
+    "Publish dashboard-safe Brain Feed status",
+    "Review Josh 2.0 kiosk state"
+  ],
+  "checks": {
+    "jaimesModelDefault": "gpt_5_5_medium_aligned",
+    "jaimesOpenClawPrimary": "openai_codex_gpt_5_5",
+    "jaimesSorareCredentials": "host_local_secret_0600_rotation_deferred_by_user",
+    "jaimesSorareGw11OfficialScores": "fetched_10_lineups_1513_87_total",
+    "jaimesSorareGw12LiveEntriesCurrent": "10_josh_manual_max_muncy_fix_verified",
+    "jaimesSorareGw12ManualHardFix": "max_muncy_il_replaced_shota_imanaga",
+    "jaimesSorareGw12ManualSlate": "accepted_as_current_baseline",
+    "jaimesSorareGw12PostSubmitRpMonitor": "pass_non_actionable",
+    "jaimesSorareGw12RpPrelockBaseline": "updated_to_josh_manual_max_muncy_fix",
+    "jaimesSorareGw12SkenesExposure": "derisked_cap2_live_verified",
+    "jaimesSorareScheduler": "pass_deduped_unified_scheduler",
+    "jaimesSorareTomorrowReadiness": "pass_credential_dry_run_missions_dry_run_gw_probe",
+    "jainBreakingSecurityAlertTuning": "deployed",
+    "jainBreakingSecurityClusters": "ivanti_epmm_vm2_intercom_linux_kernel",
+    "jainBreakingSecurityCombinedCap": "2_per_12h",
+    "jainBreakingSecurityNoSendSmoke": "pass_recent_security_count_10_cap_blocks_true",
+    "jainBreakingSecurityPostPatchScan": "pass_2026_05_07_2230_et_zero_pushes",
+    "jainBreakingSecurityRemoteCompile": "pass",
+    "jainBreakingSecuritySourceCaps": "cisa_1_nvd_1_ghsa_1",
+    "joshTelegramAgentsBlock": "applied_2026_05_05",
+    "joshTelegramGatewayReload": "pass_2026_05_05",
+    "joshTelegramUxConfig": "present_work_cards_active"
+  },
+  "currentTool": "Hermes/OpenCLAW integration",
+  "history": [
     {
-      "time": "2026-04-30T15:55:43Z",
-      "event": "Completed Phase 4A rollout and verified task lifecycle on JOSHeX, Josh 2.0, JAIMES, and J.A.I.N"
+      "event": "Audited Josh manual GW12 slate, preserved manual Champion choices, replaced Max Muncy IL exposure in Challenger #2 FLEX with Shota Imanaga, and verified 10/10 live.",
+      "time": "2026-05-04T06:07:30Z"
     },
     {
-      "time": "2026-04-30T15:46:46Z",
-      "event": "Resumed Phase 4A execution and refreshed JOSHeX Brain Feed before final rollout steps"
-    },
-    {
-      "time": "2026-04-30T15:37:41Z",
-      "event": "Started Phase 4A implementation after Josh approved all next steps"
+      "event": "Submitted GW12 Skenes-cap de-risked slate live: 10 requested, 10 submitted, 10 verified; RP pre-lock baseline updated and immediate monitor non-actionable.",
+      "time": "2026-05-04T04:53:10Z"
     }
   ],
-  "metrics": {
-    "openQuestions": 0,
-    "liveSourceMismatch": 0,
-    "joshexSupabaseFresh": 1
-  },
   "links": [
     {
       "label": "Brain Feed",
@@ -45,5 +50,49 @@
       "label": "Agent Control",
       "url": "#agent-control"
     }
-  ]
+  ],
+  "metrics": {
+    "jaimesSorareChampionHotMinInseason": 6,
+    "jaimesSorareGw12ChampionDelta": 35.08,
+    "jaimesSorareGw12ChampionOptimizedDelta": 35.08,
+    "jaimesSorareGw12CreateTargets": 1,
+    "jaimesSorareGw12DryRunLineups": 10,
+    "jaimesSorareGw12LiveEntries": 10,
+    "jaimesSorareGw12ProposalTargets": 10,
+    "jaimesSorareGw12SubmitFailures": 0,
+    "jaimesSorareGw12VerifiedEntries": 10,
+    "jaimesSorareLatestLineups": 10,
+    "jaimesSorareTargetLineups": 10,
+    "joshexSupabaseFresh": 1,
+    "liveSourceMismatch": 0,
+    "openQuestions": 0
+  },
+  "mode": "jain-breaking-security-alert-tuning",
+  "objective": "JOSHeX visibility current; awaiting direct instruction",
+  "patchStatus": {
+    "detail": "JOSHeX status is refreshed through the Personal Codex sidecar so Mission Control does not infer stale work from old local cache rows.",
+    "status": "ready",
+    "summary": "Brain Feed local-live publish contract checked",
+    "updatedAt": "2026-05-26T03:54:54Z"
+  },
+  "promoteToBrainFeed": false,
+  "recentActivity": [
+    "Verified Brain Feed local-live source-of-truth wiring after Supabase removal."
+  ],
+  "repo": {
+    "branch": "codex/mission-control-v2",
+    "dirty": true,
+    "path": "/Users/joshcubell/Documents/New project/mission-control"
+  },
+  "status": "ready",
+  "summary": "JAIMES now sees the practical model inventory, Hermes Kanban boards are initialized, two deterministic guard jobs are in no-agent mode, and Mission Control reliability status shows provider/Kanban/no-agent wiring.",
+  "updatedAt": "2026-05-26T03:54:54Z",
+  "validation": {
+    "dashboardBuild": "pass",
+    "eveningFirstSubmitJob": "scheduled",
+    "gw13FirstPassSubmitted": "pass",
+    "gw13LineupsVerified": 10,
+    "missionControlTodayJobs": "refreshed",
+    "preLockUpgradeValidation": "enabled"
+  }
 }

@@ -1,6 +1,48 @@
 [
   [
     {
+      "text": "1. Gemini review",
+      "callback_data": "model:gemini_flash"
+    }
+  ],
+  [
+    {
+      "text": "2. JAIMES workhorse",
+      "callback_data": "route:jaimes"
+    }
+  ],
+  [
+    {
+      "text": "Agent council",
+      "callback_data": "route:agent_council"
+    }
+  ],
+  [
+    {
+      "text": "3. Run on Josh 2.0 device",
+      "callback_data": "model:codex"
+    }
+  ],
+  [
+    {
+      "text": "4. JOSHeX Cloud / repo-safe",
+      "callback_data": "route:joshex_cloud"
+    }
+  ],
+  [
+    {
+      "text": "5. JOSHeX private accounts",
+      "callback_data": "route:joshex"
+    }
+  ],
+  [
+    {
+      "text": "Force Mission Control sync",
+      "callback_data": "next:check_mission_control"
+    }
+  ],
+  [
+    {
       "text": "Open control panel",
       "web_app": {
         "url": "https://jcubellagent-web.github.io/mission-control/telegram-control-panel.html"
@@ -9,31 +51,13 @@
   ],
   [
     {
-      "text": "Check Mission Control",
-      "callback_data": "next:check_mission_control"
-    }
-  ],
-  [
-    {
-      "text": "Route to JOSHeX",
-      "callback_data": "route:joshex"
-    }
-  ],
-  [
-    {
-      "text": "Route to JAIMES",
-      "callback_data": "route:jaimes"
-    }
-  ],
-  [
-    {
-      "text": "Show Models",
+      "text": "Show model choices",
       "callback_data": "next:show_models"
     }
   ],
   [
     {
-      "text": "Hold",
+      "text": "Hold / no action",
       "callback_data": "next:hold"
     }
   ]

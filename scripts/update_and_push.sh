@@ -12,54 +12,11 @@ else
   echo "mission-control: kiosk-dashboard missing; skipping model sync"
 fi
 cd "$ROOT_DIR"
-publisher="${HOME}/scripts/mission_control_brain_feed_publish.py"
-
-publish_bf() {
-  local bf_status="$1"
-  local objective="$2"
-  local step="$3"
-  if [[ -x "$publisher" || -f "$publisher" ]]; then
-    python3 "$publisher" \
-      --agent josh \
-      --status "$bf_status" \
-      --tool cron \
-      --cron "Mission Control publisher" \
-      --objective "$objective" \
-      --step "$step" >/dev/null 2>&1 || true
-  fi
-}
-
-publish_bf active "Publishing Mission Control data" "Started dashboard refresh"
-trap 'rc=$?; if [[ $rc -ne 0 ]]; then publish_bf blocked "Mission Control publisher failed" "Refresh exited with code $rc"; fi' EXIT
-
-sync_branch() {
-  local phase="$1"
-  echo "mission-control: syncing origin/main (${phase})"
-  # These generated sidecars may be marked skip-worktree on Josh 2.0.
-  # Make them visible so git rebase --autostash can protect them instead
-  # of aborting when origin/main changes the tracked copies.
-  git update-index --no-skip-worktree -- \
-    data/brain-feed.json \
-    data/dashboard-data.json \
-    data/jaimes-brain-feed.json \
-    data/mission-control-canaries.json \
-    data/modelUsage.json \
-    data/newsfeed.json \
-    data/personal-codex.json 2>/dev/null || true
-  git fetch origin main
-  if ! git rebase --autostash origin/main; then
-    echo "mission-control: rebase failed during ${phase}; aborting publish so cron does not create another divergent commit" >&2
-    git rebase --abort >/dev/null 2>&1 || true
-    exit 1
-  fi
-}
-
-sync_branch "preflight"
-
 # Pull J.A.I.N / JAIMES brain feed and newsfeed from remote (non-blocking on failure)
 bash scripts/jain_bf_pull.sh || true
 bash scripts/jain_newsfeed_sync.sh || true
 bash scripts/jain_breaking_highlights_sync.sh || true
+python3 scripts/build_jain_daily_signals.py || true
 pull_json() {
   local remote_path="$1"
   local dest="$2"
@@ -83,6 +40,7 @@ pull_json() {
 # Pull remote JSON safely; never overwrite valid local JSON with empty SSH output.
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/jaimes-brain-feed.json" data/jaimes-brain-feed.json '{"agent":"JAIMES","status":"unknown","active":false}'
 pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/moltworld-state.json" data/moltworld-state.json '{}'
+pull_json "/Users/jc_agent/.openclaw/workspace/mission-control/data/x-progress.json" data/x-progress.json '{"available":false,"stale":true,"lastError":"fallback: source unavailable"}'
 python3 scripts/update_mission_control.py
 python3 scripts/mission_control_visual_canaries.py || true
 python3 scripts/update_mission_control.py
@@ -90,11 +48,9 @@ python3 scripts/update_mission_control.py
 # Brain feed active state is managed by Supabase Realtime (bf_push.sh).
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-git add --sparse data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/mission-control-canaries.json data/capability-canary.json
+git add data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/jain-daily-signals.json data/mission-control-canaries.json
 if git diff --cached --quiet; then
   echo "mission-control: no changes"
-  publish_bf done "Mission Control data current" "No dashboard changes to publish"
-  trap - EXIT
   exit 0
 fi
 git commit -m "dashboard: auto refresh $ts"
@@ -108,11 +64,7 @@ else
 fi
 if [[ -n "$GH_TOKEN" ]]; then
   AUTH_HEADER=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
-  sync_branch "pre-push"
   git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH_HEADER" push origin HEAD:main
 else
-  sync_branch "pre-push"
   git push origin HEAD:main
 fi
-publish_bf done "Mission Control data published" "Pushed dashboard refresh to main"
-trap - EXIT

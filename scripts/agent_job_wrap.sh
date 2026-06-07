@@ -29,7 +29,7 @@ if [[ -z "$PYTHON_BIN" ]]; then
   fi
 fi
 
-"$PYTHON_BIN" "$PUBLISH" --agent "$AGENT" --type job --status active --title "$TITLE" --tool "$TOOL" --detail "$DETAIL" --brain-feed >/dev/null || true
+"$PYTHON_BIN" "$PUBLISH" --agent "$AGENT" --type job --status active --title "$TITLE" --tool "$TOOL" --detail "$DETAIL" --job --brain-feed >/dev/null || true
 
 set +e
 "$@"

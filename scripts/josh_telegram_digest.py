@@ -16,11 +16,14 @@ if str(WORKSPACE / "scripts") not in sys.path:
 from send_josh_reply import send_message  # type: ignore  # noqa: E402
 
 BUTTONS = [
-    [{"text": "Check Mission Control", "callback_data": "next:check_mission_control"}],
-    [{"text": "Route to JOSHeX", "callback_data": "route:joshex"}],
-    [{"text": "Route to JAIMES", "callback_data": "route:jaimes"}],
-    [{"text": "Show Models", "callback_data": "next:show_models"}],
-    [{"text": "Hold", "callback_data": "next:hold"}],
+    [{"text": "Use Gemini for review", "callback_data": "model:gemini_flash"}],
+    [{"text": "Send to JAIMES / Hermes", "callback_data": "route:jaimes"}],
+    [{"text": "Use Josh 2.0 Mac tools", "callback_data": "model:codex"}],
+    [{"text": "Send to JOSHeX Cloud / repo-safe", "callback_data": "route:joshex_cloud"}],
+    [{"text": "Send to JOSHeX / private accounts", "callback_data": "route:joshex"}],
+    [{"text": "Force Mission Control sync", "callback_data": "next:check_mission_control"}],
+    [{"text": "Show model choices", "callback_data": "next:show_models"}],
+    [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
 
 

@@ -28,8 +28,8 @@ INDEX = ROOT / "index.html"
 
 AGENT_IDS = {
     "josh": "josh",
-    "josh2": "josh",
-    "josh2.0": "josh",
+    "josh2": "josh2",
+    "josh2.0": "josh2",
     "josh 2.0": "josh",
     "jaimes": "jaimes",
     "jain": "jain",

@@ -16,12 +16,12 @@ if str(WORKSPACE / "scripts") not in sys.path:
 from send_josh_reply import send_message  # type: ignore  # noqa: E402
 
 BUTTONS = [
-    [{"text": "Check Mission Control", "callback_data": "next:check_mission_control"}],
+    [{"text": "Force Mission Control sync", "callback_data": "next:check_mission_control"}],
     [{"text": "Josh 2.0", "callback_data": "agent:josh"}],
     [{"text": "JAIMES", "callback_data": "agent:jaimes"}],
     [{"text": "J.AI.N", "callback_data": "agent:jain"}],
     [{"text": "JOSHeX", "callback_data": "agent:joshex"}],
-    [{"text": "Hold", "callback_data": "next:hold"}],
+    [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
 
 ALIASES = {

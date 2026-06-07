@@ -31,16 +31,16 @@ AGENTS = {
 AGENT_IDS = {
     "joshex": "joshex",
     "codex": "joshex",
-    "josh": "josh",
-    "josh2": "josh",
-    "josh2.0": "josh",
+    "josh": "josh2",
+    "josh2": "josh2",
+    "josh2.0": "josh2",
     "jaimes": "jaimes",
     "jain": "jain",
     "j.a.i.n": "jain",
 }
 ACTIVE_STATUSES = {"active", "queued", "accepted"}
 EVENT_TYPES = {"status", "job", "decision", "handoff", "blocked", "complete", "note", "heartbeat"}
-STATUSES = {"active", "queued", "accepted", "done", "blocked", "error", "info", "cancelled"}
+STATUSES = {"active", "queued", "accepted", "ready", "done", "blocked", "error", "info", "cancelled"}
 SECRET_PATTERNS = [
     re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}"),
     re.compile(r"(?<![A-Za-z0-9])sb_secret_[A-Za-z0-9_-]+"),
@@ -64,7 +64,7 @@ def canonical_agent(raw: str) -> str:
     key = str(raw or "").strip().lower().replace("_", "").replace(" ", "")
     if key in AGENT_IDS:
         return AGENT_IDS[key]
-    raise SystemExit(f"Unknown agent '{raw}'. Use josh, jaimes, jain, or joshex.")
+    raise SystemExit(f"Unknown agent '{raw}'. Use josh2, jaimes, jain, or joshex.")
 
 
 def event_id(agent: str, event_type: str, now: str, title: str) -> str:
@@ -202,7 +202,7 @@ def build_payload(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Publish dashboard-safe Mission Control canonical state.")
-    parser.add_argument("--agent", required=True, help="josh, jaimes, jain, or joshex")
+    parser.add_argument("--agent", required=True, help="josh2, jaimes, jain, or joshex")
     parser.add_argument("--type", default="status", choices=sorted(EVENT_TYPES))
     parser.add_argument("--status", default="active", choices=sorted(STATUSES))
     parser.add_argument("--title", required=True)
