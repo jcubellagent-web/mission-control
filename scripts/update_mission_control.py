@@ -2447,12 +2447,17 @@ PY"""
             f"echo '===STRATEGICREPLIES==='; grep -E '^\\[([0-9]{{2}}):' /Users/jc_agent/.openclaw/workspace/logs/x_strategic_reply.log 2>/dev/null | tail -20 || echo ''; "
             f"echo '===HERMESJOBS==='; cat /Users/jc_agent/.hermes/cron/jobs.json 2>/dev/null || echo '{{}}'"
         )
-        r = subprocess.run(
-            ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
-             "jaimes-via-josh", jain_batch_cmd],
-            capture_output=True, text=True, timeout=12
-        )
-        if r.returncode == 0:
+        r = None
+        for host in ("jaimes-via-josh", "jc_agent@100.121.89.84"):
+            candidate = subprocess.run(
+                ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
+                 host, jain_batch_cmd],
+                capture_output=True, text=True, timeout=12
+            )
+            if candidate.returncode == 0:
+                r = candidate
+                break
+        if r is not None and r.returncode == 0:
             raw = r.stdout
             parts = raw.split("===XLOG===")
             jain_listing = parts[0].replace("===CRON===", "").strip() if parts else ""
