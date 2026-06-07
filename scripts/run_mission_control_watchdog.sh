@@ -27,7 +27,7 @@ publish_bf() {
       --agent jaimes \
       --status "$status" \
       --tool cron \
-      --cron "Mission Control watchdog" \
+      --cron "Control Tower watchdog" \
       --objective "$objective" \
       --step "$step" >/dev/null 2>&1 && return 0
   fi
@@ -37,7 +37,7 @@ publish_bf() {
     --type "$event_type" \
     --title "$objective" \
     --status "$status" \
-    --tool "Mission Control watchdog" \
+    --tool "Control Tower watchdog" \
     --detail "$step" \
     --privacy dashboard-safe \
     --brain-feed >/dev/null 2>&1 || true
@@ -54,7 +54,7 @@ refresh_dashboard_data() {
 }
 
 run_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-publish_bf active "Mission Control watchdog running" "Started regression, optional screenshot, and live layout checks"
+publish_bf active "Control Tower watchdog running" "Started regression, optional screenshot, and live layout checks"
 watchdog_ok=1
 {
   echo "=== $run_ts mission-control watchdog ==="
@@ -80,10 +80,10 @@ fi
 
 if [[ "$watchdog_ok" != "1" ]]; then
   tail_msg=$(tail -n 12 "$log_path" | tr '\n' ' ' | cut -c1-180)
-  push_jaimes "Mission Control watchdog alert: ${tail_msg}" idle exec
-  publish_bf blocked "Mission Control watchdog failed" "Regression or live layout check failed"
+  push_jaimes "Control Tower watchdog alert: ${tail_msg}" idle exec
+  publish_bf blocked "Control Tower watchdog failed" "Regression or live layout check failed"
   exit 1
 fi
 
-push_jaimes "Mission Control watchdog clean" idle exec
-publish_bf done "Mission Control watchdog clean" "Regression, live layout, and dashboard refresh checks passed"
+push_jaimes "Control Tower watchdog clean" idle exec
+publish_bf done "Control Tower watchdog clean" "Regression, live layout, and dashboard refresh checks passed"

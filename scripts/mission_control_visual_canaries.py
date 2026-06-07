@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate lightweight Mission Control visual/data canaries.
+"""Generate lightweight Control Tower visual/data canaries.
 
 These are dashboard-facing guardrails: they summarize whether the pieces Josh
 actually looks at are intact before a human has to notice a visual regression.
@@ -178,7 +178,7 @@ def main() -> int:
     x_posting_jobs = [row for row in crons if row.get("name") in x_posting_job_names]
     for item in action_required_raw:
         title = str(item.get("title", "")).lower()
-        if "mission control canary issue" in title:
+        if "control tower canary issue" in title or "mission control canary issue" in title:
             continue
         if "due/unverified" in title:
             continue
@@ -276,10 +276,10 @@ def main() -> int:
         ),
         status(
             (
-                "Mission Control alignment pass" in html
+                "Control Tower alignment pass" in html
                 and "height: 66px;" in html
                 and "-webkit-line-clamp: 2 !important" in html
-                and "Mission Control alignment pass 2" in html
+                and "Control Tower alignment pass 2" in html
                 and "grid-template-columns: repeat(2, minmax(0, 1fr)) !important;" in html
                 and ".card-jobs-full .codex-job-title,\n        .card-jobs-full .codex-job-detail,\n        .card-jobs-full .shared-event-title" in html
                 and "setInterval(() =>" not in objective_fn
@@ -471,7 +471,7 @@ def main() -> int:
             "Next job and owner." in react_main
             and "Ready/watch result, next owner, and any needed handoff." in react_main
             and react_main.find("if (/daily mission|missions|mission picks|claim|reward/.test(text))") != -1
-            and react_main.find("if (/daily mission|missions|mission picks|claim|reward/.test(text))") < react_main.find("if (/mission control|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(text))")
+            and react_main.find("if (/daily mission|missions|mission picks|claim|reward/.test(text))") < react_main.find("if (/control tower|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(text))")
             and "Points the Next readout to the visible calendar." not in react_main
             and "Ready/watch status plus the next handoff or repair instruction." not in react_main,
             "Today Jobs Next Up plain language",
@@ -570,7 +570,9 @@ def main() -> int:
             severity="medium",
         ),
         status(
-            'if (block.synthetic) return `${block.count} check${block.count === 1 ? "" : "s"}`;' in react_main
+            'if (block.tone === "done") return block.synthetic ? `${block.count} done` : "Done";' in react_main
+            and 'if (block.tone === "planned") return block.synthetic ? `${block.count} scheduled` : "Planned";' in react_main
+            and 'if (block.tone === "ready") return block.synthetic ? `${block.count} ready` : "Ready";' in react_main
             and "function groupedRoutineTitle(items: CalendarJobBlock[], firstBlock: CalendarJobBlock, isSystemGroup: boolean)" in react_main
             and 'if (isSystemGroup) return "System checks";' in react_main
             and 'return "Signal checks";' in react_main
@@ -674,7 +676,7 @@ def main() -> int:
             and 'if (routineFocus) return "Current";' in react_main
             and 'if (label === "Routine") return "Watches";' in react_main
             and "Aligned; only reports mismatches." in react_main
-            and "Keeps Mission Control aligned; reports only if a mismatch appears." not in react_main
+            and "Keeps Control Tower aligned; reports only if a mismatch appears." not in react_main
             and "Status update will publish when this check finishes." not in react_main
             and "const headerStateLabel = agentHeaderStateLabel(visualState, routineFocus, activeFocus);" in react_main
             and 'routineFocus ? "is-routine-focus" : activeFocus ? "is-working-focus"' in react_main
@@ -688,10 +690,10 @@ def main() -> int:
             "Breaking + newsletter signals." in react_main
             and 'if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Breaking + newsletter signals.";'
                 in react_main
-            and 'if (/mission control|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";'
+            and 'if (/control tower|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";'
                 in react_main
             and react_main.find('if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Breaking + newsletter signals.";')
-                < react_main.find('if (/mission control|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";'),
+                < react_main.find('if (/control tower|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";'),
             "Brain Feed active-detail classification",
             "signal/news refresh work stays described as signal work instead of generic kiosk verification",
             severity="medium",
@@ -800,7 +802,7 @@ def main() -> int:
             and "Result or blocker." in react_main
             and "Completion summary or blocker will publish here." not in react_main
             and "Result will publish here when complete." not in react_main
-            and "Keeps Mission Control aligned; reports only if a mismatch appears." not in react_main
+            and "Keeps Control Tower aligned; reports only if a mismatch appears." not in react_main
             and "Status update will publish when this check finishes." not in react_main
             and "grid-template-columns: repeat(2, minmax(0, 1fr));" in react_styles
             and "grid-template-rows: minmax(30px, 1fr);" in react_styles
@@ -957,8 +959,8 @@ def main() -> int:
             and ".control-tower-grid" in react_styles
             and ".activity-ledger" in react_styles
             and ".tower-agent-deck" in react_styles,
-            "Control Tower replacement",
-            "Mission Control renders an executive control tower with active, needs-Josh, complete, and planned activity lanes",
+            "Control Tower surface",
+            "Control Tower renders an executive control tower with active, needs-Josh, complete, and planned activity lanes",
             severity="high",
         ),
         status(
@@ -1017,7 +1019,7 @@ def main() -> int:
             and isinstance(runtime_layout.get("textQuality"), dict)
             and not runtime_layout.get("textQuality", {}).get("visibleInternalTextLeaks"),
             "Runtime visible text quality",
-            "live rendered Mission Control text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
+            "live rendered Control Tower text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
             severity="medium",
         ),
         status(
@@ -1026,7 +1028,7 @@ def main() -> int:
             and 'watchdog_ok=0' in run_watchdog
             and 'if [[ "$watchdog_ok" != "1" ]]' in run_watchdog,
             "Runtime layout alert propagation",
-            "watchdog refreshes dashboard data after runtime layout checks so display failures surface on Mission Control",
+            "watchdog refreshes dashboard data after runtime layout checks so display failures surface on Control Tower",
             severity="medium",
         ),
         status(
@@ -1062,9 +1064,9 @@ def main() -> int:
             and "--brain-feed" in run_watchdog
             and "--privacy dashboard-safe" in run_watchdog
             and 'event_type="complete"' in run_watchdog
-            and "Mission Control watchdog" in run_watchdog,
+            and "Control Tower watchdog" in run_watchdog,
             "Watchdog Brain Feed fallback",
-            "scheduled Mission Control watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
+            "scheduled Control Tower watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
             severity="medium",
         ),
         status(
@@ -1298,7 +1300,7 @@ def main() -> int:
             and "normalizeBrainFeedRow(row: unknown" in react_data
             and "isRecord" in data_adapters,
             "Typed data adapters",
-            "Supabase and sidecar rows are normalized before rendering",
+            "local sidecar rows are normalized before rendering",
             severity="medium",
         ),
         status(
@@ -1310,10 +1312,10 @@ def main() -> int:
             severity="medium",
         ),
         status(
-            "selectLiveSupabaseJobs" in react_data
-            and "mergeJobs(selectLiveSupabaseJobs(jobs), fallback.jobs)" in react_data,
+            "selectLiveJobs" in react_data
+            and "blockedJobSuperseded" in react_data,
             "Today Jobs live merge policy",
-            "scheduled inventory stays authoritative while only recent live job rows are layered in",
+            "scheduled inventory stays authoritative while only recent live job rows are allowed through",
             severity="medium",
         ),
         status(
@@ -1322,7 +1324,7 @@ def main() -> int:
             and "jobTopicsOverlap" in react_data
             and "row.get(\"source\") == \"codex_automation\"" in update_script,
             "Stale blocker suppression",
-            "old blocked live rows and stale Codex automation misses cannot keep Mission Control red after a newer clear result",
+            "old blocked live rows and stale Codex automation misses cannot keep Control Tower red after a newer clear result",
             severity="medium",
         ),
         status(
@@ -1368,7 +1370,7 @@ def main() -> int:
             and 'rel="icon"' in v2_index
             and "favicon.svg" in v2_index,
             "React favicon",
-            "kiosk has an explicit Mission Control icon and no default favicon.ico miss",
+            "kiosk has an explicit Control Tower icon and no default favicon.ico miss",
             severity="low",
         ),
     ]

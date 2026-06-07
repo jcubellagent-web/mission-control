@@ -9,12 +9,12 @@ if [[ "${1:-}" == "--force" ]]; then
   shift
 fi
 
-URL="${1:-http://127.0.0.1:5174/?mc_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
-PROFILE="/tmp/mission-control-kiosk-profile"
-CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+URL="${1:-http://127.0.0.1:5174/?ct_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
+PROFILE="/tmp/control-tower-kiosk-profile"
+CHROME_APP="Google Chrome"
 
 if ! curl -fsS --max-time 2 "http://127.0.0.1:5174/" >/dev/null 2>&1; then
-  echo "mission-control: current React kiosk server not ready at http://127.0.0.1:5174/"
+  echo "control-tower: current React kiosk server not ready at http://127.0.0.1:5174/"
   exit 1
 fi
 
@@ -32,10 +32,14 @@ if [[ "$FORCE_RELOAD" != "1" && "$current_url" == "$URL" ]]; then
   exit 0
 fi
 
-pkill -f "mission-control-kiosk-profile" 2>/dev/null || true
-sleep 1
+# Dedicated kiosk screen: close stale tabbed/app Chrome windows first.
+osascript -e 'tell application "Google Chrome" to quit' >/dev/null 2>&1 || true
+sleep 3
+pkill -f 'Google Chrome' 2>/dev/null || true
+sleep 2
+rm -rf "$PROFILE/SingletonLock" "$PROFILE/SingletonSocket" "$PROFILE/SingletonCookie" 2>/dev/null || true
 
-exec "$CHROME" \
+open -na "$CHROME_APP" --args \
   --user-data-dir="$PROFILE" \
   --remote-debugging-port=9224 \
   --remote-allow-origins='*' \
@@ -44,4 +48,7 @@ exec "$CHROME" \
   --password-store=basic \
   --disable-session-crashed-bubble \
   --disable-infobars \
-  --kiosk "$URL"
+  --hide-scrollbars \
+  --app="$URL" \
+  --start-fullscreen \
+  --start-maximized

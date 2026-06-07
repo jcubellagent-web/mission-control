@@ -8,7 +8,7 @@ import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string }> = {
   joshex: { label: "JOSHeX", role: "Private coordination" },
-  josh: { label: "Josh 2.0", role: "Mission Control host" },
+  josh: { label: "Josh 2.0", role: "Control Tower host" },
   jaimes: { label: "JAIMES", role: "Hermes workhorse" },
   jain: { label: "J.A.I.N", role: "Breaking + signals" },
 };
@@ -98,7 +98,7 @@ function missionText(value?: string | null) {
     agent_heartbeat: "status check",
     "jaimes-ops-drift-check": "JAIMES ops drift check",
     "jaimes-model-efficiency-guard": "JAIMES model efficiency guard",
-    index: "Mission Control build",
+    index: "Control Tower build",
   };
   const humanizeScript = (name: string) => {
     const stem = name.split("/").pop()?.replace(/\.(py|sh|js|ts|tsx|html)$/i, "") || name;
@@ -114,9 +114,9 @@ function missionText(value?: string | null) {
     .replace(/\bmacbook-codex\b/gi, "JOSHeX")
     .replace(/\bjaimes-ops-drift-check\b/gi, "JAIMES ops drift check")
     .replace(/\bjaimes-model-efficiency-guard\b/gi, "JAIMES model efficiency guard")
-    .replace(/React v2 Mission Control/gi, "current Mission Control")
-    .replace(/Mission Control v2/gi, "Mission Control")
-    .replace(/React v2/gi, "React Mission Control")
+    .replace(/current Control Tower/gi, "current Control Tower")
+    .replace(/Control Tower/gi, "Control Tower")
+    .replace(/React v2/gi, "React Control Tower")
     .replace(/v2 refresh/gi, "current refresh")
     .replace(/v2 row/gi, "status row")
     .replace(/v2 status\/events/gi, "status/events")
@@ -269,7 +269,7 @@ function jobIsRoutineActivity(job: MissionControlState["jobs"][number]) {
 }
 
 function textIsRoutineActivity(text: string) {
-  const routineMatch = /context sync|brain feed server|mission control refresh|watchdog|heartbeat|health check|agent control checks|automation checks|silence detector|error rate monitor|invite sync|calendar sync|appointment sync|chiro invite/.test(text);
+  const routineMatch = /context sync|brain feed server|control tower refresh|watchdog|heartbeat|health check|agent control checks|automation checks|silence detector|error rate monitor|invite sync|calendar sync|appointment sync|chiro invite/.test(text);
   const priorityMatch = /gmail|inbox|sorare|fantasy|waiver|lineup|daily mission|breaking news|x watchlist|wallet|crypto/.test(text);
   return routineMatch && !priorityMatch;
 }
@@ -518,9 +518,9 @@ function dataQualityIssues(state: MissionControlState): AttentionItem[] {
       label: "Data",
       title: "Job data needs refresh",
       detail: `${trackedJobs.length} jobs loaded; expected the full operator inventory.`,
-      why: "Mission Control is missing part of the scheduled job inventory.",
+      why: "Control Tower is missing part of the scheduled job inventory.",
       means: "This is usually a stale generated-data layer, not proof that the agents stopped working.",
-      action: "Refresh Mission Control data and reload the Josh 2.0 kiosk.",
+      action: "Refresh Control Tower data and reload the Josh 2.0 kiosk.",
       tone: "risk",
       target: "today-jobs",
     });
@@ -531,9 +531,9 @@ function dataQualityIssues(state: MissionControlState): AttentionItem[] {
       label: "Data",
       title: "Agent status coverage is low",
       detail: `${state.statuses.length}/3 core agent rows loaded.`,
-      why: "Mission Control is missing at least one core Brain Feed status row.",
+      why: "Control Tower is missing at least one core Brain Feed status row.",
       means: "A visible agent card may be stale even if the agent itself is healthy.",
-      action: "Repair Brain Feed visibility and regenerate Mission Control data.",
+      action: "Repair Brain Feed visibility and regenerate Control Tower data.",
       tone: "watch",
       target: "brain-feed",
     });
@@ -544,9 +544,9 @@ function dataQualityIssues(state: MissionControlState): AttentionItem[] {
       label: "Display",
       title: "Josh 2.0 screen layout needs attention",
       detail: runtimeIssues.slice(0, 2).join("; ") || runtimeLayout.summary || "The rendered kiosk layout did not pass its live fit check.",
-      why: "Mission Control measured the actual Chrome kiosk and found a fit, overlap, or row-visibility issue.",
+      why: "Control Tower measured the actual Chrome kiosk and found a fit, overlap, or row-visibility issue.",
       means: "The data may still be fresh, but the wall display may be hiding or crowding important sections.",
-      action: "Run the runtime layout guard, refresh Mission Control, and inspect the Josh 2.0 display.",
+      action: "Run the runtime layout guard, refresh Control Tower, and inspect the Josh 2.0 display.",
       tone: "risk",
       target: "brain-feed",
     });
@@ -557,8 +557,8 @@ function dataQualityIssues(state: MissionControlState): AttentionItem[] {
       title: "Josh 2.0 screen check is stale",
       detail: `Last rendered-layout check was ${ageLabel(runtimeLayout.checkedAt)} ago.`,
       why: "The dashboard has not recently verified that all modules still fit the live wall display.",
-      means: "Mission Control may still be usable, but the first-view fit guarantee is older than expected.",
-      action: "Run the runtime layout guard and refresh Mission Control.",
+      means: "Control Tower may still be usable, but the first-view fit guarantee is older than expected.",
+      action: "Run the runtime layout guard and refresh Control Tower.",
       tone: "watch",
       target: "brain-feed",
     });
@@ -1064,7 +1064,7 @@ function activityIsRoutineFocus(row?: TowerActivity) {
     "live kiosk health",
     "status check",
     "heartbeat",
-    "mission control refresh",
+    "control tower refresh",
     "scheduled jobs healthy",
     "rows, sidecars, live path",
     "agent state current",
@@ -1078,7 +1078,7 @@ function activityIsPriorityFocus(row: TowerActivity) {
 
 function activityIsUserFacingFocus(row: TowerActivity) {
   const text = activityText(row);
-  return activityIsPriorityFocus(row) || /telegram|josh|user|request|asked|approved|handoff|screen|kiosk|dashboard|mission control/.test(text);
+  return activityIsPriorityFocus(row) || /telegram|josh|user|request|asked|approved|handoff|screen|kiosk|dashboard|control tower/.test(text);
 }
 
 function activityFocusRank(row: TowerActivity) {
@@ -1402,7 +1402,6 @@ function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentI
 function ControlTower({
   state,
   statuses,
-  quietMode,
   onNavigate,
   liveCues,
   loading,
@@ -1410,7 +1409,6 @@ function ControlTower({
 }: {
   state: MissionControlState;
   statuses: Map<AgentId, AgentStatus>;
-  quietMode: boolean;
   onNavigate: (target: AttentionTarget) => void;
   liveCues: LiveCueState;
   loading: boolean;
@@ -1422,9 +1420,8 @@ function ControlTower({
     return () => window.clearInterval(timer);
   }, []);
   const model = useMemo(() => buildControlTowerModel(state, statuses, nowMs), [state, statuses, nowMs]);
-  const truth = missionTruthSummary(state);
   return (
-    <section className="control-tower-grid" aria-label="Josh 2.0 control tower">
+    <section className="control-tower-grid" aria-label="Josh 2.0 Control Tower">
       {/* Column 1 (Left): Live Work Board + Agent Flight Deck */}
       <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Ecosystem hero and flight deck">
         <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
@@ -1432,16 +1429,15 @@ function ControlTower({
         <AgentFlightDeck state={state} statuses={statuses} model={model} nowMs={nowMs} liveCues={liveCues} />
       </section>
 
-      {/* Column 2 (Center): Executive Overview + Priority Queue + Resource Stack */}
-      <section className="tower-column tower-center-column" aria-label="Ecosystem metrics and queue">
-        <TowerCommandStrip model={model} truth={truth} state={state} />
+      {/* Column 2 (Center): Priority Queue + Resource Stack */}
+      <section className="tower-column tower-center-column" aria-label="Priority work and resources">
         <PriorityQueuePanel state={state} model={model} onNavigate={onNavigate} />
         <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
       </section>
 
       {/* Column 3 (Right): Scheduled Jobs / Daily Calendar */}
       <aside className="right-rail tower-jobs-rail">
-        <JobsRail jobs={state.jobs} quietMode={quietMode} liveCues={liveCues} />
+        <JobsRail jobs={state.jobs} liveCues={liveCues} />
       </aside>
     </section>
   );
@@ -1875,11 +1871,11 @@ function App() {
             }}
           />
           <div>
-            <h1>Josh 2.0 | Mission Control</h1>
-            <p>Brain Feed command view for the agent ecosystem</p>
+            <h1>Josh 2.0 | Control Tower</h1>
+            <p>Control Tower for the agent ecosystem</p>
           </div>
         </div>
-        <section className="status-ribbon header-status-ribbon" aria-label="Mission Control summary">
+        <section className="status-ribbon header-status-ribbon" aria-label="Control Tower summary">
           <Metric icon={<UserRoundCheck size={18} />} label={actionLabel} value={needsJoshValue} tone={decisionCount ? "risk" : "clear"} />
           <Metric icon={<AlertTriangle size={18} />} label="System" value={systemValue} tone={needsFocusCount ? "watch" : "clear"} />
           <Metric icon={<ClipboardList size={18} />} label="Jobs" value={jobsValue} tone={workingCount ? "info" : "clear"} />
@@ -1908,7 +1904,6 @@ function App() {
       <ControlTower
         state={state}
         statuses={statusByAgent}
-        quietMode={quietMode}
         onNavigate={navigateToPanel}
         liveCues={liveCues}
         loading={loading}
@@ -2402,7 +2397,7 @@ function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { ro
           </div>
           <p className="signal-impact">{emptyLabel}</p>
           <div className="signal-meta">
-            <em className="signal-source">Mission Control</em>
+            <em className="signal-source">Control Tower</em>
             <time>clear</time>
           </div>
         </article>
@@ -2415,7 +2410,7 @@ function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { ro
             </div>
             <p className="signal-impact">{reserveImpact}</p>
             <div className="signal-meta">
-              <em className="signal-source">Mission Control</em>
+              <em className="signal-source">Control Tower</em>
               <time>watching</time>
             </div>
           </article>
@@ -2462,7 +2457,7 @@ function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { ro
           </div>
           <p className="signal-impact">{reserveImpact}</p>
           <div className="signal-meta">
-            <em className="signal-source">Mission Control</em>
+            <em className="signal-source">Control Tower</em>
             <time>watching</time>
           </div>
         </article>
@@ -2491,7 +2486,7 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
       why: approvalAlertReason(approval),
       means: isHardDecision
         ? "An agent is waiting before it should continue. This alert needs a Josh decision."
-        : "Mission Control is highlighting a current setup or follow-up item. This is not an agent outage.",
+        : "Control Tower is highlighting a current setup or follow-up item. This is not an agent outage.",
       action: isHardDecision
         ? "Open the related job or approval lane, then approve, hold, or deny from the source that requested it."
         : "Open Today's Jobs when you are ready to finish the setup or clear the follow-up.",
@@ -2509,7 +2504,7 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
         : `${riskJobs.length} jobs need focus`,
       detail: jobAlertReason(firstJob),
       why: jobAlertReason(firstJob),
-      means: "A scheduled or priority job reported blocked, error, or missed. Mission Control is surfacing the first affected row so you can inspect it quickly.",
+      means: "A scheduled or priority job reported blocked, error, or missed. Control Tower is surfacing the first affected row so you can inspect it quickly.",
       action: "Open Today's Jobs and inspect the highlighted row first.",
       tone: "risk",
       target: "today-jobs",
@@ -3206,7 +3201,7 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     return [
       { label: "Input", text: "Latest agent memory, task state, and shared context sidecars." },
       { label: "Checks", text: "Confirms each agent has a fresh plain-English status." },
-      { label: "Output", text: "Keeps Brain Feed, Telegram, and Mission Control reading the same state." },
+      { label: "Output", text: "Keeps Brain Feed, Telegram, and Control Tower reading the same state." },
       { label: "Alert", text: "Only if an agent state file is stale or disagrees with the kiosk." },
     ];
   }
@@ -3223,7 +3218,7 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
   if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(titleTopic)) {
     return [
       { label: "Input", text: "Latest J.A.I.N breaking rows, newsfeed rows, and newsletter trends." },
-      { label: "Checks", text: "Dedupes stories and scores relevance without crowding Mission Control." },
+      { label: "Checks", text: "Dedupes stories and scores relevance without crowding Control Tower." },
       { label: "Output", text: "Telegram push or archived source data when something is worth attention." },
       { label: "Alert", text: "Only if a source is broken or a high-confidence item needs Josh." },
     ];
@@ -3238,11 +3233,11 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     ];
   }
 
-  if (/mission control|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(text)) {
+  if (/control tower|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(text)) {
     return [
       { label: "Input", text: "Dashboard data, sidecars, kiosk server, and the live display." },
       { label: "Checks", text: "Verifies data freshness, layout fit, readable labels, and alerts." },
-      { label: "Output", text: "A cleaner Mission Control surface with current live status." },
+      { label: "Output", text: "A cleaner Control Tower surface with current live status." },
       { label: "Alert", text: "Only if the display, data, or refresh path needs repair." },
     ];
   }
@@ -3277,7 +3272,7 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
   if (/signal|intelligence|news|newsletter|breaking/.test(text)) {
     return [
       { label: "Input", text: "Latest J.A.I.N breaking rows, newsfeed rows, and newsletter trends." },
-      { label: "Checks", text: "Dedupes stories and scores relevance without crowding Mission Control." },
+      { label: "Checks", text: "Dedupes stories and scores relevance without crowding Control Tower." },
       { label: "Output", text: "Telegram push or archived source data when something is worth attention." },
       { label: "Alert", text: "Only if a source is broken or a high-confidence item needs Josh." },
     ];
@@ -3571,7 +3566,7 @@ function cleanHeadlineText(value: string) {
     .replace(/information density/i, "info density")
     .replace(/\bMorning Inbox Triage\b/i, "Inbox Triage")
     .replace(/\bFantasy Waiver Review\b/i, "Fantasy Waivers")
-    .replace(/\bMission Control Refresh\b/i, "Mission Control Refresh")
+    .replace(/\bControl Tower Refresh\b/i, "Control Tower Refresh")
     .replace(/\bBrain Feed Server\b/i, "Brain Feed Refresh")
     .replace(/\bintelligence feed\b/i, "Intelligence Feed")
     .replace(/\bintelligence feedback loop\b/i, "Intelligence Feedback Loop")
@@ -3591,14 +3586,14 @@ function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
   const titleTopic = classifierText(title);
   const text = classifierText(`${title} ${rows.map((row) => row.text).join(" ")}`);
   if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(titleTopic)) return "Source-backed signals.";
-  if (/mission control|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(titleTopic)) return "Dashboard health check.";
+  if (/control tower|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(titleTopic)) return "Dashboard health check.";
   if (/gmail|inbox|email|mail triage|unread/.test(text)) return "Urgent-only inbox review.";
   if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Injuries, waivers, roster risk.";
   if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Mission choices or blockers.";
   if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(text)) return "Slots, deadlines, risk.";
   if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Live agent status.";
   if (/context sync|agent context|shared context/.test(text)) return "Keeps agent state aligned.";
-  if (/mission control|kiosk|dashboard|react|watchdog|refresh/.test(text)) return "Dashboard health.";
+  if (/control tower|kiosk|dashboard|react|watchdog|refresh/.test(text)) return "Dashboard health.";
   if (/signal|intelligence|news|newsletter|breaking/.test(text)) return "Source-backed signals.";
   if (/memory|backup|sync|manifest|recovery/.test(text)) return "Confirms sync status or repair note.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Checks routes, ownership, and handoffs.";
@@ -3625,7 +3620,7 @@ function readoutSummary(value?: string | null, fallback = "Scheduled check.", ma
   if (/concise triage status|items josh actually needs/i.test(lower)) return "Triage summary.";
   if (/mission choices|submission\/claim status|blocked action/i.test(lower)) return "Mission status.";
   if (/updated agent cards|current complete, next|live status/i.test(lower)) return "Live agent cards.";
-  if (/refreshed mission control surface|clean kiosk health/i.test(lower)) return "Dashboard health.";
+  if (/refreshed control tower surface|clean kiosk health/i.test(lower)) return "Dashboard health.";
   if (/high-confidence item|source is broken|worth attention/i.test(lower)) return "Source-backed signals.";
   if (/confirmed backup state|clear repair note|sync fails/i.test(lower)) return "Confirmed sync status or repair note.";
   if (/telegram push|archived source data|source data/i.test(lower)) return "Publishes or archives source updates.";
@@ -3641,7 +3636,7 @@ function readoutSummary(value?: string | null, fallback = "Scheduled check.", ma
   if (/today'?s jobs|today jobs|daily calendar|calendar fit|scheduler inventory/.test(lower)) return "Daily calendar fit.";
   if (/(?:live|current)(?: josh 2\.0)? display|wall display|screen balance|visual hierarchy|visual audit|kiosk audit|display balance|scanability|readability improvement|clutter reduction|visual noise|minimal, high value cleanup|source-of-truth|source of truth|trust at a glance|professional personal assistant/.test(lower)) return "Live layout cleanup.";
   if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Breaking + newsletter signals.";
-  if (/mission control|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";
+  if (/control tower|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";
   if (/memory|backup|sync|manifest|recovery/.test(lower)) return "Memory + sync health.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(lower)) return "Routes and handoffs.";
   if (/google|calendar|drive|auth|oauth|scope/.test(lower)) return "Google auth health.";
@@ -3688,7 +3683,7 @@ function idleChecksSummary(agent: AgentId, idleContext: AgentIdleContext, rows: 
   if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(text)) return "Source-backed signals.";
   if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Rows, sidecars, live path.";
   if (/context sync|agent context|shared context/.test(text)) return "Shared agent status.";
-  if (/mission control|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Live kiosk health.";
+  if (/control tower|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Live kiosk health.";
   if (/memory|backup|sync|manifest|recovery/.test(text)) return "Memory + sync health.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Routes and handoffs.";
   return briefText(rows, ["Checks", "Input"], `${AGENTS[agent].label} schedule, sidecars, and latest state.`, 72);
@@ -3703,7 +3698,7 @@ function idleOutputSummary(agent: AgentId, idleContext: AgentIdleContext, rows: 
   if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(text)) return "Source-backed updates.";
   if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Current live cards.";
   if (/context sync|agent context|shared context/.test(text)) return "Aligned agent state.";
-  if (/mission control|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Dashboard health.";
+  if (/control tower|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Dashboard health.";
   if (/memory|backup|sync|manifest|recovery/.test(text)) return "Sync or repair note.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Ready/watch status.";
   return briefText(rows, ["Output"], fallback, 72);
@@ -4047,7 +4042,7 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
               <footer>
                 <span>{AGENTS[event.agent_id]?.label || event.agent_id}</span>
                 <span>{event.event_type}</span>
-                <span>{missionText(event.tool || "Mission Control")}</span>
+                <span>{missionText(event.tool || "Control Tower")}</span>
               </footer>
             </div>
           </article>
@@ -4060,7 +4055,7 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
 type JobRow = MissionControlState["jobs"][number];
 
 const JOB_CATEGORY_RULES: Array<{ key: string; label: string; matcher: (job: JobRow, text: string) => boolean }> = [
-  { key: "mission-control", label: "Mission Control", matcher: (_job, text) => /mission control|dashboard|brain feed|react|kiosk|v2/.test(text) },
+  { key: "mission-control", label: "Control Tower", matcher: (_job, text) => /control tower|dashboard|brain feed|react|kiosk|v2/.test(text) },
   { key: "inbox", label: "Inbox & Handoffs", matcher: (_job, text) => /inbox|approval|handoff|ledger/.test(text) },
   { key: "sorare", label: "Sorare MLB", matcher: (_job, text) => /sorare|mlb|baseball/.test(text) },
   { key: "fantasy", label: "Fantasy Ops", matcher: (_job, text) => /fantasy|lineup|waiver|roster|pitcher|player/.test(text) },
@@ -4406,9 +4401,11 @@ function jobRunCells(job: JobRow) {
 }
 
 function calendarBlockRunLabel(block: CalendarJobBlock, run: ReturnType<typeof jobRunCells>) {
-  if (block.synthetic) return `${block.count} check${block.count === 1 ? "" : "s"}`;
   if (block.tone === "working") return "Now";
   if (block.tone === "attention") return "Focus";
+  if (block.tone === "done") return block.synthetic ? `${block.count} done` : "Done";
+  if (block.tone === "planned") return block.synthetic ? `${block.count} scheduled` : "Planned";
+  if (block.tone === "ready") return block.synthetic ? `${block.count} ready` : "Ready";
   return run.today;
 }
 
@@ -4552,12 +4549,10 @@ function startOfLocalDay(date = new Date()) {
 }
 
 function calendarWindow() {
-  const now = new Date();
-  const start = startOfLocalDay(now);
+  const start = startOfLocalDay();
   start.setHours(5, 0, 0, 0);
   const end = new Date(start);
-  end.setDate(start.getDate() + (now.getHours() >= 18 ? 1 : 0));
-  end.setHours(now.getHours() >= 18 ? 10 : 23, now.getHours() >= 18 ? 0 : 59, 0, 0);
+  end.setHours(23, 59, 0, 0);
   return { start, end };
 }
 
@@ -4567,9 +4562,34 @@ function dateFromTimestamp(value?: string | null) {
   return Number.isFinite(date.getTime()) ? date : null;
 }
 
+function parseScheduleClockMinutes(schedule?: string | null) {
+  const match = missionText(schedule || "").match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM|A|P)\b/i);
+  if (!match) return null;
+  const hour12 = Number(match[1]);
+  const minute = Number(match[2] || 0);
+  const ampm = match[3].toUpperCase()[0];
+  if (!hour12 || hour12 > 12 || minute < 0 || minute > 59) return null;
+  let hour = hour12 % 12;
+  if (ampm === "P") hour += 12;
+  return hour * 60 + minute;
+}
+
+function scheduledDateToday(job: JobRow) {
+  if (!job.todayRelevant) return null;
+  const schedule = missionText(job.schedule || "");
+  if (!schedule || /on boot|on demand/i.test(schedule)) return null;
+  const minuteOfDay = parseScheduleClockMinutes(schedule);
+  if (minuteOfDay === null) return null;
+  const date = startOfLocalDay();
+  date.setHours(Math.floor(minuteOfDay / 60), minuteOfDay % 60, 0, 0);
+  return date;
+}
+
 function calendarDateForJob(job: JobRow, now = new Date()) {
   const status = jobStatusValue(job);
   if (jobIsFreshActive(job) || ["active", "running", "queued"].includes(status)) return now;
+  const scheduled = scheduledDateToday(job);
+  if (scheduled) return scheduled;
   const last = dateFromTimestamp(job.lastRun || job.completed_at);
   if (last && sameLocalDay(last.toISOString())) return last;
   const next = nextRunTime(job);
@@ -4611,6 +4631,10 @@ function calendarTone(job: JobRow, allJobs: JobRow[]): CalendarBlockTone {
   if (jobNeedsAttention(job, allJobs)) return "attention";
   if (jobIsFreshActive(job)) return "working";
   if (job.verifiedToday || sameLocalDay(job.lastRun || job.completed_at || "")) return "done";
+  const scheduled = scheduledDateToday(job);
+  if (scheduled) {
+    return scheduled.getTime() >= Date.now() - 15 * 60 * 1000 ? "planned" : "ready";
+  }
   if (nextRunTime(job) >= Date.now() - 15 * 60 * 1000) return "planned";
   return "ready";
 }
@@ -4643,7 +4667,7 @@ function routineCalendarGroupKey(block: CalendarJobBlock) {
   const text = missionText(`${block.title} ${block.detail} ${block.job.title} ${block.job.detail} ${block.job.tool}`).toLowerCase();
   const systemRoutine = jobIsRoutineActivity(block.job) && (
     ["mission-control", "agent-control", "automation"].includes(block.category.key)
-    || /context sync|brain feed server|mission control refresh|agent control checks|automation checks|watchdog|heartbeat|health check|silence detector|error rate|invite sync|calendar sync|appointment sync|chiro invite/.test(text)
+    || /context sync|brain feed server|control tower refresh|agent control checks|automation checks|watchdog|heartbeat|health check|silence detector|error rate|invite sync|calendar sync|appointment sync|chiro invite/.test(text)
   );
   if (systemRoutine) return `${block.hourKey}-system-checks`;
   return `${block.hourKey}-${block.category.key}-${block.agent}`;
@@ -4720,7 +4744,7 @@ function buildCalendarJobBlocks(jobs: JobRow[]) {
 
   return [...important, ...groupedRoutine]
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime() || priorityScore(b.job) - priorityScore(a.job))
-    .slice(0, 32);
+    .slice(0, 48);
 }
 
 function calendarJobsForMode(jobs: JobRow[], quietMode: boolean) {
@@ -4813,8 +4837,8 @@ function calendarSlots(blocks: CalendarJobBlock[]) {
   }));
 }
 
-function DailyJobsCalendar({ jobs, quietMode, liveCues }: { jobs: JobRow[]; quietMode: boolean; liveCues: LiveCueState }) {
-  const calendarJobs = calendarJobsForMode(jobs, quietMode);
+function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveCueState }) {
+  const calendarJobs = jobs;
   const blocks = buildCalendarJobBlocks(calendarJobs);
   const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
   const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
@@ -4831,7 +4855,7 @@ function DailyJobsCalendar({ jobs, quietMode, liveCues }: { jobs: JobRow[]; quie
   const priorityRunning = Math.max(0, workingBlocks.length - routineRunning);
   const attention = visibleBlocks.filter((block) => block.tone === "attention").length;
   const completed = visibleBlocks.filter((block) => block.tone === "done").length;
-  const planned = visibleBlocks.filter((block) => block.tone === "planned" || block.tone === "ready").length;
+  const planned = visibleBlocks.filter((block) => block.tone === "planned").length;
   const attentionValue = attention ? `${attention} review${attention === 1 ? "" : "s"}` : "Clear";
   const activeLabel = priorityRunning ? "Now" : routineRunning ? "Background" : "Now";
   const activeValue = priorityRunning
@@ -5062,7 +5086,7 @@ function sorareGroupSummary(group: ReturnType<typeof sorareDailyGroups>[number])
   return compactText(`${group.items.length} job${group.items.length === 1 ? "" : "s"} · ${names}${extra}`, 68);
 }
 
-function JobsRail({ jobs, quietMode, liveCues }: { jobs: MissionControlState["jobs"]; quietMode: boolean; liveCues: LiveCueState }) {
+function JobsRail({ jobs, liveCues }: { jobs: MissionControlState["jobs"]; liveCues: LiveCueState }) {
   const trackedJobs = operatorTrackedJobs(jobs);
   const inventoryGroups = groupedJobs(trackedJobs, "category");
   return (
@@ -5075,7 +5099,7 @@ function JobsRail({ jobs, quietMode, liveCues }: { jobs: MissionControlState["jo
         </div>
       </div>
       <div className="job-list">
-        <DailyJobsCalendar jobs={trackedJobs} quietMode={quietMode} liveCues={liveCues} />
+        <DailyJobsCalendar jobs={trackedJobs} liveCues={liveCues} />
         <SchedulerInventoryDisclosure groups={inventoryGroups} total={trackedJobs.length} surfaced={trackedJobs.length} liveCues={liveCues} />
       </div>
     </aside>
@@ -5539,7 +5563,7 @@ function offlineStatus(agent: AgentId): AgentStatus {
   return {
     agent_id: agent,
     status: "offline",
-    objective: "No current Mission Control status has been published yet",
+    objective: "No current Control Tower status has been published yet",
     detail: "This agent has not reported a dashboard-safe status row.",
     current_tool: "",
     active: false,

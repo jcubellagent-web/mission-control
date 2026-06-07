@@ -62,8 +62,6 @@ JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
 NEXT_BASE = "http://127.0.0.1:3030"
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
-AGENT_BUS_URL = "https://cdzaeptrggczynijegls.supabase.co"
-AGENT_BUS_KEY = "sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
 CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-state.json"
 CONTEXT_HANDOFF_PATH = WORKSPACE_ROOT / "memory" / "context-handoff-latest.md"
 CONTEXT_WATCHDOG_LABEL = "com.josh20.context-watchdog"
@@ -504,7 +502,9 @@ LOW_SIGNAL_SHARED_EVENT_PATTERNS = re.compile(
     r"weekly autonomy self-test|remote probe|operation not permitted|"
     r"repo write access|push permission|allowlist requires explicit approval|"
     r"daily agent ecosystem health sweep|ecosystem health sweep|"
-    r"stale brain feed freshness guard|brain feed needs refresh",
+    r"stale brain feed freshness guard|brain feed needs refresh|"
+    r"heartbeat check complete|mission control latest commit|repo dirty tree|"
+    r"dirty/untracked entries|no auto-push was attempted",
     re.IGNORECASE,
 )
 
@@ -3381,29 +3381,7 @@ def build_products(now_iso: str) -> List[Dict[str, str]]:
 
 
 def fetch_agent_bus_tasks(limit: int = 12) -> List[Dict[str, Any]]:
-    if os.environ.get("MISSION_CONTROL_AGENT_BUS", "").lower() not in {"1", "true", "yes", "on"}:
-        return []
-    query = urllib.parse.urlencode({
-        "select": "id,origin_node,target_node,task_type,status,payload,created_at,result,error_log",
-        "order": "created_at.desc",
-        "limit": str(limit),
-    })
-    url = f"{AGENT_BUS_URL}/rest/v1/agent_tasks?{query}"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "apikey": AGENT_BUS_KEY,
-            "Authorization": f"Bearer {AGENT_BUS_KEY}",
-            "Content-Type": "application/json",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            data = json.loads(resp.read().decode())
-        return data if isinstance(data, list) else []
-    except Exception as exc:
-        print(f"[warn] fetch_agent_bus_tasks failed: {exc}", file=sys.stderr)
-        return []
+    return []
 
 
 def fetch_context_watchdog_status() -> Dict[str, Any]:
@@ -4149,7 +4127,7 @@ def main() -> None:
     if dashboard["visualCanaries"].get("status") == "attention":
         dashboard["actionRequired"].insert(0, {
             "priority": "high",
-            "title": f"Mission Control canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
+            "title": f"Control Tower canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
             "url": "#canaries",
         })
     if dashboard["runtimeLayout"].get("status") == "attention":

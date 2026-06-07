@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mission Control React UI/data regression checks.
+"""Control Tower React UI/data regression checks.
 
 This is the fast, browserless guard for the current Vite/React kiosk. The old
 static index.html guard became stale after the Control Tower moved to
