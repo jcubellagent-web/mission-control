@@ -1146,6 +1146,56 @@ function activityFocusRows(model: ControlTowerModel) {
   }).slice(0, 3);
 }
 
+// Multi-agent concurrency: how many DISTINCT agents are genuinely active at once.
+// Used to switch the Live Work Board hero from single-focus to a co-equal grid.
+function concurrentActiveAgents(model: ControlTowerModel): AgentId[] {
+  const seen = new Set<AgentId>();
+  const order: AgentId[] = [];
+  [...model.needsJosh, ...model.active].forEach((row) => {
+    if (row.lane !== "active" && row.lane !== "needs-josh") return;
+    if (activityIsRoutineFocus(row)) return;
+    if (!row.time || isFreshActiveTimestamp(row.time)) {
+      if (!seen.has(row.agent)) {
+        seen.add(row.agent);
+        order.push(row.agent);
+      }
+    }
+  });
+  return order;
+}
+
+// One representative focus row per active agent, ranked — for the concurrent hero grid.
+function perAgentFocusRows(model: ControlTowerModel, agents: AgentId[]): TowerActivity[] {
+  const rawActive = activityRankedRows(
+    [...model.needsJosh, ...model.active].filter((row) => !activityIsRoutineFocus(row)),
+  );
+  const out: TowerActivity[] = [];
+  agents.forEach((agent) => {
+    const row = rawActive.find((r) => r.agent === agent);
+    if (row) out.push(row);
+  });
+  return out.slice(0, 3);
+}
+
+// Contention: two or more agents whose current work targets the same thing.
+function focusContentionKey(row: TowerActivity): string {
+  return missionText(row.title).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").slice(0, 4).join(" ");
+}
+function detectFocusContention(rows: TowerActivity[]): Set<string> {
+  const byKey = new Map<string, Set<AgentId>>();
+  rows.forEach((row) => {
+    const key = focusContentionKey(row);
+    if (!key) return;
+    if (!byKey.has(key)) byKey.set(key, new Set());
+    byKey.get(key)!.add(row.agent);
+  });
+  const contended = new Set<string>();
+  byKey.forEach((agents, key) => {
+    if (agents.size >= 2) contended.add(key);
+  });
+  return contended;
+}
+
 function focusEyebrow(row?: TowerActivity) {
   if (!row) return "Live status";
   if (row.lane === "needs-josh") return "Needs Josh";
@@ -1523,6 +1573,12 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
   const systemQuiet = activitySystemQuietCount(model);
   const focusRows = activityFocusRows(model);
   const primaryFocus = focusRows[0];
+  // Multi-agent: when 2+ distinct agents are active at once, show a co-equal grid
+  // instead of a single hero so concurrent workflows are all visible.
+  const activeAgents = concurrentActiveAgents(model);
+  const concurrent = activeAgents.length >= 2;
+  const concurrentRows = concurrent ? perAgentFocusRows(model, activeAgents) : [];
+  const contended = concurrent ? detectFocusContention(concurrentRows) : new Set<string>();
   return (
     <section className="tower-module activity-ledger" aria-label="Unified activity ledger">
       <header>
@@ -1532,6 +1588,33 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
         </div>
         <span>{model.counts.trackedJobs} tracked jobs</span>
       </header>
+      {concurrent ? (
+        <section
+          className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 3)}`}
+          aria-label={`Live ecosystem focus — ${concurrentRows.length} agents working`}
+        >
+          {concurrentRows.map((row) => {
+            const inContention = contended.has(focusContentionKey(row));
+            return (
+              <article
+                key={row.id}
+                className={`ledger-focus-primary ledger-focus-concurrent is-${row.tone} ${agentClass(row.agent)} ${activityIsRoutineFocus(row) ? "is-routine-focus" : "is-priority-focus"}${inContention ? " is-contended" : ""}`}
+              >
+                <span className="ledger-now-label">
+                  {AGENTS[row.agent]?.label || row.agent}
+                  {inContention ? <em className="focus-contention-badge" title="Two or more agents are working the same target">shared target</em> : null}
+                </span>
+                <h3 className="ledger-now-title" title={missionText(row.title)}>{row.title}</h3>
+                <p className="ledger-now-detail" title={missionText(row.detail)}>{row.detail}</p>
+                <footer>
+                  <strong>{focusEyebrow(row)}</strong>
+                  <em>{row.time ? ageLabel(row.time) : "live"}</em>
+                </footer>
+              </article>
+            );
+          })}
+        </section>
+      ) : (
       <section className="ledger-live-focus" aria-label="Live ecosystem focus">
         <article className={`ledger-focus-primary ${primaryFocus ? `is-${primaryFocus.tone} ${agentClass(primaryFocus.agent)} ${activityIsRoutineFocus(primaryFocus) ? "is-routine-focus" : "is-priority-focus"}` : "is-done"}`}>
           <span className="ledger-now-label">{focusEyebrow(primaryFocus)}</span>
@@ -1556,6 +1639,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
           ))}
         </div>
       </section>
+      )}
       <div className="ledger-summary-strip">
         {TOWER_LANES.map((lane) => (
           <article key={lane.key} className={`ledger-summary-card lane-${lane.key}`}>

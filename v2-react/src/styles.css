@@ -15001,3 +15001,106 @@ body > #root,
 
 /* Scrollbar accent token (still hidden, but keep brand-consistent) */
 * { scrollbar-color: var(--brand-blue) transparent !important; }
+
+/* ============================================================
+   MULTI-AGENT LIVE WORK BOARD — concurrent hero grid
+   Appended 2026-06-07. When 2+ agents work at once, the Live
+   Work Board shows co-equal cards instead of one hero + minis.
+   Dark-blue/green theme, no scrollbars, fits kiosk viewport.
+   ============================================================ */
+.ledger-live-focus.is-concurrent {
+  display: grid !important;
+  gap: 8px !important;
+  min-height: 235px !important;
+  overflow: hidden !important;
+}
+.ledger-live-focus.is-concurrent.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+.ledger-live-focus.is-concurrent.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.ledger-focus-concurrent {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  gap: 6px !important;
+  padding: 14px 15px !important;
+  overflow: hidden !important;
+}
+
+/* In concurrent mode each card is co-equal, so the title scales
+   down from the single-hero size to fit 2-3 across without clipping. */
+.ledger-focus-concurrent .ledger-now-title {
+  align-self: start !important;
+  font-size: clamp(18px, 1.35vw, 26px) !important;
+  line-height: 1.12 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+}
+.ledger-live-focus.is-concurrent.cols-3 .ledger-focus-concurrent .ledger-now-title {
+  font-size: clamp(16px, 1.1vw, 22px) !important;
+  -webkit-line-clamp: 2 !important;
+}
+.ledger-focus-concurrent .ledger-now-detail {
+  font-size: clamp(12px, 0.85vw, 14px) !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+}
+
+/* Per-agent left accent bar uses the agent's own brand tone. */
+.ledger-focus-concurrent.agent-jaimes::before { background: var(--green, #3fcf8e) !important; }
+.ledger-focus-concurrent.agent-josh::before   { background: var(--blue, #5b9cff) !important; }
+.ledger-focus-concurrent.agent-joshex::before { background: var(--green, #3fcf8e) !important; }
+.ledger-focus-concurrent.agent-jain::before   { background: var(--lavender, #8aa0ff) !important; }
+
+/* Agent label header in concurrent mode */
+.ledger-focus-concurrent .ledger-now-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  color: #cfe2fb !important;
+}
+
+/* Contention badge — two agents on the same target */
+.focus-contention-badge {
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: #0b1f33 !important;
+  background: var(--amber, #f5c451) !important;
+  padding: 2px 6px !important;
+  border-radius: 999px !important;
+  font-style: normal !important;
+  line-height: 1 !important;
+}
+.ledger-focus-concurrent.is-contended {
+  border-color: rgba(245, 196, 81, 0.55) !important;
+}
+
+.ledger-focus-concurrent footer {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+.ledger-focus-concurrent footer strong {
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  color: #9fc3e9 !important;
+}
+.ledger-focus-concurrent footer em {
+  font-size: 10px !important;
+  font-style: normal !important;
+  color: #8fb5dc !important;
+}

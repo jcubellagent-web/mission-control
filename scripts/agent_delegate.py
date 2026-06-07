@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import subprocess
+import time
 import sys
 from pathlib import Path
 from typing import Any
@@ -30,21 +32,29 @@ AGENT_ALIASES = {
 }
 REMOTE_HOSTS = {
     "josh": {
-        "ssh": "josh2-lan",
+        "ssh": "josh2",
         "path": "/Users/josh2.0/.openclaw/workspace/mission-control",
         "python": "/opt/homebrew/bin/python3",
     },
     "jaimes": {
-        "ssh": "jaimes-via-josh",
+        "ssh": "jc_agent@100.121.89.84",
         "path": "/Users/jc_agent/.openclaw/workspace/mission-control",
         "python": "/opt/homebrew/bin/python3",
     },
     "jain": {
-        "ssh": "jaimes-via-josh",
+        "ssh": "jc_agent@100.121.89.84",
         "path": "/Users/jc_agent/.openclaw/workspace/mission-control",
         "python": "/opt/homebrew/bin/python3",
     },
 }
+
+
+def is_local_remote(remote: dict[str, str]) -> bool:
+    """Return true when the requested receiving host is this checkout."""
+    try:
+        return Path(remote["path"]).resolve() == ROOT.resolve()
+    except Exception:
+        return False
 
 
 def compact(value: Any, limit: int = 500) -> str:
@@ -62,9 +72,26 @@ def canonical_agent(value: str) -> str:
     return agent
 
 
-def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
-    if check and proc.returncode != 0:
+def run(cmd: list[str], *, check: bool = True, retries: int = 1, retry_delay: float = 2.0) -> subprocess.CompletedProcess[str]:
+    # Retry transient ssh/scp failures (Tailscale name-resolution / connect blips)
+    # so a single hiccup does not emit a permanent "receipt not confirmed" blocker.
+    is_remote = bool(cmd) and cmd[0] in ("ssh", "scp")
+    attempts = (retries + 1) if is_remote else 1
+    proc = None
+    for attempt in range(attempts):
+        proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
+        if proc.returncode == 0:
+            return proc
+        transient = is_remote and re.search(
+            r"could not resolve|connection (timed out|refused|reset)|operation timed out|temporary failure|no route to host",
+            (proc.stderr or "") + (proc.stdout or ""),
+            re.IGNORECASE,
+        )
+        if transient and attempt < attempts - 1:
+            time.sleep(retry_delay)
+            continue
+        break
+    if check and proc is not None and proc.returncode != 0:
         raise SystemExit(proc.stderr.strip() or proc.stdout.strip() or f"{cmd[0]} failed: {proc.returncode}")
     return proc
 
@@ -116,6 +143,8 @@ def create_task(args: argparse.Namespace) -> dict[str, Any]:
 def sync_task_queue(remote: dict[str, str]) -> None:
     if not TASK_QUEUE.exists():
         return
+    if is_local_remote(remote):
+        return
     destination = f"{remote['ssh']}:{remote['path']}/data/agent-task-queue.json"
     run(["scp", str(TASK_QUEUE), destination])
 
@@ -126,6 +155,9 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
         return "", ""
     title = f"Instruction received: {task['title']}"
     detail = f"Received JOSHeX request. Task id: {task['id']}. Objective: {task.get('objective') or task['title']}"
+    if is_local_remote(remote):
+        publish(agent, "handoff", "active", title, detail, True)
+        return title, detail
     base_args = [
         remote["python"],
         "scripts/agent_publish.py",
