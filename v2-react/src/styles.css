@@ -14434,3 +14434,163 @@ body::after,
   flex: 0 0 auto !important;
   height: auto !important;
 }
+
+
+/* ==========================================================================
+   JAIMES CONTROL TOWER REMODEL 2026-06-07
+   A spacious, elegant 3-column layout.
+   - Column 1: Live Work Board Hero (strictly 1 display) + Agent Flight Deck
+   - Column 2: Executive Ribbon + Priority Queue + Resource Stack
+   - Column 3: Scheduled Jobs Daily Calendar Timeline
+   ========================================================================== */
+
+/* Structural Grid Remodel */
+.control-tower-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr) minmax(500px, 0.8fr) !important;
+  grid-template-rows: 1fr !important;
+  gap: 14px !important;
+  height: calc(100vh - 104px) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  align-items: stretch !important;
+  background: #081626 !important;
+  padding: 6px 12px 12px !important;
+}
+
+.tower-column {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Left Column Sizing */
+.tower-left-column .activity-ledger {
+  flex: 0 0 calc(42% - 7px) !important;
+  height: calc(42% - 7px) !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-color: rgba(134, 191, 255, 0.2) !important;
+}
+
+.tower-left-column .tower-agent-deck {
+  flex: 1 1 calc(58% - 7px) !important;
+  height: calc(58% - 7px) !important;
+  min-height: 0 !important;
+  border-color: rgba(134, 191, 255, 0.16) !important;
+}
+
+/* Center Column Sizing */
+.tower-center-column .tower-command-strip {
+  flex: 0 0 auto !important;
+  margin-bottom: 2px !important;
+}
+
+.tower-center-column .tower-priority-queue {
+  flex: 1 1 calc(44% - 14px) !important;
+  height: calc(44% - 14px) !important;
+  min-height: 0 !important;
+  border-color: rgba(134, 191, 255, 0.16) !important;
+}
+
+.tower-center-column .tower-resource-stack {
+  flex: 1 1 calc(56% - 14px) !important;
+  height: calc(56% - 14px) !important;
+  min-height: 0 !important;
+  border-color: rgba(134, 191, 255, 0.16) !important;
+}
+
+/* Live Work Board - Hero Mode (Exactly One Focus Display) */
+.activity-ledger .ledger-focus-secondary,
+.activity-ledger .ledger-summary-strip,
+.activity-ledger .ledger-system-summary,
+.activity-ledger .ledger-row-list,
+.activity-ledger .ledger-row-list.is-flat {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.activity-ledger .ledger-live-focus {
+  display: block !important;
+  height: calc(100% - 36px) !important;
+  min-height: 0 !important;
+}
+
+.activity-ledger .ledger-focus-primary {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 16px 20px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #0d253f 0%, #081a2e 100%) !important;
+  border: 1px solid rgba(134, 191, 255, 0.28) !important;
+}
+
+.ledger-focus-primary .ledger-now-label {
+  order: 1 !important;
+  color: #7dd3fc !important;
+  font-size: 13px !important;
+  letter-spacing: 0.12em !important;
+  margin-bottom: 4px !important;
+}
+
+.ledger-focus-primary .ledger-now-title {
+  order: 2 !important;
+  width: 100% !important;
+  font-size: clamp(34px, 3.4vw, 54px) !important;
+  line-height: 0.95 !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  text-align: left !important;
+  margin: 6px 0 10px !important;
+  max-height: 110px !important;
+  overflow: hidden !important;
+}
+
+.ledger-focus-primary .ledger-now-detail {
+  order: 3 !important;
+  width: 96% !important;
+  font-size: clamp(15px, 1.25vw, 19px) !important;
+  line-height: 1.2 !important;
+  color: rgba(220, 244, 255, 0.88) !important;
+  text-align: left !important;
+  margin-bottom: auto !important;
+  max-height: 48px !important;
+  overflow: hidden !important;
+}
+
+.ledger-focus-primary footer {
+  order: 4 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  border-top: 1px solid rgba(134, 191, 255, 0.12) !important;
+  padding-top: 10px !important;
+  margin-top: 8px !important;
+}
+
+/* Polishing Flight Deck + Priority Queue Inner Layouts */
+.tower-agent-deck .tower-agent-list {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+}
+
+.tower-priority-queue .priority-row-list {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+}
+
+.tower-resource-stack .resource-card-grid {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+}

@@ -1363,18 +1363,21 @@ function ControlTower({
   const truth = missionTruthSummary(state);
   return (
     <section className="control-tower-grid" aria-label="Josh 2.0 control tower">
-      <section id="brain-feed" className={`tower-module tower-command${sectionCueClass("brain", liveCues)}`} aria-label="Agent ecosystem command view">
+      {/* Column 1 (Left): Live Work Board + Agent Flight Deck */}
+      <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Ecosystem hero and flight deck">
         <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
-        <TowerCommandStrip model={model} truth={truth} state={state} />
+        <ActivityLedger model={model} />
         <AgentFlightDeck state={state} statuses={statuses} model={model} nowMs={nowMs} liveCues={liveCues} />
+      </section>
+
+      {/* Column 2 (Center): Executive Overview + Priority Queue + Resource Stack */}
+      <section className="tower-column tower-center-column" aria-label="Ecosystem metrics and queue">
+        <TowerCommandStrip model={model} truth={truth} state={state} />
         <PriorityQueuePanel state={state} model={model} onNavigate={onNavigate} />
         <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
       </section>
 
-      <section className="tower-center-stack">
-        <ActivityLedger model={model} />
-      </section>
-
+      {/* Column 3 (Right): Scheduled Jobs / Daily Calendar */}
       <aside className="right-rail tower-jobs-rail">
         <JobsRail jobs={state.jobs} quietMode={quietMode} liveCues={liveCues} />
       </aside>
