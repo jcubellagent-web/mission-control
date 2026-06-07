@@ -14895,3 +14895,109 @@ body > #root,
 .tower-command-strip article {
   padding: 8px 12px !important;
 }
+
+/* =====================================================================
+   JAIMES CONTROL TOWER REBRAND — DARK BLUE + GREEN — 2026-06-07
+   Marker: CONTROL-TOWER-BRAND-BLUEGREEN-20260607
+   Appended last to authoritatively win the cascade.
+   Goal: dark-blue + green accents throughout. Remove teal/cyan-pop and
+   purple. Soften alert red to an on-brand deep coral. Keep contrast/insight.
+   ===================================================================== */
+
+:root {
+  /* ---- Core brand axis: deep blue + green ---- */
+  --brand-blue:        #2d8cff;   /* primary brand blue */
+  --brand-blue-deep:   #1f6feb;   /* deeper blue for fills/borders */
+  --brand-blue-dim:    #1b5cc4;   /* darkest blue for surfaces */
+  --brand-green:       #46e08a;   /* primary brand green */
+  --brand-green-deep:  #2faf6a;   /* deeper green */
+
+  /* ---- Re-point legacy accent tokens onto the blue/green axis ---- */
+  --green: var(--brand-green);
+  --cyan:  var(--brand-blue);     /* kill cyan-pop -> blue */
+  --blue:  var(--brand-blue);
+  --aqua:  var(--brand-green);    /* aqua -> green */
+  --teal:  var(--brand-green-deep); /* teal -> deep green (JAIMES) */
+  --purple: var(--brand-blue-deep); /* purple -> deep blue (J.A.I.N) */
+  --purple-rgb: 31, 111, 235;
+  --watch: var(--brand-blue-deep);
+
+  /* ---- Brand line/glow tokens ---- */
+  --line: rgba(45, 140, 255, 0.26);
+  --line-soft: rgba(70, 224, 138, 0.16);
+  --line-green: rgba(70, 224, 138, 0.30);
+
+  /* ---- Softer, on-brand alert color (was harsh #ff6b7a) ---- */
+  --red: #ff8a7a;
+}
+
+/* JAIMES agent tone -> deep green (was teal #54d6c7) */
+.brain-hero .agent-hero-card.agent-jaimes { --agent-tone: var(--brand-green-deep) !important; }
+/* J.A.I.N agent tone -> deep blue (was purple) */
+.brain-hero .agent-hero-card.agent-jain  { --agent-tone: var(--brand-blue-deep) !important; }
+/* JOSHeX stays green, Josh 2.0 -> brand blue (was cyan) */
+.brain-hero .agent-hero-card.agent-joshex { --agent-tone: var(--brand-green) !important; }
+.brain-hero .agent-hero-card.agent-josh   { --agent-tone: var(--brand-blue) !important; }
+
+/* Agent-coded job blocks / legend / timeline: blue+green only */
+.calendar-legend i.agent-jaimes,
+.calendar-job-block.agent-jaimes,
+.timeline-mark.agent-jaimes,
+.job-window-fill.agent-jaimes,
+.ledger-row.agent-jaimes .ledger-agent-dot { background: var(--brand-green-deep) !important; }
+.calendar-job-block.agent-jaimes,
+.calendar-next-brief.agent-jaimes,
+.job-focus-row.agent-jaimes,
+.job-timeline-row.agent-jaimes { border-left-color: var(--brand-green-deep) !important; }
+
+.calendar-legend i.agent-jain,
+.calendar-job-block.agent-jain,
+.timeline-mark.agent-jain,
+.ledger-row.agent-jain .ledger-agent-dot { background: var(--brand-blue-deep) !important; }
+.calendar-job-block.agent-jain,
+.calendar-next-brief.agent-jain { border-left-color: var(--brand-blue-deep) !important; }
+
+.calendar-legend i.agent-josh,
+.calendar-job-block.agent-josh,
+.ledger-row.agent-josh .ledger-agent-dot { background: var(--brand-blue) !important; }
+.calendar-job-block.agent-josh,
+.calendar-next-brief.agent-josh { border-left-color: var(--brand-blue) !important; }
+
+.calendar-legend i.agent-joshex,
+.calendar-job-block.agent-joshex,
+.ledger-row.agent-joshex .ledger-agent-dot { background: var(--brand-green) !important; }
+.calendar-job-block.agent-joshex,
+.calendar-next-brief.agent-joshex { border-left-color: var(--brand-green) !important; }
+
+/* ---------------------------------------------------------------------
+   Replace baked-in CYAN literal rgba(85,215,255,...) glows/borders with
+   brand blue so module rims, focus rings, and progress rails read blue,
+   not cyan. Targets the high-visibility surfaces.
+   --------------------------------------------------------------------- */
+.tower-left-column > .tower-agent-deck,
+.tower-center-column > .tower-command-strip,
+.tower-center-column > .tower-priority-queue,
+.tower-center-column > .tower-resource-stack,
+.control-tower-grid > .right-rail.tower-jobs-rail,
+.tower-left-column > .activity-ledger,
+.control-tower-grid > .activity-ledger {
+  border-color: rgba(45, 140, 255, 0.24) !important;
+}
+
+/* Live Work Board "working" progress rail + active rings -> blue/green */
+.work-progress-rail,
+.ledger-focus-primary .ledger-now-title::after {
+  background: linear-gradient(90deg, transparent, var(--brand-green), transparent) !important;
+}
+
+/* Status pills: active=green, info=blue, alert=soft coral */
+.status-pill.is-active,
+.status-chip.is-active { color: var(--brand-green) !important; }
+.status-pill.is-risk,
+.status-chip.is-risk { color: var(--red) !important; }
+
+/* Header summary "Focus" / live dot -> brand green */
+.tower-command-strip article.is-active strong { color: var(--brand-green) !important; }
+
+/* Scrollbar accent token (still hidden, but keep brand-consistent) */
+* { scrollbar-color: var(--brand-blue) transparent !important; }
