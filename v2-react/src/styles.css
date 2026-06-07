@@ -14728,3 +14728,70 @@ html, body, #root, .app-shell {
   max-height: unset !important; /* Let clamp do the work */
 }
 
+
+/* JAIMES: INCREASED DISTINCTION BETWEEN MODULES */
+.control-tower-grid {
+  gap: 24px !important; /* Increase gap between columns */
+}
+
+.tower-left-column,
+.tower-center-column {
+  gap: 24px !important; /* Increase gap between vertical stacked modules */
+}
+
+/* Base structural separation */
+.tower-left-column > .tower-agent-deck,
+.tower-center-column > .tower-command-strip,
+.tower-center-column > .tower-priority-queue,
+.tower-center-column > .tower-resource-stack,
+.control-tower-grid > .right-rail.tower-jobs-rail,
+.tower-left-column > .activity-ledger,
+.control-tower-grid > .activity-ledger {
+  background: linear-gradient(145deg, rgba(14, 30, 48, 0.95) 0%, rgba(5, 12, 20, 0.98) 100%) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 20px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Distinct Top-Border Accents using Josh 2.0 Theme Colors */
+
+/* 1. Live Work Board - Neon Blue distinction */
+.tower-left-column > .activity-ledger,
+.control-tower-grid > .activity-ledger {
+  border-top: 4px solid #00CFFF !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 -2px 16px rgba(0, 207, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 2. Jobs Rail - Silver distinction */
+.control-tower-grid > .right-rail.tower-jobs-rail {
+  border-top: 4px solid #D1D5DB !important; /* Silver */
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 -2px 16px rgba(209, 213, 219, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 3. Flight Deck (Agent Deck) - Deep Red distinction */
+.tower-left-column > .tower-agent-deck {
+  border-top: 4px solid #FF2A42 !important; /* Red */
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 -2px 16px rgba(255, 42, 66, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 4. Priority Queue / Resources - Deep Blue / Silver distinction */
+.tower-center-column > .tower-priority-queue {
+  border-top: 4px solid #3B82F6 !important; /* Blue variant */
+}
+
+.tower-center-column > .tower-resource-stack {
+  border-top: 4px solid #6B7280 !important; /* Darker Silver */
+}
+
+/* Distinct Header Treatments for readability */
+.tower-jobs-rail > header h2,
+.tower-agent-deck h2,
+.tower-priority-queue h2,
+.tower-resource-stack h2 {
+  opacity: 0.9 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  font-size: 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 16px !important;
+}

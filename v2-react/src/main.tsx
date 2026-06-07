@@ -1119,10 +1119,24 @@ function activitySystemQuietCount(model: ControlTowerModel) {
 }
 
 function activityFocusRows(model: ControlTowerModel) {
-  const ordered = activityRankedRows([
-    ...model.needsJosh,
-    ...model.active,
-  ]);
+  // Only include actually active or critical items, filter out unhelpful stuck items
+  const rawActive = [...model.needsJosh, ...model.active].filter(row => {
+    const text = ((row.title || "") + " " + (row.detail || "")).toLowerCase();
+    // Filter out unhelpful stuck routine jobs
+    if (text.includes("gmail morninginbox triage")) return false;
+    if (text.includes("routine triage")) return false;
+    
+    // Filter out routine health checks and heartbeats so they dont hijack the hero
+    if (text.includes("heartbeat")) return false;
+    if (text.includes("kiosk health")) return false;
+    if (text.includes("status check")) return false;
+    if (text.includes("rows, sidecars, live path")) return false;
+    if (text.includes("agent context sync")) return false;
+
+    return true;
+  });
+
+  const ordered = activityRankedRows(rawActive);
   const seen = new Set<string>();
   return ordered.filter((row) => {
     const key = `${row.lane}-${row.agent}-${missionText(row.title).toLowerCase()}`;
