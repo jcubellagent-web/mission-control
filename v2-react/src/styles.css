@@ -15566,3 +15566,64 @@ body > #root,
 .ledger-focus-concurrent footer {
   padding-left: 6px !important;
 }
+
+/* =====================================================================
+   LIVE WORK BOARD STRONG INSET — JAIMES — 2026-06-07
+   Josh-visible fix: create obvious breathing room between left rail and copy.
+   ===================================================================== */
+.activity-ledger {
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+}
+
+.activity-ledger .ledger-live-focus {
+  padding-inline: 16px !important;
+}
+
+.ledger-focus-primary {
+  padding: 24px 36px 22px 56px !important;
+}
+
+.ledger-focus-primary::before {
+  left: 16px !important;
+  width: 5px !important;
+  border-radius: 999px !important;
+}
+
+.ledger-focus-primary .ledger-now-label,
+.ledger-focus-primary .ledger-now-title,
+.ledger-focus-primary .ledger-now-detail,
+.ledger-focus-primary footer {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.ledger-focus-concurrent {
+  padding: 20px 28px 20px 42px !important;
+}
+
+.ledger-focus-concurrent::before {
+  left: 14px !important;
+  width: 4px !important;
+  border-radius: 999px !important;
+}
+
+/* =====================================================================
+   LIVE WORK BOARD TEXT INSET OVERRIDE — JAIMES — 2026-06-07
+   Direct child-text offset. Verified by DOM measurement; fixes flush h3.
+   ===================================================================== */
+.ledger-focus-primary .ledger-now-label,
+.ledger-focus-primary .ledger-now-title,
+.ledger-focus-primary .ledger-now-detail,
+.ledger-focus-primary footer {
+  margin-left: 44px !important;
+  max-width: calc(100% - 44px) !important;
+}
+
+.ledger-focus-concurrent .ledger-now-label,
+.ledger-focus-concurrent .ledger-now-title,
+.ledger-focus-concurrent .ledger-now-detail,
+.ledger-focus-concurrent footer {
+  margin-left: 30px !important;
+  max-width: calc(100% - 30px) !important;
+}
