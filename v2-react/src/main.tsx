@@ -4404,6 +4404,8 @@ function calendarBlockRunLabel(block: CalendarJobBlock, run: ReturnType<typeof j
   if (block.tone === "working") return "Now";
   if (block.tone === "attention") return "Focus";
   if (block.tone === "done") return block.synthetic ? `${block.count} done` : "Done";
+  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
+  if (status === "missed") return "Overdue";
   if (block.tone === "planned") return block.synthetic ? `${block.count} scheduled` : "Planned";
   if (block.tone === "ready") return block.synthetic ? `${block.count} ready` : "Ready";
   return run.today;
