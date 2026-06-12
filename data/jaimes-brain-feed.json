@@ -2,10 +2,22 @@
   "active": false,
   "objective": "JAIMES is online and ready",
   "status": "ready",
-  "updatedAt": "2026-06-12T21:50:20Z",
+  "updatedAt": "2026-06-12T21:52:21Z",
   "model": "gpt-5.5",
   "messageReceived": "2026-06-12T21:48:25Z",
   "steps": [
+    {
+      "label": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
     {
       "label": "JAIMES is online and ready",
       "status": "ready",
@@ -41,29 +53,17 @@
       "status": "done",
       "tool": "exec",
       "kind": "status"
-    },
-    {
-      "label": "Done: JAIMES Brain Feed path healthy",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Self-test: JAIMES Brain Feed path healthy",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
     }
   ],
   "currentTool": "status check",
-  "checkedAt": "2026-06-12T21:50:20Z",
+  "checkedAt": "2026-06-12T21:52:21Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
   "reportedActive": false,
-  "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
+  "detail": "JAIMES live check: JAIMES is online and ready.",
   "supabaseBacked": false,
   "localLiveFeed": true
 }

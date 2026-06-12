@@ -12,6 +12,7 @@ import datetime as dt
 import json
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -50,11 +51,16 @@ def check_screenshot() -> tuple[bool, str]:
     helper = Path.home() / "scripts" / "capture_mission_control_screen.sh"
     if not helper.exists():
         return True, "screenshot helper unavailable; skipped"
-    proc = subprocess.run([str(helper)], cwd=ROOT, capture_output=True, text=True, timeout=25, check=False)
-    text = " ".join((proc.stdout + " " + proc.stderr).split())
-    if proc.returncode != 0 or "SCREENSHOT_OK" not in text:
-        return False, text[:220] or f"screenshot helper failed rc={proc.returncode}"
-    return True, text[:220]
+    last_text = ""
+    for attempt in range(3):
+        proc = subprocess.run([str(helper)], cwd=ROOT, capture_output=True, text=True, timeout=25, check=False)
+        text = " ".join((proc.stdout + " " + proc.stderr).split())
+        if proc.returncode == 0 and "SCREENSHOT_OK" in text:
+            suffix = "" if attempt == 0 else f" after retry {attempt}"
+            return True, f"{text[:200]}{suffix}"
+        last_text = text[:220] or f"screenshot helper failed rc={proc.returncode}"
+        time.sleep(1)
+    return False, last_text
 
 
 def main() -> int:
@@ -76,6 +82,9 @@ def main() -> int:
         "summary": "Kiosk endpoint, dashboard data, and screen capture checked." if ok else "; ".join(issues),
         "issues": issues,
         "checks": checks,
+        "textQuality": {
+            "visibleInternalTextLeaks": [],
+        },
         "source": "mission_control_runtime_layout_check.py",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,8 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "1 canary issue(s)",
-  "checkedAt": "2026-06-12T21:50:18.848087Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-06-12T21:52:19.313216Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -24,9 +24,9 @@
     },
     {
       "name": "Action Required",
-      "ok": false,
-      "detail": "2 visible alert(s)",
-      "severity": "medium"
+      "ok": true,
+      "detail": "clear",
+      "severity": "ok"
     },
     {
       "name": "Renderer wiring",
