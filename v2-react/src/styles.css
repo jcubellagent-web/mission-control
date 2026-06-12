@@ -16136,3 +16136,99 @@ body::before {
   .tower-resource-stack .resource-card strong,
   .tower-resource-stack .resource-card strong:first-of-type { font-size: clamp(20px, 1.35vw, 25px) !important; }
 }
+
+/* ============================================================
+   FABLE HERO METRIC POLISH 2026-06-12
+   Appended override — last block wins. CSS-only, no DOM changes.
+   ============================================================ */
+:root {
+  --fable-green: var(--green, #34d399);
+  --fable-blue: #102a48;
+  --fable-blue-deep: #061321;
+  --fable-label: #8aa3c2;
+}
+
+.metric:not(.is-wide) strong,
+.ledger-summary-card strong {
+  font-size: clamp(1.9rem, 3.4vw, 3rem) !important;
+  line-height: 1.05 !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--fable-green) !important;
+  font-variant-numeric: tabular-nums !important;
+  display: block !important;
+}
+
+.metric.is-wide strong {
+  font-size: clamp(1.05rem, 1.35vw, 1.42rem) !important;
+  line-height: 1.08 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.015em !important;
+  color: var(--fable-green) !important;
+}
+
+.metric span,
+.ledger-summary-card span {
+  font-size: 0.68rem !important;
+  line-height: 1.05 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.09em !important;
+  color: var(--fable-label) !important;
+}
+
+.metric,
+.status-ribbon .metric,
+.ledger-summary-card {
+  background:
+    linear-gradient(180deg, rgba(16, 42, 72, 0.48), rgba(6, 19, 33, 0.66)) !important;
+  border-left-width: 3px !important;
+  border-left-style: solid !important;
+  border-left-color: var(--fable-green) !important;
+  border-radius: 10px !important;
+  padding: 0.55rem 0.8rem !important;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(190, 244, 211, 0.08) !important;
+}
+
+.tower-resource-stack .resource-card strong,
+.ledger-system-summary strong {
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem) !important;
+  color: var(--fable-green) !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.metric-strip,
+.ledger-summary-strip,
+.tower-priority-queue {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.metric-strip::-webkit-scrollbar,
+.ledger-summary-strip::-webkit-scrollbar,
+.tower-priority-queue::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+@media (max-height: 620px) {
+  .metric:not(.is-wide) strong,
+  .ledger-summary-card strong {
+    font-size: clamp(1.5rem, 2.6vw, 2.2rem) !important;
+  }
+  .metric,
+  .status-ribbon .metric,
+  .ledger-summary-card {
+    padding: 0.4rem 0.65rem !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .metric-strip,
+  .ledger-summary-strip {
+    gap: 0.5rem !important;
+  }
+}
+/* ==================== end FABLE HERO METRIC POLISH ==================== */
