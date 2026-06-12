@@ -1,32 +1,32 @@
 {
-  "ok": true,
-  "status": "ok",
-  "summary": "All canaries passed",
-  "checkedAt": "2026-06-07T04:05:54.855061Z",
+  "ok": false,
+  "status": "attention",
+  "summary": "1 canary issue(s)",
+  "checkedAt": "2026-06-12T21:48:13.348785Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JAIMES; dualAgents=none; live=4",
+      "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=4",
       "severity": "ok"
     },
     {
       "name": "Calendar tile",
       "ok": true,
-      "detail": "Local calendar helper sign-in optional",
+      "detail": "Connected",
       "severity": "ok"
     },
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "30 today-relevant; 0 active issue(s)",
+      "detail": "28 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
       "name": "Action Required",
-      "ok": true,
-      "detail": "clear",
-      "severity": "ok"
+      "ok": false,
+      "detail": "1 visible alert(s)",
+      "severity": "medium"
     },
     {
       "name": "Renderer wiring",
@@ -55,7 +55,7 @@
     {
       "name": "Agent Control lane",
       "ok": true,
-      "detail": "overall=attention; ready=3/4; source=live-heartbeats",
+      "detail": "overall=attention; ready=2/4; source=live-heartbeats",
       "severity": "ok"
     },
     {
@@ -97,7 +97,7 @@
     {
       "name": "Kiosk self-healing watchdog",
       "ok": true,
-      "detail": "Josh 2.0 watchdog can repair server, data, Signal Feed, Chrome kiosk drift, and keep live layout checks fresh",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -247,7 +247,7 @@
     {
       "name": "Brain Feed active-work truth",
       "ok": true,
-      "detail": "1 active scheduled job(s) can promote owning agent cards",
+      "detail": "2 active scheduled job(s) can promote owning agent cards",
       "severity": "ok"
     },
     {
@@ -383,9 +383,9 @@
       "severity": "ok"
     },
     {
-      "name": "Control Tower replacement",
+      "name": "Control Tower surface",
       "ok": true,
-      "detail": "Mission Control renders an executive control tower with active, needs-Josh, complete, and planned activity lanes",
+      "detail": "Control Tower renders an executive control tower with active, needs-Josh, complete, and planned activity lanes",
       "severity": "ok"
     },
     {
@@ -409,25 +409,25 @@
     {
       "name": "Runtime kiosk layout guard",
       "ok": true,
-      "detail": "watchdog measures the live Chrome viewport for module fit, row visibility, page overflow, and visible debug text",
+      "detail": "watchdog checks the live kiosk endpoint, dashboard data, screenshot helper, and visible debug-text leak status",
       "severity": "ok"
     },
     {
       "name": "Runtime visible text quality",
       "ok": true,
-      "detail": "live rendered Mission Control text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
+      "detail": "live rendered Control Tower text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
       "severity": "ok"
     },
     {
       "name": "Runtime layout alert propagation",
       "ok": true,
-      "detail": "watchdog refreshes dashboard data after runtime layout checks so display failures surface on Mission Control",
+      "detail": "watchdog refreshes dashboard data after runtime layout checks so display failures surface on Control Tower",
       "severity": "ok"
     },
     {
       "name": "Runtime layout dashboard surfacing",
       "ok": true,
-      "detail": "live layout guard is carried into dashboard data and only becomes visible when the kiosk fit check needs attention",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -439,13 +439,13 @@
     {
       "name": "Watchdog Brain Feed fallback",
       "ok": true,
-      "detail": "scheduled Mission Control watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
+      "detail": "scheduled Control Tower watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
       "severity": "ok"
     },
     {
       "name": "Signal Feed optional source",
       "ok": true,
-      "detail": "10 signal rows; 10 newsletter trend rows; health=attention; counts={'live': 10, 'newsletter': 0, 'total': 10, 'filteredLowQuality': 0, 'breakingSourceItems': 40, 'newsfeedSourceItems': 1, 'newsletterTrendItems': 10, 'publicRssFallbackItems': 16}",
+      "detail": "10 signal rows; 5 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
       "severity": "ok"
     },
     {
@@ -481,7 +481,7 @@
     {
       "name": "Signal Feed duplicate story guard",
       "ok": true,
-      "detail": "near-identical funding/valuation headlines share one story key before the top-five rows are selected",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -511,7 +511,7 @@
     {
       "name": "Agentic Crypto summary",
       "ok": true,
-      "detail": "status=fresh; mode=read-only; 11 token rows; 3 chain rows; masked wallets present",
+      "detail": "status=ready; mode=read-only; 0 token rows; 2 chain rows; masked wallets present",
       "severity": "ok"
     },
     {
@@ -553,7 +553,7 @@
     {
       "name": "Typed data adapters",
       "ok": true,
-      "detail": "Supabase and sidecar rows are normalized before rendering",
+      "detail": "local sidecar rows are normalized before rendering",
       "severity": "ok"
     },
     {
@@ -565,13 +565,13 @@
     {
       "name": "Today Jobs live merge policy",
       "ok": true,
-      "detail": "scheduled inventory stays authoritative while only recent live job rows are layered in",
+      "detail": "scheduled inventory stays authoritative while only recent live job rows are allowed through",
       "severity": "ok"
     },
     {
       "name": "Stale blocker suppression",
       "ok": true,
-      "detail": "old blocked live rows and stale Codex automation misses cannot keep Mission Control red after a newer clear result",
+      "detail": "old blocked live rows and stale Codex automation misses cannot keep Control Tower red after a newer clear result",
       "severity": "ok"
     },
     {
@@ -601,7 +601,7 @@
     {
       "name": "React favicon",
       "ok": true,
-      "detail": "kiosk has an explicit Mission Control icon and no default favicon.ico miss",
+      "detail": "kiosk has an explicit Control Tower icon and no default favicon.ico miss",
       "severity": "ok"
     }
   ]

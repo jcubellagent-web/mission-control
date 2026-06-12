@@ -1,19 +1,69 @@
 {
-  "active": false,
-  "objective": "Standby",
-  "status": "idle",
-  "updatedAt": "2026-06-07T04:22:57Z",
-  "model": "GPT-5.5",
-  "messageReceived": "2026-06-07T04:22:57Z",
+  "active": true,
+  "objective": "JAIMES is working now",
+  "status": "active",
+  "updatedAt": "2026-06-12T21:48:20Z",
+  "model": "gpt-5.5",
+  "messageReceived": "2026-06-12T21:47:57Z",
   "steps": [
     {
-      "label": "Sorare canonical sync complete",
+      "label": "JAIMES is working now",
+      "status": "active",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "GW23 Skubal: inspect lineup artifacts",
+      "status": "active",
+      "tool": "code",
+      "kind": "status"
+    },
+    {
+      "label": "GW23 Skubal: MLB probable/API check",
+      "status": "active",
+      "tool": "web",
+      "kind": "status"
+    },
+    {
+      "label": "GW23 Skubal pre-lock recheck",
+      "status": "active",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Done: JAIMES Brain Feed path healthy",
       "status": "done",
-      "tool": "exec"
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Self-test: JAIMES Brain Feed path healthy",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Done: Sorare refresh verified",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Step: summarize refresh",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
     }
   ],
-  "currentTool": "",
-  "checkedAt": "2026-06-07T04:22:57Z",
+  "currentTool": "status check",
+  "checkedAt": "2026-06-12T21:48:20Z",
   "agent": "JAIMES",
-  "source": "jaimes-live-poller"
+  "source": "josh2-local-live-feed",
+  "auth": "subscription",
+  "modelAuth": "gpt-5.5 (subscription)",
+  "agentId": "jaimes",
+  "reportedActive": true,
+  "detail": "JAIMES live update: GW23 Skubal: inspect lineup artifacts.",
+  "supabaseBacked": false,
+  "localLiveFeed": true
 }
