@@ -209,8 +209,11 @@ function mergeStatuses(visibleBrainFeed: AgentStatus[], primary: AgentStatus[], 
     const visible = visibleByAgent.get(agent);
     const primaryRow = primaryByAgent.get(agent);
     const fallbackRow = fallbackByAgent.get(agent);
+    const fallbackFreshActive = fallbackRow && Boolean(fallbackRow.active) && isFreshBrainFeedTruth(fallbackRow);
     if (visible && (isFreshBrainFeedTruth(visible) || !primaryRow)) {
       rows.push(visible);
+    } else if (fallbackFreshActive && (!primaryRow || !primaryRow.active)) {
+      rows.push(fallbackRow);
     } else if (primaryRow) {
       rows.push(primaryRow);
     } else if (visible) {

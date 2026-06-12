@@ -95,7 +95,7 @@ Do not delegate with only chat text or an untracked SSH command when the request
 
 ## Brain Feed Publish Contract
 
-Josh 2.0 and JAIMES must publish meaningful work to Brain Feed. This is not optional for Telegram tasks, delegated tasks, scheduled jobs with user-visible impact, Mission Control changes, or ecosystem maintenance.
+All active ecosystem agents must publish meaningful work to Brain Feed / Live Work Board under their own lane. This includes Josh 2.0, JAIMES, J.A.I.N, and JOSHeX. It is not optional for Telegram tasks, delegated tasks, scheduled jobs with user-visible impact, Mission Control changes, or ecosystem maintenance.
 
 Required publishing cadence:
 
@@ -137,12 +137,13 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - The fast-ack watcher owns that acknowledgement. The model/agent must not output only that acknowledgement or stop after it; it must continue to execute the objective and provide a real result.
 - As soon as the objective is known, edit that acknowledgement to `Objective: <objective>`.
 - Objectives must be specific enough for Josh to understand the exact work at a glance: include the target system, the concrete change/check, and the intended outcome. Do not use vague placeholders such as "Sync agent ecosystem state" when the user asked for a specific bug fix, audit, cleanup, or UX change.
-- Do not create a work card until the objective is known. Once known, immediately start the editable work card with the real objective. Keep it simple: show Objective, Current step, Done so far, Issues, Next steps, Status, Route, Using, and Updated. Do not duplicate Current step or Next steps inside the done log.
+- Do not create a work card until the objective is known. Once known, immediately start exactly one editable work card for the objective. Maintain one consolidated card through the task: show Objective, Progress/Done so far, Decisions, Issues, Next steps, Status, Route, Using, and Updated. Do not fragment long work into multiple tiny live cards; if the transport cannot edit, send replacement cards with the same title and current full state.
 - If no new tool/model event is visible for a longer-running task, update the card with a short "still working" heartbeat instead of letting the card look frozen.
 - Publish Brain Feed under the agent that received the Telegram task. If the task was in Josh 2.0 Telegram, publish as `--agent josh2`; if it was in JAIMES Telegram, publish as `--agent jaimes`.
 - Do not show routing/model buttons by default. Only show routing buttons when it is useful for Josh to steer the objective toward a specific model or agent.
 - Do not send the final Telegram template until all local/tool work is complete, or until there is a blocker that needs Josh's attention or approval. After sending the final template, do not keep running follow-up cleanup that can generate more Telegram cards; finish cleanup first, then send the final.
 - The final Telegram message must be a separate catch-up summary after the card, using this exact structure with bold headers:
+  - `Model:` as the first line, showing the model used for the turn.
   - `Complete:` then `Yes` or `No` plus the specific objective in plain language.
   - `What was done:` with 3-5 tight user-facing bullets that explain the outcome and verification, not internal implementation trivia.
   - `Issues:` with issue bullets, or `n/a`.

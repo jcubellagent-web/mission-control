@@ -94,7 +94,7 @@ def is_quiet_ok_job(job: dict) -> bool:
     return name in QUIET_OK_JOBS and status in OK_STATUSES
 
 
-LIVE_PUSH_HOLD_SECONDS = 180  # respect a live JAIMES push for this long before resuming synthesis
+LIVE_PUSH_HOLD_SECONDS = 1200  # hold live JAIMES pushes for long tasks; avoids flapping back to idle mid-work
 
 
 def main() -> int:

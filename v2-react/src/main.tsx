@@ -1360,21 +1360,23 @@ function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentI
     pushUniqueActivity(planned, row, seen);
   });
 
-  if (!active.length) {
-    state.statuses
-      .filter((status) => agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at))
-      .forEach((status) => pushUniqueActivity(active, {
-        id: `status-${status.agent_id}-${status.updated_at}`,
-        lane: "active",
-        tone: "active",
-        agent: status.agent_id,
-        title: headlineTitle(status.objective || AGENTS[status.agent_id].role, 54),
-        detail: readoutSummary(status.detail || status.current_tool, "Agent is reporting active work.", 104),
-        meta: "agent status",
-        time: status.updated_at,
-        sortAt: timeValue(status.updated_at),
-      }, seen));
-  }
+  // Always let fresh explicit agent Brain Feed rows surface as active work.
+  // Previously this only ran when no active jobs existed; routine active jobs
+  // could fill `active`, get filtered from the hero, and leave the board saying
+  // "No active work right now" while JAIMES/JOSHeX/J.A.I.N were working.
+  state.statuses
+    .filter((status) => agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at))
+    .forEach((status) => pushUniqueActivity(active, {
+      id: `status-${status.agent_id}-${status.updated_at}`,
+      lane: "active",
+      tone: "active",
+      agent: status.agent_id,
+      title: headlineTitle(status.objective || AGENTS[status.agent_id].role, 54),
+      detail: readoutSummary(status.detail || status.current_tool, "Agent is reporting active work.", 104),
+      meta: "agent status",
+      time: status.updated_at,
+      sortAt: timeValue(status.updated_at),
+    }, seen));
 
   const visibleStatuses = TOWER_AGENT_ORDER.map((agent) => statuses.get(agent)).filter(Boolean) as AgentStatus[];
   const agentsReady = visibleStatuses.filter((status) => statusIsClear(status.status) && !agentNeedsFocus(status)).length;

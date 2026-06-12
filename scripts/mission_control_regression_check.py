@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 SRC_DIR = ROOT / "v2-react" / "src"
 MAIN_TSX = SRC_DIR / "main.tsx"
+DATA_TS = SRC_DIR / "data.ts"
 STYLES = SRC_DIR / "styles.css"
 TMP_JS = Path("/tmp/mc_scripts_regression.js")
 
@@ -66,8 +67,10 @@ def check_json() -> None:
 
 def check_react_source() -> None:
     require(MAIN_TSX.exists(), "React kiosk main.tsx missing")
+    require(DATA_TS.exists(), "React kiosk data.ts missing")
     require(STYLES.exists(), "React kiosk styles.css missing")
     main = MAIN_TSX.read_text()
+    data_ts = DATA_TS.read_text()
     css = STYLES.read_text()
 
     require_text(
@@ -86,6 +89,27 @@ def check_react_source() -> None:
             "signal-feed",
         ],
         "Control Tower React surface",
+    )
+
+    require_text(
+        main,
+        [
+            "Always let fresh explicit agent Brain Feed rows surface as active work",
+            "state.statuses",
+            "agentIsWorking(status)",
+            "isFreshActiveTimestamp(status.updated_at)",
+        ],
+        "Live Work Board active-agent fallback",
+    )
+
+    require_text(
+        data_ts,
+        [
+            "fallbackFreshActive",
+            "Boolean(fallbackRow.active)",
+            "isFreshBrainFeedTruth(fallbackRow)",
+        ],
+        "Live Work Board fresh sidecar merge",
     )
 
     require_text(
