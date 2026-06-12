@@ -4,7 +4,7 @@ moltworld_presence.py — JOSH 2.0 hybrid MoltWorld presence runner.
 
 - Uses MoltWorld v2 (app.moltworld.gg) for actual participation/actions.
 - Uses the older balance endpoint (moltworld.io) when available for SIM totals.
-- Writes a dashboard-friendly data file for Mission Control.
+- Writes a dashboard-friendly data file for Control Tower.
 """
 import datetime
 import json

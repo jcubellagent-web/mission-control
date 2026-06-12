@@ -3,7 +3,7 @@
 
 This is intentionally a local entrypoint: OpenClaw/Telegram can pass an inbound
 voice file here, then a follow-up agent can decide whether the text becomes a
-memory task, calendar hold, JAIMES ask, or Mission Control note.
+memory task, calendar hold, JAIMES ask, or Control Tower note.
 """
 from __future__ import annotations
 

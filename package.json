@@ -6,7 +6,12 @@
     "kiosk": "scripts/open_mission_control_kiosk.sh",
     "dev:v2": "vite --host 127.0.0.1 --port 5174",
     "build:v2": "vite build",
-    "preview:v2": "vite preview --host 127.0.0.1 --port 5174"
+    "preview:v2": "vite preview --host 127.0.0.1 --port 5174",
+    "check": "python3 scripts/mission_control_regression_check.py",
+    "check:control-tower": "python3 scripts/mission_control_regression_check.py",
+    "build:control-tower": "vite build",
+    "preview:control-tower": "vite preview --host 127.0.0.1 --port 5174",
+    "kiosk:control-tower": "scripts/open_mission_control_kiosk.sh"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

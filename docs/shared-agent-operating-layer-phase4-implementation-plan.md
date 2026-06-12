@@ -12,7 +12,7 @@ Give JOSHeX, JOSH 2.0, JAIMES, and J.A.I.N a common way to:
 - hand off work
 - enforce privacy/approval tiers
 - leave artifacts in predictable locations
-- show current work and stale tasks in Mission Control
+- show current work and stale tasks in Control Tower
 
 ## Non-Negotiables
 
@@ -37,14 +37,14 @@ Purpose:
 
 Initial agents:
 
-- `joshex`: sensitive coordination, repo edits, Mission Control patches, connected account triage, planning.
+- `joshex`: sensitive coordination, repo edits, Control Tower patches, connected account triage, planning.
 - `josh`: dashboard host, fast local ops, OpenCLAW services, Brain Feed server, health checks.
 - `jaimes`: Hermes/specialist workflows, Sorare ML, fantasy workflows, reports, specialist background jobs.
 - `jain`: scheduled workers, intelligence scans, X/watchlist monitors, cron-heavy automation.
 
 Acceptance criteria:
 
-- Mission Control can show capability counts/status.
+- Control Tower can show capability counts/status.
 - Each agent has a machine-readable lane, owner, and allowed task classes.
 
 ### 2. Task Queue
@@ -87,7 +87,7 @@ Acceptance criteria:
 
 - Any agent can create, accept, update, block, complete, and hand off a task through `agent_task.py`.
 - Task updates also write shared events and optionally Brain Feed.
-- Mission Control can show active/blocked/queued tasks.
+- Control Tower can show active/blocked/queued tasks.
 
 ### 3. Permission Tiers
 
@@ -107,7 +107,7 @@ Tiers:
 Acceptance criteria:
 
 - `agent_task.py` refuses unsafe task creation when required approval metadata is missing.
-- Mission Control shows approval-needed tasks without leaking content.
+- Control Tower shows approval-needed tasks without leaking content.
 
 ### 4. Orchestration Helper
 
@@ -133,7 +133,7 @@ Acceptance criteria:
 - Status changes can publish Brain Feed when requested.
 - Jobs/tasks can be tied to Today Jobs.
 
-### 5. Mission Control UI
+### 5. Control Tower UI
 
 Add to Today Jobs / Shared OS:
 
@@ -173,7 +173,7 @@ Rules:
 
 Acceptance criteria:
 
-- Mission Control Action Required only shows actionable issues.
+- Control Tower Action Required only shows actionable issues.
 - No noisy alerts for normal progress.
 
 ### 7. Agent Wiring
@@ -193,7 +193,7 @@ Responsibilities:
 - update `joshex` Brain Feed
 - write decisions
 - validate dashboard changes
-- keep Mission Control accurate
+- keep Control Tower accurate
 
 Required behavior:
 
@@ -204,7 +204,7 @@ Required behavior:
 
 Install/use:
 
-- Mission Control helper scripts
+- Control Tower helper scripts
 - top-level shims in `~/.openclaw/workspace/scripts/`
 - task queue reader/writer
 
@@ -219,7 +219,7 @@ Responsibilities:
 
 Initial wrapping candidates:
 
-- Mission Control refresh
+- Control Tower refresh
 - Brain Feed server keepalive
 - context watchdog/health checks
 
@@ -233,7 +233,7 @@ Do not initially wrap:
 
 Install/use:
 
-- Mission Control helper scripts
+- Control Tower helper scripts
 - top-level shims
 - task queue reader/writer
 - Hermes-aware wrappers
@@ -291,7 +291,7 @@ Do not initially wrap:
 
 1. Add schemas and seed data.
 2. Build `agent_task.py`.
-3. Add Mission Control task summary.
+3. Add Control Tower task summary.
 4. Validate locally.
 5. Sync to Josh 2.0 and JAIMES/J.A.I.N.
 
@@ -341,7 +341,7 @@ Phase 4 is complete when:
 
 - all agents have capability records
 - all agents can create/update/complete tasks
-- Mission Control shows task queue summary
+- Control Tower shows task queue summary
 - Josh 2.0 and JAIMES/J.A.I.N have task helper/shims installed
 - at least one safe task lifecycle has been tested from each node
 - no secrets appear in dashboard-visible data
@@ -351,6 +351,6 @@ Phase 4 is complete when:
 
 - SSH reachability to both minis.
 - Supabase publishable key remains valid.
-- Mission Control repo paths remain stable.
+- Control Tower repo paths remain stable.
 - Josh approval before wrapping sensitive or fragile automations.
 - Local `gog` calendar auth still needs separate refresh.

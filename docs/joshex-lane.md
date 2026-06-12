@@ -1,6 +1,6 @@
 # JOSHeX Lane
 
-JOSHeX is a local Codex contribution-visibility lane for Mission Control.
+JOSHeX is a local Codex contribution-visibility lane for Control Tower.
 It is not a JAIMES/Hermes live-agent slot and must not be promoted into the Brain Feed hero.
 
 ## Source data

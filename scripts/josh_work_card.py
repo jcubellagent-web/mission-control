@@ -213,13 +213,13 @@ def describe_shell_command(value: str) -> str:
     text = text.strip("'\"")
     lower = text.lower()
     if "state_visibility_guard.py" in lower:
-        return "refreshing Mission Control and Brain Feed visibility"
+        return "refreshing Control Tower and Brain Feed visibility"
     if "update_mission_control.py" in lower:
-        return "regenerating Mission Control dashboard data"
+        return "regenerating Control Tower dashboard data"
     if "agent_publish.py" in lower:
         return "publishing the latest status to Brain Feed"
     if "open_mission_control_kiosk" in lower:
-        return "bringing Mission Control back onto the Josh 2.0 screen"
+        return "bringing Control Tower back onto the Josh 2.0 screen"
     if "openclaw update status" in lower:
         return "checking whether OpenCLAW has an update available"
     if "openclaw update" in lower:
@@ -235,13 +235,13 @@ def describe_shell_command(value: str) -> str:
     if "openclaw infer" in lower or "model run" in lower:
         return "testing that Josh 2.0 can reach the selected model"
     if "npm run build" in lower:
-        return "building Mission Control to catch UI/runtime errors"
+        return "building Control Tower to catch UI/runtime errors"
     if "npm run" in lower:
-        return "running the Mission Control app command"
+        return "running the Control Tower app command"
     if "python3" in lower and "mission-control/scripts/" in lower:
         script = lower.split("mission-control/scripts/", 1)[1].split()[0].strip("'\"")
         script = script.replace("_", " ").replace(".py", "")
-        return f"running the Mission Control {script} helper"
+        return f"running the Control Tower {script} helper"
     if lower.startswith("date "):
         return "checking the current time on Josh 2.0"
     if not text:
@@ -687,7 +687,7 @@ def main() -> int:
             """
             Send or edit a Josh-facing Telegram work card.
             Example:
-              scripts/josh_work_card.py start --key mc-fix --title "Mission Control fix" --now "reading files"
+              scripts/josh_work_card.py start --key mc-fix --title "Control Tower fix" --now "reading files"
               scripts/josh_work_card.py update --key mc-fix --now "running tests" --done "patched CSS|py_compile passed"
               scripts/josh_work_card.py done --key mc-fix --done "tests passed|pushed main"
             """

@@ -9,8 +9,8 @@ LEAN_BLOCK = """
 
 - Keep AGENTS lean. Full policy lives in `mission-control/docs/josh2-telegram-ux-audit.md` and `mission-control/data/josh2-telegram-ux-config.json`.
 - Telegram replies must use compact bullet-card style: one model/auth line, blank line, then short bullets for Route, Objective, Status, Now, Done, Blocker, and Next.
-- Prefer inline buttons for safe next steps, routing, Mission Control checks, and Hold.
-- Use `scripts/josh_work_card.py` by default for most requested tasks with more than one step, especially anything over about 60 seconds or anything that changes Mission Control/agent state.
+- Prefer inline buttons for safe next steps, routing, Control Tower checks, and Hold.
+- Use `scripts/josh_work_card.py` by default for most requested tasks with more than one step, especially anything over about 60 seconds or anything that changes Control Tower/agent state.
 """.strip()
 
 

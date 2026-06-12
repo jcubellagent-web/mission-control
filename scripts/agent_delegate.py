@@ -185,7 +185,7 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Delegate work with visible Mission Control Brain Feed updates.")
+    parser = argparse.ArgumentParser(description="Delegate work with visible Control Tower Brain Feed updates.")
     parser.add_argument("--to", required=True)
     parser.add_argument("--requester", default="joshex")
     parser.add_argument("--task-type", default="delegated-work")

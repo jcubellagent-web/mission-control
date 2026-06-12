@@ -16,7 +16,7 @@ if str(WORKSPACE / "scripts") not in sys.path:
 from send_josh_reply import send_message  # type: ignore  # noqa: E402
 
 BUTTONS = [
-    [{"text": "Force Mission Control sync", "callback_data": "next:check_mission_control"}],
+    [{"text": "Force Control Tower sync", "callback_data": "next:check_mission_control"}],
     [{"text": "Josh 2.0", "callback_data": "agent:josh"}],
     [{"text": "JAIMES", "callback_data": "agent:jaimes"}],
     [{"text": "J.AI.N", "callback_data": "agent:jain"}],
@@ -54,7 +54,7 @@ def agent_card(agent: str) -> str:
                 "- Route: JOSHeX quick card.",
                 "- Objective: Show coordinator status.",
                 f"- Status: {status}.",
-                "- Now: Coordinating Mission Control, routing, and repo-safe changes.",
+                "- Now: Coordinating Control Tower, routing, and repo-safe changes.",
                 "- Done: Personal Codex lane and Brain Feed sidecars are the source of truth.",
                 "- Blocker: None unless a task needs private connector access or auth.",
                 "- Next: Tap a route button or send the task.",
@@ -79,7 +79,7 @@ def agent_card(agent: str) -> str:
             f"- Now: {responsibilities or 'Operational status check.'}",
             f"- Done: Failed queues {failed_queues}; repo drift entries {dirty}.",
             "- Blocker: None visible in this card." if status == "ready" else "- Blocker: Needs follow-up from Agent Control.",
-            "- Next: Tap another agent, check Mission Control, or send a task.",
+            "- Next: Tap another agent, check Control Tower, or send a task.",
         ]
     )
 

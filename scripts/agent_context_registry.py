@@ -22,14 +22,14 @@ AGENTS = {
         "node": "macbook-codex",
         "brainFeedPath": DATA_DIR / "personal-codex.json",
         "fallbackBrainFeedPath": DATA_DIR / "brain-feed.json",
-        "contextScope": "Private coordinator context, Mission Control implementation, cross-agent handoffs, validation, and sensitive-account routing decisions.",
+        "contextScope": "Private coordinator context, Control Tower implementation, cross-agent handoffs, validation, and sensitive-account routing decisions.",
     },
     "josh": {
         "label": "Josh 2.0",
-        "role": "front door and Mission Control host",
+        "role": "front door and Control Tower host",
         "node": "josh2-lan",
         "brainFeedPath": DATA_DIR / "brain-feed.json",
-        "contextScope": "Telegram front door, Mission Control kiosk, OpenCLAW services, Josh-side jobs, user-visible routing, and live dashboard publishing.",
+        "contextScope": "Telegram front door, Control Tower kiosk, OpenCLAW services, Josh-side jobs, user-visible routing, and live dashboard publishing.",
     },
     "jaimes": {
         "label": "JAIMES",
@@ -266,7 +266,7 @@ def build_registry() -> dict[str, Any]:
         }
     return {
         "generatedAt": generated,
-        "canonicalSource": "Mission Control shared sidecars plus visible Brain Feed lane; Josh 2.0 live Mission Control is the operational source of truth.",
+        "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
         "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
         "chatSources": read_json(CHAT_SOURCES_PATH, {"sources": []}),
         "summary": {

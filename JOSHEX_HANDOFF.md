@@ -1,10 +1,10 @@
-# JOSHeX Handoff — Mission Control Agent Board Polish
+# JOSHeX Handoff — Control Tower Agent Board Polish
 
 ## Context
-Josh approved continuing the Mission Control work with JOSHeX.
+Josh approved continuing the Control Tower work with JOSHeX.
 
 Main deployed fix:
-- Commit: `50cbb7870 Fix Mission Control agent board cutoff`
+- Commit: `50cbb7870 Fix Control Tower agent board cutoff`
 - Current worktree starts from latest `origin/main`, which includes that fix plus publisher refresh commits.
 - Live marker: `mc-agent-board-cutoff-fix-20260430`
 
@@ -49,7 +49,7 @@ Josh can watch UI edits without waiting for GitHub Pages by using the local JOSH
 - Local URL: `http://127.0.0.1:8788/index.html?mode=kiosk&preview=joshex`
 - Server log: `/tmp/mission_control_preview_8788.log`
 
-Use this for live design sessions. Make preview edits there, refresh the Chrome tab, then copy/commit the final patch through the normal Mission Control branch.
+Use this for live design sessions. Make preview edits there, refresh the Chrome tab, then copy/commit the final patch through the normal Control Tower branch.
 
 ## Follow-up pinning fix
 The Brain Feed picker now keeps all three operator lanes pinned even when live feed data changes:

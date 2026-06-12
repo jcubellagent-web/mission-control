@@ -1,7 +1,7 @@
-# Mission Control Kiosk Control Panel Review
+# Control Tower Kiosk Control Panel Review
 
 ## Architecture
-- Mission Control is a static dashboard served from GitHub Pages and a local JOSH 2.0 preview server.
+- Control Tower is a static dashboard served from GitHub Pages and a local JOSH 2.0 preview server.
 - `scripts/update_mission_control.py` assembles JSON state into `data/dashboard-data.json` and sidecar feeds.
 - `index.html` owns the visible app: layout, CSS, render functions, modals, Brain Feed, Today Jobs, and local controls.
 - The 24-inch kiosk view is activated by `kiosk-mode`, with Brain Feed as the primary surface and Today Jobs as the right rail.

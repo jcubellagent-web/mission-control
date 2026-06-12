@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update Mission Control dashboard JSON with live data."""
+"""Update Control Tower dashboard JSON with live data."""
 from __future__ import annotations
 
 import datetime as dt
@@ -152,9 +152,9 @@ CRON_TARGETS = [
     {"name": "Gmail Morning Inbox Triage", "pattern": "gmail-morning-inbox-triage", "schedule": "Daily 8:30 AM ET", "description": "Reviews the last 24 hours of Personal Gmail, quiets low-signal mail, and surfaces anything that needs attention", "category": "Personal Inbox", "agent": "JOSHeX", "source": "codex_automation", "automationId": "gmail-morning-inbox-triage", "assumePresent": True},
 
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
-    {"name": "Mission Control Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Mission Control data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Control Tower Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Control Tower data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Context Sync", "pattern": "com.josh20.mission-control-signal-refresh", "schedule": "Every 5 min", "description": "Keeps J.A.I.N alert state available for Telegram and agent context", "category": "Agent Context", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log"},
-    {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Mission Control", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
@@ -187,7 +187,7 @@ CRON_TARGETS = [
     {"name": "Log Rotation", "pattern": "rotate_logs.sh", "schedule": "Sun 3:00 AM ET", "description": "Weekly log rotation on J.A.I.N", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
     {"name": "XMCP Boot", "pattern": "xmcp", "schedule": "On boot", "description": "Boot-time XMCP startup on J.A.I.N so agent services recover after restart", "category": "Maintenance", "agent": "J.A.I.N", "jain": True},
 
-    # X is intelligence-only in Mission Control. Posting/reply automations stay
+    # X is intelligence-only in Control Tower. Posting/reply automations stay
     # out of Today's Jobs unless a human explicitly re-enables a posting lane.
 
     # ── Sorare MLB ──────────────────────────────────────────────────────────
@@ -1120,7 +1120,7 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
             }
     return {
         "status": "System nominal",
-        "context": "Mission Control is syncing live CodexBar usage and publishing refreshes automatically.",
+        "context": "Control Tower is syncing live CodexBar usage and publishing refreshes automatically.",
         "updatedAt": updated_at,
     }
 
@@ -2326,7 +2326,7 @@ def fetch_active_subagents() -> List[Dict[str, Any]]:
 
 def fetch_crons() -> List[Dict[str, Any]]:
     # JOSH 2.0 crontab — prefer the real JOSH host when this runs from JAIMES;
-    # fall back to local crontab when Mission Control refresh runs on JOSH itself.
+    # fall back to local crontab when Control Tower refresh runs on JOSH itself.
     josh_listing = ""
     try:
         result = subprocess.run(
@@ -2384,7 +2384,7 @@ import datetime as dt, json, pathlib
 from zoneinfo import ZoneInfo
 et = ZoneInfo('America/New_York')
     jobs = {
-    'Mission Control Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
+    'Control Tower Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
     'J.A.I.N Context Sync': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log',
     'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
@@ -2418,7 +2418,7 @@ PY"""
             et = ZoneInfo("America/New_York")
             today_local = dt.datetime.now(et).strftime('%Y-%m-%d')
             local_jobs = {
-                'Mission Control Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
+                'Control Tower Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
                 'J.A.I.N Context Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log'),
                 'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
@@ -2848,7 +2848,7 @@ PY"""
             run_status = 'upcoming'
 
         # Hermes persists the last job result until the next scheduled run. Treat
-        # old failures as historical context, not active Mission Control cron
+        # old failures as historical context, not active Control Tower cron
         # errors, otherwise a Friday/Saturday empty-response can keep Sunday
         # dashboard health red even when the next run is still upcoming.
         hermes_last_failed = bool(
@@ -3288,7 +3288,7 @@ def build_capability_stack(
             "id": "visual-canaries",
             "name": "Visual Canaries",
             "status": visual_canaries.get("status") or ("ok" if visual_canaries.get("ok") else "attention"),
-            "summary": visual_canaries.get("summary") or "Mission Control guardrails",
+            "summary": visual_canaries.get("summary") or "Control Tower guardrails",
             "detail": f"{len([c for c in visual_canaries.get('checks', []) if c.get('ok')])}/{len(visual_canaries.get('checks', []))} checks passing",
         },
         {
@@ -3339,7 +3339,7 @@ def build_capability_stack(
             "name": "Personal Codex",
             "status": personal_codex.get("status") or "ready",
             "summary": personal_codex.get("summary"),
-            "detail": personal_codex.get("objective") or "Local Mission Control contribution lane",
+            "detail": personal_codex.get("objective") or "Local Control Tower contribution lane",
         })
     for item in (
         build_runtime_inventory_capability(capability_inventory),
@@ -3365,13 +3365,13 @@ def build_products(now_iso: str) -> List[Dict[str, str]]:
     kiosk_live = check_http_ok(kiosk_url)
     return [
         {
-            "name": "Mission Control",
+            "name": "Control Tower",
             "url": mission_control_url,
             "status": "live",
             "lastChecked": now_iso,
         },
         {
-            "name": "Mission Control PWA",
+            "name": "Control Tower PWA",
             "url": mission_control_url,
             "status": "live",
             "lastChecked": now_iso,
@@ -3767,7 +3767,7 @@ def build_recent_activity(
                 "event": "Device layer nominal",
             })
 
-    items.append({"time": now_iso, "event": "Mission Control refresh published"})
+    items.append({"time": now_iso, "event": "Control Tower refresh published"})
     deduped: List[Dict[str, str]] = []
     seen_events: set[str] = set()
     for item in items:
@@ -3972,7 +3972,7 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
         "upcomingEvents": [],
         "focus": {
             "status": "System nominal",
-            "context": "Mission Control is running.",
+            "context": "Control Tower is running.",
             "runway": 0.98,
             "updatedAt": now_iso,
         },
@@ -4079,7 +4079,7 @@ def main() -> None:
     dashboard["agentControl"] = load_agent_control_status(now_iso)
     dashboard["agentContextRegistry"] = load_json_file(AGENT_CONTEXT_REGISTRY_PATH, {
         "generatedAt": now_iso,
-        "canonicalSource": "Mission Control shared sidecars plus Josh 2.0 local live Brain Feed lane.",
+        "canonicalSource": "Control Tower shared sidecars plus Josh 2.0 local live Brain Feed lane.",
         "privacy": "dashboard-safe summaries only",
         "summary": {"status": "unknown", "agents": 0, "staleAgents": [], "openTasks": 0, "openHandoffs": 0},
         "agents": {},
@@ -4138,7 +4138,7 @@ def main() -> None:
     if dashboard["runtimeLayout"].get("status") == "attention":
         dashboard["actionRequired"].insert(0, {
             "priority": "high",
-            "title": "Mission Control layout issue: live kiosk no longer fits cleanly",
+            "title": "Control Tower layout issue: live kiosk no longer fits cleanly",
             "detail": dashboard["runtimeLayout"].get("summary") or "Check the Josh 2.0 display layout.",
             "url": "#brain-feed",
         })

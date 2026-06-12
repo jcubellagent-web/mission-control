@@ -363,7 +363,7 @@ def objective_from_prompt(prompt: str) -> str:
 OBJECTIVE_RULES = [
     (("what's happening to jaimes", "what is happening to jaimes", "jaimes status", "unresponsive"), "Check JAIMES status"),
     (("telegram ux", "telegram interface", "telegram formatting", "telegram button", "work card format", "live card"), "Tune JAIMES Telegram UX"),
-    (("mission control", "brain feed", "dashboard", "kiosk"), "Check Mission Control state"),
+    (("mission control", "brain feed", "dashboard", "kiosk"), "Check Control Tower state"),
     (("sorare", "lineup", "game week", "gw", "pre-lock", "mission"), "Review Sorare lineup state"),
     (("fantasy baseball", "espn", "roster", "lineup", "matchup", "waiver", "trade"), "Sync fantasy baseball roster"),
     (("health", "status", "gateway", "hermes", "telegram"), "Run JAIMES health check"),

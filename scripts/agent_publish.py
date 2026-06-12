@@ -668,7 +668,7 @@ def main() -> int:
     parser.add_argument("--handoff-to", default="", help="Write a markdown handoff doc for this target")
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
-    parser.add_argument("--v2", action="store_true", help="Also publish dashboard-safe state to Mission Control canonical tables")
+    parser.add_argument("--v2", action="store_true", help="Also publish dashboard-safe state to Control Tower canonical tables")
     args = parser.parse_args()
 
     agent = canonical_agent(args.agent)

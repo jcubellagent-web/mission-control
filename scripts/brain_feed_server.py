@@ -13,7 +13,7 @@ Endpoints:
   GET  /dashboard-data.json — serve dashboard data (legacy compat)
   GET  /jain-brain-feed.json— serve J.A.I.N brain feed (legacy compat)
   GET  /agent-comms.json    — serve agent comms (legacy compat)
-  POST /refresh             — force refresh Safari (reloads Mission Control)
+  POST /refresh             — force refresh Safari (reloads Control Tower)
   POST /nightmode/on        — enable night mode on desktop
   POST /nightmode/off       — disable night mode on desktop
   GET  /nightmode/state     — current night mode state
@@ -215,7 +215,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path in LEGACY_JSON:
             return self._serve_file(LEGACY_JSON[path], no_cache=True)
 
-        # Legacy static dashboard root. Current Mission Control is the React kiosk
+        # Legacy static dashboard root. Current Control Tower is the React kiosk
         # served by Vite on Josh 2.0 at http://127.0.0.1:5174/.
         if path in ("/", "/index.html"):
             return self._serve_file(ROOT_DIR / "index.html", no_cache=False)
@@ -293,7 +293,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._json({"ok": True, "action": "refresh"})
 
         elif path == "/hard-refresh":
-            # Hard reload — Safari location.reload(true) on the Mission Control tab
+            # Hard reload — Safari location.reload(true) on the Control Tower tab
             run_applescript(
                 'tell application "Safari"\n'
                 '    repeat with w in windows\n'

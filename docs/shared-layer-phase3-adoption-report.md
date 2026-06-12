@@ -63,4 +63,4 @@ First wrap candidates:
 
 ## Recommendation
 
-Do not bulk-rewrite crontabs. Wrap one low-risk job at a time, confirm logs and exit code behavior, then proceed to the next job. Start with Mission Control refresh and health/check jobs before sensitive connector workflows.
+Do not bulk-rewrite crontabs. Wrap one low-risk job at a time, confirm logs and exit code behavior, then proceed to the next job. Start with Control Tower refresh and health/check jobs before sensitive connector workflows.

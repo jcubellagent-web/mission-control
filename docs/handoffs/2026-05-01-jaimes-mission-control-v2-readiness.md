@@ -1,6 +1,6 @@
-# Historical Handoff: JAIMES Mission Control Data-Layer Readiness
+# Historical Handoff: JAIMES Control Tower Data-Layer Readiness
 
-> Superseded operational context: for current work, "Mission Control" means the Josh 2.0 React kiosk at `http://127.0.0.1:5174/` from `v2-react/`. This handoff is historical migration context only; do not use its static route references as the current operator surface.
+> Superseded operational context: for current work, "Control Tower" means the Josh 2.0 React kiosk at `http://127.0.0.1:5174/` from `v2-react/`. This handoff is historical migration context only; do not use its static route references as the current operator surface.
 
 - Time: 2026-05-01T02:45:00Z
 - From: JOSHeX
@@ -10,12 +10,12 @@
 
 ## Objective
 
-JAIMES should support the Mission Control dashboard-safe data layer by reviewing architecture, validating status visibility, and preparing specialist/evaluator feedback. JAIMES should not handle private service keys, raw connector payloads, OAuth data, account mutation, or browser-authenticated workflows.
+JAIMES should support the Control Tower dashboard-safe data layer by reviewing architecture, validating status visibility, and preparing specialist/evaluator feedback. JAIMES should not handle private service keys, raw connector payloads, OAuth data, account mutation, or browser-authenticated workflows.
 
 ## Current State
 
-- Mission Control dashboard-safe dual-write is activated.
-- Current Mission Control operator surface is the React kiosk at `http://127.0.0.1:5174/`.
+- Control Tower dashboard-safe dual-write is activated.
+- Current Control Tower operator surface is the React kiosk at `http://127.0.0.1:5174/`.
 - `index.html` and `v2/index.html` are legacy rollback/proof surfaces.
 - v2 status/events are readable through dashboard-safe policies.
 - React migration has started and is now the active display path.
@@ -26,7 +26,7 @@ JAIMES should support the Mission Control dashboard-safe data layer by reviewing
 
 ```bash
 cd ~/.openclaw/workspace/mission-control
-python3 scripts/agent_heartbeat.py write --agent jaimes --node jaimes-via-josh --status ok --summary "JAIMES ready for Mission Control data-layer review"
+python3 scripts/agent_heartbeat.py write --agent jaimes --node jaimes-via-josh --status ok --summary "JAIMES ready for Control Tower data-layer review"
 ```
 
 2. Read the v2 docs:
@@ -51,7 +51,7 @@ python3 scripts/mc_v2_verify.py --agent joshex
 5. Publish only dashboard-safe progress:
 
 ```bash
-python3 scripts/agent_publish.py --agent jaimes --brain-feed --type status --status active --title "Mission Control JAIMES data review" --tool "JAIMES evaluator" --detail "Reviewing dashboard-safe Mission Control data model and JAIMES/Hermes visibility needs."
+python3 scripts/agent_publish.py --agent jaimes --brain-feed --type status --status active --title "Control Tower JAIMES data review" --tool "JAIMES evaluator" --detail "Reviewing dashboard-safe Control Tower data model and JAIMES/Hermes visibility needs."
 ```
 
 ## Do Not

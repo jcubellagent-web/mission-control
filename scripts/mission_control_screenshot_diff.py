@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Focused screenshot diff checks for Mission Control.
+"""Focused screenshot diff checks for Control Tower.
 
 Captures the Brain Feed / Memory Roadmap panel in desktop and mobile widths,
 then compares against checked-in baselines when the optional image comparison

@@ -2,7 +2,7 @@
 
 Audience: JOSH 2.0, JAIMES, J.A.I.N, and JOSHeX.
 
-Mission Control now has a shared dashboard-safe operating ledger. Use it for important work so every agent can see what happened, what is active, what completed, and which lane owns it.
+Control Tower now has a shared dashboard-safe operating ledger. Use it for important work so every agent can see what happened, what is active, what completed, and which lane owns it.
 
 ## Required Habit
 
@@ -26,7 +26,7 @@ python3 scripts/agent_publish.py --agent <lane> --type job --status done --title
 
 For shared delegated tasks, use `scripts/agent_task.py` or `scripts/agent_delegate.py`. `agent_task.py` publishes to Brain Feed by default; use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
 
-Regenerate Mission Control after local ledger/job changes:
+Regenerate Control Tower after local ledger/job changes:
 
 ```bash
 python3 scripts/update_mission_control.py
@@ -37,7 +37,7 @@ python3 scripts/update_mission_control.py
 - JOSH 2.0: host services, dashboard serving, OpenCLAW services, Josh-side crons, keepalives.
 - JAIMES: Hermes and specialist work, Sorare ML, fantasy/specialist workflows, JAIMES-owned reports.
 - J.A.I.N: scheduled worker jobs, intelligence scans, X/watchlist monitoring, background automation.
-- JOSHeX: Codex/Personal Codex work, Mission Control patches, validation, docs, sidecar syncs, coordination.
+- JOSHeX: Codex/Personal Codex work, Control Tower patches, validation, docs, sidecar syncs, coordination.
 
 Do not publish JOSHeX work to the Josh lane just because Josh hosts the dashboard.
 

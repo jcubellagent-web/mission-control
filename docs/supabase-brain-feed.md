@@ -1,22 +1,22 @@
 # Supabase Brain Feed Bridge
 
-Mission Control uses Supabase `public.brain_feed` as the live agent bus. The existing JSON files remain as fallbacks. Publish to the intentional lane for the work owner; do not only update local JSON.
+Control Tower uses Supabase `public.brain_feed` as the live agent bus. The existing JSON files remain as fallbacks. Publish to the intentional lane for the work owner; do not only update local JSON.
 
 ## Lane routing
 
 | Lane | Supabase row | JSON fallback | Use for |
 | --- | --- | --- | --- |
-| JOSH 2.0 | `josh` | `data/brain-feed.json` | JOSH 2.0 system work, Mission Control hosting, OpenCLAW gateway/node work, local dashboard refreshes, Josh-side keepalive/service actions. |
+| JOSH 2.0 | `josh` | `data/brain-feed.json` | JOSH 2.0 system work, Control Tower hosting, OpenCLAW gateway/node work, local dashboard refreshes, Josh-side keepalive/service actions. |
 | JAIMES | `jaimes` | `data/jaimes-brain-feed.json` | JAIMES/Hermes work, specialist tasks, Sorare ML, fantasy workflows, intelligence workflows owned by JAIMES, Hermes-managed jobs. |
 | J.A.I.N | `jain` | `data/jain-brain-feed.json` | J.A.I.N worker activity, scheduled intelligence scans, X/watchlist automation, background monitors, J.A.I.N-owned cron jobs. |
-| JOSHeX | `joshex` | `data/personal-codex.json` | Codex/JOSHeX work: UI patches, Mission Control edits, sidecar updates, repo changes, dashboard validation, handoff docs, Personal Codex coordination. |
+| JOSHeX | `joshex` | `data/personal-codex.json` | Codex/JOSHeX work: UI patches, Control Tower edits, sidecar updates, repo changes, dashboard validation, handoff docs, Personal Codex coordination. |
 | Legacy | `main` | `data/brain-feed.json` | Backward-compatible main feed only. Prefer named rows above for new work. |
 
 Important: updating JOSH 2.0's `brain-feed.json` does not update the JOSHeX card. JOSHeX must publish to `--agent joshex`.
 
 ## Publishing
 
-From any agent worktree with Mission Control checked out, or from the installed helper at `~/scripts/mission_control_brain_feed_publish.py`:
+From any agent worktree with Control Tower checked out, or from the installed helper at `~/scripts/mission_control_brain_feed_publish.py`:
 
 ```bash
 python3 scripts/supabase_brain_feed_publish.py \
@@ -31,13 +31,13 @@ python3 scripts/supabase_brain_feed_publish.py \
 Agent examples:
 
 ```bash
-python3 scripts/supabase_brain_feed_publish.py --agent josh --status active --tool openclaw --objective "Refreshing Mission Control display" --step "Reloaded dashboard host"
+python3 scripts/supabase_brain_feed_publish.py --agent josh --status active --tool openclaw --objective "Refreshing Control Tower display" --step "Reloaded dashboard host"
 python3 scripts/supabase_brain_feed_publish.py --agent jaimes --status active --tool hermes --objective "Running Sorare ML audit" --step "Loaded projections"
 python3 scripts/supabase_brain_feed_publish.py --agent jain --status active --tool monitor --objective "Running intelligence scan" --step "Scanning watchlists"
-python3 scripts/supabase_brain_feed_publish.py --agent joshex --status active --tool codex --objective "Patching Mission Control UI" --step "Validating dashboard diff"
+python3 scripts/supabase_brain_feed_publish.py --agent joshex --status active --tool codex --objective "Patching Control Tower UI" --step "Validating dashboard diff"
 ```
 
-The helper reads the existing frontend Supabase publishable config from the repo, the current directory, or the usual `.openclaw/workspace` Mission Control paths. It can also use these environment variables:
+The helper reads the existing frontend Supabase publishable config from the repo, the current directory, or the usual `.openclaw/workspace` Control Tower paths. It can also use these environment variables:
 
 ```bash
 MISSION_CONTROL_SUPABASE_URL=...
@@ -97,7 +97,7 @@ Example entry:
   "status": "done",
   "tool": "supabase_brain_feed_publish.py",
   "owner": "Personal Codex",
-  "detail": "Updated the joshex Supabase row after Mission Control patch work"
+  "detail": "Updated the joshex Supabase row after Control Tower patch work"
 }
 ```
 
@@ -111,7 +111,7 @@ Do not spam Action Required. Use Action Required only when Josh needs to approve
 
 ## Frontend behavior
 
-Mission Control subscribes to `brain_feed` realtime changes and also polls these rows as a fallback:
+Control Tower subscribes to `brain_feed` realtime changes and also polls these rows as a fallback:
 
 `main,josh,jain,jaimes,joshex`
 

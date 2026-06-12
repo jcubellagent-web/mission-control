@@ -11,11 +11,11 @@ Every node should have:
 - top-level shims in `~/.openclaw/workspace/scripts/`
 - Phase 1/2/3 docs
 - schemas
-- a compliance report in Mission Control
+- a compliance report in Control Tower
 
 ## Compliance Check
 
-Run from a Mission Control checkout:
+Run from a Control Tower checkout:
 
 ```bash
 python3 scripts/shared_layer_adoption_check.py --label "JOSH 2.0" --agent josh --workspace ~/.openclaw/workspace
@@ -27,14 +27,14 @@ The check writes:
 data/shared-layer-adoption.json
 ```
 
-Mission Control reads this through the Shared OS block.
+Control Tower reads this through the Shared OS block.
 
 ## Wrapping Jobs
 
 Use the wrapper around safe jobs first:
 
 ```bash
-scripts/agent_job_wrap.sh josh "Mission Control Refresh" update_and_push.sh "Refresh dashboard data" -- /bin/zsh scripts/update_and_push.sh
+scripts/agent_job_wrap.sh josh "Control Tower Refresh" update_and_push.sh "Refresh dashboard data" -- /bin/zsh scripts/update_and_push.sh
 ```
 
 The wrapper publishes:
@@ -47,7 +47,7 @@ It preserves the original command exit code.
 
 ## Adoption Order
 
-1. Mission Control refresh and dashboard health jobs.
+1. Control Tower refresh and dashboard health jobs.
 2. Non-sensitive health checks.
 3. Report generation.
 4. Intelligence scans.

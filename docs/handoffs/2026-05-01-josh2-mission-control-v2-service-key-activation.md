@@ -1,6 +1,6 @@
-# Historical Handoff: Mission Control Data-Layer Service Key Activation
+# Historical Handoff: Control Tower Data-Layer Service Key Activation
 
-> Superseded operational context: for current work, "Mission Control" means the Josh 2.0 React kiosk at `http://127.0.0.1:5174/` from `v2-react/`. This handoff is historical migration context only; do not use its static route references as the current operator surface.
+> Superseded operational context: for current work, "Control Tower" means the Josh 2.0 React kiosk at `http://127.0.0.1:5174/` from `v2-react/`. This handoff is historical migration context only; do not use its static route references as the current operator surface.
 
 - Time: 2026-05-01T01:44:17Z
 - From: JOSHeX
@@ -10,11 +10,11 @@
 
 ## Objective
 
-Activate the first real Mission Control dashboard-safe dual-write publisher on Josh 2.0 without weakening Supabase RLS or changing the active kiosk path.
+Activate the first real Control Tower dashboard-safe dual-write publisher on Josh 2.0 without weakening Supabase RLS or changing the active kiosk path.
 
 ## Current State
 
-- Current Mission Control operator surface is the React kiosk at `http://127.0.0.1:5174/`.
+- Current Control Tower operator surface is the React kiosk at `http://127.0.0.1:5174/`.
 - `index.html` and `v2/index.html` remain available only as legacy rollback/proof surfaces.
 - v2 schema is installed in Supabase.
 - `agent_publish.py` supports optional v2 mirroring through `--v2` or `MISSION_CONTROL_V2_DUAL_WRITE=1`.
@@ -74,7 +74,7 @@ Expected result:
 
 ## Do Not
 
-- Do not add anonymous write policies to Mission Control tables.
+- Do not add anonymous write policies to Control Tower tables.
 - Do not use the browser publishable key for server writes.
 - Do not cut over the kiosk to legacy static routes.
-- Do not store private raw connector/account data in Mission Control tables.
+- Do not store private raw connector/account data in Control Tower tables.

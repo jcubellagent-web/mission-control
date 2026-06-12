@@ -264,11 +264,11 @@ def describe_shell_command(value: str) -> str:
     if "pytest" in lower:
         return "running verification tests"
     if "state_visibility_guard.py" in lower:
-        return "refreshing Mission Control and Brain Feed visibility"
+        return "refreshing Control Tower and Brain Feed visibility"
     if "update_mission_control.py" in lower:
-        return "regenerating Mission Control dashboard data"
+        return "regenerating Control Tower dashboard data"
     if "ecosystem_health_sweep.py" in lower:
-        return "checking Josh 2.0, JAIMES, J.AI.N, and Mission Control health"
+        return "checking Josh 2.0, JAIMES, J.AI.N, and Control Tower health"
     if "xai_agent.py" in lower:
         return "checking the xAI/Grok helper connection"
     if "agent_publish.py" in lower:
@@ -292,11 +292,11 @@ def describe_shell_command(value: str) -> str:
     if "openclaw doctor" in lower:
         return "checking OpenCLAW configuration for repairable issues"
     if "npm run build" in lower:
-        return "building Mission Control to catch UI/runtime errors"
+        return "building Control Tower to catch UI/runtime errors"
     if "python3" in lower and "mission-control/scripts/" in lower:
         script = lower.split("mission-control/scripts/", 1)[1].split()[0].strip("'\"")
         script = script.replace("_", " ").replace(".py", "")
-        return f"running the Mission Control {script} helper"
+        return f"running the Control Tower {script} helper"
     if lower.startswith("date "):
         return "checking the current time on JAIMES"
     if not text:
@@ -813,7 +813,7 @@ def main() -> int:
             """
             Send or edit a JAIMES-facing Telegram work card.
             Example:
-              scripts/jaimes_work_card.py start --key mc-fix --title "Mission Control fix" --now "reading files"
+              scripts/jaimes_work_card.py start --key mc-fix --title "Control Tower fix" --now "reading files"
               scripts/jaimes_work_card.py update --key mc-fix --now "running tests" --done "patched CSS|py_compile passed"
               scripts/jaimes_work_card.py done --key mc-fix --done "tests passed|pushed main"
             """

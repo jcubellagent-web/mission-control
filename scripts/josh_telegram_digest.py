@@ -21,7 +21,7 @@ BUTTONS = [
     [{"text": "Use Josh 2.0 Mac tools", "callback_data": "model:codex"}],
     [{"text": "Send to JOSHeX Cloud / repo-safe", "callback_data": "route:joshex_cloud"}],
     [{"text": "Send to JOSHeX / private accounts", "callback_data": "route:joshex"}],
-    [{"text": "Force Mission Control sync", "callback_data": "next:check_mission_control"}],
+    [{"text": "Force Control Tower sync", "callback_data": "next:check_mission_control"}],
     [{"text": "Show model choices", "callback_data": "next:show_models"}],
     [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
@@ -67,7 +67,7 @@ def build_digest(kind: str) -> str:
         f"- Route: Josh 2.0 Telegram; {label.lower()}.",
         f"- Objective: Give Josh a quick ecosystem view.",
         f"- Status: {ready}/{total} agents ready; failed queues {failed_queues}.",
-        f"- Now: Tracking Mission Control, Brain Feed, and jobs.",
+        f"- Now: Tracking Control Tower, Brain Feed, and jobs.",
         f"- Done: Active jobs {len(active_jobs)}; recent updates {len(recent)}.",
         "- Blocker: OpenAI-Codex re-auth if doctor still reports expired token.",
     ]

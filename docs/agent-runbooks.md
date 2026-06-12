@@ -2,7 +2,7 @@
 
 ## JOSHeX / Personal Codex
 
-Owns sensitive account connectors, approval decisions, Mission Control code, dashboard validation, task routing, and cross-agent handoffs.
+Owns sensitive account connectors, approval decisions, Control Tower code, dashboard validation, task routing, and cross-agent handoffs.
 
 Must publish meaningful work to:
 
@@ -13,7 +13,7 @@ Must publish meaningful work to:
 When delegating work to another agent, use `scripts/agent_delegate.py` rather than only sending an out-of-band message. The delegate wrapper publishes the JOSHeX request, writes/syncs the task queue, and asks the receiving host to publish its own Brain Feed receipt. Example:
 
 ```bash
-python3 scripts/agent_delegate.py --to josh2 --title "Check kiosk health" --objective "Confirm the Josh 2.0 Mission Control kiosk is reachable and current." --job
+python3 scripts/agent_delegate.py --to josh2 --title "Check kiosk health" --objective "Confirm the Josh 2.0 Control Tower kiosk is reachable and current." --job
 ```
 
 Must not put secrets, raw connector payloads, private account contents, OAuth payloads, tokens, or raw emails into dashboard-visible stores.
@@ -26,7 +26,7 @@ Recovery:
 
 ## Josh 2.0
 
-Owns Mission Control hosting, Brain Feed server health, local OpenCLAW services, Josh-side crons, and host operations.
+Owns Control Tower hosting, Brain Feed server health, local OpenCLAW services, Josh-side crons, and host operations.
 
 Use:
 
@@ -46,7 +46,7 @@ Recovery:
 
 - Check wrapped cron logs under `~/.openclaw/workspace/logs/`
 - Publish a heartbeat after recovery
-- Keep Mission Control data refreshed
+- Keep Control Tower data refreshed
 
 ## JAIMES
 
@@ -92,4 +92,4 @@ Recovery:
 
 - Check the specific job log first
 - Publish `blocked` only when Josh must approve or fix something
-- Use heartbeat status `ok`, `degraded`, or `blocked` to keep Mission Control honest
+- Use heartbeat status `ok`, `degraded`, or `blocked` to keep Control Tower honest

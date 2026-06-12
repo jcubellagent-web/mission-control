@@ -113,6 +113,14 @@ def check_react_source() -> None:
     )
 
     require_text(
+        data_ts,
+        [
+            "Control Tower job",
+        ],
+        "Control Tower user-facing naming",
+    )
+
+    require_text(
         css,
         [
             "CONTROL-TOWER-BRAND-BLUEGREEN-20260607",

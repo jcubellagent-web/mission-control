@@ -244,7 +244,7 @@ def cmd_install_key(args: argparse.Namespace) -> int:
     existing = read_env_file(target)
     existing[var_name] = key
     lines = [
-        "# Local xAI keys for OpenCLAW/Mission Control agents.",
+        "# Local xAI keys for OpenCLAW/Control Tower agents.",
         "# Do not commit this file. Rotate any key pasted into chat.",
     ]
     for name in sorted(existing):
@@ -353,7 +353,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run dashboard-safe xAI/Grok checks for Mission Control.")
+    parser = argparse.ArgumentParser(description="Run dashboard-safe xAI/Grok checks for Control Tower.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     install_p = sub.add_parser("install-key", help="Securely prompt for and store a local xAI key.")

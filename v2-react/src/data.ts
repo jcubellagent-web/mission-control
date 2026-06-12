@@ -440,7 +440,7 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
     rows.push({
       id: String(job.id || `${job.owner || "job"}-${job.title || rows.length}`),
       agent_id: ownerToAgentId(job.owner || job.agent),
-      title: job.title || job.name || "Mission Control job",
+      title: job.title || job.name || "Control Tower job",
       status: job.status || "info",
       detail: job.detail || job.description || job.tool || "",
       tool: job.tool || "codex-jobs",

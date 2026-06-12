@@ -172,7 +172,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run dashboard-safe Gemini CLI checks for Mission Control.")
+    parser = argparse.ArgumentParser(description="Run dashboard-safe Gemini CLI checks for Control Tower.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     status_p = sub.add_parser("status", help="Check local Gemini CLI installation.")

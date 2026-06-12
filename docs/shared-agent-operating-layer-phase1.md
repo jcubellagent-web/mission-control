@@ -8,7 +8,7 @@ Phase 1 gives JOSHeX, JOSH 2.0, JAIMES, and J.A.I.N one dashboard-safe way to pu
 - Event schema: `schemas/shared-agent-event.schema.json`
 - Publishing helper: `scripts/agent_publish.py`
 - Today Jobs Codex Automations: `data/codex-jobs.json`
-- Mission Control dashboard fields:
+- Control Tower dashboard fields:
   - `sharedEvents`
   - `codexJobs`
 - Live Brain Feed rows in Supabase:
@@ -30,7 +30,7 @@ python3 scripts/agent_publish.py \
   --agent joshex \
   --type status \
   --status active \
-  --title "Updating Mission Control shared ledger" \
+  --title "Updating Control Tower shared ledger" \
   --tool codex \
   --detail "Adding Phase 1 shared event visibility" \
   --brain-feed
@@ -43,7 +43,7 @@ python3 scripts/agent_publish.py \
   --agent josh \
   --type job \
   --status done \
-  --title "Regenerated Mission Control dashboard data" \
+  --title "Regenerated Control Tower dashboard data" \
   --tool update_mission_control.py \
   --detail "Dashboard data refreshed and served from Josh 2.0" \
   --job
@@ -68,7 +68,7 @@ python3 scripts/agent_publish.py \
   --agent joshex \
   --type handoff \
   --status done \
-  --title "Mission Control shared ledger handoff" \
+  --title "Control Tower shared ledger handoff" \
   --tool codex \
   --detail "Adopt agent_publish.py for Brain Feed and Today Jobs publishing" \
   --handoff-to jaimes
@@ -82,14 +82,14 @@ python3 scripts/update_mission_control.py
 
 ## Lane Routing
 
-- `--agent josh`: Josh 2.0 hosting, OpenCLAW, local services, Mission Control keepalive and publishing.
+- `--agent josh`: Josh 2.0 hosting, OpenCLAW, local services, Control Tower keepalive and publishing.
 - `--agent jaimes`: JAIMES/Hermes specialist jobs, Sorare ML, fantasy workflows, Hermes-managed automations.
 - `--agent jain`: J.A.I.N scheduled workers, intelligence scans, X/watchlist monitors, background crons.
 - `--agent joshex`: Codex/JOSHeX patches, dashboard edits, validation, docs, sidecar syncs, coordination.
 
 ## Privacy
 
-Only use `--privacy dashboard-safe` for Mission Control-visible activity. The helper refuses obvious secret-looking strings in dashboard-safe events.
+Only use `--privacy dashboard-safe` for Control Tower-visible activity. The helper refuses obvious secret-looking strings in dashboard-safe events.
 
 Never publish:
 

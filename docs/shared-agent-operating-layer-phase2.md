@@ -50,7 +50,7 @@ python3 scripts/agent_publish.py --agent jain --type job --status done --title "
 
 ## Freshness Rules
 
-Mission Control marks the shared layer:
+Control Tower marks the shared layer:
 
 - `ready` when recent dashboard-safe events exist and no open handoffs/blockers are present.
 - `attention` when open handoffs or blocked/error events are present.

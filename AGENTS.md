@@ -1,6 +1,6 @@
-# Mission Control Agent Instructions
+# Control Tower Agent Instructions
 
-An unqualified reference to "Mission Control" means the current Josh 2.0 React kiosk.
+An unqualified user-facing reference to the dashboard should say "Control Tower". The legacy repo/path name remains `mission-control`.
 
 - Current UI source: `v2-react/`
 - Current live Josh 2.0 URL: `http://127.0.0.1:5174/`
@@ -14,9 +14,9 @@ Legacy surfaces are not the default:
 - `v2/index.html` is the older static v2 proof surface.
 - `scripts/open_react_v2_kiosk.sh` is retained only as a compatibility alias.
 
-When updating Mission Control, sync and verify the current React kiosk on Josh 2.0 before calling the work complete. Avoid using "v1", "v2", or "React v2" in new operator-facing notes unless the topic is historical migration or rollback.
+When updating Control Tower, sync and verify the current React kiosk on Josh 2.0 before calling the work complete. Avoid using "v1", "v2", or "React v2" in new operator-facing notes unless the topic is historical migration or rollback.
 
-Keep Mission Control visibility and shared context current. Josh 2.0 live Mission Control is the operational source of truth. Local JSON on JOSHeX is a cache unless refreshed from Josh 2.0.
+Keep Control Tower visibility and shared context current. Josh 2.0 live Control Tower is the operational source of truth. Local JSON on JOSHeX is a cache unless refreshed from Josh 2.0.
 
 Maintain local/shared sidecars:
 
@@ -61,7 +61,7 @@ Prefer Josh 2.0 or JAIMES for real agent-ecosystem work whenever the task does n
 Default ownership:
 
 - JOSHeX: planning, coordination, architecture decisions, lightweight integration, private-Mac-only work, personal account/browser/keychain/OAuth work, and final review when the user is directly engaging from this laptop.
-- Josh 2.0: Mission Control kiosk, OpenCLAW operations, device alerts on the Josh 2.0 Mac mini, dashboard refreshes, service checks, browser automation that should not disturb the MacBook, and ecosystem host maintenance.
+- Josh 2.0: Control Tower kiosk, OpenCLAW operations, device alerts on the Josh 2.0 Mac mini, dashboard refreshes, service checks, browser automation that should not disturb the MacBook, and ecosystem host maintenance.
 - JAIMES/J.AI.N: heavier compute, long-running work, scheduled jobs, Gemini/Grok specialist passes, Sorare operations, intelligence scans, durable Hermes workflows, and background processing.
 
 Dedicated-host autonomy:
@@ -69,12 +69,12 @@ Dedicated-host autonomy:
 - Josh 2.0 and JAIMES/J.AI.N run on dedicated Mac minis. Device-local tool approvals should be configured for full access and auto-approval: terminal work, workspace file edits, browser automation on those hosts, service restarts, cron/job maintenance, plugin updates, diagnostics, and local cleanup should not require Josh to approve each step.
 - Do not ask for user approval solely because a task needs to use the dedicated host's shell, filesystem, browser, local app controls, or service manager. Execute on the proper dedicated host and keep Brain Feed current.
 - Keep explicit approval only for truly external or irreversible actions unless a standing policy already pre-approves that workflow: purchases, public posts/messages, account deletion, destructive private-account changes, production pushes, or fantasy/Sorare roster or lineup changes outside the accepted standing policy.
-- Onchain and wallet actions are always proposal-first. Base MCP, Base Account, wallet, swap, trade, bridge, mint, stake, claim, revoke, approval, transfer, or portfolio-management work may be researched, simulated, and drafted by agents, but signing/broadcasting/submitting requires Josh's explicit wallet/Base Account approval. Never store private keys, seed phrases, raw wallet secrets, raw calldata, cookies, OAuth payloads, or tokens in Mission Control surfaces.
+- Onchain and wallet actions are always proposal-first. Base MCP, Base Account, wallet, swap, trade, bridge, mint, stake, claim, revoke, approval, transfer, or portfolio-management work may be researched, simulated, and drafted by agents, but signing/broadcasting/submitting requires Josh's explicit wallet/Base Account approval. Never store private keys, seed phrases, raw wallet secrets, raw calldata, cookies, OAuth payloads, or tokens in Control Tower surfaces.
 
 Standing Josh 2.0 delegation:
 
 - When Josh asks JOSHeX, Josh 2.0, or JAIMES to do something on Josh 2.0, treat that as standing permission to use Josh 2.0's local tools and grant routine local access on Josh's behalf whenever the platform permits it.
-- Routine local access includes opening and controlling Chrome, using Computer Use, interacting with local setup dialogs, starting or restarting OpenCLAW/Codex/gateway services, editing workspace files, updating plugins, running diagnostics, clearing local alerts, changing local Mission Control/kiosk settings, and approving local-only tool prompts.
+- Routine local access includes opening and controlling Chrome, using Computer Use, interacting with local setup dialogs, starting or restarting OpenCLAW/Codex/gateway services, editing workspace files, updating plugins, running diagnostics, clearing local alerts, changing local Control Tower/kiosk settings, and approving local-only tool prompts.
 - Do not bounce routine Josh 2.0 device work back to Josh for manual clicks. If macOS requires one-time Privacy & Security consent, tell Josh the exact pane and item to enable; after consent is granted, continue without re-asking.
 - Keep the hard human boundary at identity, money, public commitment, and irreversible external state: passkeys, 2FA, account sign-ins, wallet/Base Account signing, purchases, public posting, external account deletion, and live roster/lineup submission outside standing policy still require explicit Josh approval at the moment of action.
 - If a requested action is blocked only because Josh 2.0 lacks Accessibility, Screen Recording, Input Monitoring, Automation, Full Disk Access, Chrome extension, or Computer Use permission, surface that exact missing permission and continue immediately once it is granted.
@@ -85,7 +85,7 @@ Do not add noisy Action Required items for normal progress. Only use Action Requ
 
 Never put secrets, private account contents, tokens, raw sensitive connector data, OAuth payloads, raw emails, cookies, passwords, or private customer/account content into Brain Feed, Personal Codex, dashboard-data.json, shared-events.json, codex-jobs.json, decisions.json, handoff docs, agent-context-registry.json, agent-chat-sources.json, or optional Supabase mirror rows.
 
-For cross-agent requests, use `scripts/agent_delegate.py` so Mission Control shows both sides of the handoff:
+For cross-agent requests, use `scripts/agent_delegate.py` so Control Tower shows both sides of the handoff:
 
 - JOSHeX tile: "Requesting <agent>: <task>"
 - Receiving agent tile: "Instruction received: <task>"
@@ -95,7 +95,7 @@ Do not delegate with only chat text or an untracked SSH command when the request
 
 ## Brain Feed Publish Contract
 
-All active ecosystem agents must publish meaningful work to Brain Feed / Live Work Board under their own lane. This includes Josh 2.0, JAIMES, J.A.I.N, and JOSHeX. It is not optional for Telegram tasks, delegated tasks, scheduled jobs with user-visible impact, Mission Control changes, or ecosystem maintenance.
+All active ecosystem agents must publish meaningful work to Brain Feed / Live Work Board under their own lane. This includes Josh 2.0, JAIMES, J.A.I.N, and JOSHeX. It is not optional for Telegram tasks, delegated tasks, scheduled jobs with user-visible impact, Control Tower changes, or ecosystem maintenance.
 
 Required publishing cadence:
 
@@ -157,5 +157,5 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - Use the OpenAI developer documentation MCP server for current OpenAI API, ChatGPT Apps SDK, Codex, Responses API, or related product documentation questions.
 - Use Playwright MCP for repeatable browser automation, page inspection, screenshots, and web UI verification when a structured browser path is safer than visual/manual control.
 - Use `gog` for dashboard-safe Google Workspace automation involving the shared agent inbox, calendar, Drive, Docs, Sheets, Slides, Contacts, or Tasks. Prefer `--json`, `--no-input`, and `--gmail-no-send` unless sending mail is explicitly approved.
-- Use 1Password CLI (`op`) only as a secret retrieval/storage mechanism after the relevant vault/account is manually signed in or otherwise intentionally configured. Do not publish vault item contents or secret values to Mission Control.
+- Use 1Password CLI (`op`) only as a secret retrieval/storage mechanism after the relevant vault/account is manually signed in or otherwise intentionally configured. Do not publish vault item contents or secret values to Control Tower.
 - Route repo-safe, non-private JOSHeX handoffs through the Codex Cloud handoff path when local JOSHeX is unavailable; keep local-only tasks on JOSHeX when they involve private accounts, browser sessions, keychains, OAuth, cookies, secrets, or local desktop state.

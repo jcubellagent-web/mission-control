@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create and update shared agent tasks for Mission Control."""
+"""Create and update shared agent tasks for Control Tower."""
 from __future__ import annotations
 
 import argparse
@@ -261,7 +261,7 @@ def list_tasks(args: argparse.Namespace) -> list[dict[str, Any]]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Manage shared Mission Control agent tasks.")
+    parser = argparse.ArgumentParser(description="Manage shared Control Tower agent tasks.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     create_p = sub.add_parser("create")

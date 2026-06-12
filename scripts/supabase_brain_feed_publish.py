@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Publish a safe live Brain Feed row for any Mission Control agent.
+"""Publish a safe live Brain Feed row for any Control Tower agent.
 
 This uses the existing public Supabase `brain_feed` table and keeps JSON files as
 fallbacks. It does not read or print private credentials; provide
 MISSION_CONTROL_SUPABASE_URL / MISSION_CONTROL_SUPABASE_KEY when running outside
-the Mission Control repo.
+the Control Tower repo.
 """
 
 from __future__ import annotations
@@ -218,7 +218,7 @@ def build_payload(args: argparse.Namespace, existing: dict[str, Any]) -> dict[st
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Publish a Mission Control Brain Feed update to Supabase.")
+    parser = argparse.ArgumentParser(description="Publish a Control Tower Brain Feed update to Supabase.")
     parser.add_argument("--agent", required=True, help="josh, jaimes, jain, or joshex")
     parser.add_argument("--status", default="active", help="active, running, done, idle, blocked, stale")
     parser.add_argument("--objective", default="", help="Visible current objective")

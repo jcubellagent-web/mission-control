@@ -139,7 +139,7 @@ function selectedStatus() {
     || {
       agent_id: state.selectedAgent,
       status: "offline",
-      objective: "No current Mission Control status has been published yet",
+      objective: "No current Control Tower status has been published yet",
       detail: "Run scripts/mc_v2_publish.py after the v2 Supabase schema is installed.",
       current_tool: "",
       active: false,

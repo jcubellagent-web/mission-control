@@ -1,10 +1,10 @@
-# Mission Control Current Contract
+# Control Tower Current Contract
 
-This file is retained at its historical path because many agent notes still point here. As of May 2, 2026, it describes the current Mission Control contract.
+This file is retained at its historical path because many agent notes still point here. As of May 2, 2026, it describes the current Control Tower contract.
 
 ## Canonical Meaning
 
-An unqualified reference to "Mission Control" means the current Josh 2.0 React kiosk:
+An unqualified user-facing reference should now say "Control Tower" and means the current Josh 2.0 React kiosk:
 
 - Source: `v2-react/`
 - Build output: `dist/v2-react/`
@@ -13,7 +13,7 @@ An unqualified reference to "Mission Control" means the current Josh 2.0 React k
 - Build command: `npm run build`
 - Dev command: `npm run dev`
 
-Agents should not call this surface "v1", "v2", or "React v2" in new operator-facing notes. Use "Mission Control" or "current React Mission Control" unless the subject is explicitly historical migration or rollback.
+Agents should not call this surface "v1", "v2", or "React v2" in new operator-facing notes. Use "Control Tower" or "current React Control Tower" unless the subject is explicitly historical migration or rollback.
 
 ## Legacy Surfaces
 
@@ -23,11 +23,11 @@ The older surfaces remain available only for compatibility and rollback:
 - `v2/index.html`: older static proof surface for the initial Supabase state migration.
 - `scripts/open_react_v2_kiosk.sh`: compatibility alias that now delegates to `scripts/open_mission_control_kiosk.sh`.
 
-Do not point Josh 2.0, JAIMES, J.AI.N, OpenCLAW, Hermes, or Codex handoffs at the legacy static pages for normal Mission Control work.
+Do not point Josh 2.0, JAIMES, J.AI.N, OpenCLAW, Hermes, or Codex handoffs at the legacy static pages for normal Control Tower work.
 
 ## Data Contract
 
-The current React Mission Control reads from:
+The current React Control Tower reads from:
 
 - Supabase dashboard-safe rows when configured.
 - Local sidecars under `data/` as fallback.
@@ -43,7 +43,7 @@ For jobs, add `--job` when the work should appear in Today's Jobs.
 
 ## Verification Contract
 
-Before calling current Mission Control UI work complete:
+Before calling current Control Tower UI work complete:
 
 1. Build from `mission-control/`:
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a cron command while publishing Mission Control Brain Feed heartbeats.
+"""Run a cron command while publishing Control Tower Brain Feed heartbeats.
 
 This wrapper is intentionally secret-safe: it never prints environment values,
 never logs the child command with expanded secrets, and treats Brain Feed publish

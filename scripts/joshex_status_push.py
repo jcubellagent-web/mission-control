@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update the local JOSHeX Mission Control sidecar without exposing secrets."""
+"""Update the local JOSHeX Control Tower sidecar without exposing secrets."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def load_json(path: Path) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Push a safe live JOSHeX status into Mission Control.")
+    parser = argparse.ArgumentParser(description="Push a safe live JOSHeX status into Control Tower.")
     parser.add_argument("--file", default="data/personal-codex.json", help="Sidecar JSON file to update.")
     parser.add_argument("--status", default="active", help="Visible JOSHeX status.")
     parser.add_argument("--objective", required=True, help="Current work visible in the JOSHeX panel and Brain Feed.")
@@ -42,7 +42,7 @@ def main() -> int:
 
     data["status"] = args.status
     data["objective"] = args.objective
-    data["validation"] = args.validation or data.get("validation") or "Mission Control live status updated"
+    data["validation"] = args.validation or data.get("validation") or "Control Tower live status updated"
     data["updatedAt"] = now
     data["agentSlot"] = False
     data["promoteToBrainFeed"] = False
@@ -55,7 +55,7 @@ def main() -> int:
     if args.capability:
         data["capabilities"] = args.capability[:5]
     elif not data.get("capabilities"):
-        data["capabilities"] = ["Inspect Mission Control", "Edit UI", "Run validation", "Prepare Git patches"]
+        data["capabilities"] = ["Inspect Control Tower", "Edit UI", "Run validation", "Prepare Git patches"]
 
     patch = data.get("patchStatus") if isinstance(data.get("patchStatus"), dict) else {}
     patch["status"] = args.status

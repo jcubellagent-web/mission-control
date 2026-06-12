@@ -72,7 +72,7 @@ def main() -> int:
     results["setMyShortDescription"] = api_call(
         api_base,
         "setMyShortDescription",
-        {"short_description": "Josh 2.0 command center: status, routing, Mission Control, and safe next steps."},
+        {"short_description": "Josh 2.0 command center: status, routing, Control Tower, and safe next steps."},
     )
     require_ok("setMyShortDescription", results["setMyShortDescription"])
     results["setMyDescription"] = api_call(
@@ -81,7 +81,7 @@ def main() -> int:
         {
             "description": (
                 "Use Josh 2.0 for iPhone-first agent control. Prefer buttons and editable work cards for safe next steps, "
-                "Mission Control checks, overview/daily digests, routing to JOSHeX/JAIMES/J.AI.N, and clear model/status visibility."
+                "Control Tower checks, overview/daily digests, routing to JOSHeX/JAIMES/J.AI.N, and clear model/status visibility."
             )
         },
     )

@@ -5,7 +5,7 @@ Gemini is available to the agent ecosystem through the local Gemini CLI and Code
 ## Routing
 
 - JOSHeX owns Gemini brokering for `gemini-review`, `gemini-long-context`, `gemini-research`, and `model-fallback`.
-- Josh 2.0 owns host health checks such as `gemini-health-check` when running on the Mission Control host.
+- Josh 2.0 owns host health checks such as `gemini-health-check` when running on the Control Tower host.
 - JAIMES can use Gemini only as an evaluator for dashboard-safe reports, ML notes, and specialist summaries.
 - J.A.I.N can use Gemini for scheduled summaries and stale-task review.
 
@@ -13,7 +13,7 @@ Gemini is available to the agent ecosystem through the local Gemini CLI and Code
 
 - Do not send secrets, OAuth payloads, tokens, raw emails, private account contents, or private customer/account data to Gemini automatically.
 - Use sanitized briefs, selected files, or summaries by default.
-- Any Gemini task that needs raw private context requires JOSHeX approval and should not be written into Mission Control sidecars.
+- Any Gemini task that needs raw private context requires JOSHeX approval and should not be written into Control Tower sidecars.
 - Store only status, role, model, route, and test metadata in dashboard data.
 
 ## Local Commands

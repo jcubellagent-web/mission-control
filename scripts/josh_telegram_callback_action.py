@@ -38,7 +38,7 @@ BUTTONS = [
     [{"text": "3. Run on Josh 2.0 device", "callback_data": "model:codex"}],
     [{"text": "4. JOSHeX Cloud / repo-safe", "callback_data": "route:joshex_cloud"}],
     [{"text": "5. JOSHeX private accounts", "callback_data": "route:joshex"}],
-    [{"text": "Force Mission Control sync", "callback_data": "next:check_mission_control"}],
+    [{"text": "Force Control Tower sync", "callback_data": "next:check_mission_control"}],
     [{"text": "Send daily digest", "callback_data": "next:daily_digest"}],
     [{"text": "Run health sweep", "callback_data": "next:run_health_sweep"}],
     [{"text": "Show model choices", "callback_data": "next:show_models"}],
@@ -237,7 +237,7 @@ def create_joshex_handoff() -> tuple[str, str]:
         title = compact(f"JOSHeX handoff: {title}", 120)
     objective = (
         "Josh 2.0 user tapped the JOSHeX/private-accounts route. "
-        "JOSHeX should pick up the sanitized handoff from Mission Control, "
+        "JOSHeX should pick up the sanitized handoff from Control Tower, "
         "handle personal-laptop/private-account work when appropriate, and "
         "report a dashboard-safe done/blocked result back to Josh 2.0."
     )
@@ -368,7 +368,7 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 now=f"Approval captured, but task queue failed for: {step}",
                 done="No mitigation task was queued.",
                 blocker=compact(str(exc), 220),
-                next_step="Send the mitigation text directly or retry after Mission Control task queue is healthy.",
+                next_step="Send the mitigation text directly or retry after Control Tower task queue is healthy.",
             ), BUTTONS
 
     if action == "model:gemini_flash":
@@ -447,9 +447,9 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
         return bullet_card(
             status="done" if '"ok": true' in result.lower() else "attention",
             objective="Run the ecosystem health sweep.",
-            now="Checked agent hosts, gateway health, Telegram, model auth, jobs, and Mission Control freshness.",
+            now="Checked agent hosts, gateway health, Telegram, model auth, jobs, and Control Tower freshness.",
             done=result.splitlines()[-1] if result else "Health sweep command ran.",
-            next_step="Open Mission Control if any row reports attention.",
+            next_step="Open Control Tower if any row reports attention.",
         ), BUTTONS
 
     if action.startswith("agent:"):
@@ -462,9 +462,9 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
         result = run_text(["python3", "mission-control/scripts/update_mission_control.py"], timeout=90)
         return bullet_card(
             status="done",
-            objective="Refresh Mission Control.",
+            objective="Refresh Control Tower.",
             now="Dashboard data regenerated.",
-            done=result.splitlines()[-1] if result else "Mission Control update command ran.",
+            done=result.splitlines()[-1] if result else "Control Tower update command ran.",
             next_step="Check the kiosk/dashboard or tap another action.",
         ), BUTTONS
 
@@ -475,14 +475,14 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 objective="Send work to JOSHeX / private accounts.",
                 now="Dry-run: this callback would create an approved JOSHeX-owned sensitive-account handoff task.",
                 done="No task queued during dry-run.",
-                next_step="A live button tap will create the task, publish Mission Control visibility, and ask JOSHeX to report back dashboard-safe results.",
+                next_step="A live button tap will create the task, publish Control Tower visibility, and ask JOSHeX to report back dashboard-safe results.",
             ), BUTTONS
         try:
             task_id, title = create_joshex_handoff()
             return bullet_card(
                 status="queued",
                 objective="Send work to JOSHeX / private accounts.",
-                now="Created a durable JOSHeX-owned task in Mission Control. JOSHeX is the personal-laptop Codex lane, not the Josh 2.0 Mac.",
+                now="Created a durable JOSHeX-owned task in Control Tower. JOSHeX is the personal-laptop Codex lane, not the Josh 2.0 Mac.",
                 done=f"Task queued: {task_id} - {compact(title, 120)}.",
                 next_step="JOSHeX should handle private-account work and report a dashboard-safe done/blocked result back to Josh 2.0.",
             ), BUTTONS
@@ -493,7 +493,7 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 now="Tried to create a durable JOSHeX-owned task.",
                 done="No JOSHeX task was queued.",
                 blocker=compact(str(exc), 220),
-                next_step="Send the task here directly or try again after Mission Control task queue is healthy.",
+                next_step="Send the task here directly or try again after Control Tower task queue is healthy.",
             ), BUTTONS
 
     if action == "route:joshex_cloud":
@@ -521,7 +521,7 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 now="Tried to create a durable JOSHeX-owned cloud-candidate task.",
                 done="No JOSHeX Cloud task was queued.",
                 blocker=compact(str(exc), 220),
-                next_step="Use local JOSHeX/private-account route or try again after Mission Control task queue is healthy.",
+                next_step="Use local JOSHeX/private-account route or try again after Control Tower task queue is healthy.",
             ), BUTTONS
 
     if action == "route:jaimes":
@@ -555,7 +555,7 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 now="Tried to create a durable JAIMES-owned task.",
                 done="No JAIMES task was queued.",
                 blocker=compact(str(exc), 220),
-                next_step="Send the task details directly or try again after Mission Control task queue is healthy.",
+                next_step="Send the task details directly or try again after Control Tower task queue is healthy.",
             ), BUTTONS
 
     if action == "route:agent_council":
@@ -589,7 +589,7 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
                 now="Tried to create a guarded JAIMES-owned council task.",
                 done="No agent-council task was queued.",
                 blocker=compact(str(exc), 220),
-                next_step="Send the task to JAIMES directly or try again after Mission Control task queue is healthy.",
+                next_step="Send the task to JAIMES directly or try again after Control Tower task queue is healthy.",
             ), BUTTONS
 
     if action == "next:hold":

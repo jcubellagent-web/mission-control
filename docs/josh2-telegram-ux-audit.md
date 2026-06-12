@@ -6,7 +6,7 @@ Privacy: dashboard-safe
 
 ## Goal
 
-Make Telegram the cleanest iPhone front door for Josh 2.0 while preserving autonomy, privacy, and Mission Control visibility.
+Make Telegram the cleanest iPhone front door for Josh 2.0 while preserving autonomy, privacy, and Control Tower visibility.
 
 ## Current State
 
@@ -15,7 +15,7 @@ Make Telegram the cleanest iPhone front door for Josh 2.0 while preserving auton
 - Josh 2.0 OpenAI-Codex auth needs an interactive re-auth. Headless SSH cannot complete it.
 - OpenCLAW doctor reports Telegram is in pairing/allowlist mode. That is safer, but new chats or groups need explicit approval.
 - OpenCLAW doctor also reports the bundled Telegram channel cannot load `grammy`; that should be fixed before treating Telegram as fully optimized.
-- Existing Mission Control scripts already support Telegram voice task routing and main Telegram session usage tracking.
+- Existing Control Tower scripts already support Telegram voice task routing and main Telegram session usage tracking.
 
 ## Best iPhone Experience
 
@@ -55,8 +55,8 @@ Default buttons should be:
 Common commands should be short and memorable:
 
 - `/new` reset the conversation.
-- `/status` return Josh 2.0, JAIMES, J.AI.N, and Mission Control status.
-- `/mc` push/check Mission Control.
+- `/status` return Josh 2.0, JAIMES, J.AI.N, and Control Tower status.
+- `/mc` push/check Control Tower.
 - `/overview` send a compact ecosystem overview card.
 - `/daily` send a compact daily digest card.
 - `/route` explain which agent should own the request.
@@ -68,7 +68,7 @@ Common commands should be short and memorable:
 
 ## Routing Defaults
 
-- Josh 2.0 owns device-local work, Telegram interaction, quick status, approvals, kiosk/Mission Control refresh, and light shell operations.
+- Josh 2.0 owns device-local work, Telegram interaction, quick status, approvals, kiosk/Control Tower refresh, and light shell operations.
 - JOSHeX means the personal-laptop Codex coordinator lane. It is not the Josh 2.0 Mac.
 - JOSHeX owns architecture, repo changes, cross-agent coordination, sensitive connector work, and final decision records.
 - JAIMES owns heavier services, Hermes workflows, background services, and headless service checks.
@@ -80,7 +80,7 @@ Common commands should be short and memorable:
 
 ## UX Rules
 
-- Never expose secrets, tokens, raw private account data, raw emails, or OAuth details in Telegram summaries or Mission Control.
+- Never expose secrets, tokens, raw private account data, raw emails, or OAuth details in Telegram summaries or Control Tower.
 - Do not ask for approval for safe, already-approved host-local operations.
 - Do ask for approval for destructive actions, secrets, auth changes, public posting, payment/account changes, or broad permission changes.
 - If blocked, state exactly what is blocked and provide one actionable fix.
@@ -94,7 +94,7 @@ Common commands should be short and memorable:
 
 Use these options in this order:
 
-- Inline keyboards: primary control surface for approvals, routing, Mission Control checks, and safe next steps.
+- Inline keyboards: primary control surface for approvals, routing, Control Tower checks, and safe next steps.
 - Callback queries: every inline tap must be acknowledged immediately so Telegram does not show a stuck spinner.
 - Bot command menu: persistent low-friction entrypoint for `/status`, `/mc`, `/models`, `/route`, `/joshex`, `/jaimes`, `/jain`, `/new`, and `/help`.
 - Chat menu button: set to Telegram's commands menu for now; use a Web App later only if a true mobile control panel is needed.
@@ -102,11 +102,11 @@ Use these options in this order:
 - Copy-text buttons: use later for handoff snippets, one-time commands, and URLs that Josh 2.0 may need to paste.
 - ForceReply: use later for narrow forms where Josh 2.0 must type one specific value.
 
-The active config lives in `data/josh2-telegram-ux-config.json`. Reapply Telegram bot settings with `scripts/josh_telegram_setup.py` from the Mission Control checkout on Josh 2.0.
+The active config lives in `data/josh2-telegram-ux-config.json`. Reapply Telegram bot settings with `scripts/josh_telegram_setup.py` from the Control Tower checkout on Josh 2.0.
 
 ## Implemented Helpers
 
-- `scripts/josh_work_card.py`: compact editable Telegram work cards. Use by default for most tasks requested through Josh 2.0 when the task has more than one step, might take more than about 60 seconds, or changes Mission Control/agent state.
+- `scripts/josh_work_card.py`: compact editable Telegram work cards. Use by default for most tasks requested through Josh 2.0 when the task has more than one step, might take more than about 60 seconds, or changes Control Tower/agent state.
 - `scripts/josh_telegram_fast_ack.py`: immediate direct-chat acknowledgement watcher. It watches OpenCLAW session metadata for `prompt.submitted`, sends a compact "received/working" work card, and avoids polling Telegram or reading Telegram message content.
 - `hooks/josh-new-session-startup/`: OpenCLAW `/new` internal hook. Replaces the terse default reset message with an informative compact startup card.
 - `scripts/josh_telegram_digest.py overview`: sends a compact ecosystem overview card.
@@ -127,11 +127,11 @@ Do not create work cards for single-turn pleasantries, trivial answers, or tasks
 
 ## AGENTS Lean Rule
 
-Josh 2.0 `AGENTS.md` should stay below the bootstrap warning zone. Keep only hard operating rules there. Detailed routing, Telegram UX, startup nuance, and implementation notes belong in Mission Control docs/config or MEMORY.md.
+Josh 2.0 `AGENTS.md` should stay below the bootstrap warning zone. Keep only hard operating rules there. Detailed routing, Telegram UX, startup nuance, and implementation notes belong in Control Tower docs/config or MEMORY.md.
 
 Current desired AGENTS shape:
 
-- Mission Control / Brain Feed must-run rules.
+- Control Tower / Brain Feed must-run rules.
 - Session startup hard rules.
 - Reply format hard rules.
 - Routing defaults.
@@ -152,11 +152,11 @@ P0:
 
 P1:
 
-- Reserve `Force Mission Control sync` for diagnostics, stale dashboard recovery, or explicit user requests; normal task cards should update Mission Control automatically.
+- Reserve `Force Control Tower sync` for diagnostics, stale dashboard recovery, or explicit user requests; normal task cards should update Control Tower automatically.
 - Add a `Ask JOSHeX on laptop` button for architecture/repo/coordinator tasks.
 - Add a `Send to JAIMES / Hermes` button for headless service work that discloses target, primary model/auth, Gemini first-pass option, Grok relevance rule, reason, and fallback before handoff.
 - Add `Use Gemini for review` and `Use Josh 2.0 Mac tools` buttons to default work cards; show `Use Grok for public/X context` only when public/current-events context is highly relevant.
-- Add concise failure templates for auth expired, gateway down, missing dependency, stale Mission Control, and approval required.
+- Add concise failure templates for auth expired, gateway down, missing dependency, stale Control Tower, and approval required.
 - Verify the GitHub Pages Web App URL after publish, then keep the `Open control panel` inline button pointed at it.
 
 P2:
@@ -169,8 +169,8 @@ P2:
 - Josh 2.0 can answer `/status`, `/models`, and `/mc` from Telegram.
 - Josh 2.0 command menu includes `/overview` and `/daily`.
 - A normal Telegram user can tell which model is being used and why.
-- Long-running work has a stable work card and Mission Control row.
+- Long-running work has a stable work card and Control Tower row.
 - Agent quick cards are available for Josh 2.0, JOSHeX, JAIMES, and J.AI.N.
 - Safe local work proceeds without repetitive approvals.
 - Sensitive or destructive work still requires explicit user approval.
-- Mission Control agrees with Telegram status after a refresh.
+- Control Tower agrees with Telegram status after a refresh.

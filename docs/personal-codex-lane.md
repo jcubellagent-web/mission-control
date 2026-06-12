@@ -1,6 +1,6 @@
-# Personal Codex Mission Control Lane
+# Personal Codex Control Tower Lane
 
-This lane gives Josh's local Codex a distinct, non-live-agent home in Mission Control.
+This lane gives Josh's local Codex a distinct, non-live-agent home in Control Tower.
 It is intentionally separate from JOSH 2.0, JAIMES, and J.A.I.N Brain Feed slots.
 
 ## Sidecar Contract
@@ -12,7 +12,7 @@ Personal Codex writes or updates:
 Supported keys:
 
 - `status`: one of `ready`, `working`, `blocked`, `needs_josh`, `offline`
-- `objective`: current scoped Mission Control objective
+- `objective`: current scoped Control Tower objective
 - `updatedAt`: ISO timestamp
 - `summary`: one concise operator-facing sentence
 - `mode`: usually `local`, `patch`, or `approval-needed`
@@ -32,7 +32,7 @@ The dashboard renders a dedicated Personal Codex panel below System Health and
 above Capability Stack. It uses an amber accent so it is easy to distinguish
 from:
 
-- red critical Mission Control signals
+- red critical Control Tower signals
 - green healthy live-agent status
 - JOSH 2.0 / JAIMES / J.A.I.N Brain Feed hero cards
 
