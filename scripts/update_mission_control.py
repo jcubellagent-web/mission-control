@@ -517,6 +517,37 @@ def is_actionable_shared_event(event: Dict[str, Any]) -> bool:
     return True
 
 
+def event_key(event: Dict[str, Any]) -> tuple[str, str, str]:
+    return (
+        str(event.get("agent") or "").lower(),
+        str(event.get("tool") or "").lower(),
+        str(event.get("title") or "").lower(),
+    )
+
+
+def superseded_blocked_event_ids(events: List[Dict[str, Any]]) -> set[str]:
+    """Return blocked/error event ids that have a newer ok/done event for same lane."""
+    latest_clear_by_key: Dict[tuple[str, str, str], str] = {}
+    for event in events:
+        status = str(event.get("status") or "").lower()
+        etype = str(event.get("type") or "").lower()
+        key = event_key(event)
+        event_time = str(event.get("time") or "")
+        if status in {"ok", "done", "ready"} and etype != "blocked":
+            latest_clear_by_key.setdefault(key, event_time)
+
+    superseded: set[str] = set()
+    for event in events:
+        status = str(event.get("status") or "").lower()
+        etype = str(event.get("type") or "").lower()
+        if status not in {"blocked", "error"} and etype != "blocked":
+            continue
+        clear_time = latest_clear_by_key.get(event_key(event))
+        if clear_time and clear_time > str(event.get("time") or ""):
+            superseded.add(str(event.get("id") or ""))
+    return superseded
+
+
 def shared_layer_attention_item(shared_layer: Dict[str, Any]) -> Dict[str, Any]:
     """Return the single most useful Josh-facing shared-layer alert."""
     counts = shared_layer.get("counts", {}) if isinstance(shared_layer.get("counts"), dict) else {}
@@ -613,9 +644,11 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
         and not handoff_points_to_closed_task(h)
     ]
     attention_handoffs = [h for h in open_handoffs if h.get("status") == "blocked"]
+    superseded_event_ids = superseded_blocked_event_ids(events)
     blocked_events = [
         e for e in events
         if (e.get("status") in {"blocked", "error"} or e.get("type") == "blocked")
+        and str(e.get("id") or "") not in superseded_event_ids
         and is_actionable_shared_event(e)
     ]
     latest_event_at = events[0].get("time") if events else None
