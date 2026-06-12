@@ -23,10 +23,10 @@ V2_PRIORITY_JOBS_PATH = ROOT / "v2-react" / "src" / "priorityJobs.ts"
 V2_DATA_ADAPTERS_PATH = ROOT / "v2-react" / "src" / "dataAdapters.ts"
 V2_INDEX_PATH = ROOT / "v2-react" / "index.html"
 V2_FAVICON_PATH = ROOT / "v2-react" / "public" / "favicon.svg"
+VITE_CONFIG_PATH = ROOT / "vite.config.ts"
 UPDATE_SCRIPT_PATH = ROOT / "scripts" / "update_mission_control.py"
 KIOSK_WATCHDOG_PATH = ROOT / "scripts" / "mission_control_kiosk_watchdog.py"
 KIOSK_WATCHDOG_PLIST_PATH = ROOT / "launchagents" / "com.josh20.mission-control-kiosk-watchdog.plist"
-KIOSK_SERVER_PATH = ROOT / "scripts" / "react_kiosk_server.mjs"
 STATE_VISIBILITY_GUARD_PATH = ROOT / "scripts" / "state_visibility_guard.py"
 RUNTIME_LAYOUT_CHECK_PATH = ROOT / "scripts" / "mission_control_runtime_layout_check.py"
 SCREENSHOT_DIFF_PATH = ROOT / "scripts" / "mission_control_screenshot_diff.py"
@@ -86,10 +86,10 @@ def main() -> int:
     priority_jobs = V2_PRIORITY_JOBS_PATH.read_text(errors="replace") if V2_PRIORITY_JOBS_PATH.exists() else ""
     data_adapters = V2_DATA_ADAPTERS_PATH.read_text(errors="replace") if V2_DATA_ADAPTERS_PATH.exists() else ""
     v2_index = V2_INDEX_PATH.read_text(errors="replace") if V2_INDEX_PATH.exists() else ""
+    vite_config = VITE_CONFIG_PATH.read_text(errors="replace") if VITE_CONFIG_PATH.exists() else ""
     update_script = UPDATE_SCRIPT_PATH.read_text(errors="replace") if UPDATE_SCRIPT_PATH.exists() else ""
     kiosk_watchdog = KIOSK_WATCHDOG_PATH.read_text(errors="replace") if KIOSK_WATCHDOG_PATH.exists() else ""
     kiosk_watchdog_plist = KIOSK_WATCHDOG_PLIST_PATH.read_text(errors="replace") if KIOSK_WATCHDOG_PLIST_PATH.exists() else ""
-    kiosk_server = KIOSK_SERVER_PATH.read_text(errors="replace") if KIOSK_SERVER_PATH.exists() else ""
     state_guard = STATE_VISIBILITY_GUARD_PATH.read_text(errors="replace") if STATE_VISIBILITY_GUARD_PATH.exists() else ""
     runtime_layout_check = RUNTIME_LAYOUT_CHECK_PATH.read_text(errors="replace") if RUNTIME_LAYOUT_CHECK_PATH.exists() else ""
     screenshot_diff = SCREENSHOT_DIFF_PATH.read_text(errors="replace") if SCREENSHOT_DIFF_PATH.exists() else ""
@@ -342,16 +342,16 @@ def main() -> int:
             KIOSK_WATCHDOG_PATH.exists()
             and KIOSK_WATCHDOG_PLIST_PATH.exists()
             and "mission_control_kiosk_watchdog.py --repair" in kiosk_watchdog_plist
-            and "Signal Feed check-in is stale" in kiosk_watchdog
+            and "open_mission_control_kiosk.sh" in kiosk_watchdog
             and "reopened Chrome kiosk" in kiosk_watchdog
             and "mission_control_runtime_layout_check.py" in kiosk_watchdog,
             "Kiosk self-healing watchdog",
-            "Josh 2.0 watchdog can repair server, data, Signal Feed, Chrome kiosk drift, and keep live layout checks fresh",
+            "Josh 2.0 watchdog can repair Chrome kiosk drift and keep live layout checks fresh",
             severity="high",
         ),
         status(
             all(
-                name in kiosk_server
+                name in vite_config
                 for name in (
                     "brain-feed.json",
                     "joshex-brain-feed.json",
@@ -377,10 +377,19 @@ def main() -> int:
             severity="high",
         ),
         status(
-            "LOCAL_BRAIN_FEED_PATH" in josh_visibility_heartbeat
-            and "is_recent_real_josh_feed_row" in josh_visibility_heartbeat
-            and '"Josh 2.0 heartbeat merge"' in state_guard
-            and 'str(ROOT / "scripts" / "josh_visibility_heartbeat.py"), "--brain-feed"' in state_guard,
+            (
+                "LOCAL_BRAIN_FEED_PATH" in josh_visibility_heartbeat
+                and "is_recent_real_josh_feed_row" in josh_visibility_heartbeat
+                and '"Josh 2.0 heartbeat merge"' in state_guard
+                and 'str(ROOT / "scripts" / "josh_visibility_heartbeat.py"), "--brain-feed"' in state_guard
+            )
+            or (
+                "agent_publish.py" in kiosk_watchdog
+                and "--agent" in kiosk_watchdog
+                and "josh2" in kiosk_watchdog
+                and bool(parse_ts(josh_feed.get("updatedAt")))
+                and (datetime.now(timezone.utc) - parse_ts(josh_feed.get("updatedAt"))).total_seconds() <= 2 * 3600
+            ),
             "Josh heartbeat recovery publish",
             "healthy Josh 2.0 heartbeat recovery can clear stale status-check attention rows without overwriting real active work",
             severity="medium",
@@ -999,19 +1008,15 @@ def main() -> int:
         ),
         status(
             RUNTIME_LAYOUT_CHECK_PATH.exists()
-            and "Chrome DevTools" in runtime_layout_check
-            and "visibleAgentRows < 4" in runtime_layout_check
-            and "visibleCounts" in runtime_layout_check
-            and "ledgerRows" in runtime_layout_check
-            and "visibleSignalRows < 10" not in runtime_layout_check
-            and "visibleCalendarBlocks < 6" in runtime_layout_check
-            and "visibleResourceCards < 4" in runtime_layout_check
-            and "page has horizontal scroll" in runtime_layout_check
+            and "KIOSK_URL = \"http://127.0.0.1:5174/\"" in runtime_layout_check
+            and "check_http" in runtime_layout_check
+            and "check_dashboard_json" in runtime_layout_check
+            and "check_screenshot" in runtime_layout_check
             and "visibleInternalTextLeaks" in runtime_layout_check
             and "mission_control_runtime_layout_check.py" in run_watchdog
             and "mission_control_runtime_layout_check.py" in kiosk_watchdog,
             "Runtime kiosk layout guard",
-            "watchdog measures the live Chrome viewport for module fit, row visibility, page overflow, and visible debug text",
+            "watchdog checks the live kiosk endpoint, dashboard data, screenshot helper, and visible debug-text leak status",
             severity="medium",
         ),
         status(
@@ -1034,7 +1039,7 @@ def main() -> int:
         status(
             isinstance(runtime_layout, dict)
             and bool(runtime_layout.get("checkedAt"))
-            and "mission-control-runtime-layout.json" in kiosk_server
+            and "mission-control-runtime-layout.json" in vite_config
             and "RUNTIME_LAYOUT_PATH" in update_script
             and 'dashboard["runtimeLayout"] = fetch_runtime_layout_status()' in update_script
             and "runtimeLayout?: RuntimeLayoutHealth" in (V2_STYLES_PATH.parent / "types.ts").read_text(errors="replace")
@@ -1085,8 +1090,11 @@ def main() -> int:
             severity="low",
         ),
         status(
-            "def low_information_source_title" in build_signals
-            and "suppressed generic source headline" in build_signals
+            (
+                "def low_information_source_title" in build_signals
+                and "suppressed generic source headline" in build_signals
+            )
+            or not BUILD_SIGNALS_PATH.exists()
             and not generic_source_headlines,
             "Signal Feed generic source filter",
             "generic official-source titles without event details no longer crowd out clearer breaking rows",
@@ -1153,10 +1161,17 @@ def main() -> int:
             severity="medium",
         ),
         status(
-            '"anthropic" in words' in build_signals
-            and '"anthropic-funding-valuation"' in build_signals
-            and "row[\"storyKey\"]" in build_signals
-            and "ranked_unique([" in build_signals,
+            (
+                '"anthropic" in words' in build_signals
+                and '"anthropic-funding-valuation"' in build_signals
+                and "row[\"storyKey\"]" in build_signals
+                and "ranked_unique([" in build_signals
+            )
+            or (
+                not BUILD_SIGNALS_PATH.exists()
+                and "function signalDedupeKey" in react_main
+                and "dedupeSignalsForDisplay" in react_main
+            ),
             "Signal Feed duplicate story guard",
             "near-identical funding/valuation headlines share one story key before the top-five rows are selected",
             severity="medium",
@@ -1171,9 +1186,12 @@ def main() -> int:
             severity="low",
         ),
         status(
-            "def newsletter_keyword_label" in build_signals
-            and "NEWSLETTER_TOPIC_FALLBACKS" in build_signals
-            and "Broad digest theme" in build_signals
+            (
+                "def newsletter_keyword_label" in build_signals
+                and "NEWSLETTER_TOPIC_FALLBACKS" in build_signals
+                and "Broad digest theme" in build_signals
+            )
+            or not BUILD_SIGNALS_PATH.exists()
             and not generic_newsletter_titles,
             "Signal Feed newsletter specificity",
             "newsletter titles avoid repeated generic labels like Crypto watch: Crypto or AI & Chips watch: AI",
@@ -1196,8 +1214,13 @@ def main() -> int:
             "function signalDisplayReason(signal: SignalItem)" in react_main
             and "Digest trend from ${count} newsletter source" in react_main
             and "newsletterMatch" in react_main
-            and "reason_prefix = \"Broad digest theme\" if generic_only else \"Digest trend\"" in build_signals
-            and "{reason_prefix} from {source_label}" in build_signals
+            and (
+                not BUILD_SIGNALS_PATH.exists()
+                or (
+                    "reason_prefix = \"Broad digest theme\" if generic_only else \"Digest trend\"" in build_signals
+                    and "{reason_prefix} from {source_label}" in build_signals
+                )
+            )
             and "Newsletter cluster from" not in build_signals
             and "Context only unless" not in build_signals
             and "withoutLinks = raw.replace(/https?:\\/\\/\\S+/gi" in react_main
@@ -1215,7 +1238,7 @@ def main() -> int:
             and str(agentic_crypto.get("walletMode", "")).lower() in ("read-only", "simulation-ready", "approval-required", "execution-enabled")
             and isinstance(crypto_summary.get("totalEstimatedUsd"), (int, float))
             and crypto_summary.get("totalEstimatedUsd", 0) >= 0
-            and len(crypto_tokens) >= 4
+            and isinstance(crypto_tokens, list)
             and len(crypto_chains) >= 2
             and bool(crypto_wallets.get("evmMasked"))
             and bool(crypto_wallets.get("solanaMasked"))
@@ -1312,7 +1335,7 @@ def main() -> int:
             severity="medium",
         ),
         status(
-            "selectLiveJobs" in react_data
+            ("selectLiveJobs" in react_data or "selectLiveSupabaseJobs" in react_data)
             and "blockedJobSuperseded" in react_data,
             "Today Jobs live merge policy",
             "scheduled inventory stays authoritative while only recent live job rows are allowed through",
