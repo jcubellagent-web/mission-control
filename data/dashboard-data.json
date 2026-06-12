@@ -1,6 +1,12 @@
 {
   "actionRequired": [
     {
+      "priority": "medium",
+      "title": "Josh 2.0 screen check needs attention",
+      "detail": "SCREENSHOT_FAILED could not create image from display",
+      "url": "#jobs"
+    },
+    {
       "priority": "high",
       "title": "Control Tower layout issue: live kiosk no longer fits cleanly",
       "detail": "Live kiosk layout needs attention: SCREENSHOT_FAILED could not create image from display",
@@ -21,9 +27,9 @@
     "reportedActive": true,
     "status": "active",
     "objective": "Check Mission Control state",
-    "detail": "Running bash: ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771",
-    "updatedAt": "2026-06-12T21:47:56Z",
-    "checkedAt": "2026-06-12T21:47:56Z",
+    "detail": "Running bash: osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026",
+    "updatedAt": "2026-06-12T21:50:13Z",
+    "checkedAt": "2026-06-12T21:50:13Z",
     "currentTool": "Josh 2.0 Telegram",
     "steps": [
       {
@@ -39,16 +45,10 @@
         "kind": "status"
       },
       {
-        "label": "Check Mission Control state",
-        "status": "active",
-        "tool": "Josh 2.0 Telegram",
-        "kind": "status"
-      },
-      {
-        "label": "Check Mission Control state",
-        "status": "active",
-        "tool": "telegram work card",
-        "kind": "status"
+        "label": "Josh 2.0 screen check needs attention",
+        "status": "blocked",
+        "tool": "Control Tower screen check",
+        "kind": "blocked"
       },
       {
         "label": "Check Mission Control state",
@@ -72,6 +72,12 @@
         "label": "Check Mission Control state",
         "status": "active",
         "tool": "telegram work card",
+        "kind": "status"
+      },
+      {
+        "label": "Check Mission Control state",
+        "status": "active",
+        "tool": "Josh 2.0 Telegram",
         "kind": "status"
       }
     ],
@@ -84,7 +90,7 @@
   "focus": {
     "status": "Brain Feed live",
     "context": "Check Mission Control state",
-    "updatedAt": "2026-06-12T21:48:13Z"
+    "updatedAt": "2026-06-12T21:50:18Z"
   },
   "contextWindow": {
     "usedTokens": 159124,
@@ -107,7 +113,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 58,
-    "missionControlDirty": 16,
+    "missionControlDirty": 12,
     "recentFiles": [
       "mission-control/scripts/update_and_push.sh"
     ],
@@ -120,18 +126,18 @@
       ],
       "summary": "CodexBar available"
     },
-    "updatedAt": "2026-06-12T21:48:13Z"
+    "updatedAt": "2026-06-12T21:50:19Z"
   },
   "modelUsage": {
     "session": 0.087446,
-    "daily": 50.233922,
-    "weekly": 529.604053,
-    "monthly": 972.045261,
+    "daily": 51.31159,
+    "weekly": 530.681721,
+    "monthly": 973.122929,
     "topModels": [
       {
         "name": "gpt-5.5",
         "window": "session",
-        "cost": 529.007172
+        "cost": 530.08484
       },
       {
         "name": "openai/gpt-5.5",
@@ -158,9 +164,9 @@
       {
         "name": "gpt-5.5",
         "source": "codex",
-        "weeklyCost": 529.007172,
-        "dailyCost": 49.987017,
-        "sessionCost": 529.007172,
+        "weeklyCost": 530.08484,
+        "dailyCost": 51.064685,
+        "sessionCost": 530.08484,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -230,7 +236,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-06-12T21:48:17Z",
+    "lastUpdated": "2026-06-12T21:50:22Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -282,21 +288,21 @@
       "available": true
     },
     "aggregate": {
-      "daily": 50.233922,
-      "total": 529.604053,
-      "monthly": 972.045261
+      "daily": 51.31159,
+      "total": 530.681721,
+      "monthly": 973.122929
     },
     "weeklyRunRate": {
-      "total": 529.604053,
+      "total": 530.681721,
       "automation": 0.0,
-      "interactive": 529.604053,
-      "projectedMonthly": 2269.73
+      "interactive": 530.681721,
+      "projectedMonthly": 2274.35
     },
     "providerBudgets": [],
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-12T21:48:13Z",
+    "updatedAt": "2026-06-12T21:50:18Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -317,7 +323,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-12T21:48:17Z",
+    "updatedAt": "2026-06-12T21:50:22Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -334,14 +340,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 45.5,
-      "cpu_user": 24.6,
-      "cpu_sys": 21.39,
-      "load1": 2.59,
-      "load5": 2.37,
-      "load15": 2.36,
-      "ram_used_gb": 13.0,
-      "ram_total_gb": 15.2,
+      "cpu_pct": 59.3,
+      "cpu_user": 34.92,
+      "cpu_sys": 24.33,
+      "load1": 3.01,
+      "load5": 2.58,
+      "load15": 2.44,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -349,14 +355,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 20.9,
-      "cpu_user": 8.2,
-      "cpu_sys": 12.68,
-      "load1": 2.08,
-      "load5": 2.18,
-      "load15": 2.09,
+      "cpu_pct": 28.9,
+      "cpu_user": 16.9,
+      "cpu_sys": 11.97,
+      "load1": 1.8,
+      "load5": 2.07,
+      "load15": 2.06,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -380,19 +386,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-12T21:48:13Z"
+      "lastChecked": "2026-06-12T21:50:18Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-12T21:48:13Z"
+      "lastChecked": "2026-06-12T21:50:18Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-12T21:48:13Z"
+      "lastChecked": "2026-06-12T21:50:18Z"
     }
   ],
   "crons": [
@@ -987,236 +993,236 @@
   ],
   "sharedEvents": [
     {
-      "id": "josh2-status-20260612-214819-check-mission-control-state",
-      "time": "2026-06-12T21:48:19Z",
+      "id": "josh2-status-20260612-215021-check-mission-control-state",
+      "time": "2026-06-12T21:50:21Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
+      "detail": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026"
     },
     {
-      "id": "josh2-status-20260612-214818-check-mission-control-state",
-      "time": "2026-06-12T21:48:18Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "telegram work card",
-      "detail": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
-    },
-    {
-      "id": "josh2-status-20260612-214756-check-mission-control-state",
-      "time": "2026-06-12T21:47:56Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
-    },
-    {
-      "id": "josh2-status-20260612-214748-check-mission-control-state",
-      "time": "2026-06-12T21:47:48Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
-    },
-    {
-      "id": "josh2-status-20260612-214731-check-mission-control-state",
-      "time": "2026-06-12T21:47:31Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
-    },
-    {
-      "id": "josh2-status-20260612-214729-check-mission-control-state",
-      "time": "2026-06-12T21:47:29Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
-    },
-    {
-      "id": "josh2-status-20260612-214727-check-mission-control-state",
-      "time": "2026-06-12T21:47:27Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
-    },
-    {
-      "id": "josh2-status-20260612-214726-check-mission-control-state",
-      "time": "2026-06-12T21:47:26Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Finished file edit: completed checking the next relevant signal"
-    },
-    {
-      "id": "josh2-status-20260612-214725-check-mission-control-state",
-      "time": "2026-06-12T21:47:25Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "telegram work card",
-      "detail": "Finished file edit: completed checking the next relevant signal"
-    },
-    {
-      "id": "josh2-status-20260612-214724-check-mission-control-state",
-      "time": "2026-06-12T21:47:24Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Running file edit: checking the next relevant signal"
-    },
-    {
-      "id": "josh2-status-20260612-214723-token-cost-guard",
-      "time": "2026-06-12T21:47:23Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Token/cost guard",
-      "status": "info",
-      "tool": "token_cost_guard_loop",
-      "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
-    },
-    {
-      "id": "josh2-status-20260612-214722-check-mission-control-state",
-      "time": "2026-06-12T21:47:22Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed ps -axo pid,ppid,stat,etime,command | awk '\"'$5==\"-zsh\" {count++} END {print count+0}'\"'"
-    },
-    {
-      "id": "josh2-status-20260612-214720-check-mission-control-state",
-      "time": "2026-06-12T21:47:20Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: ps -axo pid,ppid,stat,etime,command | awk '\"'$5==\"-zsh\" {count++} END {print count+0}'\"'"
-    },
-    {
-      "id": "jaimes-status-20260612-214720-jaimes-is-working-now",
-      "time": "2026-06-12T21:47:20Z",
+      "id": "jaimes-status-20260612-215020-jaimes-is-online-and-ready",
+      "time": "2026-06-12T21:50:20Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
-      "title": "JAIMES is working now",
-      "status": "active",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
       "tool": "status check",
-      "detail": "JAIMES live update: JAIMES is working now."
+      "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck."
     },
     {
-      "id": "josh2-status-20260612-214715-check-mission-control-state",
-      "time": "2026-06-12T21:47:15Z",
+      "id": "josh2-status-20260612-215013-check-mission-control-state",
+      "time": "2026-06-12T21:50:13Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed launchctl print gui/$(id -u)/com.josh20.mission-control-kio[redacted] 2>/dev/null | sed -n '\"'1,120p"
+      "detail": "Running bash: osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026"
     },
     {
-      "id": "josh2-status-20260612-214707-check-mission-control-state",
-      "time": "2026-06-12T21:47:07Z",
+      "id": "josh2-blocked-20260612-215012-josh-2-0-screen-check-needs-attention",
+      "time": "2026-06-12T21:50:12Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "blocked",
+      "title": "Josh 2.0 screen check needs attention",
+      "status": "blocked",
+      "tool": "Control Tower screen check",
+      "detail": "SCREENSHOT_FAILED could not create image from display"
+    },
+    {
+      "id": "josh2-status-20260612-215005-check-mission-control-state",
+      "time": "2026-06-12T21:50:05Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: launchctl print gui/$(id -u)/com.josh20.mission-control-kio[redacted] 2>/dev/null | sed -n '\"'1,120p"
+      "detail": "Finished bash: completed publishing the latest status to Brain Feed"
     },
     {
-      "id": "josh2-status-20260612-214705-check-mission-control-state",
-      "time": "2026-06-12T21:47:05Z",
+      "id": "josh2-status-20260612-214948-check-mission-control-state",
+      "time": "2026-06-12T21:49:48Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed sed -n '1,220p' ~capture mission control screen 2>/dev/null"
+      "detail": "Running bash: publishing the latest status to Brain Feed"
     },
     {
-      "id": "josh2-status-20260612-214704-check-mission-control-state",
-      "time": "2026-06-12T21:47:04Z",
+      "id": "josh2-status-20260612-214946-check-mission-control-state",
+      "time": "2026-06-12T21:49:46Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Running bash: sed -n '1,220p' ~capture mission control screen 2>/dev/null"
+      "detail": "Finished bash: completed ps -axo pid,ppid,stat,etime,command | rg -i 'Terminal|iTerm|zsh|bash|openclaw|codex|vite|mission_control|npm|node|pytho\u2026"
     },
     {
-      "id": "josh2-status-20260612-214703-check-mission-control-state",
-      "time": "2026-06-12T21:47:03Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Check Mission Control state",
-      "status": "active",
-      "tool": "telegram work card",
-      "detail": "Running bash: sed -n '1,220p' ~capture mission control screen 2>/dev/null"
-    },
-    {
-      "id": "josh2-status-20260612-214702-check-mission-control-state",
-      "time": "2026-06-12T21:47:02Z",
+      "id": "josh2-status-20260612-214944-check-mission-control-state",
+      "time": "2026-06-12T21:49:44Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
       "title": "Check Mission Control state",
       "status": "active",
       "tool": "Josh 2.0 Telegram",
-      "detail": "Finished bash: completed osascript <<'OSA' tell application \\\"System Events\\\" set terminalRunning to exists process \\\"Terminal\\\" set itermRunnin\u2026"
+      "detail": "Running bash: ps -axo pid,ppid,stat,etime,command | rg -i 'Terminal|iTerm|zsh|bash|openclaw|codex|vite|mission_control|npm|node|pytho\u2026"
+    },
+    {
+      "id": "josh2-complete-20260612-214932-josh-2-0-screen-check-clean",
+      "time": "2026-06-12T21:49:32Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "jaimes-status-20260612-214920-jaimes-is-online-and-ready",
+      "time": "2026-06-12T21:49:20Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck."
+    },
+    {
+      "id": "josh2-status-20260612-214920-check-mission-control-state",
+      "time": "2026-06-12T21:49:20Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Running bash: tail -n 120 logs/mission-control-kio[redacted].log 2>/dev/null"
+    },
+    {
+      "id": "josh2-status-20260612-214918-check-mission-control-state",
+      "time": "2026-06-12T21:49:18Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Finished bash: completed regenerating Mission Control dashboard data"
+    },
+    {
+      "id": "josh2-complete-20260612-214913-heartbeat-checks-complete",
+      "time": "2026-06-12T21:49:13Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Heartbeat checks complete",
+      "status": "done",
+      "tool": "agent publish",
+      "detail": "17:00 inbox check found no urgent action; maintenance and canary checks passed except noncritical ElevenLabs key warning; Mission Control refresh/push repaired and current."
+    },
+    {
+      "id": "josh2-status-20260612-214910-check-mission-control-state",
+      "time": "2026-06-12T21:49:10Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Running bash: regenerating Mission Control dashboard data"
+    },
+    {
+      "id": "josh2-status-20260612-214908-check-mission-control-state",
+      "time": "2026-06-12T21:49:08Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Finished bash: completed python3 - <<'PY' import json p='mission-control/data/dashboard-data.json' d=json.load(open(p)) print('actionRequired')\u2026"
+    },
+    {
+      "id": "josh2-status-20260612-214906-check-mission-control-state",
+      "time": "2026-06-12T21:49:06Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Running bash: python3 - <<'PY' import json p='mission-control/data/dashboard-data.json' d=json.load(open(p)) print('actionRequired')\u2026"
+    },
+    {
+      "id": "josh2-status-20260612-214904-check-mission-control-state",
+      "time": "2026-06-12T21:49:04Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Finished bash: completed running the mission control runtime layout check helper"
+    },
+    {
+      "id": "josh2-status-20260612-214848-check-mission-control-state",
+      "time": "2026-06-12T21:48:48Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Running bash: running the mission control runtime layout check helper"
+    },
+    {
+      "id": "josh2-status-20260612-214846-check-mission-control-state",
+      "time": "2026-06-12T21:48:46Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Finished bash: completed running the mission control visual canaries helper"
+    },
+    {
+      "id": "josh2-status-20260612-214844-check-mission-control-state",
+      "time": "2026-06-12T21:48:44Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "active",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Running bash: running the mission control visual canaries helper"
     }
   ],
   "sharedOperatingLayer": {
-    "status": "ready",
-    "updatedAt": "2026-06-12T21:48:19Z",
+    "status": "attention",
+    "updatedAt": "2026-06-12T21:50:21Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
       "knowledgeEntries": 38,
       "openHandoffs": 0,
       "attentionHandoffs": 0,
-      "blocked": 0,
+      "blocked": 1,
       "activeTasks": 0,
       "blockedTasks": 0,
       "approvalNeeded": 0,
@@ -1229,73 +1235,85 @@
     },
     "latestEvents": [
       {
-        "id": "josh2-status-20260612-214819-check-mission-control-state",
-        "time": "2026-06-12T21:48:19Z",
+        "id": "josh2-status-20260612-215021-check-mission-control-state",
+        "time": "2026-06-12T21:50:21Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "status",
         "title": "Check Mission Control state",
         "status": "active",
         "tool": "Josh 2.0 Telegram",
-        "detail": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
+        "detail": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026"
       },
       {
-        "id": "josh2-status-20260612-214818-check-mission-control-state",
-        "time": "2026-06-12T21:48:18Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
+        "id": "jaimes-status-20260612-215020-jaimes-is-online-and-ready",
+        "time": "2026-06-12T21:50:20Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
         "type": "status",
-        "title": "Check Mission Control state",
-        "status": "active",
-        "tool": "telegram work card",
-        "detail": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
+        "title": "JAIMES is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck."
       },
       {
-        "id": "josh2-status-20260612-214756-check-mission-control-state",
-        "time": "2026-06-12T21:47:56Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "status",
-        "title": "Check Mission Control state",
-        "status": "active",
-        "tool": "Josh 2.0 Telegram",
-        "detail": "Running bash: ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771"
-      },
-      {
-        "id": "josh2-status-20260612-214748-check-mission-control-state",
-        "time": "2026-06-12T21:47:48Z",
+        "id": "josh2-status-20260612-215013-check-mission-control-state",
+        "time": "2026-06-12T21:50:13Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "status",
         "title": "Check Mission Control state",
         "status": "active",
         "tool": "Josh 2.0 Telegram",
-        "detail": "Finished bash: completed pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
+        "detail": "Running bash: osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026"
       },
       {
-        "id": "josh2-status-20260612-214731-check-mission-control-state",
-        "time": "2026-06-12T21:47:31Z",
+        "id": "josh2-blocked-20260612-215012-josh-2-0-screen-check-needs-attention",
+        "time": "2026-06-12T21:50:12Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "blocked",
+        "title": "Josh 2.0 screen check needs attention",
+        "status": "blocked",
+        "tool": "Control Tower screen check",
+        "detail": "SCREENSHOT_FAILED could not create image from display"
+      },
+      {
+        "id": "josh2-status-20260612-215005-check-mission-control-state",
+        "time": "2026-06-12T21:50:05Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "status",
         "title": "Check Mission Control state",
         "status": "active",
         "tool": "Josh 2.0 Telegram",
-        "detail": "Running bash: pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
+        "detail": "Finished bash: completed publishing the latest status to Brain Feed"
       },
       {
-        "id": "josh2-status-20260612-214729-check-mission-control-state",
-        "time": "2026-06-12T21:47:29Z",
+        "id": "josh2-status-20260612-214948-check-mission-control-state",
+        "time": "2026-06-12T21:49:48Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "status",
         "title": "Check Mission Control state",
         "status": "active",
         "tool": "Josh 2.0 Telegram",
-        "detail": "Finished bash: completed pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026"
+        "detail": "Running bash: publishing the latest status to Brain Feed"
       }
     ],
-    "blockedEvents": [],
+    "blockedEvents": [
+      {
+        "id": "josh2-blocked-20260612-215012-josh-2-0-screen-check-needs-attention",
+        "time": "2026-06-12T21:50:12Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "blocked",
+        "title": "Josh 2.0 screen check needs attention",
+        "status": "blocked",
+        "tool": "Control Tower screen check",
+        "detail": "SCREENSHOT_FAILED could not create image from display"
+      }
+    ],
     "recentDecisions": [
       {
         "id": "joshex-decision-20260514-031403-jaimes-remains-headless",
@@ -1486,7 +1504,7 @@
     "attentionHandoffs": [],
     "dailyRollup": {
       "date": "2026-06-12",
-      "generatedAt": "2026-06-12T21:47:20Z",
+      "generatedAt": "2026-06-12T21:50:20Z",
       "summary": "500 shared event(s), 2 job(s), 0 decision(s), 0 open handoff(s).",
       "counts": {
         "events": 500,
@@ -1496,11 +1514,25 @@
         "blocked": 10
       },
       "highlights": [
-        "JAIMES is working now",
-        "Check Mission Control state"
+        "JAIMES is online and ready",
+        "Check Mission Control state",
+        "Josh 2.0 screen check needs attention",
+        "Josh 2.0 screen check clean"
       ],
       "openHandoffs": [],
       "blockedItems": [
+        {
+          "id": "josh2-blocked-20260612-215012-josh-2-0-screen-check-needs-attention",
+          "time": "2026-06-12T21:50:12Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "Josh 2.0 screen check needs attention",
+          "status": "blocked",
+          "tool": "Control Tower screen check",
+          "detail": "SCREENSHOT_FAILED could not create image from display",
+          "privacy": "dashboard-safe"
+        },
         {
           "id": "josh2-blocked-20260612-214454-josh-2-0-screen-check-needs-attention",
           "time": "2026-06-12T21:44:54Z",
@@ -1583,18 +1615,6 @@
           "status": "error",
           "tool": "mission_control_freshness_loop",
           "detail": "Mission Control freshness needs attention: jaimesBrainFeed",
-          "privacy": "dashboard-safe"
-        },
-        {
-          "id": "josh2-blocked-20260612-211310-josh-2-0-screen-check-needs-attention",
-          "time": "2026-06-12T21:13:10Z",
-          "agent": "josh2",
-          "agentLabel": "JOSH 2.0",
-          "type": "blocked",
-          "title": "Josh 2.0 screen check needs attention",
-          "status": "blocked",
-          "tool": "Control Tower screen check",
-          "detail": "SCREENSHOT_FAILED could not create image from display",
           "privacy": "dashboard-safe"
         }
       ]
@@ -2215,28 +2235,53 @@
       "staleAfterMinutes": 120,
       "fresh": [
         {
-          "agent": "jaimes",
-          "node": "jaimes-live-poller",
-          "status": "active",
-          "summary": "JAIMES live update: GW23 Skubal: inspect lineup artifacts.",
-          "updatedAt": "2026-06-12T21:48:20Z",
-          "stale": false
-        },
-        {
           "agent": "josh2",
           "node": "josh2-brain-feed-publish",
           "status": "active",
-          "summary": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771",
-          "updatedAt": "2026-06-12T21:48:19Z",
+          "summary": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026",
+          "updatedAt": "2026-06-12T21:50:21Z",
           "stale": false,
           "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "status": "ok",
+          "summary": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
+          "updatedAt": "2026-06-12T21:50:20Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-live-poller",
+          "status": "ok",
+          "summary": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
+          "updatedAt": "2026-06-12T21:50:20Z",
+          "stale": false
         },
         {
           "agent": "josh2",
           "node": "josh2-self-recovery-loop",
           "status": "ok",
           "summary": "Josh 2.0 self-recovery checks are healthy.",
-          "updatedAt": "2026-06-12T21:48:15Z",
+          "updatedAt": "2026-06-12T21:49:20Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "auto-offload-loop",
+          "status": "ok",
+          "summary": "Auto-offload routing policy ok.",
+          "updatedAt": "2026-06-12T21:49:01Z",
+          "stale": false
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
+          "status": "ok",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-12T21:48:32Z",
           "stale": false
         },
         {
@@ -2253,31 +2298,6 @@
           "status": "error",
           "summary": "Token/cost guard attention: Weekly model spend is above the warning threshold.",
           "updatedAt": "2026-06-12T21:47:23Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-brain-feed-publish",
-          "status": "active",
-          "summary": "JAIMES live update: JAIMES is working now.",
-          "updatedAt": "2026-06-12T21:47:20Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "josh2",
-          "node": "stuck-task-watchdog-loop",
-          "status": "ok",
-          "summary": "No stuck agent work detected.",
-          "updatedAt": "2026-06-12T21:47:07Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "auto-offload-loop",
-          "status": "ok",
-          "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-12T21:46:01Z",
           "stale": false
         }
       ],
@@ -2705,7 +2725,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-12T21:48:13Z",
+      "updatedAt": "2026-06-12T21:50:18Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -2749,12 +2769,12 @@
     "ok": false,
     "status": "attention",
     "summary": "1 canary issue(s)",
-    "checkedAt": "2026-06-12T21:48:13.348785Z",
+    "checkedAt": "2026-06-12T21:50:18.848087Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=['JOSH 2.0', 'JAIMES']; live=4",
+        "detail": "primary=JOSH 2.0; dualAgents=none; live=4",
         "severity": "ok"
       },
       {
@@ -2772,7 +2792,7 @@
       {
         "name": "Action Required",
         "ok": false,
-        "detail": "1 visible alert(s)",
+        "detail": "2 visible alert(s)",
         "severity": "medium"
       },
       {
@@ -3356,7 +3376,7 @@
   "runtimeLayout": {
     "ok": false,
     "status": "attention",
-    "checkedAt": "2026-06-12T21:44:46Z",
+    "checkedAt": "2026-06-12T21:50:03Z",
     "summary": "Live kiosk layout needs attention: SCREENSHOT_FAILED could not create image from display",
     "issues": [
       "SCREENSHOT_FAILED could not create image from display"
@@ -3458,7 +3478,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-12T21:48:13Z",
+    "generatedAt": "2026-06-12T21:50:18Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3479,8 +3499,8 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-12T21:48:20Z",
-        "summary": "JAIMES live update: GW23 Skubal: inspect lineup artifacts.",
+        "probedAt": "2026-06-12T21:50:20Z",
+        "summary": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3499,8 +3519,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-12T21:48:19Z",
-        "summary": "Finished bash: completed ps -o user,pid,ppid,stat,etime,command -p 12771,12784,76034; id; kill -9 12771",
+        "probedAt": "2026-06-12T21:50:21Z",
+        "summary": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3517,7 +3537,7 @@
     }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-12T21:35:13Z",
+    "generatedAt": "2026-06-12T21:50:23Z",
     "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
     "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
     "chatSources": {
@@ -3547,8 +3567,8 @@
         "brainFeed": {
           "status": "active",
           "objective": "Check Mission Control state",
-          "detail": "Running bash: pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026",
-          "updatedAt": "2026-06-12T21:35:04Z",
+          "detail": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026",
+          "updatedAt": "2026-06-12T21:50:21Z",
           "ageMinutes": 0,
           "currentTool": "Josh 2.0 Telegram",
           "active": true
@@ -3580,8 +3600,8 @@
         "brainFeed": {
           "status": "active",
           "objective": "Check Mission Control state",
-          "detail": "Running bash: pids=$(ps -axo pid,ppid,stat,etime,command | awk '\"'\"'$5==\"-zsh\" {print $1}'\"' | tr '\\\\n' ' '); count=\"'$(printf '\"'%s\\\u2026",
-          "updatedAt": "2026-06-12T21:35:04Z",
+          "detail": "Finished bash: completed osascript -e 'tell application \\\"Terminal\\\" to if it is running then get count of windows else return 0' 2>/dev/null; o\u2026",
+          "updatedAt": "2026-06-12T21:50:21Z",
           "ageMinutes": 0,
           "currentTool": "Josh 2.0 Telegram",
           "active": true
@@ -3613,22 +3633,62 @@
         "brainFeed": {
           "status": "ready",
           "objective": "JAIMES is online and ready",
-          "detail": "JAIMES live check: JAIMES is online and ready.",
-          "updatedAt": "2026-06-12T21:23:16Z",
-          "ageMinutes": 11,
+          "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
+          "updatedAt": "2026-06-12T21:50:20Z",
+          "ageMinutes": 0,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T06:36:52Z",
-          "ageMinutes": 898,
+          "ageMinutes": 913,
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "stale": true
         },
         "openTasks": [],
         "openHandoffs": [],
         "recentEvents": [
+          {
+            "id": "jaimes-status-20260612-215020-jaimes-is-online-and-ready",
+            "time": "2026-06-12T21:50:20Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck."
+          },
+          {
+            "id": "jaimes-status-20260612-214920-jaimes-is-online-and-ready",
+            "time": "2026-06-12T21:49:20Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck."
+          },
+          {
+            "id": "jaimes-status-20260612-214820-jaimes-is-working-now",
+            "time": "2026-06-12T21:48:20Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: GW23 Skubal: inspect lineup artifacts."
+          },
+          {
+            "id": "jaimes-status-20260612-214720-jaimes-is-working-now",
+            "time": "2026-06-12T21:47:20Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: JAIMES is working now."
+          },
+          {
+            "id": "jaimes-status-20260612-214619-jaimes-is-working-now",
+            "time": "2026-06-12T21:46:19Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: GW23 Skubal: MLB probable/API check."
+          },
           {
             "id": "jaimes-status-20260612-212316-jaimes-is-online-and-ready",
             "time": "2026-06-12T21:23:16Z",
@@ -3652,14 +3712,6 @@
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
-          },
-          {
-            "id": "jaimes-status-20260612-212015-jaimes-is-online-and-ready",
-            "time": "2026-06-12T21:20:15Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Sorare Daily Missions complete."
           }
         ],
         "pickupPrompt": "Review JAIMES brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
@@ -3682,14 +3734,14 @@
           "objective": "J.A.I.N is online and ready",
           "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "updatedAt": "2026-06-12T21:23:06Z",
-          "ageMinutes": 12,
+          "ageMinutes": 27,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T13:01:17Z",
-          "ageMinutes": 513,
+          "ageMinutes": 529,
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "stale": true
         },
@@ -3701,7 +3753,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-12T21:48:13Z",
+    "updatedAt": "2026-06-12T21:50:18Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4077,13 +4129,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-12T21:48:13Z",
+    "updatedAt": "2026-06-12T21:50:18Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-12T21:48:13Z",
+    "updatedAt": "2026-06-12T21:50:18Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4150,7 +4202,7 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-12T21:48:13Z"
+      "detail": "Updated 2026-06-12T21:50:18Z"
     }
   ],
   "trackedTasks": [],
@@ -4197,7 +4249,7 @@
       "objective": "Check Mission Control state",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-06-12T21:47:56Z",
+      "updatedAt": "2026-06-12T21:50:13Z",
       "messageReceived": "2026-05-25T00:14:38Z",
       "currentTool": "Josh 2.0 Telegram",
       "model": "GPT-5.5",
@@ -4215,16 +4267,10 @@
           "kind": "status"
         },
         {
-          "label": "Check Mission Control state",
-          "status": "active",
-          "tool": "Josh 2.0 Telegram",
-          "kind": "status"
-        },
-        {
-          "label": "Check Mission Control state",
-          "status": "active",
-          "tool": "telegram work card",
-          "kind": "status"
+          "label": "Josh 2.0 screen check needs attention",
+          "status": "blocked",
+          "tool": "Control Tower screen check",
+          "kind": "blocked"
         },
         {
           "label": "Check Mission Control state",
@@ -4248,6 +4294,12 @@
           "label": "Check Mission Control state",
           "status": "active",
           "tool": "telegram work card",
+          "kind": "status"
+        },
+        {
+          "label": "Check Mission Control state",
+          "status": "active",
+          "tool": "Josh 2.0 Telegram",
           "kind": "status"
         }
       ]
@@ -4316,31 +4368,49 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
-      "objective": "GW23 Skubal: inspect lineup artifacts",
-      "status": "active",
+      "active": false,
+      "reportedActive": false,
+      "objective": "JAIMES is online and ready",
+      "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-12T21:47:58Z",
-      "messageReceived": "2026-06-12T21:47:57Z",
-      "currentTool": "code",
+      "updatedAt": "2026-06-12T21:50:20Z",
+      "messageReceived": "2026-06-12T21:48:25Z",
+      "currentTool": "status check",
       "model": "gpt-5.5",
       "steps": [
         {
+          "label": "JAIMES is online and ready",
+          "status": "ready",
+          "tool": "status check",
+          "kind": "status"
+        },
+        {
+          "label": "Done: GW23 Skubal keep/no-change recheck",
+          "status": "done",
+          "tool": "exec",
+          "kind": "status"
+        },
+        {
+          "label": "GW23 Skubal: active roster/status check",
+          "status": "done",
+          "tool": "web",
+          "kind": "status"
+        },
+        {
           "label": "GW23 Skubal: inspect lineup artifacts",
-          "status": "active",
+          "status": "done",
           "tool": "code",
           "kind": "status"
         },
         {
           "label": "GW23 Skubal: MLB probable/API check",
-          "status": "active",
+          "status": "done",
           "tool": "web",
           "kind": "status"
         },
         {
           "label": "GW23 Skubal pre-lock recheck",
-          "status": "active",
+          "status": "done",
           "tool": "exec",
           "kind": "status"
         },
@@ -4355,24 +4425,6 @@
           "status": "done",
           "tool": "exec",
           "kind": "status"
-        },
-        {
-          "label": "Done: Sorare refresh verified",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Step: summarize refresh",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Step: run refresh+verify",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
         }
       ]
     }
@@ -4384,7 +4436,7 @@
     "objective": "Check Mission Control state",
     "status": "active",
     "stale": false,
-    "updatedAt": "2026-06-12T21:47:56Z",
+    "updatedAt": "2026-06-12T21:50:13Z",
     "messageReceived": "2026-05-25T00:14:38Z",
     "currentTool": "Josh 2.0 Telegram",
     "model": "GPT-5.5",
@@ -4402,16 +4454,10 @@
         "kind": "status"
       },
       {
-        "label": "Check Mission Control state",
-        "status": "active",
-        "tool": "Josh 2.0 Telegram",
-        "kind": "status"
-      },
-      {
-        "label": "Check Mission Control state",
-        "status": "active",
-        "tool": "telegram work card",
-        "kind": "status"
+        "label": "Josh 2.0 screen check needs attention",
+        "status": "blocked",
+        "tool": "Control Tower screen check",
+        "kind": "blocked"
       },
       {
         "label": "Check Mission Control state",
@@ -4435,6 +4481,12 @@
         "label": "Check Mission Control state",
         "status": "active",
         "tool": "telegram work card",
+        "kind": "status"
+      },
+      {
+        "label": "Check Mission Control state",
+        "status": "active",
+        "tool": "Josh 2.0 Telegram",
         "kind": "status"
       }
     ]
@@ -4503,31 +4555,49 @@
   },
   "jaimesBrainFeed": {
     "agent": "JAIMES",
-    "active": true,
-    "reportedActive": true,
-    "objective": "GW23 Skubal: inspect lineup artifacts",
-    "status": "active",
+    "active": false,
+    "reportedActive": false,
+    "objective": "JAIMES is online and ready",
+    "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-12T21:47:58Z",
-    "messageReceived": "2026-06-12T21:47:57Z",
-    "currentTool": "code",
+    "updatedAt": "2026-06-12T21:50:20Z",
+    "messageReceived": "2026-06-12T21:48:25Z",
+    "currentTool": "status check",
     "model": "gpt-5.5",
     "steps": [
       {
+        "label": "JAIMES is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "kind": "status"
+      },
+      {
+        "label": "Done: GW23 Skubal keep/no-change recheck",
+        "status": "done",
+        "tool": "exec",
+        "kind": "status"
+      },
+      {
+        "label": "GW23 Skubal: active roster/status check",
+        "status": "done",
+        "tool": "web",
+        "kind": "status"
+      },
+      {
         "label": "GW23 Skubal: inspect lineup artifacts",
-        "status": "active",
+        "status": "done",
         "tool": "code",
         "kind": "status"
       },
       {
         "label": "GW23 Skubal: MLB probable/API check",
-        "status": "active",
+        "status": "done",
         "tool": "web",
         "kind": "status"
       },
       {
         "label": "GW23 Skubal pre-lock recheck",
-        "status": "active",
+        "status": "done",
         "tool": "exec",
         "kind": "status"
       },
@@ -4542,102 +4612,18 @@
         "status": "done",
         "tool": "exec",
         "kind": "status"
-      },
-      {
-        "label": "Done: Sorare refresh verified",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Step: summarize refresh",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Step: run refresh+verify",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
       }
     ]
   },
   "liveObjectives": {
     "activeAgents": [
-      "JAIMES",
       "JOSH 2.0"
     ],
-    "activeCount": 2,
-    "primaryAgent": "JAIMES",
-    "dualMode": true,
-    "dualAgents": [
-      "JOSH 2.0",
-      "JAIMES"
-    ],
+    "activeCount": 1,
+    "primaryAgent": "JOSH 2.0",
+    "dualMode": false,
+    "dualAgents": [],
     "agents": [
-      {
-        "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
-        "objective": "GW23 Skubal: inspect lineup artifacts",
-        "status": "active",
-        "stale": false,
-        "updatedAt": "2026-06-12T21:47:58Z",
-        "messageReceived": "2026-06-12T21:47:57Z",
-        "currentTool": "code",
-        "model": "gpt-5.5",
-        "steps": [
-          {
-            "label": "GW23 Skubal: inspect lineup artifacts",
-            "status": "active",
-            "tool": "code",
-            "kind": "status"
-          },
-          {
-            "label": "GW23 Skubal: MLB probable/API check",
-            "status": "active",
-            "tool": "web",
-            "kind": "status"
-          },
-          {
-            "label": "GW23 Skubal pre-lock recheck",
-            "status": "active",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Done: JAIMES Brain Feed path healthy",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Self-test: JAIMES Brain Feed path healthy",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Done: Sorare refresh verified",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Step: summarize refresh",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Step: run refresh+verify",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          }
-        ]
-      },
       {
         "agent": "JOSH 2.0",
         "active": true,
@@ -4645,7 +4631,7 @@
         "objective": "Check Mission Control state",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-06-12T21:47:56Z",
+        "updatedAt": "2026-06-12T21:50:13Z",
         "messageReceived": "2026-05-25T00:14:38Z",
         "currentTool": "Josh 2.0 Telegram",
         "model": "GPT-5.5",
@@ -4663,16 +4649,10 @@
             "kind": "status"
           },
           {
-            "label": "Check Mission Control state",
-            "status": "active",
-            "tool": "Josh 2.0 Telegram",
-            "kind": "status"
-          },
-          {
-            "label": "Check Mission Control state",
-            "status": "active",
-            "tool": "telegram work card",
-            "kind": "status"
+            "label": "Josh 2.0 screen check needs attention",
+            "status": "blocked",
+            "tool": "Control Tower screen check",
+            "kind": "blocked"
           },
           {
             "label": "Check Mission Control state",
@@ -4696,6 +4676,74 @@
             "label": "Check Mission Control state",
             "status": "active",
             "tool": "telegram work card",
+            "kind": "status"
+          },
+          {
+            "label": "Check Mission Control state",
+            "status": "active",
+            "tool": "Josh 2.0 Telegram",
+            "kind": "status"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "objective": "JAIMES is online and ready",
+        "status": "ready",
+        "stale": false,
+        "updatedAt": "2026-06-12T21:50:20Z",
+        "messageReceived": "2026-06-12T21:48:25Z",
+        "currentTool": "status check",
+        "model": "gpt-5.5",
+        "steps": [
+          {
+            "label": "JAIMES is online and ready",
+            "status": "ready",
+            "tool": "status check",
+            "kind": "status"
+          },
+          {
+            "label": "Done: GW23 Skubal keep/no-change recheck",
+            "status": "done",
+            "tool": "exec",
+            "kind": "status"
+          },
+          {
+            "label": "GW23 Skubal: active roster/status check",
+            "status": "done",
+            "tool": "web",
+            "kind": "status"
+          },
+          {
+            "label": "GW23 Skubal: inspect lineup artifacts",
+            "status": "done",
+            "tool": "code",
+            "kind": "status"
+          },
+          {
+            "label": "GW23 Skubal: MLB probable/API check",
+            "status": "done",
+            "tool": "web",
+            "kind": "status"
+          },
+          {
+            "label": "GW23 Skubal pre-lock recheck",
+            "status": "done",
+            "tool": "exec",
+            "kind": "status"
+          },
+          {
+            "label": "Done: JAIMES Brain Feed path healthy",
+            "status": "done",
+            "tool": "exec",
+            "kind": "status"
+          },
+          {
+            "label": "Self-test: JAIMES Brain Feed path healthy",
+            "status": "done",
+            "tool": "exec",
             "kind": "status"
           }
         ]
@@ -4783,25 +4831,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-12T21:48:17Z",
+      "time": "2026-06-12T21:50:22Z",
       "event": "Session spend: $0.09"
     },
     {
-      "time": "2026-06-12T21:48:13Z",
-      "event": "Brain: Brain Feed live"
-    },
-    {
-      "time": "2026-06-12T21:48:13Z",
+      "time": "2026-06-12T21:50:19Z",
       "event": "Coding: mission-control/scripts/update_and_push.sh"
     },
     {
-      "time": "2026-06-12T21:48:13Z",
+      "time": "2026-06-12T21:50:19Z",
       "event": "CodexBar: CodexBar available"
     },
     {
-      "time": "2026-06-12T21:48:13Z",
+      "time": "2026-06-12T21:50:18Z",
+      "event": "Brain: Brain Feed live"
+    },
+    {
+      "time": "2026-06-12T21:50:18Z",
       "event": "35 scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-06-12T21:48:13Z"
+  "lastUpdated": "2026-06-12T21:50:18Z"
 }

@@ -1,32 +1,44 @@
 {
-  "active": true,
-  "objective": "JAIMES is working now",
-  "status": "active",
-  "updatedAt": "2026-06-12T21:48:20Z",
+  "active": false,
+  "objective": "JAIMES is online and ready",
+  "status": "ready",
+  "updatedAt": "2026-06-12T21:50:20Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-12T21:47:57Z",
+  "messageReceived": "2026-06-12T21:48:25Z",
   "steps": [
     {
-      "label": "JAIMES is working now",
-      "status": "active",
+      "label": "JAIMES is online and ready",
+      "status": "ready",
       "tool": "status check",
       "kind": "status"
     },
     {
+      "label": "Done: GW23 Skubal keep/no-change recheck",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "GW23 Skubal: active roster/status check",
+      "status": "done",
+      "tool": "web",
+      "kind": "status"
+    },
+    {
       "label": "GW23 Skubal: inspect lineup artifacts",
-      "status": "active",
+      "status": "done",
       "tool": "code",
       "kind": "status"
     },
     {
       "label": "GW23 Skubal: MLB probable/API check",
-      "status": "active",
+      "status": "done",
       "tool": "web",
       "kind": "status"
     },
     {
       "label": "GW23 Skubal pre-lock recheck",
-      "status": "active",
+      "status": "done",
       "tool": "exec",
       "kind": "status"
     },
@@ -41,29 +53,17 @@
       "status": "done",
       "tool": "exec",
       "kind": "status"
-    },
-    {
-      "label": "Done: Sorare refresh verified",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Step: summarize refresh",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
     }
   ],
   "currentTool": "status check",
-  "checkedAt": "2026-06-12T21:48:20Z",
+  "checkedAt": "2026-06-12T21:50:20Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
-  "reportedActive": true,
-  "detail": "JAIMES live update: GW23 Skubal: inspect lineup artifacts.",
+  "reportedActive": false,
+  "detail": "JAIMES live check: Done: GW23 Skubal keep/no-change recheck.",
   "supabaseBacked": false,
   "localLiveFeed": true
 }
