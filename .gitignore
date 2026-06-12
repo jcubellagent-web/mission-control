@@ -2,7 +2,13 @@ screenshots/current/
 screenshots/diffs/
 data/mission-control-regression-status.json
 data/*.lock
+# Runtime/generated sidecars. Keep source producers tracked; keep live data out of commits.
+data/agent-context-registry.json
+data/jain-newsletter-trends.json
+data/joshex-brain-feed.json
+data/xai-ecosystem.json
 data/moltworld-cache.json
+logs/
 data/agent-control-status.json
 data/agent-heartbeats.json
 data/agent-task-queue.json
