@@ -518,10 +518,14 @@ def is_actionable_shared_event(event: Dict[str, Any]) -> bool:
 
 
 def event_key(event: Dict[str, Any]) -> tuple[str, str, str]:
+    tool = str(event.get("tool") or "").lower()
+    title = str(event.get("title") or "").lower()
+    if "screen check" in tool or "screen check" in title:
+        title = "screen check"
     return (
         str(event.get("agent") or "").lower(),
-        str(event.get("tool") or "").lower(),
-        str(event.get("title") or "").lower(),
+        tool,
+        title,
     )
 
 

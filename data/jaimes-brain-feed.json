@@ -2,9 +2,9 @@
   "active": false,
   "objective": "JAIMES is online and ready",
   "status": "ready",
-  "updatedAt": "2026-06-12T21:52:21Z",
+  "updatedAt": "2026-06-13T00:13:48Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-12T21:48:25Z",
+  "messageReceived": "2026-06-13T00:10:45Z",
   "steps": [
     {
       "label": "JAIMES is online and ready",
@@ -25,45 +25,48 @@
       "kind": "status"
     },
     {
-      "label": "Done: GW23 Skubal keep/no-change recheck",
-      "status": "done",
-      "tool": "exec",
+      "label": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "GW23 Skubal: active roster/status check",
+      "label": "JAIMES is online and ready",
       "status": "done",
-      "tool": "web",
+      "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "GW23 Skubal: inspect lineup artifacts",
+      "label": "JAIMES is online and ready",
       "status": "done",
-      "tool": "code",
+      "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "GW23 Skubal: MLB probable/API check",
+      "label": "JAIMES is online and ready",
       "status": "done",
-      "tool": "web",
+      "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "GW23 Skubal pre-lock recheck",
+      "label": "JAIMES is online and ready",
       "status": "done",
-      "tool": "exec",
+      "tool": "status check",
       "kind": "status"
     }
   ],
   "currentTool": "status check",
-  "checkedAt": "2026-06-12T21:52:21Z",
+  "checkedAt": "2026-06-13T00:13:48Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
-  "auth": "subscription",
-  "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
   "reportedActive": false,
   "detail": "JAIMES live check: JAIMES is online and ready.",
   "supabaseBacked": false,
-  "localLiveFeed": true
+  "localLiveFeed": true,
+  "updated_at": "2026-06-13T00:10:46Z",
+  "auth": "subscription",
+  "modelAuth": "gpt-5.5 (subscription)",
+  "liveAgentPush": "2026-06-13T00:10:46Z",
+  "liveAgentPushAt": "2026-06-13T00:10:46Z"
 }
