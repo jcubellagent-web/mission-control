@@ -1,15 +1,15 @@
 {
   "active": false,
-  "objective": "JAIMES is online and ready",
-  "status": "ready",
-  "updatedAt": "2026-06-13T15:12:16Z",
+  "objective": "Sorare pre-lock loop",
+  "status": "info",
+  "updatedAt": "2026-06-13T23:14:44Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-13T14:48:12Z",
+  "messageReceived": "2026-06-13T22:49:04Z",
   "steps": [
     {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
+      "label": "Sorare pre-lock loop",
+      "status": "info",
+      "tool": "sorare_prelock_loop",
       "kind": "status"
     },
     {
@@ -37,33 +37,33 @@
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
+      "label": "Done: ESPN fantasy auth healthy",
       "status": "done",
-      "tool": "sorare_prelock_loop",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
+      "label": "Fantasy: checking ESPN auth freshness",
       "status": "done",
-      "tool": "sorare_prelock_loop",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Done: model efficiency guard alert",
+      "label": "Done: late refresh verified",
       "status": "done",
       "tool": "exec",
       "kind": "status"
     }
   ],
-  "currentTool": "status check",
-  "checkedAt": "2026-06-13T15:12:16Z",
+  "currentTool": "sorare_prelock_loop",
+  "checkedAt": "2026-06-13T23:14:44Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
   "reportedActive": false,
-  "detail": "JAIMES live check: Sorare pre-lock loop.",
+  "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Corey Seager, Eugenio Su\u00e1rez, Gleyber Torres, Jared Triolo",
   "supabaseBacked": false,
   "localLiveFeed": true
 }
