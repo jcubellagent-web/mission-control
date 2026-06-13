@@ -2,9 +2,9 @@
   "active": false,
   "objective": "Sorare pre-lock loop",
   "status": "info",
-  "updatedAt": "2026-06-13T08:43:14Z",
+  "updatedAt": "2026-06-13T11:28:30Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-13T08:10:33Z",
+  "messageReceived": "2026-06-13T10:47:47Z",
   "steps": [
     {
       "label": "Sorare pre-lock loop",
@@ -25,13 +25,13 @@
       "kind": "status"
     },
     {
-      "label": "Done: model efficiency guard alert",
+      "label": "Done: JAIMES Brain Feed path healthy",
       "status": "done",
       "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Ops: running model efficiency guard",
+      "label": "Self-test: JAIMES Brain Feed path healthy",
       "status": "done",
       "tool": "exec",
       "kind": "status"
@@ -43,20 +43,20 @@
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
+      "label": "Done: ESPN fantasy auth healthy",
       "status": "done",
-      "tool": "sorare_prelock_loop",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Sorare claim sweep claimed rewards",
+      "label": "Fantasy: checking ESPN auth freshness",
       "status": "done",
-      "tool": "cron",
+      "tool": "exec",
       "kind": "status"
     }
   ],
   "currentTool": "sorare_prelock_loop",
-  "checkedAt": "2026-06-13T08:43:14Z",
+  "checkedAt": "2026-06-13T11:28:30Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "auth": "subscription",
