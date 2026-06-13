@@ -1,11 +1,17 @@
 {
   "active": false,
-  "objective": "Sorare pre-lock loop",
-  "status": "info",
-  "updatedAt": "2026-06-13T23:14:44Z",
+  "objective": "JAIMES is online and ready",
+  "status": "ready",
+  "updatedAt": "2026-06-13T23:29:25Z",
   "model": "gpt-5.5",
   "messageReceived": "2026-06-13T22:49:04Z",
   "steps": [
+    {
+      "label": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
     {
       "label": "Sorare pre-lock loop",
       "status": "info",
@@ -47,23 +53,17 @@
       "status": "done",
       "tool": "exec",
       "kind": "status"
-    },
-    {
-      "label": "Done: late refresh verified",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
     }
   ],
-  "currentTool": "sorare_prelock_loop",
-  "checkedAt": "2026-06-13T23:14:44Z",
+  "currentTool": "status check",
+  "checkedAt": "2026-06-13T23:29:25Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
   "reportedActive": false,
-  "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Corey Seager, Eugenio Su\u00e1rez, Gleyber Torres, Jared Triolo",
+  "detail": "JAIMES live check: Sorare pre-lock loop.",
   "supabaseBacked": false,
   "localLiveFeed": true
 }
