@@ -1,72 +1,69 @@
 {
   "active": false,
-  "objective": "JAIMES is online and ready",
-  "status": "ready",
-  "updatedAt": "2026-06-13T00:13:48Z",
+  "objective": "Done: Sorare MLB training verified",
+  "status": "done",
+  "updatedAt": "2026-06-13T06:01:06Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-13T00:10:45Z",
+  "messageReceived": "2026-06-13T06:00:55Z",
   "steps": [
     {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
+      "label": "Done: Sorare MLB training verified",
       "status": "done",
-      "tool": "status check",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "JAIMES is online and ready",
+      "label": "Sorare MLB: verifying training artifacts",
       "status": "done",
-      "tool": "status check",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "JAIMES is online and ready",
+      "label": "Sorare MLB: starting training job",
       "status": "done",
-      "tool": "status check",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "JAIMES is online and ready",
+      "label": "Sorare pre-lock loop",
       "status": "done",
-      "tool": "status check",
+      "tool": "sorare_prelock_loop",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare pre-lock loop",
+      "status": "done",
+      "tool": "sorare_prelock_loop",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare pre-lock loop",
+      "status": "done",
+      "tool": "sorare_prelock_loop",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare pre-lock loop",
+      "status": "done",
+      "tool": "sorare_prelock_loop",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare pre-lock loop",
+      "status": "done",
+      "tool": "sorare_prelock_loop",
       "kind": "status"
     }
   ],
-  "currentTool": "status check",
-  "checkedAt": "2026-06-13T00:13:48Z",
+  "currentTool": "exec",
+  "checkedAt": "2026-06-13T06:01:06Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
-  "agentId": "jaimes",
-  "reportedActive": false,
-  "detail": "JAIMES live check: JAIMES is online and ready.",
-  "supabaseBacked": false,
-  "localLiveFeed": true,
-  "updated_at": "2026-06-13T00:10:46Z",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "liveAgentPush": "2026-06-13T00:10:46Z",
-  "liveAgentPushAt": "2026-06-13T00:10:46Z"
+  "agentId": "jaimes",
+  "reportedActive": false,
+  "detail": "Done: Sorare MLB training verified",
+  "supabaseBacked": false,
+  "localLiveFeed": true
 }
