@@ -16820,3 +16820,53 @@ body::before {
   max-width: none !important;
 }
 /* end TODAY JOBS RIGHT-COLUMN FILL FIX */
+
+/* TODAY JOBS ROW COMFORT FIX 2026-06-13
+   Use available right-rail height for slightly taller rows while preserving fit. */
+#today-jobs .calendar-day-axis {
+  gap: 3px !important;
+}
+
+#today-jobs .calendar-hour-content {
+  gap: 3px !important;
+}
+
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block,
+#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 27px !important;
+  height: 27px !important;
+  max-height: 27px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+#today-jobs .calendar-block-time,
+#today-jobs .calendar-block-state,
+#today-jobs .calendar-block-main,
+#today-jobs .calendar-block-meta {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+#today-jobs .calendar-block-time strong,
+#today-jobs .calendar-block-time em,
+#today-jobs .calendar-block-state strong,
+#today-jobs .calendar-block-main strong,
+#today-jobs .calendar-block-meta span {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+/* end TODAY JOBS ROW COMFORT FIX */
