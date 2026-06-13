@@ -4878,9 +4878,12 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
   const blocks = buildCalendarJobBlocks(calendarJobs);
   const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
   const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
-  const visibleBlocks = todayBlocks.length >= 6
+  const rawVisibleBlocks = todayBlocks.length >= 6
     ? todayBlocks
     : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))];
+  const visibleBlocks = rawVisibleBlocks
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+    .slice(0, 10);
   const slots = calendarSlots(visibleBlocks);
   const nowMs = Date.now();
   const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
@@ -4928,6 +4931,12 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
         <span><i className="agent-jaimes" />JAIMES</span>
         <span><i className="agent-jain" />J.A.I.N</span>
       </div>
+      <div className="jobs-table-head" aria-hidden="true">
+        <span>Time</span>
+        <span>State</span>
+        <span>Job</span>
+        <span>Owner</span>
+      </div>
       <div className="calendar-day-axis">
         {slots.map((slot) => {
           const nowBlockLabel = slot.blocks.length
@@ -4971,6 +4980,16 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
   );
 }
 
+function calendarBlockStateLabel(block: CalendarJobBlock, run: ReturnType<typeof jobRunCells>) {
+  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
+  if (block.tone === "working" || /running|active|in.progress/.test(status)) return "IN PROGRESS";
+  if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return /missed|overdue/.test(status) ? "OVERDUE" : "NEEDS JOSH";
+  if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "COMPLETE";
+  if (block.tone === "ready" || /ready|due/.test(status)) return "READY";
+  if (block.tone === "planned" || block.startsAt.getTime() > Date.now()) return "UPCOMING";
+  return calendarBlockRunLabel(block, run).toUpperCase();
+}
+
 function CalendarNextBrief({ block }: { block: CalendarJobBlock | null }) {
   if (!block) {
     return (
@@ -5009,6 +5028,9 @@ function CalendarJobBlockCard({ block, liveCues, isNextUp }: { block: CalendarJo
       <div className="calendar-block-time">
         <strong>{time}</strong>
         <em>{calendarBlockRunLabel(block, run)}</em>
+      </div>
+      <div className="calendar-block-state">
+        <strong>{calendarBlockStateLabel(block, run)}</strong>
       </div>
       <div className="calendar-block-main">
         <strong title={missionText(block.job.title)}>{block.title}</strong>

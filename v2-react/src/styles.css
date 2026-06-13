@@ -13314,7 +13314,7 @@ body::after,
 
 .calendar-block-meta em {
   color: rgba(193, 200, 202, 0.58) !important;
-  font-size: 7px !important;
+  font-size: 9px !important;
 }
 
 .calendar-next-brief {
@@ -16307,3 +16307,197 @@ body::before {
   }
 }
 /* ==================== end COMPACT TOP INDICATORS ==================== */
+
+/* ============================================================
+   TODAY JOBS STABLE TABLE CONTRACT 2026-06-13
+   Locks Today's Jobs into a compact, consistent agenda table.
+   ============================================================ */
+.daily-calendar-view {
+  display: grid !important;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto !important;
+  gap: 7px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.jobs-table-head {
+  display: grid !important;
+  grid-template-columns: 48px 72px minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  min-height: 17px !important;
+  padding: 0 10px 0 8px !important;
+  border: 1px solid rgba(105, 144, 181, 0.10) !important;
+  border-radius: 7px !important;
+  background: rgba(6, 19, 33, 0.42) !important;
+}
+
+.jobs-table-head span {
+  color: rgba(190, 244, 211, 0.66) !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.12em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+.calendar-day-axis {
+  display: grid !important;
+  align-content: start !important;
+  gap: 5px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+
+.calendar-hour-slot {
+  display: grid !important;
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 6px !important;
+  min-height: 0 !important;
+}
+
+.calendar-hour-slot > time {
+  align-self: center !important;
+  color: rgba(138, 163, 194, 0.78) !important;
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1 !important;
+  text-align: right !important;
+}
+
+.calendar-hour-content {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+
+.calendar-job-block,
+.calendar-empty-block {
+  display: grid !important;
+  grid-template-columns: 0 48px 72px minmax(0, 1fr) 58px !important;
+  align-items: center !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  padding: 5px 9px 5px 0 !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+
+.calendar-job-block.is-next-up {
+  min-height: 30px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+}
+
+.calendar-job-block.is-next-up::after {
+  content: "NEXT" !important;
+  top: 50% !important;
+  right: 66px !important;
+  font-size: 9px !important;
+  padding: 2px 4px !important;
+}
+
+.calendar-block-time,
+.calendar-block-state,
+.calendar-block-main,
+.calendar-block-meta {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.calendar-block-state strong {
+  display: block !important;
+  overflow: hidden !important;
+  color: rgba(190, 244, 211, 0.92) !important;
+  font-size: 9px !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.calendar-job-block.tone-attention .calendar-block-state strong,
+.calendar-job-block.is-risk .calendar-block-state strong {
+  color: #ffb29f !important;
+}
+
+.calendar-job-block.tone-working .calendar-block-state strong,
+.calendar-job-block.is-active .calendar-block-state strong {
+  color: var(--fable-green, #46e08a) !important;
+}
+
+.calendar-block-main p,
+.calendar-block-meta em,
+.calendar-job-block.tone-working .calendar-block-main p,
+.calendar-job-block.tone-planned .calendar-block-main p,
+.calendar-job-block.tone-ready .calendar-block-main p {
+  display: none !important;
+}
+
+.calendar-block-main strong,
+.calendar-job-block.tone-working .calendar-block-main strong {
+  display: block !important;
+  color: #f4f8ff !important;
+  font-size: 10.6px !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-align: left !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.calendar-block-time strong,
+.calendar-block-time em,
+.calendar-block-meta span {
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+.calendar-block-meta {
+  text-align: right !important;
+}
+
+.calendar-next-brief {
+  min-height: 42px !important;
+  max-height: 48px !important;
+  overflow: hidden !important;
+}
+/* ==================== end TODAY JOBS STABLE TABLE CONTRACT ==================== */
+
+/* TODAY JOBS STABLE TABLE SPECIFICITY LOCK 2026-06-13 */
+.calendar-job-block,
+.calendar-job-block.tone-working,
+.calendar-job-block.tone-planned,
+.calendar-job-block.tone-ready,
+.calendar-job-block.tone-done,
+.calendar-job-block.tone-attention,
+.calendar-empty-block {
+  display: grid !important;
+  grid-template-columns: 0 48px 72px minmax(0, 1fr) 58px !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  padding: 5px 9px 5px 0 !important;
+  gap: 6px !important;
+  overflow: hidden !important;
+}
+/* end TODAY JOBS STABLE TABLE SPECIFICITY LOCK */
+
+/* TODAY JOBS ROW HEIGHT FINAL LOCK 2026-06-13 */
+.calendar-job-block.tone-planned:not(.is-synthetic),
+.calendar-job-block.tone-ready:not(.is-synthetic),
+.calendar-job-block.tone-done:not(.is-synthetic),
+.calendar-job-block.tone-attention:not(.is-synthetic),
+.calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 30px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+/* end TODAY JOBS ROW HEIGHT FINAL LOCK */
