@@ -127,9 +127,10 @@ def check_react_source() -> None:
             "liveAgentDetailLines(status)",
             "Agent-agnostic: JOSH 2.0, JOSHeX, JAIMES, and J.A.I.N",
             "ledger-now-context",
-            "Tool:",
+            "Using:",
             "Fresh:",
-            "Why:",
+            "Step:",
+            "Context:",
         ],
         "all-agent rich Live Work Board details",
     )
@@ -139,6 +140,8 @@ def check_react_source() -> None:
         [
             "LIVE WORK BOARD RICH DETAIL CHIPS",
             "LIVE WORK BOARD RICH DETAIL FIT",
+            "CONTROL TOWER GLASS INSIGHT PASS",
+            "calendar-phase-strip",
             ":has(.ledger-now-context)",
         ],
         "rich Live Work Board detail fit",

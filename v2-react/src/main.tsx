@@ -1334,10 +1334,10 @@ function liveAgentDetailLines(status: AgentStatus) {
   const recent = recentConcreteStep(status);
   const tool = compactText(status.current_tool || "", 30);
   const lines = [
-    tool ? `Tool: ${tool}` : "",
+    tool ? `Using: ${tool}` : "",
     status.updated_at ? `Fresh: ${ageLabel(status.updated_at)}` : "",
-    recent ? `Latest: ${compactText(recent, 54)}` : "",
-    rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() ? `Why: ${compactText(rawDetail, 72)}` : "",
+    recent ? `Step: ${compactText(recent, 54)}` : "",
+    rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() ? `Context: ${compactText(rawDetail, 72)}` : "",
   ].filter(Boolean);
   return lines.slice(0, 4);
 }
@@ -4939,6 +4939,36 @@ function calendarSlots(blocks: CalendarJobBlock[]) {
   }));
 }
 
+function calendarPhaseKey(block: CalendarJobBlock) {
+  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
+  if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return "needs";
+  if (block.tone === "working" || /running|active|in.progress/.test(status)) return "now";
+  if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "done";
+  if (block.tone === "ready" || /ready|due/.test(status)) return "ready";
+  return "next";
+}
+
+function calendarPhaseLabel(key: string) {
+  if (key === "needs") return "Needs Josh";
+  if (key === "now") return "Now";
+  if (key === "done") return "Done";
+  if (key === "ready") return "Ready";
+  return "Next";
+}
+
+function CalendarPhaseStrip({ blocks }: { blocks: CalendarJobBlock[] }) {
+  const order = ["needs", "now", "ready", "next", "done"];
+  const counts = new Map<string, number>();
+  blocks.forEach((block) => counts.set(calendarPhaseKey(block), (counts.get(calendarPhaseKey(block)) || 0) + 1));
+  return (
+    <div className="calendar-phase-strip" aria-label="Today's Jobs grouped by state">
+      {order.filter((key) => counts.get(key)).map((key) => (
+        <span key={key} className={`phase-${key}`}><b>{calendarPhaseLabel(key)}</b><em>{counts.get(key)}</em></span>
+      ))}
+    </div>
+  );
+}
+
 function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveCueState }) {
   const calendarJobs = jobs;
   const blocks = buildCalendarJobBlocks(calendarJobs);
@@ -4991,6 +5021,7 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
           <strong>{planned}</strong>
         </article>
       </div>
+      <CalendarPhaseStrip blocks={visibleBlocks} />
       <div className="calendar-legend" aria-label="Calendar legend">
         <span><i className="agent-joshex" />JOSHeX</span>
         <span><i className="agent-josh" />Josh 2.0</span>
@@ -5089,7 +5120,7 @@ function CalendarJobBlockCard({ block, liveCues, isNextUp }: { block: CalendarJo
     ? `${block.agents.length} agents`
     : AGENTS[block.agent]?.label || block.agent;
   return (
-    <article className={`calendar-job-block tone-${block.tone} ${isNextUp ? "is-next-up" : ""} ${block.synthetic ? "is-synthetic" : ""} ${agentClass(block.agent)} ${categoryClass(block.job)}${changedRowClass(changed)}`}>
+    <article data-phase={calendarPhaseKey(block)} className={`calendar-job-block tone-${block.tone} phase-${calendarPhaseKey(block)} ${isNextUp ? "is-next-up" : ""} ${block.synthetic ? "is-synthetic" : ""} ${agentClass(block.agent)} ${categoryClass(block.job)}${changedRowClass(changed)}`}>
       <span className="row-change-dot" aria-hidden="true" />
       <div className="calendar-block-time">
         <strong>{time}</strong>

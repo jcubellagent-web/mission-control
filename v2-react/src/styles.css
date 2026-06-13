@@ -17062,3 +17062,165 @@ body::before {
 .activity-ledger .ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-detail {
   display: none !important;
 }
+
+
+/* =====================================================================
+   CONTROL TOWER GLASS INSIGHT PASS — JAIMES — 2026-06-13
+   Agent identity accents, semantic chips, job grouping, frosted depth,
+   and ambient freshness/urgency states. Minimal, glassy, dashboard-safe.
+   ===================================================================== */
+:root {
+  --agent-joshex: #46e08a;
+  --agent-josh: #5ea2ff;
+  --agent-jaimes: #35c987;
+  --agent-jain: #7fa4ff;
+  --glass-bg-1: rgba(8, 22, 39, 0.68);
+  --glass-bg-2: rgba(15, 36, 60, 0.56);
+  --glass-rim: rgba(184, 214, 240, 0.14);
+  --glass-rim-hot: rgba(70, 224, 138, 0.26);
+  --ambient-fresh: rgba(70, 224, 138, 0.16);
+  --ambient-watch: rgba(245, 196, 81, 0.14);
+  --ambient-urgent: rgba(255, 138, 122, 0.16);
+}
+
+.tower-module,
+.activity-ledger,
+.tower-agent-deck,
+.tower-priority-queue,
+.tower-resource-stack,
+.jobs-rail,
+.daily-calendar-view {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(70,224,138,0.070), transparent 34%),
+    linear-gradient(145deg, rgba(9, 26, 46, 0.82), rgba(7, 18, 32, 0.66) 62%, rgba(6, 30, 39, 0.56)) !important;
+  border-color: var(--glass-rim) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.055),
+    inset 0 -1px 0 rgba(255,255,255,0.025),
+    0 18px 42px rgba(0, 0, 0, 0.26) !important;
+  backdrop-filter: blur(18px) saturate(128%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(128%) !important;
+}
+
+.agent-joshex { --agent-accent: var(--agent-joshex); }
+.agent-josh { --agent-accent: var(--agent-josh); }
+.agent-jaimes { --agent-accent: var(--agent-jaimes); }
+.agent-jain { --agent-accent: var(--agent-jain); }
+
+.ledger-focus-primary[class*="agent-"],
+.tower-agent-row[class*="agent-"],
+.calendar-job-block[class*="agent-"] {
+  border-left: 3px solid color-mix(in srgb, var(--agent-accent, var(--brand-green)) 86%, transparent) !important;
+  box-shadow:
+    inset 1px 0 0 color-mix(in srgb, var(--agent-accent, var(--brand-green)) 24%, transparent),
+    0 12px 28px rgba(0, 0, 0, 0.20) !important;
+}
+
+.ledger-focus-primary[class*="agent-"]::before,
+.ledger-focus-concurrent[class*="agent-"]::before {
+  background: linear-gradient(180deg, var(--agent-accent, var(--brand-green)), rgba(94,162,255,0.72)) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--agent-accent, var(--brand-green)) 34%, transparent) !important;
+}
+
+.calendar-legend i.agent-joshex,
+.timeline-mark.agent-joshex,
+.status-dot.agent-joshex { background: var(--agent-joshex) !important; color: var(--agent-joshex) !important; }
+.calendar-legend i.agent-josh,
+.timeline-mark.agent-josh,
+.status-dot.agent-josh { background: var(--agent-josh) !important; color: var(--agent-josh) !important; }
+.calendar-legend i.agent-jaimes,
+.timeline-mark.agent-jaimes,
+.status-dot.agent-jaimes { background: var(--agent-jaimes) !important; color: var(--agent-jaimes) !important; }
+.calendar-legend i.agent-jain,
+.timeline-mark.agent-jain,
+.status-dot.agent-jain { background: var(--agent-jain) !important; color: var(--agent-jain) !important; }
+
+.ledger-focus-primary .ledger-now-context span {
+  border-color: color-mix(in srgb, var(--agent-accent, var(--brand-green)) 30%, transparent) !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--agent-accent, var(--brand-green)) 13%, transparent), rgba(255,255,255,0.035)) !important;
+  color: rgba(232, 246, 255, 0.88) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
+.ledger-focus-primary .ledger-now-context span:nth-child(1) { border-color: rgba(94, 162, 255, 0.30) !important; }
+.ledger-focus-primary .ledger-now-context span:nth-child(2) { border-color: rgba(70, 224, 138, 0.30) !important; }
+.ledger-focus-primary .ledger-now-context span:nth-child(4) { border-color: rgba(245, 196, 81, 0.26) !important; }
+
+.calendar-phase-strip {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 5px !important;
+  margin: 3px 0 5px !important;
+}
+.calendar-phase-strip span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  padding: 4px 7px !important;
+  border: 1px solid rgba(184,214,240,0.13) !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,0.035) !important;
+  color: rgba(226,241,250,0.82) !important;
+}
+.calendar-phase-strip b {
+  font-size: 9px !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.calendar-phase-strip em {
+  font-size: 9px !important;
+  font-style: normal !important;
+  color: rgba(255,255,255,0.78) !important;
+}
+.calendar-phase-strip .phase-needs { border-color: rgba(255,138,122,0.34) !important; background: var(--ambient-urgent) !important; }
+.calendar-phase-strip .phase-now { border-color: rgba(70,224,138,0.34) !important; background: var(--ambient-fresh) !important; }
+.calendar-phase-strip .phase-ready { border-color: rgba(94,162,255,0.30) !important; background: rgba(94,162,255,0.105) !important; }
+.calendar-phase-strip .phase-next { border-color: rgba(184,214,240,0.18) !important; }
+.calendar-phase-strip .phase-done { opacity: 0.78 !important; }
+
+.calendar-job-block.phase-needs { background: linear-gradient(90deg, rgba(255,138,122,0.12), rgba(15,36,60,0.36)) !important; }
+.calendar-job-block.phase-now { background: linear-gradient(90deg, rgba(70,224,138,0.115), rgba(15,36,60,0.34)) !important; }
+.calendar-job-block.phase-ready { background: linear-gradient(90deg, rgba(94,162,255,0.095), rgba(15,36,60,0.32)) !important; }
+.calendar-job-block.phase-done { opacity: 0.84 !important; }
+.calendar-job-block.phase-next { background: linear-gradient(90deg, rgba(184,214,240,0.045), rgba(15,36,60,0.28)) !important; }
+
+.calendar-job-block .calendar-block-state strong {
+  border-radius: 999px !important;
+  padding: 3px 7px !important;
+  background: rgba(255,255,255,0.052) !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+}
+.calendar-job-block.phase-needs .calendar-block-state strong { color: #ffd7d1 !important; border-color: rgba(255,138,122,0.34) !important; }
+.calendar-job-block.phase-now .calendar-block-state strong { color: #dfffe9 !important; border-color: rgba(70,224,138,0.34) !important; }
+.calendar-job-block.phase-ready .calendar-block-state strong { color: #dbeaff !important; border-color: rgba(94,162,255,0.30) !important; }
+
+.tower-agent-fresh.is-fresh,
+.tower-agent-row.is-working,
+.ledger-focus-primary.is-active,
+.ledger-focus-concurrent.is-active {
+  box-shadow:
+    inset 0 0 0 1px var(--glass-rim-hot),
+    0 0 0 1px rgba(70,224,138,0.035),
+    0 18px 42px rgba(0,0,0,0.24) !important;
+}
+.tower-agent-fresh.is-stale,
+.tower-agent-row.is-stale {
+  filter: saturate(0.70) brightness(0.92) !important;
+  opacity: 0.82 !important;
+}
+.calendar-job-block.is-next-up,
+.calendar-job-block.tone-working {
+  outline: 1px solid color-mix(in srgb, var(--agent-accent, var(--brand-green)) 28%, transparent) !important;
+  outline-offset: -1px !important;
+}
+
+@media (min-width: 1500px) {
+  .calendar-phase-strip { gap: 6px !important; margin-bottom: 6px !important; }
+  .calendar-phase-strip span { padding-inline: 8px !important; }
+}
