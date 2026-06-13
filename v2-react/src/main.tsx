@@ -1143,12 +1143,12 @@ function activityFocusRows(model: ControlTowerModel) {
     // the live hero while a fresh agent is actively broadcasting work.
     if (row.lane === "needs-josh" && isStaleFocus) return false;
 
-    // Filter out routine health checks and heartbeats so they do not hijack the hero.
-    if (text.includes("heartbeat")) return false;
-    if (text.includes("kiosk health")) return false;
-    if (text.includes("status check")) return false;
-    if (text.includes("rows, sidecars, live path")) return false;
-    if (text.includes("agent context sync")) return false;
+    // Filter routine health checks only when the headline itself is routine.
+    // Do not hide real work just because its explanatory detail mentions a
+    // heartbeat/guard being fixed or verified.
+    const titleText = (row.title || "").toLowerCase();
+    if (/heartbeat|kiosk health|status check|agent context sync/.test(titleText)) return false;
+    if (titleText.includes("rows, sidecars, live path")) return false;
 
     return true;
   });
@@ -1243,14 +1243,16 @@ function statusIsProblem(status?: string | null) {
 function towerActivityFromWork(item: WorkItem): TowerActivity {
   const lane: TowerLane = item.state === "blocked" || item.state === "waiting" ? "needs-josh" : "active";
   const tone: TowerTone = item.state === "blocked" ? "risk" : item.state === "waiting" ? "watch" : "active";
+  const isAgentStatus = item.source === "agent";
+  const agentDetail = compactText(item.detail || "Agent is reporting active work.", 128);
   return {
     id: item.id,
     lane,
     tone,
     agent: item.agent_id,
-    title: headlineTitle(item.title, 54),
-    detail: readoutSummary(item.detail, "Working through the current step.", 104),
-    meta: item.source === "job" ? "scheduled job" : item.source === "approval" ? "approval flow" : "Brain Feed",
+    title: headlineTitle(item.title, 58),
+    detail: isAgentStatus ? agentDetail : readoutSummary(item.detail, "Working through the current step.", 104),
+    meta: item.source === "job" ? "scheduled job" : item.source === "approval" ? "approval flow" : (item.detail ? "live Brain Feed" : "Brain Feed"),
     time: item.updated_at,
     sortAt: timeValue(item.updated_at),
   };
@@ -1285,6 +1287,34 @@ function towerActivityFromJob(job: JobRow, lane: TowerLane, tone: TowerTone): To
     time: job.updated_at || job.lastRun || job.nextRun,
     sortAt,
   };
+}
+
+function recentConcreteStep(status: AgentStatus) {
+  const objective = cleanHeadlineText(status.objective || "").toLowerCase();
+  const generic = /^(?:jaimes|josh 2\.0|joshex|j\.a\.i\.n) is (?:working now|online and ready|standing by)$/i;
+  const steps = Array.isArray(status.steps) ? [...status.steps].reverse() : [];
+  for (const step of steps) {
+    const label = cleanHeadlineText(step.label || step.title || "");
+    if (!label || generic.test(label)) continue;
+    if (label.toLowerCase() === objective) continue;
+    return label;
+  }
+  return "";
+}
+
+function liveAgentWorkDetail(status: AgentStatus) {
+  const objective = cleanHeadlineText(status.objective || "");
+  const rawDetail = cleanHeadlineText(status.detail || "");
+  const recent = recentConcreteStep(status);
+  const tool = compactText(status.current_tool || "", 26);
+  const parts: string[] = [];
+  if (tool) parts.push(`Tool: ${tool}`);
+  if (recent) parts.push(`Latest: ${recent}`);
+  if (rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() && rawDetail.toLowerCase() !== recent.toLowerCase()) {
+    parts.push(`Context: ${rawDetail}`);
+  }
+  if (!parts.length && objective) parts.push(`Current objective: ${objective}`);
+  return readoutSummary(parts.join(" · "), "Agent is reporting active work.", 128);
 }
 
 function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentId, AgentStatus>, nowMs = Date.now()): ControlTowerModel {
@@ -1388,9 +1418,9 @@ function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentI
       lane: "active",
       tone: "active",
       agent: status.agent_id,
-      title: headlineTitle(status.objective || AGENTS[status.agent_id].role, 54),
-      detail: readoutSummary(status.detail || status.current_tool, "Agent is reporting active work.", 104),
-      meta: "agent status",
+      title: headlineTitle(status.objective || AGENTS[status.agent_id].role, 58),
+      detail: liveAgentWorkDetail(status),
+      meta: status.current_tool ? `tool: ${compactText(status.current_tool, 28)}` : "agent status",
       time: status.updated_at,
       sortAt: timeValue(status.updated_at),
     }, seen));
@@ -3595,6 +3625,7 @@ function cleanHeadlineText(value: string) {
   return missionText(value)
     .replace(/\s*\([^)]*\)/g, "")
     .replace(/^(?:JOSHeX|Josh 2\.0|JAIMES|J\.A\.I\.N)\s+scheduled:\s*/i, "")
+    .replace(/^(?:Task|Step|Done):\s*/i, "")
     .replace(/^make\s+/i, "")
     .replace(/^fix\s+/i, "")
     .replace(/^improve\s+/i, "")

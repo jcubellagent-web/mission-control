@@ -278,6 +278,20 @@ def preserve_active_telegram_task(existing: dict[str, Any], event: dict[str, Any
     return "telegram work card" in tool or "telegram" in source
 
 
+def recent_live_agent_push(existing: dict[str, Any], hold_seconds: int = 1200) -> bool:
+    """Protect explicit JAIMES live pushes from generic heartbeat/status rows."""
+    raw = existing.get("liveAgentPush") or existing.get("liveAgentPushAt")
+    if not raw:
+        return False
+    try:
+        parsed = dt.datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    except Exception:
+        return False
+    return (dt.datetime.now(dt.timezone.utc) - parsed.astimezone(dt.timezone.utc)).total_seconds() <= hold_seconds
+
+
 def read_json(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text())
@@ -452,7 +466,8 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
         "kind": event["type"],
     }
     preserve_top = (
-        preserve_top_level_brain_feed(event)
+        recent_live_agent_push(existing)
+        or preserve_top_level_brain_feed(event)
         or preserve_active_telegram_task(existing, event)
     ) and isinstance(existing, dict) and bool(existing.get("objective"))
     payload = {
@@ -499,7 +514,8 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
         "kind": event["type"],
     }
     preserve_top = (
-        preserve_top_level_brain_feed(event)
+        recent_live_agent_push(existing)
+        or preserve_top_level_brain_feed(event)
         or preserve_active_telegram_task(existing, event)
     ) and bool(existing.get("objective"))
     payload = {

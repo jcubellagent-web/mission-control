@@ -63,7 +63,7 @@ def main():
     if steps and isinstance(steps[-1], dict) and steps[-1].get("status") == "active":
         steps[-1]["status"] = "done"
     if active:
-        steps.append({"label": objective[:60], "status": "active", "tool": tool, "time": now})
+        steps.append({"label": objective[:96], "status": "active", "tool": tool, "time": now})
     else:
         for s in steps:
             if isinstance(s, dict):
