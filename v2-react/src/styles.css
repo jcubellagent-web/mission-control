@@ -16709,3 +16709,69 @@ body::before {
   }
 }
 /* end 24IN DISPLAY BALANCED LAYOUT FIX */
+
+/* TODAY JOBS ALL-DAY VISIBILITY FIX 2026-06-13
+   Josh expects the right column to show the full day's agenda, not a preview. */
+#today-jobs .calendar-control-strip {
+  min-height: 36px !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  gap: 5px !important;
+}
+
+#today-jobs .calendar-control-strip article {
+  min-height: 30px !important;
+  padding: 4px 6px !important;
+}
+
+#today-jobs .calendar-control-strip span,
+#today-jobs .calendar-control-strip strong {
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+#today-jobs .daily-calendar-view {
+  grid-template-rows: 36px 17px minmax(0, 1fr) !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+#today-jobs .calendar-day-axis {
+  align-content: start !important;
+  gap: 2px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#today-jobs .calendar-hour-content {
+  gap: 2px !important;
+}
+
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block,
+#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 23px !important;
+  height: 23px !important;
+  max-height: 23px !important;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+
+#today-jobs .calendar-block-main strong,
+#today-jobs .calendar-job-block.tone-working .calendar-block-main strong,
+#today-jobs .calendar-block-time strong,
+#today-jobs .calendar-block-state strong,
+#today-jobs .calendar-block-meta span {
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+/* end TODAY JOBS ALL-DAY VISIBILITY FIX */
