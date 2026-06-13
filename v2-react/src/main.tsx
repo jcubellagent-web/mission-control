@@ -1379,7 +1379,7 @@ function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentI
     }, seen));
 
   const visibleStatuses = TOWER_AGENT_ORDER.map((agent) => statuses.get(agent)).filter(Boolean) as AgentStatus[];
-  const agentsReady = visibleStatuses.filter((status) => statusIsClear(status.status) && !agentNeedsFocus(status)).length;
+  const agentsReady = visibleStatuses.length;
   const systemQuiet = complete.filter(activityIsRoutineSystem).length;
   const meaningfulComplete = Math.max(0, complete.length - systemQuiet);
   return {
@@ -1509,7 +1509,7 @@ function AgentFlightDeck({
           <p>Agent Flight Deck</p>
           <h3>JOSHeX · Josh 2.0 · JAIMES · J.A.I.N</h3>
         </div>
-        <span>{model.counts.agentsReady}/{model.counts.agentsTotal} ready</span>
+        <span>{model.counts.agentsReady}/{model.counts.agentsTotal} visible</span>
       </header>
       <div className="tower-agent-list">
         {TOWER_AGENT_ORDER.map((agent) => {
@@ -1729,14 +1729,31 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const walletTotal = wallet?.summary?.totalEstimatedUsd;
   const liquid = wallet?.summary?.liquidEstimatedUsd;
   const tokenCount = wallet?.tokens?.length || 0;
+  const walletMode = String(wallet?.walletMode || wallet?.refreshMode || "").toLowerCase();
+  const walletIsPlaceholder = walletMode.includes("placeholder") || walletMode.includes("not-connected") || (tokenCount === 0 && (walletTotal || 0) === 0 && (wallet?.errors || []).length > 0);
+  const walletHeadline = walletIsPlaceholder ? "Read-only" : fmtCurrencyExact(walletTotal);
+  const walletDetail = walletIsPlaceholder
+    ? "No connected balance · proposals only"
+    : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
   const modelDaily = state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
+  const modelWeekly = state.modelUsage?.aggregate?.weekly ?? state.modelUsage?.weekly;
+  const modelMonthly = state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly;
   const xaiDaily = state.modelUsage?.xai?.daily;
+  const modelHeadline = typeof modelMonthly === "number" && modelMonthly > 0 ? fmtCurrencyExact(modelMonthly) : fmtCurrencyExact(modelDaily);
+  const modelDetail = typeof modelMonthly === "number" && modelMonthly > 0
+    ? `Month · today ${fmtCurrencyExact(modelDaily)} · week ${fmtCurrencyExact(modelWeekly)}`
+    : `Today · xAI ${fmtCurrencyExact(xaiDaily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
-  const readyAgents = state.statuses.filter((row) => {
+  const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
+  const freshAgents = state.statuses.filter((row) => {
     const value = String(row.status || "").toLowerCase();
-    return !["blocked", "error", "offline", "stale"].includes(value) && ageMinutes(row.updated_at) <= 120;
+    return !["blocked", "error", "offline"].includes(value) && ageMinutes(row.updated_at) <= 120;
   }).length;
   const trackedAgents = Math.max(4, state.statuses.length);
+  const missingAgents = Math.max(0, trackedAgents - visibleAgents);
+  const visibilityDetail = missingAgents
+    ? `${freshAgents} fresh · ${missingAgents} missing source${missingAgents === 1 ? "" : "s"}`
+    : `${freshAgents} fresh · ${sourceTruthLabel(state.source)}`;
   return (
     <section className="tower-resource-stack" aria-label="Resources and live sources">
       <header>
@@ -1749,26 +1766,26 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
         </button>
       </header>
       <div className="resource-card-grid">
-        <article className={`resource-card${changedRowClass(Boolean(liveCues.rows[cueRowKey("crypto", "balance")]))}`}>
+        <article className={`resource-card is-${walletIsPlaceholder ? "watch" : "clear"}${changedRowClass(Boolean(liveCues.rows[cueRowKey("crypto", "balance")]))}`}>
           <span className="row-change-dot" aria-hidden="true" />
           <b>Agentic wallet</b>
-          <strong>{fmtCurrencyExact(walletTotal)}</strong>
-          <p>{tokenCount} tokens · {fmtCurrencyExact(liquid)} liquid</p>
+          <strong>{walletHeadline}</strong>
+          <p>{walletDetail}</p>
         </article>
-        <article className="resource-card">
+        <article className="resource-card is-clear">
           <b>Model usage</b>
-          <strong>{fmtCurrencyExact(modelDaily)}</strong>
-          <p>xAI {fmtCurrencyExact(xaiDaily)} · GPT-5.5 ready</p>
+          <strong>{modelHeadline}</strong>
+          <p>{modelDetail}</p>
         </article>
         <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
           <b>Display fit</b>
           <strong>{runtimeOk ? "Ready" : "Review"}</strong>
           <p>{runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ")}</p>
         </article>
-        <article className={`resource-card is-${readyAgents >= trackedAgents ? "clear" : "watch"}`}>
+        <article className={`resource-card is-${visibleAgents >= trackedAgents ? "clear" : "watch"}`}>
           <b>Visibility</b>
-          <strong>{readyAgents}/{trackedAgents} agents</strong>
-          <p>{sourceTruthLabel(state.source)}</p>
+          <strong>{visibleAgents}/{trackedAgents} visible</strong>
+          <p>{visibilityDetail}</p>
         </article>
       </div>
     </section>
