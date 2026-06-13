@@ -16589,3 +16589,52 @@ body::before {
   overflow: hidden !important;
 }
 /* end TODAY JOBS NO-CUTOFF FIT FIX */
+
+/* TODAY JOBS TRUE FULL-WIDTH FIX 2026-06-13
+   Remove legacy inner gutters that made rows appear half-width inside module. */
+.control-tower-grid > .right-rail.tower-jobs-rail {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+#today-jobs,
+#today-jobs .job-list,
+#today-jobs .daily-calendar-view,
+#today-jobs .jobs-table-head,
+#today-jobs .calendar-day-axis,
+#today-jobs .calendar-hour-slot,
+#today-jobs .calendar-hour-content,
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-empty-block {
+  box-sizing: border-box !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+#today-jobs {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+#today-jobs .job-list,
+#today-jobs .daily-calendar-view,
+#today-jobs .calendar-day-axis,
+#today-jobs .calendar-hour-slot,
+#today-jobs .calendar-hour-content {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#today-jobs .jobs-table-head,
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block {
+  grid-template-columns: 50px 78px minmax(0, 1fr) 66px !important;
+}
+/* end TODAY JOBS TRUE FULL-WIDTH FIX */
