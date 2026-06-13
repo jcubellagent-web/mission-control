@@ -16638,3 +16638,30 @@ body::before {
   grid-template-columns: 50px 78px minmax(0, 1fr) 66px !important;
 }
 /* end TODAY JOBS TRUE FULL-WIDTH FIX */
+
+/* 24IN DISPLAY JOBS RAIL WIDTH FIX 2026-06-13
+   On the 1920x1080 HP 24f, Today's Jobs needs real horizontal priority. */
+@media (min-width: 1500px) {
+  .control-tower-grid {
+    grid-template-columns: minmax(0, 0.95fr) minmax(300px, 0.58fr) minmax(560px, 1.32fr) !important;
+    gap: 18px !important;
+  }
+
+  .control-tower-grid > .right-rail.tower-jobs-rail {
+    min-width: 560px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  #today-jobs .jobs-table-head,
+  #today-jobs .calendar-job-block,
+  #today-jobs .calendar-job-block.tone-working,
+  #today-jobs .calendar-job-block.tone-planned,
+  #today-jobs .calendar-job-block.tone-ready,
+  #today-jobs .calendar-job-block.tone-done,
+  #today-jobs .calendar-job-block.tone-attention,
+  #today-jobs .calendar-empty-block {
+    grid-template-columns: 58px 92px minmax(0, 1fr) 86px !important;
+  }
+}
+/* end 24IN DISPLAY JOBS RAIL WIDTH FIX */
