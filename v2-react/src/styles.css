@@ -16232,3 +16232,78 @@ body::before {
   }
 }
 /* ==================== end FABLE HERO METRIC POLISH ==================== */
+
+/* ============================================================
+   COMPACT TOP INDICATORS 2026-06-13
+   Keeps header status chips readable without hero-metric sizing.
+   ============================================================ */
+.status-ribbon,
+.header-status-ribbon {
+  gap: 6px !important;
+  margin-top: 8px !important;
+}
+
+.status-ribbon .metric,
+.header-status-ribbon .metric {
+  min-height: 42px !important;
+  padding: 7px 9px 7px 12px !important;
+  border-left-width: 2px !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(190, 244, 211, 0.055) !important;
+}
+
+.status-ribbon .metric::before,
+.header-status-ribbon .metric::before {
+  inset: 8px auto 8px 0 !important;
+  width: 2px !important;
+}
+
+.status-ribbon .metric span,
+.header-status-ribbon .metric span {
+  font-size: 9.5px !important;
+  line-height: 1 !important;
+  letter-spacing: 0.075em !important;
+  gap: 4px !important;
+}
+
+.status-ribbon .metric span svg,
+.header-status-ribbon .metric span svg {
+  width: 11px !important;
+  height: 11px !important;
+}
+
+.status-ribbon .metric strong,
+.header-status-ribbon .metric strong,
+.status-ribbon .metric:not(.is-wide) strong,
+.header-status-ribbon .metric:not(.is-wide) strong {
+  margin-top: 4px !important;
+  font-size: clamp(0.86rem, 1.05vw, 1.08rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.015em !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.status-ribbon .metric.is-wide strong,
+.header-status-ribbon .metric.is-wide strong {
+  font-size: clamp(0.78rem, 0.92vw, 0.96rem) !important;
+  line-height: 1.05 !important;
+}
+
+@media (max-height: 620px) {
+  .status-ribbon .metric,
+  .header-status-ribbon .metric {
+    min-height: 36px !important;
+    padding: 6px 8px 6px 11px !important;
+  }
+
+  .status-ribbon .metric strong,
+  .header-status-ribbon .metric strong,
+  .status-ribbon .metric:not(.is-wide) strong,
+  .header-status-ribbon .metric:not(.is-wide) strong {
+    font-size: clamp(0.78rem, 0.94vw, 0.95rem) !important;
+  }
+}
+/* ==================== end COMPACT TOP INDICATORS ==================== */
