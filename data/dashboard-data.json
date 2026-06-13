@@ -5,27 +5,15 @@
   "brainFeed": {
     "agentId": "josh2",
     "agent": "JOSH 2.0",
-    "active": false,
-    "reportedActive": false,
-    "status": "done",
-    "objective": "Josh 2.0 screen check clean",
-    "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-    "updatedAt": "2026-06-13T06:02:56Z",
-    "checkedAt": "2026-06-13T06:02:56Z",
-    "currentTool": "Control Tower screen check",
+    "active": true,
+    "reportedActive": true,
+    "status": "active",
+    "objective": "Heartbeat maintenance started",
+    "detail": "Running scheduled OpenClaw and Mission Control checks.",
+    "updatedAt": "2026-06-13T08:46:27Z",
+    "checkedAt": "2026-06-13T08:46:27Z",
+    "currentTool": "agent publish",
     "steps": [
-      {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
-      },
-      {
-        "label": "Token/cost guard",
-        "status": "info",
-        "tool": "token_cost_guard_loop",
-        "kind": "status"
-      },
       {
         "label": "Heartbeat maintenance started",
         "status": "active",
@@ -45,10 +33,22 @@
         "kind": "complete"
       },
       {
+        "label": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "kind": "complete"
+      },
+      {
         "label": "Token/cost guard",
         "status": "info",
         "tool": "token_cost_guard_loop",
         "kind": "status"
+      },
+      {
+        "label": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "kind": "complete"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -70,9 +70,9 @@
     "localLiveFeed": true
   },
   "focus": {
-    "status": "Brain Feed idle",
-    "context": "Last completed objective: Josh 2.0 screen check clean",
-    "updatedAt": "2026-06-13T06:03:23Z"
+    "status": "Brain Feed live",
+    "context": "Heartbeat maintenance started",
+    "updatedAt": "2026-06-13T08:46:55Z"
   },
   "contextWindow": {
     "usedTokens": 105593,
@@ -95,11 +95,8 @@
   },
   "codingVisibility": {
     "workspaceDirty": 58,
-    "missionControlDirty": 11,
-    "recentFiles": [
-      "mission-control/scripts/state_visibility_guard.py",
-      "scripts/jaimes_brain_feed_poller.py"
-    ],
+    "missionControlDirty": 10,
+    "recentFiles": [],
     "codexbarStatus": "CodexBar available",
     "codexbar": {
       "available": true,
@@ -109,18 +106,18 @@
       ],
       "summary": "CodexBar available"
     },
-    "updatedAt": "2026-06-13T06:03:23Z"
+    "updatedAt": "2026-06-13T08:46:55Z"
   },
   "modelUsage": {
     "session": 0.014432,
-    "daily": 2.458119,
+    "daily": 5.114885,
     "weekly": 548.359219,
     "monthly": 990.800427,
     "topModels": [
       {
         "name": "gpt-5.5",
         "window": "session",
-        "cost": 535.7600050000001
+        "cost": 538.4461510000001
       },
       {
         "name": "gpt-5.4-mini",
@@ -130,12 +127,12 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.292028
+        "cost": 0.38848
       },
       {
         "name": "openai/gpt-5.4-mini",
         "window": "session",
-        "cost": 0.14026304999999997
+        "cost": 0.014431649999999999
       },
       {
         "name": "xai/grok-4.20-reasoning",
@@ -147,9 +144,9 @@
       {
         "name": "gpt-5.5",
         "source": "codex",
-        "weeklyCost": 535.7600050000001,
-        "dailyCost": 2.194821,
-        "sessionCost": 535.7600050000001,
+        "weeklyCost": 538.4461510000001,
+        "dailyCost": 4.880967,
+        "sessionCost": 538.4461510000001,
         "totalTokens": 0,
         "costEstimated": false
       },
@@ -165,26 +162,26 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 53880,
-        "outputTokens": 174,
-        "totalTokens": 54054,
-        "sessionCost": 0.292028,
-        "dailyCost": 0.011635,
-        "weeklyCost": 0.292028,
-        "sessions": 4,
+        "inputTokens": 63516,
+        "outputTokens": 198,
+        "totalTokens": 63714,
+        "sessionCost": 0.38848,
+        "dailyCost": 0.108087,
+        "weeklyCost": 0.38848,
+        "sessions": 5,
         "isGemini": false,
         "costEstimated": false
       },
       {
         "name": "openai/gpt-5.4-mini",
         "source": "openclaw",
-        "inputTokens": 166695,
-        "outputTokens": 1514,
-        "totalTokens": 168209,
-        "sessionCost": 0.14026304999999997,
-        "dailyCost": 0.12583139999999998,
-        "weeklyCost": 0.14026304999999997,
-        "sessions": 2,
+        "inputTokens": 761,
+        "outputTokens": 1333,
+        "totalTokens": 2094,
+        "sessionCost": 0.014431649999999999,
+        "dailyCost": 0.0,
+        "weeklyCost": 0.014431649999999999,
+        "sessions": 1,
         "isGemini": false,
         "costEstimated": false
       },
@@ -232,7 +229,7 @@
         "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
       }
     ],
-    "lastUpdated": "2026-06-13T06:03:26Z",
+    "lastUpdated": "2026-06-13T08:46:58Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -284,8 +281,8 @@
       "available": true
     },
     "aggregate": {
-      "daily": 2.458119,
-      "total": 536.76029,
+      "daily": 5.114885,
+      "total": 539.417057,
       "monthly": 990.800427
     },
     "weeklyRunRate": {
@@ -298,7 +295,7 @@
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-13T06:03:23Z",
+    "updatedAt": "2026-06-13T08:46:55Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -319,7 +316,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-13T06:03:26Z",
+    "updatedAt": "2026-06-13T08:46:59Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -336,14 +333,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 43.5,
-      "cpu_user": 22.3,
-      "cpu_sys": 21.46,
-      "load1": 1.97,
-      "load5": 1.68,
-      "load15": 1.57,
+      "cpu_pct": 43.7,
+      "cpu_user": 22.95,
+      "cpu_sys": 20.76,
+      "load1": 2.26,
+      "load5": 1.62,
+      "load15": 1.46,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.3,
+      "ram_total_gb": 15.1,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "78Gi",
@@ -351,14 +348,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 37.5,
-      "cpu_user": 21.52,
-      "cpu_sys": 15.97,
-      "load1": 2.19,
-      "load5": 2.16,
-      "load15": 2.11,
+      "cpu_pct": 21.1,
+      "cpu_user": 6.76,
+      "cpu_sys": 14.28,
+      "load1": 2.89,
+      "load5": 2.29,
+      "load15": 2.12,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "52Gi",
@@ -382,19 +379,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-13T06:03:23Z"
+      "lastChecked": "2026-06-13T08:46:55Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-13T06:03:23Z"
+      "lastChecked": "2026-06-13T08:46:55Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-13T06:03:23Z"
+      "lastChecked": "2026-06-13T08:46:55Z"
     }
   ],
   "crons": [
@@ -500,7 +497,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "due",
-      "lastRun": "2026-06-13T06:00:02.364337+00:00"
+      "lastRun": "2026-06-13T08:00:04.715824+00:00"
     },
     {
       "name": "Breaking News Scanner",
@@ -672,9 +669,9 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-06-12T03:30:48.359091-04:00",
-      "nextRun": "2026-06-13T03:30:00-04:00"
+      "runStatus": "done",
+      "lastRun": "2026-06-13T03:30:37.251602-04:00",
+      "nextRun": "2026-06-14T03:30:00-04:00"
     },
     {
       "name": "Sorare Daily Missions",
@@ -942,52 +939,8 @@
   "codexJobs": [],
   "sharedEvents": [
     {
-      "id": "josh2-complete-20260613-060256-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T06:02:56Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "jaimes-status-20260613-060251-jaimes-is-online-and-ready",
-      "time": "2026-06-13T06:02:51Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
-    },
-    {
-      "id": "josh2-status-20260613-060230-token-cost-guard",
-      "time": "2026-06-13T06:02:30Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Token/cost guard",
-      "status": "info",
-      "tool": "token_cost_guard_loop",
-      "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
-    },
-    {
-      "id": "jaimes-status-20260613-060151-jaimes-is-online-and-ready",
-      "time": "2026-06-13T06:01:51Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: Sorare MLB training verified."
-    },
-    {
-      "id": "josh2-status-20260613-060134-heartbeat-maintenance-started",
-      "time": "2026-06-13T06:01:34Z",
+      "id": "josh2-status-20260613-084627-heartbeat-maintenance-started",
+      "time": "2026-06-13T08:46:27Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
@@ -997,41 +950,8 @@
       "detail": "Running scheduled OpenClaw and Mission Control checks."
     },
     {
-      "id": "jaimes-status-20260613-060051-jaimes-is-working-now",
-      "time": "2026-06-13T06:00:51Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is working now",
-      "status": "active",
-      "tool": "status check",
-      "detail": "JAIMES live update: Sorare MLB: starting training job."
-    },
-    {
-      "id": "josh2-complete-20260613-055744-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:57:44Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-055232-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:52:32Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "jaimes-status-20260613-055049-jaimes-is-online-and-ready",
-      "time": "2026-06-13T05:50:49Z",
+      "id": "jaimes-status-20260613-084416-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:44:16Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
@@ -1041,8 +961,41 @@
       "detail": "JAIMES live check: JAIMES is online and ready."
     },
     {
-      "id": "josh2-status-20260613-054730-token-cost-guard",
-      "time": "2026-06-13T05:47:30Z",
+      "id": "josh2-complete-20260613-084410-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:44:10Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-complete-20260613-083858-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:38:58Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-complete-20260613-083346-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:33:46Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-status-20260613-083232-token-cost-guard",
+      "time": "2026-06-13T08:32:32Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
@@ -1052,8 +1005,8 @@
       "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
     },
     {
-      "id": "josh2-complete-20260613-054719-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:47:19Z",
+      "id": "josh2-complete-20260613-082834-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:28:34Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1063,8 +1016,8 @@
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
-      "id": "josh2-complete-20260613-054206-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:42:06Z",
+      "id": "josh2-complete-20260613-082322-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:23:22Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1074,8 +1027,8 @@
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
-      "id": "josh2-complete-20260613-053654-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:36:54Z",
+      "id": "josh2-complete-20260613-081811-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:18:11Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1085,8 +1038,8 @@
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
-      "id": "josh2-status-20260613-053230-token-cost-guard",
-      "time": "2026-06-13T05:32:30Z",
+      "id": "josh2-status-20260613-081732-token-cost-guard",
+      "time": "2026-06-13T08:17:32Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "status",
@@ -1096,41 +1049,8 @@
       "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
     },
     {
-      "id": "josh2-complete-20260613-053140-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:31:40Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-052628-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:26:28Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-052116-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:21:16Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "jaimes-status-20260613-052044-jaimes-is-online-and-ready",
-      "time": "2026-06-13T05:20:44Z",
+      "id": "jaimes-status-20260613-081412-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:14:12Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
@@ -1140,19 +1060,19 @@
       "detail": "JAIMES live check: JAIMES is online and ready."
     },
     {
-      "id": "josh2-status-20260613-051728-token-cost-guard",
-      "time": "2026-06-13T05:17:28Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
+      "id": "jaimes-status-20260613-081311-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:13:11Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
       "type": "status",
-      "title": "Token/cost guard",
-      "status": "info",
-      "tool": "token_cost_guard_loop",
-      "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: JAIMES is online and ready."
     },
     {
-      "id": "josh2-complete-20260613-051604-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T05:16:04Z",
+      "id": "josh2-complete-20260613-081259-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:12:59Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1160,11 +1080,88 @@
       "status": "done",
       "tool": "Control Tower screen check",
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "jaimes-status-20260613-081211-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:12:11Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: JAIMES is online and ready."
+    },
+    {
+      "id": "jaimes-status-20260613-081111-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:11:11Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: Done: model efficiency guard alert."
+    },
+    {
+      "id": "josh2-complete-20260613-080747-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:07:47Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-status-20260613-080554-stuck-task-watchdog",
+      "time": "2026-06-13T08:05:54Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Stuck-task watchdog",
+      "status": "done",
+      "tool": "stuck_task_watchdog_loop",
+      "detail": "No stuck agent work detected."
+    },
+    {
+      "id": "jaimes-status-20260613-080410-jaimes-is-online-and-ready",
+      "time": "2026-06-13T08:04:10Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: JAIMES is online and ready."
+    },
+    {
+      "id": "josh2-complete-20260613-080236-josh-2-0-screen-check-clean",
+      "time": "2026-06-13T08:02:36Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-status-20260613-080232-token-cost-guard",
+      "time": "2026-06-13T08:02:32Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Token/cost guard",
+      "status": "info",
+      "tool": "token_cost_guard_loop",
+      "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
     }
   ],
   "sharedOperatingLayer": {
     "status": "ready",
-    "updatedAt": "2026-06-13T06:02:56Z",
+    "updatedAt": "2026-06-13T08:46:27Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
@@ -1184,52 +1181,8 @@
     },
     "latestEvents": [
       {
-        "id": "josh2-complete-20260613-060256-josh-2-0-screen-check-clean",
-        "time": "2026-06-13T06:02:56Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-      },
-      {
-        "id": "jaimes-status-20260613-060251-jaimes-is-online-and-ready",
-        "time": "2026-06-13T06:02:51Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: JAIMES is online and ready."
-      },
-      {
-        "id": "josh2-status-20260613-060230-token-cost-guard",
-        "time": "2026-06-13T06:02:30Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "status",
-        "title": "Token/cost guard",
-        "status": "info",
-        "tool": "token_cost_guard_loop",
-        "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
-      },
-      {
-        "id": "jaimes-status-20260613-060151-jaimes-is-online-and-ready",
-        "time": "2026-06-13T06:01:51Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: Done: Sorare MLB training verified."
-      },
-      {
-        "id": "josh2-status-20260613-060134-heartbeat-maintenance-started",
-        "time": "2026-06-13T06:01:34Z",
+        "id": "josh2-status-20260613-084627-heartbeat-maintenance-started",
+        "time": "2026-06-13T08:46:27Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "status",
@@ -1239,15 +1192,59 @@
         "detail": "Running scheduled OpenClaw and Mission Control checks."
       },
       {
-        "id": "jaimes-status-20260613-060051-jaimes-is-working-now",
-        "time": "2026-06-13T06:00:51Z",
+        "id": "jaimes-status-20260613-084416-jaimes-is-online-and-ready",
+        "time": "2026-06-13T08:44:16Z",
         "agent": "jaimes",
         "agentLabel": "JAIMES",
         "type": "status",
-        "title": "JAIMES is working now",
-        "status": "active",
+        "title": "JAIMES is online and ready",
+        "status": "ready",
         "tool": "status check",
-        "detail": "JAIMES live update: Sorare MLB: starting training job."
+        "detail": "JAIMES live check: JAIMES is online and ready."
+      },
+      {
+        "id": "josh2-complete-20260613-084410-josh-2-0-screen-check-clean",
+        "time": "2026-06-13T08:44:10Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      },
+      {
+        "id": "josh2-complete-20260613-083858-josh-2-0-screen-check-clean",
+        "time": "2026-06-13T08:38:58Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      },
+      {
+        "id": "josh2-complete-20260613-083346-josh-2-0-screen-check-clean",
+        "time": "2026-06-13T08:33:46Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      },
+      {
+        "id": "josh2-status-20260613-083232-token-cost-guard",
+        "time": "2026-06-13T08:32:32Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "status",
+        "title": "Token/cost guard",
+        "status": "info",
+        "tool": "token_cost_guard_loop",
+        "detail": "Token/cost guard attention: Weekly model spend is above the warning threshold."
       }
     ],
     "blockedEvents": [],
@@ -1441,24 +1438,34 @@
     "attentionHandoffs": [],
     "dailyRollup": {
       "date": "2026-06-13",
-      "generatedAt": "2026-06-13T06:02:51Z",
+      "generatedAt": "2026-06-13T08:44:16Z",
       "summary": "500 shared event(s), 0 job(s), 0 decision(s), 0 open handoff(s).",
       "counts": {
         "events": 500,
         "jobs": 0,
         "decisions": 0,
         "handoffs": 0,
-        "blocked": 5
+        "blocked": 6
       },
       "highlights": [
         "JAIMES is online and ready",
-        "Token/cost guard",
-        "Heartbeat maintenance started",
-        "JAIMES is working now",
-        "Josh 2.0 screen check clean"
+        "Josh 2.0 screen check clean",
+        "Token/cost guard"
       ],
       "openHandoffs": [],
       "blockedItems": [
+        {
+          "id": "josh2-blocked-20260613-080052-stuck-task-watchdog",
+          "time": "2026-06-13T08:00:52Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "Stuck-task watchdog",
+          "status": "error",
+          "tool": "stuck_task_watchdog_loop",
+          "detail": "Possible stale/stuck work detected: OpenCLAW reports 1 active task(s), but no sidecar shows active work.",
+          "privacy": "dashboard-safe"
+        },
         {
           "id": "josh2-blocked-20260613-032001-mission-control-freshness-loop",
           "time": "2026-06-13T03:20:01Z",
@@ -2138,35 +2145,18 @@
       "fresh": [
         {
           "agent": "josh2",
-          "node": "mission-control-freshness-loop",
+          "node": "auto-offload-loop",
           "status": "ok",
-          "summary": "Mission Control freshness ok.",
-          "updatedAt": "2026-06-13T06:03:00Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "josh2-self-recovery-loop",
-          "status": "ok",
-          "summary": "Josh 2.0 self-recovery checks are healthy.",
-          "updatedAt": "2026-06-13T06:02:59Z",
+          "summary": "Auto-offload routing policy ok.",
+          "updatedAt": "2026-06-13T08:46:39Z",
           "stale": false
         },
         {
           "agent": "josh2",
           "node": "josh2-brain-feed-publish",
-          "status": "ok",
-          "summary": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T06:02:56Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-brain-feed-publish",
-          "status": "ok",
-          "summary": "JAIMES live check: JAIMES is online and ready.",
-          "updatedAt": "2026-06-13T06:02:51Z",
+          "status": "active",
+          "summary": "Running scheduled OpenClaw and Mission Control checks.",
+          "updatedAt": "2026-06-13T08:46:27Z",
           "stale": false,
           "source": "agent_publish.py"
         },
@@ -2175,23 +2165,7 @@
           "node": "jaimes-live-poller",
           "status": "ok",
           "summary": "JAIMES live check: JAIMES is online and ready.",
-          "updatedAt": "2026-06-13T06:02:51Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "token-cost-guard-loop",
-          "status": "error",
-          "summary": "Token/cost guard attention: Weekly model spend is above the warning threshold.",
-          "updatedAt": "2026-06-13T06:02:30Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "auto-offload-loop",
-          "status": "ok",
-          "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-13T06:01:30Z",
+          "updatedAt": "2026-06-13T08:46:16Z",
           "stale": false
         },
         {
@@ -2199,7 +2173,40 @@
           "node": "stuck-task-watchdog-loop",
           "status": "ok",
           "summary": "No stuck agent work detected.",
-          "updatedAt": "2026-06-13T06:00:02Z",
+          "updatedAt": "2026-06-13T08:46:08Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-self-recovery-loop",
+          "status": "ok",
+          "summary": "Josh 2.0 self-recovery checks are healthy.",
+          "updatedAt": "2026-06-13T08:46:00Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "state-visibility-guard",
+          "status": "error",
+          "summary": "Mission Control visibility guard needs attention.",
+          "updatedAt": "2026-06-13T08:44:23Z",
+          "stale": false
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "status": "ok",
+          "summary": "JAIMES live check: JAIMES is online and ready.",
+          "updatedAt": "2026-06-13T08:44:16Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
+          "status": "ok",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-13T08:43:03Z",
           "stale": false
         }
       ],
@@ -2635,7 +2642,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-13T06:03:23Z",
+      "updatedAt": "2026-06-13T08:46:55Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -2679,7 +2686,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-06-13T06:03:23.422442Z",
+    "checkedAt": "2026-06-13T08:46:55.483545Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -3286,7 +3293,7 @@
   "runtimeLayout": {
     "ok": true,
     "status": "ok",
-    "checkedAt": "2026-06-13T06:02:44Z",
+    "checkedAt": "2026-06-13T08:43:58Z",
     "summary": "Live kiosk layout fits the 24-inch screen",
     "issues": [],
     "checks": [
@@ -3386,7 +3393,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-13T06:03:23Z",
+    "generatedAt": "2026-06-13T08:46:55Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3407,7 +3414,7 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-13T06:02:51Z",
+        "probedAt": "2026-06-13T08:46:16Z",
         "summary": "JAIMES live check: JAIMES is online and ready.",
         "source": "live-heartbeats",
         "stale": false
@@ -3427,8 +3434,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-13T06:03:00Z",
-        "summary": "Mission Control freshness ok.",
+        "probedAt": "2026-06-13T08:46:39Z",
+        "summary": "Auto-offload routing policy ok.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3445,7 +3452,7 @@
     }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-13T05:55:18Z",
+    "generatedAt": "2026-06-13T08:42:00Z",
     "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
     "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
     "chatSources": {
@@ -3476,8 +3483,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T05:52:32Z",
-          "ageMinutes": 2,
+          "updatedAt": "2026-06-13T08:38:58Z",
+          "ageMinutes": 3,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3518,8 +3525,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T05:52:32Z",
-          "ageMinutes": 2,
+          "updatedAt": "2026-06-13T08:38:58Z",
+          "ageMinutes": 3,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3551,7 +3558,7 @@
           "status": "ready",
           "objective": "JAIMES is online and ready",
           "detail": "JAIMES live check: JAIMES is online and ready.",
-          "updatedAt": "2026-06-13T05:54:50Z",
+          "updatedAt": "2026-06-13T08:41:15Z",
           "ageMinutes": 0,
           "currentTool": "status check",
           "active": false
@@ -3559,7 +3566,7 @@
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T06:36:52Z",
-          "ageMinutes": 1398,
+          "ageMinutes": 1565,
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "stale": true
         },
@@ -3567,64 +3574,64 @@
         "openHandoffs": [],
         "recentEvents": [
           {
-            "id": "jaimes-status-20260613-055049-jaimes-is-online-and-ready",
-            "time": "2026-06-13T05:50:49Z",
+            "id": "jaimes-status-20260613-081412-jaimes-is-online-and-ready",
+            "time": "2026-06-13T08:14:12Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-052044-jaimes-is-online-and-ready",
-            "time": "2026-06-13T05:20:44Z",
+            "id": "jaimes-status-20260613-081311-jaimes-is-online-and-ready",
+            "time": "2026-06-13T08:13:11Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-045040-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:50:40Z",
+            "id": "jaimes-status-20260613-081211-jaimes-is-online-and-ready",
+            "time": "2026-06-13T08:12:11Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-044940-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:49:40Z",
+            "id": "jaimes-status-20260613-081111-jaimes-is-online-and-ready",
+            "time": "2026-06-13T08:11:11Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Done: model efficiency guard alert."
+          },
+          {
+            "id": "jaimes-status-20260613-080410-jaimes-is-online-and-ready",
+            "time": "2026-06-13T08:04:10Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-044840-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:48:40Z",
+            "id": "jaimes-status-20260613-073405-jaimes-is-online-and-ready",
+            "time": "2026-06-13T07:34:05Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-044739-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:47:39Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-044539-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:45:39Z",
+            "id": "jaimes-status-20260613-073305-jaimes-is-online-and-ready",
+            "time": "2026-06-13T07:33:05Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: JAIMES is online and ready."
           },
           {
-            "id": "jaimes-status-20260613-044439-jaimes-is-online-and-ready",
-            "time": "2026-06-13T04:44:39Z",
+            "id": "jaimes-status-20260613-073205-jaimes-is-online-and-ready",
+            "time": "2026-06-13T07:32:05Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
@@ -3650,15 +3657,15 @@
           "status": "ready",
           "objective": "J.A.I.N is online and ready",
           "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-13T05:23:32Z",
-          "ageMinutes": 31,
+          "updatedAt": "2026-06-13T08:23:41Z",
+          "ageMinutes": 18,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T13:01:17Z",
-          "ageMinutes": 1014,
+          "ageMinutes": 1180,
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "stale": true
         },
@@ -3670,7 +3677,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-13T06:03:23Z",
+    "updatedAt": "2026-06-13T08:46:55Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4046,13 +4053,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-13T06:03:23Z",
+    "updatedAt": "2026-06-13T08:46:55Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-13T06:03:23Z",
+    "updatedAt": "2026-06-13T08:46:55Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4119,21 +4126,11 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-13T06:03:23Z"
+      "detail": "Updated 2026-06-13T08:46:55Z"
     }
   ],
   "trackedTasks": [],
   "activeAgents": [
-    {
-      "id": "coding-visibility",
-      "label": "Recently edited: mission-control/scripts/state_visibility_guard.py, scripts/jaimes_brain_feed_poller.py",
-      "status": "done",
-      "elapsedSecs": 0,
-      "tool": "code",
-      "model": "recent",
-      "agentLabel": "CODING",
-      "agentClass": "agent"
-    },
     {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 64%",
@@ -4152,7 +4149,7 @@
       "reportedActive": false,
       "objective": "JOSHeX visible and ready",
       "status": "ready",
-      "stale": false,
+      "stale": true,
       "updatedAt": "2026-06-13T02:45:25Z",
       "messageReceived": null,
       "currentTool": "visibility-heartbeat",
@@ -4168,20 +4165,45 @@
     },
     "josh": {
       "agent": "JOSH 2.0",
-      "active": false,
-      "reportedActive": false,
-      "objective": "Mission Control freshness ok.",
-      "status": "ok",
+      "active": true,
+      "reportedActive": true,
+      "objective": "Heartbeat maintenance started",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-06-13T06:03:00Z",
-      "messageReceived": null,
-      "currentTool": "status check",
+      "updatedAt": "2026-06-13T08:46:27Z",
+      "messageReceived": "2026-05-25T00:14:38Z",
+      "currentTool": "agent publish",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Mission Control freshness ok.",
-          "status": "ok",
-          "tool": "status check"
+          "label": "Heartbeat maintenance started",
+          "status": "active",
+          "tool": "agent publish",
+          "kind": "status"
+        },
+        {
+          "label": "Josh 2.0 screen check clean",
+          "status": "done",
+          "tool": "Control Tower screen check",
+          "kind": "complete"
+        },
+        {
+          "label": "Josh 2.0 screen check clean",
+          "status": "done",
+          "tool": "Control Tower screen check",
+          "kind": "complete"
+        },
+        {
+          "label": "Josh 2.0 screen check clean",
+          "status": "done",
+          "tool": "Control Tower screen check",
+          "kind": "complete"
+        },
+        {
+          "label": "Token/cost guard",
+          "status": "info",
+          "tool": "token_cost_guard_loop",
+          "kind": "status"
         },
         {
           "label": "Josh 2.0 screen check clean",
@@ -4210,11 +4232,29 @@
       "objective": "J.A.I.N is online and ready",
       "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-13T05:23:32Z",
+      "updatedAt": "2026-06-13T08:23:41Z",
       "messageReceived": "2026-04-30T07:10:36Z",
       "currentTool": "status check",
       "model": "GPT-5.5",
       "steps": [
+        {
+          "label": "J.A.I.N is online and ready",
+          "status": "ready",
+          "tool": "status check",
+          "kind": "status"
+        },
+        {
+          "label": "J.A.I.N is online and ready",
+          "status": "ready",
+          "tool": "status check",
+          "kind": "status"
+        },
+        {
+          "label": "J.A.I.N is online and ready",
+          "status": "ready",
+          "tool": "status check",
+          "kind": "status"
+        },
         {
           "label": "J.A.I.N is online and ready",
           "status": "ready",
@@ -4244,24 +4284,6 @@
           "status": "ready",
           "tool": "status check",
           "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
         }
       ]
     },
@@ -4269,28 +4291,40 @@
       "agent": "JAIMES",
       "active": false,
       "reportedActive": false,
-      "objective": "Done: Sorare MLB training verified",
-      "status": "done",
+      "objective": "Sorare pre-lock loop",
+      "status": "info",
       "stale": false,
-      "updatedAt": "2026-06-13T06:01:06Z",
-      "messageReceived": "2026-06-13T06:00:55Z",
-      "currentTool": "exec",
+      "updatedAt": "2026-06-13T08:43:14Z",
+      "messageReceived": "2026-06-13T08:10:33Z",
+      "currentTool": "sorare_prelock_loop",
       "model": "gpt-5.5",
       "steps": [
         {
-          "label": "Done: Sorare MLB training verified",
+          "label": "Sorare pre-lock loop",
+          "status": "info",
+          "tool": "sorare_prelock_loop",
+          "kind": "status"
+        },
+        {
+          "label": "Sorare pre-lock loop",
+          "status": "info",
+          "tool": "sorare_prelock_loop",
+          "kind": "status"
+        },
+        {
+          "label": "Sorare pre-lock loop",
+          "status": "info",
+          "tool": "sorare_prelock_loop",
+          "kind": "status"
+        },
+        {
+          "label": "Done: model efficiency guard alert",
           "status": "done",
           "tool": "exec",
           "kind": "status"
         },
         {
-          "label": "Sorare MLB: verifying training artifacts",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare MLB: starting training job",
+          "label": "Ops: running model efficiency guard",
           "status": "done",
           "tool": "exec",
           "kind": "status"
@@ -4308,21 +4342,9 @@
           "kind": "status"
         },
         {
-          "label": "Sorare pre-lock loop",
+          "label": "Sorare claim sweep claimed rewards",
           "status": "done",
-          "tool": "sorare_prelock_loop",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare pre-lock loop",
-          "status": "done",
-          "tool": "sorare_prelock_loop",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare pre-lock loop",
-          "status": "done",
-          "tool": "sorare_prelock_loop",
+          "tool": "cron",
           "kind": "status"
         }
       ]
@@ -4330,20 +4352,45 @@
   },
   "joshBrainFeed": {
     "agent": "JOSH 2.0",
-    "active": false,
-    "reportedActive": false,
-    "objective": "Mission Control freshness ok.",
-    "status": "ok",
+    "active": true,
+    "reportedActive": true,
+    "objective": "Heartbeat maintenance started",
+    "status": "active",
     "stale": false,
-    "updatedAt": "2026-06-13T06:03:00Z",
-    "messageReceived": null,
-    "currentTool": "status check",
+    "updatedAt": "2026-06-13T08:46:27Z",
+    "messageReceived": "2026-05-25T00:14:38Z",
+    "currentTool": "agent publish",
     "model": "GPT-5.5",
     "steps": [
       {
-        "label": "Mission Control freshness ok.",
-        "status": "ok",
-        "tool": "status check"
+        "label": "Heartbeat maintenance started",
+        "status": "active",
+        "tool": "agent publish",
+        "kind": "status"
+      },
+      {
+        "label": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "kind": "complete"
+      },
+      {
+        "label": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "kind": "complete"
+      },
+      {
+        "label": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "kind": "complete"
+      },
+      {
+        "label": "Token/cost guard",
+        "status": "info",
+        "tool": "token_cost_guard_loop",
+        "kind": "status"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -4372,11 +4419,29 @@
     "objective": "J.A.I.N is online and ready",
     "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-13T05:23:32Z",
+    "updatedAt": "2026-06-13T08:23:41Z",
     "messageReceived": "2026-04-30T07:10:36Z",
     "currentTool": "status check",
     "model": "GPT-5.5",
     "steps": [
+      {
+        "label": "J.A.I.N is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "kind": "status"
+      },
+      {
+        "label": "J.A.I.N is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "kind": "status"
+      },
+      {
+        "label": "J.A.I.N is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "kind": "status"
+      },
       {
         "label": "J.A.I.N is online and ready",
         "status": "ready",
@@ -4406,24 +4471,6 @@
         "status": "ready",
         "tool": "status check",
         "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
       }
     ]
   },
@@ -4431,28 +4478,40 @@
     "agent": "JAIMES",
     "active": false,
     "reportedActive": false,
-    "objective": "Done: Sorare MLB training verified",
-    "status": "done",
+    "objective": "Sorare pre-lock loop",
+    "status": "info",
     "stale": false,
-    "updatedAt": "2026-06-13T06:01:06Z",
-    "messageReceived": "2026-06-13T06:00:55Z",
-    "currentTool": "exec",
+    "updatedAt": "2026-06-13T08:43:14Z",
+    "messageReceived": "2026-06-13T08:10:33Z",
+    "currentTool": "sorare_prelock_loop",
     "model": "gpt-5.5",
     "steps": [
       {
-        "label": "Done: Sorare MLB training verified",
+        "label": "Sorare pre-lock loop",
+        "status": "info",
+        "tool": "sorare_prelock_loop",
+        "kind": "status"
+      },
+      {
+        "label": "Sorare pre-lock loop",
+        "status": "info",
+        "tool": "sorare_prelock_loop",
+        "kind": "status"
+      },
+      {
+        "label": "Sorare pre-lock loop",
+        "status": "info",
+        "tool": "sorare_prelock_loop",
+        "kind": "status"
+      },
+      {
+        "label": "Done: model efficiency guard alert",
         "status": "done",
         "tool": "exec",
         "kind": "status"
       },
       {
-        "label": "Sorare MLB: verifying training artifacts",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare MLB: starting training job",
+        "label": "Ops: running model efficiency guard",
         "status": "done",
         "tool": "exec",
         "kind": "status"
@@ -4470,48 +4529,63 @@
         "kind": "status"
       },
       {
-        "label": "Sorare pre-lock loop",
+        "label": "Sorare claim sweep claimed rewards",
         "status": "done",
-        "tool": "sorare_prelock_loop",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare pre-lock loop",
-        "status": "done",
-        "tool": "sorare_prelock_loop",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare pre-lock loop",
-        "status": "done",
-        "tool": "sorare_prelock_loop",
+        "tool": "cron",
         "kind": "status"
       }
     ]
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JOSH 2.0"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JOSH 2.0",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
         "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Mission Control freshness ok.",
-        "status": "ok",
+        "active": true,
+        "reportedActive": true,
+        "objective": "Heartbeat maintenance started",
+        "status": "active",
         "stale": false,
-        "updatedAt": "2026-06-13T06:03:00Z",
-        "messageReceived": null,
-        "currentTool": "status check",
+        "updatedAt": "2026-06-13T08:46:27Z",
+        "messageReceived": "2026-05-25T00:14:38Z",
+        "currentTool": "agent publish",
         "model": "GPT-5.5",
         "steps": [
           {
-            "label": "Mission Control freshness ok.",
-            "status": "ok",
-            "tool": "status check"
+            "label": "Heartbeat maintenance started",
+            "status": "active",
+            "tool": "agent publish",
+            "kind": "status"
+          },
+          {
+            "label": "Josh 2.0 screen check clean",
+            "status": "done",
+            "tool": "Control Tower screen check",
+            "kind": "complete"
+          },
+          {
+            "label": "Josh 2.0 screen check clean",
+            "status": "done",
+            "tool": "Control Tower screen check",
+            "kind": "complete"
+          },
+          {
+            "label": "Josh 2.0 screen check clean",
+            "status": "done",
+            "tool": "Control Tower screen check",
+            "kind": "complete"
+          },
+          {
+            "label": "Token/cost guard",
+            "status": "info",
+            "tool": "token_cost_guard_loop",
+            "kind": "status"
           },
           {
             "label": "Josh 2.0 screen check clean",
@@ -4537,28 +4611,40 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "objective": "Done: Sorare MLB training verified",
-        "status": "done",
+        "objective": "Sorare pre-lock loop",
+        "status": "info",
         "stale": false,
-        "updatedAt": "2026-06-13T06:01:06Z",
-        "messageReceived": "2026-06-13T06:00:55Z",
-        "currentTool": "exec",
+        "updatedAt": "2026-06-13T08:43:14Z",
+        "messageReceived": "2026-06-13T08:10:33Z",
+        "currentTool": "sorare_prelock_loop",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "Done: Sorare MLB training verified",
+            "label": "Sorare pre-lock loop",
+            "status": "info",
+            "tool": "sorare_prelock_loop",
+            "kind": "status"
+          },
+          {
+            "label": "Sorare pre-lock loop",
+            "status": "info",
+            "tool": "sorare_prelock_loop",
+            "kind": "status"
+          },
+          {
+            "label": "Sorare pre-lock loop",
+            "status": "info",
+            "tool": "sorare_prelock_loop",
+            "kind": "status"
+          },
+          {
+            "label": "Done: model efficiency guard alert",
             "status": "done",
             "tool": "exec",
             "kind": "status"
           },
           {
-            "label": "Sorare MLB: verifying training artifacts",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare MLB: starting training job",
+            "label": "Ops: running model efficiency guard",
             "status": "done",
             "tool": "exec",
             "kind": "status"
@@ -4576,21 +4662,9 @@
             "kind": "status"
           },
           {
-            "label": "Sorare pre-lock loop",
+            "label": "Sorare claim sweep claimed rewards",
             "status": "done",
-            "tool": "sorare_prelock_loop",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare pre-lock loop",
-            "status": "done",
-            "tool": "sorare_prelock_loop",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare pre-lock loop",
-            "status": "done",
-            "tool": "sorare_prelock_loop",
+            "tool": "cron",
             "kind": "status"
           }
         ]
@@ -4602,11 +4676,29 @@
         "objective": "J.A.I.N is online and ready",
         "status": "ready",
         "stale": false,
-        "updatedAt": "2026-06-13T05:23:32Z",
+        "updatedAt": "2026-06-13T08:23:41Z",
         "messageReceived": "2026-04-30T07:10:36Z",
         "currentTool": "status check",
         "model": "GPT-5.5",
         "steps": [
+          {
+            "label": "J.A.I.N is online and ready",
+            "status": "ready",
+            "tool": "status check",
+            "kind": "status"
+          },
+          {
+            "label": "J.A.I.N is online and ready",
+            "status": "ready",
+            "tool": "status check",
+            "kind": "status"
+          },
+          {
+            "label": "J.A.I.N is online and ready",
+            "status": "ready",
+            "tool": "status check",
+            "kind": "status"
+          },
           {
             "label": "J.A.I.N is online and ready",
             "status": "ready",
@@ -4636,24 +4728,6 @@
             "status": "ready",
             "tool": "status check",
             "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
           }
         ]
       },
@@ -4663,7 +4737,7 @@
         "reportedActive": false,
         "objective": "JOSHeX visible and ready",
         "status": "ready",
-        "stale": false,
+        "stale": true,
         "updatedAt": "2026-06-13T02:45:25Z",
         "messageReceived": null,
         "currentTool": "visibility-heartbeat",
@@ -4685,25 +4759,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-13T06:03:26Z",
+      "time": "2026-06-13T08:46:58Z",
       "event": "Session spend: $0.01"
     },
     {
-      "time": "2026-06-13T06:03:23Z",
-      "event": "Brain: Brain Feed idle"
+      "time": "2026-06-13T08:46:55Z",
+      "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-06-13T06:03:23Z",
-      "event": "Coding: mission-control/scripts/state_visibility_guard.py, scripts/jaimes_brain_feed_poller.py"
-    },
-    {
-      "time": "2026-06-13T06:03:23Z",
+      "time": "2026-06-13T08:46:55Z",
       "event": "CodexBar: CodexBar available"
     },
     {
-      "time": "2026-06-13T06:03:23Z",
+      "time": "2026-06-13T08:46:55Z",
       "event": "35 scheduled jobs healthy"
+    },
+    {
+      "time": "2026-06-13T08:46:55Z",
+      "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-06-13T06:03:23Z"
+  "lastUpdated": "2026-06-13T08:46:55Z"
 }
