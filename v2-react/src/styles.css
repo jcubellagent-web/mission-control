@@ -16501,3 +16501,91 @@ body::before {
   padding-bottom: 5px !important;
 }
 /* end TODAY JOBS ROW HEIGHT FINAL LOCK */
+
+/* TODAY JOBS FULL-WIDTH TABLE FIX 2026-06-13
+   The table rows already carry their own Time cell, so the old hourly rail
+   label must not consume the left half of the module. */
+.calendar-hour-slot {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+  width: 100% !important;
+}
+
+.calendar-hour-slot > time {
+  display: none !important;
+}
+
+.calendar-hour-content {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.calendar-job-block,
+.calendar-job-block.tone-working,
+.calendar-job-block.tone-planned,
+.calendar-job-block.tone-ready,
+.calendar-job-block.tone-done,
+.calendar-job-block.tone-attention,
+.calendar-empty-block {
+  grid-template-columns: 48px 72px minmax(0, 1fr) 58px !important;
+  width: 100% !important;
+}
+
+.calendar-job-block .row-change-dot,
+.calendar-empty-block .row-change-dot {
+  display: none !important;
+}
+/* end TODAY JOBS FULL-WIDTH TABLE FIX */
+
+/* TODAY JOBS ROW STACKING FIX 2026-06-13
+   Undo old timeline slot compression so table rows stack normally. */
+.calendar-hour-slot,
+.calendar-hour-slot.is-current {
+  position: static !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.calendar-hour-content,
+.calendar-hour-slot.is-current .calendar-hour-content {
+  position: static !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.calendar-now-marker,
+.calendar-gap {
+  display: none !important;
+}
+
+.calendar-day-axis {
+  align-content: start !important;
+  grid-auto-rows: auto !important;
+}
+/* end TODAY JOBS ROW STACKING FIX */
+
+/* TODAY JOBS NO-CUTOFF FIT FIX 2026-06-13
+   Show a stable above-the-fold agenda instead of clipping a long day list. */
+.daily-calendar-view {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 6px !important;
+}
+
+.calendar-legend,
+.calendar-next-brief {
+  display: none !important;
+}
+
+.calendar-day-axis {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+/* end TODAY JOBS NO-CUTOFF FIT FIX */

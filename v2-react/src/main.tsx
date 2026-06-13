@@ -4883,7 +4883,7 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
     : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))];
   const visibleBlocks = rawVisibleBlocks
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
-    .slice(0, 10);
+    .slice(0, 5);
   const slots = calendarSlots(visibleBlocks);
   const nowMs = Date.now();
   const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
