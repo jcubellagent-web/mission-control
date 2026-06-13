@@ -15021,6 +15021,41 @@ body > #root,
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
+.ledger-live-focus.is-concurrent.cols-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent {
+  gap: 3px !important;
+  padding: 10px 12px 10px 20px !important;
+}
+
+.ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-title {
+  font-size: clamp(13px, 0.98vw, 17px) !important;
+  line-height: 1.08 !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-detail {
+  font-size: 10px !important;
+  line-height: 1.12 !important;
+  -webkit-line-clamp: 1 !important;
+}
+
+.ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-context {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 3px !important;
+  margin-left: 18px !important;
+  max-width: calc(100% - 18px) !important;
+}
+
+.ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-context span {
+  font-size: 8.5px !important;
+  padding: 2px 5px !important;
+}
+
 .ledger-focus-concurrent {
   display: grid !important;
   grid-template-rows: auto minmax(0, 1fr) auto !important;
@@ -17005,4 +17040,25 @@ body::before {
 
 .ledger-focus-primary:has(.ledger-now-context) footer {
   margin-top: 2px !important;
+}
+
+
+/* Four-agent concurrent mode must fit inside the fixed Live Work Board. */
+.activity-ledger .ledger-live-focus.is-concurrent.cols-4 {
+  height: calc(100% - 46px) !important;
+  min-height: 0 !important;
+  grid-auto-rows: minmax(0, 1fr) !important;
+}
+
+.activity-ledger .ledger-live-focus.is-concurrent.cols-4 .ledger-focus-primary,
+.activity-ledger .ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+
+.activity-ledger .ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent footer,
+.activity-ledger .ledger-live-focus.is-concurrent.cols-4 .ledger-focus-concurrent .ledger-now-detail {
+  display: none !important;
 }

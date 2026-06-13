@@ -1213,11 +1213,12 @@ def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str)
         "active": reported_active and not stale,
         "reportedActive": reported_active,
         "objective": plain_dashboard_text(raw.get("objective") or "", 220),
+        "detail": plain_dashboard_text(raw.get("detail") or raw.get("summary") or "", 260) or None,
         "status": "stale" if stale and reported_active else status,
         "stale": stale,
         "updatedAt": updated_at,
         "messageReceived": plain_dashboard_text(raw.get("messageReceived") or "", 220) or None,
-        "currentTool": plain_dashboard_text(raw.get("currentTool") or "", 80) or None,
+        "currentTool": plain_dashboard_text(raw.get("currentTool") or raw.get("current_tool") or raw.get("tool") or "", 80) or None,
         "model": raw.get("model"),
         "steps": [
             {
@@ -1295,9 +1296,10 @@ def heartbeat_brain_feed(agent_key: str, fallback_agent: str) -> Dict[str, Any]:
             "agent": fallback_agent,
             "active": row.get("status") in {"ready", "ok", "active"},
             "objective": heartbeat_summary(row, fallback_agent),
+            "detail": row.get("summary") or heartbeat_summary(row, fallback_agent),
             "status": row.get("status") or "idle",
             "updatedAt": row.get("updatedAt"),
-            "currentTool": "status check",
+            "currentTool": row.get("tool") or "status check",
             "steps": [
                 {
                     "label": heartbeat_summary(row, fallback_agent),

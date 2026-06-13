@@ -121,6 +121,30 @@ def check_react_source() -> None:
     )
 
     require_text(
+        main,
+        [
+            "detailLines?: string[]",
+            "liveAgentDetailLines(status)",
+            "Agent-agnostic: JOSH 2.0, JOSHeX, JAIMES, and J.A.I.N",
+            "ledger-now-context",
+            "Tool:",
+            "Fresh:",
+            "Why:",
+        ],
+        "all-agent rich Live Work Board details",
+    )
+
+    require_text(
+        css,
+        [
+            "LIVE WORK BOARD RICH DETAIL CHIPS",
+            "LIVE WORK BOARD RICH DETAIL FIT",
+            ":has(.ledger-now-context)",
+        ],
+        "rich Live Work Board detail fit",
+    )
+
+    require_text(
         css,
         [
             "CONTROL-TOWER-BRAND-BLUEGREEN-20260607",

@@ -1194,7 +1194,7 @@ function perAgentFocusRows(model: ControlTowerModel, agents: AgentId[]): TowerAc
     const row = rawActive.find((r) => r.agent === agent);
     if (row) out.push(row);
   });
-  return out.slice(0, 3);
+  return out.slice(0, 4);
 }
 
 // Contention: two or more agents whose current work targets the same thing.
@@ -1297,13 +1297,17 @@ function recentConcreteStep(status: AgentStatus) {
   const objective = cleanHeadlineText(status.objective || "").toLowerCase();
   const generic = /^(?:jaimes|josh 2\.0|joshex|j\.a\.i\.n) is (?:working now|online and ready|standing by)$/i;
   const steps = Array.isArray(status.steps) ? [...status.steps].reverse() : [];
+  let objectiveMatch = "";
   for (const step of steps) {
     const label = cleanHeadlineText(step.label || step.title || "");
     if (!label || generic.test(label)) continue;
-    if (label.toLowerCase() === objective) continue;
+    if (label.toLowerCase() === objective) {
+      if (!objectiveMatch) objectiveMatch = label;
+      continue;
+    }
     return label;
   }
-  return "";
+  return objectiveMatch;
 }
 
 function liveAgentWorkDetail(status: AgentStatus) {
@@ -1324,6 +1328,7 @@ function liveAgentWorkDetail(status: AgentStatus) {
 }
 
 function liveAgentDetailLines(status: AgentStatus) {
+  // Agent-agnostic: JOSH 2.0, JOSHeX, JAIMES, and J.A.I.N all use this chip builder.
   const objective = cleanHeadlineText(status.objective || "");
   const rawDetail = cleanHeadlineText(status.detail || "");
   const recent = recentConcreteStep(status);
@@ -1656,7 +1661,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
       </header>
       {concurrent ? (
         <section
-          className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 3)}`}
+          className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 4)}`}
           aria-label={`Live ecosystem focus — ${concurrentRows.length} agents working`}
         >
           {concurrentRows.map((row) => {
