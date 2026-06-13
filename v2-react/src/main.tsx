@@ -49,6 +49,7 @@ type WorkItem = {
   source: "agent" | "job" | "approval";
   target: AttentionTarget;
   priority: number;
+  detailLines?: string[];
 };
 type HandoffBeam = {
   id: string;
@@ -354,6 +355,7 @@ function buildWorkItems(state: MissionControlState): WorkItem[] {
         source: "agent",
         target: "brain-feed",
         priority: workState === "blocked" ? 75 : workState === "working" ? 55 : workState === "ready" ? 32 : 12,
+        detailLines: liveAgentDetailLines(status),
       });
     });
 
@@ -994,6 +996,7 @@ type TowerActivity = {
   meta: string;
   time?: string;
   sortAt: number;
+  detailLines?: string[];
 };
 type ControlTowerModel = {
   active: TowerActivity[];
@@ -1255,6 +1258,7 @@ function towerActivityFromWork(item: WorkItem): TowerActivity {
     meta: item.source === "job" ? "scheduled job" : item.source === "approval" ? "approval flow" : (item.detail ? "live Brain Feed" : "Brain Feed"),
     time: item.updated_at,
     sortAt: timeValue(item.updated_at),
+    detailLines: item.detailLines,
   };
 }
 
@@ -1308,13 +1312,29 @@ function liveAgentWorkDetail(status: AgentStatus) {
   const recent = recentConcreteStep(status);
   const tool = compactText(status.current_tool || "", 26);
   const parts: string[] = [];
-  if (tool) parts.push(`Tool: ${tool}`);
-  if (recent) parts.push(`Latest: ${recent}`);
   if (rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() && rawDetail.toLowerCase() !== recent.toLowerCase()) {
-    parts.push(`Context: ${rawDetail}`);
+    parts.push(rawDetail);
+  } else if (recent) {
+    parts.push(`Latest: ${recent}`);
+  } else if (tool) {
+    parts.push(`Using ${tool}`);
   }
   if (!parts.length && objective) parts.push(`Current objective: ${objective}`);
-  return readoutSummary(parts.join(" · "), "Agent is reporting active work.", 128);
+  return compactText(parts.join(" · "), 148) || "Agent is reporting active work.";
+}
+
+function liveAgentDetailLines(status: AgentStatus) {
+  const objective = cleanHeadlineText(status.objective || "");
+  const rawDetail = cleanHeadlineText(status.detail || "");
+  const recent = recentConcreteStep(status);
+  const tool = compactText(status.current_tool || "", 30);
+  const lines = [
+    tool ? `Tool: ${tool}` : "",
+    status.updated_at ? `Fresh: ${ageLabel(status.updated_at)}` : "",
+    recent ? `Latest: ${compactText(recent, 54)}` : "",
+    rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() ? `Why: ${compactText(rawDetail, 72)}` : "",
+  ].filter(Boolean);
+  return lines.slice(0, 4);
 }
 
 function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentId, AgentStatus>, nowMs = Date.now()): ControlTowerModel {
@@ -1423,6 +1443,7 @@ function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentI
       meta: status.current_tool ? `tool: ${compactText(status.current_tool, 28)}` : "agent status",
       time: status.updated_at,
       sortAt: timeValue(status.updated_at),
+      detailLines: liveAgentDetailLines(status),
     }, seen));
 
   const visibleStatuses = TOWER_AGENT_ORDER.map((agent) => statuses.get(agent)).filter(Boolean) as AgentStatus[];
@@ -1651,6 +1672,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
                 </span>
                 <h3 className="ledger-now-title" title={missionText(row.title)}>{row.title}</h3>
                 <p className="ledger-now-detail" title={missionText(row.detail)}>{row.detail}</p>
+                {row.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{row.detailLines.slice(0, 3).map((line) => <span key={line}>{line}</span>)}</div> : null}
                 <footer>
                   <strong>{focusEyebrow(row)}</strong>
                   <em>{row.time ? ageLabel(row.time) : "live"}</em>
@@ -1669,6 +1691,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
           <p className="ledger-now-detail" title={missionText(primaryFocus?.detail)}>
             {primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}
           </p>
+          {primaryFocus?.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{primaryFocus.detailLines.map((line) => <span key={line}>{line}</span>)}</div> : null}
           <footer>
             <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
             <em>{primaryFocus?.time ? ageLabel(primaryFocus.time) : "live"}</em>

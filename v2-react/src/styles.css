@@ -16920,3 +16920,89 @@ body::before {
   max-height: 29px !important;
 }
 /* end TODAY JOBS TIME STATE BREATHING ROOM */
+
+
+/* =====================================================================
+   LIVE WORK BOARD RICH DETAIL CHIPS — JAIMES — 2026-06-13
+   Make the board explain what is happening, not just who is active.
+   ===================================================================== */
+.ledger-focus-primary .ledger-now-context {
+  margin-left: 34px !important;
+  max-width: calc(100% - 34px) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px 8px !important;
+  margin-top: 8px !important;
+  margin-bottom: 7px !important;
+}
+
+.ledger-focus-primary .ledger-now-context span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  border: 1px solid rgba(70, 224, 138, 0.24) !important;
+  background: rgba(70, 224, 138, 0.08) !important;
+  color: rgba(231, 246, 255, 0.86) !important;
+  border-radius: 999px !important;
+  padding: 4px 8px !important;
+  font-size: clamp(9px, 0.72vw, 11px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.ledger-focus-concurrent .ledger-now-context {
+  grid-template-columns: 1fr !important;
+  gap: 4px !important;
+  margin-left: 30px !important;
+  max-width: calc(100% - 30px) !important;
+}
+
+.ledger-focus-concurrent .ledger-now-context span {
+  font-size: 9px !important;
+  padding: 3px 7px !important;
+}
+
+
+/* =====================================================================
+   LIVE WORK BOARD RICH DETAIL FIT — JAIMES — 2026-06-13
+   Keep richer context visible inside the 24in hero without clipping.
+   ===================================================================== */
+.activity-ledger .ledger-focus-primary:has(.ledger-now-context) {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  padding-top: 20px !important;
+  padding-bottom: 16px !important;
+}
+
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-label { order: 1 !important; }
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-title { order: 2 !important; }
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-detail { order: 3 !important; }
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-context { order: 4 !important; }
+.ledger-focus-primary:has(.ledger-now-context) footer { order: 5 !important; }
+
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-title {
+  font-size: clamp(26px, 2.05vw, 38px) !important;
+  line-height: 1.05 !important;
+  margin-top: 2px !important;
+  max-height: 82px !important;
+  overflow: hidden !important;
+}
+
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-detail {
+  font-size: clamp(13px, 0.92vw, 16px) !important;
+  line-height: 1.25 !important;
+  margin-top: 0 !important;
+  max-height: 42px !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+.ledger-focus-primary:has(.ledger-now-context) .ledger-now-context {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.ledger-focus-primary:has(.ledger-now-context) footer {
+  margin-top: 2px !important;
+}
