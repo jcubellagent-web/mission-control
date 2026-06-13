@@ -254,7 +254,9 @@ function statusWorkState(status: AgentStatus): WorkState {
 }
 
 function jobWorkState(job: MissionControlState["jobs"][number], jobs: MissionControlState["jobs"] = []): WorkState {
+  const rawStatus = String(job.status || "").toLowerCase();
   const value = String(job.runStatus || job.status || "").toLowerCase();
+  if (rawStatus === "paused") return "quiet";
   if (jobNeedsAttention(job, jobs)) return "blocked";
   if (value === "missed") return jobIsSoftMissedAutomation(job) ? "ready" : "blocked";
   if ((value === "active" || value === "running" || value === "queued") && jobIsFreshActive(job)) return "working";

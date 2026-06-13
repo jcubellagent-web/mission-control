@@ -451,7 +451,15 @@ def fetch_codex_jobs(now_iso: str) -> List[Dict[str, Any]]:
             })
 
         jobs.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
-        return jobs[:10]
+        latest_by_work: Dict[tuple[str, str, str], Dict[str, Any]] = {}
+        for item in jobs:
+            key = (
+                str(item.get("owner") or "").lower(),
+                str(item.get("tool") or "").lower(),
+                str(item.get("title") or "").lower(),
+            )
+            latest_by_work.setdefault(key, item)
+        return list(latest_by_work.values())[:10]
     except Exception as exc:
         print(f"[warn] fetch_codex_jobs failed: {exc}", file=sys.stderr)
         return []
