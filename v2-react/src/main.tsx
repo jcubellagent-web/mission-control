@@ -1750,14 +1750,16 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const walletDetail = walletIsPlaceholder
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
-  const modelDaily = state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
-  const modelWeekly = state.modelUsage?.aggregate?.weekly ?? state.modelUsage?.weekly;
-  const modelMonthly = state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly;
-  const xaiDaily = state.modelUsage?.xai?.daily;
-  const modelHeadline = typeof modelMonthly === "number" && modelMonthly > 0 ? fmtCurrencyExact(modelMonthly) : fmtCurrencyExact(modelDaily);
-  const modelDetail = typeof modelMonthly === "number" && modelMonthly > 0
-    ? `Month · today ${fmtCurrencyExact(modelDaily)} · week ${fmtCurrencyExact(modelWeekly)}`
-    : `Today · xAI ${fmtCurrencyExact(xaiDaily)} · GPT-5.5 ready`;
+  const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
+  const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
+  const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
+  const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
+  const modelHeadline = typeof subscriptionFee === "number"
+    ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
+    : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
+  const modelDetail = typeof subscriptionFee === "number"
+    ? `OpenAI usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
+    : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
   const freshAgents = state.statuses.filter((row) => {
@@ -3171,20 +3173,20 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
     <section className="brain-cost-card">
       <div className="panel-title compact">
         <h2>Model Cost</h2>
-        <span>{fmtCurrency(modelUsage?.daily)} daily</span>
+        <span>{fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered today</span>
       </div>
       <div className="cost-snapshot">
         <article>
-          <span>Weekly</span>
-          <strong>{fmtCurrency(modelUsage?.weekly)}</strong>
+          <span>Metered week</span>
+          <strong>{fmtCurrency(modelUsage?.metered?.weekly ?? modelUsage?.weekly)}</strong>
         </article>
         <article>
-          <span>Monthly</span>
-          <strong>{fmtCurrency(modelUsage?.monthly)}</strong>
+          <span>Sub/month</span>
+          <strong>{fmtCurrency(modelUsage?.subscription?.monthlyFee ?? modelUsage?.monthly)}</strong>
         </article>
         <article>
-          <span>Projected</span>
-          <strong>{fmtCurrency(modelUsage?.weeklyRunRate?.projectedMonthly)}</strong>
+          <span>Usage equiv</span>
+          <strong>{fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly)}</strong>
         </article>
       </div>
       <div className="brain-model-list">
@@ -5476,13 +5478,13 @@ function ModelUsageCard({
     <section className="model-usage-card">
       <div className="panel-title compact">
         <h2>Model Cost & Usage</h2>
-        <span><DollarSign size={14} />{codexMode === "normal" ? `${fmtCurrency(modelUsage?.daily)} daily` : `Codex ${codexMode}`}</span>
+        <span><DollarSign size={14} />{codexMode === "normal" ? `${fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered` : `Codex ${codexMode}`}</span>
       </div>
       <div className="cost-grid">
-        <MetricMini label="Session" value={fmtCurrency(modelUsage?.session)} />
-        <MetricMini label="Weekly" value={fmtCurrency(modelUsage?.weekly)} />
-        <MetricMini label="Monthly" value={fmtCurrency(modelUsage?.monthly)} />
-        <MetricMini label="Projected" value={fmtCurrency(modelUsage?.weeklyRunRate?.projectedMonthly)} />
+        <MetricMini label="Sub/month" value={fmtCurrency(modelUsage?.subscription?.monthlyFee ?? 200)} />
+        <MetricMini label="Metered week" value={fmtCurrency(modelUsage?.metered?.weekly ?? modelUsage?.weekly)} />
+        <MetricMini label="Metered month" value={fmtCurrency(modelUsage?.metered?.monthly ?? 0)} />
+        <MetricMini label="Usage equiv" value={fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.monthly)} />
       </div>
       <div className="model-list">
         {topModels.slice(0, 5).map((model: any) => (

@@ -2176,29 +2176,51 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                     "_note": f"Direct API call from JAIN script ({mdata.get('last_script','?')}). Calls: {mdata.get('calls',0)}",
                 })
 
-        total_monthly = round(monthly_cost + or_monthly + jain_api_monthly, 6)
+        # Subscription-backed Codex/OpenAI usage is not marginal spend. Keep the
+        # token-priced equivalent for capacity/context, but separate it from the
+        # actual monthly bill Josh pays.
+        subscription_monthly_fee = 200.0
+        subscription_usage_equiv_daily = round(daily_cost, 6)
+        subscription_usage_equiv_weekly = round(weekly_cost, 6)
+        subscription_usage_equiv_monthly = round(monthly_cost, 6)
+        metered_daily = round(or_daily + jain_api_daily + (xai_usage.get("daily", 0.0) if xai_usage.get("available") else 0.0), 6)
+        metered_weekly = round(or_weekly + jain_api.get("weekly", 0) + xai_weekly, 6)
+        metered_monthly = round(or_monthly + jain_api_monthly + (xai_usage.get("monthly", 0.0) if xai_usage.get("available") else 0.0), 6)
+        total_monthly = round(subscription_monthly_fee + metered_monthly, 6)
 
-        # ── Weekly Run Rate: automation baseline vs interactive ───────────────
-        # automation = J.A.I.N scripts + OpenRouter background + JAIN API models
-        # interactive = JOSH 2.0 chat sessions (Sonnet-driven, Josh-initiated)
-        automation_weekly = round(
-            jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0) + xai_weekly, 6
-        )
-        interactive_weekly = round(max(0.0, weekly_cost - automation_weekly), 6)
-        total_weekly_all   = round(weekly_cost + or_weekly + jain.get("total", 0) + jain_api.get("weekly", 0), 6)
+        for row in breakdown:
+            source = str(row.get("source") or "").lower()
+            name = str(row.get("name") or "").lower()
+            if source in {"openclaw", "codexbar"} or name.startswith("openai/"):
+                row["billingMode"] = "subscription"
+                row["usageEquivalentCost"] = round(float(row.get("weeklyCost") or row.get("sessionCost") or 0.0), 6)
+                row["marginalCost"] = 0.0
+                row["_note"] = "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
+            elif row.get("isLocal"):
+                row["billingMode"] = "local"
+                row["marginalCost"] = 0.0
+            else:
+                row["billingMode"] = "metered"
+                row["marginalCost"] = round(float(row.get("weeklyCost") or row.get("sessionCost") or 0.0), 6)
+
+        # ── Weekly Run Rate: actual paid layers vs subscription usage equiv ───
+        automation_weekly = round(metered_weekly, 6)
+        interactive_weekly = round(subscription_usage_equiv_weekly, 6)
+        total_weekly_all = round(metered_weekly, 6)
         weekly_run_rate = {
             "total":       total_weekly_all,
             "automation":  automation_weekly,
             "interactive": interactive_weekly,
-            # projected monthly = total * (30/7)
-            "projectedMonthly": round(total_weekly_all * (30 / 7), 2),
+            "projectedMonthly": round(metered_weekly * (30 / 7), 2),
+            "subscriptionUsageEquivalentWeekly": subscription_usage_equiv_weekly,
+            "subscriptionUsageEquivalentProjectedMonthly": round(subscription_usage_equiv_weekly * (30 / 7), 2),
         }
 
         payload = {
             "session": round(current_session_cost, 6),
-            "daily":   round(daily_cost,   6),
-            "weekly":  round(weekly_cost,  6),
-            "monthly": round(monthly_cost, 6),
+            "daily":   round(metered_daily,   6),
+            "weekly":  round(metered_weekly,  6),
+            "monthly": round(total_monthly, 6),
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "lastUpdated": utc_iso(),
@@ -2208,9 +2230,33 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "openrouter": openrouter,
             "elevenlabs": elevenlabs,
             "aggregate": {
-                "daily":   round(daily_cost + jain.get("daily", 0) + or_daily + jain_api_daily, 6),
-                "total":   round(session_cost + jain.get("total", 0) + or_weekly + jain_api.get("weekly", 0), 6),
+                "daily":   metered_daily,
+                "total":   round(metered_weekly, 6),
                 "monthly": total_monthly,
+            },
+            "subscription": {
+                "provider": "OpenAI Pro / Codex",
+                "monthlyFee": subscription_monthly_fee,
+                "billingMode": "subscription",
+                "usageEquivalentDaily": subscription_usage_equiv_daily,
+                "usageEquivalentWeekly": subscription_usage_equiv_weekly,
+                "usageEquivalentMonthly": subscription_usage_equiv_monthly,
+                "note": "Subscription-backed usage is capacity consumption, not incremental API spend.",
+            },
+            "metered": {
+                "daily": metered_daily,
+                "weekly": metered_weekly,
+                "monthly": metered_monthly,
+                "providers": {
+                    "openrouter": round(or_monthly, 6),
+                    "jainApi": round(jain_api_monthly, 6),
+                    "xai": round(xai_usage.get("monthly", 0.0) if xai_usage.get("available") else 0.0, 6),
+                },
+            },
+            "usageEquivalent": {
+                "daily": subscription_usage_equiv_daily,
+                "weekly": subscription_usage_equiv_weekly,
+                "monthly": subscription_usage_equiv_monthly,
             },
             "weeklyRunRate": weekly_run_rate,
         }
