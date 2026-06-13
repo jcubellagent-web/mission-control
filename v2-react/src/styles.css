@@ -16870,3 +16870,53 @@ body::before {
   white-space: nowrap !important;
 }
 /* end TODAY JOBS ROW COMFORT FIX */
+
+/* TODAY JOBS TIME STATE BREATHING ROOM 2026-06-13
+   12-hour AM/PM time belongs in Time; lifecycle belongs in State. */
+#today-jobs .jobs-table-head,
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block {
+  grid-template-columns: 76px 112px minmax(0, 1fr) 84px !important;
+  column-gap: 8px !important;
+}
+
+#today-jobs .calendar-block-time {
+  text-align: left !important;
+}
+
+#today-jobs .calendar-block-time strong {
+  font-size: 9px !important;
+  letter-spacing: 0.01em !important;
+}
+
+#today-jobs .calendar-block-time em {
+  display: none !important;
+}
+
+#today-jobs .calendar-block-state strong {
+  font-size: 9px !important;
+  letter-spacing: 0.045em !important;
+}
+
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block,
+#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 29px !important;
+  height: 29px !important;
+  max-height: 29px !important;
+}
+/* end TODAY JOBS TIME STATE BREATHING ROOM */

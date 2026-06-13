@@ -4853,7 +4853,10 @@ function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
 }
 
 function calendarBlockTimeLabel(date: Date) {
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]M$/i, "");
+  return date
+    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    .replace(/\s/g, " ")
+    .toUpperCase();
 }
 
 function calendarClearUntilLabel(hourKey: number) {
