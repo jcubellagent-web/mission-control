@@ -2937,8 +2937,11 @@ PY"""
         else:
             row_status = 'ok' if present else 'paused'
 
-        if row_status == 'paused' and run_status == 'due':
-            run_status = 'upcoming'
+        if row_status == 'paused' and run_status in {'due', 'missed'}:
+            # Paused/disabled jobs are not operational misses. Keep them
+            # visible for inventory, but never promote stale windows as
+            # OVERDUE in Today's Jobs or Action Required.
+            run_status = 'paused'
 
         # Hermes persists the last job result until the next scheduled run. Treat
         # old failures as historical context, not active Control Tower cron

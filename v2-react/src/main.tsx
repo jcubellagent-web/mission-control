@@ -4503,6 +4503,7 @@ function calendarBlockRunLabel(block: CalendarJobBlock, run: ReturnType<typeof j
   if (block.tone === "done") return block.synthetic ? `${block.count} done` : "Done";
   const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
   if (status === "missed") return "Overdue";
+  if (status === "paused") return "Paused";
   if (block.tone === "planned") return block.synthetic ? `${block.count} scheduled` : "Planned";
   if (block.tone === "ready") return block.synthetic ? `${block.count} ready` : "Ready";
   return run.today;
@@ -4943,6 +4944,7 @@ function calendarPhaseKey(block: CalendarJobBlock) {
   const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
   if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return "needs";
   if (block.tone === "working" || /running|active|in.progress/.test(status)) return "now";
+  if (/paused|disabled/.test(status)) return "next";
   if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "done";
   if (block.tone === "ready" || /ready|due/.test(status)) return "ready";
   return "next";
@@ -5081,6 +5083,7 @@ function calendarBlockStateLabel(block: CalendarJobBlock, run: ReturnType<typeof
   const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
   if (block.tone === "working" || /running|active|in.progress/.test(status)) return "IN PROGRESS";
   if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return /missed|overdue/.test(status) ? "OVERDUE" : "NEEDS JOSH";
+  if (/paused|disabled/.test(status)) return "PAUSED";
   if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "COMPLETE";
   if (block.tone === "ready" || /ready|due/.test(status)) return "READY";
   if (block.tone === "planned" || block.startsAt.getTime() > Date.now()) return "UPCOMING";
