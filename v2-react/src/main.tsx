@@ -1082,13 +1082,22 @@ function activityIsUserFacingFocus(row: TowerActivity) {
 }
 
 function activityFocusRank(row: TowerActivity) {
-  const laneBase = row.lane === "needs-josh" ? 900 : row.lane === "active" ? 650 : row.lane === "planned" ? 360 : 140;
+  const ageMs = Date.now() - row.sortAt;
+  const isFresh = Number.isFinite(ageMs) && ageMs <= ACTIVE_FOCUS_FRESH_MINUTES * 60_000;
+  const isVeryStale = Number.isFinite(ageMs) && ageMs > 24 * 60 * 60_000;
+  const laneBase = row.lane === "active"
+    ? 980
+    : row.lane === "needs-josh"
+      ? (isFresh ? 900 : 520)
+      : row.lane === "planned" ? 360 : 140;
   const priorityBoost = activityIsPriorityFocus(row) ? 130 : 0;
   const userFacingBoost = activityIsUserFacingFocus(row) ? 90 : 0;
   const agentBoost = row.agent === "joshex" || row.agent === "jaimes" || row.agent === "josh" ? 24 : 12;
+  const freshActiveBoost = row.lane === "active" && isFresh ? 360 : 0;
+  const stalePenalty = isVeryStale ? 720 : Number.isFinite(ageMs) && ageMs > 6 * 60 * 60_000 ? 340 : 0;
   const routinePenalty = activityIsRoutineFocus(row) ? 260 : 0;
-  const recencyBoost = Math.max(0, Math.min(55, Math.floor((Date.now() - row.sortAt) / -60_000)));
-  return laneBase + priorityBoost + userFacingBoost + agentBoost + recencyBoost - routinePenalty;
+  const recencyBoost = Math.max(0, Math.min(80, Math.floor((Date.now() - row.sortAt) / -60_000)));
+  return laneBase + priorityBoost + userFacingBoost + agentBoost + freshActiveBoost + recencyBoost - routinePenalty - stalePenalty;
 }
 
 function activityRankedRows(rows: TowerActivity[]) {
@@ -1119,14 +1128,20 @@ function activitySystemQuietCount(model: ControlTowerModel) {
 }
 
 function activityFocusRows(model: ControlTowerModel) {
-  // Only include actually active or critical items, filter out unhelpful stuck items
+  // The Live Work Board is the real-time source of truth: fresh active agent
+  // status must beat stale scheduled/needs-Josh rows such as old Daily Missions.
   const rawActive = [...model.needsJosh, ...model.active].filter(row => {
     const text = ((row.title || "") + " " + (row.detail || "")).toLowerCase();
-    // Filter out unhelpful stuck routine jobs
+    const ageMs = Date.now() - row.sortAt;
+    const isStaleFocus = Number.isFinite(ageMs) && ageMs > 6 * 60 * 60_000;
+    // Filter out unhelpful stuck routine jobs.
     if (text.includes("gmail morninginbox triage")) return false;
     if (text.includes("routine triage")) return false;
-    
-    // Filter out routine health checks and heartbeats so they dont hijack the hero
+    // Old attention rows can stay in Priority Queue, but they should never own
+    // the live hero while a fresh agent is actively broadcasting work.
+    if (row.lane === "needs-josh" && isStaleFocus) return false;
+
+    // Filter out routine health checks and heartbeats so they do not hijack the hero.
     if (text.includes("heartbeat")) return false;
     if (text.includes("kiosk health")) return false;
     if (text.includes("status check")) return false;
