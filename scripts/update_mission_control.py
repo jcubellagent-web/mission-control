@@ -2921,7 +2921,18 @@ PY"""
                 else:
                     run_status = 'upcoming'
         elif today_relevant and sched_meta.get('kind') in {'recurring', 'calendar_split'}:
-            run_status = 'active' if present else 'due'
+            if source == 'hermes':
+                # Hermes recurring watchdogs are scheduled check loops, not
+                # continuously-running work. Show the next scheduled check
+                # instead of pinning JAIMES/Sorare as Working all day.
+                if hermes_next_dt is not None and hermes_next_dt > now_et:
+                    run_status = 'upcoming'
+                elif last_run_today or verified_today:
+                    run_status = 'done'
+                else:
+                    run_status = 'due'
+            else:
+                run_status = 'active' if present else 'due'
         elif target['name'] == 'X Strategic Replies':
             if last_run_today:
                 run_status = 'done'
