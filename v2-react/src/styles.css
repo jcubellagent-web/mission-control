@@ -16775,3 +16775,48 @@ body::before {
   line-height: 1 !important;
 }
 /* end TODAY JOBS ALL-DAY VISIBILITY FIX */
+
+/* TODAY JOBS RIGHT-COLUMN FILL FIX 2026-06-13
+   The right column should be all Today's Jobs: full height, full row width. */
+.control-tower-grid > .right-rail.tower-jobs-rail {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+#today-jobs {
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+}
+
+#today-jobs .job-list {
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
+}
+
+#today-jobs .daily-calendar-view {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+#today-jobs .calendar-day-axis,
+#today-jobs .calendar-hour-slot,
+#today-jobs .calendar-hour-content {
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-empty-block {
+  width: 100% !important;
+  max-width: none !important;
+}
+/* end TODAY JOBS RIGHT-COLUMN FILL FIX */
