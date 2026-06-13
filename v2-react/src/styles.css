@@ -16665,3 +16665,47 @@ body::before {
   }
 }
 /* end 24IN DISPLAY JOBS RAIL WIDTH FIX */
+
+/* 24IN DISPLAY BALANCED LAYOUT FIX 2026-06-13
+   Keep Today's Jobs wider than the old sidebar, without starving the center/left. */
+@media (min-width: 1500px) {
+  .control-tower-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.78fr) minmax(520px, 1fr) !important;
+    gap: 18px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .control-tower-grid > .right-rail.tower-jobs-rail {
+    min-width: 520px !important;
+    padding: 14px 12px !important;
+  }
+
+  .tower-left-column > .activity-ledger,
+  .control-tower-grid > .activity-ledger {
+    flex-basis: calc(40% - 9px) !important;
+    height: calc(40% - 9px) !important;
+  }
+
+  .tower-left-column > .tower-agent-deck {
+    flex-basis: calc(60% - 9px) !important;
+    height: calc(60% - 9px) !important;
+  }
+
+  .ledger-focus-primary .ledger-now-title {
+    font-size: clamp(30px, 2.65vw, 50px) !important;
+    line-height: 1.04 !important;
+  }
+
+  #today-jobs .jobs-table-head,
+  #today-jobs .calendar-job-block,
+  #today-jobs .calendar-job-block.tone-working,
+  #today-jobs .calendar-job-block.tone-planned,
+  #today-jobs .calendar-job-block.tone-ready,
+  #today-jobs .calendar-job-block.tone-done,
+  #today-jobs .calendar-job-block.tone-attention,
+  #today-jobs .calendar-empty-block {
+    grid-template-columns: 58px 92px minmax(0, 1fr) 84px !important;
+  }
+}
+/* end 24IN DISPLAY BALANCED LAYOUT FIX */
