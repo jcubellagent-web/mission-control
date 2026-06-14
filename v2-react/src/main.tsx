@@ -1822,10 +1822,10 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
   const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
   const modelHeadline = typeof subscriptionFee === "number"
-    ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
-    : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
+    ? `${fmtCurrency(subscriptionFee)} sub + ${fmtCurrency(meteredMonthly)}`
+    : fmtCurrency(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
   const modelDetail = typeof subscriptionFee === "number"
-    ? `OpenAI usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
+    ? `Usage equiv ${fmtCurrency(usageEquivalentMonthly)} · metered today ${fmtCurrency(meteredDaily)}`
     : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
@@ -1856,7 +1856,7 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
           <strong>{walletHeadline}</strong>
           <p>{walletDetail}</p>
         </article>
-        <article className="resource-card is-clear">
+        <article className="resource-card resource-card-model-usage is-clear">
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
           <p>{modelDetail}</p>

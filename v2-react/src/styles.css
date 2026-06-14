@@ -17255,13 +17255,16 @@ body::before {
 
 /* Resources overflow guard: keep every card title/value/subtitle inside its border. */
 .tower-resource-stack .resource-card-grid {
-  grid-auto-rows: minmax(86px, auto) !important;
+  grid-template-rows: none !important;
+  grid-auto-rows: minmax(80px, auto) !important;
+  align-content: start !important;
 }
 
 .tower-resource-stack .resource-card {
   align-items: start !important;
   justify-items: start !important;
-  row-gap: 3px !important;
+  align-content: center !important;
+  row-gap: 6px !important;
 }
 
 .tower-resource-stack .resource-card b {
@@ -17286,8 +17289,8 @@ body::before {
   overflow: hidden !important;
   text-overflow: clip !important;
   font-size: clamp(16px, 1.18vw, 22px) !important;
-  line-height: 0.98 !important;
-  letter-spacing: -0.03em !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.02em !important;
 }
 
 .tower-resource-stack .resource-card p {
@@ -17302,4 +17305,53 @@ body::before {
   text-overflow: clip !important;
   font-size: 11px !important;
   line-height: 1.12 !important;
+}
+
+.tower-resource-stack .resource-card-model-usage {
+  grid-template-rows: auto minmax(0, auto) auto !important;
+  align-content: center !important;
+  row-gap: 5px !important;
+}
+
+.tower-resource-stack .resource-card-model-usage strong {
+  -webkit-line-clamp: 1 !important;
+  font-size: clamp(17px, 0.98vw, 21px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.tower-resource-stack .resource-card-model-usage p {
+  -webkit-line-clamp: 2 !important;
+  font-size: clamp(9px, 0.58vw, 10.5px) !important;
+  line-height: 1.14 !important;
+}
+
+.tower-resource-stack .resource-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  min-height: 80px !important;
+  gap: 4px !important;
+}
+
+.tower-resource-stack .resource-card b,
+.tower-resource-stack .resource-card strong,
+.tower-resource-stack .resource-card p {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+.tower-resource-stack .resource-card strong {
+  display: block !important;
+  max-height: 2.3em !important;
+  font-size: clamp(14px, 0.96vw, 19px) !important;
+  line-height: 1.12 !important;
+}
+
+.tower-resource-stack .resource-card p {
+  display: block !important;
+  max-height: 2.32em !important;
+  font-size: clamp(8.5px, 0.58vw, 10px) !important;
+  line-height: 1.16 !important;
 }

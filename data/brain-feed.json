@@ -4,22 +4,28 @@
   "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Mission Control publish blocked",
-  "detail": "Cleared: Mission Control cleanup was committed and pushed to origin/main; local generated dashboard refreshes are no longer awaiting Josh approval.",
-  "updatedAt": "2026-06-14T19:16:21Z",
-  "checkedAt": "2026-06-14T19:16:21Z",
-  "currentTool": "git publish",
+  "objective": "Josh 2.0 screen check clean",
+  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+  "updatedAt": "2026-06-14T19:26:07Z",
+  "checkedAt": "2026-06-14T19:26:07Z",
+  "currentTool": "Control Tower screen check",
   "steps": [
-    {
-      "label": "Mission Control publish blocked",
-      "status": "done",
-      "tool": "git publish",
-      "kind": "complete"
-    },
     {
       "label": "Josh 2.0 screen check clean",
       "status": "done",
       "tool": "Control Tower screen check",
+      "kind": "complete"
+    },
+    {
+      "label": "Fix Resources model usage overlap",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "status"
+    },
+    {
+      "label": "Mission Control publish blocked",
+      "status": "done",
+      "tool": "git publish",
       "kind": "complete"
     },
     {
@@ -39,18 +45,6 @@
       "status": "done",
       "tool": "agent publish",
       "kind": "status"
-    },
-    {
-      "label": "Control Tower publish warning diagnosed",
-      "status": "done",
-      "tool": "state visibility guard",
-      "kind": "complete"
-    },
-    {
-      "label": "Mission Control publish blocked",
-      "status": "blocked",
-      "tool": "heartbeat",
-      "kind": "blocked"
     }
   ],
   "source": "josh2-local-live-feed",
