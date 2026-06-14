@@ -1,0 +1,41 @@
+{
+  "ok": false,
+  "status": "attention",
+  "checkedAt": "2026-06-14T19:08:24Z",
+  "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1.",
+  "staleAfterMinutes": 120,
+  "agents": [
+    {
+      "agent": "josh2",
+      "ok": true,
+      "status": "ok",
+      "stale": false,
+      "ageMinutes": 1.7,
+      "updatedAt": "2026-06-14T19:06:40Z",
+      "summary": "Auto-offload routing policy ok."
+    },
+    {
+      "agent": "jaimes",
+      "ok": true,
+      "status": "ok",
+      "stale": false,
+      "ageMinutes": 0.8,
+      "updatedAt": "2026-06-14T19:07:38Z",
+      "summary": "JAIMES live check: Done: BLKJCK scout entered."
+    },
+    {
+      "agent": "jain",
+      "ok": true,
+      "status": "ready",
+      "stale": false,
+      "ageMinutes": 42.8,
+      "updatedAt": "2026-06-14T18:25:35Z",
+      "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks."
+    }
+  ],
+  "modelRoutesOk": true,
+  "controlTowerAgeMinutes": 0.8,
+  "actionRequiredCount": 1,
+  "cronAttentionCount": 0,
+  "cronAttention": []
+}

@@ -1,0 +1,507 @@
+{
+  "approvals": [
+    {
+      "allowanceType": "unlimited-like",
+      "chain": "base",
+      "risk": "attention",
+      "spenderLabel": "Permit2",
+      "spenderMasked": "0x0000...8BA3",
+      "token": "USDC"
+    },
+    {
+      "allowanceType": "finite",
+      "chain": "base",
+      "risk": "low",
+      "spenderLabel": "Permit2",
+      "spenderMasked": "0x0000...8BA3",
+      "token": "VIRTUAL"
+    },
+    {
+      "allowanceType": "unlimited-like",
+      "chain": "base",
+      "risk": "attention",
+      "spenderLabel": "Permit2",
+      "spenderMasked": "0x0000...8BA3",
+      "token": "VVV"
+    }
+  ],
+  "baseMcp": {
+    "accountConnection": "connected",
+    "capabilities": [
+      "Read connected Base Account context for account-aware proposals.",
+      "Draft swaps, trades, portfolio actions, and app-plugin proposals.",
+      "Surface pending proposals in Telegram and Mission Control for human approval."
+    ],
+    "guardrails": [
+      "No private keys or raw wallet secrets stored in Mission Control.",
+      "Every swap, transfer, bridge, mint, stake, approval, or revoke requires Josh approval in Base Account."
+    ],
+    "lastChecked": "2026-06-12T06:33:20Z",
+    "links": [
+      {
+        "label": "Base MCP announcement",
+        "url": "https://blog.base.org/base-mcp"
+      },
+      {
+        "label": "Base AI agent resources",
+        "url": "https://docs.base.org/get-started/resources-for-ai-agents"
+      }
+    ],
+    "mode": "proposal-only",
+    "owner": "Josh 2.0 monitors Base opportunities; J.A.I.N watches public signal; JOSHeX reviews private wallet approvals.",
+    "pendingProposals": [],
+    "status": "ready",
+    "summary": "Base MCP is connected on Josh 2.0 for proposal drafting; onchain actions still require Josh approval in Base Account."
+  },
+  "chains": [
+    {
+      "chain": "base",
+      "estimatedGasBudgetUsd": 2.07,
+      "gasBalance": 0.001253,
+      "gasStatus": "low",
+      "gasSymbol": "ETH",
+      "gasValueUsd": 2.07
+    },
+    {
+      "chain": "ethereum",
+      "estimatedGasBudgetUsd": 9.94,
+      "gasBalance": 0.006004,
+      "gasStatus": "ready",
+      "gasSymbol": "ETH",
+      "gasValueUsd": 9.94
+    },
+    {
+      "chain": "solana",
+      "estimatedGasBudgetUsd": 75.29,
+      "gasBalance": 1.117034,
+      "gasStatus": "ready",
+      "gasSymbol": "SOL",
+      "gasValueUsd": 75.29
+    }
+  ],
+  "errors": [],
+  "guardrails": {
+    "blockSetApprovalForAll": true,
+    "blockUnlimitedApprovals": true,
+    "bridgingRequiresApproval": true,
+    "chainAllowlist": [
+      "Base",
+      "Ethereum",
+      "Solana"
+    ],
+    "dailyGasCapUsd": 15,
+    "maxApprovalValueUsd": 0,
+    "maxTransactionValueUsd": 0,
+    "mintingRequiresApproval": true,
+    "simulationRequired": true,
+    "stakingRequiresApproval": true,
+    "swapsRequireApproval": true,
+    "unknownContractWritesBlocked": true
+  },
+  "lastFullRefreshAt": "2026-06-14T19:06:07Z",
+  "nfts": [
+    {
+      "chain": "ethereum",
+      "collection": "Parallel Avatars",
+      "confidence": "medium",
+      "count": 1,
+      "floorUsd": 99.41,
+      "source": "Blockscout",
+      "tokenStandard": "ERC-721"
+    },
+    {
+      "chain": "base",
+      "collection": "Parallel Haven Drop",
+      "confidence": "medium",
+      "count": 1,
+      "floorUsd": 29.28,
+      "source": "Blockscout",
+      "tokenStandard": "ERC-721"
+    },
+    {
+      "chain": "base",
+      "collection": "Parallel Haven",
+      "confidence": "medium",
+      "count": 1,
+      "floorUsd": 0.21,
+      "source": "Blockscout",
+      "tokenStandard": "ERC-1155"
+    },
+    {
+      "chain": "base",
+      "collection": "Base Genesis Claim",
+      "confidence": "low",
+      "count": 1,
+      "floorUsd": null,
+      "source": "Blockscout",
+      "tokenStandard": "ERC-1155"
+    }
+  ],
+  "opportunities": [
+    {
+      "actionType": "Refresh inventory",
+      "chain": "all",
+      "estimatedCost": "$0",
+      "expectedBenefit": "Keeps balances, NFTs, approvals, and activity fresh.",
+      "requiredApproval": "none for read-only refresh",
+      "riskLevel": "low",
+      "simulationStatus": "ready"
+    },
+    {
+      "actionType": "Check airdrops/claims",
+      "chain": "Base / Ethereum / Solana",
+      "estimatedCost": "read-only first",
+      "expectedBenefit": "Find claim opportunities without signing anything.",
+      "requiredApproval": "Josh approval before claim",
+      "riskLevel": "medium",
+      "simulationStatus": "simulation required"
+    },
+    {
+      "actionType": "Revoke risky approvals",
+      "chain": "Base",
+      "estimatedCost": "gas only",
+      "expectedBenefit": "2 approvals flagged for review.",
+      "requiredApproval": "Josh approval before revoke",
+      "riskLevel": "medium",
+      "simulationStatus": "not simulated"
+    },
+    {
+      "actionType": "Use VIRTUAL/VVV ecosystem features",
+      "chain": "Base",
+      "estimatedCost": "varies",
+      "expectedBenefit": "Quest, staking, or ecosystem participation after review.",
+      "requiredApproval": "Josh approval before write",
+      "riskLevel": "medium",
+      "simulationStatus": "not simulated"
+    }
+  ],
+  "recentActivity": [
+    {
+      "action": "Solana transaction",
+      "chain": "solana",
+      "explorerLabel": "Solana tx 2gjP...TuQd",
+      "explorerUrl": "https://solscan.io/tx/2gjPdk4JrQbuJ5X1QBWG5otsGConyCociRw5qLVtfjb1W8AqWwfaE6vGupMEewPxAdLpZzer6ZSBVHMvUZpQTuQd",
+      "status": "success",
+      "timestamp": "2026-06-07T00:13:00Z",
+      "valueSummary": "See simulation before action"
+    },
+    {
+      "action": "Solana transaction",
+      "chain": "solana",
+      "explorerLabel": "Solana tx 4hjs...6wJF",
+      "explorerUrl": "https://solscan.io/tx/4hjsTCfxW3Zfoe1UEqtx8YcszYEMNAfpxSRuwrtSnFcfKDPEzMb9UqHSTThUfWEnBtuDGxZDSWu6afXjNB1m6wJF",
+      "status": "success",
+      "timestamp": "2026-05-28T04:09:17Z",
+      "valueSummary": "See simulation before action"
+    },
+    {
+      "action": "Solana transaction",
+      "chain": "solana",
+      "explorerLabel": "Solana tx k4y3...5q1M",
+      "explorerUrl": "https://solscan.io/tx/k4y3bsQiyf8QjXFq5so2FW63CNq6T9utJy6fAqA8mHWPqBY7nP4RLPXyWSMW8WDyEQXWAFJgXfaoRtvQbTN5q1M",
+      "status": "success",
+      "timestamp": "2026-05-28T04:09:07Z",
+      "valueSummary": "See simulation before action"
+    },
+    {
+      "action": "Solana transaction",
+      "chain": "solana",
+      "explorerLabel": "Solana tx 5Z8A...iKbK",
+      "explorerUrl": "https://solscan.io/tx/5Z8AEKGEaGYqcXTZZM76XPLGjzvbD8GQUJnMirsBaBBWp8c61G6PTiqwX8ZBqRBGfeYwzm7pYEW6B2yf5HrCiKbK",
+      "status": "success",
+      "timestamp": "2026-05-28T04:09:03Z",
+      "valueSummary": "See simulation before action"
+    },
+    {
+      "action": "Solana transaction",
+      "chain": "solana",
+      "explorerLabel": "Solana tx SMWf...CHDj",
+      "explorerUrl": "https://solscan.io/tx/SMWfa8rtyYdMm2sR3JS6aY9GAzZa3cZG4TLMvHpAFMz2xU7WGqQetgoRDfDEWoNxNG9bjzU1VEk27f1i5XGCHDj",
+      "status": "success",
+      "timestamp": "2026-05-28T04:08:53Z",
+      "valueSummary": "See simulation before action"
+    },
+    {
+      "action": "createSaltedOrder",
+      "chain": "base",
+      "explorerLabel": "Base tx 0x87d2...cb7a",
+      "explorerUrl": "https://basescan.org/tx/0x87d2db458d07b8e1e53da8bacd7f6fd00019e7186f176a2dbe6fd1fb39d8cb7a",
+      "status": "success",
+      "timestamp": "2026-05-28T04:07:45.000000Z",
+      "valueSummary": "0.001 ETH"
+    },
+    {
+      "action": "createSaltedOrder",
+      "chain": "base",
+      "explorerLabel": "Base tx 0x381b...fd2a",
+      "explorerUrl": "https://basescan.org/tx/0x381baf8a8416bc50f1eb567b807f494cc17ff6e0459059e3858d7b00cfe7fd2a",
+      "status": "success",
+      "timestamp": "2026-05-28T03:56:27.000000Z",
+      "valueSummary": "0.001 ETH"
+    },
+    {
+      "action": "approve",
+      "chain": "base",
+      "explorerLabel": "Base tx 0x315c...0dc5",
+      "explorerUrl": "https://basescan.org/tx/0x315cf04b208cfa41481f278568439591594df9b052483677da6ccd928ad60dc5",
+      "status": "success",
+      "timestamp": "2026-05-28T03:56:25.000000Z",
+      "valueSummary": "No native value moved"
+    },
+    {
+      "action": "execute",
+      "chain": "ethereum",
+      "explorerLabel": "Ethereum tx 0xbe70...d9f7",
+      "explorerUrl": "https://etherscan.io/tx/0xbe70ed5c3baca1c70af594f1f1aa3e1d86eb1c0f6702c0cf76d95ba3b0b3d9f7",
+      "status": "success",
+      "timestamp": "2026-05-25T22:35:35.000000Z",
+      "valueSummary": "0.01 ETH"
+    },
+    {
+      "action": "execute",
+      "chain": "ethereum",
+      "explorerLabel": "Ethereum tx 0x6a01...69ed",
+      "explorerUrl": "https://etherscan.io/tx/0x6a01a7bd3b2efb1769228206108f9548965fa37898652d45fb1874b421c769ed",
+      "status": "success",
+      "timestamp": "2026-05-25T22:32:59.000000Z",
+      "valueSummary": "0.01 ETH"
+    },
+    {
+      "action": "ETH transfer",
+      "chain": "ethereum",
+      "explorerLabel": "Ethereum tx 0x2f48...10f4",
+      "explorerUrl": "https://etherscan.io/tx/0x2f48735283e04f3ffed43c9ff7d906f8d9f952d1ef43578139708807222110f4",
+      "status": "success",
+      "timestamp": "2026-05-25T22:31:59.000000Z",
+      "valueSummary": "0.025 ETH"
+    },
+    {
+      "action": "execute",
+      "chain": "base",
+      "explorerLabel": "Base tx 0x3da9...6e87",
+      "explorerUrl": "https://basescan.org/tx/0x3da900a3de8037381f8bd4dfa8ce74ed7e016f7f2274015cb2933f8b27516e87",
+      "status": "success",
+      "timestamp": "2026-05-25T22:26:45.000000Z",
+      "valueSummary": "No native value moved"
+    },
+    {
+      "action": "execute",
+      "chain": "base",
+      "explorerLabel": "Base tx 0x4074...22f6",
+      "explorerUrl": "https://basescan.org/tx/0x4074d6066a17ad1c420aa4b9bf0a93f7b7383159672826f58cb7f15f849122f6",
+      "status": "success",
+      "timestamp": "2026-05-25T22:26:09.000000Z",
+      "valueSummary": "No native value moved"
+    },
+    {
+      "action": "exec",
+      "chain": "ethereum",
+      "explorerLabel": "Ethereum tx 0x1ac5...a20b",
+      "explorerUrl": "https://etherscan.io/tx/0x1ac59c31066a5dc844d04613cfa12df090cdf8aeba8b787d6b0f0eb79e31a20b",
+      "status": "success",
+      "timestamp": "2026-05-16T22:33:23.000000Z",
+      "valueSummary": "0.0053 ETH"
+    },
+    {
+      "action": "exec",
+      "chain": "ethereum",
+      "explorerLabel": "Ethereum tx 0x566f...d351",
+      "explorerUrl": "https://etherscan.io/tx/0x566f6daae4fea105c1961f8361dc3342487ab595163f5f273d2340398376d351",
+      "status": "success",
+      "timestamp": "2026-05-16T22:17:59.000000Z",
+      "valueSummary": "0.00502 ETH"
+    }
+  ],
+  "refreshMode": "live-solana-plus-private-cache",
+  "status": "fresh",
+  "summary": {
+    "freshnessStatus": "fresh",
+    "lastRefreshed": "2026-06-14T19:06:07Z",
+    "liquidEstimatedUsd": 351.28,
+    "nftEstimatedUsd": 128.9,
+    "totalEstimatedUsd": 480.18
+  },
+  "tokens": [
+    {
+      "amount": 1.117034,
+      "chain": "solana",
+      "classification": "core",
+      "name": "Solana",
+      "priceSource": "Jupiter",
+      "source": "solana-rpc-live",
+      "symbol": "SOL",
+      "valueUsd": 75.29
+    },
+    {
+      "amount": 108.5952,
+      "chain": "base",
+      "classification": "useful",
+      "contractMasked": "0x0b3e...7E1b",
+      "name": "Virtuals Protocol",
+      "priceSource": "CoinGecko",
+      "source": "direct-contract",
+      "symbol": "VIRTUAL",
+      "valueUsd": 63.54
+    },
+    {
+      "amount": 2.9737,
+      "chain": "base",
+      "classification": "useful",
+      "contractMasked": "0xacfE...21bf",
+      "name": "Venice Token",
+      "priceSource": "CoinGecko",
+      "source": "direct-contract",
+      "symbol": "VVV",
+      "valueUsd": 43.59
+    },
+    {
+      "amount": 2116.788529,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "Tqj8...pump",
+      "name": "Kintara",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "KINS",
+      "valueUsd": 32.96
+    },
+    {
+      "amount": 892.769,
+      "chain": "ethereum",
+      "classification": "useful",
+      "contractMasked": "0x7Cf9...2d47",
+      "name": "Nillion",
+      "priceSource": "CoinGecko",
+      "source": "direct-contract",
+      "symbol": "NIL",
+      "valueUsd": 32.76
+    },
+    {
+      "amount": 63.74,
+      "chain": "ethereum",
+      "classification": "unknown",
+      "contractMasked": "0x163f...8753",
+      "name": "Worldcoin",
+      "priceSource": "Blockscout",
+      "source": "blockscout-indexer",
+      "symbol": "WLD",
+      "valueUsd": 32.24
+    },
+    {
+      "amount": 20.0002,
+      "chain": "base",
+      "classification": "core",
+      "contractMasked": "0x8335...2913",
+      "name": "USDC",
+      "priceSource": "CoinGecko",
+      "source": "direct-contract",
+      "symbol": "USDC",
+      "valueUsd": 19.99
+    },
+    {
+      "amount": 232353.903473,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "6bB6...pump",
+      "name": "trumpmaxxing",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "trumpmaxx",
+      "valueUsd": 18.91
+    },
+    {
+      "amount": 48208.043309,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "CxpU...pump",
+      "name": "Turtle Trump",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "TURTRUMP",
+      "valueUsd": 9.25
+    },
+    {
+      "amount": 4240.295015,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "68Nq...Yj6D",
+      "name": "Nest",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "NEST",
+      "valueUsd": 8.42
+    },
+    {
+      "amount": 3063.596598,
+      "chain": "solana",
+      "classification": "active-trade",
+      "mintMasked": "SPCX...3N69",
+      "name": "SPCX69",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "SPCX69",
+      "valueUsd": 4.86
+    },
+    {
+      "amount": 13638.229916,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "7XL2...pump",
+      "name": "BLKJCK",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "BLKJCK",
+      "valueUsd": 3.3
+    },
+    {
+      "amount": 16137.645395,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "9spN...pump",
+      "name": "Solscape",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "XP",
+      "valueUsd": 2.97
+    },
+    {
+      "amount": 1853.076292,
+      "chain": "solana",
+      "classification": "useful",
+      "mintMasked": "7XLu...pump",
+      "name": "XRP SUPERCYCLE",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "XRPS",
+      "valueUsd": 1.89
+    },
+    {
+      "amount": 36081.06,
+      "chain": "ethereum",
+      "classification": "unknown",
+      "contractMasked": "0x69D0...283a",
+      "name": "Space Puppy",
+      "priceSource": "DexScreener",
+      "source": "blockscout-indexer",
+      "symbol": "JUDE",
+      "valueUsd": 1.31
+    },
+    {
+      "amount": 3029.201985,
+      "chain": "solana",
+      "classification": "active-trade",
+      "mintMasked": "2dJn...pump",
+      "name": "TheMisterTurtle",
+      "priceSource": "DexScreener",
+      "source": "solana-rpc-live",
+      "symbol": "TURTLE",
+      "valueUsd": 0.0
+    }
+  ],
+  "updatedAt": "2026-06-14T19:06:07Z",
+  "walletMode": "read-only",
+  "wallets": {
+    "evmMasked": "0xf1CC...B596",
+    "solanaMasked": "J3AB...iMRA"
+  }
+}

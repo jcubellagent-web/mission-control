@@ -32,13 +32,13 @@ except Exception:  # noqa: BLE001 - local dry-runs can run away from Josh's Bot 
         return False
 
 BUTTONS = [
-    [{"text": "1. Gemini review", "callback_data": "model:gemini_flash"}],
-    [{"text": "2. JAIMES workhorse", "callback_data": "route:jaimes"}],
-    [{"text": "Agent council", "callback_data": "route:agent_council"}],
-    [{"text": "3. Run on Josh 2.0 device", "callback_data": "model:codex"}],
-    [{"text": "4. JOSHeX Cloud / repo-safe", "callback_data": "route:joshex_cloud"}],
-    [{"text": "5. JOSHeX private accounts", "callback_data": "route:joshex"}],
-    [{"text": "Force Control Tower sync", "callback_data": "next:check_mission_control"}],
+    [{"text": "Review with Gemini", "callback_data": "model:gemini_flash"}],
+    [{"text": "Send to JAIMES", "callback_data": "route:jaimes"}],
+    [{"text": "Ask agent council", "callback_data": "route:agent_council"}],
+    [{"text": "Run on Josh 2.0", "callback_data": "model:codex"}],
+    [{"text": "Send to JOSHeX Cloud", "callback_data": "route:joshex_cloud"}],
+    [{"text": "Send to JOSHeX Mac", "callback_data": "route:joshex"}],
+    [{"text": "Sync Control Tower", "callback_data": "next:check_mission_control"}],
     [{"text": "Send daily digest", "callback_data": "next:daily_digest"}],
     [{"text": "Run health sweep", "callback_data": "next:run_health_sweep"}],
     [{"text": "Show model choices", "callback_data": "next:show_models"}],
@@ -46,10 +46,10 @@ BUTTONS = [
 ]
 
 PUBLIC_CONTEXT_BUTTONS = [
-    [{"text": "1. Gemini review", "callback_data": "model:gemini_flash"}],
-    [{"text": "2. JAIMES workhorse", "callback_data": "route:jaimes"}],
-    [{"text": "3. Run on Josh 2.0 device", "callback_data": "model:codex"}],
-    [{"text": "Grok for public/X context", "callback_data": "model:grok"}],
+    [{"text": "Review with Gemini", "callback_data": "model:gemini_flash"}],
+    [{"text": "Send to JAIMES", "callback_data": "route:jaimes"}],
+    [{"text": "Run on Josh 2.0", "callback_data": "model:codex"}],
+    [{"text": "Check with Grok", "callback_data": "model:grok"}],
     [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
 
@@ -415,13 +415,25 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
 
     if action in {"next:daily_digest", "next:overview"}:
         kind = "daily" if action == "next:daily_digest" else "overview"
-        text = run_text(["python3", "mission-control/scripts/josh_telegram_digest.py", kind, "--dry-run"])
-        if '"text":' in text:
+        cmd = ["python3", "mission-control/scripts/josh_telegram_digest.py", kind]
+        if dry_run:
+            cmd.append("--dry-run")
+        text = run_text(cmd, timeout=45)
+        if dry_run and '"rich_html":' in text:
             return bullet_card(
                 status="ready",
                 objective=f"Prepare {kind} digest.",
-                now="Digest helper is available.",
-                done=f"Run `python3 mission-control/scripts/josh_telegram_digest.py {kind}` to send it.",
+                now="Rich digest helper is available.",
+                done=f"`python3 mission-control/scripts/josh_telegram_digest.py {kind}` dry-run returned native rich HTML and fallback text.",
+            ), BUTTONS
+        if '"ok": true' in text.lower():
+            native = "native rich table" if '"native_rich_message": true' in text.lower() else "fallback table"
+            return bullet_card(
+                status="sent",
+                objective=f"Send {kind} digest.",
+                now="Digest button handled.",
+                done=f"Sent {kind} digest using {native}.",
+                next_step="Tap another action or send a task.",
             ), BUTTONS
         return text, BUTTONS
 
@@ -455,7 +467,26 @@ def handle(action: str, dry_run: bool = False) -> tuple[str, list | None]:
     if action.startswith("agent:"):
         agent = action.split(":", 1)[1]
         if agent in {"josh", "josh2", "jaimes", "jain", "joshex"}:
-            text = run_text(["python3", "mission-control/scripts/josh_agent_quick_card.py", agent, "--dry-run"])
+            cmd = ["python3", "mission-control/scripts/josh_agent_quick_card.py", agent]
+            if dry_run:
+                cmd.append("--dry-run")
+            text = run_text(cmd, timeout=45)
+            if dry_run and '"rich_html":' in text:
+                return bullet_card(
+                    status="ready",
+                    objective=f"Prepare {agent} quick card.",
+                    now="Rich agent-card helper is available.",
+                    done=f"`python3 mission-control/scripts/josh_agent_quick_card.py {agent}` dry-run returned native rich HTML and fallback text.",
+                ), BUTTONS
+            if '"ok": true' in text.lower():
+                native = "native rich card" if '"native_rich_message": true' in text.lower() else "plain fallback card"
+                return bullet_card(
+                    status="sent",
+                    objective=f"Send {agent} quick card.",
+                    now="Agent button handled.",
+                    done=f"Sent {agent} quick card using {native}.",
+                    next_step="Tap another agent, sync Control Tower, or send a task.",
+                ), BUTTONS
             return text, BUTTONS
 
     if action == "next:check_mission_control":

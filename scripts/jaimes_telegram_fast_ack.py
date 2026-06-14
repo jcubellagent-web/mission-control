@@ -70,11 +70,20 @@ def send_chat_action(action: str = "typing") -> None:
 
 
 def send_message_draft(draft_id: int, text: str = "") -> None:
+    """Optionally update Telegram draft text.
+
+    Disabled by default. The custom draft lane has rendered badly in Telegram
+    and can expose streaming/internal-looking text as overlapping UI. Keep the
+    visible chat clean; use the editable work card instead.
+    """
+    if os.environ.get("JAIMES_TELEGRAM_DRAFTS", "").lower() not in {"1", "true", "yes"}:
+        return
     if work_card is None:
         return
+    safe = clean_prompt(text).replace("\n", " · ")[:280]
     work_card.api_call(
         "sendMessageDraft",
-        {"chat_id": work_card.telegram_target(), "draft_id": draft_id, "text": text[:4096]},
+        {"chat_id": work_card.telegram_target(), "draft_id": draft_id, "text": safe},
         timeout=6,
     )
 
@@ -274,10 +283,10 @@ def mitigation_steps_from_text(text: str) -> list[str]:
         line = raw_line.strip()
         if not line:
             continue
-        if re.match(r"(?i)^\*{0,2}(complete|what was done|tldr|issues|appropriate next steps|objective|status|next)\b", line):
+        if re.match(r"(?i)^\*{0,2}(complete|what was done|tldr|issues|appropriate next steps|approval options|objective|status|next|model|control tower|context|sources?|references?)\b", line):
             break
         line = re.sub(r"^(?:[-*•]|\d+[.)])\s*", "", line).strip()
-        line = line.strip("* ")
+        line = clean_approval_step(line)
         if not line or line.lower() in {"n/a", "na", "none", "not applicable"}:
             continue
         steps.append(line)
@@ -286,13 +295,30 @@ def mitigation_steps_from_text(text: str) -> list[str]:
     return steps
 
 
+def clean_approval_step(step: str) -> str:
+    text = " ".join((step or "").split())
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
+    text = re.sub(r"__([^_]+)__", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"^[-*•\s]+", "", text).strip()
+    text = text.strip("*_ ")
+    text = re.sub(r"^\*{1,2}|\*{1,2}$", "", text).strip()
+    text = re.sub(r"\s+([,.!?;:])", r"\1", text)
+    return text
+
+
 def actionable_approval_step(step: str) -> bool:
-    normalized = " ".join((step or "").strip().lower().split())
+    normalized = " ".join(clean_approval_step(step).strip().lower().split())
     if normalized in {"", "n/a", "na", "none", "not applicable", "no action needed"}:
         return False
-    if re.match(r"^(context|complete|what was done|issues|appropriate next steps|approval needed|objective|status|next|model|route|using)\b", normalized):
+    if re.match(r"^(context|complete|what was done|issues|appropriate next steps|approval needed|approval options|objective|status|next|model|route|using|sources?|references?)\b", normalized):
+        return False
+    if re.match(r"^https?://", normalized):
         return False
     if re.match(r"^context:\s*\d+%$", normalized):
+        return False
+    if re.match(r"^(say|send|reply)\s+[\"'`]", normalized) or re.search(r"\bif you want\b", normalized):
         return False
     return True
 
@@ -310,6 +336,15 @@ def save_approval_actions(actions: dict[str, Any]) -> None:
     save_json(APPROVAL_ACTIONS_PATH, existing)
 
 
+def approval_button_label(step: str) -> str:
+    label = clean_approval_step(step)
+    label = re.sub(r"(?i)^(optional:\s*)", "", label).strip()
+    label = re.sub(r"(?i)^(approve|approval to|approval for)\s+", "", label).strip()
+    label = label.rstrip(".")
+    label = label[:38] + ("..." if len(label) > 38 else "")
+    return f"Approve: {label or 'next action'}"
+
+
 def send_approval_options(objective: str, final_text: str, dry_run: bool = False) -> str:
     steps = [step for step in mitigation_steps_from_text(final_text) if actionable_approval_step(step)]
     if not steps:
@@ -324,11 +359,7 @@ def send_approval_options(objective: str, final_text: str, dry_run: bool = False
             "step": step,
             "created_at": utc_now(),
         }
-        label = " ".join(step.split())
-        if label.lower().startswith("approve "):
-            label = label[8:].strip()
-        label = label[:46] + ("..." if len(label) > 46 else "")
-        buttons.append([{"text": f"Approve {index}: {label}", "callback_data": callback}])
+        buttons.append([{"text": approval_button_label(step), "callback_data": callback}])
     buttons.append([{"text": "Hold / no action", "callback_data": "next:hold"}])
     if dry_run:
         return "dry-run-approval-buttons"
@@ -361,6 +392,8 @@ def objective_from_prompt(prompt: str) -> str:
 
 
 OBJECTIVE_RULES = [
+    (("jaimes", "strict", "settings", "prevent him", "following my instructions"), "Tune JAIMES instruction-following settings"),
+    (("crypto", "wallet", "portfolio", "profit target", "trade card", "trading autonomy"), "Tune JAIMES crypto action mode"),
     (("what's happening to jaimes", "what is happening to jaimes", "jaimes status", "unresponsive"), "Check JAIMES status"),
     (("telegram ux", "telegram interface", "telegram formatting", "telegram button", "work card format", "live card"), "Tune JAIMES Telegram UX"),
     (("mission control", "brain feed", "dashboard", "kiosk"), "Check Control Tower state"),
@@ -553,7 +586,7 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False) -> dict[s
         display_model = f"{display_model}; skill: {skill['label']}"
         display_route = f"{display_route}; runbook={skill['id']}"
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
-    ack_message_id = "dry-run-message" if dry_run else send_initial_ack("recieved, determining objective")
+    ack_message_id = "dry-run-message" if dry_run else send_initial_ack("received — determining objective")
     if not dry_run and ack_message_id:
         send_chat_action()
         send_message_draft(draft_id, objective_card_text(objective, display_model))
@@ -594,6 +627,11 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False) -> dict[s
 
 
 def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = False) -> list[dict[str, Any]]:
+    # Disabled by default after Telegram rendered overlapping live-card text.
+    # Keep prompt acks/finals, but avoid streaming internal-looking progress.
+    if os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower() not in {"1", "true", "yes"}:
+        state["processed_progress_events"] = sorted(set(state.get("processed_progress_events") or []))[-300:]
+        return []
     active = state.get("active_cards") or {}
     processed = set(state.get("processed_progress_events") or [])
     approval_sent = set(state.get("approval_buttons_sent") or [])

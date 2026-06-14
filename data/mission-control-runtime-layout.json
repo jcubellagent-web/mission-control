@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "status": "ok",
+  "checkedAt": "2026-06-14T19:05:06Z",
+  "summary": "Kiosk endpoint, dashboard data, and screen capture checked.",
+  "issues": [],
+  "checks": [
+    {
+      "name": "kiosk",
+      "ok": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "dashboard",
+      "ok": true,
+      "detail": "dashboard JSON parsed"
+    },
+    {
+      "name": "screenshot",
+      "ok": true,
+      "detail": "screenshot advisory: SCREENSHOT_FAILED could not create image from display"
+    }
+  ],
+  "textQuality": {
+    "visibleInternalTextLeaks": []
+  },
+  "source": "mission_control_runtime_layout_check.py"
+}

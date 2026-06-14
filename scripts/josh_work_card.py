@@ -205,6 +205,46 @@ def clean_live_text(value: str, fallback: str = "") -> str:
     return " ".join((value or fallback).replace("...", "").replace("…", "").split())
 
 
+def operator_objective(title: str) -> str:
+    text = clean_live_text(title, "Handle the current Telegram task")
+    lowered = text.lower()
+    if lowered in {"latest telegram task received", "determining objective", "handle latest telegram task"}:
+        return "Work out the real objective and start the right check."
+    return compact(text, limit=150)
+
+
+def friendly_model_line(model: str) -> str:
+    text = clean_live_text(model)
+    lower = text.lower()
+    if not text:
+        return "Josh 2.0"
+    if "gemini" in lower and ("safe summary" in lower or "review" in lower):
+        return "Josh 2.0, with a summary helper if needed"
+    if "codex" in lower or "openclaw" in lower:
+        return "Josh 2.0 / Codex"
+    if "jaimes" in lower:
+        return "JAIMES support lane"
+    if "jain" in lower:
+        return "J.AI.N worker support"
+    return compact(text, limit=90)
+
+
+def friendly_route_line(route: str) -> str:
+    text = clean_live_text(route)
+    lower = text.lower()
+    if not text:
+        return "Josh 2.0 direct chat"
+    if "jaimes" in lower:
+        return "Josh 2.0 coordinating with JAIMES"
+    if "gemini" in lower:
+        return "Josh 2.0 using a summary helper"
+    if "joshex" in lower:
+        return "JOSHeX support lane"
+    if "auto:" in lower:
+        return "Auto-routed to the safest available helper"
+    return compact(text, limit=110)
+
+
 def describe_shell_command(value: str) -> str:
     text = clean_live_text(value)
     text = re.sub(r"^/bin/(?:zsh|bash)\s+-lc\s+", "", text).strip()
@@ -299,6 +339,10 @@ def live_line(item: str) -> str:
         return f"🤖 model: {text.split(':', 1)[1].strip()}"
     if lower.startswith("skill selected:"):
         return f"🧭 skill: {text.split(':', 1)[1].strip()}"
+    if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
+        return f"🔧 tool: {simplify_live_detail(text)}"
+    if lower.startswith(("local check | completed", "system check | completed")):
+        return f"✅ done: {simplify_live_detail(text)}"
     if lower.startswith(("running ", "checking ", "tool:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("tool:") else text
         return f"🔧 tool: {simplify_live_detail(detail)}"
@@ -309,7 +353,7 @@ def live_line(item: str) -> str:
         return "🏁 final: summary sent"
     if lower.startswith("still working"):
         return "⏳ working: waiting for the current model or tool step to finish"
-    return f"• {compact(text, limit=150)}"
+    return f"• {compact(text, limit=90)}"
 
 
 def is_empty_issue(value: str | None) -> bool:
@@ -361,6 +405,60 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
     return [f"Earlier: {', '.join(parts)} consolidated so the card stays readable.", "", *clean[-limit:]]
 
 
+COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
+
+
+def is_complete_status(status: str) -> bool:
+    return str(status or "").strip().lower() in COMPLETE_STATUSES
+
+
+def progress_lines(items: list[str], status: str) -> list[str]:
+    clean = []
+    for item in items:
+        text = live_line(item)
+        if text and text not in clean:
+            clean.append(text)
+    complete_status = is_complete_status(status)
+    if not clean:
+        if complete_status:
+            return ["Progress: ██████████ 100% - complete", ""]
+        return ["Progress: ░░░░░░░░░░ 0% - waiting for first update", ""]
+
+    done_count = sum(1 for line in clean if line.startswith(("✅", "🏁")))
+    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳")))
+    total = max(done_count + active_count, 1)
+    if complete_status:
+        percent = 100
+    elif status == "failed":
+        percent = min(95, round((done_count / total) * 100))
+    else:
+        percent = min(95, round((done_count / total) * 100))
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    if complete_status:
+        complete_count = max(done_count, total)
+        detail = f"{complete_count}/{total} steps complete" if total > 1 else "complete"
+    elif active_count:
+        detail = f"{done_count}/{total} steps complete, {active_count} active/checking"
+    else:
+        detail = f"{done_count}/{total} updates complete"
+    return [f"Progress: {bar} {percent}% - {detail}", ""]
+
+
+def current_step_text(status: str, now: str, live_items: list[str]) -> str:
+    if now:
+        return compact(simplify_live_detail(now), limit=150)
+    if status == "done":
+        return "Finished and verified the result."
+    if status == "failed":
+        return "Stopped on an issue that needs attention."
+    if status == "paused":
+        return "Paused until the next instruction."
+    if live_items:
+        return compact(simplify_live_detail(live_items[-1]), limit=150)
+    return default_current_step(status)
+
+
 def build_completion_summary(
     *,
     title: str,
@@ -385,8 +483,11 @@ def build_completion_summary(
     if not next_steps:
         next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
     approval_needed = next_steps if issues else ["n/a"]
+    model_line = os.environ.get("JOSH_WORK_CARD_MODEL") or "Josh 2.0 Telegram task card"
 
     lines = [
+        f"Model: {html.escape(friendly_model_line(model_line))}",
+        "",
         "<b>Complete:</b>",
         f"{complete} - {html.escape(complete_detail)}",
         "",
@@ -423,10 +524,26 @@ def build_card(
     issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
     next_steps = parse_list(next_step) or default_next_steps(status, bool(issues))
     live_items = append_log(done, [now] if now else [])
+    card_title = {
+        "running": "Live work - in progress",
+        "done": "Work complete",
+        "failed": "Work needs attention",
+        "paused": "Work paused",
+    }.get(status, "Live work")
     lines = [
-        "Live work",
+        f"Model: {friendly_model_line(model_line)}",
         "",
-        *live_lines(live_items, fallback="waiting: first update", limit=10),
+        card_title,
+        "",
+        "Objective:",
+        f"- {operator_objective(title)}",
+        "",
+        "Current step:",
+        f"- {current_step_text(status, now, live_items)}",
+        "",
+        "Done so far:",
+        *progress_lines(live_items, status),
+        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=10),
         "",
         "Issues:",
         *plain_bullet_lines(issues, fallback="None", limit=4),
@@ -435,8 +552,8 @@ def build_card(
         *plain_bullet_lines(next_steps, fallback="No action needed.", limit=4),
         "",
         f"Status: {status_label(status)}",
-        f"Using: {clean_live_text(model_line)}",
-        f"Route: {clean_live_text(route, 'Josh 2.0 direct chat')}",
+        f"Running on: {friendly_model_line(model_line)}",
+        f"Path: {friendly_route_line(route)}",
         f"Updated: {updated or now_label()}",
     ]
     if eta:
@@ -489,6 +606,36 @@ def send_final_summary(text: str, timeout: int, buttons: list | None = None) -> 
     payload["parse_mode"] = "HTML"
     payload["disable_web_page_preview"] = True
     return api_call("sendMessage", payload, timeout=timeout)
+
+
+def send_rich_message(
+    rich_html: str,
+    fallback_text: str,
+    timeout: int,
+    buttons: list | None = None,
+    silent: bool = True,
+) -> dict:
+    payload = {
+        "chat_id": TARGET,
+        "rich_message": {
+            "html": rich_html,
+            "skip_entity_detection": True,
+        },
+        "disable_notification": silent,
+    }
+    if buttons:
+        payload["reply_markup"] = {"inline_keyboard": buttons}
+    result = api_call("sendRichMessage", payload, timeout=timeout)
+    if result.get("ok"):
+        result["native_rich_message"] = True
+        return result
+
+    fallback_payload = build_payload(fallback_text, buttons, silent=silent)
+    fallback_payload["disable_web_page_preview"] = True
+    fallback = api_call("sendMessage", fallback_payload, timeout=timeout)
+    fallback["native_rich_message"] = False
+    fallback["rich_error"] = result.get("error") or result
+    return fallback
 
 
 def edit_final_summary(message_id: int | str, text: str, timeout: int, buttons: list | None = None) -> dict:

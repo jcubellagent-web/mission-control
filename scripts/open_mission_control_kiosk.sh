@@ -9,7 +9,8 @@ if [[ "${1:-}" == "--force" ]]; then
   shift
 fi
 
-URL="${1:-http://127.0.0.1:5174/?ct_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
+KIOSK_ORIGIN="http://127.0.0.1:5174"
+URL="${1:-$KIOSK_ORIGIN/?ct_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
 PROFILE="/tmp/control-tower-kiosk-profile"
 CHROME_APP="Google Chrome"
 
@@ -28,7 +29,12 @@ except Exception:
     print("")
 ' || true)"
 
-if [[ "$FORCE_RELOAD" != "1" && "$current_url" == "$URL" ]]; then
+if [[ "$FORCE_RELOAD" != "1" && "$current_url" == "$KIOSK_ORIGIN"* ]]; then
+  exit 0
+fi
+
+if [[ "$FORCE_RELOAD" != "1" ]] && pgrep -f "Google Chrome.*--user-data-dir=$PROFILE" >/dev/null 2>&1; then
+  echo "control-tower: kiosk Chrome is already running; leaving it in place"
   exit 0
 fi
 
@@ -48,7 +54,12 @@ open -na "$CHROME_APP" --args \
   --password-store=basic \
   --disable-session-crashed-bubble \
   --disable-infobars \
+  --force-prefers-reduced-motion \
   --hide-scrollbars \
   --app="$URL" \
   --start-fullscreen \
   --start-maximized
+
+sleep 2
+osascript -e 'tell application "Google Chrome" to activate' \
+  -e 'tell application "System Events" to key code 53' >/dev/null 2>&1 || true

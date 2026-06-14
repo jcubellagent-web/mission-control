@@ -7,8 +7,13 @@ const dataRoot = resolve(__dirname, "data");
 const configLocalPath = resolve(__dirname, "v2-react", "config.local.js");
 const liveWatchFiles = [
   "brain-feed.json",
+  "joshex-brain-feed.json",
   "jaimes-brain-feed.json",
   "jain-brain-feed.json",
+  "agentic-crypto-wallet.json",
+  "modelUsage.json",
+  "jain-daily-signals.json",
+  "jain-signal-health.json",
   "personal-codex.json",
   "dashboard-data.json",
   "shared-events.json",

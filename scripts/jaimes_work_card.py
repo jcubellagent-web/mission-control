@@ -195,7 +195,7 @@ def operator_objective(title: str) -> str:
     lowered = text.lower()
     if lowered in {"latest telegram task received", "determining objective", "handle latest telegram task"}:
         return "Work out the real objective and start the right check."
-    return compact(text, limit=150)
+    return compact(text, limit=90)
 
 
 def friendly_model_line(model: str) -> str:
@@ -356,7 +356,7 @@ def simplify_live_detail(value: str) -> str:
         return "running a system check"
     if text.lower() in {"running local check", "checking local check"}:
         return "running a system check"
-    return compact(text, limit=150)
+    return compact(text, limit=90)
 
 
 def live_line(item: str) -> str:
@@ -372,6 +372,10 @@ def live_line(item: str) -> str:
         return f"🤖 model: {text.split(':', 1)[1].strip()}"
     if lower.startswith("skill selected:"):
         return f"🧭 skill: {text.split(':', 1)[1].strip()}"
+    if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
+        return f"🔧 step: {simplify_live_detail(text)}"
+    if lower.startswith(("local check | completed", "system check | completed")):
+        return f"✅ done: {simplify_live_detail(text)}"
     if lower.startswith(("running ", "checking ", "tool:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("tool:") else text
         return f"🔧 step: {simplify_live_detail(detail)}"
@@ -385,14 +389,14 @@ def live_line(item: str) -> str:
     commandish = unwrap_shell_command(text).lower()
     if commandish.startswith(("cd ", "python3 ", "openclaw ", "npm ", "hermes ", "launchctl ", "curl ", "git ", "rg ", "sed ", "ssh ", "scp ", "jq ")):
         return f"🔧 step: {describe_shell_command(text)}"
-    return f"• {compact(text, limit=150)}"
+    return f"• {compact(text, limit=90)}"
 
 
 def plain_progress_text(item: str) -> str:
     text = live_line(item)
     text = re.sub(r"^[^\w]+", "", text).strip()
     text = re.sub(r"^(?:step|done|objective|model|skill|working|received|final):\s*", "", text, flags=re.I).strip()
-    return compact(text, limit=150)
+    return compact(text, limit=90)
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:
@@ -436,7 +440,7 @@ def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int =
     return [f"- {item}" for item in clean[:limit]]
 
 
-def live_lines(items: list[str], *, fallback: str = "waiting: first update", limit: int = 10) -> list[str]:
+def live_lines(items: list[str], *, fallback: str = "waiting: first update", limit: int = 6) -> list[str]:
     clean = []
     for item in items:
         text = live_line(item)
@@ -457,6 +461,46 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
     if not parts:
         parts.append(f"{len(earlier)} earlier updates")
     return [f"Earlier: {', '.join(parts)} consolidated so the card stays readable.", "", *clean[-limit:]]
+
+
+COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
+
+
+def is_complete_status(status: str) -> bool:
+    return str(status or "").strip().lower() in COMPLETE_STATUSES
+
+
+def progress_lines(items: list[str], status: str) -> list[str]:
+    clean = []
+    for item in items:
+        text = live_line(item)
+        if text and text not in clean:
+            clean.append(text)
+    complete_status = is_complete_status(status)
+    if not clean:
+        if complete_status:
+            return ["Progress: ██████████ 100% - complete", ""]
+        return ["Progress: ░░░░░░░░░░ 0% - waiting for first update", ""]
+
+    done_count = sum(1 for line in clean if line.startswith(("✅", "🏁")))
+    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳")))
+    total = max(done_count + active_count, 1)
+    if complete_status:
+        percent = 100
+    elif status == "failed":
+        percent = min(95, round((done_count / total) * 100))
+    else:
+        percent = min(95, round((done_count / total) * 100))
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    if complete_status:
+        complete_count = max(done_count, total)
+        detail = f"{complete_count}/{total} steps complete" if total > 1 else "complete"
+    elif active_count:
+        detail = f"{done_count}/{total} steps complete, {active_count} active/checking"
+    else:
+        detail = f"{done_count}/{total} updates complete"
+    return [f"Progress: {bar} {percent}% - {detail}", ""]
 
 
 def build_completion_summary(
@@ -544,7 +588,8 @@ def build_card(
         f"- {current_step_text(status, now, live_items)}",
         "",
         "Done so far:",
-        *live_lines(live_items, fallback="waiting: first update", limit=10),
+        *progress_lines(live_items, status),
+        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=6),
         "",
         "Issues:",
         *plain_bullet_lines(issues, fallback="None", limit=4),

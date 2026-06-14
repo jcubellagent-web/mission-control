@@ -1,23 +1,13 @@
 {
-  "session": 0.0732,
+  "session": 0.058067,
   "daily": 0.0,
   "weekly": 0.0,
   "monthly": 200.0,
   "topModels": [
     {
-      "name": "gpt-5.5",
-      "window": "session",
-      "cost": 562.7299770000001
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "window": "session",
-      "cost": 0.6566157
-    },
-    {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 0.424009
+      "cost": 0.39349199999999995
     },
     {
       "name": "xai/grok-4.20-reasoning",
@@ -28,45 +18,28 @@
       "name": "local/qwen2.5-coder:7b",
       "window": "session",
       "cost": 0.0
+    },
+    {
+      "name": "local/nomic-embed-text:latest",
+      "window": "session",
+      "cost": 0.0
     }
   ],
   "breakdown": [
     {
-      "name": "gpt-5.5",
-      "source": "codex",
-      "weeklyCost": 562.7299770000001,
-      "dailyCost": 29.164793,
-      "sessionCost": 562.7299770000001,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "billingMode": "metered",
-      "marginalCost": 562.729977
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "source": "codex",
-      "weeklyCost": 0.6566157,
-      "dailyCost": 0.21445305,
-      "sessionCost": 0.6566157,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "billingMode": "metered",
-      "marginalCost": 0.656616
-    },
-    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 54759,
-      "outputTokens": 429,
-      "totalTokens": 55188,
-      "sessionCost": 0.424009,
-      "dailyCost": 0.14361600000000002,
-      "weeklyCost": 0.424009,
+      "inputTokens": 55772,
+      "outputTokens": 540,
+      "totalTokens": 56312,
+      "sessionCost": 0.39349199999999995,
+      "dailyCost": 0.113099,
+      "weeklyCost": 0.39349199999999995,
       "sessions": 6,
       "isGemini": false,
       "costEstimated": false,
       "billingMode": "subscription",
-      "usageEquivalentCost": 0.424009,
+      "usageEquivalentCost": 0.393492,
       "marginalCost": 0.0,
       "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
@@ -120,7 +93,7 @@
       "marginalCost": 0.0
     }
   ],
-  "lastUpdated": "2026-06-13T23:29:32Z",
+  "lastUpdated": "2026-06-14T19:10:25Z",
   "jain": {
     "daily": 0.0,
     "session": 0.0,
@@ -167,7 +140,7 @@
     "lastError": "disabled: OpenRouter usage fetch retired"
   },
   "elevenlabs": {
-    "chars_used": 41100,
+    "chars_used": 41270,
     "chars_limit": 578422,
     "available": true
   },
@@ -180,9 +153,9 @@
     "provider": "OpenAI Pro / Codex",
     "monthlyFee": 200.0,
     "billingMode": "subscription",
-    "usageEquivalentDaily": 29.522862,
-    "usageEquivalentWeekly": 563.810602,
-    "usageEquivalentMonthly": 1006.25181,
+    "usageEquivalentDaily": 0.113099,
+    "usageEquivalentWeekly": 630.972517,
+    "usageEquivalentMonthly": 630.972517,
     "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
   },
   "metered": {
@@ -196,17 +169,17 @@
     }
   },
   "usageEquivalent": {
-    "daily": 29.522862,
-    "weekly": 563.810602,
-    "monthly": 1006.25181
+    "daily": 0.113099,
+    "weekly": 630.972517,
+    "monthly": 630.972517
   },
   "weeklyRunRate": {
     "total": 0.0,
     "automation": 0.0,
-    "interactive": 563.810602,
+    "interactive": 630.972517,
     "projectedMonthly": 0.0,
-    "subscriptionUsageEquivalentWeekly": 563.810602,
-    "subscriptionUsageEquivalentProjectedMonthly": 2416.33
+    "subscriptionUsageEquivalentWeekly": 630.972517,
+    "subscriptionUsageEquivalentProjectedMonthly": 2704.17
   },
   "providerBudgets": [],
   "routerPolicy": {}

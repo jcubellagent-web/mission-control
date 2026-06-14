@@ -17224,3 +17224,82 @@ body::before {
   .calendar-phase-strip { gap: 6px !important; margin-bottom: 6px !important; }
   .calendar-phase-strip span { padding-inline: 8px !important; }
 }
+
+/* Kiosk performance governor: keep the wall display readable without continuous GPU churn. */
+.agent-live-rail::after,
+.agent-pulse-ring,
+.work-card::before,
+.calendar-hour-slot.is-current .calendar-hour-content::before,
+.calendar-now-marker span::after,
+.ledger-focus-primary.is-priority-focus::before,
+.ledger-focus-primary.is-priority-focus::after,
+.ledger-live-focus::before,
+.ledger-live-focus::after,
+.living-status-dot,
+.source-chip.is-live::before,
+.tower-agent-row.is-working::before,
+.tower-agent-fresh.is-fresh::before {
+  animation: none !important;
+}
+
+.activity-ledger .ledger-live-focus,
+.tower-card,
+.tower-resource-stack article,
+.daily-calendar-view,
+.calendar-job-block,
+.signal-feed,
+.agentic-crypto-panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Resources overflow guard: keep every card title/value/subtitle inside its border. */
+.tower-resource-stack .resource-card-grid {
+  grid-auto-rows: minmax(86px, auto) !important;
+}
+
+.tower-resource-stack .resource-card {
+  align-items: start !important;
+  justify-items: start !important;
+  row-gap: 3px !important;
+}
+
+.tower-resource-stack .resource-card b {
+  display: block !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 10px !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.12em !important;
+}
+
+.tower-resource-stack .resource-card strong {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  font-size: clamp(16px, 1.18vw, 22px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.tower-resource-stack .resource-card p {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  font-size: 11px !important;
+  line-height: 1.12 !important;
+}

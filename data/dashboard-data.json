@@ -1,5 +1,12 @@
 {
-  "actionRequired": [],
+  "actionRequired": [
+    {
+      "priority": "medium",
+      "title": "Mission Control publish blocked",
+      "detail": "Heartbeat checks passed except Mission Control freshness: latest dashboard commit is 19 hours old and local worktree has uncommitted source/data/build changes blocking a clean pub...",
+      "url": "#jobs"
+    }
+  ],
   "activeNow": [],
   "upcomingEvents": [],
   "brainFeed": {
@@ -7,18 +14,24 @@
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "status": "done",
-    "objective": "Josh 2.0 screen check clean",
-    "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-    "updatedAt": "2026-06-13T23:28:47Z",
-    "checkedAt": "2026-06-13T23:28:47Z",
-    "currentTool": "Control Tower screen check",
+    "status": "blocked",
+    "objective": "Daily agent ecosystem health sweep",
+    "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1.",
+    "updatedAt": "2026-06-14T19:08:25Z",
+    "checkedAt": "2026-06-14T19:08:25Z",
+    "currentTool": "ecosystem health sweep",
     "steps": [
       {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
+        "label": "Daily agent ecosystem health sweep",
+        "status": "blocked",
+        "tool": "ecosystem health sweep",
+        "kind": "status"
+      },
+      {
+        "label": "Mission Control publish cleanup in progress",
+        "status": "blocked",
+        "tool": "git cleanup",
+        "kind": "status"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -27,39 +40,27 @@
         "kind": "complete"
       },
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Mission Control publish cleanup approved",
         "status": "done",
-        "tool": "Control Tower screen check",
+        "tool": "agent publish",
+        "kind": "status"
+      },
+      {
+        "label": "Control Tower publish warning diagnosed",
+        "status": "done",
+        "tool": "state visibility guard",
         "kind": "complete"
       },
       {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
+        "label": "Mission Control publish blocked",
+        "status": "blocked",
+        "tool": "heartbeat",
+        "kind": "blocked"
       },
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Codex subscription optimization complete",
         "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
-      },
-      {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
-      },
-      {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
-      },
-      {
-        "label": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
+        "tool": "codex",
         "kind": "complete"
       }
     ],
@@ -71,65 +72,72 @@
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last completed objective: Josh 2.0 screen check clean",
-    "updatedAt": "2026-06-13T23:29:28Z"
+    "context": "Last objective: Daily agent ecosystem health sweep",
+    "updatedAt": "2026-06-14T19:10:21Z"
   },
   "contextWindow": {
-    "usedTokens": 127788,
+    "usedTokens": 90859,
     "limitTokens": 272000,
-    "pct": 0.4698,
+    "pct": 0.334,
     "model": "gpt-5.5",
-    "status": "amber"
+    "status": "green"
   },
   "agentBus": [],
   "contextWatchdog": {
     "loaded": true,
     "label": "com.josh20.context-watchdog",
     "threshold": 0.5,
-    "lastTriggeredAt": "2026-06-04T15:48:13Z",
+    "lastTriggeredAt": "2026-06-14T18:18:23Z",
     "handoffExists": true,
-    "sessionKey": "agent:main:main",
-    "usedTokens": 173374,
-    "limitTokens": 272000,
-    "pct": 0.6374
+    "sessionKey": "agent:main:telegram:direct:6218150306",
+    "usedTokens": 151287,
+    "limitTokens": 200000,
+    "pct": 0.7564
   },
   "codingVisibility": {
-    "workspaceDirty": 58,
-    "missionControlDirty": 15,
+    "workspaceDirty": 59,
+    "missionControlDirty": 3,
     "recentFiles": [
-      "scripts/jaimes_brain_feed_poller.py"
+      "mission-control/scripts/jaimes_telegram_fast_ack.py",
+      "mission-control/dist/v2-react/assets/index-CfFKg7B_.css",
+      "mission-control/dist/v2-react/assets/index-D41OYgYo.js",
+      "mission-control/dist/v2-react/index.html",
+      "mission-control/AGENTS.md",
+      "mission-control/scripts/jaimes_work_card.py"
     ],
-    "codexbarStatus": "CodexBar available",
+    "codexbarStatus": "75% left \u00b7 wk 57% left",
     "codexbar": {
       "available": true,
       "raw": [
-        "[codex notify] remoteControl/status/changed",
-        "Error: Codex connection failed: chatgpt authentication required to read rate limits"
+        "== Codex 0.139.0 (oauth) ==",
+        "Session: 75% left [=========---]",
+        "Resets in 2h 33m",
+        "Weekly: 57% left [======------]",
+        "Pace: 11% in reserve | Expected 54% used | Lasts until reset",
+        "Resets in 3d 5h",
+        "Credits: 444.72 left",
+        "Account: jcubell16@gmail.com"
       ],
-      "summary": "CodexBar available"
+      "session": "75% left",
+      "weekly": "57% left",
+      "credits": "444.72 left",
+      "account": "jcubell16@gmail.com",
+      "sessionReset": "2h 33m",
+      "weeklyReset": "3d 5h",
+      "summary": "75% left \u00b7 wk 57% left"
     },
-    "updatedAt": "2026-06-13T23:29:28Z"
+    "updatedAt": "2026-06-14T19:10:23Z"
   },
   "modelUsage": {
-    "session": 0.0732,
+    "session": 0.058067,
     "daily": 0.0,
     "weekly": 0.0,
     "monthly": 200.0,
     "topModels": [
       {
-        "name": "gpt-5.5",
-        "window": "session",
-        "cost": 562.7299770000001
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "window": "session",
-        "cost": 0.6566157
-      },
-      {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.424009
+        "cost": 0.39349199999999995
       },
       {
         "name": "xai/grok-4.20-reasoning",
@@ -140,45 +148,28 @@
         "name": "local/qwen2.5-coder:7b",
         "window": "session",
         "cost": 0.0
+      },
+      {
+        "name": "local/nomic-embed-text:latest",
+        "window": "session",
+        "cost": 0.0
       }
     ],
     "breakdown": [
       {
-        "name": "gpt-5.5",
-        "source": "codex",
-        "weeklyCost": 562.7299770000001,
-        "dailyCost": 29.164793,
-        "sessionCost": 562.7299770000001,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "billingMode": "metered",
-        "marginalCost": 562.729977
-      },
-      {
-        "name": "gpt-5.4-mini",
-        "source": "codex",
-        "weeklyCost": 0.6566157,
-        "dailyCost": 0.21445305,
-        "sessionCost": 0.6566157,
-        "totalTokens": 0,
-        "costEstimated": false,
-        "billingMode": "metered",
-        "marginalCost": 0.656616
-      },
-      {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 54759,
-        "outputTokens": 429,
-        "totalTokens": 55188,
-        "sessionCost": 0.424009,
-        "dailyCost": 0.14361600000000002,
-        "weeklyCost": 0.424009,
+        "inputTokens": 55772,
+        "outputTokens": 540,
+        "totalTokens": 56312,
+        "sessionCost": 0.39349199999999995,
+        "dailyCost": 0.113099,
+        "weeklyCost": 0.39349199999999995,
         "sessions": 6,
         "isGemini": false,
         "costEstimated": false,
         "billingMode": "subscription",
-        "usageEquivalentCost": 0.424009,
+        "usageEquivalentCost": 0.393492,
         "marginalCost": 0.0,
         "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
       },
@@ -232,7 +223,7 @@
         "marginalCost": 0.0
       }
     ],
-    "lastUpdated": "2026-06-13T23:29:32Z",
+    "lastUpdated": "2026-06-14T19:10:25Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -279,7 +270,7 @@
       "lastError": "disabled: OpenRouter usage fetch retired"
     },
     "elevenlabs": {
-      "chars_used": 41100,
+      "chars_used": 41270,
       "chars_limit": 578422,
       "available": true
     },
@@ -292,9 +283,9 @@
       "provider": "OpenAI Pro / Codex",
       "monthlyFee": 200.0,
       "billingMode": "subscription",
-      "usageEquivalentDaily": 29.522862,
-      "usageEquivalentWeekly": 563.810602,
-      "usageEquivalentMonthly": 1006.25181,
+      "usageEquivalentDaily": 0.113099,
+      "usageEquivalentWeekly": 630.972517,
+      "usageEquivalentMonthly": 630.972517,
       "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
     },
     "metered": {
@@ -308,23 +299,23 @@
       }
     },
     "usageEquivalent": {
-      "daily": 29.522862,
-      "weekly": 563.810602,
-      "monthly": 1006.25181
+      "daily": 0.113099,
+      "weekly": 630.972517,
+      "monthly": 630.972517
     },
     "weeklyRunRate": {
       "total": 0.0,
       "automation": 0.0,
-      "interactive": 563.810602,
+      "interactive": 630.972517,
       "projectedMonthly": 0.0,
-      "subscriptionUsageEquivalentWeekly": 563.810602,
-      "subscriptionUsageEquivalentProjectedMonthly": 2416.33
+      "subscriptionUsageEquivalentWeekly": 630.972517,
+      "subscriptionUsageEquivalentProjectedMonthly": 2704.17
     },
     "providerBudgets": [],
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-13T23:29:28Z",
+    "updatedAt": "2026-06-14T19:10:21Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -345,7 +336,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-13T23:29:32Z",
+    "updatedAt": "2026-06-14T19:10:25Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -362,32 +353,32 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 51.8,
-      "cpu_user": 29.37,
-      "cpu_sys": 22.37,
-      "load1": 2.11,
-      "load5": 1.76,
-      "load15": 1.63,
-      "ram_used_gb": 12.0,
-      "ram_total_gb": 15.3,
+      "cpu_pct": 41.7,
+      "cpu_user": 23.7,
+      "cpu_sys": 18.58,
+      "load1": 1.61,
+      "load5": 1.87,
+      "load15": 1.76,
+      "ram_used_gb": 13.0,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "78Gi",
+      "disk_avail": "76Gi",
       "disk_pct": 14,
       "available": true
     },
     "jain": {
-      "cpu_pct": 22.5,
-      "cpu_user": 7.24,
-      "cpu_sys": 15.21,
-      "load1": 2.2,
-      "load5": 2.2,
-      "load15": 2.15,
+      "cpu_pct": 29.3,
+      "cpu_user": 15.6,
+      "cpu_sys": 13.65,
+      "load1": 2.45,
+      "load5": 2.18,
+      "load15": 2.1,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 16.0,
+      "ram_total_gb": 15.8,
       "uptime": "",
       "disk_used": "12Gi",
-      "disk_avail": "52Gi",
+      "disk_avail": "50Gi",
       "disk_pct": 19,
       "available": true
     }
@@ -408,19 +399,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-13T23:29:28Z"
+      "lastChecked": "2026-06-14T19:10:21Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-13T23:29:28Z"
+      "lastChecked": "2026-06-14T19:10:21Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-13T23:29:28Z"
+      "lastChecked": "2026-06-14T19:10:21Z"
     }
   ],
   "crons": [
@@ -484,21 +475,6 @@
       "lastRun": "2026-05-27T04:44:57.245511+00:00"
     },
     {
-      "name": "Chiro Invite Sync",
-      "schedule": "Hourly",
-      "description": "Syncs chiropractic client invites into calendar",
-      "category": "Appointments",
-      "agent": "JOSH 2.0",
-      "status": "paused",
-      "source": "cron",
-      "sourceLabel": "Josh Local Cron",
-      "todayRelevant": true,
-      "errors": 0,
-      "lastError": null,
-      "runStatus": "paused",
-      "lastRun": "2026-04-26T16:00:00.936978+00:00"
-    },
-    {
       "name": "J.A.I.N Silence Detector",
       "schedule": "Hourly",
       "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly",
@@ -526,7 +502,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "due",
-      "lastRun": "2026-06-13T23:00:03.012002+00:00"
+      "lastRun": "2026-06-14T19:00:02.500313+00:00"
     },
     {
       "name": "Breaking News Scanner",
@@ -582,7 +558,7 @@
             "time": "4:15 PM",
             "mode": "Weekend",
             "label": "Weekend close",
-            "past": true,
+            "past": false,
             "done": false
           },
           {
@@ -653,9 +629,10 @@
       "status": "paused",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": false,
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "XMCP Boot",
@@ -683,8 +660,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-06-13T02:01:10.521859-04:00",
-      "nextRun": "2026-06-14T02:00:00-04:00"
+      "lastRun": "2026-06-14T02:01:22.322444-04:00",
+      "nextRun": "2026-06-15T02:00:00-04:00"
     },
     {
       "name": "Sorare All-Rarity Claim Sweep",
@@ -699,8 +676,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-06-13T03:30:37.251602-04:00",
-      "nextRun": "2026-06-14T03:30:00-04:00"
+      "lastRun": "2026-06-14T03:30:58.758806-04:00",
+      "nextRun": "2026-06-15T03:30:00-04:00"
     },
     {
       "name": "Sorare Daily Missions Watchdog",
@@ -715,8 +692,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
-      "lastRun": "2026-06-13T19:00:23.733559-04:00",
-      "nextRun": "2026-06-13T19:30:00-04:00"
+      "lastRun": "2026-06-14T15:00:24.287170-04:00",
+      "nextRun": "2026-06-14T15:30:00-04:00"
     },
     {
       "name": "Sorare Daily Missions Late Refresh",
@@ -730,7 +707,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-06-13T16:33:48.461080-04:00",
       "nextRun": "2026-06-14T16:30:00-04:00"
     },
@@ -746,7 +723,7 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "done",
+      "runStatus": "upcoming",
       "lastRun": "2026-06-13T18:32:56.182541-04:00",
       "nextRun": "2026-06-14T18:30:00-04:00"
     },
@@ -779,8 +756,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-06-13T08:07:23.333006-04:00",
-      "nextRun": "2026-06-14T08:00:00-04:00"
+      "lastRun": "2026-06-14T08:06:39.507512-04:00",
+      "nextRun": "2026-06-15T08:00:00-04:00"
     },
     {
       "name": "Sorare GW Evening First Submit",
@@ -839,8 +816,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
-      "lastRun": "2026-06-12T23:20:56.113446-04:00",
-      "nextRun": "2026-06-13T23:20:00-04:00"
+      "lastRun": "2026-06-13T23:21:12.247417-04:00",
+      "nextRun": "2026-06-14T23:20:00-04:00"
     },
     {
       "name": "Fantasy Waiver Scan (post-process)",
@@ -851,9 +828,10 @@
       "status": "paused",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": false,
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "upcoming"
     },
     {
       "name": "Fantasy Weekly Recap",
@@ -864,9 +842,10 @@
       "status": "paused",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": false,
+      "todayRelevant": true,
       "errors": 0,
-      "lastError": null
+      "lastError": null,
+      "runStatus": "paused"
     },
     {
       "name": "Fantasy Injury Monitor",
@@ -947,8 +926,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "done",
-      "lastRun": "2026-06-13T05:51:04.442015-04:00",
-      "nextRun": "2026-06-14T05:50:00-04:00"
+      "lastRun": "2026-06-14T05:50:25.049101-04:00",
+      "nextRun": "2026-06-15T05:50:00-04:00"
     },
     {
       "name": "JAIMES Weekly Report",
@@ -959,49 +938,79 @@
       "status": "paused",
       "source": "cron",
       "sourceLabel": "J.A.I.N Cron",
-      "todayRelevant": true,
+      "todayRelevant": false,
       "errors": 0,
-      "lastError": null,
-      "runStatus": "paused"
+      "lastError": null
     }
   ],
   "codexJobs": [
     {
-      "id": "josh2-complete-20260613-175854-daily-agent-ecosystem-health-sweep",
+      "id": "josh2-complete-20260614-155701-daily-agent-ecosystem-health-sweep",
       "title": "Daily agent ecosystem health sweep",
       "status": "done",
-      "time": "2026-06-13T17:58:54Z",
+      "time": "2026-06-14T15:57:01Z",
       "tool": "ecosystem health sweep",
-      "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.6 min; cron attention 0; action items 0.",
+      "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.1 min; cron attention 0; action items 0.",
+      "owner": "JOSH 2.0"
+    },
+    {
+      "id": "josh2-complete-20260614-154349-telegram-table-rendering-regression-fixed",
+      "title": "Telegram table rendering regression fixed",
+      "status": "done",
+      "time": "2026-06-14T15:43:49Z",
+      "tool": "agent publish",
+      "detail": "Confirmed Josh screenshot showed raw Markdown table fallback rendering; callback rich-card path fixed and durable Telegram final-format rule added.",
       "owner": "JOSH 2.0"
     }
   ],
   "sharedEvents": [
     {
-      "id": "jaimes-status-20260613-232925-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:29:25Z",
+      "id": "jaimes-status-20260614-190938-jaimes-is-working-now",
+      "time": "2026-06-14T19:09:38Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is working now",
+      "status": "active",
+      "tool": "status check",
+      "detail": "JAIMES live update: Kintara/Islands runner."
+    },
+    {
+      "id": "josh2-status-20260614-190825-daily-agent-ecosystem-health-sweep",
+      "time": "2026-06-14T19:08:25Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Daily agent ecosystem health sweep",
+      "status": "blocked",
+      "tool": "ecosystem health sweep",
+      "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1."
+    },
+    {
+      "id": "jaimes-status-20260614-190738-jaimes-is-online-and-ready",
+      "time": "2026-06-14T19:07:38Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
       "title": "JAIMES is online and ready",
       "status": "ready",
       "tool": "status check",
-      "detail": "JAIMES live check: Sorare pre-lock loop."
+      "detail": "JAIMES live check: Done: BLKJCK scout entered."
     },
     {
-      "id": "jaimes-status-20260613-232849-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:28:49Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
+      "id": "josh2-status-20260614-190550-mission-control-publish-cleanup-in-progress",
+      "time": "2026-06-14T19:05:50Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
       "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
+      "title": "Mission Control publish cleanup in progress",
+      "status": "active",
+      "tool": "git cleanup",
+      "detail": "Build passed. Staging Mission Control source, data, guards, and generated kiosk assets; pruning stale local backup artifacts."
     },
     {
-      "id": "josh2-complete-20260613-232847-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:28:47Z",
+      "id": "josh2-complete-20260614-190518-josh-2-0-screen-check-clean",
+      "time": "2026-06-14T19:05:18Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1011,239 +1020,239 @@
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
-      "id": "jaimes-status-20260613-232812-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:28:12Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
+      "id": "josh2-status-20260614-190440-mission-control-publish-cleanup-approved",
+      "time": "2026-06-14T19:04:40Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
       "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
+      "title": "Mission Control publish cleanup approved",
+      "status": "active",
+      "tool": "agent publish",
+      "detail": "Josh approved clearing the publish-blocked review. Inspecting dirty Mission Control changes, then committing and pushing a scoped cleanup."
     },
     {
-      "id": "jaimes-status-20260613-232749-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:27:49Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Sorare pre-lock loop."
-    },
-    {
-      "id": "josh2-complete-20260613-232334-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:23:34Z",
+      "id": "josh2-complete-20260614-185942-control-tower-publish-warning-diagnosed",
+      "time": "2026-06-14T18:59:42Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
-      "title": "Josh 2.0 screen check clean",
+      "title": "Control Tower publish warning diagnosed",
       "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      "tool": "state visibility guard",
+      "detail": "Mission Control local freshness is OK; the visible review card is from the clean publish guard because the mission-control worktree has uncommitted source/data/build changes and the GitHub dashboard commit is old. No Codex auth issue."
     },
     {
-      "id": "jaimes-status-20260613-232248-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:22:48Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
+      "id": "josh2-blocked-20260614-184222-mission-control-publish-blocked",
+      "time": "2026-06-14T18:42:22Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "blocked",
+      "title": "Mission Control publish blocked",
+      "status": "blocked",
+      "tool": "heartbeat",
+      "detail": "Heartbeat checks passed except Mission Control freshness: latest dashboard commit is 19 hours old and local worktree has uncommitted source/data/build changes blocking a clean publish."
     },
     {
-      "id": "jaimes-status-20260613-232148-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:21:48Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
-    },
-    {
-      "id": "jaimes-status-20260613-232048-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:20:48Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: JAIMES is online and ready."
-    },
-    {
-      "id": "jaimes-status-20260613-231948-jaimes-is-online-and-ready",
-      "time": "2026-06-13T23:19:48Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Sorare Daily Missions complete."
-    },
-    {
-      "id": "josh2-complete-20260613-231822-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:18:22Z",
+      "id": "josh2-complete-20260614-181944-codex-subscription-optimization-complete",
+      "time": "2026-06-14T18:19:44Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
-      "title": "Josh 2.0 screen check clean",
+      "title": "Codex subscription optimization complete",
       "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      "tool": "codex",
+      "detail": "Codex CLI and OpenClaw Codex homes aligned to ChatGPT subscription auth; gpt-5.5 defaults normalized; doctor passes with 17 ok, 0 warnings, 0 failures under normal terminal settings."
     },
     {
-      "id": "josh2-complete-20260613-231310-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:13:10Z",
+      "id": "josh2-status-20260614-175024-codex-cleanup-and-optimization",
+      "time": "2026-06-14T17:50:24Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-230758-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:07:58Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-230247-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T23:02:47Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "josh2-complete-20260613-225735-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T22:57:35Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "jaimes-status-20260613-225241-jaimes-is-online-and-ready",
-      "time": "2026-06-13T22:52:41Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
       "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
+      "title": "Codex cleanup and optimization",
+      "status": "active",
+      "tool": "agent publish",
+      "detail": "Auditing Codex/OpenClaw auth, runtime health, local state, plugins, and safe optimization opportunities."
     },
     {
-      "id": "josh2-complete-20260613-225223-josh-2-0-screen-check-clean",
-      "time": "2026-06-13T22:52:23Z",
+      "id": "josh2-complete-20260614-174445-verify-codex-subscription-setup",
+      "time": "2026-06-14T17:44:45Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
-      "title": "Josh 2.0 screen check clean",
+      "title": "Verify Codex subscription setup",
       "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      "tool": "agent publish",
+      "detail": "Pinned OpenAI auth order to Pro OAuth profile first; verified current Telegram session uses openai/gpt-5.5 via OAuth/OpenAI Codex. Standalone codex CLI still has API-key auth file and needs device auth if Josh wants direct CLI converted to..."
     },
     {
-      "id": "jaimes-status-20260613-225141-jaimes-is-online-and-ready",
-      "time": "2026-06-13T22:51:41Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
+      "id": "josh2-complete-20260614-173732-diagnose-gpt-5-4-fallback",
+      "time": "2026-06-14T17:37:32Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Diagnose GPT-5.4 fallback",
+      "status": "done",
+      "tool": "agent publish",
+      "detail": "Checked live session and model config: primary is openai/gpt-5.5 via OAuth; openai/gpt-5.4-mini is configured as first fallback. Earlier fallback notice appears transient."
     },
     {
-      "id": "jaimes-status-20260613-225041-jaimes-is-online-and-ready",
-      "time": "2026-06-13T22:50:41Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
+      "id": "josh2-complete-20260614-173314-tighten-telegram-final-formatting",
+      "time": "2026-06-14T17:33:14Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Tighten Telegram final formatting",
+      "status": "done",
+      "tool": "telegram formatting",
+      "detail": "Final Telegram summaries now require section headers on their own lines, with content beneath and shorter mobile-safe bullets. Josh and JAIMES dry-runs confirm the structure."
     },
     {
-      "id": "jaimes-status-20260613-224941-jaimes-is-online-and-ready",
-      "time": "2026-06-13T22:49:41Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
+      "id": "josh2-complete-20260614-172649-harden-telegram-progress-completion",
+      "time": "2026-06-14T17:26:49Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Harden Telegram progress completion",
+      "status": "done",
+      "tool": "Codex",
+      "detail": "Josh and JAIMES live-card helpers now force completed cards to render Progress 100%, including empty done-list cases."
+    },
+    {
+      "id": "josh2-status-20260614-171319-add-telegram-live-card-progress-bar",
+      "time": "2026-06-14T17:13:19Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
       "type": "status",
-      "title": "JAIMES is online and ready",
+      "title": "Add Telegram live-card progress bar",
+      "status": "done",
+      "tool": "josh work card",
+      "detail": "Josh and JAIMES live cards now show a compact progress bar above Done so far; dry-runs passed"
+    },
+    {
+      "id": "josh2-complete-20260614-170938-telegram-formatting-ux-audit-complete",
+      "time": "2026-06-14T17:09:38Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Telegram formatting UX audit complete",
+      "status": "done",
+      "tool": "agent publish",
+      "detail": "Patched Josh Telegram final/card structure, verified rich-card dry-runs, and added Brain Feed duplicate-row merging for Telegram work cards."
+    },
+    {
+      "id": "josh2-status-20260614-170855-audit-telegram-formatting-ux",
+      "time": "2026-06-14T17:08:55Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Audit Telegram formatting UX",
+      "status": "active",
+      "tool": "agent publish",
+      "detail": "Patched Josh Telegram final structure and Brain Feed duplicate-row handling; running final verification and Control Tower refresh."
+    },
+    {
+      "id": "josh2-handoff-20260614-165211-fresh-session-recommended",
+      "time": "2026-06-14T16:52:11Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "handoff",
+      "title": "Fresh session recommended",
       "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
+      "tool": "heartbeat",
+      "detail": "Direct-chat context reached 59%; heartbeat state is current and no operational blocker was found. Use a fresh lane for the next substantive request."
+    },
+    {
+      "id": "josh2-status-20260614-160934-check-mission-control-state",
+      "time": "2026-06-14T16:09:34Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Check Mission Control state",
+      "status": "done",
+      "tool": "Josh 2.0 Telegram",
+      "detail": "Final response sent in Josh 2.0 Telegram."
+    },
+    {
+      "id": "josh2-complete-20260614-160513-control-tower-duplicate-check-current",
+      "time": "2026-06-14T16:05:13Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Control Tower duplicate check current",
+      "status": "done",
+      "tool": "agent publish",
+      "detail": "Final state refreshed after duplicate status-card check; no action required."
     }
   ],
   "sharedOperatingLayer": {
-    "status": "ready",
-    "updatedAt": "2026-06-13T23:29:25Z",
+    "status": "attention",
+    "updatedAt": "2026-06-14T19:09:38Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
       "knowledgeEntries": 38,
-      "openHandoffs": 0,
+      "openHandoffs": 1,
       "attentionHandoffs": 0,
-      "blocked": 0,
+      "blocked": 1,
       "activeTasks": 0,
       "blockedTasks": 0,
       "approvalNeeded": 0,
       "capabilityAgents": 4,
       "routingRules": 4,
-      "freshHeartbeats": 12,
-      "staleHeartbeats": 7,
+      "freshHeartbeats": 10,
+      "staleHeartbeats": 9,
       "inventoryNodes": 4,
       "wrappedAutomations": 0
     },
     "latestEvents": [
       {
-        "id": "jaimes-status-20260613-232925-jaimes-is-online-and-ready",
-        "time": "2026-06-13T23:29:25Z",
+        "id": "jaimes-status-20260614-190938-jaimes-is-working-now",
+        "time": "2026-06-14T19:09:38Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "JAIMES is working now",
+        "status": "active",
+        "tool": "status check",
+        "detail": "JAIMES live update: Kintara/Islands runner."
+      },
+      {
+        "id": "josh2-status-20260614-190825-daily-agent-ecosystem-health-sweep",
+        "time": "2026-06-14T19:08:25Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "status",
+        "title": "Daily agent ecosystem health sweep",
+        "status": "blocked",
+        "tool": "ecosystem health sweep",
+        "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1."
+      },
+      {
+        "id": "jaimes-status-20260614-190738-jaimes-is-online-and-ready",
+        "time": "2026-06-14T19:07:38Z",
         "agent": "jaimes",
         "agentLabel": "JAIMES",
         "type": "status",
         "title": "JAIMES is online and ready",
         "status": "ready",
         "tool": "status check",
-        "detail": "JAIMES live check: Sorare pre-lock loop."
+        "detail": "JAIMES live check: Done: BLKJCK scout entered."
       },
       {
-        "id": "jaimes-status-20260613-232849-jaimes-is-online-and-ready",
-        "time": "2026-06-13T23:28:49Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
+        "id": "josh2-status-20260614-190550-mission-control-publish-cleanup-in-progress",
+        "time": "2026-06-14T19:05:50Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
         "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: JAIMES is online and ready."
+        "title": "Mission Control publish cleanup in progress",
+        "status": "active",
+        "tool": "git cleanup",
+        "detail": "Build passed. Staging Mission Control source, data, guards, and generated kiosk assets; pruning stale local backup artifacts."
       },
       {
-        "id": "josh2-complete-20260613-232847-josh-2-0-screen-check-clean",
-        "time": "2026-06-13T23:28:47Z",
+        "id": "josh2-complete-20260614-190518-josh-2-0-screen-check-clean",
+        "time": "2026-06-14T19:05:18Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "complete",
@@ -1253,40 +1262,30 @@
         "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
       },
       {
-        "id": "jaimes-status-20260613-232812-jaimes-is-online-and-ready",
-        "time": "2026-06-13T23:28:12Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: JAIMES is online and ready."
-      },
-      {
-        "id": "jaimes-status-20260613-232749-jaimes-is-online-and-ready",
-        "time": "2026-06-13T23:27:49Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: Sorare pre-lock loop."
-      },
-      {
-        "id": "josh2-complete-20260613-232334-josh-2-0-screen-check-clean",
-        "time": "2026-06-13T23:23:34Z",
+        "id": "josh2-status-20260614-190440-mission-control-publish-cleanup-approved",
+        "time": "2026-06-14T19:04:40Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+        "type": "status",
+        "title": "Mission Control publish cleanup approved",
+        "status": "active",
+        "tool": "agent publish",
+        "detail": "Josh approved clearing the publish-blocked review. Inspecting dirty Mission Control changes, then committing and pushing a scoped cleanup."
       }
     ],
-    "blockedEvents": [],
+    "blockedEvents": [
+      {
+        "id": "josh2-blocked-20260614-184222-mission-control-publish-blocked",
+        "time": "2026-06-14T18:42:22Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "blocked",
+        "title": "Mission Control publish blocked",
+        "status": "blocked",
+        "tool": "heartbeat",
+        "detail": "Heartbeat checks passed except Mission Control freshness: latest dashboard commit is 19 hours old and local worktree has uncommitted source/data/build changes blocking a clean publish."
+      }
+    ],
     "recentDecisions": [
       {
         "id": "joshex-decision-20260514-031403-jaimes-remains-headless",
@@ -1473,25 +1472,116 @@
         "summary": "Reusable inline-button payload for the Josh 2.0 iPhone command-center control panel."
       }
     ],
-    "openHandoffs": [],
+    "openHandoffs": [
+      {
+        "id": "josh2-handoff-20260614-165211-fresh-session-recommended",
+        "time": "2026-06-14T16:52:11Z",
+        "from": "josh2",
+        "fromLabel": "JOSH 2.0",
+        "to": "josh2",
+        "title": "Fresh session recommended",
+        "status": "open",
+        "detail": "Direct-chat context reached 59%; heartbeat state is current and no operational blocker was found. Use a fresh lane for the next substantive request.",
+        "path": "docs/handoffs/2026-06-14-josh2-josh2-handoff-20260614-165211-fresh-session-recommended.md",
+        "privacy": "dashboard-safe"
+      }
+    ],
     "attentionHandoffs": [],
     "dailyRollup": {
-      "date": "2026-06-13",
-      "generatedAt": "2026-06-13T23:29:25Z",
-      "summary": "500 shared event(s), 3 job(s), 0 decision(s), 0 open handoff(s).",
+      "date": "2026-06-14",
+      "generatedAt": "2026-06-14T19:09:38Z",
+      "summary": "500 shared event(s), 9 job(s), 0 decision(s), 1 open handoff(s).",
       "counts": {
         "events": 500,
-        "jobs": 3,
+        "jobs": 9,
         "decisions": 0,
-        "handoffs": 0,
-        "blocked": 0
+        "handoffs": 1,
+        "blocked": 5
       },
       "highlights": [
+        "JAIMES is working now",
+        "Daily agent ecosystem health sweep",
         "JAIMES is online and ready",
-        "Josh 2.0 screen check clean"
+        "Mission Control publish cleanup in progress",
+        "Josh 2.0 screen check clean",
+        "Mission Control publish cleanup approved"
       ],
-      "openHandoffs": [],
-      "blockedItems": []
+      "openHandoffs": [
+        {
+          "id": "josh2-handoff-20260614-165211-fresh-session-recommended",
+          "time": "2026-06-14T16:52:11Z",
+          "from": "josh2",
+          "fromLabel": "JOSH 2.0",
+          "to": "josh2",
+          "title": "Fresh session recommended",
+          "status": "open",
+          "detail": "Direct-chat context reached 59%; heartbeat state is current and no operational blocker was found. Use a fresh lane for the next substantive request.",
+          "path": "docs/handoffs/2026-06-14-josh2-josh2-handoff-20260614-165211-fresh-session-recommended.md",
+          "privacy": "dashboard-safe"
+        }
+      ],
+      "blockedItems": [
+        {
+          "id": "josh2-status-20260614-190825-daily-agent-ecosystem-health-sweep",
+          "time": "2026-06-14T19:08:25Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "status",
+          "title": "Daily agent ecosystem health sweep",
+          "status": "blocked",
+          "tool": "ecosystem health sweep",
+          "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1.",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh2-blocked-20260614-184222-mission-control-publish-blocked",
+          "time": "2026-06-14T18:42:22Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "Mission Control publish blocked",
+          "status": "blocked",
+          "tool": "heartbeat",
+          "detail": "Heartbeat checks passed except Mission Control freshness: latest dashboard commit is 19 hours old and local worktree has uncommitted source/data/build changes blocking a clean publish.",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh2-status-20260614-151522-daily-agent-ecosystem-health-sweep",
+          "time": "2026-06-14T15:15:22Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "status",
+          "title": "Daily agent ecosystem health sweep",
+          "status": "blocked",
+          "tool": "ecosystem health sweep",
+          "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.2 min; cron attention 0; action items 1.",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh2-status-20260614-151320-daily-agent-ecosystem-health-sweep",
+          "time": "2026-06-14T15:13:20Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "status",
+          "title": "Daily agent ecosystem health sweep",
+          "status": "blocked",
+          "tool": "ecosystem health sweep",
+          "detail": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.3 min; cron attention 0; action items 1.",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "josh2-blocked-20260614-142122-today-s-jobs-consistency-needs-attention",
+          "time": "2026-06-14T14:21:22Z",
+          "agent": "josh2",
+          "agentLabel": "JOSH 2.0",
+          "type": "blocked",
+          "title": "Today's Jobs consistency needs attention",
+          "status": "blocked",
+          "tool": "todays-jobs-consistency-watchdog",
+          "detail": "regression check failed",
+          "privacy": "dashboard-safe"
+        }
+      ]
     },
     "adoption": {
       "generatedAt": "2026-05-29T15:49:46Z",
@@ -2109,61 +2199,28 @@
       "staleAfterMinutes": 120,
       "fresh": [
         {
-          "agent": "jaimes",
-          "node": "jaimes-telegram-health-loop",
-          "status": "ok",
-          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
-          "updatedAt": "2026-06-13T23:29:32Z",
-          "stale": false
-        },
-        {
           "agent": "josh2",
           "node": "auto-offload-loop",
           "status": "ok",
           "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-13T23:29:31Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "state-visibility-guard",
-          "status": "ok",
-          "summary": "Mission Control visibility guard ok.",
-          "updatedAt": "2026-06-13T23:29:31Z",
+          "updatedAt": "2026-06-14T19:09:40Z",
           "stale": false
         },
         {
           "agent": "jaimes",
           "node": "jaimes-brain-feed-publish",
-          "status": "ok",
-          "summary": "JAIMES live check: Sorare pre-lock loop.",
-          "updatedAt": "2026-06-13T23:29:25Z",
+          "status": "active",
+          "summary": "JAIMES live update: Kintara/Islands runner.",
+          "updatedAt": "2026-06-14T19:09:38Z",
           "stale": false,
           "source": "agent_publish.py"
         },
         {
           "agent": "jaimes",
           "node": "jaimes-live-poller",
-          "status": "ok",
-          "summary": "JAIMES live check: Sorare pre-lock loop.",
-          "updatedAt": "2026-06-13T23:29:25Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "josh2-brain-feed-publish",
-          "status": "ok",
-          "summary": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T23:28:47Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "josh2",
-          "node": "josh2-self-recovery-loop",
-          "status": "ok",
-          "summary": "Josh 2.0 self-recovery checks are healthy.",
-          "updatedAt": "2026-06-13T23:28:36Z",
+          "status": "active",
+          "summary": "JAIMES live update: Kintara/Islands runner.",
+          "updatedAt": "2026-06-14T19:09:38Z",
           "stale": false
         },
         {
@@ -2171,11 +2228,69 @@
           "node": "mission-control-freshness-loop",
           "status": "ok",
           "summary": "Mission Control freshness ok.",
-          "updatedAt": "2026-06-13T23:28:24Z",
+          "updatedAt": "2026-06-14T19:08:52Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "state-visibility-guard",
+          "status": "ok",
+          "summary": "Control Tower visibility guard ok.",
+          "updatedAt": "2026-06-14T19:08:31Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-brain-feed-publish",
+          "status": "blocked",
+          "summary": "Daily health sweep completed: 3/3 host rows ok; Control Tower age 0.8 min; cron attention 0; action items 1.",
+          "updatedAt": "2026-06-14T19:08:25Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
+          "status": "ok",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-14T19:05:52Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "token-cost-guard-loop",
+          "status": "ok",
+          "summary": "Token/cost guard ok; no high-burn pattern detected in local tracker.",
+          "updatedAt": "2026-06-14T19:02:52Z",
           "stale": false
         }
       ],
       "stale": [
+        {
+          "agent": "joshex",
+          "node": "joshex-brain-feed-publish",
+          "status": "ok",
+          "summary": "JAIMES verified gateway reachability, Control Tower build health, J.A.I.N local build recovery, JSON validation, regression check, and no unmerged conflicts. Remaining diffs are expected telemetry churn; stage only intentional source changes before release.",
+          "updatedAt": "2026-06-14T07:19:43Z",
+          "stale": true,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-self-recovery-loop",
+          "status": "ok",
+          "summary": "Josh 2.0 self-recovery checks are healthy.",
+          "updatedAt": "2026-06-14T05:40:29Z",
+          "stale": true
+        },
+        {
+          "agent": "josh2",
+          "node": "stuck-task-watchdog-loop",
+          "status": "ok",
+          "summary": "No stuck agent work detected.",
+          "updatedAt": "2026-06-14T05:39:49Z",
+          "stale": true
+        },
         {
           "agent": "jain",
           "node": "jain-brain-feed-publish",
@@ -2192,15 +2307,6 @@
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "updatedAt": "2026-06-13T18:27:00Z",
           "stale": true
-        },
-        {
-          "agent": "joshex",
-          "node": "joshex-brain-feed-publish",
-          "status": "ok",
-          "summary": "JOSHeX visible and ready",
-          "updatedAt": "2026-06-13T17:58:18Z",
-          "stale": true,
-          "source": "agent_publish.py"
         },
         {
           "agent": "josh2",
@@ -2225,14 +2331,6 @@
           "status": "ok",
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "updatedAt": "2026-06-12T06:36:52Z"
-        },
-        {
-          "agent": "jaimes",
-          "node": "sorare-prelock-loop",
-          "stale": true,
-          "status": "ok",
-          "summary": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Corey Seager, Eugenio Su\u00e1rez, Gleyber Torres, Jared Triolo",
-          "updatedAt": "2026-06-12T06:34:45Z"
         }
       ]
     },
@@ -2607,7 +2705,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-13T23:29:28Z",
+      "updatedAt": "2026-06-14T19:10:21Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -2651,12 +2749,12 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-06-13T23:29:28.026553Z",
+    "checkedAt": "2026-06-14T07:10:40.412837Z",
     "checks": [
       {
         "name": "Live objectives",
         "ok": true,
-        "detail": "primary=JAIMES; dualAgents=none; live=4",
+        "detail": "primary=JOSH 2.0; dualAgents=none; live=4",
         "severity": "ok"
       },
       {
@@ -2668,7 +2766,7 @@
       {
         "name": "Today Jobs",
         "ok": true,
-        "detail": "28 today-relevant; 0 active issue(s)",
+        "detail": "29 today-relevant; 0 active issue(s)",
         "severity": "ok"
       },
       {
@@ -2704,7 +2802,7 @@
       {
         "name": "Agent Control lane",
         "ok": true,
-        "detail": "overall=attention; ready=2/4; source=live-heartbeats",
+        "detail": "overall=attention; ready=3/4; source=live-heartbeats",
         "severity": "ok"
       },
       {
@@ -3160,7 +3258,7 @@
       {
         "name": "Agentic Crypto summary",
         "ok": true,
-        "detail": "status=fresh; mode=read-only; 11 token rows; 3 chain rows; masked wallets present",
+        "detail": "status=fresh; mode=read-only; 16 token rows; 3 chain rows; masked wallets present",
         "severity": "ok"
       },
       {
@@ -3258,7 +3356,7 @@
   "runtimeLayout": {
     "ok": true,
     "status": "ok",
-    "checkedAt": "2026-06-13T23:28:34Z",
+    "checkedAt": "2026-06-14T19:05:06Z",
     "summary": "Live kiosk layout fits the 24-inch screen",
     "issues": [],
     "checks": [
@@ -3358,7 +3456,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-13T23:29:28Z",
+    "generatedAt": "2026-06-14T19:10:21Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3379,8 +3477,8 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-13T23:29:32Z",
-        "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+        "probedAt": "2026-06-14T19:09:38Z",
+        "summary": "JAIMES live update: Kintara/Islands runner.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3399,7 +3497,7 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-13T23:29:31Z",
+        "probedAt": "2026-06-14T19:09:40Z",
         "summary": "Auto-offload routing policy ok.",
         "source": "live-heartbeats",
         "stale": false
@@ -3409,15 +3507,15 @@
         "label": "JOSHeX",
         "status": "attention",
         "available": false,
-        "probedAt": "2026-06-13T17:58:18Z",
-        "summary": "JOSHeX visible and ready",
+        "probedAt": "2026-06-14T07:19:43Z",
+        "summary": "JAIMES verified gateway reachability, Control Tower build health, J.A.I.N local build recovery, JSON validation, regression check, and no unmerged conflicts. Remaining diffs are e...",
         "source": "live-heartbeats",
         "stale": true
       }
     }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-13T23:20:37Z",
+    "generatedAt": "2026-06-14T19:02:38Z",
     "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
     "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
     "chatSources": {
@@ -3448,7 +3546,7 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T23:18:22Z",
+          "updatedAt": "2026-06-14T19:00:06Z",
           "ageMinutes": 2,
           "currentTool": "Control Tower screen check",
           "active": false
@@ -3481,7 +3579,7 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-13T23:18:22Z",
+          "updatedAt": "2026-06-14T19:00:06Z",
           "ageMinutes": 2,
           "currentTool": "Control Tower screen check",
           "active": false
@@ -3511,18 +3609,18 @@
           "role": "heavy-worker"
         },
         "brainFeed": {
-          "status": "ready",
-          "objective": "JAIMES is online and ready",
-          "detail": "JAIMES live check: Sorare Daily Missions complete.",
-          "updatedAt": "2026-06-13T23:19:48Z",
+          "status": "active",
+          "objective": "Kintara/Islands runner",
+          "detail": "Kintara/Islands runner",
+          "updatedAt": "2026-06-14T19:02:37Z",
           "ageMinutes": 0,
-          "currentTool": "status check",
-          "active": false
+          "currentTool": "telegram",
+          "active": true
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T06:36:52Z",
-          "ageMinutes": 2443,
+          "ageMinutes": 3625,
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "stale": true
         },
@@ -3530,68 +3628,68 @@
         "openHandoffs": [],
         "recentEvents": [
           {
-            "id": "jaimes-status-20260613-231948-jaimes-is-online-and-ready",
-            "time": "2026-06-13T23:19:48Z",
+            "id": "jaimes-status-20260614-190237-jaimes-is-working-now",
+            "time": "2026-06-14T19:02:37Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Kintara/Islands runner."
+          },
+          {
+            "id": "jaimes-status-20260614-190036-jaimes-is-online-and-ready",
+            "time": "2026-06-14T19:00:36Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Sorare Daily Missions complete."
+            "detail": "JAIMES live check: Trade: stop watch 1.25 SOL \u00b7 de-risking."
           },
           {
-            "id": "jaimes-status-20260613-225241-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:52:41Z",
+            "id": "jaimes-status-20260614-185836-jaimes-is-working-now",
+            "time": "2026-06-14T18:58:36Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Continue autonomous strategy."
+          },
+          {
+            "id": "jaimes-status-20260614-185635-jaimes-is-working-now",
+            "time": "2026-06-14T18:56:35Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Check TURTLE setup."
+          },
+          {
+            "id": "jaimes-status-20260614-185535-jaimes-is-working-now",
+            "time": "2026-06-14T18:55:35Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: great, 2dJniDEAGCG7zWKseCkyrML3W23WLjDf1CGxpNv3pump looks like it could."
+          },
+          {
+            "id": "jaimes-status-20260614-185435-jaimes-is-working-now",
+            "time": "2026-06-14T18:54:35Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Silence raw market alerts."
+          },
+          {
+            "id": "jaimes-status-20260614-185334-jaimes-is-online-and-ready",
+            "time": "2026-06-14T18:53:34Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
             "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
           },
           {
-            "id": "jaimes-status-20260613-225141-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:51:41Z",
+            "id": "jaimes-status-20260614-185134-jaimes-is-online-and-ready",
+            "time": "2026-06-14T18:51:34Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-225041-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:50:41Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-224941-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:49:41Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: JAIMES Brain Feed path healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-224740-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:47:40Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: ESPN fantasy auth healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-224640-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:46:40Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: ESPN fantasy auth healthy."
-          },
-          {
-            "id": "jaimes-status-20260613-224540-jaimes-is-online-and-ready",
-            "time": "2026-06-13T22:45:40Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: ESPN fantasy auth healthy."
+            "detail": "JAIMES live check: Done: BLKJCK alert checked."
           }
         ],
         "pickupPrompt": "Review JAIMES brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
@@ -3613,15 +3711,15 @@
           "status": "ready",
           "objective": "J.A.I.N is online and ready",
           "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-13T22:24:24Z",
-          "ageMinutes": 56,
+          "updatedAt": "2026-06-14T18:25:35Z",
+          "ageMinutes": 37,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-13T18:27:00Z",
-          "ageMinutes": 293,
+          "ageMinutes": 1475,
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "stale": true
         },
@@ -3633,7 +3731,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-13T23:29:28Z",
+    "updatedAt": "2026-06-14T19:10:21Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4009,13 +4107,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-13T23:29:28Z",
+    "updatedAt": "2026-06-14T19:10:21Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-13T23:29:28Z",
+    "updatedAt": "2026-06-14T19:10:21Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4082,14 +4180,25 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-13T23:29:28Z"
+      "detail": "Updated 2026-06-14T19:10:21Z"
     }
   ],
-  "trackedTasks": [],
+  "trackedTasks": [
+    {
+      "id": "T-20260614-1504",
+      "title": "Clear Mission Control publish blocked review",
+      "status": "active",
+      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
+      "requestedAt": "2026-06-14 15:04",
+      "updatedAt": "2026-06-14 15:05",
+      "notes": "Josh approved the Mission Control commit/push cleanup to clear the `1 review` / publish-blocked card. Scope is Mission Control source/data/build outputs only; backup artifacts should remain uncommitted.",
+      "owner": "JOSH 2.0"
+    }
+  ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: scripts/jaimes_brain_feed_poller.py",
+      "label": "Recently edited: mission-control/scripts/jaimes_telegram_fast_ack.py, mission-control/dist/v2-react/assets/index-CfFKg7B_.css",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -4099,7 +4208,7 @@
     },
     {
       "id": "context-watchdog",
-      "label": "Context watchdog armed at 50% \u00b7 last trigger 64%",
+      "label": "Context watchdog armed at 50% \u00b7 last trigger 76%",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "watchdog",
@@ -4113,19 +4222,49 @@
       "agent": "JOSHeX",
       "active": false,
       "reportedActive": false,
-      "objective": "JOSHeX visible and ready",
-      "detail": "JOSHeX visible and ready",
-      "status": "ready",
+      "objective": "JAIMES maintenance handoff received",
+      "detail": "JAIMES verified gateway reachability, Control Tower build health, J.A.I.N local build recovery, JSON validation, regression check, and no unmerged conflicts. Remaining diffs are expected telemetry churn; stage only intentional source changes before release.",
+      "status": "done",
       "stale": true,
-      "updatedAt": "2026-06-13T17:58:18Z",
+      "updatedAt": "2026-06-14T07:19:43Z",
       "messageReceived": null,
-      "currentTool": "visibility-heartbeat",
+      "currentTool": "handoff review",
       "model": null,
       "steps": [
         {
-          "label": "JOSHeX visible and ready",
-          "status": "ready",
-          "tool": "visibility-heartbeat",
+          "label": "JAIMES maintenance handoff received",
+          "status": "done",
+          "tool": "handoff review",
+          "kind": "status"
+        },
+        {
+          "label": "Control Tower cleanup complete",
+          "status": "done",
+          "tool": "ecosystem maintenance",
+          "kind": "status"
+        },
+        {
+          "label": "Control Tower cleanup",
+          "status": "done",
+          "tool": "ecosystem maintenance",
+          "kind": "status"
+        },
+        {
+          "label": "Updating JAIMES stack",
+          "status": "done",
+          "tool": "Hermes/OpenCLAW maintenance",
+          "kind": "status"
+        },
+        {
+          "label": "Agent ecosystem scan complete",
+          "status": "done",
+          "tool": "Mission Control health scan",
+          "kind": "complete"
+        },
+        {
+          "label": "Scanning agent ecosystem health",
+          "status": "done",
+          "tool": "Mission Control health scan",
           "kind": "status"
         },
         {
@@ -4144,7 +4283,7 @@
       "detail": "Auto-offload routing policy ok.",
       "status": "ok",
       "stale": false,
-      "updatedAt": "2026-06-13T23:29:31Z",
+      "updatedAt": "2026-06-14T19:09:40Z",
       "messageReceived": null,
       "currentTool": "status check",
       "model": "GPT-5.5",
@@ -4161,15 +4300,15 @@
           "kind": "complete"
         },
         {
-          "label": "Josh 2.0 screen check clean",
+          "label": "Mission Control publish cleanup approved",
           "status": "done",
-          "tool": "Control Tower screen check",
-          "kind": "complete"
+          "tool": "agent publish",
+          "kind": "status"
         },
         {
-          "label": "Josh 2.0 screen check clean",
+          "label": "Control Tower publish warning diagnosed",
           "status": "done",
-          "tool": "Control Tower screen check",
+          "tool": "state visibility guard",
           "kind": "complete"
         }
       ]
@@ -4182,53 +4321,11 @@
       "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
       "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-13T23:24:27Z",
-      "messageReceived": "2026-04-30T07:10:36Z",
+      "updatedAt": "2026-06-14T18:25:35Z",
+      "messageReceived": null,
       "currentTool": "status check",
-      "model": "GPT-5.5",
+      "model": null,
       "steps": [
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "J.A.I.N is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
         {
           "label": "J.A.I.N is online and ready",
           "status": "ready",
@@ -4238,16 +4335,16 @@
       ]
     },
     "jaimes": {
-      "agent": "JAIMES",
-      "active": false,
+      "agent": "jaimes",
+      "active": true,
       "reportedActive": false,
-      "objective": "JAIMES is online and ready",
-      "detail": "JAIMES live check: Sorare pre-lock loop.",
-      "status": "ready",
+      "objective": "is there any narrative or legit team",
+      "detail": "Telegram message received; JAIMES is routing the task.",
+      "status": "active",
       "stale": false,
-      "updatedAt": "2026-06-13T23:29:25Z",
-      "messageReceived": "2026-06-13T22:49:04Z",
-      "currentTool": "status check",
+      "updatedAt": "2026-06-14T19:12:50Z",
+      "messageReceived": "2026-06-14T19:05:47Z",
+      "currentTool": "telegram-ingress",
       "model": "gpt-5.5",
       "steps": [
         {
@@ -4257,48 +4354,22 @@
           "kind": "status"
         },
         {
-          "label": "Sorare pre-lock loop",
-          "status": "info",
-          "tool": "sorare_prelock_loop",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare pre-lock loop",
-          "status": "info",
-          "tool": "sorare_prelock_loop",
-          "kind": "status"
-        },
-        {
-          "label": "Done: JAIMES Brain Feed path healthy",
+          "label": "Sorare Daily Missions complete",
           "status": "done",
-          "tool": "exec",
-          "kind": "status"
+          "tool": "exec"
         },
         {
-          "label": "Self-test: JAIMES Brain Feed path healthy",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare pre-lock loop",
-          "status": "done",
-          "tool": "sorare_prelock_loop",
-          "kind": "status"
-        },
-        {
-          "label": "Done: ESPN fantasy auth healthy",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Fantasy: checking ESPN auth freshness",
-          "status": "done",
-          "tool": "exec",
-          "kind": "status"
+          "label": "is there any narrative or legit team",
+          "status": "active",
+          "tool": "telegram-ingress",
+          "time": "2026-06-14T19:12:50Z"
         }
-      ]
+      ],
+      "label": "JAIMES",
+      "updated_at": "2026-06-14T19:12:50Z",
+      "tool": "telegram-ingress",
+      "auth": "subscription",
+      "modelAuth": "gpt-5.5 (subscription)"
     }
   },
   "joshBrainFeed": {
@@ -4309,7 +4380,7 @@
     "detail": "Auto-offload routing policy ok.",
     "status": "ok",
     "stale": false,
-    "updatedAt": "2026-06-13T23:29:31Z",
+    "updatedAt": "2026-06-14T19:09:40Z",
     "messageReceived": null,
     "currentTool": "status check",
     "model": "GPT-5.5",
@@ -4326,15 +4397,15 @@
         "kind": "complete"
       },
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Mission Control publish cleanup approved",
         "status": "done",
-        "tool": "Control Tower screen check",
-        "kind": "complete"
+        "tool": "agent publish",
+        "kind": "status"
       },
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Control Tower publish warning diagnosed",
         "status": "done",
-        "tool": "Control Tower screen check",
+        "tool": "state visibility guard",
         "kind": "complete"
       }
     ]
@@ -4347,53 +4418,11 @@
     "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
     "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-13T23:24:27Z",
-    "messageReceived": "2026-04-30T07:10:36Z",
+    "updatedAt": "2026-06-14T18:25:35Z",
+    "messageReceived": null,
     "currentTool": "status check",
-    "model": "GPT-5.5",
+    "model": null,
     "steps": [
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "J.A.I.N is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
       {
         "label": "J.A.I.N is online and ready",
         "status": "ready",
@@ -4403,16 +4432,16 @@
     ]
   },
   "jaimesBrainFeed": {
-    "agent": "JAIMES",
-    "active": false,
+    "agent": "jaimes",
+    "active": true,
     "reportedActive": false,
-    "objective": "JAIMES is online and ready",
-    "detail": "JAIMES live check: Sorare pre-lock loop.",
-    "status": "ready",
+    "objective": "is there any narrative or legit team",
+    "detail": "Telegram message received; JAIMES is routing the task.",
+    "status": "active",
     "stale": false,
-    "updatedAt": "2026-06-13T23:29:25Z",
-    "messageReceived": "2026-06-13T22:49:04Z",
-    "currentTool": "status check",
+    "updatedAt": "2026-06-14T19:12:50Z",
+    "messageReceived": "2026-06-14T19:05:47Z",
+    "currentTool": "telegram-ingress",
     "model": "gpt-5.5",
     "steps": [
       {
@@ -4422,48 +4451,22 @@
         "kind": "status"
       },
       {
-        "label": "Sorare pre-lock loop",
-        "status": "info",
-        "tool": "sorare_prelock_loop",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare pre-lock loop",
-        "status": "info",
-        "tool": "sorare_prelock_loop",
-        "kind": "status"
-      },
-      {
-        "label": "Done: JAIMES Brain Feed path healthy",
+        "label": "Sorare Daily Missions complete",
         "status": "done",
-        "tool": "exec",
-        "kind": "status"
+        "tool": "exec"
       },
       {
-        "label": "Self-test: JAIMES Brain Feed path healthy",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare pre-lock loop",
-        "status": "done",
-        "tool": "sorare_prelock_loop",
-        "kind": "status"
-      },
-      {
-        "label": "Done: ESPN fantasy auth healthy",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Fantasy: checking ESPN auth freshness",
-        "status": "done",
-        "tool": "exec",
-        "kind": "status"
+        "label": "is there any narrative or legit team",
+        "status": "active",
+        "tool": "telegram-ingress",
+        "time": "2026-06-14T19:12:50Z"
       }
-    ]
+    ],
+    "label": "JAIMES",
+    "updated_at": "2026-06-14T19:12:50Z",
+    "tool": "telegram-ingress",
+    "auth": "subscription",
+    "modelAuth": "gpt-5.5 (subscription)"
   },
   "liveObjectives": {
     "activeAgents": [],
@@ -4480,7 +4483,7 @@
         "detail": "Auto-offload routing policy ok.",
         "status": "ok",
         "stale": false,
-        "updatedAt": "2026-06-13T23:29:31Z",
+        "updatedAt": "2026-06-14T19:09:40Z",
         "messageReceived": null,
         "currentTool": "status check",
         "model": "GPT-5.5",
@@ -4497,15 +4500,15 @@
             "kind": "complete"
           },
           {
-            "label": "Josh 2.0 screen check clean",
+            "label": "Mission Control publish cleanup approved",
             "status": "done",
-            "tool": "Control Tower screen check",
-            "kind": "complete"
+            "tool": "agent publish",
+            "kind": "status"
           },
           {
-            "label": "Josh 2.0 screen check clean",
+            "label": "Control Tower publish warning diagnosed",
             "status": "done",
-            "tool": "Control Tower screen check",
+            "tool": "state visibility guard",
             "kind": "complete"
           }
         ]
@@ -4514,62 +4517,37 @@
         "agent": "JAIMES",
         "active": false,
         "reportedActive": false,
-        "objective": "JAIMES is online and ready",
-        "detail": "JAIMES live check: Sorare pre-lock loop.",
-        "status": "ready",
+        "objective": "Done: BLKJCK scout entered",
+        "detail": "Done: BLKJCK scout entered",
+        "status": "idle",
         "stale": false,
-        "updatedAt": "2026-06-13T23:29:25Z",
-        "messageReceived": "2026-06-13T22:49:04Z",
-        "currentTool": "status check",
+        "updatedAt": "2026-06-14T19:08:38Z",
+        "messageReceived": "2026-06-14T19:05:47Z",
+        "currentTool": "telegram",
         "model": "gpt-5.5",
         "steps": [
           {
-            "label": "JAIMES is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare pre-lock loop",
-            "status": "info",
-            "tool": "sorare_prelock_loop",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare pre-lock loop",
-            "status": "info",
-            "tool": "sorare_prelock_loop",
-            "kind": "status"
-          },
-          {
-            "label": "Done: JAIMES Brain Feed path healthy",
+            "label": "Sorare Daily Missions complete",
             "status": "done",
-            "tool": "exec",
-            "kind": "status"
+            "tool": "exec"
           },
           {
-            "label": "Self-test: JAIMES Brain Feed path healthy",
+            "label": "approve next steps, but please also log",
             "status": "done",
-            "tool": "exec",
-            "kind": "status"
+            "tool": "telegram-ingress",
+            "time": "2026-06-14T18:06:59Z"
           },
           {
-            "label": "Sorare pre-lock loop",
+            "label": "Run approved P2E next steps",
             "status": "done",
-            "tool": "sorare_prelock_loop",
-            "kind": "status"
+            "tool": "telegram",
+            "time": "2026-06-14T18:07:06Z"
           },
           {
-            "label": "Done: ESPN fantasy auth healthy",
+            "label": "Deep dive BLKJCK",
             "status": "done",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Fantasy: checking ESPN auth freshness",
-            "status": "done",
-            "tool": "exec",
-            "kind": "status"
+            "tool": "telegram",
+            "time": "2026-06-14T19:04:13Z"
           }
         ]
       },
@@ -4581,53 +4559,11 @@
         "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
         "status": "ready",
         "stale": false,
-        "updatedAt": "2026-06-13T23:24:27Z",
-        "messageReceived": "2026-04-30T07:10:36Z",
+        "updatedAt": "2026-06-14T18:25:35Z",
+        "messageReceived": null,
         "currentTool": "status check",
-        "model": "GPT-5.5",
+        "model": null,
         "steps": [
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "J.A.I.N is online and ready",
-            "status": "ready",
-            "tool": "status check",
-            "kind": "status"
-          },
           {
             "label": "J.A.I.N is online and ready",
             "status": "ready",
@@ -4640,19 +4576,49 @@
         "agent": "JOSHeX",
         "active": false,
         "reportedActive": false,
-        "objective": "JOSHeX visible and ready",
-        "detail": "JOSHeX visible and ready",
-        "status": "ready",
+        "objective": "JAIMES maintenance handoff received",
+        "detail": "JAIMES verified gateway reachability, Control Tower build health, J.A.I.N local build recovery, JSON validation, regression check, and no unmerged conflicts. Remaining diffs are expected telemetry churn; stage only intentional source changes before release.",
+        "status": "done",
         "stale": true,
-        "updatedAt": "2026-06-13T17:58:18Z",
+        "updatedAt": "2026-06-14T07:19:43Z",
         "messageReceived": null,
-        "currentTool": "visibility-heartbeat",
+        "currentTool": "handoff review",
         "model": null,
         "steps": [
           {
-            "label": "JOSHeX visible and ready",
-            "status": "ready",
-            "tool": "visibility-heartbeat",
+            "label": "JAIMES maintenance handoff received",
+            "status": "done",
+            "tool": "handoff review",
+            "kind": "status"
+          },
+          {
+            "label": "Control Tower cleanup complete",
+            "status": "done",
+            "tool": "ecosystem maintenance",
+            "kind": "status"
+          },
+          {
+            "label": "Control Tower cleanup",
+            "status": "done",
+            "tool": "ecosystem maintenance",
+            "kind": "status"
+          },
+          {
+            "label": "Updating JAIMES stack",
+            "status": "done",
+            "tool": "Hermes/OpenCLAW maintenance",
+            "kind": "status"
+          },
+          {
+            "label": "Agent ecosystem scan complete",
+            "status": "done",
+            "tool": "Mission Control health scan",
+            "kind": "complete"
+          },
+          {
+            "label": "Scanning agent ecosystem health",
+            "status": "done",
+            "tool": "Mission Control health scan",
             "kind": "status"
           },
           {
@@ -4671,25 +4637,26 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-13T23:29:32Z",
-      "event": "Session spend: $0.07"
+      "time": "2026-06-14T19:10:25Z",
+      "event": "Session spend: $0.06"
     },
     {
-      "time": "2026-06-13T23:29:28Z",
+      "time": "2026-06-14T19:10:23Z",
+      "event": "Coding: mission-control/scripts/jaimes_telegram_fast_ack.py, mission-control/dist/v2-react/assets/index-CfFKg7B_.css"
+    },
+    {
+      "time": "2026-06-14T19:10:23Z",
+      "event": "CodexBar: 75% left \u00b7 wk 57% left"
+    },
+    {
+      "time": "2026-06-14T19:10:21Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-06-13T23:29:28Z",
-      "event": "Coding: scripts/jaimes_brain_feed_poller.py"
-    },
-    {
-      "time": "2026-06-13T23:29:28Z",
-      "event": "CodexBar: CodexBar available"
-    },
-    {
-      "time": "2026-06-13T23:29:28Z",
-      "event": "35 scheduled jobs healthy"
+      "time": "2026-06-14T19:10:21Z",
+      "event": "12 live scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-06-13T23:29:28Z"
+  "lastUpdated": "2026-06-14T19:10:21Z",
+  "generatedAt": "2026-06-14T19:12:50Z"
 }

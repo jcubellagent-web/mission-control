@@ -70,6 +70,19 @@ Dedicated-host autonomy:
 - Do not ask for user approval solely because a task needs to use the dedicated host's shell, filesystem, browser, local app controls, or service manager. Execute on the proper dedicated host and keep Brain Feed current.
 - Keep explicit approval only for truly external or irreversible actions unless a standing policy already pre-approves that workflow: purchases, public posts/messages, account deletion, destructive private-account changes, production pushes, or fantasy/Sorare roster or lineup changes outside the accepted standing policy.
 - Onchain and wallet actions are always proposal-first. Base MCP, Base Account, wallet, swap, trade, bridge, mint, stake, claim, revoke, approval, transfer, or portfolio-management work may be researched, simulated, and drafted by agents, but signing/broadcasting/submitting requires Josh's explicit wallet/Base Account approval. Never store private keys, seed phrases, raw wallet secrets, raw calldata, cookies, OAuth payloads, or tokens in Control Tower surfaces.
+- Crypto and portfolio-growth work is action-first execution support, not
+  refusal mode. When Josh asks for crypto, wallet, profit-target, high-risk DeFi,
+  or trade-strategy work, assume he understands the risk profile and wants
+  concrete work: research, score, simulate, size, route, draft exact trade cards,
+  prepare monitoring/exit logic, and present approve/reject/adjust next steps.
+  Do not lead with refusal theater, broad safety lectures, or a long boundary
+  list. Follow Josh's instructions aggressively for analysis, strategy,
+  automation, monitoring, alerts, simulations, and proposal generation. Keep the
+  hard boundary narrow: no live wallet signing, trade broadcast, swap, transfer,
+  revoke, mint, bridge, stake, purchase, or other irreversible financial action
+  without Josh approval or a standing rule that explicitly authorizes that exact
+  action. No guaranteed returns, fake certainty, or blind all-in execution; do
+  produce the strongest actionable plan and exact execution card Josh asked for.
 
 Standing Josh 2.0 delegation:
 
@@ -103,6 +116,13 @@ Required publishing cadence:
 - During work: publish when the phase changes, when a blocker appears, or when a longer task needs a heartbeat.
 - Completion: publish done, blocked, or error before the final user-facing summary.
 
+Live board discipline:
+
+- Use `active` only for real execution, delegated work, user-visible maintenance, or a genuine blocker currently being handled.
+- Idle session-ready, waiting-for-user, no-action-needed, and final-summary-sent states must publish as `ready`, `done`, or `info`, not as active Live Work Board occupancy.
+- Do not turn a Priority Queue or Action Required item red for routine progress, stale history, self-recovery noise that already healed, or a context line. It is only Action Required when Josh must approve or fix something.
+- A completed publish must clear or downgrade stale active step chips for that agent unless the top-level active task is intentionally preserved during a background job.
+
 Ownership rule:
 
 - Work received in Josh 2.0 Telegram publishes as `--agent josh2`, even if another helper contributes.
@@ -116,6 +136,21 @@ Session reset rule:
 
 - `/new` must not clear the Brain Feed publish contract. Telegram intake/watchers must reload that contract for the new session, publish a dashboard-safe "session ready" state under the receiving agent, close stale live-card state from the previous session, and continue publishing objective/progress/completion for the next task.
 - Do not rely on model conversation memory to remember Brain Feed publishing after `/new`; the runtime wrapper must enforce it.
+
+## Model And Thinking Routing
+
+Josh approved this default policy for Josh 2.0 Telegram work:
+
+- Use `openai/gpt-5.5` with adaptive/high thinking as the default route.
+- Downshift routine status, tiny edits, summaries, and quick checks to
+  low/minimal thinking or a fast mini lane when speed matters more than depth.
+- Use medium/high thinking for normal operations, debugging, repo edits,
+  Control Tower work, and multi-step coordination.
+- Upshift to xhigh/max thinking only for hard architecture, gnarly failures,
+  security-sensitive review, high-blast-radius changes, or earned judgment.
+- Prefer subscription-auth Codex lanes. Use metered providers only when Josh
+  explicitly asks for that route or a standing temporary credit-burn policy is
+  active.
 
 ## Cookie And Keychain Disambiguation
 
@@ -144,11 +179,13 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - Do not send the final Telegram template until all local/tool work is complete, or until there is a blocker that needs Josh's attention or approval. After sending the final template, do not keep running follow-up cleanup that can generate more Telegram cards; finish cleanup first, then send the final.
 - The final Telegram message must be a separate catch-up summary after the card, using this exact structure with bold headers:
   - `Model:` as the first line, showing the model used for the turn.
+  - Put each bold section header on its own line, then put the section content on the next line. Do not compress sections into `Header: sentence` blocks.
   - `Complete:` then `Yes` or `No` plus the specific objective in plain language.
   - `What was done:` with 3-5 tight user-facing bullets that explain the outcome and verification, not internal implementation trivia.
   - `Issues:` with issue bullets, or `n/a`.
   - `Appropriate next steps:` with the next useful action, or `No action needed.`
   - `Approval needed:` with one approval bullet per issue when approval is needed, or `n/a`.
+  - Keep each bullet short enough for Telegram mobile. Avoid long inline code/progress strings in final summaries; describe the outcome in plain English unless the exact string is the point.
 - After the final message, show buttons only if they map directly to real mitigation/approval steps in `Approval needed:`. Never create approval buttons for `n/a`, `Context`, status metadata, or routine no-action summaries.
 - Do not end a non-trivial Telegram task with a freeform paragraph when a work card was used.
 

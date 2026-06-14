@@ -4,59 +4,47 @@
   "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Heartbeat checks complete",
-  "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
-  "updatedAt": "2026-06-07T04:17:05Z",
-  "checkedAt": "2026-06-07T04:17:05Z",
-  "currentTool": "agent publish",
+  "objective": "Josh 2.0 screen check clean",
+  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+  "updatedAt": "2026-06-14T19:10:29Z",
+  "checkedAt": "2026-06-14T19:10:29Z",
+  "currentTool": "Control Tower screen check",
   "steps": [
     {
-      "label": "Heartbeat checks complete",
+      "label": "Josh 2.0 screen check clean",
       "status": "done",
-      "tool": "agent publish",
+      "tool": "Control Tower screen check",
       "kind": "complete"
     },
     {
-      "label": "Heartbeat checks started",
-      "status": "active",
+      "label": "Mission Control publish cleanup in progress",
+      "status": "blocked",
+      "tool": "git cleanup",
+      "kind": "status"
+    },
+    {
+      "label": "Mission Control publish cleanup approved",
+      "status": "done",
       "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Heartbeat checks complete",
+      "label": "Control Tower publish warning diagnosed",
       "status": "done",
-      "tool": "agent publish",
+      "tool": "state visibility guard",
       "kind": "complete"
     },
     {
-      "label": "Heartbeat checks started",
-      "status": "active",
-      "tool": "agent publish",
-      "kind": "status"
+      "label": "Mission Control publish blocked",
+      "status": "blocked",
+      "tool": "heartbeat",
+      "kind": "blocked"
     },
     {
-      "label": "Heartbeat checks complete",
+      "label": "Codex subscription optimization complete",
       "status": "done",
-      "tool": "agent publish",
+      "tool": "codex",
       "kind": "complete"
-    },
-    {
-      "label": "Heartbeat checks started",
-      "status": "active",
-      "tool": "agent publish",
-      "kind": "status"
-    },
-    {
-      "label": "Heartbeat complete",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "complete"
-    },
-    {
-      "label": "Heartbeat maintenance",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "status"
     }
   ],
   "source": "josh2-local-live-feed",

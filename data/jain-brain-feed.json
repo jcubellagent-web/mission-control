@@ -1,27 +1,12 @@
 {
+  "agent": "J.A.I.N",
+  "agentId": "jain",
   "active": false,
-  "messageReceived": "2026-04-30T07:10:36Z",
+  "reportedActive": false,
   "objective": "J.A.I.N is online and ready",
   "status": "ready",
+  "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
   "steps": [
-    {
-      "label": "J.A.I.N is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "J.A.I.N is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "Cost baseline reset",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "complete"
-    },
     {
       "label": "J.A.I.N is online and ready",
       "status": "ready",
@@ -54,14 +39,8 @@
     }
   ],
   "currentTool": "status check",
-  "updatedAt": "2026-06-14T05:24:47Z",
-  "checkedAt": "2026-06-14T05:24:47Z",
-  "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.5",
-  "agent": "J.A.I.N",
-  "agentId": "jain",
-  "reportedActive": false,
-  "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+  "updatedAt": "2026-06-14T18:25:35Z",
+  "checkedAt": "2026-06-14T18:25:35Z",
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "localLiveFeed": true

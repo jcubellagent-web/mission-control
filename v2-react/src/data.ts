@@ -463,7 +463,12 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
     tool: item?.sourceLabel || item?.source || "",
     updated_at: item?.lastRun || dashboard?.generatedAt || "",
   }));
-  const dailyCrons = crons.filter((item: any) => item?.todayRelevant);
+  const dailyCrons = crons.filter((item: any) => {
+    const status = String(item?.status || "").toLowerCase();
+    const runStatus = String(item?.runStatus || "").toLowerCase();
+    if (status === "paused" || runStatus === "paused") return false;
+    return item?.todayRelevant;
+  });
   const selectedCrons = new Map<string, any>();
   for (const cron of [...activeCrons, ...priorityCrons, ...dailyCrons]) {
     selectedCrons.set(String(cron?.name || selectedCrons.size), cron);

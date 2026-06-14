@@ -227,13 +227,14 @@ STALE_ATTENTION_HEARTBEAT_STEP_PATTERNS = re.compile(
 )
 
 
-def brain_feed_step_history(rows: Any, event: dict[str, Any]) -> list[dict[str, Any]]:
+def brain_feed_step_history(rows: Any, event: dict[str, Any], *, preserve_active: bool = False) -> list[dict[str, Any]]:
     """Keep ready heartbeats from carrying stale active chips forward."""
     steps = dashboard_steps(rows)
     if event["status"] in STATUS_TO_ACTIVE:
-        return steps
+        return merge_brain_feed_steps(event["agent"], steps)
     replacement = "ready" if event["status"] in {"ok", "ready", "info"} else event["status"]
     cleaned: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
     for step in steps:
         step = dict(step)
         if "label" in step:
@@ -249,7 +250,42 @@ def brain_feed_step_history(rows: Any, event: dict[str, Any]) -> list[dict[str, 
             continue
         if str(step.get("status") or "").lower() == "active" and READY_HEARTBEAT_STEP_PATTERNS.search(text):
             step["status"] = replacement
+        elif str(step.get("status") or "").lower() == "active" and not preserve_active:
+            step["status"] = replacement
+        key = brain_feed_step_key(event["agent"], step)
+        if key in seen:
+            continue
+        seen.add(key)
         cleaned.append(step)
+    return cleaned
+
+
+def brain_feed_step_key(agent: str, step: dict[str, Any]) -> tuple[str, str, str, str]:
+    label = re.sub(r"\s+", " ", str(step.get("label") or "")).strip().lower()
+    status = re.sub(r"\s+", " ", str(step.get("status") or "")).strip().lower()
+    tool = re.sub(r"\s+", " ", str(step.get("tool") or "")).strip().lower()
+    kind = re.sub(r"\s+", " ", str(step.get("kind") or "")).strip().lower()
+    label = re.sub(r"media://inbound/[a-z0-9-]+", "media://inbound", label)
+    if label.startswith("[media attached:"):
+        label = "telegram media intake"
+    if agent in {"josh", "josh2", "jaimes"} and "telegram" in tool:
+        tool = "telegram task"
+    return (label[:180], status[:32], tool[:64], kind[:32])
+
+
+def merge_brain_feed_steps(agent: str, steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    cleaned: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for step in steps:
+        if not isinstance(step, dict):
+            continue
+        key = brain_feed_step_key(agent, step)
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(step)
+        if len(cleaned) >= 7:
+            break
     return cleaned
 
 
@@ -337,6 +373,25 @@ def event_id(agent: str, event_type: str, now: str, title: str) -> str:
     return f"{agent}-{event_type}-{stamp}-{slug}"
 
 
+def shared_event_dedupe_key(event: dict[str, Any]) -> tuple[str, str, str, str, str, str]:
+    def normalize(value: Any, limit: int = 240) -> str:
+        text = re.sub(r"\s+", " ", str(value or "")).strip().lower()
+        text = re.sub(r"media://inbound/[a-z0-9-]+", "media://inbound", text)
+        return text[:limit]
+
+    title = normalize(event.get("title"), 160)
+    if title.startswith("[media attached:"):
+        title = "telegram media intake"
+    return (
+        normalize(event.get("agent"), 32),
+        normalize(event.get("type"), 32),
+        title,
+        normalize(event.get("status"), 32),
+        normalize(event.get("tool"), 96),
+        normalize(event.get("detail"), 240),
+    )
+
+
 def append_event(event: dict[str, Any]) -> None:
     EVENTS_PATH.parent.mkdir(parents=True, exist_ok=True)
     lock_path = EVENTS_PATH.with_suffix(".lock")
@@ -344,7 +399,13 @@ def append_event(event: dict[str, Any]) -> None:
         fcntl.flock(lock, fcntl.LOCK_EX)
         ledger = read_json(EVENTS_PATH, {"events": []})
         events = ledger.get("events", []) if isinstance(ledger, dict) else []
-        events = [item for item in events if isinstance(item, dict) and item.get("id") != event["id"]]
+        new_key = shared_event_dedupe_key(event)
+        events = [
+            item for item in events
+            if isinstance(item, dict)
+            and item.get("id") != event["id"]
+            and shared_event_dedupe_key(item) != new_key
+        ]
         events.insert(0, event)
         write_json(EVENTS_PATH, {"events": events[:500]})
         fcntl.flock(lock, fcntl.LOCK_UN)
@@ -482,7 +543,7 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
         "updatedAt": existing.get("updatedAt") if preserve_top else event["time"],
         "checkedAt": event["time"],
         "currentTool": agent_dashboard_text(agent, existing.get("currentTool") if preserve_top else (event.get("tool") or "agent_publish.py"), 44),
-        "steps": [step] + brain_feed_step_history(existing.get("steps"), event),
+        "steps": merge_brain_feed_steps(agent, [step] + brain_feed_step_history(existing.get("steps"), event, preserve_active=preserve_top)),
         "source": "shared-agent-event-ledger",
         "supabaseBacked": True,
     }
@@ -527,7 +588,7 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
         "objective": agent_dashboard_text(event["agent"], existing.get("objective") if preserve_top else event["title"], 220),
         "status": existing.get("status") if preserve_top else ("active" if active else event["status"]),
         "detail": agent_dashboard_text(event["agent"], existing.get("detail") if preserve_top else (event.get("detail") or event["title"]), 260),
-        "steps": [step] + brain_feed_step_history(existing.get("steps"), event),
+        "steps": merge_brain_feed_steps(event["agent"], [step] + brain_feed_step_history(existing.get("steps"), event, preserve_active=preserve_top)),
         "currentTool": agent_dashboard_text(event["agent"], existing.get("currentTool") if preserve_top else (event.get("tool") or "agent_publish.py"), 44),
         "updatedAt": existing.get("updatedAt") if preserve_top else event["time"],
         "checkedAt": event["time"],

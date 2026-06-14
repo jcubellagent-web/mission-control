@@ -4,16 +4,16 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE = ROOT.parent
-if str(WORKSPACE / "scripts") not in sys.path:
-    sys.path.insert(0, str(WORKSPACE / "scripts"))
+SCRIPT_DIR = ROOT / "scripts"
+sys.path = [str(SCRIPT_DIR)] + [path for path in sys.path if path != str(SCRIPT_DIR)]
 
-from send_josh_reply import send_message  # type: ignore  # noqa: E402
+from josh_work_card import send_rich_message  # type: ignore  # noqa: E402
 
 BUTTONS = [
     [{"text": "Use Gemini for review", "callback_data": "model:gemini_flash"}],
@@ -77,18 +77,61 @@ def build_digest(kind: str) -> str:
     return "\n".join(lines)
 
 
+def build_rich_digest(kind: str) -> tuple[str, str]:
+    agent_control = load_json(ROOT / "data" / "agent-control-status.json", {})
+    brain = load_json(ROOT / "data" / "brain-feed.json", {})
+    jobs = load_json(ROOT / "data" / "codex-jobs.json", {})
+    ready, total, failed_queues = count_status(agent_control)
+    recent = recent_brain_items(brain)
+    job_items = jobs.get("jobs") or jobs.get("items") or []
+    active_jobs = [j for j in job_items if str(j.get("status", "")).lower() in {"active", "running", "queued"}]
+    label = "Daily digest" if kind == "daily" else "Agent overview"
+    rows = [
+        ("Agents", f"{ready}/{total} ready", f"Failed queues: {failed_queues}"),
+        ("Jobs", f"{len(active_jobs)} active", "Control Tower tracked"),
+        ("Brain Feed", f"{len(recent)} recent", recent[0] if recent else "No fresh item"),
+        ("Route", "Josh 2.0 Telegram", "Tap a button or send a task"),
+    ]
+    table_rows = "\n".join(
+        "<tr>"
+        f"<td>{html.escape(name)}</td>"
+        f"<td>{html.escape(status)}</td>"
+        f"<td>{html.escape(next_step)}</td>"
+        "</tr>"
+        for name, status, next_step in rows
+    )
+    rich_html = f"""
+<h2>{html.escape(label)}</h2>
+<table bordered="true" striped="true">
+  <caption>Control Tower snapshot</caption>
+  <tr><th>Area</th><th>Status</th><th>Next</th></tr>
+  {table_rows}
+</table>
+<details>
+  <summary>Recent context</summary>
+  <p>{html.escape('; '.join(recent[:3]) if recent else 'No recent Brain Feed items found.')}</p>
+</details>
+<footer>JOSH 2.0 Telegram digest</footer>
+""".strip()
+    return rich_html, build_digest(kind)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("kind", choices=["overview", "daily"])
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    text = build_digest(args.kind)
+    rich_html, text = build_rich_digest(args.kind)
     if args.dry_run:
-        print(json.dumps({"ok": True, "text": text, "buttons": BUTTONS}, indent=2))
+        print(json.dumps({"ok": True, "rich_html": rich_html, "text": text, "buttons": BUTTONS}, indent=2))
         return 0
-    ok = send_message(text, BUTTONS, silent=False, dedupe_key=f"josh-telegram-{args.kind}", force=True)
-    print("ok" if ok else "fail")
-    return 0 if ok else 1
+    result = send_rich_message(rich_html, text, timeout=15, buttons=BUTTONS, silent=False)
+    print(json.dumps({
+        "ok": bool(result.get("ok")),
+        "native_rich_message": bool(result.get("native_rich_message")),
+        "message_id": (result.get("result") or {}).get("message_id"),
+    }, indent=2, sort_keys=True))
+    return 0 if result.get("ok") else 1
 
 
 if __name__ == "__main__":

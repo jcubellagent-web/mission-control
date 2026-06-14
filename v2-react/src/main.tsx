@@ -1810,6 +1810,13 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const walletDetail = walletIsPlaceholder
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
+  const p2eResearch = wallet?.p2eResearch;
+  const p2eTokens = p2eResearch?.tokens || [];
+  const p2eHeld = p2eTokens.filter((token) => token.held).length;
+  const p2eAlerts = p2eResearch?.alerts || [];
+  const p2eTone = p2eAlerts.length ? "risk" : String(p2eResearch?.status || "watch").toLowerCase().includes("clear") ? "clear" : "watch";
+  const p2eHeadline = p2eResearch?.headline || (p2eTokens.length ? `${p2eHeld}/${p2eTokens.length} held` : "Monitor armed");
+  const p2eDetail = p2eResearch?.detail || (p2eResearch?.updatedAt ? `Updated ${ageLabel(p2eResearch.updatedAt)}` : "Solana P2E scorecard ready");
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
@@ -1853,6 +1860,11 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
           <p>{modelDetail}</p>
+        </article>
+        <article className={`resource-card is-${p2eTone}`}>
+          <b>Solana P2E</b>
+          <strong>{p2eHeadline}</strong>
+          <p>{p2eDetail}</p>
         </article>
         <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
           <b>Display fit</b>
@@ -4919,6 +4931,7 @@ function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
 function calendarBlockTimeLabel(date: Date) {
   return date
     .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    .replace(/\s?[AP]M$/i, "")
     .replace(/\s/g, " ")
     .toUpperCase();
 }
@@ -4976,12 +4989,11 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
   const blocks = buildCalendarJobBlocks(calendarJobs);
   const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
   const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
-  const rawVisibleBlocks = todayBlocks.length >= 6
-    ? todayBlocks
-    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))];
-  const visibleBlocks = rawVisibleBlocks
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
-    .slice(0, 20);
+  const visibleBlocks = todayBlocks.length >= 6
+    ? [...todayBlocks].sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()).slice(0, 20)
+    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))]
+      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+      .slice(0, 20);
   const slots = calendarSlots(visibleBlocks);
   const nowMs = Date.now();
   const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
