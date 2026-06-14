@@ -4,12 +4,18 @@
   "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Josh 2.0 screen check clean",
-  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-  "updatedAt": "2026-06-14T19:10:29Z",
-  "checkedAt": "2026-06-14T19:10:29Z",
-  "currentTool": "Control Tower screen check",
+  "objective": "Mission Control publish cleanup complete",
+  "detail": "Mission Control cleanup was committed, rebased onto current origin/main, and pushed. Control Tower publish-blocked review should clear after refresh.",
+  "updatedAt": "2026-06-14T19:13:49Z",
+  "checkedAt": "2026-06-14T19:13:49Z",
+  "currentTool": "git publish",
   "steps": [
+    {
+      "label": "Mission Control publish cleanup complete",
+      "status": "done",
+      "tool": "git publish",
+      "kind": "complete"
+    },
     {
       "label": "Josh 2.0 screen check clean",
       "status": "done",
