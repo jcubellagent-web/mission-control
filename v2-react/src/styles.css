@@ -16766,7 +16766,7 @@ body::before {
 }
 
 #today-jobs .daily-calendar-view {
-  grid-template-rows: 36px 17px minmax(0, 1fr) !important;
+  grid-template-rows: 36px auto 17px minmax(0, 1fr) !important;
   min-height: 0 !important;
   height: 100% !important;
 }
@@ -16918,6 +16918,12 @@ body::before {
 #today-jobs .calendar-empty-block {
   grid-template-columns: 76px 112px minmax(0, 1fr) 84px !important;
   column-gap: 8px !important;
+}
+
+#today-jobs .jobs-table-head {
+  min-height: 17px !important;
+  height: 17px !important;
+  max-height: 17px !important;
 }
 
 #today-jobs .calendar-block-time {
