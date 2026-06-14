@@ -8,14 +8,14 @@
     "active": true,
     "reportedActive": true,
     "status": "active",
-    "objective": "Polish Today\u2019s Jobs readability",
-    "detail": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state.",
-    "updatedAt": "2026-06-14T21:15:40Z",
-    "checkedAt": "2026-06-14T21:15:40Z",
+    "objective": "Improve Today\u2019s Jobs readability",
+    "detail": "Making rows thicker and moving the Time text away from the left edge.",
+    "updatedAt": "2026-06-14T21:47:54Z",
+    "checkedAt": "2026-06-14T21:47:54Z",
     "currentTool": "agent publish",
     "steps": [
       {
-        "label": "Polish Today\u2019s Jobs readability",
+        "label": "Improve Today\u2019s Jobs readability",
         "status": "active",
         "tool": "agent publish",
         "kind": "status"
@@ -27,6 +27,12 @@
         "kind": "complete"
       },
       {
+        "label": "Today\u2019s Jobs readability polished",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "status"
+      },
+      {
         "label": "Polish Today\u2019s Jobs readability",
         "status": "done",
         "tool": "agent publish",
@@ -49,12 +55,6 @@
         "status": "done",
         "tool": "agent publish",
         "kind": "complete"
-      },
-      {
-        "label": "Pull Control Tower back up on Josh 2.0 screen",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "status"
       }
     ],
     "source": "josh2-local-live-feed",
@@ -65,15 +65,15 @@
   },
   "focus": {
     "status": "Brain Feed live",
-    "context": "Polish Today\u2019s Jobs readability",
-    "updatedAt": "2026-06-14T21:16:43Z"
+    "context": "Improve Today\u2019s Jobs readability",
+    "updatedAt": "2026-06-14T21:48:56Z"
   },
   "contextWindow": {
-    "usedTokens": 99975,
+    "usedTokens": 115769,
     "limitTokens": 272000,
-    "pct": 0.3676,
-    "model": "gpt-5.5",
-    "status": "green"
+    "pct": 0.4256,
+    "model": "gpt-5.4",
+    "status": "amber"
   },
   "agentBus": [],
   "contextWatchdog": {
@@ -91,38 +91,38 @@
     "workspaceDirty": 59,
     "missionControlDirty": 15,
     "recentFiles": [
-      "mission-control/dist/v2-react/assets/index-w2N4_GZU.css",
-      "mission-control/dist/v2-react/assets/index-Dtj_pTIn.js",
+      "mission-control/dist/v2-react/assets/index-BShtT5DM.css",
+      "mission-control/dist/v2-react/assets/index-CX-KNZ9L.js",
       "mission-control/dist/v2-react/index.html",
       "mission-control/v2-react/src/styles.css",
       "mission-control/scripts/update_mission_control.py",
       "mission-control/vite.config.ts"
     ],
-    "codexbarStatus": "60% left \u00b7 wk 54% left",
+    "codexbarStatus": "99% left \u00b7 wk 54% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.139.0 (oauth) ==",
-        "Session: 60% left [=======-----]",
-        "Resets in 27m",
+        "Session: 99% left [===========-]",
+        "Resets in 4h 55m",
         "Weekly: 54% left [======------]",
-        "Pace: 9% in reserve | Expected 55% used | Lasts until reset",
-        "Resets in 3d 3h",
+        "Pace: 10% in reserve | Expected 56% used | Lasts until reset",
+        "Resets in 3d 2h",
         "Credits: 444.72 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "60% left",
+      "session": "99% left",
       "weekly": "54% left",
       "credits": "444.72 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "27m",
-      "weeklyReset": "3d 3h",
-      "summary": "60% left \u00b7 wk 54% left"
+      "sessionReset": "4h 55m",
+      "weeklyReset": "3d 2h",
+      "summary": "99% left \u00b7 wk 54% left"
     },
-    "updatedAt": "2026-06-14T21:16:44Z"
+    "updatedAt": "2026-06-14T21:48:56Z"
   },
   "modelUsage": {
-    "session": 0.065595,
+    "session": 0.2895,
     "daily": 0.0,
     "weekly": 0.0,
     "monthly": 200.0,
@@ -130,7 +130,7 @@
       {
         "name": "gpt-5.5",
         "window": "session",
-        "cost": 643.186495
+        "cost": 645.977876
       },
       {
         "name": "gpt-5.4-mini",
@@ -140,30 +140,30 @@
       {
         "name": "gpt-5.4",
         "window": "session",
-        "cost": 0.663721
+        "cost": 0.9532215
       },
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.408636
+        "cost": 0.348702
       },
       {
-        "name": "xai/grok-4.20-reasoning",
+        "name": "openai/gpt-5.4",
         "window": "session",
-        "cost": 0.0
+        "cost": 0.2895005
       }
     ],
     "breakdown": [
       {
         "name": "gpt-5.5",
         "source": "codex",
-        "weeklyCost": 643.186495,
-        "dailyCost": 80.102765,
-        "sessionCost": 643.186495,
+        "weeklyCost": 645.977876,
+        "dailyCost": 82.894146,
+        "sessionCost": 645.977876,
         "totalTokens": 0,
         "costEstimated": false,
         "billingMode": "metered",
-        "marginalCost": 643.186495
+        "marginalCost": 645.977876
       },
       {
         "name": "gpt-5.4-mini",
@@ -179,28 +179,45 @@
       {
         "name": "gpt-5.4",
         "source": "codex",
-        "weeklyCost": 0.663721,
-        "dailyCost": 0.663721,
-        "sessionCost": 0.663721,
+        "weeklyCost": 0.9532215,
+        "dailyCost": 0.9532215,
+        "sessionCost": 0.9532215,
         "totalTokens": 0,
         "costEstimated": false,
         "billingMode": "metered",
-        "marginalCost": 0.663721
+        "marginalCost": 0.953222
       },
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 55396,
-        "outputTokens": 604,
-        "totalTokens": 56000,
-        "sessionCost": 0.408636,
-        "dailyCost": 0.128243,
-        "weeklyCost": 0.408636,
-        "sessions": 6,
+        "inputTokens": 54422,
+        "outputTokens": 200,
+        "totalTokens": 54622,
+        "sessionCost": 0.348702,
+        "dailyCost": 0.068309,
+        "weeklyCost": 0.348702,
+        "sessions": 5,
         "isGemini": false,
         "costEstimated": false,
         "billingMode": "subscription",
-        "usageEquivalentCost": 0.408636,
+        "usageEquivalentCost": 0.348702,
+        "marginalCost": 0.0,
+        "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
+      },
+      {
+        "name": "openai/gpt-5.4",
+        "source": "openclaw",
+        "inputTokens": 113337,
+        "outputTokens": 370,
+        "totalTokens": 113707,
+        "sessionCost": 0.2895005,
+        "dailyCost": 0.2895005,
+        "weeklyCost": 0.2895005,
+        "sessions": 1,
+        "isGemini": false,
+        "costEstimated": false,
+        "billingMode": "subscription",
+        "usageEquivalentCost": 0.2895,
         "marginalCost": 0.0,
         "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
       },
@@ -254,7 +271,7 @@
         "marginalCost": 0.0
       }
     ],
-    "lastUpdated": "2026-06-14T21:16:47Z",
+    "lastUpdated": "2026-06-14T21:49:01Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -314,9 +331,9 @@
       "provider": "OpenAI Pro / Codex",
       "monthlyFee": 200.0,
       "billingMode": "subscription",
-      "usageEquivalentDaily": 83.207889,
-      "usageEquivalentWeekly": 647.34871,
-      "usageEquivalentMonthly": 647.34871,
+      "usageEquivalentDaily": 86.518337,
+      "usageEquivalentWeekly": 650.659158,
+      "usageEquivalentMonthly": 650.659158,
       "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
     },
     "metered": {
@@ -330,23 +347,23 @@
       }
     },
     "usageEquivalent": {
-      "daily": 83.207889,
-      "weekly": 647.34871,
-      "monthly": 647.34871
+      "daily": 86.518337,
+      "weekly": 650.659158,
+      "monthly": 650.659158
     },
     "weeklyRunRate": {
       "total": 0.0,
       "automation": 0.0,
-      "interactive": 647.34871,
+      "interactive": 650.659158,
       "projectedMonthly": 0.0,
-      "subscriptionUsageEquivalentWeekly": 647.34871,
-      "subscriptionUsageEquivalentProjectedMonthly": 2774.35
+      "subscriptionUsageEquivalentWeekly": 650.659158,
+      "subscriptionUsageEquivalentProjectedMonthly": 2788.54
     },
     "providerBudgets": [],
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-14T21:16:43Z",
+    "updatedAt": "2026-06-14T21:48:56Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -367,7 +384,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-14T21:16:47Z",
+    "updatedAt": "2026-06-14T21:49:01Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -384,12 +401,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 37.4,
-      "cpu_user": 19.54,
-      "cpu_sys": 18.39,
-      "load1": 1.7,
-      "load5": 1.76,
-      "load15": 1.62,
+      "cpu_pct": 37.2,
+      "cpu_user": 18.6,
+      "cpu_sys": 18.6,
+      "load1": 2.04,
+      "load5": 1.56,
+      "load15": 1.41,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.3,
       "uptime": "",
@@ -399,13 +416,13 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 19.3,
-      "cpu_user": 6.81,
-      "cpu_sys": 12.5,
-      "load1": 1.67,
-      "load5": 2.12,
-      "load15": 2.25,
-      "ram_used_gb": 13.0,
+      "cpu_pct": 31.8,
+      "cpu_user": 18.7,
+      "cpu_sys": 13.26,
+      "load1": 3.11,
+      "load5": 2.68,
+      "load15": 2.44,
+      "ram_used_gb": 14.0,
       "ram_total_gb": 15.0,
       "uptime": "",
       "disk_used": "12Gi",
@@ -430,19 +447,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-14T21:16:43Z"
+      "lastChecked": "2026-06-14T21:48:56Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-14T21:16:43Z"
+      "lastChecked": "2026-06-14T21:48:56Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-14T21:16:43Z"
+      "lastChecked": "2026-06-14T21:48:56Z"
     }
   ],
   "crons": [
@@ -723,8 +740,8 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "upcoming",
-      "lastRun": "2026-06-14T17:00:40.159210-04:00",
-      "nextRun": "2026-06-14T17:30:00-04:00"
+      "lastRun": "2026-06-14T17:30:40.407181-04:00",
+      "nextRun": "2026-06-14T18:00:00-04:00"
     },
     {
       "name": "Sorare Daily Missions Late Refresh",
@@ -996,15 +1013,59 @@
   ],
   "sharedEvents": [
     {
-      "id": "jaimes-status-20260614-211604-jaimes-is-working-now",
-      "time": "2026-06-14T21:16:04Z",
+      "id": "jaimes-status-20260614-214810-jaimes-is-online-and-ready",
+      "time": "2026-06-14T21:48:10Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: Done: TURTLE/SPCX69 quick read."
+    },
+    {
+      "id": "josh2-status-20260614-214754-improve-today-s-jobs-readability",
+      "time": "2026-06-14T21:47:54Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Improve Today\u2019s Jobs readability",
+      "status": "active",
+      "tool": "agent publish",
+      "detail": "Making rows thicker and moving the Time text away from the left edge."
+    },
+    {
+      "id": "jaimes-status-20260614-214710-jaimes-is-working-now",
+      "time": "2026-06-14T21:47:10Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
       "title": "JAIMES is working now",
       "status": "active",
       "tool": "status check",
-      "detail": "JAIMES live update: Kintara: play loop restart."
+      "detail": "JAIMES live update: Reviewing TURTLE/SPCX69 signal."
+    },
+    {
+      "id": "josh2-complete-20260614-214637-josh-2-0-screen-check-clean",
+      "time": "2026-06-14T21:46:37Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+    },
+    {
+      "id": "josh2-status-20260614-211756-today-s-jobs-readability-polished",
+      "time": "2026-06-14T21:17:56Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "status",
+      "title": "Today\u2019s Jobs readability polished",
+      "status": "done",
+      "tool": "agent publish",
+      "detail": "Rows are now 31px with stronger 9.5px labels; live Control Tower measured no clipping and freshness guard is green."
     },
     {
       "id": "josh2-status-20260614-211540-polish-today-s-jobs-readability",
@@ -1016,28 +1077,6 @@
       "status": "active",
       "tool": "agent publish",
       "detail": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state."
-    },
-    {
-      "id": "josh2-complete-20260614-211524-josh-2-0-screen-check-clean",
-      "time": "2026-06-14T21:15:24Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-    },
-    {
-      "id": "jaimes-status-20260614-211404-jaimes-is-online-and-ready",
-      "time": "2026-06-14T21:14:04Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Kintara/Islands runner idle."
     },
     {
       "id": "josh2-complete-20260614-205911-fix-today-jobs-header",
@@ -1192,33 +1231,11 @@
       "status": "done",
       "tool": "telegram formatting",
       "detail": "Final Telegram summaries now require section headers on their own lines, with content beneath and shorter mobile-safe bullets. Josh and JAIMES dry-runs confirm the structure."
-    },
-    {
-      "id": "josh2-complete-20260614-172649-harden-telegram-progress-completion",
-      "time": "2026-06-14T17:26:49Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Harden Telegram progress completion",
-      "status": "done",
-      "tool": "Codex",
-      "detail": "Josh and JAIMES live-card helpers now force completed cards to render Progress 100%, including empty done-list cases."
-    },
-    {
-      "id": "josh2-status-20260614-171319-add-telegram-live-card-progress-bar",
-      "time": "2026-06-14T17:13:19Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "status",
-      "title": "Add Telegram live-card progress bar",
-      "status": "done",
-      "tool": "josh work card",
-      "detail": "Josh and JAIMES live cards now show a compact progress bar above Done so far; dry-runs passed"
     }
   ],
   "sharedOperatingLayer": {
     "status": "ready",
-    "updatedAt": "2026-06-14T21:16:04Z",
+    "updatedAt": "2026-06-14T21:48:10Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
@@ -1238,15 +1255,59 @@
     },
     "latestEvents": [
       {
-        "id": "jaimes-status-20260614-211604-jaimes-is-working-now",
-        "time": "2026-06-14T21:16:04Z",
+        "id": "jaimes-status-20260614-214810-jaimes-is-online-and-ready",
+        "time": "2026-06-14T21:48:10Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "JAIMES is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "detail": "JAIMES live check: Done: TURTLE/SPCX69 quick read."
+      },
+      {
+        "id": "josh2-status-20260614-214754-improve-today-s-jobs-readability",
+        "time": "2026-06-14T21:47:54Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "status",
+        "title": "Improve Today\u2019s Jobs readability",
+        "status": "active",
+        "tool": "agent publish",
+        "detail": "Making rows thicker and moving the Time text away from the left edge."
+      },
+      {
+        "id": "jaimes-status-20260614-214710-jaimes-is-working-now",
+        "time": "2026-06-14T21:47:10Z",
         "agent": "jaimes",
         "agentLabel": "JAIMES",
         "type": "status",
         "title": "JAIMES is working now",
         "status": "active",
         "tool": "status check",
-        "detail": "JAIMES live update: Kintara: play loop restart."
+        "detail": "JAIMES live update: Reviewing TURTLE/SPCX69 signal."
+      },
+      {
+        "id": "josh2-complete-20260614-214637-josh-2-0-screen-check-clean",
+        "time": "2026-06-14T21:46:37Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
+      },
+      {
+        "id": "josh2-status-20260614-211756-today-s-jobs-readability-polished",
+        "time": "2026-06-14T21:17:56Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "status",
+        "title": "Today\u2019s Jobs readability polished",
+        "status": "done",
+        "tool": "agent publish",
+        "detail": "Rows are now 31px with stronger 9.5px labels; live Control Tower measured no clipping and freshness guard is green."
       },
       {
         "id": "josh2-status-20260614-211540-polish-today-s-jobs-readability",
@@ -1258,50 +1319,6 @@
         "status": "active",
         "tool": "agent publish",
         "detail": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state."
-      },
-      {
-        "id": "josh2-complete-20260614-211524-josh-2-0-screen-check-clean",
-        "time": "2026-06-14T21:15:24Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
-      },
-      {
-        "id": "jaimes-status-20260614-211404-jaimes-is-online-and-ready",
-        "time": "2026-06-14T21:14:04Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: Kintara/Islands runner idle."
-      },
-      {
-        "id": "josh2-complete-20260614-205911-fix-today-jobs-header",
-        "time": "2026-06-14T20:59:11Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Fix Today jobs header",
-        "status": "done",
-        "tool": "agent publish",
-        "detail": "Done: Today\u2019s Jobs header is fixed on the live Control Tower layout; source and production assets pushed in b6a2069a5; Control Tower guard is green."
-      },
-      {
-        "id": "josh2-complete-20260614-195909-pull-control-tower-back-up-on-josh-2-0-screen",
-        "time": "2026-06-14T19:59:09Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Pull Control Tower back up on Josh 2.0 screen",
-        "status": "done",
-        "tool": "agent publish",
-        "detail": "Control Tower React kiosk is open and visible full-screen in Chrome on the Josh 2.0 display."
       }
     ],
     "blockedEvents": [],
@@ -1508,7 +1525,7 @@
     "attentionHandoffs": [],
     "dailyRollup": {
       "date": "2026-06-14",
-      "generatedAt": "2026-06-14T21:16:04Z",
+      "generatedAt": "2026-06-14T21:48:10Z",
       "summary": "500 shared event(s), 9 job(s), 0 decision(s), 1 open handoff(s).",
       "counts": {
         "events": 500,
@@ -1518,10 +1535,10 @@
         "blocked": 5
       },
       "highlights": [
+        "JAIMES is online and ready",
+        "Improve Today\u2019s Jobs readability",
         "JAIMES is working now",
-        "Polish Today\u2019s Jobs readability",
-        "Josh 2.0 screen check clean",
-        "JAIMES is online and ready"
+        "Josh 2.0 screen check clean"
       ],
       "openHandoffs": [
         {
@@ -2216,28 +2233,11 @@
       "staleAfterMinutes": 120,
       "fresh": [
         {
-          "agent": "jaimes",
-          "node": "jaimes-telegram-health-loop",
+          "agent": "josh2",
+          "node": "mission-control-freshness-loop",
           "status": "ok",
-          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
-          "updatedAt": "2026-06-14T21:16:34Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-brain-feed-publish",
-          "status": "active",
-          "summary": "JAIMES live update: Kintara: play loop restart.",
-          "updatedAt": "2026-06-14T21:16:04Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-live-poller",
-          "status": "active",
-          "summary": "JAIMES live update: Kintara: play loop restart.",
-          "updatedAt": "2026-06-14T21:16:04Z",
+          "summary": "Mission Control freshness ok.",
+          "updatedAt": "2026-06-14T21:48:56Z",
           "stale": false
         },
         {
@@ -2245,40 +2245,57 @@
           "node": "auto-offload-loop",
           "status": "ok",
           "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-14T21:15:48Z",
+          "updatedAt": "2026-06-14T21:48:50Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "codex-process-guard",
+          "status": "ok",
+          "summary": "cleaned 18 stale Codex process(es)",
+          "updatedAt": "2026-06-14T21:48:19Z",
+          "stale": false
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "status": "ok",
+          "summary": "JAIMES live check: Done: TURTLE/SPCX69 quick read.",
+          "updatedAt": "2026-06-14T21:48:10Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-live-poller",
+          "status": "ok",
+          "summary": "JAIMES live check: Done: TURTLE/SPCX69 quick read.",
+          "updatedAt": "2026-06-14T21:48:10Z",
           "stale": false
         },
         {
           "agent": "josh2",
           "node": "josh2-brain-feed-publish",
           "status": "active",
-          "summary": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state.",
-          "updatedAt": "2026-06-14T21:15:40Z",
+          "summary": "Making rows thicker and moving the Time text away from the left edge.",
+          "updatedAt": "2026-06-14T21:47:54Z",
           "stale": false,
           "source": "agent_publish.py"
         },
         {
           "agent": "josh2",
-          "node": "mission-control-freshness-loop",
+          "node": "token-cost-guard-loop",
           "status": "ok",
-          "summary": "Mission Control freshness ok.",
-          "updatedAt": "2026-06-14T21:13:55Z",
+          "summary": "Token/cost guard ok; no high-burn pattern detected in local tracker.",
+          "updatedAt": "2026-06-14T21:47:53Z",
           "stale": false
         },
         {
-          "agent": "josh2",
-          "node": "model-router-guard-loop",
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
           "status": "ok",
-          "summary": "Model/router guard ok: default openai/gpt-5.5 and 11 configured route(s) available.",
-          "updatedAt": "2026-06-14T21:10:53Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "state-visibility-guard",
-          "status": "ok",
-          "summary": "Control Tower visibility guard ok.",
-          "updatedAt": "2026-06-14T21:05:33Z",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-14T21:46:42Z",
           "stale": false
         }
       ],
@@ -2722,7 +2739,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-14T21:16:43Z",
+      "updatedAt": "2026-06-14T21:48:56Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -2766,7 +2783,7 @@
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-06-14T21:13:52.503284Z",
+    "checkedAt": "2026-06-14T21:48:25.449607Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -3373,7 +3390,7 @@
   "runtimeLayout": {
     "ok": true,
     "status": "ok",
-    "checkedAt": "2026-06-14T21:15:51Z",
+    "checkedAt": "2026-06-14T21:48:56Z",
     "summary": "Live kiosk layout fits the 24-inch screen",
     "issues": [],
     "checks": [
@@ -3390,7 +3407,7 @@
       {
         "name": "screenshot",
         "ok": true,
-        "detail": "SCREENSHOT_OK path=/tmp/mission_control_screen.png size=1283576 mode=direct"
+        "detail": "SCREENSHOT_OK path=/tmp/mission_control_screen.png size=1173572 mode=direct"
       }
     ],
     "textQuality": {
@@ -3473,7 +3490,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-14T21:16:43Z",
+    "generatedAt": "2026-06-14T21:48:56Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3494,8 +3511,8 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-14T21:16:34Z",
-        "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+        "probedAt": "2026-06-14T21:48:10Z",
+        "summary": "JAIMES live check: Done: TURTLE/SPCX69 quick read.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3514,8 +3531,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-14T21:15:48Z",
-        "summary": "Auto-offload routing policy ok.",
+        "probedAt": "2026-06-14T21:48:56Z",
+        "summary": "Mission Control freshness ok.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3532,7 +3549,7 @@
     }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-14T21:03:52Z",
+    "generatedAt": "2026-06-14T21:34:10Z",
     "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
     "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
     "chatSources": {
@@ -3563,8 +3580,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-14T20:59:47Z",
-          "ageMinutes": 4,
+          "updatedAt": "2026-06-14T21:31:01Z",
+          "ageMinutes": 3,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3596,8 +3613,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-14T20:59:47Z",
-          "ageMinutes": 4,
+          "updatedAt": "2026-06-14T21:31:01Z",
+          "ageMinutes": 3,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3626,18 +3643,18 @@
           "role": "heavy-worker"
         },
         "brainFeed": {
-          "status": "active",
-          "objective": "You've reached the maximum number of tool-calling",
-          "detail": "Telegram message received; JAIMES is routing the task.",
-          "updatedAt": "2026-06-14T21:03:12Z",
+          "status": "idle",
+          "objective": "Kintara/Islands runner idle",
+          "detail": "Kintara/Islands runner idle",
+          "updatedAt": "2026-06-14T21:34:08Z",
           "ageMinutes": 0,
-          "currentTool": "telegram-ingress",
-          "active": true
+          "currentTool": "telegram",
+          "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T06:36:52Z",
-          "ageMinutes": 3747,
+          "ageMinutes": 3777,
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "stale": true
         },
@@ -3645,68 +3662,68 @@
         "openHandoffs": [],
         "recentEvents": [
           {
-            "id": "jaimes-status-20260614-210302-jaimes-is-working-now",
-            "time": "2026-06-14T21:03:02Z",
+            "id": "jaimes-status-20260614-213408-jaimes-is-online-and-ready",
+            "time": "2026-06-14T21:34:08Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Kintara/Islands runner idle."
+          },
+          {
+            "id": "jaimes-status-20260614-213107-jaimes-is-working-now",
+            "time": "2026-06-14T21:31:07Z",
             "type": "status",
             "status": "active",
             "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: cleaned duplicate tabs."
+            "detail": "JAIMES live update: Kintara: wood step complete."
           },
           {
-            "id": "jaimes-status-20260614-210202-jaimes-is-working-now",
-            "time": "2026-06-14T21:02:02Z",
+            "id": "jaimes-status-20260614-212807-jaimes-is-online-and-ready",
+            "time": "2026-06-14T21:28:07Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.40 SOL \u00b7 de-risking."
+          },
+          {
+            "id": "jaimes-status-20260614-212606-jaimes-is-online-and-ready",
+            "time": "2026-06-14T21:26:06Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.39 SOL \u00b7 de-risking."
+          },
+          {
+            "id": "jaimes-status-20260614-212205-jaimes-is-working-now",
+            "time": "2026-06-14T21:22:05Z",
             "type": "status",
             "status": "active",
             "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: queued after axe."
+            "detail": "JAIMES live update: Kintara: CDP helper approved."
           },
           {
-            "id": "jaimes-status-20260614-210001-jaimes-is-working-now",
-            "time": "2026-06-14T21:00:01Z",
+            "id": "jaimes-status-20260614-212033-jaimes-is-working-now",
+            "time": "2026-06-14T21:20:33Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: [IMPORTANT: Background process proc_997ce8afe57a completed (exit code."
+          },
+          {
+            "id": "jaimes-status-20260614-212005-jaimes-is-working-now",
+            "time": "2026-06-14T21:20:05Z",
             "type": "status",
             "status": "active",
             "title": "JAIMES is working now",
             "detail": "JAIMES live update: Kintara/Islands runner."
           },
           {
-            "id": "jaimes-status-20260614-205500-jaimes-is-working-now",
-            "time": "2026-06-14T20:55:00Z",
+            "id": "jaimes-status-20260614-211604-jaimes-is-working-now",
+            "time": "2026-06-14T21:16:04Z",
             "type": "status",
             "status": "active",
             "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: navigate to Woodcutting."
-          },
-          {
-            "id": "jaimes-status-20260614-205300-jaimes-is-working-now",
-            "time": "2026-06-14T20:53:00Z",
-            "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: resume gameplay."
-          },
-          {
-            "id": "jaimes-status-20260614-205200-jaimes-is-online-and-ready",
-            "time": "2026-06-14T20:52:00Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Complete: Kintara context recalled."
-          },
-          {
-            "id": "jaimes-status-20260614-205100-jaimes-is-working-now",
-            "time": "2026-06-14T20:51:00Z",
-            "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Answer Kintara activity."
-          },
-          {
-            "id": "jaimes-status-20260614-205015-jaimes-is-online-and-ready",
-            "time": "2026-06-14T20:50:15Z",
-            "type": "status",
-            "status": "ready",
-            "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Done: GLOOP watch + Kintara status."
+            "detail": "JAIMES live update: Kintara: play loop restart."
           }
         ],
         "pickupPrompt": "Review JAIMES brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
@@ -3728,15 +3745,15 @@
           "status": "ready",
           "objective": "J.A.I.N is online and ready",
           "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-14T20:25:43Z",
-          "ageMinutes": 38,
+          "updatedAt": "2026-06-14T21:25:48Z",
+          "ageMinutes": 8,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-13T18:27:00Z",
-          "ageMinutes": 1596,
+          "ageMinutes": 1627,
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "stale": true
         },
@@ -3748,7 +3765,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-14T21:16:43Z",
+    "updatedAt": "2026-06-14T21:48:56Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4124,13 +4141,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-14T21:16:43Z",
+    "updatedAt": "2026-06-14T21:48:56Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-14T21:16:43Z",
+    "updatedAt": "2026-06-14T21:48:56Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4197,25 +4214,25 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-14T21:16:43Z"
+      "detail": "Updated 2026-06-14T21:48:56Z"
     }
   ],
   "trackedTasks": [
     {
-      "id": "T-20260614-1712",
-      "title": "Make Today's Jobs rows more readable",
+      "id": "T-20260614-1747",
+      "title": "Thicken Today's Jobs rows and inset time text",
       "status": "active",
       "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "requestedAt": "2026-06-14 17:12",
-      "updatedAt": "2026-06-14 17:13",
-      "notes": "Josh asked to make each job in Today's Jobs a little thicker and more readable. Working in Control Tower React CSS final Today Jobs override layer; Brain Feed published under josh2.",
+      "requestedAt": "2026-06-14 17:47",
+      "updatedAt": "2026-06-14 17:48",
+      "notes": "Josh said the 31px Today\u2019s Jobs rows still look too thin and the time text is too close to the left edge. Updating Control Tower CSS to make rows visibly thicker and move the Time lane inward.",
       "owner": "JOSH 2.0"
     }
   ],
   "activeAgents": [
     {
       "id": "coding-visibility",
-      "label": "Recently edited: mission-control/dist/v2-react/assets/index-w2N4_GZU.css, mission-control/dist/v2-react/assets/index-Dtj_pTIn.js",
+      "label": "Recently edited: mission-control/dist/v2-react/assets/index-BShtT5DM.css, mission-control/dist/v2-react/assets/index-CX-KNZ9L.js",
       "status": "done",
       "elapsedSecs": 0,
       "tool": "code",
@@ -4296,17 +4313,17 @@
       "agent": "JOSH 2.0",
       "active": false,
       "reportedActive": false,
-      "objective": "Auto-offload routing policy ok.",
-      "detail": "Auto-offload routing policy ok.",
+      "objective": "Mission Control freshness ok.",
+      "detail": "Mission Control freshness ok.",
       "status": "ok",
       "stale": false,
-      "updatedAt": "2026-06-14T21:15:48Z",
+      "updatedAt": "2026-06-14T21:48:56Z",
       "messageReceived": null,
       "currentTool": "status check",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Auto-offload routing policy ok.",
+          "label": "Mission Control freshness ok.",
           "status": "ok",
           "tool": "status check"
         },
@@ -4317,16 +4334,16 @@
           "kind": "complete"
         },
         {
-          "label": "Polish Today\u2019s Jobs readability",
+          "label": "Today\u2019s Jobs readability polished",
           "status": "done",
           "tool": "agent publish",
           "kind": "status"
         },
         {
-          "label": "Fix Today jobs header",
+          "label": "Polish Today\u2019s Jobs readability",
           "status": "done",
           "tool": "agent publish",
-          "kind": "complete"
+          "kind": "status"
         }
       ]
     },
@@ -4338,7 +4355,7 @@
       "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
       "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-14T20:25:43Z",
+      "updatedAt": "2026-06-14T21:25:48Z",
       "messageReceived": null,
       "currentTool": "status check",
       "model": null,
@@ -4353,15 +4370,15 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": true,
-      "reportedActive": true,
-      "objective": "Kintara: play loop restart",
-      "detail": "Kintara: play loop restart",
-      "status": "active",
+      "active": false,
+      "reportedActive": false,
+      "objective": "Done: TURTLE/SPCX69 quick read",
+      "detail": "Done: TURTLE/SPCX69 quick read",
+      "status": "idle",
       "stale": false,
-      "updatedAt": "2026-06-14T21:16:04Z",
-      "messageReceived": "2026-06-14T21:14:16Z",
-      "currentTool": "code",
+      "updatedAt": "2026-06-14T21:48:10Z",
+      "messageReceived": "2026-06-14T21:46:16Z",
+      "currentTool": "telegram",
       "model": "gpt-5.5",
       "steps": [
         {
@@ -4389,17 +4406,17 @@
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "objective": "Auto-offload routing policy ok.",
-    "detail": "Auto-offload routing policy ok.",
+    "objective": "Mission Control freshness ok.",
+    "detail": "Mission Control freshness ok.",
     "status": "ok",
     "stale": false,
-    "updatedAt": "2026-06-14T21:15:48Z",
+    "updatedAt": "2026-06-14T21:48:56Z",
     "messageReceived": null,
     "currentTool": "status check",
     "model": "GPT-5.5",
     "steps": [
       {
-        "label": "Auto-offload routing policy ok.",
+        "label": "Mission Control freshness ok.",
         "status": "ok",
         "tool": "status check"
       },
@@ -4410,16 +4427,16 @@
         "kind": "complete"
       },
       {
-        "label": "Polish Today\u2019s Jobs readability",
+        "label": "Today\u2019s Jobs readability polished",
         "status": "done",
         "tool": "agent publish",
         "kind": "status"
       },
       {
-        "label": "Fix Today jobs header",
+        "label": "Polish Today\u2019s Jobs readability",
         "status": "done",
         "tool": "agent publish",
-        "kind": "complete"
+        "kind": "status"
       }
     ]
   },
@@ -4431,7 +4448,7 @@
     "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
     "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-14T20:25:43Z",
+    "updatedAt": "2026-06-14T21:25:48Z",
     "messageReceived": null,
     "currentTool": "status check",
     "model": null,
@@ -4446,15 +4463,15 @@
   },
   "jaimesBrainFeed": {
     "agent": "JAIMES",
-    "active": true,
-    "reportedActive": true,
-    "objective": "Kintara: play loop restart",
-    "detail": "Kintara: play loop restart",
-    "status": "active",
+    "active": false,
+    "reportedActive": false,
+    "objective": "Done: TURTLE/SPCX69 quick read",
+    "detail": "Done: TURTLE/SPCX69 quick read",
+    "status": "idle",
     "stale": false,
-    "updatedAt": "2026-06-14T21:16:04Z",
-    "messageReceived": "2026-06-14T21:14:16Z",
-    "currentTool": "code",
+    "updatedAt": "2026-06-14T21:48:10Z",
+    "messageReceived": "2026-06-14T21:46:16Z",
+    "currentTool": "telegram",
     "model": "gpt-5.5",
     "steps": [
       {
@@ -4478,25 +4495,61 @@
     ]
   },
   "liveObjectives": {
-    "activeAgents": [
-      "JAIMES"
-    ],
-    "activeCount": 1,
-    "primaryAgent": "JAIMES",
+    "activeAgents": [],
+    "activeCount": 0,
+    "primaryAgent": "JOSH 2.0",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
-        "agent": "JAIMES",
-        "active": true,
-        "reportedActive": true,
-        "objective": "Kintara: play loop restart",
-        "detail": "Kintara: play loop restart",
-        "status": "active",
+        "agent": "JOSH 2.0",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Mission Control freshness ok.",
+        "detail": "Mission Control freshness ok.",
+        "status": "ok",
         "stale": false,
-        "updatedAt": "2026-06-14T21:16:04Z",
-        "messageReceived": "2026-06-14T21:14:16Z",
-        "currentTool": "code",
+        "updatedAt": "2026-06-14T21:48:56Z",
+        "messageReceived": null,
+        "currentTool": "status check",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Mission Control freshness ok.",
+            "status": "ok",
+            "tool": "status check"
+          },
+          {
+            "label": "Josh 2.0 screen check clean",
+            "status": "done",
+            "tool": "Control Tower screen check",
+            "kind": "complete"
+          },
+          {
+            "label": "Today\u2019s Jobs readability polished",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "status"
+          },
+          {
+            "label": "Polish Today\u2019s Jobs readability",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "status"
+          }
+        ]
+      },
+      {
+        "agent": "JAIMES",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Done: TURTLE/SPCX69 quick read",
+        "detail": "Done: TURTLE/SPCX69 quick read",
+        "status": "idle",
+        "stale": false,
+        "updatedAt": "2026-06-14T21:48:10Z",
+        "messageReceived": "2026-06-14T21:46:16Z",
+        "currentTool": "telegram",
         "model": "gpt-5.5",
         "steps": [
           {
@@ -4520,44 +4573,6 @@
         ]
       },
       {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Auto-offload routing policy ok.",
-        "detail": "Auto-offload routing policy ok.",
-        "status": "ok",
-        "stale": false,
-        "updatedAt": "2026-06-14T21:15:48Z",
-        "messageReceived": null,
-        "currentTool": "status check",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Auto-offload routing policy ok.",
-            "status": "ok",
-            "tool": "status check"
-          },
-          {
-            "label": "Josh 2.0 screen check clean",
-            "status": "done",
-            "tool": "Control Tower screen check",
-            "kind": "complete"
-          },
-          {
-            "label": "Polish Today\u2019s Jobs readability",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
-            "label": "Fix Today jobs header",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "complete"
-          }
-        ]
-      },
-      {
         "agent": "J.A.I.N",
         "active": false,
         "reportedActive": false,
@@ -4565,7 +4580,7 @@
         "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
         "status": "ready",
         "stale": false,
-        "updatedAt": "2026-06-14T20:25:43Z",
+        "updatedAt": "2026-06-14T21:25:48Z",
         "messageReceived": null,
         "currentTool": "status check",
         "model": null,
@@ -4643,25 +4658,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-14T21:16:47Z",
-      "event": "Session spend: $0.07"
+      "time": "2026-06-14T21:49:01Z",
+      "event": "Session spend: $0.29"
     },
     {
-      "time": "2026-06-14T21:16:44Z",
-      "event": "Coding: mission-control/dist/v2-react/assets/index-w2N4_GZU.css, mission-control/dist/v2-react/assets/index-Dtj_pTIn.js"
-    },
-    {
-      "time": "2026-06-14T21:16:44Z",
-      "event": "CodexBar: 60% left \u00b7 wk 54% left"
-    },
-    {
-      "time": "2026-06-14T21:16:43Z",
+      "time": "2026-06-14T21:48:56Z",
       "event": "Brain: Brain Feed live"
     },
     {
-      "time": "2026-06-14T21:16:43Z",
+      "time": "2026-06-14T21:48:56Z",
+      "event": "Coding: mission-control/dist/v2-react/assets/index-BShtT5DM.css, mission-control/dist/v2-react/assets/index-CX-KNZ9L.js"
+    },
+    {
+      "time": "2026-06-14T21:48:56Z",
+      "event": "CodexBar: 99% left \u00b7 wk 54% left"
+    },
+    {
+      "time": "2026-06-14T21:48:56Z",
       "event": "12 live scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-06-14T21:16:43Z"
+  "lastUpdated": "2026-06-14T21:48:56Z"
 }

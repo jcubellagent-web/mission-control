@@ -1,5 +1,5 @@
 {
-  "session": 0.065595,
+  "session": 0.2895,
   "daily": 0.0,
   "weekly": 0.0,
   "monthly": 200.0,
@@ -7,7 +7,7 @@
     {
       "name": "gpt-5.5",
       "window": "session",
-      "cost": 643.186495
+      "cost": 645.977876
     },
     {
       "name": "gpt-5.4-mini",
@@ -17,30 +17,30 @@
     {
       "name": "gpt-5.4",
       "window": "session",
-      "cost": 0.663721
+      "cost": 0.9532215
     },
     {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 0.408636
+      "cost": 0.348702
     },
     {
-      "name": "xai/grok-4.20-reasoning",
+      "name": "openai/gpt-5.4",
       "window": "session",
-      "cost": 0.0
+      "cost": 0.2895005
     }
   ],
   "breakdown": [
     {
       "name": "gpt-5.5",
       "source": "codex",
-      "weeklyCost": 643.186495,
-      "dailyCost": 80.102765,
-      "sessionCost": 643.186495,
+      "weeklyCost": 645.977876,
+      "dailyCost": 82.894146,
+      "sessionCost": 645.977876,
       "totalTokens": 0,
       "costEstimated": false,
       "billingMode": "metered",
-      "marginalCost": 643.186495
+      "marginalCost": 645.977876
     },
     {
       "name": "gpt-5.4-mini",
@@ -56,28 +56,45 @@
     {
       "name": "gpt-5.4",
       "source": "codex",
-      "weeklyCost": 0.663721,
-      "dailyCost": 0.663721,
-      "sessionCost": 0.663721,
+      "weeklyCost": 0.9532215,
+      "dailyCost": 0.9532215,
+      "sessionCost": 0.9532215,
       "totalTokens": 0,
       "costEstimated": false,
       "billingMode": "metered",
-      "marginalCost": 0.663721
+      "marginalCost": 0.953222
     },
     {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 55396,
-      "outputTokens": 604,
-      "totalTokens": 56000,
-      "sessionCost": 0.408636,
-      "dailyCost": 0.128243,
-      "weeklyCost": 0.408636,
-      "sessions": 6,
+      "inputTokens": 54422,
+      "outputTokens": 200,
+      "totalTokens": 54622,
+      "sessionCost": 0.348702,
+      "dailyCost": 0.068309,
+      "weeklyCost": 0.348702,
+      "sessions": 5,
       "isGemini": false,
       "costEstimated": false,
       "billingMode": "subscription",
-      "usageEquivalentCost": 0.408636,
+      "usageEquivalentCost": 0.348702,
+      "marginalCost": 0.0,
+      "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
+    },
+    {
+      "name": "openai/gpt-5.4",
+      "source": "openclaw",
+      "inputTokens": 113337,
+      "outputTokens": 370,
+      "totalTokens": 113707,
+      "sessionCost": 0.2895005,
+      "dailyCost": 0.2895005,
+      "weeklyCost": 0.2895005,
+      "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false,
+      "billingMode": "subscription",
+      "usageEquivalentCost": 0.2895,
       "marginalCost": 0.0,
       "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
@@ -131,7 +148,7 @@
       "marginalCost": 0.0
     }
   ],
-  "lastUpdated": "2026-06-14T21:16:47Z",
+  "lastUpdated": "2026-06-14T21:49:01Z",
   "jain": {
     "daily": 0.0,
     "session": 0.0,
@@ -191,9 +208,9 @@
     "provider": "OpenAI Pro / Codex",
     "monthlyFee": 200.0,
     "billingMode": "subscription",
-    "usageEquivalentDaily": 83.207889,
-    "usageEquivalentWeekly": 647.34871,
-    "usageEquivalentMonthly": 647.34871,
+    "usageEquivalentDaily": 86.518337,
+    "usageEquivalentWeekly": 650.659158,
+    "usageEquivalentMonthly": 650.659158,
     "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
   },
   "metered": {
@@ -207,17 +224,17 @@
     }
   },
   "usageEquivalent": {
-    "daily": 83.207889,
-    "weekly": 647.34871,
-    "monthly": 647.34871
+    "daily": 86.518337,
+    "weekly": 650.659158,
+    "monthly": 650.659158
   },
   "weeklyRunRate": {
     "total": 0.0,
     "automation": 0.0,
-    "interactive": 647.34871,
+    "interactive": 650.659158,
     "projectedMonthly": 0.0,
-    "subscriptionUsageEquivalentWeekly": 647.34871,
-    "subscriptionUsageEquivalentProjectedMonthly": 2774.35
+    "subscriptionUsageEquivalentWeekly": 650.659158,
+    "subscriptionUsageEquivalentProjectedMonthly": 2788.54
   },
   "providerBudgets": [],
   "routerPolicy": {}

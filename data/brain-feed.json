@@ -4,14 +4,14 @@
   "active": true,
   "reportedActive": true,
   "status": "active",
-  "objective": "Polish Today\u2019s Jobs readability",
-  "detail": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state.",
-  "updatedAt": "2026-06-14T21:15:40Z",
-  "checkedAt": "2026-06-14T21:15:40Z",
+  "objective": "Improve Today\u2019s Jobs readability",
+  "detail": "Making rows thicker and moving the Time text away from the left edge.",
+  "updatedAt": "2026-06-14T21:47:54Z",
+  "checkedAt": "2026-06-14T21:47:54Z",
   "currentTool": "agent publish",
   "steps": [
     {
-      "label": "Polish Today\u2019s Jobs readability",
+      "label": "Improve Today\u2019s Jobs readability",
       "status": "active",
       "tool": "agent publish",
       "kind": "status"
@@ -23,6 +23,12 @@
       "kind": "complete"
     },
     {
+      "label": "Today\u2019s Jobs readability polished",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "status"
+    },
+    {
       "label": "Polish Today\u2019s Jobs readability",
       "status": "done",
       "tool": "agent publish",
@@ -45,12 +51,6 @@
       "status": "done",
       "tool": "agent publish",
       "kind": "complete"
-    },
-    {
-      "label": "Pull Control Tower back up on Josh 2.0 screen",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "status"
     }
   ],
   "source": "josh2-local-live-feed",

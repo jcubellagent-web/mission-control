@@ -16997,6 +16997,51 @@ body::before {
 }
 /* end TODAY JOBS ROW READABILITY TUNE */
 
+/* TODAY JOBS ROW READABILITY RETUNE 2026-06-14
+   Thicker wall-display rows and a safer left inset for the Time lane. */
+#today-jobs .jobs-table-head,
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block {
+  grid-template-columns: 92px 112px minmax(0, 1fr) 84px !important;
+  column-gap: 9px !important;
+}
+
+#today-jobs .jobs-table-head {
+  padding-left: 14px !important;
+}
+
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block,
+#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 35px !important;
+  height: 35px !important;
+  max-height: 35px !important;
+  padding: 6px 9px 6px 14px !important;
+}
+
+#today-jobs .calendar-block-time strong,
+#today-jobs .calendar-block-state strong,
+#today-jobs .calendar-block-main strong,
+#today-jobs .calendar-block-meta span {
+  font-size: 10px !important;
+  line-height: 1.08 !important;
+}
+/* end TODAY JOBS ROW READABILITY RETUNE */
+
 
 /* =====================================================================
    LIVE WORK BOARD RICH DETAIL CHIPS — JAIMES — 2026-06-13
