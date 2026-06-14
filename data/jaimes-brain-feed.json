@@ -1,69 +1,69 @@
 {
-  "active": false,
-  "objective": "JAIMES is online and ready",
-  "status": "ready",
-  "updatedAt": "2026-06-13T23:29:25Z",
+  "active": true,
+  "objective": "Verifying after conflict repair",
+  "status": "active",
+  "updatedAt": "2026-06-14T07:13:49Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-13T22:49:04Z",
+  "auth": "subscription",
+  "modelAuth": "gpt-5.5 (subscription)",
+  "currentTool": "telegram",
+  "agent": "JAIMES",
+  "checkedAt": "2026-06-14T07:13:49Z",
+  "messageReceived": "2026-06-14T07:13:48Z",
   "steps": [
     {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
+      "label": "Verifying after conflict repair",
+      "status": "active",
+      "tool": "telegram",
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
-      "status": "info",
-      "tool": "sorare_prelock_loop",
+      "label": "Checking JOSHeX handoff health",
+      "status": "active",
+      "tool": "telegram",
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
-      "status": "info",
-      "tool": "sorare_prelock_loop",
+      "label": "Checking Control Tower conflict state",
+      "status": "active",
+      "tool": "telegram",
       "kind": "status"
     },
     {
-      "label": "Done: JAIMES Brain Feed path healthy",
+      "label": "Checking maintenance deltas",
+      "status": "active",
+      "tool": "telegram",
+      "kind": "status"
+    },
+    {
+      "label": "Check JOSHeX maintenance updates",
+      "status": "active",
+      "tool": "telegram",
+      "kind": "status"
+    },
+    {
+      "label": "Joshex just made some maintenance updates, all",
+      "status": "active",
+      "tool": "telegram-ingress",
+      "kind": "status"
+    },
+    {
+      "label": "Done: JAIN bot latest status checked",
       "status": "done",
-      "tool": "exec",
+      "tool": "telegram",
       "kind": "status"
     },
     {
-      "label": "Self-test: JAIMES Brain Feed path healthy",
+      "label": "Inspecting JAIN cron/log freshness",
       "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Sorare pre-lock loop",
-      "status": "done",
-      "tool": "sorare_prelock_loop",
-      "kind": "status"
-    },
-    {
-      "label": "Done: ESPN fantasy auth healthy",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Fantasy: checking ESPN auth freshness",
-      "status": "done",
-      "tool": "exec",
+      "tool": "telegram",
       "kind": "status"
     }
   ],
-  "currentTool": "status check",
-  "checkedAt": "2026-06-13T23:29:25Z",
-  "agent": "JAIMES",
-  "source": "josh2-local-live-feed",
-  "auth": "subscription",
-  "modelAuth": "gpt-5.5 (subscription)",
   "agentId": "jaimes",
-  "reportedActive": false,
-  "detail": "JAIMES live check: Sorare pre-lock loop.",
+  "reportedActive": true,
+  "detail": "Verifying after conflict repair",
+  "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "localLiveFeed": true
 }

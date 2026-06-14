@@ -1,18 +1,68 @@
 {
   "active": false,
   "messageReceived": "2026-04-30T07:10:36Z",
-  "objective": "Done: MEMORY reply-format snippet read completed \u00b7 Awaiting further instruction",
-  "status": "idle",
+  "objective": "J.A.I.N is online and ready",
+  "status": "ready",
   "steps": [
     {
-      "label": "Done - MEMORY reply-format snippet read completed",
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "Cost baseline reset",
       "status": "done",
-      "tool": "exec"
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "kind": "status"
     }
   ],
-  "currentTool": "exec",
-  "updatedAt": "2026-04-30T07:10:40Z",
-  "checkedAt": "2026-04-30T07:10:36Z",
+  "currentTool": "status check",
+  "updatedAt": "2026-06-14T05:24:47Z",
+  "checkedAt": "2026-06-14T05:24:47Z",
   "idleUpdatedAt": "2026-03-28T03:55:01Z",
-  "model": "GPT-5.5"
+  "model": "GPT-5.5",
+  "agent": "J.A.I.N",
+  "agentId": "jain",
+  "reportedActive": false,
+  "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+  "source": "josh2-local-live-feed",
+  "supabaseBacked": false,
+  "localLiveFeed": true
 }
