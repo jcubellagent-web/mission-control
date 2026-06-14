@@ -5,20 +5,20 @@
   "brainFeed": {
     "agentId": "josh2",
     "agent": "JOSH 2.0",
-    "active": true,
-    "reportedActive": true,
-    "status": "active",
+    "active": false,
+    "reportedActive": false,
+    "status": "done",
     "objective": "Fix Resources model usage overlap",
-    "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
-    "updatedAt": "2026-06-14T19:25:44Z",
-    "checkedAt": "2026-06-14T19:25:44Z",
+    "detail": "Resources card overlap fixed and pushed in commit e61224403. Build, regression check, screenshot verification, dashboard refresh, and freshness guard passed.",
+    "updatedAt": "2026-06-14T19:27:37Z",
+    "checkedAt": "2026-06-14T19:27:37Z",
     "currentTool": "agent publish",
     "steps": [
       {
         "label": "Fix Resources model usage overlap",
-        "status": "active",
+        "status": "done",
         "tool": "agent publish",
-        "kind": "status"
+        "kind": "complete"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -64,9 +64,9 @@
     "localLiveFeed": true
   },
   "focus": {
-    "status": "Brain Feed live",
-    "context": "Fix Resources model usage overlap",
-    "updatedAt": "2026-06-14T19:25:59Z"
+    "status": "Brain Feed idle",
+    "context": "Last completed objective: Fix Resources model usage overlap",
+    "updatedAt": "2026-06-14T19:27:37Z"
   },
   "contextWindow": {
     "usedTokens": 132220,
@@ -89,7 +89,7 @@
   },
   "codingVisibility": {
     "workspaceDirty": 59,
-    "missionControlDirty": 15,
+    "missionControlDirty": 1,
     "recentFiles": [
       "mission-control/dist/v2-react/assets/index-BFoq3_Jj.css",
       "mission-control/dist/v2-react/assets/index-7BatRZe7.js",
@@ -104,7 +104,7 @@
       "raw": [
         "== Codex 0.139.0 (oauth) ==",
         "Session: 72% left [========----]",
-        "Resets in 2h 18m",
+        "Resets in 2h 16m",
         "Weekly: 56% left [======------]",
         "Pace: 10% in reserve | Expected 54% used | Lasts until reset",
         "Resets in 3d 5h",
@@ -115,11 +115,11 @@
       "weekly": "56% left",
       "credits": "444.72 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 18m",
+      "sessionReset": "2h 16m",
       "weeklyReset": "3d 5h",
       "summary": "72% left \u00b7 wk 56% left"
     },
-    "updatedAt": "2026-06-14T19:26:00Z"
+    "updatedAt": "2026-06-14T19:27:37Z"
   },
   "modelUsage": {
     "session": 0.041239,
@@ -127,6 +127,21 @@
     "weekly": 0.0,
     "monthly": 200.0,
     "topModels": [
+      {
+        "name": "gpt-5.5",
+        "window": "session",
+        "cost": 634.51714
+      },
+      {
+        "name": "gpt-5.4-mini",
+        "window": "session",
+        "cost": 3.0898578
+      },
+      {
+        "name": "gpt-5.4",
+        "window": "session",
+        "cost": 0.663721
+      },
       {
         "name": "openai/gpt-5.5",
         "window": "session",
@@ -136,24 +151,42 @@
         "name": "openai/gpt-5.4",
         "window": "session",
         "cost": 0.041239
-      },
-      {
-        "name": "xai/grok-4.20-reasoning",
-        "window": "session",
-        "cost": 0.0
-      },
-      {
-        "name": "local/qwen2.5-coder:7b",
-        "window": "session",
-        "cost": 0.0
-      },
-      {
-        "name": "local/nomic-embed-text:latest",
-        "window": "session",
-        "cost": 0.0
       }
     ],
     "breakdown": [
+      {
+        "name": "gpt-5.5",
+        "source": "codex",
+        "weeklyCost": 634.51714,
+        "dailyCost": 71.43341,
+        "sessionCost": 634.51714,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "billingMode": "metered",
+        "marginalCost": 634.51714
+      },
+      {
+        "name": "gpt-5.4-mini",
+        "source": "codex",
+        "weeklyCost": 3.0898578,
+        "dailyCost": 2.3131599,
+        "sessionCost": 3.0898578,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "billingMode": "metered",
+        "marginalCost": 3.089858
+      },
+      {
+        "name": "gpt-5.4",
+        "source": "codex",
+        "weeklyCost": 0.663721,
+        "dailyCost": 0.663721,
+        "sessionCost": 0.663721,
+        "totalTokens": 0,
+        "costEstimated": false,
+        "billingMode": "metered",
+        "marginalCost": 0.663721
+      },
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
@@ -238,7 +271,7 @@
         "marginalCost": 0.0
       }
     ],
-    "lastUpdated": "2026-06-14T19:26:04Z",
+    "lastUpdated": "2026-06-14T19:27:41Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -298,9 +331,9 @@
       "provider": "OpenAI Pro / Codex",
       "monthlyFee": 200.0,
       "billingMode": "subscription",
-      "usageEquivalentDaily": 0.096271,
-      "usageEquivalentWeekly": 638.063714,
-      "usageEquivalentMonthly": 638.063714,
+      "usageEquivalentDaily": 74.506562,
+      "usageEquivalentWeekly": 638.647383,
+      "usageEquivalentMonthly": 638.647383,
       "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
     },
     "metered": {
@@ -314,23 +347,23 @@
       }
     },
     "usageEquivalent": {
-      "daily": 0.096271,
-      "weekly": 638.063714,
-      "monthly": 638.063714
+      "daily": 74.506562,
+      "weekly": 638.647383,
+      "monthly": 638.647383
     },
     "weeklyRunRate": {
       "total": 0.0,
       "automation": 0.0,
-      "interactive": 638.063714,
+      "interactive": 638.647383,
       "projectedMonthly": 0.0,
-      "subscriptionUsageEquivalentWeekly": 638.063714,
-      "subscriptionUsageEquivalentProjectedMonthly": 2734.56
+      "subscriptionUsageEquivalentWeekly": 638.647383,
+      "subscriptionUsageEquivalentProjectedMonthly": 2737.06
     },
     "providerBudgets": [],
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-14T19:25:59Z",
+    "updatedAt": "2026-06-14T19:27:37Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -351,7 +384,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-14T19:26:04Z",
+    "updatedAt": "2026-06-14T19:27:42Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -368,12 +401,12 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 38.0,
-      "cpu_user": 19.63,
-      "cpu_sys": 18.4,
-      "load1": 2.91,
-      "load5": 2.23,
-      "load15": 1.97,
+      "cpu_pct": 48.8,
+      "cpu_user": 30.48,
+      "cpu_sys": 18.29,
+      "load1": 1.67,
+      "load5": 1.99,
+      "load15": 1.9,
       "ram_used_gb": 13.0,
       "ram_total_gb": 15.1,
       "uptime": "",
@@ -383,14 +416,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 31.5,
-      "cpu_user": 18.96,
-      "cpu_sys": 12.5,
-      "load1": 3.03,
-      "load5": 3.06,
-      "load15": 2.63,
+      "cpu_pct": 18.4,
+      "cpu_user": 6.14,
+      "cpu_sys": 12.28,
+      "load1": 2.23,
+      "load5": 2.79,
+      "load15": 2.57,
       "ram_used_gb": 14.0,
-      "ram_total_gb": 15.7,
+      "ram_total_gb": 15.9,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "50Gi",
@@ -414,19 +447,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-14T19:25:59Z"
+      "lastChecked": "2026-06-14T19:27:37Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-14T19:25:59Z"
+      "lastChecked": "2026-06-14T19:27:37Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-14T19:25:59Z"
+      "lastChecked": "2026-06-14T19:27:37Z"
     }
   ],
   "crons": [
@@ -980,15 +1013,26 @@
   ],
   "sharedEvents": [
     {
-      "id": "josh2-status-20260614-192544-fix-resources-model-usage-overlap",
-      "time": "2026-06-14T19:25:44Z",
+      "id": "josh2-complete-20260614-192737-fix-resources-model-usage-overlap",
+      "time": "2026-06-14T19:27:37Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
-      "type": "status",
+      "type": "complete",
       "title": "Fix Resources model usage overlap",
-      "status": "active",
+      "status": "done",
       "tool": "agent publish",
-      "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard."
+      "detail": "Resources card overlap fixed and pushed in commit e61224403. Build, regression check, screenshot verification, dashboard refresh, and freshness guard passed."
+    },
+    {
+      "id": "josh2-complete-20260614-192607-josh-2-0-screen-check-clean",
+      "time": "2026-06-14T19:26:07Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Josh 2.0 screen check clean",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
       "id": "jaimes-status-20260614-192344-jaimes-is-working-now",
@@ -1000,17 +1044,6 @@
       "status": "active",
       "tool": "status check",
       "detail": "JAIMES live update: Kintara/Islands runner."
-    },
-    {
-      "id": "josh2-complete-20260614-192055-josh-2-0-screen-check-clean",
-      "time": "2026-06-14T19:20:55Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Josh 2.0 screen check clean",
-      "status": "done",
-      "tool": "Control Tower screen check",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
       "id": "josh2-complete-20260614-191621-mission-control-publish-blocked",
@@ -1202,7 +1235,7 @@
   ],
   "sharedOperatingLayer": {
     "status": "ready",
-    "updatedAt": "2026-06-14T19:25:44Z",
+    "updatedAt": "2026-06-14T19:27:37Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
@@ -1222,15 +1255,26 @@
     },
     "latestEvents": [
       {
-        "id": "josh2-status-20260614-192544-fix-resources-model-usage-overlap",
-        "time": "2026-06-14T19:25:44Z",
+        "id": "josh2-complete-20260614-192737-fix-resources-model-usage-overlap",
+        "time": "2026-06-14T19:27:37Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
-        "type": "status",
+        "type": "complete",
         "title": "Fix Resources model usage overlap",
-        "status": "active",
+        "status": "done",
         "tool": "agent publish",
-        "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard."
+        "detail": "Resources card overlap fixed and pushed in commit e61224403. Build, regression check, screenshot verification, dashboard refresh, and freshness guard passed."
+      },
+      {
+        "id": "josh2-complete-20260614-192607-josh-2-0-screen-check-clean",
+        "time": "2026-06-14T19:26:07Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Josh 2.0 screen check clean",
+        "status": "done",
+        "tool": "Control Tower screen check",
+        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
       },
       {
         "id": "jaimes-status-20260614-192344-jaimes-is-working-now",
@@ -1242,17 +1286,6 @@
         "status": "active",
         "tool": "status check",
         "detail": "JAIMES live update: Kintara/Islands runner."
-      },
-      {
-        "id": "josh2-complete-20260614-192055-josh-2-0-screen-check-clean",
-        "time": "2026-06-14T19:20:55Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Josh 2.0 screen check clean",
-        "status": "done",
-        "tool": "Control Tower screen check",
-        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
       },
       {
         "id": "josh2-complete-20260614-191621-mission-control-publish-blocked",
@@ -2201,35 +2234,10 @@
       "fresh": [
         {
           "agent": "jaimes",
-          "node": "jaimes-telegram-health-loop",
-          "status": "ok",
-          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
-          "updatedAt": "2026-06-14T19:25:57Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
           "node": "jaimes-live-poller",
           "status": "active",
           "summary": "JAIMES live update: Kintara/Islands runner.",
-          "updatedAt": "2026-06-14T19:25:44Z",
-          "stale": false
-        },
-        {
-          "agent": "josh2",
-          "node": "josh2-brain-feed-publish",
-          "status": "active",
-          "summary": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
-          "updatedAt": "2026-06-14T19:25:44Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "josh2",
-          "node": "model-router-guard-loop",
-          "status": "ok",
-          "summary": "Model/router guard ok: default openai/gpt-5.5 and 11 configured route(s) available.",
-          "updatedAt": "2026-06-14T19:25:41Z",
+          "updatedAt": "2026-06-14T19:27:44Z",
           "stale": false
         },
         {
@@ -2237,7 +2245,32 @@
           "node": "auto-offload-loop",
           "status": "ok",
           "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-14T19:24:41Z",
+          "updatedAt": "2026-06-14T19:27:41Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-brain-feed-publish",
+          "status": "ok",
+          "summary": "Resources card overlap fixed and pushed in commit e61224403. Build, regression check, screenshot verification, dashboard refresh, and freshness guard passed.",
+          "updatedAt": "2026-06-14T19:27:37Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
+          "status": "ok",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-14T19:25:57Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "model-router-guard-loop",
+          "status": "ok",
+          "summary": "Model/router guard ok: default openai/gpt-5.5 and 11 configured route(s) available.",
+          "updatedAt": "2026-06-14T19:25:41Z",
           "stale": false
         },
         {
@@ -2706,7 +2739,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-14T19:25:59Z",
+      "updatedAt": "2026-06-14T19:27:37Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -3457,7 +3490,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-14T19:25:59Z",
+    "generatedAt": "2026-06-14T19:27:37Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3478,8 +3511,8 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-14T19:25:57Z",
-        "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+        "probedAt": "2026-06-14T19:27:44Z",
+        "summary": "JAIMES live update: Kintara/Islands runner.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3498,8 +3531,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-14T19:25:44Z",
-        "summary": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
+        "probedAt": "2026-06-14T19:27:41Z",
+        "summary": "Auto-offload routing policy ok.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3732,7 +3765,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-14T19:25:59Z",
+    "updatedAt": "2026-06-14T19:27:37Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4108,13 +4141,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-14T19:25:59Z",
+    "updatedAt": "2026-06-14T19:27:37Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-14T19:25:59Z",
+    "updatedAt": "2026-06-14T19:27:37Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4181,21 +4214,10 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-14T19:25:59Z"
+      "detail": "Updated 2026-06-14T19:27:37Z"
     }
   ],
-  "trackedTasks": [
-    {
-      "id": "T-20260614-1520",
-      "title": "Fix Resources model usage overlap",
-      "status": "active",
-      "statusLabel": "\ud83d\udd04 \u8fdb\u884c\u4e2d",
-      "requestedAt": "2026-06-14 15:20",
-      "updatedAt": "2026-06-14 15:21",
-      "notes": "Added a specific Model Usage resource-card class and CSS overrides to separate title/value/detail lines. Production build passed; visual verification and Control Tower refresh in progress.",
-      "owner": "JOSH 2.0"
-    }
-  ],
+  "trackedTasks": [],
   "activeAgents": [
     {
       "id": "coding-visibility",
@@ -4280,20 +4302,25 @@
       "agent": "JOSH 2.0",
       "active": false,
       "reportedActive": false,
-      "objective": "Fix Resources model usage overlap",
-      "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
-      "status": "ready",
+      "objective": "Auto-offload routing policy ok.",
+      "detail": "Auto-offload routing policy ok.",
+      "status": "ok",
       "stale": false,
-      "updatedAt": "2026-06-14T19:25:44Z",
-      "messageReceived": "2026-05-25T00:14:38Z",
-      "currentTool": "agent publish",
+      "updatedAt": "2026-06-14T19:27:41Z",
+      "messageReceived": null,
+      "currentTool": "status check",
       "model": "GPT-5.5",
       "steps": [
         {
+          "label": "Auto-offload routing policy ok.",
+          "status": "ok",
+          "tool": "status check"
+        },
+        {
           "label": "Fix Resources model usage overlap",
-          "status": "active",
+          "status": "done",
           "tool": "agent publish",
-          "kind": "status"
+          "kind": "complete"
         },
         {
           "label": "Josh 2.0 screen check clean",
@@ -4302,34 +4329,10 @@
           "kind": "complete"
         },
         {
-          "label": "Fix Resources model usage overlap",
-          "status": "done",
-          "tool": "agent publish",
-          "kind": "status"
-        },
-        {
           "label": "Mission Control publish blocked",
           "status": "done",
           "tool": "git publish",
           "kind": "complete"
-        },
-        {
-          "label": "Mission Control publish cleanup complete",
-          "status": "done",
-          "tool": "git publish",
-          "kind": "complete"
-        },
-        {
-          "label": "Mission Control publish cleanup in progress",
-          "status": "blocked",
-          "tool": "git cleanup",
-          "kind": "status"
-        },
-        {
-          "label": "Mission Control publish cleanup approved",
-          "status": "done",
-          "tool": "agent publish",
-          "kind": "status"
         }
       ]
     },
@@ -4362,7 +4365,7 @@
       "detail": "Kintara/Islands runner",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-06-14T19:25:44Z",
+      "updatedAt": "2026-06-14T19:27:44Z",
       "messageReceived": "2026-06-14T19:17:14Z",
       "currentTool": "telegram",
       "model": "gpt-5.5",
@@ -4410,20 +4413,25 @@
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "objective": "Fix Resources model usage overlap",
-    "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
-    "status": "ready",
+    "objective": "Auto-offload routing policy ok.",
+    "detail": "Auto-offload routing policy ok.",
+    "status": "ok",
     "stale": false,
-    "updatedAt": "2026-06-14T19:25:44Z",
-    "messageReceived": "2026-05-25T00:14:38Z",
-    "currentTool": "agent publish",
+    "updatedAt": "2026-06-14T19:27:41Z",
+    "messageReceived": null,
+    "currentTool": "status check",
     "model": "GPT-5.5",
     "steps": [
       {
+        "label": "Auto-offload routing policy ok.",
+        "status": "ok",
+        "tool": "status check"
+      },
+      {
         "label": "Fix Resources model usage overlap",
-        "status": "active",
+        "status": "done",
         "tool": "agent publish",
-        "kind": "status"
+        "kind": "complete"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -4432,34 +4440,10 @@
         "kind": "complete"
       },
       {
-        "label": "Fix Resources model usage overlap",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "status"
-      },
-      {
         "label": "Mission Control publish blocked",
         "status": "done",
         "tool": "git publish",
         "kind": "complete"
-      },
-      {
-        "label": "Mission Control publish cleanup complete",
-        "status": "done",
-        "tool": "git publish",
-        "kind": "complete"
-      },
-      {
-        "label": "Mission Control publish cleanup in progress",
-        "status": "blocked",
-        "tool": "git cleanup",
-        "kind": "status"
-      },
-      {
-        "label": "Mission Control publish cleanup approved",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "status"
       }
     ]
   },
@@ -4492,7 +4476,7 @@
     "detail": "Kintara/Islands runner",
     "status": "active",
     "stale": false,
-    "updatedAt": "2026-06-14T19:25:44Z",
+    "updatedAt": "2026-06-14T19:27:44Z",
     "messageReceived": "2026-06-14T19:17:14Z",
     "currentTool": "telegram",
     "model": "gpt-5.5",
@@ -4552,7 +4536,7 @@
         "detail": "Kintara/Islands runner",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-06-14T19:25:44Z",
+        "updatedAt": "2026-06-14T19:27:44Z",
         "messageReceived": "2026-06-14T19:17:14Z",
         "currentTool": "telegram",
         "model": "gpt-5.5",
@@ -4599,20 +4583,25 @@
         "agent": "JOSH 2.0",
         "active": false,
         "reportedActive": false,
-        "objective": "Fix Resources model usage overlap",
-        "detail": "Visual check passed on the live kiosk screenshot. Current step: refresh Control Tower state and verify guard.",
-        "status": "ready",
+        "objective": "Auto-offload routing policy ok.",
+        "detail": "Auto-offload routing policy ok.",
+        "status": "ok",
         "stale": false,
-        "updatedAt": "2026-06-14T19:25:44Z",
-        "messageReceived": "2026-05-25T00:14:38Z",
-        "currentTool": "agent publish",
+        "updatedAt": "2026-06-14T19:27:41Z",
+        "messageReceived": null,
+        "currentTool": "status check",
         "model": "GPT-5.5",
         "steps": [
           {
+            "label": "Auto-offload routing policy ok.",
+            "status": "ok",
+            "tool": "status check"
+          },
+          {
             "label": "Fix Resources model usage overlap",
-            "status": "active",
+            "status": "done",
             "tool": "agent publish",
-            "kind": "status"
+            "kind": "complete"
           },
           {
             "label": "Josh 2.0 screen check clean",
@@ -4621,34 +4610,10 @@
             "kind": "complete"
           },
           {
-            "label": "Fix Resources model usage overlap",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
             "label": "Mission Control publish blocked",
             "status": "done",
             "tool": "git publish",
             "kind": "complete"
-          },
-          {
-            "label": "Mission Control publish cleanup complete",
-            "status": "done",
-            "tool": "git publish",
-            "kind": "complete"
-          },
-          {
-            "label": "Mission Control publish cleanup in progress",
-            "status": "blocked",
-            "tool": "git cleanup",
-            "kind": "status"
-          },
-          {
-            "label": "Mission Control publish cleanup approved",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "status"
           }
         ]
       },
@@ -4738,25 +4703,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-14T19:26:04Z",
+      "time": "2026-06-14T19:27:41Z",
       "event": "Session spend: $0.04"
     },
     {
-      "time": "2026-06-14T19:26:00Z",
+      "time": "2026-06-14T19:27:37Z",
+      "event": "Brain: Brain Feed idle"
+    },
+    {
+      "time": "2026-06-14T19:27:37Z",
       "event": "Coding: mission-control/dist/v2-react/assets/index-BFoq3_Jj.css, mission-control/dist/v2-react/assets/index-7BatRZe7.js"
     },
     {
-      "time": "2026-06-14T19:26:00Z",
+      "time": "2026-06-14T19:27:37Z",
       "event": "CodexBar: 72% left \u00b7 wk 56% left"
     },
     {
-      "time": "2026-06-14T19:25:59Z",
-      "event": "Brain: Brain Feed live"
-    },
-    {
-      "time": "2026-06-14T19:25:59Z",
+      "time": "2026-06-14T19:27:37Z",
       "event": "12 live scheduled jobs healthy"
     }
   ],
-  "lastUpdated": "2026-06-14T19:25:59Z"
+  "lastUpdated": "2026-06-14T19:27:37Z"
 }
