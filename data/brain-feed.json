@@ -1,20 +1,20 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": false,
-  "reportedActive": false,
-  "status": "done",
-  "objective": "Fix Resources model usage overlap",
-  "detail": "Resources card overlap fixed and pushed in commit e61224403. Build, regression check, screenshot verification, dashboard refresh, and freshness guard passed.",
-  "updatedAt": "2026-06-14T19:27:37Z",
-  "checkedAt": "2026-06-14T19:27:37Z",
+  "active": true,
+  "reportedActive": true,
+  "status": "active",
+  "objective": "Polish Today\u2019s Jobs readability",
+  "detail": "Live kiosk measured 31px Today\u2019s Jobs rows with no clipping; refreshing Control Tower state.",
+  "updatedAt": "2026-06-14T21:15:40Z",
+  "checkedAt": "2026-06-14T21:15:40Z",
   "currentTool": "agent publish",
   "steps": [
     {
-      "label": "Fix Resources model usage overlap",
-      "status": "done",
+      "label": "Polish Today\u2019s Jobs readability",
+      "status": "active",
       "tool": "agent publish",
-      "kind": "complete"
+      "kind": "status"
     },
     {
       "label": "Josh 2.0 screen check clean",
@@ -23,31 +23,31 @@
       "kind": "complete"
     },
     {
-      "label": "Fix Resources model usage overlap",
+      "label": "Polish Today\u2019s Jobs readability",
       "status": "done",
       "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Mission Control publish blocked",
+      "label": "Fix Today jobs header",
       "status": "done",
-      "tool": "git publish",
+      "tool": "agent publish",
       "kind": "complete"
     },
     {
-      "label": "Mission Control publish cleanup complete",
+      "label": "Fix Today jobs header",
       "status": "done",
-      "tool": "git publish",
-      "kind": "complete"
-    },
-    {
-      "label": "Mission Control publish cleanup in progress",
-      "status": "blocked",
-      "tool": "git cleanup",
+      "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Mission Control publish cleanup approved",
+      "label": "Pull Control Tower back up on Josh 2.0 screen",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Pull Control Tower back up on Josh 2.0 screen",
       "status": "done",
       "tool": "agent publish",
       "kind": "status"

@@ -16962,6 +16962,41 @@ body::before {
 }
 /* end TODAY JOBS TIME STATE BREATHING ROOM */
 
+/* TODAY JOBS ROW READABILITY TUNE 2026-06-14
+   Slightly thicker agenda rows for wall-display scanning. */
+#today-jobs .calendar-job-block,
+#today-jobs .calendar-job-block.tone-working,
+#today-jobs .calendar-job-block.tone-planned,
+#today-jobs .calendar-job-block.tone-ready,
+#today-jobs .calendar-job-block.tone-done,
+#today-jobs .calendar-job-block.tone-attention,
+#today-jobs .calendar-empty-block,
+#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
+#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
+  min-height: 31px !important;
+  height: 31px !important;
+  max-height: 31px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+#today-jobs .calendar-block-time strong,
+#today-jobs .calendar-block-state strong,
+#today-jobs .calendar-block-main strong,
+#today-jobs .calendar-block-meta span {
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+}
+
+#today-jobs .calendar-block-main strong {
+  color: rgba(244, 252, 246, 0.94) !important;
+}
+/* end TODAY JOBS ROW READABILITY TUNE */
+
 
 /* =====================================================================
    LIVE WORK BOARD RICH DETAIL CHIPS — JAIMES — 2026-06-13
