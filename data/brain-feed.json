@@ -4,14 +4,14 @@
   "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Mission Control publish cleanup complete",
-  "detail": "Mission Control cleanup was committed, rebased onto current origin/main, and pushed. Control Tower publish-blocked review should clear after refresh.",
-  "updatedAt": "2026-06-14T19:13:49Z",
-  "checkedAt": "2026-06-14T19:13:49Z",
+  "objective": "Mission Control publish blocked",
+  "detail": "Cleared: Mission Control cleanup was committed and pushed to origin/main; local generated dashboard refreshes are no longer awaiting Josh approval.",
+  "updatedAt": "2026-06-14T19:16:21Z",
+  "checkedAt": "2026-06-14T19:16:21Z",
   "currentTool": "git publish",
   "steps": [
     {
-      "label": "Mission Control publish cleanup complete",
+      "label": "Mission Control publish blocked",
       "status": "done",
       "tool": "git publish",
       "kind": "complete"
@@ -20,6 +20,12 @@
       "label": "Josh 2.0 screen check clean",
       "status": "done",
       "tool": "Control Tower screen check",
+      "kind": "complete"
+    },
+    {
+      "label": "Mission Control publish cleanup complete",
+      "status": "done",
+      "tool": "git publish",
       "kind": "complete"
     },
     {
@@ -45,12 +51,6 @@
       "status": "blocked",
       "tool": "heartbeat",
       "kind": "blocked"
-    },
-    {
-      "label": "Codex subscription optimization complete",
-      "status": "done",
-      "tool": "codex",
-      "kind": "complete"
     }
   ],
   "source": "josh2-local-live-feed",

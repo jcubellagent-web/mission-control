@@ -520,7 +520,7 @@ def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
                 str(event.get("agent") or "").lower(),
                 str(event.get("title") or "").lower(),
             )
-            if status in {"active", "working", "running"} and title_key in cleared_keys:
+            if status in {"active", "working", "running", "blocked", "error"} and title_key in cleared_keys:
                 continue
             key = (
                 str(event.get("agent") or "").lower(),
