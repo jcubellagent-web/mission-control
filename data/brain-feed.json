@@ -1,21 +1,15 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": true,
-  "reportedActive": true,
-  "status": "active",
-  "objective": "Improve Today\u2019s Jobs readability",
-  "detail": "Making rows thicker and moving the Time text away from the left edge.",
-  "updatedAt": "2026-06-14T21:47:54Z",
-  "checkedAt": "2026-06-14T21:47:54Z",
-  "currentTool": "agent publish",
+  "active": false,
+  "reportedActive": false,
+  "status": "done",
+  "objective": "Josh 2.0 screen check clean",
+  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+  "updatedAt": "2026-06-15T04:45:56Z",
+  "checkedAt": "2026-06-15T04:45:56Z",
+  "currentTool": "Control Tower screen check",
   "steps": [
-    {
-      "label": "Improve Today\u2019s Jobs readability",
-      "status": "active",
-      "tool": "agent publish",
-      "kind": "status"
-    },
     {
       "label": "Josh 2.0 screen check clean",
       "status": "done",
@@ -23,34 +17,40 @@
       "kind": "complete"
     },
     {
-      "label": "Today\u2019s Jobs readability polished",
+      "label": "Direct chat context high",
+      "status": "info",
+      "tool": "heartbeat",
+      "kind": "note"
+    },
+    {
+      "label": "Fresh direct session recommended",
+      "status": "ready",
+      "tool": "heartbeat",
+      "kind": "handoff"
+    },
+    {
+      "label": "Bring up Josh 2.0 and clear alerts",
       "status": "done",
       "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Polish Today\u2019s Jobs readability",
-      "status": "done",
+      "label": "Kintara tutorial continuation",
+      "status": "ready",
       "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Fix Today jobs header",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "complete"
-    },
-    {
-      "label": "Fix Today jobs header",
-      "status": "done",
+      "label": "Kintara training + tutorial assist",
+      "status": "ready",
       "tool": "agent publish",
       "kind": "status"
     },
     {
-      "label": "Pull Control Tower back up on Josh 2.0 screen",
+      "label": "J.A.I.N SSH unreachable",
       "status": "done",
-      "tool": "agent publish",
-      "kind": "complete"
+      "tool": "heartbeat",
+      "kind": "status"
     }
   ],
   "source": "josh2-local-live-feed",
