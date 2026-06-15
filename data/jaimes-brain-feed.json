@@ -1,66 +1,69 @@
 {
-  "active": true,
-  "objective": "Kintara server update wait",
-  "status": "active",
-  "updatedAt": "2026-06-15T08:26:31Z",
+  "active": false,
+  "objective": "Sorare pre-lock loop",
+  "status": "info",
+  "updatedAt": "2026-06-15T13:03:44Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-15T08:18:46Z",
-  "steps": [
-    {
-      "label": "JAIMES is working now",
-      "status": "active",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is online and ready",
-      "status": "done",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "JAIMES is working now",
-      "status": "done",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
-      "label": "image review request",
-      "status": "done",
-      "tool": "telegram-ingress",
-      "time": "2026-06-15T04:05:53Z"
-    },
-    {
-      "label": "[System note: Your previous turn was interrupted",
-      "status": "done",
-      "tool": "telegram-ingress",
-      "time": "2026-06-15T04:05:53Z"
-    },
-    {
-      "label": "Ops: running model efficiency guard",
-      "status": "done",
-      "tool": "exec",
-      "time": "2026-06-15T04:10:53Z"
-    }
-  ],
-  "currentTool": "telegram",
-  "checkedAt": "2026-06-15T08:26:31Z",
-  "agent": "JAIMES",
-  "source": "josh2-local-live-feed",
-  "agentId": "jaimes",
-  "reportedActive": false,
-  "detail": "Kintara server update wait",
-  "supabaseBacked": false,
-  "localLiveFeed": true,
-  "updated_at": "2026-06-15T08:18:46Z",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "liveAgentPush": "2026-06-15T08:18:46Z",
-  "liveAgentPushAt": "2026-06-15T08:18:46Z"
+  "currentTool": "sorare_prelock_loop",
+  "agent": "JAIMES",
+  "checkedAt": "2026-06-15T13:03:44Z",
+  "messageReceived": "2026-06-15T13:01:49Z",
+  "steps": [
+    {
+      "label": "Sorare pre-lock loop",
+      "status": "info",
+      "tool": "sorare_prelock_loop",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare GW24: submitting optimized lineups",
+      "status": "active",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Sorare Daily Missions watchdog needs attention",
+      "status": "error",
+      "tool": "cron",
+      "kind": "status"
+    },
+    {
+      "label": "Done: fantasy pre-lock report generated",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Fantasy: checking scoringPeriodId 83",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Fantasy: generating Monday pre-lock lineup report",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Done: JAIMES Brain Feed path healthy",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Self-test: JAIMES Brain Feed path healthy",
+      "status": "done",
+      "tool": "exec",
+      "kind": "status"
+    }
+  ],
+  "agentId": "jaimes",
+  "reportedActive": false,
+  "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Corey Seager, Eugenio Su\u00e1rez, Gleyber Torres, Jared Triolo",
+  "source": "josh2-local-live-feed",
+  "supabaseBacked": false,
+  "localLiveFeed": true
 }
