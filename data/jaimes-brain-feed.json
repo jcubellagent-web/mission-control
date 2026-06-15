@@ -1,10 +1,10 @@
 {
-  "active": false,
-  "objective": "Done: ESPN fantasy auth healthy",
-  "status": "idle",
-  "updatedAt": "2026-06-15T04:46:51Z",
+  "active": true,
+  "objective": "Kintara: clicking Play Now",
+  "status": "active",
+  "updatedAt": "2026-06-15T04:48:23Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-15T04:45:54Z",
+  "messageReceived": "2026-06-15T04:48:23Z",
   "steps": [
     {
       "label": "JAIMES is online and ready",
@@ -47,20 +47,38 @@
       "status": "done",
       "tool": "exec",
       "time": "2026-06-15T04:45:54Z"
+    },
+    {
+      "label": "approve",
+      "status": "done",
+      "tool": "telegram-ingress",
+      "time": "2026-06-15T04:47:56Z"
+    },
+    {
+      "label": "Kintara: approved resume with saved controls",
+      "status": "done",
+      "tool": "telegram",
+      "time": "2026-06-15T04:48:04Z"
+    },
+    {
+      "label": "Kintara: clicking Play Now",
+      "status": "active",
+      "tool": "telegram",
+      "time": "2026-06-15T04:48:23Z"
     }
   ],
-  "currentTool": "exec",
-  "checkedAt": "2026-06-15T04:46:51Z",
+  "currentTool": "telegram",
+  "checkedAt": "2026-06-15T04:48:23Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
   "agentId": "jaimes",
   "reportedActive": false,
-  "detail": "Done: ESPN fantasy auth healthy",
+  "detail": "Kintara: clicking Play Now",
   "supabaseBacked": false,
   "localLiveFeed": true,
-  "updated_at": "2026-06-15T04:45:55Z",
+  "updated_at": "2026-06-15T04:48:23Z",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "liveAgentPush": "2026-06-15T04:45:55Z",
-  "liveAgentPushAt": "2026-06-15T04:45:55Z"
+  "liveAgentPush": "2026-06-15T04:48:23Z",
+  "liveAgentPushAt": "2026-06-15T04:48:23Z"
 }
