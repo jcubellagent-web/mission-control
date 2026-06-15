@@ -8,22 +8,22 @@
     "active": false,
     "reportedActive": false,
     "status": "done",
-    "objective": "Heartbeat maintenance complete",
-    "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-    "updatedAt": "2026-06-15T04:47:58Z",
-    "checkedAt": "2026-06-15T04:47:58Z",
-    "currentTool": "heartbeat",
+    "objective": "Josh 2.0 screen check clean",
+    "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+    "updatedAt": "2026-06-15T08:24:35Z",
+    "checkedAt": "2026-06-15T08:24:35Z",
+    "currentTool": "Control Tower screen check",
     "steps": [
-      {
-        "label": "Heartbeat maintenance complete",
-        "status": "done",
-        "tool": "heartbeat",
-        "kind": "complete"
-      },
       {
         "label": "Josh 2.0 screen check clean",
         "status": "done",
         "tool": "Control Tower screen check",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat maintenance complete",
+        "status": "done",
+        "tool": "heartbeat",
         "kind": "complete"
       },
       {
@@ -65,8 +65,8 @@
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last completed objective: Heartbeat maintenance complete",
-    "updatedAt": "2026-06-15T04:47:58Z"
+    "context": "Last completed objective: Josh 2.0 screen check clean",
+    "updatedAt": "2026-06-15T08:26:49Z"
   },
   "contextWindow": {
     "usedTokens": 84887,
@@ -89,32 +89,30 @@
   },
   "codingVisibility": {
     "workspaceDirty": 59,
-    "missionControlDirty": 3,
-    "recentFiles": [
-      "mission-control/docs/handoffs/2026-06-15-josh2-josh2-handoff-20260615-025658-fresh-direct-session-recommended.md"
-    ],
-    "codexbarStatus": "83% left \u00b7 wk 42% left",
+    "missionControlDirty": 9,
+    "recentFiles": [],
+    "codexbarStatus": "98% left \u00b7 wk 40% left",
     "codexbar": {
       "available": true,
       "raw": [
         "== Codex 0.139.0 (oauth) ==",
-        "Session: 83% left [=========---]",
-        "Resets in 2h 56m",
-        "Weekly: 42% left [=====-------]",
-        "Pace: On pace | Expected 60% used | Lasts until reset",
-        "Resets in 2d 19h",
+        "Session: 98% left [===========-]",
+        "Resets in 4h 18m",
+        "Weekly: 40% left [====--------]",
+        "Pace: On pace | Expected 62% used | Lasts until reset",
+        "Resets in 2d 16h",
         "Credits: 444.72 left",
         "Account: jcubell16@gmail.com"
       ],
-      "session": "83% left",
-      "weekly": "42% left",
+      "session": "98% left",
+      "weekly": "40% left",
       "credits": "444.72 left",
       "account": "jcubell16@gmail.com",
-      "sessionReset": "2h 56m",
-      "weeklyReset": "2d 19h",
-      "summary": "83% left \u00b7 wk 42% left"
+      "sessionReset": "4h 18m",
+      "weeklyReset": "2d 16h",
+      "summary": "98% left \u00b7 wk 40% left"
     },
-    "updatedAt": "2026-06-15T04:47:59Z"
+    "updatedAt": "2026-06-15T08:26:50Z"
   },
   "modelUsage": {
     "session": 0.435151,
@@ -125,7 +123,7 @@
       {
         "name": "gpt-5.5",
         "window": "session",
-        "cost": 661.3443930000001
+        "cost": 665.3390350000001
       },
       {
         "name": "gpt-5.4",
@@ -140,7 +138,7 @@
       {
         "name": "openai/gpt-5.5",
         "window": "session",
-        "cost": 0.592784
+        "cost": 0.620888
       },
       {
         "name": "xai/grok-4.20-reasoning",
@@ -152,13 +150,13 @@
       {
         "name": "gpt-5.5",
         "source": "codex",
-        "weeklyCost": 661.3443930000001,
-        "dailyCost": 0.689409,
-        "sessionCost": 661.3443930000001,
+        "weeklyCost": 665.3390350000001,
+        "dailyCost": 4.684051,
+        "sessionCost": 665.3390350000001,
         "totalTokens": 0,
         "costEstimated": false,
         "billingMode": "metered",
-        "marginalCost": 661.344393
+        "marginalCost": 665.339035
       },
       {
         "name": "gpt-5.4",
@@ -185,17 +183,17 @@
       {
         "name": "openai/gpt-5.5",
         "source": "openclaw",
-        "inputTokens": 105260,
-        "outputTokens": 902,
-        "totalTokens": 106162,
-        "sessionCost": 0.592784,
-        "dailyCost": 0.048567,
-        "weeklyCost": 0.592784,
+        "inputTokens": 104936,
+        "outputTokens": 792,
+        "totalTokens": 105728,
+        "sessionCost": 0.620888,
+        "dailyCost": 0.076671,
+        "weeklyCost": 0.620888,
         "sessions": 4,
         "isGemini": false,
         "costEstimated": false,
         "billingMode": "subscription",
-        "usageEquivalentCost": 0.592784,
+        "usageEquivalentCost": 0.620888,
         "marginalCost": 0.0,
         "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
       },
@@ -249,7 +247,7 @@
         "marginalCost": 0.0
       }
     ],
-    "lastUpdated": "2026-06-15T04:48:03Z",
+    "lastUpdated": "2026-06-15T08:26:55Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -309,9 +307,9 @@
       "provider": "OpenAI Pro / Codex",
       "monthlyFee": 200.0,
       "billingMode": "subscription",
-      "usageEquivalentDaily": 0.737976,
-      "usageEquivalentWeekly": 670.293755,
-      "usageEquivalentMonthly": 1348.08945,
+      "usageEquivalentDaily": 4.760722,
+      "usageEquivalentWeekly": 674.316501,
+      "usageEquivalentMonthly": 1352.112196,
       "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
     },
     "metered": {
@@ -325,23 +323,23 @@
       }
     },
     "usageEquivalent": {
-      "daily": 0.737976,
-      "weekly": 670.293755,
-      "monthly": 1348.08945
+      "daily": 4.760722,
+      "weekly": 674.316501,
+      "monthly": 1352.112196
     },
     "weeklyRunRate": {
       "total": 0.0,
       "automation": 0.0,
-      "interactive": 670.293755,
+      "interactive": 674.316501,
       "projectedMonthly": 0.0,
-      "subscriptionUsageEquivalentWeekly": 670.293755,
-      "subscriptionUsageEquivalentProjectedMonthly": 2872.69
+      "subscriptionUsageEquivalentWeekly": 674.316501,
+      "subscriptionUsageEquivalentProjectedMonthly": 2889.93
     },
     "providerBudgets": [],
     "routerPolicy": {}
   },
   "modelRouter": {
-    "updatedAt": "2026-06-15T04:47:58Z",
+    "updatedAt": "2026-06-15T08:26:49Z",
     "policy": {},
     "codexAllowanceMode": "normal",
     "providers": [],
@@ -362,7 +360,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 2.4,
-    "updatedAt": "2026-06-15T04:48:03Z",
+    "updatedAt": "2026-06-15T08:26:55Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -379,14 +377,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 40.7,
-      "cpu_user": 22.0,
-      "cpu_sys": 18.66,
-      "load1": 1.81,
+      "cpu_pct": 60.1,
+      "cpu_user": 38.34,
+      "cpu_sys": 22.55,
+      "load1": 2.0,
       "load5": 1.48,
-      "load15": 1.5,
+      "load15": 1.35,
       "ram_used_gb": 13.0,
-      "ram_total_gb": 15.9,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "75Gi",
@@ -394,14 +392,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 45.7,
-      "cpu_user": 25.58,
-      "cpu_sys": 20.15,
-      "load1": 3.42,
-      "load5": 3.58,
-      "load15": 3.67,
-      "ram_used_gb": 15.0,
-      "ram_total_gb": 15.4,
+      "cpu_pct": 55.3,
+      "cpu_user": 37.96,
+      "cpu_sys": 17.28,
+      "load1": 4.55,
+      "load5": 4.71,
+      "load15": 4.54,
+      "ram_used_gb": 14.0,
+      "ram_total_gb": 15.5,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "48Gi",
@@ -425,19 +423,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-15T04:47:58Z"
+      "lastChecked": "2026-06-15T08:26:49Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-15T04:47:58Z"
+      "lastChecked": "2026-06-15T08:26:49Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-15T04:47:58Z"
+      "lastChecked": "2026-06-15T08:26:49Z"
     }
   ],
   "crons": [
@@ -528,7 +526,7 @@
       "errors": 0,
       "lastError": null,
       "runStatus": "due",
-      "lastRun": "2026-06-15T04:00:02.540319+00:00"
+      "lastRun": "2026-06-15T08:00:02.598455+00:00"
     },
     {
       "name": "Breaking News Scanner",
@@ -712,9 +710,9 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-06-14T02:01:22.322444-04:00",
-      "nextRun": "2026-06-15T02:00:00-04:00"
+      "runStatus": "done",
+      "lastRun": "2026-06-15T02:01:58.335207-04:00",
+      "nextRun": "2026-06-16T02:00:00-04:00"
     },
     {
       "name": "Sorare All-Rarity Claim Sweep",
@@ -728,9 +726,9 @@
       "todayRelevant": true,
       "errors": 0,
       "lastError": null,
-      "runStatus": "upcoming",
-      "lastRun": "2026-06-14T03:30:58.758806-04:00",
-      "nextRun": "2026-06-15T03:30:00-04:00"
+      "runStatus": "done",
+      "lastRun": "2026-06-15T03:30:07.640505-04:00",
+      "nextRun": "2026-06-16T03:30:00-04:00"
     },
     {
       "name": "Sorare Daily Missions Watchdog",
@@ -1000,30 +998,8 @@
   "codexJobs": [],
   "sharedEvents": [
     {
-      "id": "josh2-complete-20260615-044758-heartbeat-maintenance-complete",
-      "time": "2026-06-15T04:47:58Z",
-      "agent": "josh2",
-      "agentLabel": "JOSH 2.0",
-      "type": "complete",
-      "title": "Heartbeat maintenance complete",
-      "status": "done",
-      "tool": "heartbeat",
-      "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing."
-    },
-    {
-      "id": "jaimes-status-20260615-044751-jaimes-is-online-and-ready",
-      "time": "2026-06-15T04:47:51Z",
-      "agent": "jaimes",
-      "agentLabel": "JAIMES",
-      "type": "status",
-      "title": "JAIMES is online and ready",
-      "status": "ready",
-      "tool": "status check",
-      "detail": "JAIMES live check: Done: ESPN fantasy auth healthy."
-    },
-    {
-      "id": "josh2-complete-20260615-044556-josh-2-0-screen-check-clean",
-      "time": "2026-06-15T04:45:56Z",
+      "id": "josh2-complete-20260615-082435-josh-2-0-screen-check-clean",
+      "time": "2026-06-15T08:24:35Z",
       "agent": "josh2",
       "agentLabel": "JOSH 2.0",
       "type": "complete",
@@ -1033,15 +1009,37 @@
       "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
     },
     {
-      "id": "jaimes-status-20260615-044150-jaimes-is-working-now",
-      "time": "2026-06-15T04:41:50Z",
+      "id": "jaimes-status-20260615-082431-jaimes-is-working-now",
+      "time": "2026-06-15T08:24:31Z",
       "agent": "jaimes",
       "agentLabel": "JAIMES",
       "type": "status",
       "title": "JAIMES is working now",
       "status": "active",
       "tool": "status check",
-      "detail": "JAIMES live update: Kintara: saving controls/keybinds."
+      "detail": "JAIMES live update: Kintara server update wait."
+    },
+    {
+      "id": "jaimes-status-20260615-081730-jaimes-is-online-and-ready",
+      "time": "2026-06-15T08:17:30Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "JAIMES is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "JAIMES live check: Trade: stop watch 1.22 SOL \u00b7 de-risking."
+    },
+    {
+      "id": "josh2-complete-20260615-044758-heartbeat-maintenance-complete",
+      "time": "2026-06-15T04:47:58Z",
+      "agent": "josh2",
+      "agentLabel": "JOSH 2.0",
+      "type": "complete",
+      "title": "Heartbeat maintenance complete",
+      "status": "done",
+      "tool": "heartbeat",
+      "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing."
     },
     {
       "id": "josh2-note-20260615-035220-direct-chat-context-high",
@@ -1222,7 +1220,7 @@
   ],
   "sharedOperatingLayer": {
     "status": "ready",
-    "updatedAt": "2026-06-15T04:47:58Z",
+    "updatedAt": "2026-06-15T08:24:35Z",
     "counts": {
       "eventsToday": 20,
       "decisions": 5,
@@ -1242,30 +1240,8 @@
     },
     "latestEvents": [
       {
-        "id": "josh2-complete-20260615-044758-heartbeat-maintenance-complete",
-        "time": "2026-06-15T04:47:58Z",
-        "agent": "josh2",
-        "agentLabel": "JOSH 2.0",
-        "type": "complete",
-        "title": "Heartbeat maintenance complete",
-        "status": "done",
-        "tool": "heartbeat",
-        "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing."
-      },
-      {
-        "id": "jaimes-status-20260615-044751-jaimes-is-online-and-ready",
-        "time": "2026-06-15T04:47:51Z",
-        "agent": "jaimes",
-        "agentLabel": "JAIMES",
-        "type": "status",
-        "title": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "detail": "JAIMES live check: Done: ESPN fantasy auth healthy."
-      },
-      {
-        "id": "josh2-complete-20260615-044556-josh-2-0-screen-check-clean",
-        "time": "2026-06-15T04:45:56Z",
+        "id": "josh2-complete-20260615-082435-josh-2-0-screen-check-clean",
+        "time": "2026-06-15T08:24:35Z",
         "agent": "josh2",
         "agentLabel": "JOSH 2.0",
         "type": "complete",
@@ -1275,15 +1251,37 @@
         "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed"
       },
       {
-        "id": "jaimes-status-20260615-044150-jaimes-is-working-now",
-        "time": "2026-06-15T04:41:50Z",
+        "id": "jaimes-status-20260615-082431-jaimes-is-working-now",
+        "time": "2026-06-15T08:24:31Z",
         "agent": "jaimes",
         "agentLabel": "JAIMES",
         "type": "status",
         "title": "JAIMES is working now",
         "status": "active",
         "tool": "status check",
-        "detail": "JAIMES live update: Kintara: saving controls/keybinds."
+        "detail": "JAIMES live update: Kintara server update wait."
+      },
+      {
+        "id": "jaimes-status-20260615-081730-jaimes-is-online-and-ready",
+        "time": "2026-06-15T08:17:30Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "JAIMES is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "detail": "JAIMES live check: Trade: stop watch 1.22 SOL \u00b7 de-risking."
+      },
+      {
+        "id": "josh2-complete-20260615-044758-heartbeat-maintenance-complete",
+        "time": "2026-06-15T04:47:58Z",
+        "agent": "josh2",
+        "agentLabel": "JOSH 2.0",
+        "type": "complete",
+        "title": "Heartbeat maintenance complete",
+        "status": "done",
+        "tool": "heartbeat",
+        "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing."
       },
       {
         "id": "josh2-note-20260615-035220-direct-chat-context-high",
@@ -1524,20 +1522,19 @@
     "attentionHandoffs": [],
     "dailyRollup": {
       "date": "2026-06-15",
-      "generatedAt": "2026-06-15T04:47:58Z",
-      "summary": "188 shared event(s), 0 job(s), 0 decision(s), 1 open handoff(s).",
+      "generatedAt": "2026-06-15T08:24:31Z",
+      "summary": "232 shared event(s), 0 job(s), 0 decision(s), 1 open handoff(s).",
       "counts": {
-        "events": 188,
+        "events": 232,
         "jobs": 0,
         "decisions": 0,
         "handoffs": 1,
         "blocked": 7
       },
       "highlights": [
-        "Heartbeat maintenance complete",
-        "JAIMES is online and ready",
+        "JAIMES is working now",
         "Josh 2.0 screen check clean",
-        "JAIMES is working now"
+        "JAIMES is online and ready"
       ],
       "openHandoffs": [
         {
@@ -2256,45 +2253,11 @@
       "staleAfterMinutes": 120,
       "fresh": [
         {
-          "agent": "josh2",
-          "node": "josh2-brain-feed-publish",
-          "status": "ok",
-          "summary": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-          "updatedAt": "2026-06-15T04:47:58Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
-          "agent": "josh2",
-          "node": "token-cost-guard-loop",
-          "status": "ok",
-          "summary": "Token/cost guard ok; no high-burn pattern detected in local tracker.",
-          "updatedAt": "2026-06-15T04:47:57Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-brain-feed-publish",
-          "status": "ok",
-          "summary": "JAIMES live check: Done: ESPN fantasy auth healthy.",
-          "updatedAt": "2026-06-15T04:47:51Z",
-          "stale": false,
-          "source": "agent_publish.py"
-        },
-        {
           "agent": "jaimes",
           "node": "jaimes-live-poller",
-          "status": "ok",
-          "summary": "JAIMES live check: Done: ESPN fantasy auth healthy.",
-          "updatedAt": "2026-06-15T04:47:51Z",
-          "stale": false
-        },
-        {
-          "agent": "jaimes",
-          "node": "jaimes-telegram-health-loop",
-          "status": "ok",
-          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
-          "updatedAt": "2026-06-15T04:47:31Z",
+          "status": "active",
+          "summary": "JAIMES live update: Kintara server update wait.",
+          "updatedAt": "2026-06-15T08:26:31Z",
           "stale": false
         },
         {
@@ -2302,7 +2265,15 @@
           "node": "auto-offload-loop",
           "status": "ok",
           "summary": "Auto-offload routing policy ok.",
-          "updatedAt": "2026-06-15T04:46:14Z",
+          "updatedAt": "2026-06-15T08:25:27Z",
+          "stale": false
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-telegram-health-loop",
+          "status": "ok",
+          "summary": "JAIMES Telegram, Hermes, and Computer Use are healthy.",
+          "updatedAt": "2026-06-15T08:24:49Z",
           "stale": false
         },
         {
@@ -2310,15 +2281,41 @@
           "node": "mission-control-freshness-loop",
           "status": "ok",
           "summary": "Mission Control freshness ok.",
-          "updatedAt": "2026-06-15T04:44:38Z",
+          "updatedAt": "2026-06-15T08:24:43Z",
           "stale": false
         },
         {
           "agent": "josh2",
-          "node": "model-router-guard-loop",
+          "node": "josh2-brain-feed-publish",
           "status": "ok",
-          "summary": "Model/router guard ok: default openai/gpt-5.5 and 11 configured route(s) available.",
-          "updatedAt": "2026-06-15T04:41:47Z",
+          "summary": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+          "updatedAt": "2026-06-15T08:24:35Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "status": "active",
+          "summary": "JAIMES live update: Kintara server update wait.",
+          "updatedAt": "2026-06-15T08:24:31Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "josh2",
+          "node": "codex-process-guard",
+          "status": "ok",
+          "summary": "cleaned 8 stale Codex process(es)",
+          "updatedAt": "2026-06-15T08:21:05Z",
+          "stale": false
+        },
+        {
+          "agent": "josh2",
+          "node": "token-cost-guard-loop",
+          "status": "ok",
+          "summary": "Token/cost guard ok; no high-burn pattern detected in local tracker.",
+          "updatedAt": "2026-06-15T08:17:59Z",
           "stale": false
         }
       ],
@@ -2762,7 +2759,7 @@
       "updatedAt": "2026-06-12T06:36:58Z"
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-15T04:47:58Z",
+      "updatedAt": "2026-06-15T08:26:49Z",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
       "recommendations": []
@@ -3413,7 +3410,7 @@
   "runtimeLayout": {
     "ok": true,
     "status": "ok",
-    "checkedAt": "2026-06-15T04:45:44Z",
+    "checkedAt": "2026-06-15T08:24:21Z",
     "summary": "Live kiosk layout fits the 24-inch screen",
     "issues": [],
     "checks": [
@@ -3513,7 +3510,7 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-15T04:47:58Z",
+    "generatedAt": "2026-06-15T08:26:49Z",
     "statusSource": "live-heartbeats",
     "staleSourceSuppressed": true,
     "summary": {
@@ -3534,8 +3531,8 @@
         "label": "JAIMES",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-15T04:47:51Z",
-        "summary": "JAIMES live check: Done: ESPN fantasy auth healthy.",
+        "probedAt": "2026-06-15T08:26:31Z",
+        "summary": "JAIMES live update: Kintara server update wait.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3554,8 +3551,8 @@
         "label": "Josh 2.0",
         "status": "ready",
         "available": true,
-        "probedAt": "2026-06-15T04:47:58Z",
-        "summary": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missi...",
+        "probedAt": "2026-06-15T08:25:27Z",
+        "summary": "Auto-offload routing policy ok.",
         "source": "live-heartbeats",
         "stale": false
       },
@@ -3572,7 +3569,7 @@
     }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-15T04:39:14Z",
+    "generatedAt": "2026-06-15T08:26:37Z",
     "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
     "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
     "chatSources": {
@@ -3603,8 +3600,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-15T04:35:32Z",
-          "ageMinutes": 3,
+          "updatedAt": "2026-06-15T08:24:35Z",
+          "ageMinutes": 2,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3636,8 +3633,8 @@
           "status": "done",
           "objective": "Josh 2.0 screen check clean",
           "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-          "updatedAt": "2026-06-15T04:35:32Z",
-          "ageMinutes": 3,
+          "updatedAt": "2026-06-15T08:24:35Z",
+          "ageMinutes": 2,
           "currentTool": "Control Tower screen check",
           "active": false
         },
@@ -3666,18 +3663,18 @@
           "role": "heavy-worker"
         },
         "brainFeed": {
-          "status": "passive",
-          "objective": "Trade: book 1.42 SOL \u00b7 active 0.11 \u00b7 SPCX69",
-          "detail": "Trade: book 1.42 SOL \u00b7 active 0.11 \u00b7 SPCX69",
-          "updatedAt": "2026-06-15T04:38:49Z",
+          "status": "active",
+          "objective": "Kintara server update wait",
+          "detail": "Kintara server update wait",
+          "updatedAt": "2026-06-15T08:26:31Z",
           "ageMinutes": 0,
-          "currentTool": "telemetry",
-          "active": false
+          "currentTool": "telegram",
+          "active": true
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-12T06:36:52Z",
-          "ageMinutes": 4202,
+          "ageMinutes": 4429,
           "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
           "stale": true
         },
@@ -3685,68 +3682,68 @@
         "openHandoffs": [],
         "recentEvents": [
           {
-            "id": "jaimes-status-20260615-043849-jaimes-is-online-and-ready",
-            "time": "2026-06-15T04:38:49Z",
+            "id": "jaimes-status-20260615-082431-jaimes-is-working-now",
+            "time": "2026-06-15T08:24:31Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Kintara server update wait."
+          },
+          {
+            "id": "jaimes-status-20260615-081830-jaimes-is-working-now",
+            "time": "2026-06-15T08:18:30Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Kintara/Islands runner."
+          },
+          {
+            "id": "jaimes-status-20260615-081730-jaimes-is-online-and-ready",
+            "time": "2026-06-15T08:17:30Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Trade: book 1.42 SOL \u00b7 active 0.11 \u00b7 SPCX69."
+            "detail": "JAIMES live check: Trade: stop watch 1.22 SOL \u00b7 de-risking."
           },
           {
-            "id": "jaimes-status-20260615-043720-jaimes-is-online-and-ready",
-            "time": "2026-06-15T04:37:20Z",
+            "id": "jaimes-status-20260615-081246-jaimes-is-online-and-ready",
+            "time": "2026-06-15T08:12:46Z",
             "type": "status",
             "status": "ready",
             "title": "JAIMES is online and ready",
-            "detail": "JAIMES live check: Kintara: blocked on visible click action."
+            "detail": "JAIMES live check: Kintara/Islands runner idle."
           },
           {
-            "id": "jaimes-status-20260615-043548-jaimes-is-working-now",
-            "time": "2026-06-15T04:35:48Z",
+            "id": "jaimes-status-20260615-081129-jaimes-is-online-and-ready",
+            "time": "2026-06-15T08:11:29Z",
             "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: testing held tree click."
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.23 SOL \u00b7 de-risking."
           },
           {
-            "id": "jaimes-status-20260615-043448-jaimes-is-working-now",
-            "time": "2026-06-15T04:34:48Z",
+            "id": "jaimes-status-20260615-080227-jaimes-is-online-and-ready",
+            "time": "2026-06-15T08:02:27Z",
             "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: retrying highlighted tree action."
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.26 SOL \u00b7 de-risking."
           },
           {
-            "id": "jaimes-status-20260615-043348-jaimes-is-working-now",
-            "time": "2026-06-15T04:33:48Z",
+            "id": "jaimes-status-20260615-075526-jaimes-is-online-and-ready",
+            "time": "2026-06-15T07:55:26Z",
             "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: switching to visible tree action."
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.25 SOL \u00b7 de-risking."
           },
           {
-            "id": "jaimes-status-20260615-043248-jaimes-is-working-now",
-            "time": "2026-06-15T04:32:48Z",
+            "id": "jaimes-status-20260615-074223-jaimes-is-online-and-ready",
+            "time": "2026-06-15T07:42:23Z",
             "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: stopping blind scan, recalibrating."
-          },
-          {
-            "id": "jaimes-status-20260615-043148-jaimes-is-working-now",
-            "time": "2026-06-15T04:31:48Z",
-            "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: automated blue-pixel hover sweep."
-          },
-          {
-            "id": "jaimes-status-20260615-042947-jaimes-is-working-now",
-            "time": "2026-06-15T04:29:47Z",
-            "type": "status",
-            "status": "active",
-            "title": "JAIMES is working now",
-            "detail": "JAIMES live update: Kintara: clicking blue-highlighted rock."
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Trade: stop watch 1.27 SOL \u00b7 de-risking."
           }
         ],
         "pickupPrompt": "Review JAIMES brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
@@ -3768,15 +3765,15 @@
           "status": "ready",
           "objective": "J.A.I.N is online and ready",
           "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
-          "updatedAt": "2026-06-15T04:26:18Z",
-          "ageMinutes": 12,
+          "updatedAt": "2026-06-15T07:26:31Z",
+          "ageMinutes": 60,
           "currentTool": "status check",
           "active": false
         },
         "heartbeat": {
           "status": "ok",
           "updatedAt": "2026-06-13T18:27:00Z",
-          "ageMinutes": 2052,
+          "ageMinutes": 2279,
           "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
           "stale": true
         },
@@ -3813,7 +3810,7 @@
     }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-15T04:47:58Z",
+    "updatedAt": "2026-06-15T08:26:49Z",
     "summary": "Reliability upgrade probes have not run yet.",
     "items": [],
     "metrics": []
@@ -4189,13 +4186,13 @@
     "updatedAt": "2026-06-12T06:36:58Z"
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-15T04:47:58Z",
+    "updatedAt": "2026-06-15T08:26:49Z",
     "status": "pending",
     "summary": "Capability Watch has not run yet.",
     "recommendations": []
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-15T04:47:58Z",
+    "updatedAt": "2026-06-15T08:26:49Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -4262,21 +4259,11 @@
       "name": "Capability Watch",
       "status": "pending",
       "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-15T04:47:58Z"
+      "detail": "Updated 2026-06-15T08:26:49Z"
     }
   ],
   "trackedTasks": [],
   "activeAgents": [
-    {
-      "id": "coding-visibility",
-      "label": "Recently edited: mission-control/docs/handoffs/2026-06-15-josh2-josh2-handoff-20260615-025658-fresh-direct-session-recommended.md",
-      "status": "done",
-      "elapsedSecs": 0,
-      "tool": "code",
-      "model": "recent",
-      "agentLabel": "CODING",
-      "agentClass": "agent"
-    },
     {
       "id": "context-watchdog",
       "label": "Context watchdog armed at 50% \u00b7 last trigger 76%",
@@ -4350,20 +4337,19 @@
       "agent": "JOSH 2.0",
       "active": false,
       "reportedActive": false,
-      "objective": "Heartbeat maintenance complete",
-      "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-      "status": "done",
+      "objective": "Auto-offload routing policy ok.",
+      "detail": "Auto-offload routing policy ok.",
+      "status": "ok",
       "stale": false,
-      "updatedAt": "2026-06-15T04:47:58Z",
-      "messageReceived": "2026-05-25T00:14:38Z",
-      "currentTool": "heartbeat",
+      "updatedAt": "2026-06-15T08:25:27Z",
+      "messageReceived": null,
+      "currentTool": "status check",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Heartbeat maintenance complete",
-          "status": "done",
-          "tool": "heartbeat",
-          "kind": "complete"
+          "label": "Auto-offload routing policy ok.",
+          "status": "ok",
+          "tool": "status check"
         },
         {
           "label": "Josh 2.0 screen check clean",
@@ -4372,34 +4358,16 @@
           "kind": "complete"
         },
         {
-          "label": "Direct chat context high",
-          "status": "info",
+          "label": "Heartbeat maintenance complete",
+          "status": "done",
           "tool": "heartbeat",
-          "kind": "note"
+          "kind": "complete"
         },
         {
           "label": "Fresh direct session recommended",
           "status": "ready",
           "tool": "heartbeat",
           "kind": "handoff"
-        },
-        {
-          "label": "Bring up Josh 2.0 and clear alerts",
-          "status": "done",
-          "tool": "agent publish",
-          "kind": "status"
-        },
-        {
-          "label": "Kintara tutorial continuation",
-          "status": "ready",
-          "tool": "agent publish",
-          "kind": "status"
-        },
-        {
-          "label": "Kintara training + tutorial assist",
-          "status": "ready",
-          "tool": "agent publish",
-          "kind": "status"
         }
       ]
     },
@@ -4411,7 +4379,7 @@
       "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
       "status": "ready",
       "stale": false,
-      "updatedAt": "2026-06-15T04:26:18Z",
+      "updatedAt": "2026-06-15T08:26:35Z",
       "messageReceived": null,
       "currentTool": "status check",
       "model": null,
@@ -4437,36 +4405,18 @@
       ]
     },
     "jaimes": {
-      "agent": "jaimes",
+      "agent": "JAIMES",
       "active": true,
       "reportedActive": true,
-      "objective": "Kintara: clicking Play Now",
-      "detail": "Kintara: clicking Play Now",
+      "objective": "Kintara server update wait",
+      "detail": "Kintara server update wait",
       "status": "active",
       "stale": false,
-      "updatedAt": "2026-06-15T04:48:23Z",
-      "messageReceived": "2026-06-15T04:48:04Z",
+      "updatedAt": "2026-06-15T08:26:31Z",
+      "messageReceived": "2026-06-15T08:18:46Z",
       "currentTool": "telegram",
       "model": "gpt-5.5",
       "steps": [
-        {
-          "label": "JAIMES is online and ready",
-          "status": "ready",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "JAIMES is online and ready",
-          "status": "done",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "JAIMES is working now",
-          "status": "done",
-          "tool": "status check",
-          "kind": "status"
-        },
         {
           "label": "image review request",
           "status": "done",
@@ -4484,57 +4434,27 @@
           "status": "done",
           "tool": "exec",
           "time": "2026-06-15T04:10:53Z"
-        },
-        {
-          "label": "Fantasy: checking ESPN auth freshness",
-          "status": "done",
-          "tool": "exec",
-          "time": "2026-06-15T04:45:54Z"
-        },
-        {
-          "label": "approve",
-          "status": "done",
-          "tool": "telegram-ingress",
-          "time": "2026-06-15T04:47:56Z"
-        },
-        {
-          "label": "Kintara: approved resume with saved controls",
-          "status": "done",
-          "tool": "telegram",
-          "time": "2026-06-15T04:48:04Z"
-        },
-        {
-          "label": "Kintara: clicking Play Now",
-          "status": "active",
-          "tool": "telegram",
-          "time": "2026-06-15T04:48:23Z"
         }
-      ],
-      "label": "JAIMES",
-      "updated_at": "2026-06-15T04:48:23Z",
-      "tool": "telegram",
-      "auth": "subscription",
-      "modelAuth": "gpt-5.5 (subscription)"
+      ]
     }
   },
   "joshBrainFeed": {
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "objective": "Heartbeat maintenance complete",
-    "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-    "status": "done",
+    "objective": "Auto-offload routing policy ok.",
+    "detail": "Auto-offload routing policy ok.",
+    "status": "ok",
     "stale": false,
-    "updatedAt": "2026-06-15T04:47:58Z",
-    "messageReceived": "2026-05-25T00:14:38Z",
-    "currentTool": "heartbeat",
+    "updatedAt": "2026-06-15T08:25:27Z",
+    "messageReceived": null,
+    "currentTool": "status check",
     "model": "GPT-5.5",
     "steps": [
       {
-        "label": "Heartbeat maintenance complete",
-        "status": "done",
-        "tool": "heartbeat",
-        "kind": "complete"
+        "label": "Auto-offload routing policy ok.",
+        "status": "ok",
+        "tool": "status check"
       },
       {
         "label": "Josh 2.0 screen check clean",
@@ -4543,34 +4463,16 @@
         "kind": "complete"
       },
       {
-        "label": "Direct chat context high",
-        "status": "info",
+        "label": "Heartbeat maintenance complete",
+        "status": "done",
         "tool": "heartbeat",
-        "kind": "note"
+        "kind": "complete"
       },
       {
         "label": "Fresh direct session recommended",
         "status": "ready",
         "tool": "heartbeat",
         "kind": "handoff"
-      },
-      {
-        "label": "Bring up Josh 2.0 and clear alerts",
-        "status": "done",
-        "tool": "agent publish",
-        "kind": "status"
-      },
-      {
-        "label": "Kintara tutorial continuation",
-        "status": "ready",
-        "tool": "agent publish",
-        "kind": "status"
-      },
-      {
-        "label": "Kintara training + tutorial assist",
-        "status": "ready",
-        "tool": "agent publish",
-        "kind": "status"
       }
     ]
   },
@@ -4582,7 +4484,7 @@
     "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
     "status": "ready",
     "stale": false,
-    "updatedAt": "2026-06-15T04:26:18Z",
+    "updatedAt": "2026-06-15T08:26:35Z",
     "messageReceived": null,
     "currentTool": "status check",
     "model": null,
@@ -4608,36 +4510,18 @@
     ]
   },
   "jaimesBrainFeed": {
-    "agent": "jaimes",
+    "agent": "JAIMES",
     "active": true,
     "reportedActive": true,
-    "objective": "Kintara: clicking Play Now",
-    "detail": "Kintara: clicking Play Now",
+    "objective": "Kintara server update wait",
+    "detail": "Kintara server update wait",
     "status": "active",
     "stale": false,
-    "updatedAt": "2026-06-15T04:48:23Z",
-    "messageReceived": "2026-06-15T04:48:04Z",
+    "updatedAt": "2026-06-15T08:26:31Z",
+    "messageReceived": "2026-06-15T08:18:46Z",
     "currentTool": "telegram",
     "model": "gpt-5.5",
     "steps": [
-      {
-        "label": "JAIMES is online and ready",
-        "status": "ready",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "JAIMES is online and ready",
-        "status": "done",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "JAIMES is working now",
-        "status": "done",
-        "tool": "status check",
-        "kind": "status"
-      },
       {
         "label": "image review request",
         "status": "done",
@@ -4655,37 +4539,8 @@
         "status": "done",
         "tool": "exec",
         "time": "2026-06-15T04:10:53Z"
-      },
-      {
-        "label": "Fantasy: checking ESPN auth freshness",
-        "status": "done",
-        "tool": "exec",
-        "time": "2026-06-15T04:45:54Z"
-      },
-      {
-        "label": "approve",
-        "status": "done",
-        "tool": "telegram-ingress",
-        "time": "2026-06-15T04:47:56Z"
-      },
-      {
-        "label": "Kintara: approved resume with saved controls",
-        "status": "done",
-        "tool": "telegram",
-        "time": "2026-06-15T04:48:04Z"
-      },
-      {
-        "label": "Kintara: clicking Play Now",
-        "status": "active",
-        "tool": "telegram",
-        "time": "2026-06-15T04:48:23Z"
       }
-    ],
-    "label": "JAIMES",
-    "updated_at": "2026-06-15T04:48:23Z",
-    "tool": "telegram",
-    "auth": "subscription",
-    "modelAuth": "gpt-5.5 (subscription)"
+    ]
   },
   "liveObjectives": {
     "activeAgents": [
@@ -4700,12 +4555,12 @@
         "agent": "JAIMES",
         "active": true,
         "reportedActive": true,
-        "objective": "Kintara: approved resume with saved controls",
-        "detail": "Kintara: approved resume with saved controls",
+        "objective": "Kintara server update wait",
+        "detail": "Kintara server update wait",
         "status": "active",
         "stale": false,
-        "updatedAt": "2026-06-15T04:48:04Z",
-        "messageReceived": "2026-06-15T04:48:04Z",
+        "updatedAt": "2026-06-15T08:26:31Z",
+        "messageReceived": "2026-06-15T08:18:46Z",
         "currentTool": "telegram",
         "model": "gpt-5.5",
         "steps": [
@@ -4726,81 +4581,6 @@
             "status": "done",
             "tool": "exec",
             "time": "2026-06-15T04:10:53Z"
-          },
-          {
-            "label": "Fantasy: checking ESPN auth freshness",
-            "status": "done",
-            "tool": "exec",
-            "time": "2026-06-15T04:45:54Z"
-          },
-          {
-            "label": "approve",
-            "status": "done",
-            "tool": "telegram-ingress",
-            "time": "2026-06-15T04:47:56Z"
-          },
-          {
-            "label": "Kintara: approved resume with saved controls",
-            "status": "active",
-            "tool": "telegram",
-            "time": "2026-06-15T04:48:04Z"
-          }
-        ]
-      },
-      {
-        "agent": "JOSH 2.0",
-        "active": false,
-        "reportedActive": false,
-        "objective": "Heartbeat maintenance complete",
-        "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-        "status": "done",
-        "stale": false,
-        "updatedAt": "2026-06-15T04:47:58Z",
-        "messageReceived": "2026-05-25T00:14:38Z",
-        "currentTool": "heartbeat",
-        "model": "GPT-5.5",
-        "steps": [
-          {
-            "label": "Heartbeat maintenance complete",
-            "status": "done",
-            "tool": "heartbeat",
-            "kind": "complete"
-          },
-          {
-            "label": "Josh 2.0 screen check clean",
-            "status": "done",
-            "tool": "Control Tower screen check",
-            "kind": "complete"
-          },
-          {
-            "label": "Direct chat context high",
-            "status": "info",
-            "tool": "heartbeat",
-            "kind": "note"
-          },
-          {
-            "label": "Fresh direct session recommended",
-            "status": "ready",
-            "tool": "heartbeat",
-            "kind": "handoff"
-          },
-          {
-            "label": "Bring up Josh 2.0 and clear alerts",
-            "status": "done",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
-            "label": "Kintara tutorial continuation",
-            "status": "ready",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
-            "label": "Kintara training + tutorial assist",
-            "status": "ready",
-            "tool": "agent publish",
-            "kind": "status"
           }
         ]
       },
@@ -4812,7 +4592,7 @@
         "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
         "status": "ready",
         "stale": false,
-        "updatedAt": "2026-06-15T04:26:18Z",
+        "updatedAt": "2026-06-15T08:26:35Z",
         "messageReceived": null,
         "currentTool": "status check",
         "model": null,
@@ -4834,6 +4614,44 @@
             "status": "active",
             "tool": "reset cost baseline",
             "kind": "status"
+          }
+        ]
+      },
+      {
+        "agent": "JOSH 2.0",
+        "active": false,
+        "reportedActive": false,
+        "objective": "Auto-offload routing policy ok.",
+        "detail": "Auto-offload routing policy ok.",
+        "status": "ok",
+        "stale": false,
+        "updatedAt": "2026-06-15T08:25:27Z",
+        "messageReceived": null,
+        "currentTool": "status check",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Auto-offload routing policy ok.",
+            "status": "ok",
+            "tool": "status check"
+          },
+          {
+            "label": "Josh 2.0 screen check clean",
+            "status": "done",
+            "tool": "Control Tower screen check",
+            "kind": "complete"
+          },
+          {
+            "label": "Heartbeat maintenance complete",
+            "status": "done",
+            "tool": "heartbeat",
+            "kind": "complete"
+          },
+          {
+            "label": "Fresh direct session recommended",
+            "status": "ready",
+            "tool": "heartbeat",
+            "kind": "handoff"
           }
         ]
       },
@@ -4902,26 +4720,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-15T04:48:03Z",
+      "time": "2026-06-15T08:26:55Z",
       "event": "Session spend: $0.44"
     },
     {
-      "time": "2026-06-15T04:47:59Z",
-      "event": "Coding: mission-control/docs/handoffs/2026-06-15-josh2-josh2-handoff-20260615-025658-fresh-direct-session-recommended.md"
+      "time": "2026-06-15T08:26:50Z",
+      "event": "CodexBar: 98% left \u00b7 wk 40% left"
     },
     {
-      "time": "2026-06-15T04:47:59Z",
-      "event": "CodexBar: 83% left \u00b7 wk 42% left"
-    },
-    {
-      "time": "2026-06-15T04:47:58Z",
+      "time": "2026-06-15T08:26:49Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-06-15T04:47:58Z",
+      "time": "2026-06-15T08:26:49Z",
       "event": "12 live scheduled jobs healthy"
+    },
+    {
+      "time": "2026-06-15T08:26:49Z",
+      "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-06-15T04:47:58Z",
-  "generatedAt": "2026-06-15T04:48:23Z"
+  "lastUpdated": "2026-06-15T08:26:49Z"
 }

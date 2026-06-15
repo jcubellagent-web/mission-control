@@ -4,22 +4,22 @@
   "active": false,
   "reportedActive": false,
   "status": "done",
-  "objective": "Heartbeat maintenance complete",
-  "detail": "Mission Control refresh pushed at 9c821e915; OpenClaw maintenance, watchdog, canary, model status, Google/GitHub/J.A.I.N checks clean. Known warning only: ELEVENLABS_API_KEY missing.",
-  "updatedAt": "2026-06-15T04:47:58Z",
-  "checkedAt": "2026-06-15T04:47:58Z",
-  "currentTool": "heartbeat",
+  "objective": "Josh 2.0 screen check clean",
+  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+  "updatedAt": "2026-06-15T08:24:35Z",
+  "checkedAt": "2026-06-15T08:24:35Z",
+  "currentTool": "Control Tower screen check",
   "steps": [
-    {
-      "label": "Heartbeat maintenance complete",
-      "status": "done",
-      "tool": "heartbeat",
-      "kind": "complete"
-    },
     {
       "label": "Josh 2.0 screen check clean",
       "status": "done",
       "tool": "Control Tower screen check",
+      "kind": "complete"
+    },
+    {
+      "label": "Heartbeat maintenance complete",
+      "status": "done",
+      "tool": "heartbeat",
       "kind": "complete"
     },
     {
