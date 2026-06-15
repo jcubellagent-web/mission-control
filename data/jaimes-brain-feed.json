@@ -1,11 +1,29 @@
 {
   "active": false,
-  "objective": "Done: TURTLE/SPCX69 quick read",
-  "status": "idle",
-  "updatedAt": "2026-06-14T21:49:10Z",
+  "objective": "JAIMES health loop",
+  "status": "error",
+  "updatedAt": "2026-06-15T01:21:06Z",
   "model": "gpt-5.5",
-  "messageReceived": "2026-06-14T21:46:16Z",
+  "messageReceived": "2026-06-15T00:57:45Z",
   "steps": [
+    {
+      "label": "JAIMES health loop",
+      "status": "error",
+      "tool": "jaimes_telegram_health_loop",
+      "kind": "blocked"
+    },
+    {
+      "label": "JAIMES needs attention",
+      "status": "info",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "JAIMES is working now",
+      "status": "error",
+      "tool": "status check",
+      "kind": "status"
+    },
     {
       "label": "JAIMES is online and ready",
       "status": "ready",
@@ -13,48 +31,36 @@
       "kind": "status"
     },
     {
-      "label": "JAIMES is working now",
-      "status": "done",
-      "tool": "status check",
-      "kind": "status"
-    },
-    {
       "label": "JAIMES is online and ready",
       "status": "done",
       "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "is there any narrative or legit team",
+      "label": "JAIMES health loop",
       "status": "done",
-      "tool": "telegram-ingress",
-      "time": "2026-06-14T19:17:06Z"
+      "tool": "jaimes_telegram_health_loop",
+      "kind": "status"
     },
     {
-      "label": "great strategy, please continue to execute against",
+      "label": "JAIMES needs attention",
       "status": "done",
-      "tool": "telegram-ingress",
-      "time": "2026-06-14T19:17:06Z"
-    },
-    {
-      "label": "Review Control Tower request",
-      "status": "done",
-      "tool": "telegram-ingress",
-      "time": "2026-06-14T19:17:06Z"
+      "tool": "status check",
+      "kind": "status"
     }
   ],
-  "currentTool": "telegram",
-  "checkedAt": "2026-06-14T21:49:11Z",
+  "currentTool": "jaimes_telegram_health_loop",
+  "checkedAt": "2026-06-15T01:21:06Z",
   "agent": "JAIMES",
   "source": "josh2-local-live-feed",
-  "agentId": "jaimes",
-  "reportedActive": false,
-  "detail": "Done: TURTLE/SPCX69 quick read",
-  "supabaseBacked": false,
-  "localLiveFeed": true,
-  "updated_at": "2026-06-14T21:47:52Z",
+  "detail": "JAIMES needs attention: Cannot reach JAIMES over SSH: ssh: connect to host 100.121.89.84 port 22: Operation timed out; Hermes gateway state is not running.; Telegram platform is not connected.",
+  "updated_at": "2026-06-15T00:57:45Z",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "liveAgentPush": "2026-06-14T21:47:52Z",
-  "liveAgentPushAt": "2026-06-14T21:47:52Z"
+  "liveAgentPush": "2026-06-15T00:57:45Z",
+  "liveAgentPushAt": "2026-06-15T00:57:45Z",
+  "agentId": "jaimes",
+  "reportedActive": false,
+  "supabaseBacked": false,
+  "localLiveFeed": true
 }

@@ -1,8 +1,8 @@
 {
-  "ok": true,
-  "status": "ok",
-  "summary": "All canaries passed",
-  "checkedAt": "2026-06-14T21:48:25.449607Z",
+  "ok": false,
+  "status": "attention",
+  "summary": "1 canary issue(s)",
+  "checkedAt": "2026-06-15T01:20:42.027809Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -24,9 +24,9 @@
     },
     {
       "name": "Action Required",
-      "ok": true,
-      "detail": "clear",
-      "severity": "ok"
+      "ok": false,
+      "detail": "1 visible alert(s)",
+      "severity": "medium"
     },
     {
       "name": "Renderer wiring",
@@ -55,7 +55,7 @@
     {
       "name": "Agent Control lane",
       "ok": true,
-      "detail": "overall=attention; ready=2/4; source=live-heartbeats",
+      "detail": "overall=attention; ready=1/4; source=live-heartbeats",
       "severity": "ok"
     },
     {
@@ -511,7 +511,7 @@
     {
       "name": "Agentic Crypto summary",
       "ok": true,
-      "detail": "status=fresh; mode=read-only; 14 token rows; 3 chain rows; masked wallets present",
+      "detail": "status=fresh; mode=read-only; 15 token rows; 3 chain rows; masked wallets present",
       "severity": "ok"
     },
     {
