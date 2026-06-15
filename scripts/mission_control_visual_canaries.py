@@ -1283,7 +1283,7 @@ def main() -> int:
             and ".tower-resource-stack" in react_styles
             and ".resource-card" in react_styles
             and ".resource-card.has-row-update" in react_styles
-            and "Wallet · Models · Display · Visibility" in react_main,
+            and "Wallet · Models · Kintara · Display · Visibility" in react_main,
             "Agentic Crypto live cues",
             "wallet balance remains live-cued inside the compact Resources stack without exposing full wallet details in the first view",
             severity="medium",
