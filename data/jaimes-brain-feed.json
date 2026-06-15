@@ -2,14 +2,14 @@
   "active": true,
   "objective": "JAIMES is working now",
   "status": "active",
-  "updatedAt": "2026-06-15T16:42:13Z",
+  "updatedAt": "2026-06-15T20:22:05Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
   "currentTool": "status check",
   "agent": "JAIMES",
-  "checkedAt": "2026-06-15T16:42:13Z",
-  "messageReceived": "2026-06-15T16:37:53Z",
+  "checkedAt": "2026-06-15T20:22:05Z",
+  "messageReceived": "2026-06-15T20:21:33Z",
   "steps": [
     {
       "label": "JAIMES is working now",
@@ -18,39 +18,45 @@
       "kind": "status"
     },
     {
-      "label": "Kintara/Islands runner",
+      "label": "Sorare missions: locating current scripts",
       "status": "active",
-      "tool": "telegram",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Sorare pre-lock loop",
-      "status": "done",
-      "tool": "sorare_prelock_loop",
+      "label": "Kintara: checking progress snapshot",
+      "status": "active",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Kintara/Islands runner idle",
-      "status": "done",
-      "tool": "telegram",
+      "label": "Sorare missions: verifying setup",
+      "status": "active",
+      "tool": "exec",
       "kind": "status"
     },
     {
-      "label": "Sorare Daily Missions watchdog needs attention",
-      "status": "done",
-      "tool": "cron",
+      "label": "Review Sorare request",
+      "status": "active",
+      "tool": "telegram-ingress",
       "kind": "status"
     },
     {
-      "label": "Kintara/Islands runner",
+      "label": "Done: model efficiency guard alert",
       "status": "done",
-      "tool": "telegram",
+      "tool": "exec",
+      "kind": "status"
+    },
+    {
+      "label": "Ops: running model efficiency guard",
+      "status": "done",
+      "tool": "exec",
       "kind": "status"
     }
   ],
   "agentId": "jaimes",
   "reportedActive": true,
-  "detail": "JAIMES live update: Kintara/Islands runner.",
+  "detail": "JAIMES live update: Sorare missions: locating current scripts.",
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "localLiveFeed": true
