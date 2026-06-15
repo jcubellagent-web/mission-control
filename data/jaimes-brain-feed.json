@@ -1,68 +1,56 @@
 {
-  "active": false,
-  "objective": "Sorare pre-lock loop",
-  "status": "info",
-  "updatedAt": "2026-06-15T13:03:44Z",
+  "active": true,
+  "objective": "JAIMES is working now",
+  "status": "active",
+  "updatedAt": "2026-06-15T16:42:13Z",
   "model": "gpt-5.5",
   "auth": "subscription",
   "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "sorare_prelock_loop",
+  "currentTool": "status check",
   "agent": "JAIMES",
-  "checkedAt": "2026-06-15T13:03:44Z",
-  "messageReceived": "2026-06-15T13:01:49Z",
+  "checkedAt": "2026-06-15T16:42:13Z",
+  "messageReceived": "2026-06-15T16:37:53Z",
   "steps": [
     {
+      "label": "JAIMES is working now",
+      "status": "active",
+      "tool": "status check",
+      "kind": "status"
+    },
+    {
+      "label": "Kintara/Islands runner",
+      "status": "active",
+      "tool": "telegram",
+      "kind": "status"
+    },
+    {
       "label": "Sorare pre-lock loop",
-      "status": "info",
+      "status": "done",
       "tool": "sorare_prelock_loop",
       "kind": "status"
     },
     {
-      "label": "Sorare GW24: submitting optimized lineups",
-      "status": "active",
-      "tool": "exec",
+      "label": "Kintara/Islands runner idle",
+      "status": "done",
+      "tool": "telegram",
       "kind": "status"
     },
     {
       "label": "Sorare Daily Missions watchdog needs attention",
-      "status": "error",
+      "status": "done",
       "tool": "cron",
       "kind": "status"
     },
     {
-      "label": "Done: fantasy pre-lock report generated",
+      "label": "Kintara/Islands runner",
       "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Fantasy: checking scoringPeriodId 83",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Fantasy: generating Monday pre-lock lineup report",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Done: JAIMES Brain Feed path healthy",
-      "status": "done",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Self-test: JAIMES Brain Feed path healthy",
-      "status": "done",
-      "tool": "exec",
+      "tool": "telegram",
       "kind": "status"
     }
   ],
   "agentId": "jaimes",
-  "reportedActive": false,
-  "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Corey Seager, Eugenio Su\u00e1rez, Gleyber Torres, Jared Triolo",
+  "reportedActive": true,
+  "detail": "JAIMES live update: Kintara/Islands runner.",
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "localLiveFeed": true
