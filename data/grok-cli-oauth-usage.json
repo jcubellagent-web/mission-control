@@ -1,0 +1,46 @@
+{
+  "updatedAt": "2026-06-18T14:41:46Z",
+  "provider": "grok-cli-oauth",
+  "hosts": {
+    "jaimes": {
+      "authFilePresent": true,
+      "smoke": "GROK_JSON_PROBE_OK"
+    },
+    "josh2": {
+      "authFilePresent": true,
+      "smoke": "GROK_JSON_PROBE_JOSH2_OK"
+    }
+  },
+  "boundedProbe": {
+    "attempted": 50,
+    "succeeded": 50,
+    "avgSeconds": 4.8,
+    "maxSeconds": 20.62,
+    "rateLimited": false,
+    "scope": "JAIMES 50 consecutive single-turn CLI OAuth calls; no quota endpoint exposed by CLI",
+    "observedUsagePct": 2,
+    "inferredFullWindowCallEquivalent": 2500,
+    "inferredRemainingWindowCallEquivalent": 2450
+  },
+  "models": [
+    "grok-build",
+    "grok-composer-2.5-fast"
+  ],
+  "defaultModel": "grok-composer-2.5-fast",
+  "subscription": {
+    "source": "X/SuperGrok subscription OAuth",
+    "monthlyFeeUsdEstimate": 40,
+    "feeNote": "Estimated placeholder for FinOps display; exact X subscription charge not read from billing.",
+    "creditBarPct": 100
+  },
+  "calibration": {
+    "source": "Josh screenshot/user report after approved 50-call probe",
+    "probeCalls": 50,
+    "usageUsedPct": 2,
+    "callsPerUsagePct": 25,
+    "inferredFullWindowCallEquivalent": 2500,
+    "inferredRemainingWindowCallEquivalent": 2450,
+    "remainingPct": 98,
+    "caveat": "Linear estimate from one observed probe; actual Grok quota window/model mix may differ."
+  }
+}

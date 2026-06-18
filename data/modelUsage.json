@@ -1,83 +1,50 @@
 {
-  "session": 0.435151,
+  "session": 0.0,
   "daily": 0.0,
   "weekly": 0.0,
-  "monthly": 200.0,
+  "monthly": 260.0,
   "topModels": [
-    {
-      "name": "gpt-5.5",
-      "window": "session",
-      "cost": 679.7705720000001
-    },
-    {
-      "name": "gpt-5.4",
-      "window": "session",
-      "cost": 5.2667205
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "window": "session",
-      "cost": 3.0898578
-    },
     {
       "name": "openai/gpt-5.5",
       "window": "session",
-      "cost": 0.637938
+      "cost": 0.063297
     },
     {
       "name": "xai/grok-4.20-reasoning",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "local/gemma4:26b",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "local/llama3.2:latest",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "local/qwen2.5:7b",
       "window": "session",
       "cost": 0.0
     }
   ],
   "breakdown": [
     {
-      "name": "gpt-5.5",
-      "source": "codex",
-      "weeklyCost": 679.7705720000001,
-      "dailyCost": 19.115588,
-      "sessionCost": 679.7705720000001,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "billingMode": "metered",
-      "marginalCost": 679.770572
-    },
-    {
-      "name": "gpt-5.4",
-      "source": "codex",
-      "weeklyCost": 5.2667205,
-      "dailyCost": 0.0,
-      "sessionCost": 5.2667205,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "billingMode": "metered",
-      "marginalCost": 5.26672
-    },
-    {
-      "name": "gpt-5.4-mini",
-      "source": "codex",
-      "weeklyCost": 3.0898578,
-      "dailyCost": 0.0,
-      "sessionCost": 3.0898578,
-      "totalTokens": 0,
-      "costEstimated": false,
-      "billingMode": "metered",
-      "marginalCost": 3.089858
-    },
-    {
       "name": "openai/gpt-5.5",
       "source": "openclaw",
-      "inputTokens": 105042,
-      "outputTokens": 788,
-      "totalTokens": 105830,
-      "sessionCost": 0.637938,
-      "dailyCost": 0.09372100000000001,
-      "weeklyCost": 0.637938,
-      "sessions": 4,
+      "inputTokens": 279,
+      "outputTokens": 9,
+      "totalTokens": 288,
+      "sessionCost": 0.063297,
+      "dailyCost": 0.063297,
+      "weeklyCost": 0.063297,
+      "sessions": 1,
       "isGemini": false,
       "costEstimated": false,
       "billingMode": "subscription",
-      "usageEquivalentCost": 0.637938,
+      "usageEquivalentCost": 0.063297,
       "marginalCost": 0.0,
       "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
@@ -101,7 +68,37 @@
       "marginalCost": 0.0
     },
     {
-      "name": "local/qwen2.5-coder:7b",
+      "name": "local/gemma4:26b",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 17.99,
+      "loaded": false,
+      "_note": "Local Ollama model (18.0GB). Free \u2014 runs on-device.",
+      "billingMode": "local",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "local/llama3.2:latest",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 2.02,
+      "loaded": false,
+      "_note": "Local Ollama model (2.0GB). Free \u2014 runs on-device.",
+      "billingMode": "local",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "local/qwen2.5:7b",
       "source": "ollama",
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
@@ -112,6 +109,36 @@
       "sizeGb": 4.68,
       "loaded": false,
       "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device.",
+      "billingMode": "local",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "local/mistral:latest",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 4.37,
+      "loaded": false,
+      "_note": "Local Ollama model (4.4GB). Free \u2014 runs on-device.",
+      "billingMode": "local",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "local/llama3.1:8b",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "sizeGb": 4.92,
+      "loaded": false,
+      "_note": "Local Ollama model (4.9GB). Free \u2014 runs on-device.",
       "billingMode": "local",
       "marginalCost": 0.0
     },
@@ -131,7 +158,7 @@
       "marginalCost": 0.0
     }
   ],
-  "lastUpdated": "2026-06-15T20:22:14Z",
+  "lastUpdated": "2026-06-18T14:42:10Z",
   "jain": {
     "daily": 0.0,
     "session": 0.0,
@@ -178,22 +205,42 @@
     "lastError": "disabled: OpenRouter usage fetch retired"
   },
   "elevenlabs": {
-    "chars_used": 41278,
-    "chars_limit": 578422,
+    "chars_used": 20655,
+    "chars_limit": 289211,
     "available": true
   },
   "aggregate": {
     "daily": 0.0,
     "total": 0.0,
-    "monthly": 200.0
+    "monthly": 260.0
   },
   "subscription": {
-    "provider": "OpenAI Pro / Codex",
-    "monthlyFee": 200.0,
+    "provider": "Codex / OpenAI + Gemini + Grok OAuth / xAI",
+    "monthlyFee": 260.0,
     "billingMode": "subscription",
-    "usageEquivalentDaily": 19.209309,
-    "usageEquivalentWeekly": 688.765088,
-    "usageEquivalentMonthly": 1366.560783,
+    "providers": [
+      {
+        "id": "codex",
+        "label": "Codex / OpenAI",
+        "monthlyFee": 200.0,
+        "lastModelUsed": "openai-codex"
+      },
+      {
+        "id": "gemini",
+        "label": "Gemini",
+        "monthlyFee": 20.0,
+        "lastModelUsed": "google/gemini-2.5-pro"
+      },
+      {
+        "id": "xai",
+        "label": "Grok OAuth / xAI",
+        "monthlyFee": 40.0,
+        "lastModelUsed": "grok-4.20-reasoning"
+      }
+    ],
+    "usageEquivalentDaily": 0.063297,
+    "usageEquivalentWeekly": 0.063297,
+    "usageEquivalentMonthly": 0.063297,
     "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
   },
   "metered": {
@@ -207,18 +254,148 @@
     }
   },
   "usageEquivalent": {
-    "daily": 19.209309,
-    "weekly": 688.765088,
-    "monthly": 1366.560783
+    "daily": 0.063297,
+    "weekly": 0.063297,
+    "monthly": 0.063297
   },
   "weeklyRunRate": {
     "total": 0.0,
     "automation": 0.0,
-    "interactive": 688.765088,
+    "interactive": 0.063297,
     "projectedMonthly": 0.0,
-    "subscriptionUsageEquivalentWeekly": 688.765088,
-    "subscriptionUsageEquivalentProjectedMonthly": 2951.85
+    "subscriptionUsageEquivalentWeekly": 0.063297,
+    "subscriptionUsageEquivalentProjectedMonthly": 0.27
   },
-  "providerBudgets": [],
-  "routerPolicy": {}
+  "providerBudgets": [
+    {
+      "id": "codex",
+      "label": "Codex / OpenAI",
+      "role": "Default execution and private-tool owner",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 200,
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "openai/gpt-5.5",
+      "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration.",
+      "dailySpendUsd": 0.063297,
+      "weeklySpendUsd": 0.063297,
+      "monthlySpendUsd": 0.0,
+      "dailyUtilizationPct": 0.0,
+      "monthlyUtilizationPct": 0.0,
+      "status": "ready",
+      "authStatus": null,
+      "keyPresent": null,
+      "keySuffix": null,
+      "lastTestStatus": null,
+      "lastSource": "openclaw",
+      "whyChosen": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini",
+      "role": "JAIMES-first reviewer, evaluator, digest, and long-context synthesis lane",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 20,
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "google/gemini-2.5-pro",
+      "preferredModels": {
+        "routine": "google/gemini-2.5-pro",
+        "deep": "google/gemini-2.5-pro",
+        "cheapFallback": "google/gemini-2.5-flash"
+      },
+      "lastRouteReason": "Use Gemini Pro first for JAIMES dashboard-safe summaries, digests, reports, log summaries, reviews, and stale-task compression; use Flash only as fallback/cheap throughput; never raw secrets, OAuth payloads, raw mail, or private account data.",
+      "dailySpendUsd": 0.0,
+      "weeklySpendUsd": 0.0,
+      "monthlySpendUsd": 0.0,
+      "dailyUtilizationPct": 0.0,
+      "monthlyUtilizationPct": 0.0,
+      "status": "ready",
+      "authStatus": null,
+      "keyPresent": null,
+      "keySuffix": null,
+      "lastTestStatus": null,
+      "lastSource": "",
+      "whyChosen": "Use Gemini Pro first for JAIMES dashboard-safe summaries, digests, reports, log summaries, reviews, and stale-task compression; use Flash only as fallback/cheap throughput; never raw secrets, OAuth payloads, raw mail, or private account data."
+    },
+    {
+      "id": "xai",
+      "label": "Grok OAuth / xAI",
+      "role": "X/SuperGrok subscription CLI lane plus xAI API feed for X-native/current-events research",
+      "budgetType": "subscription",
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "reserveUsd": null,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "xai/grok-4.20-reasoning",
+      "authStatus": "grok-cli-oauth-authenticated",
+      "keyMode": "grok-cli-oauth-plus-xai-api-tool",
+      "lastRouteReason": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default.",
+      "monthlyFeeUsd": 40,
+      "subscriptionLabel": "X subscription flat lane",
+      "subscriptionCreditPct": 2,
+      "usageProbeSummary": "2% used by 50-call probe",
+      "lastTestStatus": "50-call probe passed; ~2,500 call-equivalent window inferred",
+      "feeNote": "Monthly fee is an estimated FinOps placeholder; exact X billing is not available to CLI.",
+      "apiModelUsed": "grok-4.20-reasoning",
+      "cliModelUsed": "grok-composer-2.5-fast",
+      "probeAvgSeconds": 4.8,
+      "probeMaxSeconds": 20.62,
+      "probeRateLimited": false,
+      "probeObservedUsagePct": 2,
+      "probeInferredFullCallEquivalent": 2500,
+      "probeInferredRemainingCallEquivalent": 2450,
+      "probeCalibrationNote": "50 calls consumed 2% per Josh screenshot; linear estimate only.",
+      "dailySpendUsd": 0.0,
+      "weeklySpendUsd": 0.0,
+      "monthlySpendUsd": 0.0,
+      "dailyUtilizationPct": 0.0,
+      "monthlyUtilizationPct": 0.0,
+      "status": "ready",
+      "keyPresent": true,
+      "keySuffix": "ygsQ",
+      "lastSource": "xai-specialist",
+      "whyChosen": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default."
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter",
+      "role": "Fallback route when primary lanes are unavailable or a specific outside model is needed",
+      "budgetType": "metered",
+      "monthlyCapUsd": 10,
+      "dailyCapUsd": 1,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "openrouter/auto",
+      "lastRouteReason": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first.",
+      "dailySpendUsd": 0.0,
+      "weeklySpendUsd": 0.0,
+      "monthlySpendUsd": 0.0,
+      "dailyUtilizationPct": 0.0,
+      "monthlyUtilizationPct": 0.0,
+      "status": "ready",
+      "authStatus": null,
+      "keyPresent": null,
+      "keySuffix": null,
+      "lastTestStatus": null,
+      "lastSource": "",
+      "whyChosen": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first."
+    }
+  ],
+  "routerPolicy": {
+    "defaultProvider": "codex",
+    "reviewProvider": "gemini",
+    "currentEventsProvider": "xai",
+    "fallbackProvider": "openrouter",
+    "codexAllowanceMode": "normal",
+    "codexExhaustedMode": {
+      "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
+      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events, X-native research, outside critique, and batch audits to xAI. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
+      "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
+    },
+    "rule": "Codex/OpenAI remains default execution. JAIMES should use Gemini Pro first for dashboard-safe review, digest, reports, stale-task compression, summaries, and long-context evaluation when sufficient. Use Gemini Flash only as cheap fallback or explicitly lightweight/noisy throughput. xAI handles X-native/current-events specialist work. OpenRouter is fallback only.",
+    "lastModeChangeAt": "2026-06-18T05:48:00Z",
+    "lastModeChangeReason": "make Gemini Pro the default JAIMES-safe synthesis lane"
+  }
 }

@@ -1595,15 +1595,6 @@ function AgentFlightDeck({
   );
 }
 
-function agentSourceDisagreement(status: AgentStatus, idleContext: AgentIdleContext) {
-  const statusValue = String(status.status || "").toLowerCase();
-  if (["blocked", "error", "offline"].includes(statusValue)) return false;
-  const stale = ageMinutes(status.updated_at) > 90;
-  const hasRecentComplete = !/no completed task reported yet/i.test(idleContext.complete || "");
-  const hasUpcomingContext = Boolean(idleContext.nextAt) || Boolean(idleContext.nextTitle && !/awaiting instruction|no upcoming/i.test(idleContext.nextTitle));
-  return stale && (hasRecentComplete || hasUpcomingContext);
-}
-
 function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId; status: AgentStatus; idleContext: AgentIdleContext; changed?: boolean }) {
   const visualState = agentNeedsFocus(status)
     ? "blocked"
@@ -1613,7 +1604,6 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
         ? "ready"
         : "waiting";
   const freshness = agentSla(status, idleContext);
-  const disagreement = agentSourceDisagreement(status, idleContext);
   const current = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
     ? headlineTitle(status.objective || status.current_tool || AGENTS[agent].role, 44)
     : idleContext.nextTitle && !/awaiting instruction/i.test(idleContext.nextTitle)
@@ -1644,16 +1634,9 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
       <div className={`tower-agent-fresh is-${freshness.tone}`}>
         <strong>{freshness.label}</strong>
         <span>{freshness.detail}</span>
-        {disagreement ? <em className="tower-agent-disagreement" title="Fresh Brain Feed context disagrees with older heartbeat coverage; treat this as a source mismatch, not an agent failure.">Source disagreement</em> : null}
       </div>
     </article>
   );
-}
-
-function activityUpdateTrail(rows: TowerActivity[], primaryFocus?: TowerActivity) {
-  return rows
-    .filter((row) => row.time && row.id !== primaryFocus?.id && !/routine confirmations collapsed/i.test(row.detail || ""))
-    .slice(0, 3);
 }
 
 function ActivityLedger({ model }: { model: ControlTowerModel }) {
@@ -1661,7 +1644,6 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
   const systemQuiet = activitySystemQuietCount(model);
   const focusRows = activityFocusRows(model);
   const primaryFocus = focusRows[0];
-  const updateTrail = activityUpdateTrail(rows, primaryFocus);
   // Multi-agent: when 2+ distinct agents are active at once, show a co-equal grid
   // instead of a single hero so concurrent workflows are all visible.
   const activeAgents = concurrentActiveAgents(model);
@@ -1715,14 +1697,6 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
             {primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}
           </p>
           {primaryFocus?.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{primaryFocus.detailLines.map((line) => <span key={line}>{line}</span>)}</div> : null}
-          {updateTrail.length ? (
-            <div className="ledger-update-trail" aria-label="Last meaningful updates">
-              <span>Last meaningful updates</span>
-              <div>
-                {updateTrail.map((row) => <em key={row.id} title={missionText(row.detail)}>{row.title}</em>)}
-              </div>
-            </div>
-          ) : null}
           <footer>
             <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
             <em>{primaryFocus?.time ? ageLabel(primaryFocus.time) : "live"}</em>
@@ -1837,6 +1811,14 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
+  const subscriptionProviders = Array.isArray((state.modelUsage?.subscription as any)?.providers)
+    ? ((state.modelUsage?.subscription as any)?.providers as Array<any>)
+    : [];
+  const subscriptionLabels = subscriptionProviders
+    .map((provider) => `${provider.label || provider.provider || "Sub"} ${fmtCurrencyExact(provider.monthlyFee ?? provider.monthlyFeeUsd ?? 0)}`)
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(" + ");
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
   const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
@@ -1844,7 +1826,7 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
     ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
     : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
   const modelDetail = typeof subscriptionFee === "number"
-    ? `OpenAI usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
+    ? `${subscriptionLabels || "Subscriptions"} · usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
     : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
@@ -1857,15 +1839,12 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const visibilityDetail = missingAgents
     ? `${freshAgents} fresh · ${missingAgents} missing source${missingAgents === 1 ? "" : "s"}`
     : `${freshAgents} fresh · ${sourceTruthLabel(state.source)}`;
-  const modelRoute = state.modelUsage?.topProvider?.provider || state.modelUsage?.topProvider?.name || state.modelUsage?.providers?.[0]?.provider || "Route watch";
-  const runtimeDetail = runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ");
-  const kintaraStatus = state.kintara?.status || state.kintara?.summary || state.kintara?.detail || "Quiet";
   return (
     <section className="tower-resource-stack" aria-label="Resources and live sources">
       <header>
         <div>
-          <p>FinOps</p>
-          <h3>Wallet · Models · Runtime · Visibility</h3>
+          <p>Resources</p>
+          <h3>Wallet · Models · Display · Visibility</h3>
         </div>
         <button type="button" onClick={onCryptoRefresh} disabled={loading} title="Refresh read-only wallet inventory">
           <RefreshCw size={12} className={loading ? "spin" : ""} /> Wallet
@@ -1881,22 +1860,18 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
         <article className="resource-card is-clear">
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
-          <p>{modelRoute} · {modelDetail}</p>
+          <p>{modelDetail}</p>
         </article>
         <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
-          <b>Runtime fit</b>
+          <b>Display fit</b>
           <strong>{runtimeOk ? "Ready" : "Review"}</strong>
-          <p>{runtimeDetail}</p>
+          <p>{runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ")}</p>
         </article>
         <article className={`resource-card is-${visibleAgents >= trackedAgents ? "clear" : "watch"}`}>
           <b>Visibility</b>
           <strong>{visibleAgents}/{trackedAgents} visible</strong>
           <p>{visibilityDetail}</p>
         </article>
-      </div>
-      <div className="resource-secondary-strip" aria-label="Secondary finops context">
-        <span><b>Kintara</b>{compactText(String(kintaraStatus), 40)}</span>
-        <span><b>Wallet mode</b>{walletIsPlaceholder ? "Read-only proposals" : "Read-only inventory"}</span>
       </div>
     </section>
   );
@@ -4952,62 +4927,12 @@ function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
 function calendarBlockTimeLabel(date: Date) {
   return date
     .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    .replace(/\s?[AP]M/i, "")
-    .trim();
-}
-
-function compactCalendarClusterDetail(items: CalendarJobBlock[]) {
-  const categoryCounts = new Map<string, number>();
-  items.forEach((item) => {
-    const key = compactCategoryLabel(item.category);
-    categoryCounts.set(key, (categoryCounts.get(key) || 0) + 1);
-  });
-  const topCategories = [...categoryCounts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 2)
-    .map(([label, count]) => count > 1 ? `${label} ×${count}` : label);
-  return topCategories.join(" · ") || "Scheduled work";
+    .replace(/\s/g, " ")
+    .toUpperCase();
 }
 
 function calendarClearUntilLabel(hourKey: number) {
   return `Clear until ${calendarHourLabel(hourKey)}`;
-}
-
-function clusteredCalendarBlock(items: CalendarJobBlock[]) {
-  if (items.length === 1) return items[0];
-  const first = items[0];
-  const tones: CalendarBlockTone[] = items.map((item) => item.tone);
-  const tone: CalendarBlockTone = tones.includes("attention")
-    ? "attention"
-    : tones.includes("working")
-      ? "working"
-      : tones.every((value) => value === "done")
-        ? "done"
-        : tones.includes("ready")
-          ? "ready"
-          : "planned";
-  const agents = Array.from(new Set(items.flatMap((item) => item.agents || [item.agent])));
-  return {
-    ...first,
-    id: `cluster-${first.hourKey}-${first.startsAt.getTime()}`,
-    title: `${items.length} jobs`,
-    detail: compactCalendarClusterDetail(items),
-    tone,
-    count: items.length,
-    synthetic: true,
-    agents,
-  } satisfies CalendarJobBlock;
-}
-
-function calendarMinuteGroups(blocks: CalendarJobBlock[]) {
-  const groups = new Map<number, CalendarJobBlock[]>();
-  blocks.forEach((block) => {
-    const key = block.startsAt.getTime();
-    const rows = groups.get(key) || [];
-    rows.push(block);
-    groups.set(key, rows);
-  });
-  return [...groups.values()].map((items) => items.sort((a, b) => priorityScore(b.job) - priorityScore(a.job)));
 }
 
 function calendarSlots(blocks: CalendarJobBlock[]) {
@@ -5139,18 +5064,14 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
                     <em>{nowLabel}</em>
                   </div>
                 ) : null}
-                {slot.blocks.length ? calendarMinuteGroups(slot.blocks).map((group) => {
-                  const block = clusteredCalendarBlock(group);
-                  const isNextUp = Boolean(nextBlock && group.some((item) => item.id === nextBlock.id));
-                  return (
-                    <CalendarJobBlockCard
-                      key={block.id}
-                      block={block}
-                      liveCues={liveCues}
-                      isNextUp={isNextUp}
-                    />
-                  );
-                }) : (
+                {slot.blocks.length ? slot.blocks.map((block) => (
+                  <CalendarJobBlockCard
+                    key={block.id}
+                    block={block}
+                    liveCues={liveCues}
+                    isNextUp={Boolean(nextBlock && block.id === nextBlock.id)}
+                  />
+                )) : (
                   <article className="calendar-empty-block">
                     <strong>Current hour clear</strong>
                     <p>No scheduled work in this hour.</p>
@@ -5679,8 +5600,11 @@ function ModelUsageCard({
       </div>
       <div className="provider-budget-list" aria-label="Provider budget caps">
         {providers.slice(0, 4).map((provider: any) => {
-          const cap = provider.dailyCapUsd || provider.monthlyCapUsd || 0;
-          const spend = provider.dailySpendUsd || 0;
+          const isSubscription = provider.budgetType === "subscription";
+          const subscriptionCap = provider.monthlyFeeUsd || provider.monthlyCapUsd || 0;
+          const syntheticPct = typeof provider.subscriptionCreditPct === "number" ? provider.subscriptionCreditPct : (isSubscription && !subscriptionCap ? 100 : 0);
+          const cap = isSubscription ? (typeof provider.subscriptionCreditPct === "number" ? 100 : (subscriptionCap || 100)) : (provider.dailyCapUsd || provider.monthlyCapUsd || 0);
+          const spend = isSubscription ? (typeof provider.subscriptionCreditPct === "number" ? syntheticPct : (subscriptionCap ? (provider.monthlySpendUsd || 0) : syntheticPct)) : (provider.dailySpendUsd || 0);
           const pct = cap ? Math.min(100, Math.round((spend / cap) * 100)) : 0;
           return (
             <article key={provider.id} className={`provider-budget is-${provider.status || "ready"}`}>
@@ -5691,10 +5615,12 @@ function ModelUsageCard({
               <div className="provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
                 <span />
               </div>
-              <p>{fmtCurrency(spend)} today{provider.dailyCapUsd ? ` / ${fmtCurrency(provider.dailyCapUsd)} cap` : ""}</p>
+              <p>{isSubscription
+                ? (subscriptionCap ? `${fmtCurrency(subscriptionCap)} / mo flat` : (provider.subscriptionLabel || "subscription included"))
+                : `${fmtCurrency(spend)} today${provider.dailyCapUsd ? ` / ${fmtCurrency(provider.dailyCapUsd)} cap` : ""}`}</p>
               <footer>
                 <span>{provider.lastModelUsed || "model route"}</span>
-                {provider.remainingCreditUsd != null ? <em>{fmtCurrency(provider.remainingCreditUsd)} left</em> : null}
+                {provider.remainingCreditUsd != null ? <em>{fmtCurrency(provider.remainingCreditUsd)} left</em> : isSubscription ? <em>{provider.usageProbeSummary || "subscription lane"}</em> : null}
               </footer>
               {(provider.authStatus || provider.lastTestStatus) ? (
                 <small>

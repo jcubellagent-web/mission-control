@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T07:05:00Z",
+  "updatedAt": "2026-06-18T05:48:00Z",
   "currency": "USD",
   "policy": {
     "defaultProvider": "codex",
@@ -26,7 +26,7 @@
       "monthlyCapUsd": 0,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "gpt-5.5",
+      "lastModelUsed": "openai-codex",
       "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
     },
     {
@@ -38,27 +38,42 @@
       "monthlyCapUsd": 0,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "gemini-3.1-pro-preview",
+      "lastModelUsed": "google/gemini-2.5-pro",
       "preferredModels": {
-        "routine": "gemini-3.1-pro-preview",
-        "deep": "gemini-3.1-pro-preview",
-        "cheapFallback": "gemini-3-flash-preview"
+        "routine": "google/gemini-2.5-pro",
+        "deep": "google/gemini-2.5-pro",
+        "cheapFallback": "google/gemini-2.5-flash"
       },
       "lastRouteReason": "Use Gemini Pro first for JAIMES dashboard-safe summaries, digests, reports, log summaries, reviews, and stale-task compression; use Flash only as fallback/cheap throughput; never raw secrets, OAuth payloads, raw mail, or private account data."
     },
     {
       "id": "xai",
-      "label": "xAI / Grok",
-      "role": "Current-events, X-native research, outside critique, and batch audit specialist",
-      "budgetType": "prepaid",
-      "monthlyCapUsd": 60,
-      "dailyCapUsd": 5,
-      "reserveUsd": 48.97,
-      "remainingCreditUsd": 108.97,
+      "label": "Grok OAuth / xAI",
+      "role": "X/SuperGrok subscription CLI lane plus xAI API feed for X-native/current-events research",
+      "budgetType": "subscription",
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "reserveUsd": null,
+      "remainingCreditUsd": null,
       "lastModelUsed": "grok-4.20-reasoning",
-      "authStatus": "configured-local-env",
-      "keyMode": "host-local-env",
-      "lastRouteReason": "Use for X-native, public current-events, creator, crypto/news pulse, and zeitgeist checks. Keep store=false/metadata-only logging where available; never raw secrets or private connector data."
+      "authStatus": "grok-cli-oauth-authenticated",
+      "keyMode": "grok-cli-oauth-plus-xai-api-tool",
+      "lastRouteReason": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default.",
+      "monthlyFeeUsd": 40,
+      "subscriptionLabel": "X subscription flat lane",
+      "subscriptionCreditPct": 2,
+      "usageProbeSummary": "2% used by 50-call probe",
+      "lastTestStatus": "50-call probe passed; ~2,500 call-equivalent window inferred",
+      "feeNote": "Monthly fee is an estimated FinOps placeholder; exact X billing is not available to CLI.",
+      "apiModelUsed": "grok-4.20-reasoning",
+      "cliModelUsed": "grok-composer-2.5-fast",
+      "probeAvgSeconds": 4.8,
+      "probeMaxSeconds": 20.62,
+      "probeRateLimited": false,
+      "probeObservedUsagePct": 2,
+      "probeInferredFullCallEquivalent": 2500,
+      "probeInferredRemainingCallEquivalent": 2450,
+      "probeCalibrationNote": "50 calls consumed 2% per Josh screenshot; linear estimate only."
     },
     {
       "id": "openrouter",
