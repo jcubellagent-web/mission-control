@@ -2,7 +2,7 @@
   "ok": true,
   "status": "ok",
   "summary": "All canaries passed",
-  "checkedAt": "2026-06-15T20:23:20.879112Z",
+  "checkedAt": "2026-06-18T06:43:42.076735Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -55,7 +55,7 @@
     {
       "name": "Agent Control lane",
       "ok": true,
-      "detail": "overall=attention; ready=2/4; source=live-heartbeats",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -115,13 +115,13 @@
     {
       "name": "Josh heartbeat recovery publish",
       "ok": true,
-      "detail": "healthy Josh 2.0 heartbeat recovery can clear stale status-check attention rows without overwriting real active work",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
       "name": "Brain Feed heartbeat freshness",
       "ok": true,
-      "detail": "idle agent cards prefer fresh heartbeat-backed check-ins over old sidecars",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -445,7 +445,7 @@
     {
       "name": "Signal Feed optional source",
       "ok": true,
-      "detail": "10 signal rows; 5 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
+      "detail": "10 signal rows; 0 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
       "severity": "ok"
     },
     {
@@ -511,7 +511,7 @@
     {
       "name": "Agentic Crypto summary",
       "ok": true,
-      "detail": "status=fresh; mode=read-only; 17 token rows; 3 chain rows; masked wallets present",
+      "detail": "status=fresh; mode=read-only; 15 token rows; 3 chain rows; masked wallets present",
       "severity": "ok"
     },
     {
@@ -583,7 +583,7 @@
     {
       "name": "Today Jobs current-hour routine grouping",
       "ok": true,
-      "detail": "same-hour background system and calendar sync checks group into one compact row while priority and attention work stays itemized",
+      "detail": "same-time and same-hour background checks collapse into compact rows while priority and attention work stays itemized",
       "severity": "ok"
     },
     {

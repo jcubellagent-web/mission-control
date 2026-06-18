@@ -1595,6 +1595,15 @@ function AgentFlightDeck({
   );
 }
 
+function agentSourceDisagreement(status: AgentStatus, idleContext: AgentIdleContext) {
+  const statusValue = String(status.status || "").toLowerCase();
+  if (["blocked", "error", "offline"].includes(statusValue)) return false;
+  const stale = ageMinutes(status.updated_at) > 90;
+  const hasRecentComplete = !/no completed task reported yet/i.test(idleContext.complete || "");
+  const hasUpcomingContext = Boolean(idleContext.nextAt) || Boolean(idleContext.nextTitle && !/awaiting instruction|no upcoming/i.test(idleContext.nextTitle));
+  return stale && (hasRecentComplete || hasUpcomingContext);
+}
+
 function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId; status: AgentStatus; idleContext: AgentIdleContext; changed?: boolean }) {
   const visualState = agentNeedsFocus(status)
     ? "blocked"
@@ -1604,6 +1613,7 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
         ? "ready"
         : "waiting";
   const freshness = agentSla(status, idleContext);
+  const disagreement = agentSourceDisagreement(status, idleContext);
   const current = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
     ? headlineTitle(status.objective || status.current_tool || AGENTS[agent].role, 44)
     : idleContext.nextTitle && !/awaiting instruction/i.test(idleContext.nextTitle)
@@ -1634,9 +1644,16 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
       <div className={`tower-agent-fresh is-${freshness.tone}`}>
         <strong>{freshness.label}</strong>
         <span>{freshness.detail}</span>
+        {disagreement ? <em className="tower-agent-disagreement" title="Fresh Brain Feed context disagrees with older heartbeat coverage; treat this as a source mismatch, not an agent failure.">Source disagreement</em> : null}
       </div>
     </article>
   );
+}
+
+function activityUpdateTrail(rows: TowerActivity[], primaryFocus?: TowerActivity) {
+  return rows
+    .filter((row) => row.time && row.id !== primaryFocus?.id && !/routine confirmations collapsed/i.test(row.detail || ""))
+    .slice(0, 3);
 }
 
 function ActivityLedger({ model }: { model: ControlTowerModel }) {
@@ -1644,6 +1661,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
   const systemQuiet = activitySystemQuietCount(model);
   const focusRows = activityFocusRows(model);
   const primaryFocus = focusRows[0];
+  const updateTrail = activityUpdateTrail(rows, primaryFocus);
   // Multi-agent: when 2+ distinct agents are active at once, show a co-equal grid
   // instead of a single hero so concurrent workflows are all visible.
   const activeAgents = concurrentActiveAgents(model);
@@ -1697,6 +1715,14 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
             {primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}
           </p>
           {primaryFocus?.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{primaryFocus.detailLines.map((line) => <span key={line}>{line}</span>)}</div> : null}
+          {updateTrail.length ? (
+            <div className="ledger-update-trail" aria-label="Last meaningful updates">
+              <span>Last meaningful updates</span>
+              <div>
+                {updateTrail.map((row) => <em key={row.id} title={missionText(row.detail)}>{row.title}</em>)}
+              </div>
+            </div>
+          ) : null}
           <footer>
             <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
             <em>{primaryFocus?.time ? ageLabel(primaryFocus.time) : "live"}</em>
@@ -1810,22 +1836,15 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const walletDetail = walletIsPlaceholder
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
-  const p2eResearch = wallet?.p2eResearch;
-  const p2eTokens = p2eResearch?.tokens || [];
-  const p2eHeld = p2eTokens.filter((token) => token.held).length;
-  const p2eAlerts = p2eResearch?.alerts || [];
-  const p2eTone = p2eAlerts.length ? "risk" : String(p2eResearch?.status || "watch").toLowerCase().includes("clear") ? "clear" : "watch";
-  const p2eHeadline = p2eResearch?.headline || (p2eTokens.length ? `${p2eHeld}/${p2eTokens.length} held` : "Monitor armed");
-  const p2eDetail = p2eResearch?.detail || (p2eResearch?.updatedAt ? `Updated ${ageLabel(p2eResearch.updatedAt)}` : "Solana P2E scorecard ready");
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
   const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
   const modelHeadline = typeof subscriptionFee === "number"
-    ? `${fmtCurrency(subscriptionFee)} sub + ${fmtCurrency(meteredMonthly)}`
-    : fmtCurrency(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
+    ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
+    : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
   const modelDetail = typeof subscriptionFee === "number"
-    ? `Usage equiv ${fmtCurrency(usageEquivalentMonthly)} · metered today ${fmtCurrency(meteredDaily)}`
+    ? `OpenAI usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
     : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
@@ -1838,12 +1857,15 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const visibilityDetail = missingAgents
     ? `${freshAgents} fresh · ${missingAgents} missing source${missingAgents === 1 ? "" : "s"}`
     : `${freshAgents} fresh · ${sourceTruthLabel(state.source)}`;
+  const modelRoute = state.modelUsage?.topProvider?.provider || state.modelUsage?.topProvider?.name || state.modelUsage?.providers?.[0]?.provider || "Route watch";
+  const runtimeDetail = runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ");
+  const kintaraStatus = state.kintara?.status || state.kintara?.summary || state.kintara?.detail || "Quiet";
   return (
     <section className="tower-resource-stack" aria-label="Resources and live sources">
       <header>
         <div>
-          <p>Resources</p>
-          <h3>Wallet · Models · Display · Visibility</h3>
+          <p>FinOps</p>
+          <h3>Wallet · Models · Runtime · Visibility</h3>
         </div>
         <button type="button" onClick={onCryptoRefresh} disabled={loading} title="Refresh read-only wallet inventory">
           <RefreshCw size={12} className={loading ? "spin" : ""} /> Wallet
@@ -1856,26 +1878,25 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
           <strong>{walletHeadline}</strong>
           <p>{walletDetail}</p>
         </article>
-        <article className="resource-card resource-card-model-usage is-clear">
+        <article className="resource-card is-clear">
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
-          <p>{modelDetail}</p>
-        </article>
-        <article className={`resource-card is-${p2eTone}`}>
-          <b>Solana P2E</b>
-          <strong>{p2eHeadline}</strong>
-          <p>{p2eDetail}</p>
+          <p>{modelRoute} · {modelDetail}</p>
         </article>
         <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
-          <b>Display fit</b>
+          <b>Runtime fit</b>
           <strong>{runtimeOk ? "Ready" : "Review"}</strong>
-          <p>{runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ")}</p>
+          <p>{runtimeDetail}</p>
         </article>
         <article className={`resource-card is-${visibleAgents >= trackedAgents ? "clear" : "watch"}`}>
           <b>Visibility</b>
           <strong>{visibleAgents}/{trackedAgents} visible</strong>
           <p>{visibilityDetail}</p>
         </article>
+      </div>
+      <div className="resource-secondary-strip" aria-label="Secondary finops context">
+        <span><b>Kintara</b>{compactText(String(kintaraStatus), 40)}</span>
+        <span><b>Wallet mode</b>{walletIsPlaceholder ? "Read-only proposals" : "Read-only inventory"}</span>
       </div>
     </section>
   );
@@ -4931,13 +4952,62 @@ function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
 function calendarBlockTimeLabel(date: Date) {
   return date
     .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    .replace(/\s?[AP]M$/i, "")
-    .replace(/\s/g, " ")
-    .toUpperCase();
+    .replace(/\s?[AP]M/i, "")
+    .trim();
+}
+
+function compactCalendarClusterDetail(items: CalendarJobBlock[]) {
+  const categoryCounts = new Map<string, number>();
+  items.forEach((item) => {
+    const key = compactCategoryLabel(item.category);
+    categoryCounts.set(key, (categoryCounts.get(key) || 0) + 1);
+  });
+  const topCategories = [...categoryCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 2)
+    .map(([label, count]) => count > 1 ? `${label} ×${count}` : label);
+  return topCategories.join(" · ") || "Scheduled work";
 }
 
 function calendarClearUntilLabel(hourKey: number) {
   return `Clear until ${calendarHourLabel(hourKey)}`;
+}
+
+function clusteredCalendarBlock(items: CalendarJobBlock[]) {
+  if (items.length === 1) return items[0];
+  const first = items[0];
+  const tones: CalendarBlockTone[] = items.map((item) => item.tone);
+  const tone: CalendarBlockTone = tones.includes("attention")
+    ? "attention"
+    : tones.includes("working")
+      ? "working"
+      : tones.every((value) => value === "done")
+        ? "done"
+        : tones.includes("ready")
+          ? "ready"
+          : "planned";
+  const agents = Array.from(new Set(items.flatMap((item) => item.agents || [item.agent])));
+  return {
+    ...first,
+    id: `cluster-${first.hourKey}-${first.startsAt.getTime()}`,
+    title: `${items.length} jobs`,
+    detail: compactCalendarClusterDetail(items),
+    tone,
+    count: items.length,
+    synthetic: true,
+    agents,
+  } satisfies CalendarJobBlock;
+}
+
+function calendarMinuteGroups(blocks: CalendarJobBlock[]) {
+  const groups = new Map<number, CalendarJobBlock[]>();
+  blocks.forEach((block) => {
+    const key = block.startsAt.getTime();
+    const rows = groups.get(key) || [];
+    rows.push(block);
+    groups.set(key, rows);
+  });
+  return [...groups.values()].map((items) => items.sort((a, b) => priorityScore(b.job) - priorityScore(a.job)));
 }
 
 function calendarSlots(blocks: CalendarJobBlock[]) {
@@ -4989,11 +5059,12 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
   const blocks = buildCalendarJobBlocks(calendarJobs);
   const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
   const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
-  const visibleBlocks = todayBlocks.length >= 6
-    ? [...todayBlocks].sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()).slice(0, 20)
-    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))]
-      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
-      .slice(0, 20);
+  const rawVisibleBlocks = todayBlocks.length >= 6
+    ? todayBlocks
+    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))];
+  const visibleBlocks = rawVisibleBlocks
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+    .slice(0, 20);
   const slots = calendarSlots(visibleBlocks);
   const nowMs = Date.now();
   const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
@@ -5068,14 +5139,18 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
                     <em>{nowLabel}</em>
                   </div>
                 ) : null}
-                {slot.blocks.length ? slot.blocks.map((block) => (
-                  <CalendarJobBlockCard
-                    key={block.id}
-                    block={block}
-                    liveCues={liveCues}
-                    isNextUp={Boolean(nextBlock && block.id === nextBlock.id)}
-                  />
-                )) : (
+                {slot.blocks.length ? calendarMinuteGroups(slot.blocks).map((group) => {
+                  const block = clusteredCalendarBlock(group);
+                  const isNextUp = Boolean(nextBlock && group.some((item) => item.id === nextBlock.id));
+                  return (
+                    <CalendarJobBlockCard
+                      key={block.id}
+                      block={block}
+                      liveCues={liveCues}
+                      isNextUp={isNextUp}
+                    />
+                  );
+                }) : (
                   <article className="calendar-empty-block">
                     <strong>Current hour clear</strong>
                     <p>No scheduled work in this hour.</p>
