@@ -2,12 +2,12 @@
   "ok": true,
   "status": "ok",
   "summary": "All canaries passed",
-  "checkedAt": "2026-06-18T06:37:57.537596Z",
+  "checkedAt": "2026-06-18T06:40:16.169972Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JOSH 2.0; dualAgents=none; live=4",
+      "detail": "primary=JAIMES; dualAgents=none; live=4",
       "severity": "ok"
     },
     {
@@ -19,7 +19,7 @@
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "28 today-relevant; 0 active issue(s)",
+      "detail": "29 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
@@ -103,7 +103,7 @@
     {
       "name": "Local live sidecar watch",
       "ok": true,
-      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+      "detail": "kiosk live feed watches main agent, wallet, model, and Signal Feed sidecars",
       "severity": "ok"
     },
     {
@@ -409,13 +409,13 @@
     {
       "name": "Runtime kiosk layout guard",
       "ok": true,
-      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+      "detail": "watchdog checks the live kiosk endpoint, dashboard data, screenshot helper, and visible debug-text leak status",
       "severity": "ok"
     },
     {
       "name": "Runtime visible text quality",
       "ok": true,
-      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+      "detail": "live rendered Control Tower text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
       "severity": "ok"
     },
     {
@@ -445,7 +445,7 @@
     {
       "name": "Signal Feed optional source",
       "ok": true,
-      "detail": "10 signal rows; 0 newsletter trend rows; health=missing; counts=missing",
+      "detail": "10 signal rows; 0 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
       "severity": "ok"
     },
     {
@@ -511,7 +511,7 @@
     {
       "name": "Agentic Crypto summary",
       "ok": true,
-      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+      "detail": "status=fresh; mode=read-only; 15 token rows; 3 chain rows; masked wallets present",
       "severity": "ok"
     },
     {
@@ -601,7 +601,7 @@
     {
       "name": "React favicon",
       "ok": true,
-      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+      "detail": "kiosk has an explicit Control Tower icon and no default favicon.ico miss",
       "severity": "ok"
     }
   ]
