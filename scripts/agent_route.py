@@ -145,6 +145,38 @@ JOSHEX_LOCAL_ONLY_TYPES = {
 }
 
 
+REQUESTED_PROVIDER_ALIASES = {
+    "gpt": "codex",
+    "gpt-5.5": "codex",
+    "gpt-5.4": "codex",
+    "codex": "codex",
+    "openai": "codex",
+    "openai-codex": "codex",
+    "gemini": "gemini",
+    "google": "gemini",
+    "google-gemini-cli": "gemini",
+    "grok": "xai",
+    "xai": "xai",
+    "x": "xai",
+    "openrouter": "openrouter",
+}
+
+PROVIDER_DEFAULT_MODELS = {
+    "codex": "gpt-5.5",
+    "gemini": "gemini-3.1-pro-preview",
+    "xai": "grok-4.20-reasoning",
+    "openrouter": "openrouter/auto",
+}
+
+PROVIDER_AUTH_LABELS = {
+    "codex": "OpenAI Codex OAuth/subscription",
+    "gemini": "Google Gemini CLI OAuth/subscription",
+    "xai": "xAI/Grok host-local auth",
+    "openrouter": "OpenRouter metered API",
+}
+
+
+
 def read_json(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text())
@@ -269,6 +301,86 @@ def choose_agent(args: argparse.Namespace) -> tuple[str, dict[str, Any], bool]:
     return str(ranked[0]["agent"]), ranked[0], needs_approval
 
 
+
+def normalize_requested_provider(value: str = "", model: str = "") -> str:
+    text = str(value or "").strip().lower()
+    model_text = str(model or "").strip().lower()
+    if text:
+        return REQUESTED_PROVIDER_ALIASES.get(text, text)
+    if model_text.startswith(("gpt-", "o", "codex/", "openai/")):
+        return "codex"
+    if "gemini" in model_text:
+        return "gemini"
+    if "grok" in model_text or model_text.startswith("xai/"):
+        return "xai"
+    if "openrouter" in model_text:
+        return "openrouter"
+    return ""
+
+
+def explicit_model_request(args: argparse.Namespace) -> tuple[str, str, str]:
+    requested_model = str(getattr(args, "requested_model", "") or "").strip()
+    requested_provider = normalize_requested_provider(getattr(args, "requested_provider", "") or "", requested_model)
+    requested_reason = str(getattr(args, "requested_reason", "") or "requested by Josh").strip()
+    if requested_provider and not requested_model:
+        if requested_provider == "gemini":
+            requested_model = gemini_model("review") or PROVIDER_DEFAULT_MODELS[requested_provider]
+        elif requested_provider == "xai":
+            requested_model = provider_budget("xai").get("lastModelUsed") or PROVIDER_DEFAULT_MODELS[requested_provider]
+        elif requested_provider == "openrouter":
+            requested_model = provider_budget("openrouter").get("lastModelUsed") or PROVIDER_DEFAULT_MODELS[requested_provider]
+        else:
+            requested_model = PROVIDER_DEFAULT_MODELS.get(requested_provider, "")
+    return requested_provider, requested_model, requested_reason
+
+
+def explicit_route_unavailable(provider: str) -> str:
+    if provider == "gemini":
+        return "" if (Path.home() / "scripts" / "hermes_gemini_sub.sh").exists() else "Gemini CLI helper is not installed on this host"
+    if provider == "xai":
+        row = provider_budget("xai")
+        auth = str(row.get("authStatus") or "").lower()
+        if "pending" in auth or "missing" in auth:
+            return f"xAI/Grok auth is {row.get('authStatus')}"
+    if provider == "openrouter":
+        ok, reason = provider_budget_guard("openrouter")
+        return "" if ok else reason
+    return ""
+
+
+def explicit_route_payload(provider: str, model: str, owner: str, args: argparse.Namespace, allowance_mode: str, reason: str) -> dict[str, Any]:
+    auth = PROVIDER_AUTH_LABELS.get(provider, provider)
+    first_stop = "grok" if provider == "xai" else provider
+    return {
+        "firstStop": first_stop,
+        "provider": provider,
+        "model": model,
+        "auth": auth,
+        "role": "explicit-model-request",
+        "owner": owner,
+        "enforced": True,
+        "explicitRequest": True,
+        "requestedBy": "Josh",
+        "freshLaneRequired": True,
+        "checkpointRequired": True,
+        "verifyBeforeWork": True,
+        "verification": {
+            "required": True,
+            "method": "launch fresh session with provider/model override and require first visible Active Model/Auth line",
+            "mustMatch": f"{provider}/{model}" if model else provider,
+        },
+        "codexAllowanceMode": allowance_mode,
+        "spendClass": "explicit-request",
+        "privacy": args.privacy,
+        "reason": compact(reason or f"{provider}/{model} explicitly requested by Josh."),
+        "telegramDisclosure": f"Model: {model or provider} - requested by Josh; Auth: {auth}",
+        "guardrails": [
+            "Do not mutate the current session to simulate a switch; checkpoint and launch a fresh lane/session.",
+            "Verify the requested provider/model before doing substantive work.",
+            "If verification fails, report unavailable and use only an approved fallback.",
+        ],
+    }
+
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
     caps = set(args.capability or [])
     task_type = args.task_type
@@ -282,6 +394,26 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
     xai_first = bool(xai_hint and not codex_only and not unsafe_privacy and not needs_approval)
     openrouter_fallback = bool(openrouter_hint and not codex_only and not unsafe_privacy and not needs_approval)
+
+    requested_provider, requested_model, requested_reason = explicit_model_request(args)
+    if requested_provider:
+        unavailable = explicit_route_unavailable(requested_provider)
+        unsafe_specialist = requested_provider in {"gemini", "xai", "openrouter"} and (unsafe_privacy or needs_approval or codex_only)
+        if unavailable or unsafe_specialist:
+            reasons = []
+            if unavailable:
+                reasons.append(unavailable)
+            if unsafe_specialist:
+                reasons.append("requested specialist/fallback lane is unsafe for this privacy/task; using Codex execution lane")
+            return explicit_route_payload(
+                "codex",
+                requested_model if requested_provider == "codex" and requested_model else PROVIDER_DEFAULT_MODELS["codex"],
+                owner,
+                args,
+                allowance_mode,
+                "; ".join(reasons),
+            )
+        return explicit_route_payload(requested_provider, requested_model, owner, args, allowance_mode, requested_reason)
 
     if xai_first:
         budget_ok, budget_reason = provider_budget_guard("xai")
@@ -297,6 +429,8 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "role": role,
                 "owner": owner,
                 "enforced": True,
+                "freshLaneRequired": True,
+                "verifyBeforeWork": True,
                 "codexAllowanceMode": allowance_mode,
                 "spendClass": "codex-sparing" if codex_constrained else "normal",
                 "privacy": "dashboard-safe",
@@ -319,6 +453,8 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "role": "provider-fallback",
                 "owner": owner,
                 "enforced": True,
+                "freshLaneRequired": True,
+                "verifyBeforeWork": True,
                 "codexAllowanceMode": allowance_mode,
                 "spendClass": "fallback-check",
                 "privacy": "dashboard-safe",
@@ -439,6 +575,9 @@ def main() -> int:
     parser.add_argument("--prefer", default="")
     parser.add_argument("--approval", default="none", choices=["none", "required", "approved", "rejected"])
     parser.add_argument("--codex-allowance", default="auto", choices=["auto", "normal", "conserve", "exhausted"])
+    parser.add_argument("--requested-provider", default="", help="Explicit provider/lane Josh requested: codex, gemini, grok/xai, or openrouter.")
+    parser.add_argument("--requested-model", default="", help="Explicit model Josh requested, e.g. gpt-5.5 or gemini-3.1-pro-preview.")
+    parser.add_argument("--requested-reason", default="requested by Josh", help="Short reason to include in route disclosure.")
     parser.add_argument("--create-task", action="store_true")
     parser.add_argument("--brain-feed", action="store_true")
     parser.add_argument("--job", action="store_true")

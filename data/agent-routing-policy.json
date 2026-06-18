@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T17:10:00Z",
+  "updatedAt": "2026-06-18T07:05:00Z",
   "defaultRequester": "joshex",
   "deviceResourcePolicy": {
     "summary": "JOSHeX is the trusted coordinator and private-Mac specialist, not the default execution host. Prefer Josh 2.0 or JAIMES for real ecosystem work unless the task requires MacBook-only local state.",
@@ -46,10 +46,10 @@
       "openrouter"
     ],
     "providerRoles": {
-      "codex": "Default execution, private connectors, auth, terminal actions, repo edits, approvals, and final integration.",
-      "gemini": "Gemini-first dashboard-safe reviewer/evaluator/digest/long-context specialist; JAIMES should use Flash for routine safe work and Pro for explicit deeper compact evaluation before Codex when sufficient.",
-      "xai": "Current-events, X-native research, outside critique, and non-urgent batch audit specialist via host-local xAI API keys.",
-      "openrouter": "Fallback when a primary provider is unavailable or a specific outside model is needed."
+      "codex": "OpenAI Codex OAuth/subscription: default for execution, code edits, repo work, shell/tools, Control Tower/OpenCLAW, auth-sensitive workflows, and final verification.",
+      "gemini": "Gemini CLI OAuth/subscription: default for dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion.",
+      "xai": "Grok/xAI specialist: X-native, current-events/social signal, creator posts, crypto/news pulse, public reaction, and zeitgeist checks.",
+      "openrouter": "Fallback/specialist route only; not primary spend."
     },
     "geminiFirstPrivacy": [
       "dashboard-safe"
@@ -120,9 +120,9 @@
     "cookieKeychainDisambiguation": "A visible alert mentioning cookie.codex, Codex cookies, Keychain Not Found, or a keychain cannot be found means macOS/Codex keychain work on the device. It is not Sorare cookie freshness unless the user explicitly says Sorare.",
     "dailyUtilizationPolicy": "Run at least two dashboard-safe Gemini specialist passes per day when quota is available: one daily digest/stale-task compression pass and one review/evaluator pass. Use scripts/gemini_specialist_pass.py --agent jaimes for JAIMES-owned passes so raw prompts and raw output are not stored. Keep Codex/Hermes as execution owner.",
     "jaimesGeminiRoute": "JAIMES should use Gemini first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations. Use Gemini Flash for routine throughput and Gemini Pro for explicit deeper compact evaluation. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
-    "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth, include Route reason when Gemini, xAI, or OpenRouter is used or skipped, announce Codex exhausted/conserve mode when active, and announce any route switch before the result.",
-    "lastModeChangeAt": "2026-05-09T03:28:00Z",
-    "lastModeChangeReason": "add Gemini Pro lane for JAIMES deeper evaluation",
+    "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth and route reason; explicit model switches must verify a fresh lane before work.",
+    "lastModeChangeAt": "2026-06-18T07:05:00Z",
+    "lastModeChangeReason": "add verified fresh-lane model switching contract from JOSHeX proposal",
     "skillPack": {
       "source": "mission-control/agent-skills",
       "inventory": "mission-control/data/agent-skill-inventory.json",
@@ -135,7 +135,18 @@
         "agent-state-visibility",
         "handoff-to-joshex"
       ]
-    }
+    },
+    "updatedAt": "2026-06-18T07:05:00Z",
+    "freshLaneSwitching": {
+      "rule": "Model switching means checkpoint + fresh execution lane/session + verification before substantive work; never pretend the current session mutated models.",
+      "explicitRequestOverride": "Josh explicit model requests override the router unless unsafe or unavailable.",
+      "verificationRequired": true,
+      "checkpointRequired": true,
+      "disclosure": "Telegram must show Objective, Active Model/Auth, and route reason before substantive work.",
+      "fallbackBehavior": "If requested model/provider is unavailable or unsafe for the task/privacy, state the reason and use the approved fallback lane."
+    },
+    "sharedPolicyFile": "data/model-routing-policy.json",
+    "laneWrapper": "scripts/model_lane.py"
   },
   "approvalRequiredPrivacy": [
     "josh-approval",
