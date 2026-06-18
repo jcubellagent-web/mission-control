@@ -155,6 +155,7 @@ CRON_TARGETS = [
     {"name": "Control Tower Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Control Tower data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Context Sync", "pattern": "com.josh20.mission-control-signal-refresh", "schedule": "Every 5 min", "description": "Keeps J.A.I.N alert state available for Telegram and agent context", "category": "Agent Context", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log"},
     {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
 
@@ -485,54 +486,19 @@ def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
             title = str(entry.get("title") or "").strip()
             if not title:
                 continue
-            display_title = title
-            if display_title.lower().startswith("[media attached:"):
-                display_title = "Telegram media intake"
-            status = str(entry.get("status") or "info")[:32]
-            if display_title == "Telegram media intake" and status.lower() not in {"blocked", "error"}:
-                continue
             events.append({
                 "id": str(entry.get("id") or f"shared-event-{idx}")[:140],
                 "time": ts,
                 "agent": str(entry.get("agent") or "joshex")[:24],
                 "agentLabel": str(entry.get("agentLabel") or entry.get("agent") or "Agent")[:80],
                 "type": str(entry.get("type") or "status")[:32],
-                "title": plain_dashboard_text(display_title, 160),
-                "status": status,
+                "title": plain_dashboard_text(title, 160),
+                "status": str(entry.get("status") or "info")[:32],
                 "tool": plain_dashboard_text(entry.get("tool") or "", 80),
                 "detail": plain_dashboard_text(entry.get("detail") or "", 240),
             })
         events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
-        cleared_keys: set[tuple[str, str]] = set()
-        for event in events:
-            status = str(event.get("status") or "").lower()
-            etype = str(event.get("type") or "").lower()
-            if status in {"done", "ok", "ready", "complete"} or etype == "complete":
-                cleared_keys.add((
-                    str(event.get("agent") or "").lower(),
-                    str(event.get("title") or "").lower(),
-                ))
-        visible: List[Dict[str, Any]] = []
-        seen: set[tuple[str, str, str, str]] = set()
-        for event in events:
-            status = str(event.get("status") or "").lower()
-            title_key = (
-                str(event.get("agent") or "").lower(),
-                str(event.get("title") or "").lower(),
-            )
-            if status in {"active", "working", "running", "blocked", "error"} and title_key in cleared_keys:
-                continue
-            key = (
-                str(event.get("agent") or "").lower(),
-                str(event.get("title") or "").lower(),
-                str(event.get("status") or "").lower(),
-                str(event.get("tool") or "").lower(),
-            )
-            if key in seen:
-                continue
-            seen.add(key)
-            visible.append(event)
-        return visible[:20]
+        return events[:20]
     except Exception as exc:
         print(f"[warn] fetch_shared_events failed: {exc}", file=sys.stderr)
         return []
@@ -547,13 +513,6 @@ LOW_SIGNAL_SHARED_EVENT_PATTERNS = re.compile(
     r"stale brain feed freshness guard|brain feed needs refresh|"
     r"heartbeat check complete|mission control latest commit|repo dirty tree|"
     r"dirty/untracked entries|no auto-push was attempted",
-    re.IGNORECASE,
-)
-LOW_SIGNAL_AGENT_MESSAGE_PATTERNS = re.compile(
-    r"^(jaimes is working now|jaimes is online and ready|image review request|"
-    r"did you get that|hello|what is going on|what's going on|"
-    r"perfect,? i am still|don't worry|do not pause|keep going|"
-    r"apply no-typing mode safely)\\b",
     re.IGNORECASE,
 )
 
@@ -839,7 +798,14 @@ def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) 
                 for host in hosts
                 if isinstance(host, dict) and host.get("agent") in {"josh", "jaimes", "jain"}
             )
-        xai_missing_key = provider_id == "xai" and not host_xai_ok and isinstance(xai_key, dict) and xai_key.get("present") is False
+        xai_cli_auth = provider_id == "xai" and (Path.home() / ".grok" / "auth.json").exists()
+        xai_missing_key = (
+            provider_id == "xai"
+            and not host_xai_ok
+            and not xai_cli_auth
+            and isinstance(xai_key, dict)
+            and xai_key.get("present") is False
+        )
         if xai_missing_key:
             status = "missing-key"
         elif daily_cap and spend["daily"] >= daily_cap:
@@ -850,6 +816,12 @@ def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) 
             status = "watch"
         else:
             status = "ready"
+        if provider_id == "xai" and xai_cli_auth:
+            auth_status = row.get("authStatus") or "grok-cli-oauth"
+            key_present = True if host_xai_ok else bool(xai_cli_auth)
+        else:
+            auth_status = "host-keys-ok" if provider_id == "xai" and host_xai_ok else "missing-key" if xai_missing_key else row.get("authStatus")
+            key_present = True if provider_id == "xai" and host_xai_ok else xai_key.get("present") if isinstance(xai_key, dict) else None
         last = last_by_provider.get(provider_id, {})
         provider_rows.append({
             **row,
@@ -860,10 +832,10 @@ def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) 
             "monthlyUtilizationPct": monthly_pct,
             "remainingCreditUsd": None if remaining is None else round(float(remaining), 6),
             "status": status,
-            "authStatus": "host-keys-ok" if provider_id == "xai" and host_xai_ok else "missing-key" if xai_missing_key else row.get("authStatus"),
-            "keyPresent": True if provider_id == "xai" and host_xai_ok else xai_key.get("present") if isinstance(xai_key, dict) else None,
+            "authStatus": auth_status,
+            "keyPresent": key_present,
             "keySuffix": xai_key.get("suffix") if isinstance(xai_key, dict) else "",
-            "lastTestStatus": xai_last_test.get("status") if isinstance(xai_last_test, dict) else "",
+            "lastTestStatus": (xai_last_test.get("status") if isinstance(xai_last_test, dict) and xai_last_test.get("status") else row.get("lastTestStatus")),
             "lastModelUsed": last.get("model") or row.get("lastModelUsed"),
             "lastSource": last.get("source") or "",
             "whyChosen": row.get("lastRouteReason") or row.get("role") or "",
@@ -1034,14 +1006,7 @@ def build_agent_comms(
         direction = str(entry.get("direction") or "")
         if not (message and timestamp and direction):
             return
-        status = str(entry.get("status") or "sent")
-        if status.lower() in {"active", "working", "running"} and LOW_SIGNAL_AGENT_MESSAGE_PATTERNS.search(message):
-            status = "done"
-        ts = iso_to_dt(timestamp)
-        if status.lower() in {"active", "working", "running"} and ts:
-            if (dt.datetime.now(dt.timezone.utc) - ts) > dt.timedelta(minutes=30):
-                status = "done"
-        if message.lower() in {"standby", "idle", "standing by"} and status.lower() in {"done", "idle", "sent"}:
+        if message.lower() in {"standby", "idle", "standing by"} and str(entry.get("status") or "").lower() in {"done", "idle", "sent"}:
             return
         key = (timestamp, direction, message)
         if key in seen:
@@ -1051,7 +1016,7 @@ def build_agent_comms(
             "timestamp": timestamp,
             "direction": direction,
             "message": message,
-            "status": status,
+            "status": str(entry.get("status") or "sent"),
         }
         merged.append(clean)
 
@@ -1242,37 +1207,16 @@ def agent_feed_is_ready_heartbeat(raw: Dict[str, Any]) -> bool:
 def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str) -> Dict[str, Any]:
     raw = feed if isinstance(feed, dict) else {}
     updated_at = raw.get("updatedAt")
-    message_received = raw.get("messageReceived")
     ready_heartbeat = agent_feed_is_ready_heartbeat(raw)
-    message_ts = iso_to_dt(message_received)
-    message_stale = bool(
-        message_ts
-        and (dt.datetime.now(dt.timezone.utc) - message_ts) > dt.timedelta(hours=12)
-    )
-    reported_active = bool(raw.get("active")) and not ready_heartbeat and not message_stale
+    reported_active = bool(raw.get("active")) and not ready_heartbeat
     stale = bool(updated_at) and not is_recent_ts(updated_at, hours=AGENT_BRAIN_FEED_STALE_HOURS)
     raw_status = str(raw.get("status") or "idle")
-    status = "ready" if (ready_heartbeat or message_stale) and raw_status.lower() in {"active", "working", "running", "queued"} else raw_status
+    status = "ready" if ready_heartbeat and raw_status.lower() in {"active", "working", "running", "queued"} else raw_status
     raw_steps = raw.get("steps") if isinstance(raw.get("steps"), list) else []
     visible_steps = []
-    seen_step_keys: set[tuple[str, str, str]] = set()
-    objective_text = str(raw.get("objective") or "").strip().lower()
     for step in raw_steps:
         if not isinstance(step, dict):
             continue
-        label = str(step.get("label") or step.get("title") or "").strip()
-        tool = str(step.get("tool") or "").strip()
-        step_status = str(step.get("status") or "").strip()
-        if (
-            label.lower() in {"jaimes is working now", "jaimes is online and ready", "josh 2.0 standing by"}
-            and objective_text
-            and objective_text != label.lower()
-        ):
-            continue
-        step_key = (label.lower(), tool.lower(), step_status.lower())
-        if step_key in seen_step_keys:
-            continue
-        seen_step_keys.add(step_key)
         text = " ".join(str(step.get(key) or "") for key in ("label", "title", "tool", "status", "kind"))
         if str(step.get("status") or "").lower() in {"blocked", "error"} and LOW_SIGNAL_SHARED_EVENT_PATTERNS.search(text):
             continue
@@ -1286,7 +1230,7 @@ def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str)
         "status": "stale" if stale and reported_active else status,
         "stale": stale,
         "updatedAt": updated_at,
-        "messageReceived": plain_dashboard_text(message_received or "", 220) or None,
+        "messageReceived": plain_dashboard_text(raw.get("messageReceived") or "", 220) or None,
         "currentTool": plain_dashboard_text(raw.get("currentTool") or raw.get("current_tool") or raw.get("tool") or "", 80) or None,
         "model": raw.get("model"),
         "steps": [
@@ -2255,10 +2199,37 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                     "_note": f"Direct API call from JAIN script ({mdata.get('last_script','?')}). Calls: {mdata.get('calls',0)}",
                 })
 
+        budgets = load_json_file(MODEL_PROVIDER_BUDGETS_PATH, {})
+
         # Subscription-backed Codex/OpenAI usage is not marginal spend. Keep the
-        # token-priced equivalent for capacity/context, but separate it from the
-        # actual monthly bill Josh pays.
-        subscription_monthly_fee = 200.0
+        # Subscription lanes: actual fixed monthly burden Josh pays.
+        subscription_providers = []
+        if isinstance(budgets, dict):
+            for row in budgets.get("providers", []):
+                if not isinstance(row, dict):
+                    continue
+                if str(row.get("budgetType") or "") != "subscription":
+                    continue
+                monthly_fee = float(row.get("monthlyFeeUsd") or row.get("monthlyCapUsd") or 0)
+                if monthly_fee <= 0:
+                    continue
+                subscription_providers.append({
+                    "id": row.get("id"),
+                    "label": row.get("label") or row.get("id") or "subscription",
+                    "monthlyFee": round(monthly_fee, 6),
+                    "lastModelUsed": row.get("lastModelUsed"),
+                })
+        if not subscription_providers:
+            subscription_providers = [{
+                "id": "codex",
+                "label": "OpenAI Pro / Codex",
+                "monthlyFee": 200.0,
+                "lastModelUsed": "openai-codex",
+            }]
+
+        subscription_monthly_fee = round(sum(row.get("monthlyFee", 0) for row in subscription_providers), 6)
+        subscription_labels = [str(row.get("label") or "subscription") for row in subscription_providers]
+        subscription_provider_label = " + ".join(subscription_labels)
         subscription_usage_equiv_daily = round(daily_cost, 6)
         subscription_usage_equiv_weekly = round(weekly_cost, 6)
         subscription_usage_equiv_monthly = round(monthly_cost, 6)
@@ -2314,9 +2285,10 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 "monthly": total_monthly,
             },
             "subscription": {
-                "provider": "OpenAI Pro / Codex",
+                "provider": subscription_provider_label or "OpenAI Pro / Codex",
                 "monthlyFee": subscription_monthly_fee,
                 "billingMode": "subscription",
+                "providers": subscription_providers,
                 "usageEquivalentDaily": subscription_usage_equiv_daily,
                 "usageEquivalentWeekly": subscription_usage_equiv_weekly,
                 "usageEquivalentMonthly": subscription_usage_equiv_monthly,
@@ -3914,11 +3886,7 @@ def build_recent_activity(
                 "event": f"CodexBar: {coding_visibility.get('codexbarStatus')}",
             })
 
-    live_crons = [cron for cron in crons if cron.get("status") != "paused"]
-    error_crons = [
-        cron for cron in live_crons
-        if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"
-    ]
+    error_crons = [cron for cron in crons if (cron.get("errors") or 0) > 0 or cron.get("status") == "error"]
     if error_crons:
         items.append({
             "time": now_iso,
@@ -3927,7 +3895,7 @@ def build_recent_activity(
     else:
         items.append({
             "time": now_iso,
-            "event": f"{len(live_crons)} live scheduled jobs healthy",
+            "event": f"{len(crons)} scheduled jobs healthy",
         })
 
     if devices:

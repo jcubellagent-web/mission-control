@@ -96,25 +96,6 @@ export type AgenticCryptoWallet = {
     lastRefreshed?: string;
     freshnessStatus?: string;
   };
-  p2eResearch?: {
-    updatedAt?: string;
-    status?: "clear" | "watch" | "risk" | string;
-    headline?: string;
-    detail?: string;
-    score?: number;
-    monitorJobId?: string;
-    tokens?: Array<{
-      symbol: string;
-      mint?: string;
-      score?: number;
-      verdict?: string;
-      posture?: string;
-      held?: boolean;
-      action?: string;
-      risk?: string;
-    }>;
-    alerts?: string[];
-  };
   chains?: Array<{
     chain: string;
     gasSymbol: string;
@@ -355,6 +336,7 @@ export type ProviderBudget = {
   label: string;
   role?: string;
   budgetType?: string;
+  monthlyFeeUsd?: number;
   monthlyCapUsd?: number;
   dailyCapUsd?: number;
   reserveUsd?: number;
@@ -370,6 +352,9 @@ export type ProviderBudget = {
   keySuffix?: string;
   lastTestStatus?: string;
   lastModelUsed?: string;
+  usageProbeSummary?: string;
+  subscriptionLabel?: string;
+  subscriptionCreditPct?: number;
   whyChosen?: string;
 };
 

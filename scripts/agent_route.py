@@ -171,7 +171,7 @@ PROVIDER_DEFAULT_MODELS = {
 PROVIDER_AUTH_LABELS = {
     "codex": "OpenAI Codex OAuth/subscription",
     "gemini": "Google Gemini CLI OAuth/subscription",
-    "xai": "xAI/Grok host-local auth",
+    "xai": "Grok CLI OAuth + xAI API feed",
     "openrouter": "OpenRouter metered API",
 }
 
@@ -425,7 +425,8 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             return {
                 "firstStop": "xai",
                 "provider": "xai",
-                "model": provider_budget("xai").get("lastModelUsed") or "grok-4.3",
+                "model": provider_budget("xai").get("apiModelUsed") or provider_budget("xai").get("lastModelUsed") or "grok-4.20-reasoning",
+                "auth": PROVIDER_AUTH_LABELS.get("xai", "xai"),
                 "role": role,
                 "owner": owner,
                 "enforced": True,
