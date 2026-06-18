@@ -753,6 +753,125 @@ def provider_from_model_name(name: str, source: str = "") -> str:
     return "other"
 
 
+def build_provider_usage_breakdown(
+    breakdown: List[Dict[str, Any]],
+    budgets: Dict[str, Any],
+    *,
+    xai_usage: Dict[str, Any] | None = None,
+    metered_providers: Dict[str, float] | None = None,
+) -> List[Dict[str, Any]]:
+    """Aggregate model usage by FinOps vendor/provider for dashboard drill-down."""
+    budget_rows = budgets.get("providers", []) if isinstance(budgets, dict) else []
+    by_budget_id = {
+        str(row.get("id") or ""): row
+        for row in budget_rows
+        if isinstance(row, dict) and row.get("id")
+    }
+    labels = {
+        "codex": "OpenAI",
+        "gemini": "Google / Gemini",
+        "xai": "Grok / xAI",
+        "openrouter": "OpenRouter",
+        "ollama": "Local Ollama",
+        "other": "Other",
+    }
+    order = {"codex": 0, "gemini": 1, "xai": 2, "openrouter": 3, "ollama": 4, "other": 9}
+    provider_rows: Dict[str, Dict[str, Any]] = {}
+
+    def ensure(provider_id: str) -> Dict[str, Any]:
+        budget = by_budget_id.get(provider_id, {})
+        row = provider_rows.setdefault(provider_id, {
+            "id": provider_id,
+            "label": labels.get(provider_id) or budget.get("label") or provider_id,
+            "budgetLabel": budget.get("label") or labels.get(provider_id) or provider_id,
+            "budgetType": budget.get("budgetType") or ("local" if provider_id == "ollama" else "metered"),
+            "monthlyFeeUsd": float(budget.get("monthlyFeeUsd") or budget.get("monthlyFee") or 0),
+            "meteredDailyUsd": 0.0,
+            "meteredWeeklyUsd": 0.0,
+            "meteredMonthlyUsd": 0.0,
+            "usageEquivalentDailyUsd": 0.0,
+            "usageEquivalentWeeklyUsd": 0.0,
+            "usageEquivalentMonthlyUsd": 0.0,
+            "usagePct": budget.get("subscriptionCreditPct"),
+            "usageSummary": budget.get("usageProbeSummary") or "",
+            "inferredFullCallEquivalent": budget.get("probeInferredFullCallEquivalent"),
+            "inferredRemainingCallEquivalent": budget.get("probeInferredRemainingCallEquivalent"),
+            "callsToday": 0,
+            "callsWeekly": 0,
+            "sessions": 0,
+            "totalTokens": 0,
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "topModels": [],
+        })
+        return row
+
+    for provider_id in ("codex", "gemini", "xai"):
+        ensure(provider_id)
+
+    for item in breakdown if isinstance(breakdown, list) else []:
+        if not isinstance(item, dict):
+            continue
+        provider_id = provider_from_model_name(str(item.get("name") or ""), str(item.get("source") or ""))
+        row = ensure(provider_id)
+        weekly = float(item.get("weeklyCost") or item.get("cost") or item.get("sessionCost") or 0.0)
+        daily = float(item.get("dailyCost") or 0.0)
+        sessions = int(item.get("sessions") or item.get("callsWeekly") or 0)
+        tokens = int(item.get("totalTokens") or 0)
+        row["usageEquivalentDailyUsd"] += daily
+        row["usageEquivalentWeeklyUsd"] += weekly
+        row["usageEquivalentMonthlyUsd"] += weekly * (30 / 7)
+        row["sessions"] += sessions
+        row["callsToday"] += int(item.get("callsToday") or 0)
+        row["callsWeekly"] += int(item.get("callsWeekly") or 0)
+        row["totalTokens"] += tokens
+        row["inputTokens"] += int(item.get("inputTokens") or 0)
+        row["outputTokens"] += int(item.get("outputTokens") or 0)
+        row["topModels"].append({
+            "name": item.get("name") or "unknown",
+            "source": item.get("source") or "model",
+            "weeklyCost": round(weekly, 6),
+            "dailyCost": round(daily, 6),
+            "usageEquivalentCost": round(float(item.get("usageEquivalentCost") or weekly), 6),
+            "marginalCost": round(float(item.get("marginalCost") or 0.0), 6),
+            "sessions": sessions,
+            "callsWeekly": int(item.get("callsWeekly") or 0),
+            "totalTokens": tokens,
+        })
+
+    for provider_id, amount in (metered_providers or {}).items():
+        ensure(provider_id)["meteredMonthlyUsd"] = round(float(amount or 0.0), 6)
+    for provider_id, row in provider_rows.items():
+        if row.get("budgetType") == "subscription":
+            row["fixedMonthlyUsd"] = round(float(row.get("monthlyFeeUsd") or 0.0), 6)
+        else:
+            row["fixedMonthlyUsd"] = 0.0
+        row["usageEquivalentDailyUsd"] = round(float(row["usageEquivalentDailyUsd"]), 6)
+        row["usageEquivalentWeeklyUsd"] = round(float(row["usageEquivalentWeeklyUsd"]), 6)
+        row["usageEquivalentMonthlyUsd"] = round(float(row["usageEquivalentMonthlyUsd"]), 6)
+        row["meteredDailyUsd"] = round(float(row.get("meteredDailyUsd") or 0.0), 6)
+        row["meteredWeeklyUsd"] = round(float(row.get("meteredWeeklyUsd") or 0.0), 6)
+        row["meteredMonthlyUsd"] = round(float(row.get("meteredMonthlyUsd") or 0.0), 6)
+        if provider_id == "xai" and xai_usage:
+            row["callsToday"] = max(int(row.get("callsToday") or 0), int(xai_usage.get("callsToday") or 0))
+            row["callsWeekly"] = max(int(row.get("callsWeekly") or 0), int(xai_usage.get("callsWeekly") or 0))
+        if not isinstance(row.get("usagePct"), (int, float)):
+            fee = float(row.get("monthlyFeeUsd") or 0.0)
+            usage_monthly = float(row.get("usageEquivalentMonthlyUsd") or 0.0)
+            row["usagePct"] = round(min(100.0, (usage_monthly / fee) * 100), 1) if fee > 0 and usage_monthly > 0 else 0.0
+        row["topModels"] = sorted(
+            row.get("topModels") or [],
+            key=lambda model: (float(model.get("usageEquivalentCost") or 0), int(model.get("totalTokens") or 0), int(model.get("sessions") or 0)),
+            reverse=True,
+        )[:4]
+        row["summary"] = (
+            f"{row['callsWeekly']} calls · {row['totalTokens']} tokens"
+            if row.get("callsWeekly")
+            else f"{row['sessions']} sessions · {row['totalTokens']} tokens"
+        )
+    return sorted(provider_rows.values(), key=lambda row: order.get(str(row.get("id")), 99))
+
+
 def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) -> Dict[str, Any]:
     budgets = load_json_file(MODEL_PROVIDER_BUDGETS_PATH, {"providers": [], "policy": {}})
     xai_ecosystem = load_json_file(XAI_ECOSYSTEM_PATH, {})
@@ -2237,6 +2356,11 @@ def fetch_model_usage() -> Dict[str, Any] | None:
         metered_weekly = round(or_weekly + jain_api.get("weekly", 0) + xai_weekly, 6)
         metered_monthly = round(or_monthly + jain_api_monthly + (xai_usage.get("monthly", 0.0) if xai_usage.get("available") else 0.0), 6)
         total_monthly = round(subscription_monthly_fee + metered_monthly, 6)
+        metered_provider_monthly = {
+            "openrouter": round(or_monthly, 6),
+            "gemini": round(jain_api_monthly, 6),
+            "xai": round(xai_usage.get("monthly", 0.0) if xai_usage.get("available") else 0.0, 6),
+        }
 
         for row in breakdown:
             source = str(row.get("source") or "").lower()
@@ -2252,6 +2376,13 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             else:
                 row["billingMode"] = "metered"
                 row["marginalCost"] = round(float(row.get("weeklyCost") or row.get("sessionCost") or 0.0), 6)
+
+        provider_breakdown = build_provider_usage_breakdown(
+            breakdown,
+            budgets if isinstance(budgets, dict) else {},
+            xai_usage=xai_usage,
+            metered_providers=metered_provider_monthly,
+        )
 
         # ── Weekly Run Rate: actual paid layers vs subscription usage equiv ───
         automation_weekly = round(metered_weekly, 6)
@@ -2273,6 +2404,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "monthly": round(total_monthly, 6),
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
+            "providerBreakdown": provider_breakdown,
             "lastUpdated": utc_iso(),
             "jain": jain,
             "jainApi": jain_api,

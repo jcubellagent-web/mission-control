@@ -1811,14 +1811,28 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
-  const subscriptionProviders = Array.isArray((state.modelUsage?.subscription as any)?.providers)
-    ? ((state.modelUsage?.subscription as any)?.providers as Array<any>)
-    : [];
+  const subscriptionProviders = state.modelUsage?.providerBreakdown?.length
+    ? (state.modelUsage.providerBreakdown as Array<any>).filter((provider) => provider.budgetType === "subscription")
+    : Array.isArray((state.modelUsage?.subscription as any)?.providers)
+      ? ((state.modelUsage?.subscription as any)?.providers as Array<any>)
+      : [];
   const subscriptionLabels = subscriptionProviders
-    .map((provider) => `${provider.label || provider.provider || "Sub"} ${fmtCurrencyExact(provider.monthlyFee ?? provider.monthlyFeeUsd ?? 0)}`)
+    .map((provider) => {
+      const fee = provider.fixedMonthlyUsd ?? provider.monthlyFeeUsd ?? provider.monthlyFee ?? 0;
+      const usage = typeof provider.usagePct === "number" ? ` · ${Math.round(provider.usagePct)}%` : "";
+      return `${provider.label || provider.provider || "Sub"} ${fmtCurrencyExact(fee)}${usage}`;
+    })
     .filter(Boolean)
-    .slice(0, 2)
+    .slice(0, 3)
     .join(" + ");
+  const topProviderModels = (state.modelUsage?.providerBreakdown || [])
+    .map((provider: any) => {
+      const top = provider.topModels?.[0];
+      return top ? `${provider.label || provider.id}: ${displayModelName(top.name)}` : "";
+    })
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(" · ");
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
   const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
@@ -1826,7 +1840,7 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
     ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
     : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
   const modelDetail = typeof subscriptionFee === "number"
-    ? `${subscriptionLabels || "Subscriptions"} · usage equiv ${fmtCurrencyExact(usageEquivalentMonthly)} · metered today ${fmtCurrencyExact(meteredDaily)}`
+    ? `${subscriptionLabels || "Subscriptions"} · top ${topProviderModels || "waiting"}`
     : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
@@ -3236,11 +3250,12 @@ function AgentEcosystemMap({ statuses }: { statuses: Map<AgentId, AgentStatus> }
 }
 
 function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["modelUsage"] }) {
-  const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
+  const providers = modelUsage?.providerBreakdown?.length ? modelUsage.providerBreakdown : [];
+  const fallbackModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
   return (
     <section className="brain-cost-card">
       <div className="panel-title compact">
-        <h2>Model Cost</h2>
+        <h2>Model Usage</h2>
         <span>{fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered today</span>
       </div>
       <div className="cost-snapshot">
@@ -3257,14 +3272,39 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
           <strong>{fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly)}</strong>
         </article>
       </div>
-      <div className="brain-model-list">
-        {topModels.slice(0, 3).map((model: any) => (
-          <article key={`${model.name}-${model.source || model.window || ""}`}>
-            <span>{model.name}</span>
-            <strong>{fmtCurrency(model.weeklyCost ?? model.cost)}</strong>
-          </article>
-        ))}
-      </div>
+      {providers.length ? (
+        <div className="brain-provider-list">
+          {providers.slice(0, 3).map((provider: any) => {
+            const top = provider.topModels?.[0];
+            const isSubscription = provider.budgetType === "subscription";
+            return (
+              <article key={provider.id}>
+                <div>
+                  <span>{provider.label || provider.id}</span>
+                  <strong>{isSubscription ? fmtCurrency(provider.fixedMonthlyUsd || provider.monthlyFeeUsd || 0) : fmtCurrency(provider.meteredMonthlyUsd || 0)}</strong>
+                </div>
+                <div>
+                  <em>{Math.round(Number(provider.usagePct || 0))}% used</em>
+                  <small>{provider.callsWeekly ? `${provider.callsWeekly} calls` : provider.summary || `${provider.sessions || 0} sessions`}</small>
+                </div>
+                <footer>
+                  <span>{top ? displayModelName(top.name) : "No model rows"}</span>
+                  <strong>{top ? fmtCurrency(top.usageEquivalentCost ?? top.weeklyCost ?? 0) : "$0.00"}</strong>
+                </footer>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="brain-model-list">
+          {fallbackModels.slice(0, 3).map((model: any) => (
+            <article key={`${model.name}-${model.source || model.window || ""}`}>
+              <span>{model.name}</span>
+              <strong>{fmtCurrency(model.weeklyCost ?? model.cost)}</strong>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -5574,8 +5614,19 @@ function ModelUsageCard({
   modelUsage?: MissionControlState["modelUsage"];
   modelRouter?: MissionControlState["modelRouter"];
 }) {
-  const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
-  const providers = modelRouter?.providers || modelUsage?.providerBudgets || [];
+  const providerBreakdown = modelUsage?.providerBreakdown?.length ? modelUsage.providerBreakdown : [];
+  const routerProviders = modelRouter?.providers || modelUsage?.providerBudgets || [];
+  const providers = providerBreakdown.length
+    ? providerBreakdown
+    : routerProviders.slice(0, 4).map((provider: any) => ({
+      id: provider.id,
+      label: provider.label,
+      budgetType: provider.budgetType,
+      fixedMonthlyUsd: provider.monthlyFeeUsd || 0,
+      usagePct: provider.subscriptionCreditPct || provider.monthlyUtilizationPct || 0,
+      usageSummary: provider.usageProbeSummary || provider.status,
+      topModels: provider.lastModelUsed ? [{ name: provider.lastModelUsed, source: provider.lastSource || "route" }] : [],
+    }));
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
   return (
     <section className="model-usage-card">
@@ -5589,45 +5640,36 @@ function ModelUsageCard({
         <MetricMini label="Metered month" value={fmtCurrency(modelUsage?.metered?.monthly ?? 0)} />
         <MetricMini label="Usage equiv" value={fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.monthly)} />
       </div>
-      <div className="model-list">
-        {topModels.slice(0, 5).map((model: any) => (
-          <article key={`${model.name}-${model.source || model.window || ""}`}>
-            <strong>{model.name}</strong>
-            <span>{model.source || model.window || "model"}</span>
-            <em>{fmtCurrency(model.weeklyCost ?? model.cost)}</em>
-          </article>
-        ))}
-      </div>
-      <div className="provider-budget-list" aria-label="Provider budget caps">
+      <div className="provider-breakout-list" aria-label="Provider model usage breakout">
         {providers.slice(0, 4).map((provider: any) => {
           const isSubscription = provider.budgetType === "subscription";
-          const subscriptionCap = provider.monthlyFeeUsd || provider.monthlyCapUsd || 0;
-          const syntheticPct = typeof provider.subscriptionCreditPct === "number" ? provider.subscriptionCreditPct : (isSubscription && !subscriptionCap ? 100 : 0);
-          const cap = isSubscription ? (typeof provider.subscriptionCreditPct === "number" ? 100 : (subscriptionCap || 100)) : (provider.dailyCapUsd || provider.monthlyCapUsd || 0);
-          const spend = isSubscription ? (typeof provider.subscriptionCreditPct === "number" ? syntheticPct : (subscriptionCap ? (provider.monthlySpendUsd || 0) : syntheticPct)) : (provider.dailySpendUsd || 0);
-          const pct = cap ? Math.min(100, Math.round((spend / cap) * 100)) : 0;
+          const pct = Math.max(0, Math.min(100, Math.round(Number(provider.usagePct || 0))));
+          const topModels = provider.topModels || [];
           return (
-            <article key={provider.id} className={`provider-budget is-${provider.status || "ready"}`}>
+            <article key={provider.id} className="provider-breakout">
               <header>
                 <strong>{provider.label || provider.id}</strong>
-                <em>{provider.status || "ready"}</em>
+                <em>{isSubscription ? `${fmtCurrency(provider.fixedMonthlyUsd || provider.monthlyFeeUsd || 0)}/mo` : `${fmtCurrency(provider.meteredMonthlyUsd || 0)} metered`}</em>
               </header>
               <div className="provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
                 <span />
               </div>
-              <p>{isSubscription
-                ? (subscriptionCap ? `${fmtCurrency(subscriptionCap)} / mo flat` : (provider.subscriptionLabel || "subscription included"))
-                : `${fmtCurrency(spend)} today${provider.dailyCapUsd ? ` / ${fmtCurrency(provider.dailyCapUsd)} cap` : ""}`}</p>
-              <footer>
-                <span>{provider.lastModelUsed || "model route"}</span>
-                {provider.remainingCreditUsd != null ? <em>{fmtCurrency(provider.remainingCreditUsd)} left</em> : isSubscription ? <em>{provider.usageProbeSummary || "subscription lane"}</em> : null}
-              </footer>
-              {(provider.authStatus || provider.lastTestStatus) ? (
-                <small>
-                  {provider.authStatus || provider.lastTestStatus}
-                  {provider.keySuffix ? ` · key ...${provider.keySuffix}` : ""}
-                </small>
-              ) : null}
+              <div className="provider-breakout-meta">
+                <span>{pct}% usage</span>
+                <span>{provider.callsWeekly ? `${provider.callsWeekly} calls` : provider.summary || `${provider.sessions || 0} sessions`}</span>
+                <span>{fmtCompactNumber(provider.totalTokens || 0)} toks</span>
+              </div>
+              <div className="provider-model-drilldown">
+                {topModels.slice(0, 3).map((model: any) => (
+                  <div key={`${provider.id}-${model.name}-${model.source || ""}`}>
+                    <strong>{displayModelName(model.name)}</strong>
+                    <span>{model.callsWeekly ? `${model.callsWeekly} calls` : `${model.sessions || 0} sessions`}</span>
+                    <em>{fmtCurrency(model.usageEquivalentCost ?? model.weeklyCost ?? model.marginalCost ?? 0)}</em>
+                  </div>
+                ))}
+                {!topModels.length ? <div><strong>No model rows yet</strong><span>waiting</span><em>$0</em></div> : null}
+              </div>
+              <small>{provider.usageSummary || (provider.inferredRemainingCallEquivalent ? `${provider.inferredRemainingCallEquivalent} est calls left` : "provider lane")}</small>
             </article>
           );
         })}
@@ -5719,6 +5761,11 @@ function fmtCurrencyExact(value?: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
+}
+
+function fmtCompactNumber(value?: number) {
+  if (typeof value !== "number" || Number.isNaN(value)) return "0";
+  return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(value);
 }
 
 function displayModelName(value?: string | null) {

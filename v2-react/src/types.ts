@@ -264,6 +264,43 @@ export type ReliabilityUpgrades = {
   metrics?: ReliabilityUpgradeMetric[];
 };
 
+export type ModelProviderBreakdown = {
+  id: string;
+  label: string;
+  budgetLabel?: string;
+  budgetType?: string;
+  monthlyFeeUsd?: number;
+  fixedMonthlyUsd?: number;
+  meteredDailyUsd?: number;
+  meteredWeeklyUsd?: number;
+  meteredMonthlyUsd?: number;
+  usageEquivalentDailyUsd?: number;
+  usageEquivalentWeeklyUsd?: number;
+  usageEquivalentMonthlyUsd?: number;
+  usagePct?: number;
+  usageSummary?: string;
+  inferredFullCallEquivalent?: number;
+  inferredRemainingCallEquivalent?: number;
+  callsToday?: number;
+  callsWeekly?: number;
+  sessions?: number;
+  totalTokens?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  summary?: string;
+  topModels?: Array<{
+    name: string;
+    source?: string;
+    weeklyCost?: number;
+    dailyCost?: number;
+    usageEquivalentCost?: number;
+    marginalCost?: number;
+    sessions?: number;
+    callsWeekly?: number;
+    totalTokens?: number;
+  }>;
+};
+
 export type ModelUsage = {
   session?: number;
   daily?: number;
@@ -327,6 +364,7 @@ export type ModelUsage = {
     lastRunAt?: string;
     available?: boolean;
   };
+  providerBreakdown?: ModelProviderBreakdown[];
   providerBudgets?: ProviderBudget[];
   routerPolicy?: Record<string, unknown>;
 };
