@@ -61,15 +61,19 @@
       "lastRouteReason": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default.",
       "monthlyFeeUsd": 40,
       "subscriptionLabel": "X subscription flat lane",
-      "subscriptionCreditPct": 100,
-      "usageProbeSummary": ">=50 CLI calls OK",
-      "lastTestStatus": "50-call probe passed",
+      "subscriptionCreditPct": 2,
+      "usageProbeSummary": "2% used by 50-call probe",
+      "lastTestStatus": "50-call probe passed; ~2,500 call-equivalent window inferred",
       "feeNote": "Monthly fee is an estimated FinOps placeholder; exact X billing is not available to CLI.",
       "apiModelUsed": "grok-4.20-reasoning",
       "cliModelUsed": "grok-composer-2.5-fast",
       "probeAvgSeconds": 4.8,
       "probeMaxSeconds": 20.62,
-      "probeRateLimited": false
+      "probeRateLimited": false,
+      "probeObservedUsagePct": 2,
+      "probeInferredFullCallEquivalent": 2500,
+      "probeInferredRemainingCallEquivalent": 2450,
+      "probeCalibrationNote": "50 calls consumed 2% per Josh screenshot; linear estimate only."
     },
     {
       "id": "openrouter",
