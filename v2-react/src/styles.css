@@ -16766,7 +16766,7 @@ body::before {
 }
 
 #today-jobs .daily-calendar-view {
-  grid-template-rows: 36px auto 17px minmax(0, 1fr) !important;
+  grid-template-rows: 36px 17px minmax(0, 1fr) !important;
   min-height: 0 !important;
   height: 100% !important;
 }
@@ -16920,12 +16920,6 @@ body::before {
   column-gap: 8px !important;
 }
 
-#today-jobs .jobs-table-head {
-  min-height: 17px !important;
-  height: 17px !important;
-  max-height: 17px !important;
-}
-
 #today-jobs .calendar-block-time {
   text-align: left !important;
 }
@@ -16961,86 +16955,6 @@ body::before {
   max-height: 29px !important;
 }
 /* end TODAY JOBS TIME STATE BREATHING ROOM */
-
-/* TODAY JOBS ROW READABILITY TUNE 2026-06-14
-   Slightly thicker agenda rows for wall-display scanning. */
-#today-jobs .calendar-job-block,
-#today-jobs .calendar-job-block.tone-working,
-#today-jobs .calendar-job-block.tone-planned,
-#today-jobs .calendar-job-block.tone-ready,
-#today-jobs .calendar-job-block.tone-done,
-#today-jobs .calendar-job-block.tone-attention,
-#today-jobs .calendar-empty-block,
-#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
-  min-height: 31px !important;
-  height: 31px !important;
-  max-height: 31px !important;
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
-}
-
-#today-jobs .calendar-block-time strong,
-#today-jobs .calendar-block-state strong,
-#today-jobs .calendar-block-main strong,
-#today-jobs .calendar-block-meta span {
-  font-size: 9.5px !important;
-  font-weight: 900 !important;
-  line-height: 1.05 !important;
-}
-
-#today-jobs .calendar-block-main strong {
-  color: rgba(244, 252, 246, 0.94) !important;
-}
-/* end TODAY JOBS ROW READABILITY TUNE */
-
-/* TODAY JOBS ROW READABILITY RETUNE 2026-06-14
-   Thicker wall-display rows and a safer left inset for the Time lane. */
-#today-jobs .jobs-table-head,
-#today-jobs .calendar-job-block,
-#today-jobs .calendar-job-block.tone-working,
-#today-jobs .calendar-job-block.tone-planned,
-#today-jobs .calendar-job-block.tone-ready,
-#today-jobs .calendar-job-block.tone-done,
-#today-jobs .calendar-job-block.tone-attention,
-#today-jobs .calendar-empty-block {
-  grid-template-columns: 92px 112px minmax(0, 1fr) 84px !important;
-  column-gap: 9px !important;
-}
-
-#today-jobs .jobs-table-head {
-  padding-left: 14px !important;
-}
-
-#today-jobs .calendar-job-block,
-#today-jobs .calendar-job-block.tone-working,
-#today-jobs .calendar-job-block.tone-planned,
-#today-jobs .calendar-job-block.tone-ready,
-#today-jobs .calendar-job-block.tone-done,
-#today-jobs .calendar-job-block.tone-attention,
-#today-jobs .calendar-empty-block,
-#today-jobs .calendar-job-block.tone-planned:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-ready:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-done:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-attention:not(.is-synthetic),
-#today-jobs .calendar-job-block.tone-working:not(.is-synthetic) {
-  min-height: 35px !important;
-  height: 35px !important;
-  max-height: 35px !important;
-  padding: 6px 9px 6px 14px !important;
-}
-
-#today-jobs .calendar-block-time strong,
-#today-jobs .calendar-block-state strong,
-#today-jobs .calendar-block-main strong,
-#today-jobs .calendar-block-meta span {
-  font-size: 10px !important;
-  line-height: 1.08 !important;
-}
-/* end TODAY JOBS ROW READABILITY RETUNE */
 
 
 /* =====================================================================
@@ -17311,133 +17225,78 @@ body::before {
   .calendar-phase-strip span { padding-inline: 8px !important; }
 }
 
-/* Kiosk performance governor: keep the wall display readable without continuous GPU churn. */
-.agent-live-rail::after,
-.agent-pulse-ring,
-.work-card::before,
-.calendar-hour-slot.is-current .calendar-hour-content::before,
-.calendar-now-marker span::after,
-.ledger-focus-primary.is-priority-focus::before,
-.ledger-focus-primary.is-priority-focus::after,
-.ledger-live-focus::before,
-.ledger-live-focus::after,
-.living-status-dot,
-.source-chip.is-live::before,
-.tower-agent-row.is-working::before,
-.tower-agent-fresh.is-fresh::before {
-  animation: none !important;
+
+.tower-agent-disagreement {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+  border: 1px solid rgba(160, 194, 226, 0.18);
+  border-radius: 999px;
+  background: rgba(11, 24, 44, 0.58);
+  color: rgba(210, 228, 245, 0.76);
+  padding: 2px 6px;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.activity-ledger .ledger-live-focus,
-.tower-card,
-.tower-resource-stack article,
-.daily-calendar-view,
-.calendar-job-block,
-.signal-feed,
-.agentic-crypto-panel {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+.ledger-update-trail {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
 }
 
-/* Resources overflow guard: keep every card title/value/subtitle inside its border. */
-.tower-resource-stack .resource-card-grid {
-  grid-template-rows: none !important;
-  grid-auto-rows: minmax(80px, auto) !important;
-  align-content: start !important;
+.ledger-update-trail > span {
+  color: rgba(199, 216, 233, 0.62);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.tower-resource-stack .resource-card {
-  align-items: start !important;
-  justify-items: start !important;
-  align-content: center !important;
-  row-gap: 6px !important;
+.ledger-update-trail > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-.tower-resource-stack .resource-card b {
-  display: block !important;
-  max-width: 100% !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  font-size: 10px !important;
-  line-height: 1.05 !important;
-  letter-spacing: 0.12em !important;
+.ledger-update-trail em {
+  border: 1px solid rgba(98, 134, 162, 0.18);
+  border-radius: 999px;
+  background: rgba(9, 21, 39, 0.52);
+  color: rgba(233, 241, 249, 0.82);
+  padding: 3px 7px;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 820;
 }
 
-.tower-resource-stack .resource-card strong {
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  max-width: 100% !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: break-word !important;
-  overflow: hidden !important;
-  text-overflow: clip !important;
-  font-size: clamp(16px, 1.18vw, 22px) !important;
-  line-height: 1.08 !important;
-  letter-spacing: -0.02em !important;
+.resource-secondary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.tower-resource-stack .resource-card p {
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  max-width: 100% !important;
-  white-space: normal !important;
-  overflow-wrap: anywhere !important;
-  word-break: break-word !important;
-  overflow: hidden !important;
-  text-overflow: clip !important;
-  font-size: 11px !important;
-  line-height: 1.12 !important;
+.resource-secondary-strip span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid rgba(120, 156, 186, 0.14);
+  border-radius: 999px;
+  background: rgba(8, 18, 34, 0.44);
+  color: rgba(210, 226, 240, 0.72);
+  padding: 4px 8px;
+  font-size: 8px;
+  font-weight: 820;
 }
 
-.tower-resource-stack .resource-card-model-usage {
-  grid-template-rows: auto minmax(0, auto) auto !important;
-  align-content: center !important;
-  row-gap: 5px !important;
-}
-
-.tower-resource-stack .resource-card-model-usage strong {
-  -webkit-line-clamp: 1 !important;
-  font-size: clamp(17px, 0.98vw, 21px) !important;
-  line-height: 1.08 !important;
-  letter-spacing: -0.02em !important;
-}
-
-.tower-resource-stack .resource-card-model-usage p {
-  -webkit-line-clamp: 2 !important;
-  font-size: clamp(9px, 0.58vw, 10.5px) !important;
-  line-height: 1.14 !important;
-}
-
-.tower-resource-stack .resource-card {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: flex-start !important;
-  min-height: 80px !important;
-  gap: 4px !important;
-}
-
-.tower-resource-stack .resource-card b,
-.tower-resource-stack .resource-card strong,
-.tower-resource-stack .resource-card p {
-  flex: 0 0 auto !important;
-  margin: 0 !important;
-}
-
-.tower-resource-stack .resource-card strong {
-  display: block !important;
-  max-height: 2.3em !important;
-  font-size: clamp(14px, 0.96vw, 19px) !important;
-  line-height: 1.12 !important;
-}
-
-.tower-resource-stack .resource-card p {
-  display: block !important;
-  max-height: 2.32em !important;
-  font-size: clamp(8.5px, 0.58vw, 10px) !important;
-  line-height: 1.16 !important;
+.resource-secondary-strip b {
+  color: rgba(239, 247, 255, 0.92);
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }

@@ -1283,7 +1283,7 @@ def main() -> int:
             and ".tower-resource-stack" in react_styles
             and ".resource-card" in react_styles
             and ".resource-card.has-row-update" in react_styles
-            and "Wallet · Models · Kintara · Display · Visibility" in react_main,
+            and "Wallet · Models · Runtime · Visibility" in react_main,
             "Agentic Crypto live cues",
             "wallet balance remains live-cued inside the compact Resources stack without exposing full wallet details in the first view",
             severity="medium",
@@ -1363,9 +1363,10 @@ def main() -> int:
             and 'return `${block.hourKey}-system-checks`;' in react_main
             and 'const isFocus = block.tone === "attention" || (block.tone === "working" && !jobIsRoutineActivity(block.job));' in react_main
             and "invite sync|calendar sync|appointment sync|chiro invite" in react_main
-            and 'jobIsSoon(block.job, 5)' not in react_main.split("function buildCalendarJobBlocks", 1)[1].split("function calendarJobsForMode", 1)[0],
+            and "function calendarMinuteGroups(blocks: CalendarJobBlock[])" in react_main
+            and "function clusteredCalendarBlock(items: CalendarJobBlock[])" in react_main,
             "Today Jobs current-hour routine grouping",
-            "same-hour background system and calendar sync checks group into one compact row while priority and attention work stays itemized",
+            "same-time and same-hour background checks collapse into compact rows while priority and attention work stays itemized",
             severity="medium",
         ),
         status(

@@ -1,13 +1,13 @@
 {
-  "ok": true,
-  "status": "ok",
-  "summary": "All canaries passed",
-  "checkedAt": "2026-06-15T20:23:20.879112Z",
+  "ok": false,
+  "status": "attention",
+  "summary": "3 canary issue(s)",
+  "checkedAt": "2026-06-18T06:30:21.975947Z",
   "checks": [
     {
       "name": "Live objectives",
       "ok": true,
-      "detail": "primary=JAIMES; dualAgents=none; live=4",
+      "detail": "primary=JOSH 2.0; dualAgents=none; live=4",
       "severity": "ok"
     },
     {
@@ -19,7 +19,7 @@
     {
       "name": "Today Jobs",
       "ok": true,
-      "detail": "29 today-relevant; 0 active issue(s)",
+      "detail": "28 today-relevant; 0 active issue(s)",
       "severity": "ok"
     },
     {
@@ -55,7 +55,7 @@
     {
       "name": "Agent Control lane",
       "ok": true,
-      "detail": "overall=attention; ready=2/4; source=live-heartbeats",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -103,7 +103,7 @@
     {
       "name": "Local live sidecar watch",
       "ok": true,
-      "detail": "kiosk live feed watches main agent, wallet, model, and Signal Feed sidecars",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -115,13 +115,13 @@
     {
       "name": "Josh heartbeat recovery publish",
       "ok": true,
-      "detail": "healthy Josh 2.0 heartbeat recovery can clear stale status-check attention rows without overwriting real active work",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
       "name": "Brain Feed heartbeat freshness",
       "ok": true,
-      "detail": "idle agent cards prefer fresh heartbeat-backed check-ins over old sidecars",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -138,9 +138,9 @@
     },
     {
       "name": "Today Jobs calendar separation",
-      "ok": true,
+      "ok": false,
       "detail": "Today Jobs renders as a today-first daily calendar while the complete grouped list remains a quiet drill-down",
-      "severity": "ok"
+      "severity": "medium"
     },
     {
       "name": "Today Jobs plain-English empty hour",
@@ -156,9 +156,9 @@
     },
     {
       "name": "Today Jobs Next Up countdown",
-      "ok": true,
+      "ok": false,
       "detail": "Next Up card uses the same countdown treatment as the top header and highlights the matching calendar block",
-      "severity": "ok"
+      "severity": "low"
     },
     {
       "name": "Today Jobs readiness label",
@@ -180,9 +180,9 @@
     },
     {
       "name": "Today Jobs row time fit",
-      "ok": true,
+      "ok": false,
       "detail": "calendar row times omit AM/PM because the hour rail already carries that context, preventing row-time ellipses",
-      "severity": "ok"
+      "severity": "medium"
     },
     {
       "name": "Today Jobs routine status label",
@@ -409,13 +409,13 @@
     {
       "name": "Runtime kiosk layout guard",
       "ok": true,
-      "detail": "watchdog checks the live kiosk endpoint, dashboard data, screenshot helper, and visible debug-text leak status",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
       "name": "Runtime visible text quality",
       "ok": true,
-      "detail": "live rendered Control Tower text has no internal host IDs, script names, raw job IDs, local URLs, or unresolved placeholders",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -445,7 +445,7 @@
     {
       "name": "Signal Feed optional source",
       "ok": true,
-      "detail": "10 signal rows; 5 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
+      "detail": "10 signal rows; 0 newsletter trend rows; health=missing; counts=missing",
       "severity": "ok"
     },
     {
@@ -511,7 +511,7 @@
     {
       "name": "Agentic Crypto summary",
       "ok": true,
-      "detail": "status=fresh; mode=read-only; 17 token rows; 3 chain rows; masked wallets present",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     },
     {
@@ -583,7 +583,7 @@
     {
       "name": "Today Jobs current-hour routine grouping",
       "ok": true,
-      "detail": "same-hour background system and calendar sync checks group into one compact row while priority and attention work stays itemized",
+      "detail": "same-time and same-hour background checks collapse into compact rows while priority and attention work stays itemized",
       "severity": "ok"
     },
     {
@@ -601,7 +601,7 @@
     {
       "name": "React favicon",
       "ok": true,
-      "detail": "kiosk has an explicit Control Tower icon and no default favicon.ico miss",
+      "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
       "severity": "ok"
     }
   ]
