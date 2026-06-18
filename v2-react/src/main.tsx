@@ -28,6 +28,7 @@ type AgentIdleContext = {
 };
 type AgentBriefRow = { label: string; text: string };
 type AgentInsightRow = { label: string; text: string; tone?: "default" | "good" | "watch" | "active" };
+type AgentCapabilityChip = { label: string; state: "hot" | "warm" | "idle" | "watch"; title: string };
 type AttentionItem = {
   id: string;
   label: string;
@@ -691,7 +692,7 @@ function agentSla(status: AgentStatus, idleContext?: AgentIdleContext) {
   }
   const age = ageLabel(status.updated_at);
   if (minutes > expected) {
-    return { tone: "late", label: age === "just now" ? "Late · checked just now" : `Late · checked ${age} ago`, detail: cadence };
+    return { tone: "late", label: age === "just now" ? "Check-in stale · just now" : `Check-in stale · ${age} ago`, detail: cadence };
   }
   if (minutes > expected * 0.75) {
     return { tone: "watch", label: age === "just now" ? "Refresh due · checked just now" : `Refresh due · checked ${age} ago`, detail: cadence };
@@ -1497,17 +1498,16 @@ function ControlTower({
   const model = useMemo(() => buildControlTowerModel(state, statuses, nowMs), [state, statuses, nowMs]);
   return (
     <section className="control-tower-grid" aria-label="Josh 2.0 Control Tower">
-      {/* Column 1 (Left): Live Work Board + Agent Flight Deck */}
-      <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Ecosystem hero and flight deck">
+      {/* Column 1 (Left): Live Work Board + FinOps */}
+      <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Live Work Board and FinOps Dashboard">
         <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
         <ActivityLedger model={model} />
-        <AgentFlightDeck state={state} statuses={statuses} model={model} nowMs={nowMs} liveCues={liveCues} />
+        <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
       </section>
 
-      {/* Column 2 (Center): Priority Queue + Resource Stack */}
-      <section className="tower-column tower-center-column" aria-label="Priority work and resources">
-        <PriorityQueuePanel state={state} model={model} onNavigate={onNavigate} />
-        <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
+      {/* Column 2 (Center): Unified Agent Flight Deck + Priority Queue */}
+      <section className="tower-column tower-center-column" aria-label="Unified agent flight deck and priority queue">
+        <AgentFlightDeck state={state} statuses={statuses} model={model} nowMs={nowMs} liveCues={liveCues} />
       </section>
 
       {/* Column 3 (Right): Scheduled Jobs / Daily Calendar */}
@@ -1579,8 +1579,8 @@ function AgentFlightDeck({
     <section className="tower-agent-deck" aria-label="Agent flight deck">
       <header>
         <div>
-          <p>Agent Flight Deck</p>
-          <h3>JOSHeX · Josh 2.0 · JAIMES · J.A.I.N</h3>
+          <p>Unified Agent Deck</p>
+          <h3>Flight Deck + Priority Queue</h3>
         </div>
         <span>{model.counts.agentsReady}/{model.counts.agentsTotal} visible</span>
       </header>
@@ -1588,14 +1588,23 @@ function AgentFlightDeck({
         {TOWER_AGENT_ORDER.map((agent) => {
           const status = statuses.get(agent) || offlineStatus(agent);
           const idleContext = buildAgentIdleContext(agent, state, nowMs);
-          return <TowerAgentRow key={agent} agent={agent} status={status} idleContext={idleContext} changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])} />;
+          const insights = agentPriorityInsights(agent, state, model);
+          return <TowerAgentRow key={agent} agent={agent} status={status} idleContext={idleContext} insights={insights} changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])} />;
         })}
       </div>
     </section>
   );
 }
 
-function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId; status: AgentStatus; idleContext: AgentIdleContext; changed?: boolean }) {
+function agentDeckRole(agent: AgentId) {
+  if (agent === "joshex") return "Private coord";
+  if (agent === "josh") return "Control Tower";
+  if (agent === "jaimes") return "Hermes";
+  if (agent === "jain") return "Signals";
+  return AGENTS[agent]?.role || agent;
+}
+
+function TowerAgentRow({ agent, status, idleContext, insights, changed }: { agent: AgentId; status: AgentStatus; idleContext: AgentIdleContext; insights: AgentInsightRow[]; changed?: boolean }) {
   const visualState = agentNeedsFocus(status)
     ? "blocked"
     : agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
@@ -1605,14 +1614,15 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
         : "waiting";
   const freshness = agentSla(status, idleContext);
   const current = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
-    ? headlineTitle(status.objective || status.current_tool || AGENTS[agent].role, 44)
+    ? headlineTitle(status.objective || status.current_tool || AGENTS[agent].role, 56)
     : idleContext.nextTitle && !/awaiting instruction/i.test(idleContext.nextTitle)
-      ? `Up next: ${headlineTitle(idleContext.nextTitle, 42)}`
+      ? `Up next: ${headlineTitle(idleContext.nextTitle, 52)}`
       : "Awaiting instruction";
   const complete = readoutSummary(idleContext.complete, "No completed task reported yet.", 72);
   const next = idleContext.countdown
     ? `${countdownShortText(idleContext.countdown)} · ${idleContext.nextTitle}`
     : idleContext.nextTitle;
+  const capabilities = agentCapabilityChips(agent, status, idleContext, insights, visualState);
   return (
     <article className={`tower-agent-row ${agentClass(agent)} is-${visualState}${changedRowClass(changed)}`}>
       <span className="row-change-dot" aria-hidden="true" />
@@ -1620,7 +1630,7 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
         <span className={`dot ${agentHeaderDotClass(visualState as AgentVisualState, false, visualState === "working")}`} />
         <div>
           <strong>{AGENTS[agent].label}</strong>
-          <em>{AGENTS[agent].role}</em>
+          <em>{agentDeckRole(agent)}</em>
         </div>
       </div>
       <div className="tower-agent-now">
@@ -1635,8 +1645,84 @@ function TowerAgentRow({ agent, status, idleContext, changed }: { agent: AgentId
         <strong>{freshness.label}</strong>
         <span>{freshness.detail}</span>
       </div>
+      <div className="tower-agent-capabilities" aria-label={`${AGENTS[agent].label} capability heat map`}>
+        {capabilities.map((chip) => (
+          <span key={chip.label} className={`cap-${chip.state}`} title={chip.title}>{chip.label}</span>
+        ))}
+      </div>
+      <div className="tower-agent-insights" aria-label={`${AGENTS[agent].label} priority insights`}>
+        {insights.slice(0, 2).map((row) => (
+          <p key={`${row.label}-${row.text}`} className={`is-${row.tone || "default"}`}>
+            <b>{row.label}</b><span>{row.text}</span>
+          </p>
+        ))}
+      </div>
     </article>
   );
+}
+
+
+
+function agentCapabilityCatalog(agent: AgentId): Array<{ label: string; patterns: RegExp[] }> {
+  if (agent === "joshex") return [
+    { label: "Inbox", patterns: [/gmail|inbox|email|triage/i] },
+    { label: "Review", patterns: [/review|final|approve|decision/i] },
+    { label: "Route", patterns: [/route|handoff|coord/i] },
+    { label: "Private", patterns: [/private|mac/i] },
+  ];
+  if (agent === "josh") return [
+    { label: "Context", patterns: [/context|sync|memory/i] },
+    { label: "Tower", patterns: [/control tower|dashboard|kiosk|screen/i] },
+    { label: "Gateway", patterns: [/telegram|gateway|openclaw/i] },
+    { label: "Medic", patterns: [/medic|health|heartbeat|hourly/i] },
+  ];
+  if (agent === "jaimes") return [
+    { label: "Exec", patterns: [/exec|pipeline|script|build|verify/i] },
+    { label: "Sorare", patterns: [/sorare|lineup|mission|gw/i] },
+    { label: "Trade", patterns: [/trade|wallet|route|crypto|sol/i] },
+    { label: "ML", patterns: [/ml|model|training|prediction/i] },
+  ];
+  return [
+    { label: "Signals", patterns: [/signal|breaking|news|watch/i] },
+    { label: "Fantasy", patterns: [/fantasy|waiver|injury|lineup/i] },
+    { label: "Cron", patterns: [/cron|monitor|watchdog|hourly/i] },
+    { label: "Feed", patterns: [/feed|briefing|digest/i] },
+  ];
+}
+
+function agentCapabilityChips(agent: AgentId, status: AgentStatus, idleContext: AgentIdleContext, insights: AgentInsightRow[], visualState: string): AgentCapabilityChip[] {
+  const liveText = missionText(`${status.objective || ""} ${status.current_tool || ""}`);
+  const nextText = missionText(`${idleContext.nextTitle || ""} ${idleContext.nextBullets?.map((row) => `${row.label} ${row.text}`).join(" ") || ""} ${insights.map((row) => `${row.label} ${row.text}`).join(" ")}`);
+  const isWorking = visualState === "working" && liveText.length > 0;
+  return agentCapabilityCatalog(agent).map((cap) => {
+    const liveHit = isWorking && cap.patterns.some((pattern) => pattern.test(liveText));
+    const nextHit = cap.patterns.some((pattern) => pattern.test(nextText));
+    const stale = /stale|late|blocked|risk/i.test(`${status.status || ""} ${insights.map((row) => row.label + row.text).join(" ")}`);
+    const state: AgentCapabilityChip["state"] = liveHit ? "hot" : nextHit ? "warm" : stale && cap.label === "Inbox" ? "watch" : "idle";
+    const basis = liveHit ? `Live: ${liveText}` : nextHit ? `Next: ${nextText}` : "Standing by";
+    return { label: cap.label, state, title: compactText(basis, 120) };
+  });
+}
+
+function agentPriorityInsights(agent: AgentId, state: MissionControlState, model: ControlTowerModel): AgentInsightRow[] {
+  const trackedJobs = operatorTrackedJobs(state.jobs);
+  const agentJobs = trackedJobs.filter((job) => (job.agent_id || "") === agent);
+  const active = model.active.find((row) => row.agent === agent && row.tone === "active");
+  const risk = agentJobs.find((job) => jobNeedsAttention(job, trackedJobs));
+  const nextJob = agentJobs.find((job) => ["ready", "working"].includes(jobWorkState(job, trackedJobs)) || ["upcoming", "scheduled"].includes(String(job.status || "").toLowerCase())) || agentJobs[0];
+  const work = state.workItems?.find((item) => item.agent_id === agent && ["working", "waiting", "blocked", "ready"].includes(item.state));
+  const approval = state.approvals?.find((row) => row.status === "pending" && (row.agent_id === agent || textMentionsAgent(`${row.title} ${row.detail}`, agent)));
+  const rows: AgentInsightRow[] = [];
+  if (active) rows.push({ label: "Live", text: compactText(active.title, 64), tone: "active" });
+  if (approval) rows.push({ label: "Josh", text: compactText(approval.title || approval.detail, 64), tone: "watch" });
+  if (risk) rows.push({ label: "Risk", text: compactText(compactJobTitle(risk), 64), tone: "watch" });
+  if (work && !rows.some((row) => row.label === "Live")) rows.push({ label: workStateLabel(work.state), text: compactText(work.title, 64), tone: work.state === "working" ? "active" : work.state === "blocked" ? "watch" : "default" });
+  if (nextJob) {
+    const run = jobRunCells(nextJob);
+    rows.push({ label: "Next", text: compactText(`${compactJobTitle(nextJob)} · ${run.next || run.today}`, 72), tone: run.todayClass === "is-risk" ? "watch" : "default" });
+  }
+  rows.push({ label: "Scope", text: agent === "joshex" ? "private Mac + final review" : agent === "josh" ? "front-line + Control Tower" : agent === "jaimes" ? "execution + ML pipelines" : "workers + cron monitors", tone: "good" });
+  return rows.slice(0, 4);
 }
 
 function ActivityLedger({ model }: { model: ControlTowerModel }) {
@@ -1693,9 +1779,11 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
           <h3 className="ledger-now-title" title={missionText(primaryFocus?.title)}>
             {primaryFocus ? primaryFocus.title : "No active work right now"}
           </h3>
-          <p className="ledger-now-detail" title={missionText(primaryFocus?.detail)}>
-            {primaryFocus ? primaryFocus.detail : "Agents are standing by; next scheduled work will surface here."}
-          </p>
+          {primaryFocus && primaryFocus.detail && primaryFocus.detail !== primaryFocus.title ? (
+            <p className="ledger-now-detail" title={missionText(primaryFocus.detail)}>{primaryFocus.detail}</p>
+          ) : !primaryFocus ? (
+            <p className="ledger-now-detail">Agents are standing by; next scheduled work will surface here.</p>
+          ) : null}
           {primaryFocus?.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{primaryFocus.detailLines.map((line) => <span key={line}>{line}</span>)}</div> : null}
           <footer>
             <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
@@ -1810,38 +1898,44 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const walletDetail = walletIsPlaceholder
     ? "No connected balance · proposals only"
     : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
+  const p2eResearch = wallet?.p2eResearch;
+  const p2eTokens = p2eResearch?.tokens || [];
+  const p2eHeld = p2eTokens.filter((token) => token.held).length;
+  const p2eAlerts = p2eResearch?.alerts || [];
+  const p2eTone = p2eAlerts.length ? "risk" : String(p2eResearch?.status || "watch").toLowerCase().includes("clear") ? "clear" : "watch";
+  const p2eHeadline = p2eResearch?.headline || (p2eTokens.length ? `${p2eHeld}/${p2eTokens.length} held` : "Monitor armed");
+  const p2eDetail = p2eResearch?.detail || (p2eResearch?.updatedAt ? `Updated ${ageLabel(p2eResearch.updatedAt)}` : "Solana P2E scorecard ready");
+  const modelUsageAny = state.modelUsage as any;
+  const providerBreakdown = Array.isArray(modelUsageAny?.providerBreakdown) ? modelUsageAny.providerBreakdown : [];
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
-  const subscriptionProviders = state.modelUsage?.providerBreakdown?.length
-    ? (state.modelUsage.providerBreakdown as Array<any>).filter((provider) => provider.budgetType === "subscription")
-    : Array.isArray((state.modelUsage?.subscription as any)?.providers)
-      ? ((state.modelUsage?.subscription as any)?.providers as Array<any>)
-      : [];
-  const subscriptionLabels = subscriptionProviders
-    .map((provider) => {
-      const fee = provider.fixedMonthlyUsd ?? provider.monthlyFeeUsd ?? provider.monthlyFee ?? 0;
-      const usage = typeof provider.usagePct === "number" ? ` · ${Math.round(provider.usagePct)}%` : "";
-      return `${provider.label || provider.provider || "Sub"} ${fmtCurrencyExact(fee)}${usage}`;
-    })
-    .filter(Boolean)
-    .slice(0, 3)
-    .join(" + ");
-  const topProviderModels = (state.modelUsage?.providerBreakdown || [])
-    .map((provider: any) => {
-      const top = provider.topModels?.[0];
-      return top ? `${provider.label || provider.id}: ${displayModelName(top.name)}` : "";
-    })
-    .filter(Boolean)
-    .slice(0, 3)
-    .join(" · ");
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
   const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
+  const providerSpend = providerBreakdown
+    .filter((provider: any) => provider?.budgetType === "subscription" && typeof provider?.monthlyFeeUsd === "number")
+    .slice(0, 3)
+    .map((provider: any) => `${provider.label} ${fmtCurrency(provider.monthlyFeeUsd)} · ${Math.round(Number(provider.usagePct || 0))}%`);
+  const topModelLabels = providerBreakdown
+    .flatMap((provider: any) => (provider.topModels || []).slice(0, 1).map((model: any) => `${provider.label}: ${String(model.name || "model").replace(/^anthropic\//, "").replace(/^openai\//, "").replace(/^google\//, "")}`))
+    .slice(0, 3);
   const modelHeadline = typeof subscriptionFee === "number"
-    ? `${fmtCurrencyExact(subscriptionFee)} sub + ${fmtCurrencyExact(meteredMonthly)}`
-    : fmtCurrencyExact(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
-  const modelDetail = typeof subscriptionFee === "number"
-    ? `${subscriptionLabels || "Subscriptions"} · top ${topProviderModels || "waiting"}`
-    : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
+    ? `${fmtCurrency(subscriptionFee)} sub + ${fmtCurrency(meteredMonthly)}`
+    : fmtCurrency(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
+  const modelDetail = providerSpend.length
+    ? `${providerSpend.join(" + ")} · top ${topModelLabels.join(" · ") || "waiting"}`
+    : typeof subscriptionFee === "number"
+      ? `Usage equiv ${fmtCurrency(usageEquivalentMonthly)} · metered today ${fmtCurrency(meteredDaily)}`
+      : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
+  const kintara = state.kintaraProgress;
+  const kintaraResources = kintara?.resources || {};
+  const kintaraProgress = typeof kintara?.progressPct === "number" ? `${kintara.progressPct.toFixed(1)}%` : "Syncing";
+  const kintaraPrimary = [
+    `Gold ${Number(kintaraResources.gold || 0).toLocaleString()}`,
+    `Wood ${Number(kintaraResources.wood || 0).toLocaleString()}`,
+    `Stone ${Number(kintaraResources.stone || 0).toLocaleString()}`,
+    `Fish ${Number(kintaraResources.fish || 0).toLocaleString()}`,
+  ].join(" · ");
+  const kintaraTone = kintara?.status === "fresh" ? "clear" : "watch";
   const runtimeOk = state.runtimeLayout?.ok !== false;
   const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
   const freshAgents = state.statuses.filter((row) => {
@@ -1857,8 +1951,8 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
     <section className="tower-resource-stack" aria-label="Resources and live sources">
       <header>
         <div>
-          <p>Resources</p>
-          <h3>Wallet · Models · Display · Visibility</h3>
+          <p>FinOps Dashboard</p>
+          <h3>Subscriptions · APIs · Wallet · Runtime limits</h3>
         </div>
         <button type="button" onClick={onCryptoRefresh} disabled={loading} title="Refresh read-only wallet inventory">
           <RefreshCw size={12} className={loading ? "spin" : ""} /> Wallet
@@ -1871,10 +1965,20 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
           <strong>{walletHeadline}</strong>
           <p>{walletDetail}</p>
         </article>
-        <article className="resource-card is-clear">
+        <article className="resource-card resource-card-model-usage is-clear">
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
           <p>{modelDetail}</p>
+        </article>
+        <article className={`resource-card is-${p2eTone}`}>
+          <b>Solana P2E</b>
+          <strong>{p2eHeadline}</strong>
+          <p>{p2eDetail}</p>
+        </article>
+        <article className={`resource-card resource-card-kintara is-${kintaraTone}`}>
+          <b>Kintara progress</b>
+          <strong>{kintara?.levelLabel || "Syncing"} · {kintaraProgress}</strong>
+          <p>{kintaraPrimary}</p>
         </article>
         <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
           <b>Display fit</b>
@@ -3118,6 +3222,17 @@ function ReliabilityUpgradesPanel({ upgrades }: { upgrades?: MissionControlState
               </header>
               <p>{missionText(item.signal)}</p>
               <small>{missionText(item.next)}</small>
+              {item.evidence ? (
+                <a
+                  className="reliability-evidence"
+                  href={item.evidence.startsWith("http") ? item.evidence : `/${item.evidence}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`Open ${item.evidence}`}
+                >
+                  {missionText(item.evidence)}
+                </a>
+              ) : null}
             </div>
           </article>
         ))}
@@ -3250,12 +3365,11 @@ function AgentEcosystemMap({ statuses }: { statuses: Map<AgentId, AgentStatus> }
 }
 
 function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["modelUsage"] }) {
-  const providers = modelUsage?.providerBreakdown?.length ? modelUsage.providerBreakdown : [];
-  const fallbackModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
+  const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
   return (
     <section className="brain-cost-card">
       <div className="panel-title compact">
-        <h2>Model Usage</h2>
+        <h2>Model Cost</h2>
         <span>{fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered today</span>
       </div>
       <div className="cost-snapshot">
@@ -3272,39 +3386,14 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
           <strong>{fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly)}</strong>
         </article>
       </div>
-      {providers.length ? (
-        <div className="brain-provider-list">
-          {providers.slice(0, 3).map((provider: any) => {
-            const top = provider.topModels?.[0];
-            const isSubscription = provider.budgetType === "subscription";
-            return (
-              <article key={provider.id}>
-                <div>
-                  <span>{provider.label || provider.id}</span>
-                  <strong>{isSubscription ? fmtCurrency(provider.fixedMonthlyUsd || provider.monthlyFeeUsd || 0) : fmtCurrency(provider.meteredMonthlyUsd || 0)}</strong>
-                </div>
-                <div>
-                  <em>{Math.round(Number(provider.usagePct || 0))}% used</em>
-                  <small>{provider.callsWeekly ? `${provider.callsWeekly} calls` : provider.summary || `${provider.sessions || 0} sessions`}</small>
-                </div>
-                <footer>
-                  <span>{top ? displayModelName(top.name) : "No model rows"}</span>
-                  <strong>{top ? fmtCurrency(top.usageEquivalentCost ?? top.weeklyCost ?? 0) : "$0.00"}</strong>
-                </footer>
-              </article>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="brain-model-list">
-          {fallbackModels.slice(0, 3).map((model: any) => (
-            <article key={`${model.name}-${model.source || model.window || ""}`}>
-              <span>{model.name}</span>
-              <strong>{fmtCurrency(model.weeklyCost ?? model.cost)}</strong>
-            </article>
-          ))}
-        </div>
-      )}
+      <div className="brain-model-list">
+        {topModels.slice(0, 3).map((model: any) => (
+          <article key={`${model.name}-${model.source || model.window || ""}`}>
+            <span>{model.name}</span>
+            <strong>{fmtCurrency(model.weeklyCost ?? model.cost)}</strong>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -4967,6 +5056,7 @@ function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
 function calendarBlockTimeLabel(date: Date) {
   return date
     .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    .replace(/\s?[AP]M$/i, "")
     .replace(/\s/g, " ")
     .toUpperCase();
 }
@@ -5024,12 +5114,11 @@ function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveC
   const blocks = buildCalendarJobBlocks(calendarJobs);
   const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
   const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
-  const rawVisibleBlocks = todayBlocks.length >= 6
-    ? todayBlocks
-    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))];
-  const visibleBlocks = rawVisibleBlocks
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
-    .slice(0, 20);
+  const visibleBlocks = todayBlocks.length >= 6
+    ? [...todayBlocks].sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()).slice(0, 20)
+    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))]
+      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+      .slice(0, 20);
   const slots = calendarSlots(visibleBlocks);
   const nowMs = Date.now();
   const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
@@ -5295,14 +5384,24 @@ function sorareGroupSummary(group: ReturnType<typeof sorareDailyGroups>[number])
 function JobsRail({ jobs, liveCues }: { jobs: MissionControlState["jobs"]; liveCues: LiveCueState }) {
   const trackedJobs = operatorTrackedJobs(jobs);
   const inventoryGroups = groupedJobs(trackedJobs, "category");
+  const actionCount = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
+  const activeCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
+  const todayCount = trackedJobs.filter((job) => job.todayRelevant || sameLocalDay(job.lastRun || job.completed_at || job.updated_at)).length;
+  const ownerCount = new Set(trackedJobs.map((job) => job.agent_id || "unknown")).size;
   return (
     <aside id="today-jobs" className={`jobs-rail${sectionCueClass("jobs", liveCues)}`}>
       <SectionCue label={liveCues.focus === "jobs" ? "focus" : "updated"} />
       <div className="panel-title compact calendar-title">
         <div>
-          <p>Daily calendar</p>
+          <p>Operating model tracker</p>
           <h2>Today's Jobs</h2>
         </div>
+        <span>{trackedJobs.length} tracked · {ownerCount} owners</span>
+      </div>
+      <div className="jobs-audit-strip" aria-label="Today's Jobs audit summary">
+        <article className={actionCount ? "is-risk" : "is-clear"}><b>{actionCount}</b><span>needs focus</span></article>
+        <article className={activeCount ? "is-active" : "is-clear"}><b>{activeCount}</b><span>active now</span></article>
+        <article><b>{todayCount}</b><span>today-linked</span></article>
       </div>
       <div className="job-list">
         <DailyJobsCalendar jobs={trackedJobs} liveCues={liveCues} />
@@ -5614,19 +5713,8 @@ function ModelUsageCard({
   modelUsage?: MissionControlState["modelUsage"];
   modelRouter?: MissionControlState["modelRouter"];
 }) {
-  const providerBreakdown = modelUsage?.providerBreakdown?.length ? modelUsage.providerBreakdown : [];
-  const routerProviders = modelRouter?.providers || modelUsage?.providerBudgets || [];
-  const providers = providerBreakdown.length
-    ? providerBreakdown
-    : routerProviders.slice(0, 4).map((provider: any) => ({
-      id: provider.id,
-      label: provider.label,
-      budgetType: provider.budgetType,
-      fixedMonthlyUsd: provider.monthlyFeeUsd || 0,
-      usagePct: provider.subscriptionCreditPct || provider.monthlyUtilizationPct || 0,
-      usageSummary: provider.usageProbeSummary || provider.status,
-      topModels: provider.lastModelUsed ? [{ name: provider.lastModelUsed, source: provider.lastSource || "route" }] : [],
-    }));
+  const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
+  const providers = modelRouter?.providers || modelUsage?.providerBudgets || [];
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
   return (
     <section className="model-usage-card">
@@ -5640,36 +5728,40 @@ function ModelUsageCard({
         <MetricMini label="Metered month" value={fmtCurrency(modelUsage?.metered?.monthly ?? 0)} />
         <MetricMini label="Usage equiv" value={fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.monthly)} />
       </div>
-      <div className="provider-breakout-list" aria-label="Provider model usage breakout">
+      <div className="model-list">
+        {topModels.slice(0, 5).map((model: any) => (
+          <article key={`${model.name}-${model.source || model.window || ""}`}>
+            <strong>{model.name}</strong>
+            <span>{model.source || model.window || "model"}</span>
+            <em>{fmtCurrency(model.weeklyCost ?? model.cost)}</em>
+          </article>
+        ))}
+      </div>
+      <div className="provider-budget-list" aria-label="Provider budget caps">
         {providers.slice(0, 4).map((provider: any) => {
-          const isSubscription = provider.budgetType === "subscription";
-          const pct = Math.max(0, Math.min(100, Math.round(Number(provider.usagePct || 0))));
-          const topModels = provider.topModels || [];
+          const cap = provider.dailyCapUsd || provider.monthlyCapUsd || 0;
+          const spend = provider.dailySpendUsd || 0;
+          const pct = cap ? Math.min(100, Math.round((spend / cap) * 100)) : 0;
           return (
-            <article key={provider.id} className="provider-breakout">
+            <article key={provider.id} className={`provider-budget is-${provider.status || "ready"}`}>
               <header>
                 <strong>{provider.label || provider.id}</strong>
-                <em>{isSubscription ? `${fmtCurrency(provider.fixedMonthlyUsd || provider.monthlyFeeUsd || 0)}/mo` : `${fmtCurrency(provider.meteredMonthlyUsd || 0)} metered`}</em>
+                <em>{provider.status || "ready"}</em>
               </header>
               <div className="provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
                 <span />
               </div>
-              <div className="provider-breakout-meta">
-                <span>{pct}% usage</span>
-                <span>{provider.callsWeekly ? `${provider.callsWeekly} calls` : provider.summary || `${provider.sessions || 0} sessions`}</span>
-                <span>{fmtCompactNumber(provider.totalTokens || 0)} toks</span>
-              </div>
-              <div className="provider-model-drilldown">
-                {topModels.slice(0, 3).map((model: any) => (
-                  <div key={`${provider.id}-${model.name}-${model.source || ""}`}>
-                    <strong>{displayModelName(model.name)}</strong>
-                    <span>{model.callsWeekly ? `${model.callsWeekly} calls` : `${model.sessions || 0} sessions`}</span>
-                    <em>{fmtCurrency(model.usageEquivalentCost ?? model.weeklyCost ?? model.marginalCost ?? 0)}</em>
-                  </div>
-                ))}
-                {!topModels.length ? <div><strong>No model rows yet</strong><span>waiting</span><em>$0</em></div> : null}
-              </div>
-              <small>{provider.usageSummary || (provider.inferredRemainingCallEquivalent ? `${provider.inferredRemainingCallEquivalent} est calls left` : "provider lane")}</small>
+              <p>{fmtCurrency(spend)} today{provider.dailyCapUsd ? ` / ${fmtCurrency(provider.dailyCapUsd)} cap` : ""}</p>
+              <footer>
+                <span>{provider.lastModelUsed || "model route"}</span>
+                {provider.remainingCreditUsd != null ? <em>{fmtCurrency(provider.remainingCreditUsd)} left</em> : null}
+              </footer>
+              {(provider.authStatus || provider.lastTestStatus) ? (
+                <small>
+                  {provider.authStatus || provider.lastTestStatus}
+                  {provider.keySuffix ? ` · key ...${provider.keySuffix}` : ""}
+                </small>
+              ) : null}
             </article>
           );
         })}
@@ -5761,11 +5853,6 @@ function fmtCurrencyExact(value?: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
-}
-
-function fmtCompactNumber(value?: number) {
-  if (typeof value !== "number" || Number.isNaN(value)) return "0";
-  return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(value);
 }
 
 function displayModelName(value?: string | null) {
