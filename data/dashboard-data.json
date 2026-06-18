@@ -1,6 +1,12 @@
 {
   "actionRequired": [
     {
+      "priority": "medium",
+      "title": "Sorare Daily Missions watchdog needs attention",
+      "detail": "Sorare Daily Missions watchdog needs attention",
+      "url": "#jobs"
+    },
+    {
       "priority": "high",
       "title": "Calendar issue: Calendar fetch failed",
       "url": "#calendar"
@@ -14,51 +20,57 @@
     "active": false,
     "reportedActive": false,
     "status": "done",
-    "objective": "Josh 2.0 screen check clean",
-    "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-    "updatedAt": "2026-06-15T08:24:35Z",
-    "checkedAt": "2026-06-15T08:24:35Z",
-    "currentTool": "Control Tower screen check",
+    "objective": "Heartbeat checks complete",
+    "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
+    "updatedAt": "2026-06-07T04:17:05Z",
+    "checkedAt": "2026-06-07T04:17:05Z",
+    "currentTool": "agent publish",
     "steps": [
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Heartbeat checks complete",
         "status": "done",
-        "tool": "Control Tower screen check",
+        "tool": "agent publish",
         "kind": "complete"
       },
       {
-        "label": "Heartbeat maintenance complete",
-        "status": "done",
-        "tool": "heartbeat",
-        "kind": "complete"
-      },
-      {
-        "label": "Direct chat context high",
-        "status": "info",
-        "tool": "heartbeat",
-        "kind": "note"
-      },
-      {
-        "label": "Fresh direct session recommended",
-        "status": "ready",
-        "tool": "heartbeat",
-        "kind": "handoff"
-      },
-      {
-        "label": "Bring up Josh 2.0 and clear alerts",
-        "status": "done",
+        "label": "Heartbeat checks started",
+        "status": "active",
         "tool": "agent publish",
         "kind": "status"
       },
       {
-        "label": "Kintara tutorial continuation",
-        "status": "ready",
+        "label": "Heartbeat checks complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat checks started",
+        "status": "active",
         "tool": "agent publish",
         "kind": "status"
       },
       {
-        "label": "Kintara training + tutorial assist",
-        "status": "ready",
+        "label": "Heartbeat checks complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat checks started",
+        "status": "active",
+        "tool": "agent publish",
+        "kind": "status"
+      },
+      {
+        "label": "Heartbeat complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat maintenance",
+        "status": "done",
         "tool": "agent publish",
         "kind": "status"
       }
@@ -71,8 +83,8 @@
   },
   "focus": {
     "status": "Brain Feed idle",
-    "context": "Last completed objective: Josh 2.0 screen check clean",
-    "updatedAt": "2026-06-18T14:42:15Z"
+    "context": "Last completed objective: Heartbeat checks complete",
+    "updatedAt": "2026-06-18T14:41:57Z"
   },
   "contextWindow": {
     "usedTokens": 123543,
@@ -94,14 +106,21 @@
     "pct": 0.0
   },
   "codingVisibility": {
-    "workspaceDirty": 0,
-    "missionControlDirty": 0,
-    "recentFiles": [],
+    "workspaceDirty": 1,
+    "missionControlDirty": 26,
+    "recentFiles": [
+      "scripts/feedback_offset.json",
+      "scripts/intel_feedback_offset.json",
+      "scripts/jaimes_healthcheck_state.json",
+      "scripts/jaimes_healthcheck_status.json",
+      "mission-control/scripts/update_mission_control.py",
+      "mission-control/dist/v2-react/assets/index-DvxCypGD.js"
+    ],
     "codexbarStatus": "Codex auth required",
     "codexbar": {
       "available": false
     },
-    "updatedAt": "2026-06-18T14:42:23Z"
+    "updatedAt": "2026-06-18T14:42:06Z"
   },
   "modelUsage": {
     "session": 0.0,
@@ -263,7 +282,7 @@
         "marginalCost": 0.0
       }
     ],
-    "lastUpdated": "2026-06-18T14:42:26Z",
+    "lastUpdated": "2026-06-18T14:42:10Z",
     "jain": {
       "daily": 0.0,
       "session": 0.0,
@@ -344,8 +363,8 @@
         }
       ],
       "usageEquivalentDaily": 0.063297,
-      "usageEquivalentWeekly": 674.316501,
-      "usageEquivalentMonthly": 1352.112196,
+      "usageEquivalentWeekly": 0.063297,
+      "usageEquivalentMonthly": 0.063297,
       "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
     },
     "metered": {
@@ -360,16 +379,16 @@
     },
     "usageEquivalent": {
       "daily": 0.063297,
-      "weekly": 674.316501,
-      "monthly": 1352.112196
+      "weekly": 0.063297,
+      "monthly": 0.063297
     },
     "weeklyRunRate": {
       "total": 0.0,
       "automation": 0.0,
-      "interactive": 674.316501,
+      "interactive": 0.063297,
       "projectedMonthly": 0.0,
-      "subscriptionUsageEquivalentWeekly": 674.316501,
-      "subscriptionUsageEquivalentProjectedMonthly": 2889.93
+      "subscriptionUsageEquivalentWeekly": 0.063297,
+      "subscriptionUsageEquivalentProjectedMonthly": 0.27
     },
     "providerBudgets": [
       {
@@ -460,7 +479,7 @@
         "monthlyUtilizationPct": 0.0,
         "status": "ready",
         "keyPresent": true,
-        "keySuffix": null,
+        "keySuffix": "ygsQ",
         "lastSource": "xai-specialist",
         "whyChosen": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default."
       },
@@ -505,7 +524,7 @@
     }
   },
   "modelRouter": {
-    "updatedAt": "2026-06-18T14:42:15Z",
+    "updatedAt": "2026-06-18T14:41:57Z",
     "policy": {
       "defaultProvider": "codex",
       "reviewProvider": "gemini",
@@ -611,7 +630,7 @@
         "monthlyUtilizationPct": 0.0,
         "status": "ready",
         "keyPresent": true,
-        "keySuffix": null,
+        "keySuffix": "ygsQ",
         "lastSource": "xai-specialist",
         "whyChosen": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default."
       },
@@ -661,7 +680,7 @@
     "last_thought": "Exploring and mapping the area",
     "blocks_built": 0,
     "projection_per_day": 0.0,
-    "updatedAt": "2026-06-18T14:42:26Z",
+    "updatedAt": "2026-06-18T14:42:10Z",
     "statusMessage": "Active in MoltWorld v2",
     "last_action": "Queued walk southwest. You look around for resources to gather.. Tick fires in 0s.",
     "biome": "forest",
@@ -678,14 +697,14 @@
   },
   "machineHealth": {
     "josh": {
-      "cpu_pct": 46.3,
-      "cpu_user": 25.23,
-      "cpu_sys": 21.2,
-      "load1": 2.57,
-      "load5": 2.24,
-      "load15": 2.18,
+      "cpu_pct": 22.6,
+      "cpu_user": 9.13,
+      "cpu_sys": 13.46,
+      "load1": 2.07,
+      "load5": 2.13,
+      "load15": 2.14,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.4,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "63Gi",
@@ -693,14 +712,14 @@
       "available": true
     },
     "jain": {
-      "cpu_pct": 24.5,
-      "cpu_user": 12.22,
-      "cpu_sys": 12.22,
-      "load1": 2.57,
-      "load5": 2.24,
-      "load15": 2.18,
+      "cpu_pct": 14.5,
+      "cpu_user": 4.3,
+      "cpu_sys": 10.21,
+      "load1": 2.07,
+      "load5": 2.13,
+      "load15": 2.14,
       "ram_used_gb": 12.0,
-      "ram_total_gb": 15.5,
+      "ram_total_gb": 15.6,
       "uptime": "",
       "disk_used": "12Gi",
       "disk_avail": "63Gi",
@@ -724,19 +743,19 @@
       "name": "Control Tower",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-18T14:42:15Z"
+      "lastChecked": "2026-06-18T14:41:57Z"
     },
     {
       "name": "Control Tower PWA",
       "url": "https://jcubellagent-web.github.io/mission-control/",
       "status": "live",
-      "lastChecked": "2026-06-18T14:42:15Z"
+      "lastChecked": "2026-06-18T14:41:57Z"
     },
     {
       "name": "Kiosk dashboard",
       "url": "http://192.168.4.40:3030",
       "status": "down",
-      "lastChecked": "2026-06-18T14:42:15Z"
+      "lastChecked": "2026-06-18T14:41:57Z"
     }
   ],
   "crons": [
@@ -1302,41 +1321,836 @@
       "lastError": null
     }
   ],
-  "codexJobs": [],
-  "sharedEvents": [],
+  "codexJobs": [
+    {
+      "id": "jaimes-note-20260618-035541-crypto-monitor-no-trade-review",
+      "title": "Crypto monitor no-trade review",
+      "status": "done",
+      "time": "2026-06-18T03:55:41Z",
+      "tool": "crypto-trading-monitor",
+      "detail": "Fresh remote MTM complete; shortlist stayed chasey; no live trade.",
+      "owner": "JAIMES"
+    },
+    {
+      "id": "jaimes-note-20260618-034140-crypto-trade-monitor-review-complete",
+      "title": "Crypto trade monitor review complete",
+      "status": "done",
+      "time": "2026-06-18T03:41:40Z",
+      "tool": "exec",
+      "detail": "MTM total 412.55 USD; liquid 283.65 USD; NFTs 128.90 USD; Base gas low; review shortlist chasey; no trade.",
+      "owner": "JAIMES"
+    },
+    {
+      "id": "jaimes-decision-20260618-024730-crypto-monitor-no-trade-after-fresh-mtm",
+      "title": "Crypto Monitor: no trade after fresh MTM",
+      "status": "done",
+      "time": "2026-06-18T02:47:30Z",
+      "tool": "exec",
+      "detail": "Remote MTM is fresh; review shortlist remains chasey; no wallet action taken.",
+      "owner": "JAIMES"
+    }
+  ],
+  "sharedEvents": [
+    {
+      "id": "jaimes-status-20260618-144156-rebuild-calibrated-grok-usage",
+      "time": "2026-06-18T14:41:56Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Rebuild calibrated Grok usage",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Rebuild calibrated Grok usage"
+    },
+    {
+      "id": "jaimes-status-20260618-144100-calibrate-grok-usage-from-screenshot",
+      "time": "2026-06-18T14:41:00Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Calibrate Grok usage from screenshot",
+      "status": "active",
+      "tool": "telegram",
+      "detail": "Calibrate Grok usage from screenshot"
+    },
+    {
+      "id": "jaimes-status-20260618-144053-check-agent-operations",
+      "time": "2026-06-18T14:40:53Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Check agent operations",
+      "status": "active",
+      "tool": "telegram-ingress",
+      "detail": "Check agent operations"
+    },
+    {
+      "id": "jaimes-status-20260618-143304-sorare-pre-lock-loop",
+      "time": "2026-06-18T14:33:04Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Sorare pre-lock loop",
+      "status": "info",
+      "tool": "sorare_prelock_loop",
+      "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Gleyber Torres, Jackson Chourio, Jordan Walker, Reid Detmers"
+    },
+    {
+      "id": "jain-status-20260618-143201-j-a-i-n-is-online-and-ready",
+      "time": "2026-06-18T14:32:01Z",
+      "agent": "jain",
+      "agentLabel": "J.A.I.N",
+      "type": "status",
+      "title": "J.A.I.N is online and ready",
+      "status": "ready",
+      "tool": "status check",
+      "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks."
+    },
+    {
+      "id": "jaimes-status-20260618-143101-sorare-daily-missions-watchdog-needs-attention",
+      "time": "2026-06-18T14:31:01Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Sorare Daily Missions watchdog needs attention",
+      "status": "error",
+      "tool": "cron",
+      "detail": "Sorare Daily Missions watchdog needs attention"
+    },
+    {
+      "id": "jaimes-status-20260618-143058-done-no-trade-mtm-route-check-journaled",
+      "time": "2026-06-18T14:30:58Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Done: no-trade MTM + route check journaled",
+      "status": "done",
+      "tool": "exec",
+      "detail": "Done: no-trade MTM + route check journaled"
+    },
+    {
+      "id": "jaimes-status-20260618-142844-allowance-and-native-eth-drift-checks",
+      "time": "2026-06-18T14:28:44Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Allowance and native ETH drift checks",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Allowance and native ETH drift checks"
+    },
+    {
+      "id": "jaimes-status-20260618-142732-current-holdings-route-probes",
+      "time": "2026-06-18T14:27:32Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Current holdings route probes",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Current holdings route probes"
+    },
+    {
+      "id": "jaimes-status-20260618-142709-diagnose-balance-route-probes",
+      "time": "2026-06-18T14:27:09Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Diagnose balance/route probes",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Diagnose balance/route probes"
+    },
+    {
+      "id": "jaimes-status-20260618-142642-executor-balance-probes",
+      "time": "2026-06-18T14:26:42Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Executor balance probes",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Executor balance probes"
+    },
+    {
+      "id": "jaimes-status-20260618-142549-route-checks-on-held-assets",
+      "time": "2026-06-18T14:25:49Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Route checks on held assets",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Route checks on held assets"
+    },
+    {
+      "id": "jaimes-status-20260618-142523-inspect-remote-wallet-snapshot",
+      "time": "2026-06-18T14:25:23Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Inspect remote wallet snapshot",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Inspect remote wallet snapshot"
+    },
+    {
+      "id": "jaimes-status-20260618-142508-remote-mtm-refresh-pregate-handoff",
+      "time": "2026-06-18T14:25:08Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Remote MTM refresh + pregate handoff",
+      "status": "active",
+      "tool": "web",
+      "detail": "Remote MTM refresh + pregate handoff"
+    },
+    {
+      "id": "jaimes-status-20260618-142456-pregate-read-path-verification",
+      "time": "2026-06-18T14:24:56Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Pregate read + path verification",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Pregate read + path verification"
+    },
+    {
+      "id": "jaimes-status-20260618-142438-trade-monitor-pre-gate-mtm-run",
+      "time": "2026-06-18T14:24:38Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Trade monitor: pre-gate + MTM run",
+      "status": "active",
+      "tool": "exec",
+      "detail": "Trade monitor: pre-gate + MTM run"
+    },
+    {
+      "id": "jaimes-status-20260618-141803-sorare-pre-lock-loop",
+      "time": "2026-06-18T14:18:03Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Sorare pre-lock loop",
+      "status": "info",
+      "tool": "sorare_prelock_loop",
+      "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Gleyber Torres, Jackson Chourio, Jordan Walker, Reid Detmers"
+    },
+    {
+      "id": "jaimes-status-20260618-141553-yes-i-fully-approve",
+      "time": "2026-06-18T14:15:53Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Yes, I fully approve",
+      "status": "active",
+      "tool": "telegram-ingress",
+      "detail": "Yes, I fully approve"
+    },
+    {
+      "id": "jaimes-status-20260618-141544-done-grok-finops-pr-opened",
+      "time": "2026-06-18T14:15:44Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Done: Grok FinOps PR opened",
+      "status": "done",
+      "tool": "telegram",
+      "detail": "Done: Grok FinOps PR opened"
+    },
+    {
+      "id": "jaimes-status-20260618-141244-done-no-trade-monitor-run-toescoin-reject-spcx69",
+      "time": "2026-06-18T14:12:44Z",
+      "agent": "jaimes",
+      "agentLabel": "JAIMES",
+      "type": "status",
+      "title": "Done: no-trade monitor run; TOESCOIN reject, SPCX69 hold, VVV gated",
+      "status": "done",
+      "tool": "exec",
+      "detail": "Done: no-trade monitor run; TOESCOIN reject, SPCX69 hold, VVV gated"
+    }
+  ],
   "sharedOperatingLayer": {
-    "status": "stale",
-    "updatedAt": "2026-06-18T14:42:15Z",
+    "status": "attention",
+    "updatedAt": "2026-06-18T14:41:56Z",
     "counts": {
-      "eventsToday": 0,
-      "decisions": 0,
-      "knowledgeEntries": 0,
-      "openHandoffs": 0,
+      "eventsToday": 20,
+      "decisions": 5,
+      "knowledgeEntries": 38,
+      "openHandoffs": 3,
       "attentionHandoffs": 0,
-      "blocked": 0,
-      "activeTasks": 0,
+      "blocked": 1,
+      "activeTasks": 3,
       "blockedTasks": 0,
       "approvalNeeded": 0,
       "capabilityAgents": 4,
       "routingRules": 4,
-      "freshHeartbeats": 0,
-      "staleHeartbeats": 0,
-      "inventoryNodes": 0,
+      "freshHeartbeats": 4,
+      "staleHeartbeats": 3,
+      "inventoryNodes": 4,
       "wrappedAutomations": 0
     },
-    "latestEvents": [],
-    "blockedEvents": [],
-    "recentDecisions": [],
-    "knowledgeEntries": [],
-    "openHandoffs": [],
+    "latestEvents": [
+      {
+        "id": "jaimes-status-20260618-144156-rebuild-calibrated-grok-usage",
+        "time": "2026-06-18T14:41:56Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Rebuild calibrated Grok usage",
+        "status": "active",
+        "tool": "exec",
+        "detail": "Rebuild calibrated Grok usage"
+      },
+      {
+        "id": "jaimes-status-20260618-144100-calibrate-grok-usage-from-screenshot",
+        "time": "2026-06-18T14:41:00Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Calibrate Grok usage from screenshot",
+        "status": "active",
+        "tool": "telegram",
+        "detail": "Calibrate Grok usage from screenshot"
+      },
+      {
+        "id": "jaimes-status-20260618-144053-check-agent-operations",
+        "time": "2026-06-18T14:40:53Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Check agent operations",
+        "status": "active",
+        "tool": "telegram-ingress",
+        "detail": "Check agent operations"
+      },
+      {
+        "id": "jaimes-status-20260618-143304-sorare-pre-lock-loop",
+        "time": "2026-06-18T14:33:04Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Sorare pre-lock loop",
+        "status": "info",
+        "tool": "sorare_prelock_loop",
+        "detail": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Gleyber Torres, Jackson Chourio, Jordan Walker, Reid Detmers"
+      },
+      {
+        "id": "jain-status-20260618-143201-j-a-i-n-is-online-and-ready",
+        "time": "2026-06-18T14:32:01Z",
+        "agent": "jain",
+        "agentLabel": "J.A.I.N",
+        "type": "status",
+        "title": "J.A.I.N is online and ready",
+        "status": "ready",
+        "tool": "status check",
+        "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks."
+      },
+      {
+        "id": "jaimes-status-20260618-143101-sorare-daily-missions-watchdog-needs-attention",
+        "time": "2026-06-18T14:31:01Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Sorare Daily Missions watchdog needs attention",
+        "status": "error",
+        "tool": "cron",
+        "detail": "Sorare Daily Missions watchdog needs attention"
+      }
+    ],
+    "blockedEvents": [
+      {
+        "id": "jaimes-status-20260618-143101-sorare-daily-missions-watchdog-needs-attention",
+        "time": "2026-06-18T14:31:01Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "type": "status",
+        "title": "Sorare Daily Missions watchdog needs attention",
+        "status": "error",
+        "tool": "cron",
+        "detail": "Sorare Daily Missions watchdog needs attention"
+      }
+    ],
+    "recentDecisions": [
+      {
+        "id": "jaimes-decision-20260618-024730-crypto-monitor-no-trade-after-fresh-mtm",
+        "time": "2026-06-18T02:47:30Z",
+        "agent": "jaimes",
+        "agentLabel": "JAIMES",
+        "title": "Crypto Monitor: no trade after fresh MTM",
+        "status": "accepted",
+        "detail": "Remote MTM is fresh; review shortlist remains chasey; no wallet action taken.",
+        "privacy": "dashboard-safe",
+        "tags": []
+      },
+      {
+        "id": "joshex-decision-20260430-153638-always-include-proposed-next-steps-in-ecosystem-",
+        "time": "2026-04-30T15:36:38Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "title": "Always include proposed next steps in ecosystem work",
+        "status": "accepted",
+        "detail": "Josh requested that responses include proposed next steps; future Mission Control and agent ecosystem updates should end with concrete next recommended actions.",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "preference",
+          "next-steps"
+        ]
+      },
+      {
+        "id": "joshex-decision-20260430-153238-phase-4-will-build-task-queue-and-capability-reg",
+        "time": "2026-04-30T15:32:38Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "title": "Phase 4 will build task queue and capability registry before broad wrapping",
+        "status": "accepted",
+        "detail": "Implementation plan prioritizes capability records, task lifecycle helper, permission tiers, Mission Control task summary, then safe one-job-at-a-time automation wrapping.",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "phase4",
+          "task-queue",
+          "capabilities"
+        ]
+      },
+      {
+        "id": "joshex-decision-20260430-090044-phase-3-stages-cron-wrapping-one-job-at-a-time",
+        "time": "2026-04-30T09:00:44Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "title": "Phase 3 stages cron wrapping one job at a time",
+        "status": "accepted",
+        "detail": "All nodes have helper/wrapper tooling; existing cron lines are reported as ready_unwrapped and should be wrapped per job after confirming owner lane, logs, and exit code behavior.",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "phase3",
+          "adoption"
+        ]
+      },
+      {
+        "id": "joshex-decision-20260430-081851-phase-2-stores-durable-coordination-facts-outsid",
+        "time": "2026-04-30T08:18:51Z",
+        "agent": "joshex",
+        "agentLabel": "JOSHeX",
+        "title": "Phase 2 stores durable coordination facts outside Brain Feed",
+        "status": "accepted",
+        "detail": "Brain Feed remains live status; decisions, handoffs, knowledge, and daily rollups use durable sidecars consumed by Mission Control.",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "phase2",
+          "shared-os"
+        ]
+      }
+    ],
+    "knowledgeEntries": [
+      {
+        "id": "josh-agent-quick-card",
+        "title": "Josh Agent Quick Card",
+        "path": "scripts/josh_agent_quick_card.py",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "agent-status",
+          "quick-card"
+        ],
+        "summary": "Sends compact Telegram status cards for Josh 2.0, JOSHeX, JAIMES, and J.AI.N using Mission Control sidecars."
+      },
+      {
+        "id": "josh-telegram-callback-action",
+        "title": "Josh Telegram Callback Action",
+        "path": "scripts/josh_telegram_callback_action.py",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "callbacks",
+          "buttons"
+        ],
+        "summary": "Maps common Josh 2.0 Telegram inline-button callback payloads to concrete actions or compact response cards without polling Telegram directly."
+      },
+      {
+        "id": "telegram-control-panel",
+        "title": "Telegram Control Panel",
+        "path": "telegram-control-panel.html",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "webapp",
+          "control-panel"
+        ],
+        "summary": "Dashboard-safe mobile control panel artifact for future Telegram Web App wiring when a stable HTTPS endpoint is available."
+      },
+      {
+        "id": "josh-telegram-digest",
+        "title": "Josh Telegram Digest",
+        "path": "scripts/josh_telegram_digest.py",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "digest",
+          "overview"
+        ],
+        "summary": "Sends compact overview and daily digest cards to Josh 2.0 Telegram using Mission Control sidecars."
+      },
+      {
+        "id": "josh-work-card",
+        "title": "Josh Telegram Work Card",
+        "path": "scripts/josh_work_card.py",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "work-card",
+          "iphone"
+        ],
+        "summary": "Compact editable Telegram work-card helper intended to be synced to Josh 2.0 workspace scripts for most multi-step tasks."
+      },
+      {
+        "id": "josh2-telegram-ux-audit",
+        "title": "Josh 2.0 Telegram UX Audit",
+        "path": "docs/josh2-telegram-ux-audit.md",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "iphone",
+          "ux",
+          "routing"
+        ],
+        "summary": "Dashboard-safe audit and implementation backlog for making Josh 2.0 Telegram the primary iPhone command-center experience."
+      },
+      {
+        "id": "josh2-telegram-ux-config",
+        "title": "Josh 2.0 Telegram UX Config",
+        "path": "data/josh2-telegram-ux-config.json",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "iphone",
+          "commands",
+          "buttons"
+        ],
+        "summary": "Machine-readable Telegram UX policy for Josh 2.0 command menu, inline buttons, response templates, and future UI options."
+      },
+      {
+        "id": "josh2-telegram-control-panel-buttons",
+        "title": "Josh 2.0 Telegram Control Panel Buttons",
+        "path": "data/josh2-telegram-control-panel-buttons.json",
+        "owner": "JOSHeX",
+        "privacy": "dashboard-safe",
+        "tags": [
+          "josh2",
+          "telegram",
+          "buttons",
+          "iphone"
+        ],
+        "summary": "Reusable inline-button payload for the Josh 2.0 iPhone command-center control panel."
+      }
+    ],
+    "openHandoffs": [
+      {
+        "id": "jaimes-handoff-20260617-011610-requesting-joshex-install-joshex-gui-app-canarie",
+        "time": "2026-06-17T01:16:10Z",
+        "from": "jaimes",
+        "fromLabel": "JAIMES",
+        "to": "agent",
+        "title": "Requesting JOSHeX: Install JOSHeX GUI app canaries",
+        "status": "open",
+        "detail": "Created task task-joshex-20260617-011610-install-joshex-gui-app-canaries for JOSHeX: Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent, write a dashboard-safe gui-app-canaries-joshex.json sidecar, and sync it back to Control Tower. Do not inspect private content or secrets.",
+        "path": "docs/handoffs/2026-06-17-agent-jaimes-handoff-20260617-011610-requesting-joshex-install-joshex-gui-app-canarie.md",
+        "privacy": "dashboard-safe"
+      },
+      {
+        "id": "jaimes-handoff-20260612-040609-requesting-joshex-macbook-no-ssh-boundary",
+        "time": "2026-06-12T04:06:09Z",
+        "from": "jaimes",
+        "fromLabel": "JAIMES",
+        "to": "agent",
+        "title": "Requesting JOSHeX: MacBook no-SSH boundary",
+        "status": "open",
+        "detail": "Created task task-joshex-20260612-040609-macbook-no-ssh-boundary for JOSHeX: Use JOSHeX/Mission Control handoffs for future jcubell16 or MacBook-only work; JAIMES should not request SSH to Josh's MacBook.",
+        "path": "docs/handoffs/2026-06-12-agent-jaimes-handoff-20260612-040609-requesting-joshex-macbook-no-ssh-boundary.md",
+        "privacy": "dashboard-safe"
+      },
+      {
+        "id": "jaimes-handoff-20260510-041150-request-josh-2-0-display-refresh-verification",
+        "time": "2026-05-10T04:11:50Z",
+        "from": "jaimes",
+        "fromLabel": "JAIMES",
+        "to": "josh2",
+        "title": "Request JOSH 2.0 display refresh verification",
+        "status": "open",
+        "detail": "Josh approved follow-up: please verify the Mission Control display shows the JAIMES Brain Feed row after the helper patch/self-test.",
+        "path": "docs/handoffs/2026-05-10-josh2-jaimes-handoff-20260510-041150-request-josh-2-0-display-refresh-verification.md",
+        "privacy": "dashboard-safe"
+      }
+    ],
     "attentionHandoffs": [],
-    "dailyRollup": {},
-    "adoption": {},
+    "dailyRollup": {
+      "date": "2026-06-18",
+      "generatedAt": "2026-06-18T14:32:01Z",
+      "summary": "500 shared event(s), 3 job(s), 1 decision(s), 0 open handoff(s).",
+      "counts": {
+        "events": 500,
+        "jobs": 3,
+        "decisions": 1,
+        "handoffs": 0,
+        "blocked": 8
+      },
+      "highlights": [
+        "J.A.I.N is online and ready",
+        "Sorare Daily Missions watchdog needs attention",
+        "Done: no-trade MTM + route check journaled",
+        "Allowance and native ETH drift checks",
+        "Current holdings route probes",
+        "Diagnose balance/route probes",
+        "Executor balance probes",
+        "Route checks on held assets"
+      ],
+      "openHandoffs": [],
+      "blockedItems": [
+        {
+          "id": "jaimes-status-20260618-143101-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T14:31:01Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-140057-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T14:00:57Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-133053-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T13:30:53Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-130048-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T13:00:48Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-123046-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T12:30:46Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-120743-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T12:07:43Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-113043-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T11:30:43Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        },
+        {
+          "id": "jaimes-status-20260618-110037-sorare-daily-missions-watchdog-needs-attention",
+          "time": "2026-06-18T11:00:37Z",
+          "agent": "jaimes",
+          "agentLabel": "JAIMES",
+          "type": "status",
+          "title": "Sorare Daily Missions watchdog needs attention",
+          "status": "error",
+          "tool": "cron",
+          "detail": "Sorare Daily Missions watchdog needs attention",
+          "privacy": "dashboard-safe"
+        }
+      ]
+    },
+    "adoption": {
+      "generatedAt": "2026-05-29T15:50:08Z",
+      "nodes": [
+        {
+          "label": "local",
+          "agent": "joshex",
+          "workspace": "/Users/jc_agent/.openclaw/workspace",
+          "checkedAt": "2026-05-29T15:50:08Z",
+          "helperReady": true,
+          "wrapperReady": true,
+          "topLevelHelperReady": true,
+          "topLevelWrapperReady": true,
+          "docsReady": true,
+          "schemasReady": true,
+          "crontabAvailable": false,
+          "totalCronLines": 0,
+          "wrappedCronLines": 0,
+          "sampleWrappedCronLines": [],
+          "needsWrapping": [],
+          "status": "ready"
+        }
+      ],
+      "summary": {
+        "nodesChecked": 1,
+        "helpersReady": 1,
+        "wrappersReady": 1,
+        "wrappedCronLines": 0,
+        "totalCronLines": 0,
+        "overall": "ready"
+      }
+    },
     "tasks": {
-      "active": [],
+      "active": [
+        {
+          "id": "task-joshex-20260617-011610-install-joshex-gui-app-canaries",
+          "title": "Install JOSHeX GUI app canaries",
+          "objective": "Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent, write a dashboard-safe gui-app-canaries-joshex.json sidecar, and sync it back to Control Tower. Do not inspect private content or secrets.",
+          "owner": "joshex",
+          "requester": "jaimes",
+          "status": "queued",
+          "priority": "normal",
+          "privacy": "dashboard-safe",
+          "approval": "approved",
+          "requiredCapabilities": [
+            "gui-canaries"
+          ],
+          "dependencies": [],
+          "artifacts": [
+            "/Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md"
+          ],
+          "notes": [
+            {
+              "time": "2026-06-17T01:16:10Z",
+              "agent": "jaimes",
+              "status": "queued",
+              "note": "Delegated through agent_delegate.py. Type=reliability"
+            }
+          ],
+          "createdAt": "2026-06-17T01:16:10Z",
+          "updatedAt": "2026-06-17T01:16:10Z",
+          "dueAt": null,
+          "completedAt": null,
+          "summary": ""
+        },
+        {
+          "id": "task-joshex-20260612-040609-macbook-no-ssh-boundary",
+          "title": "MacBook no-SSH boundary",
+          "objective": "Use JOSHeX/Mission Control handoffs for future jcubell16 or MacBook-only work; JAIMES should not request SSH to Josh's MacBook.",
+          "owner": "joshex",
+          "requester": "jaimes",
+          "status": "queued",
+          "priority": "low",
+          "privacy": "dashboard-safe",
+          "approval": "none",
+          "requiredCapabilities": [],
+          "dependencies": [],
+          "artifacts": [
+            "/Users/jc_agent/.secrets/agent_account_scan/joshex_personal_account_boundary.md"
+          ],
+          "notes": [
+            {
+              "time": "2026-06-12T04:06:09Z",
+              "agent": "jaimes",
+              "status": "queued",
+              "note": "Delegated through agent_delegate.py. Type=coordination"
+            }
+          ],
+          "createdAt": "2026-06-12T04:06:09Z",
+          "updatedAt": "2026-06-12T04:06:09Z",
+          "dueAt": null,
+          "completedAt": null,
+          "summary": ""
+        },
+        {
+          "id": "task-jaimes-20260510-031939-consolidate-espn-fantasy-monday-9-am-crons",
+          "title": "Consolidate ESPN fantasy Monday 9 AM crons",
+          "objective": "After the Monday 2026-05-11 09:00 ET deterministic Fantasy Monday Pre-Lock Lineup Report runs successfully and produces the target-week artifact with FIRSTGAME_WEEKLY metadata, pause the older 6bcc0e8bb382 Fantasy weekly pre-lock planner. Keep Monday 11 final lineup check, Sunday post-waiver planner, and ESPN auth watchdog.",
+          "owner": "jaimes",
+          "requester": "joshex",
+          "status": "queued",
+          "priority": "normal",
+          "privacy": "dashboard-safe",
+          "approval": "none",
+          "requiredCapabilities": [
+            "espn-fantasy-baseball-automation"
+          ],
+          "dependencies": [],
+          "artifacts": [
+            "mission-control/docs/handoffs/2026-05-10-espn-fantasy-auth-policy.md",
+            "mission-control/data/fantasy-espn-auth-policy.json"
+          ],
+          "notes": [
+            {
+              "time": "2026-05-10T03:19:39Z",
+              "agent": "joshex",
+              "status": "queued",
+              "note": "Do not pause the older job until the new no-agent report has one successful run."
+            }
+          ],
+          "createdAt": "2026-05-10T03:19:39Z",
+          "updatedAt": "2026-05-10T03:19:39Z",
+          "dueAt": "2026-05-11T10:00:00-04:00",
+          "completedAt": null,
+          "summary": ""
+        }
+      ],
       "blocked": [],
       "approvalNeeded": [],
-      "byOwner": {}
+      "byOwner": {
+        "joshex": 2,
+        "jaimes": 1
+      }
     },
     "capabilities": {
       "updatedAt": "2026-05-14T03:13:00Z",
@@ -1584,7 +2398,7 @@
       ]
     },
     "routingPolicy": {
-      "updatedAt": "2026-06-18T07:05:00Z",
+      "updatedAt": "2026-06-18T06:55:00Z",
       "defaultRequester": "joshex",
       "deviceResourcePolicy": {
         "summary": "JOSHeX is the trusted coordinator and private-Mac specialist, not the default execution host. Prefer Josh 2.0 or JAIMES for real ecosystem work unless the task requires MacBook-only local state.",
@@ -1704,9 +2518,15 @@
         "guardrail": "Codex/OpenAI remains default execution model, but JOSHeX on the personal MacBook is not the default execution host. Prefer Josh 2.0 or JAIMES for ecosystem execution and heavier work. Gemini, xAI, and OpenRouter receive sanitized dashboard-safe specialist work only. xAI calls should use store=false where available and must not receive secrets or raw private connector/account data. JOSHeX owns private-Mac-only work, coordination, approvals, and final review.",
         "cookieKeychainDisambiguation": "A visible alert mentioning cookie.codex, Codex cookies, Keychain Not Found, or a keychain cannot be found means macOS/Codex keychain work on the device. It is not Sorare cookie freshness unless the user explicitly says Sorare.",
         "dailyUtilizationPolicy": "Run at least two dashboard-safe Gemini specialist passes per day when quota is available: one daily digest/stale-task compression pass and one review/evaluator pass. Use scripts/gemini_specialist_pass.py --agent jaimes for JAIMES-owned passes so raw prompts and raw output are not stored. Keep Codex/Hermes as execution owner.",
-        "jaimesGeminiRoute": "JAIMES should use Gemini first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations. Use Gemini Flash for routine throughput and Gemini Pro for explicit deeper compact evaluation. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
-        "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth and route reason; explicit model switches must verify a fresh lane before work.",
-        "lastModeChangeAt": "2026-06-18T07:05:00Z",
+        "jaimesGeminiRoute": "JAIMES should use Gemini Pro first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations so the daily Pro subscription is used on applicable work. Use Gemini Flash only as fallback/cheap throughput. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
+        "sorareFastLaneRoute": "Sorare and fantasy questions should use JAIMES precomputed cache first when fresh, JAIMES read-only validation for standard checks, and deep JAIMES optimization only when cache is stale, disputed, action-bearing, or explicitly requested.",
+        "runtimeSlaPolicy": {
+          "fast": "Target 1-3 minutes. Use cache-first answers from data/sorare-fast-lane-cache.json when fresh.",
+          "standard": "Target 5-10 minutes. Use JAIMES read-only validation and summarize only the actionable delta.",
+          "deep": "Expected 20+ minutes. Use for multi-entry optimization, browser fallback, authenticated mutation paths, or explicit deep audits."
+        },
+        "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth, include Route reason when Gemini, xAI, or OpenRouter is used or skipped, announce Codex exhausted/conserve mode when active, and announce any route switch before the result.",
+        "lastModeChangeAt": "2026-06-18T06:55:00Z",
         "lastModeChangeReason": "add verified fresh-lane model switching contract from JOSHeX proposal",
         "skillPack": {
           "source": "mission-control/agent-skills",
@@ -1721,7 +2541,7 @@
             "handoff-to-joshex"
           ]
         },
-        "updatedAt": "2026-06-18T07:05:00Z",
+        "updatedAt": "2026-06-18T06:55:00Z",
         "freshLaneSwitching": {
           "rule": "Model switching means checkpoint + fresh execution lane/session + verification before substantive work; never pretend the current session mutated models.",
           "explicitRequestOverride": "Josh explicit model requests override the router unless unsafe or unavailable.",
@@ -1781,7 +2601,9 @@
             "red-team-review",
             "batch-audit",
             "config-drift-audit",
-            "agent-ecosystem-audit"
+            "agent-ecosystem-audit",
+            "sorare-fast-check",
+            "fantasy-fast-check"
           ],
           "capabilities": [
             "repo-edit",
@@ -1796,7 +2618,8 @@
             "gemini-research",
             "xai-red-team",
             "xai-batch-audit",
-            "openrouter-fallback"
+            "openrouter-fallback",
+            "cache-first-review"
           ],
           "privacyTiers": [
             "dashboard-safe",
@@ -1866,7 +2689,15 @@
             "ml-workflows",
             "gemini-review",
             "gemini-long-context",
-            "gemini-evaluation"
+            "gemini-evaluation",
+            "sorare-fast-lane",
+            "sorare-fast-check",
+            "sorare-standard-review",
+            "sorare-deep-audit",
+            "fantasy-fast-lane",
+            "fantasy-fast-check",
+            "fantasy-standard-review",
+            "fantasy-deep-audit"
           ],
           "capabilities": [
             "hermes",
@@ -1881,7 +2712,10 @@
             "gemini-scheduled-summary",
             "ml-workflows",
             "gemini-evaluator",
-            "connected-account-triage"
+            "connected-account-triage",
+            "sorare-precompute",
+            "fantasy-precompute",
+            "cache-first-review"
           ],
           "privacyTiers": [
             "dashboard-safe",
@@ -1926,27 +2760,403 @@
     },
     "heartbeats": {
       "staleAfterMinutes": 120,
-      "fresh": [],
-      "stale": []
+      "fresh": [
+        {
+          "agent": "jaimes",
+          "node": "jaimes-brain-feed-publish",
+          "status": "active",
+          "summary": "Rebuild calibrated Grok usage",
+          "updatedAt": "2026-06-18T14:41:56Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "sorare-prelock-loop",
+          "status": "ok",
+          "summary": "Sorare pre-lock attention: 7 limited mission(s) are incomplete or unclaimed.; Lineup DNP/injury risk detected: Alec Burleson, Gleyber Torres, Jackson Chourio, Jordan Walker, Reid Detmers",
+          "updatedAt": "2026-06-18T14:33:04Z",
+          "stale": false
+        },
+        {
+          "agent": "jain",
+          "node": "jain-brain-feed-publish",
+          "status": "ok",
+          "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+          "updatedAt": "2026-06-18T14:32:01Z",
+          "stale": false,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jain",
+          "node": "jaimes-via-josh",
+          "status": "ok",
+          "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+          "updatedAt": "2026-06-18T14:32:01Z",
+          "stale": false
+        }
+      ],
+      "stale": [
+        {
+          "agent": "joshex",
+          "node": "joshex-brain-feed-publish",
+          "status": "active",
+          "summary": "Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent, write a dashboard-safe gui-app-canaries-joshex.json sidecar, and sync it back t...",
+          "updatedAt": "2026-06-17T01:16:10Z",
+          "stale": true,
+          "source": "agent_publish.py"
+        },
+        {
+          "agent": "jaimes",
+          "node": "jaimes-via-josh",
+          "status": "ok",
+          "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
+          "updatedAt": "2026-06-12T06:36:52Z",
+          "stale": true
+        },
+        {
+          "agent": "josh2",
+          "node": "josh2-brain-feed-publish",
+          "status": "blocked",
+          "summary": "Why: JOSH 2.0 has not published a Brain Feed update for 999h; the freshness limit is 2h. This is a reporting freshness alert, not proof the agent is offline.",
+          "updatedAt": "2026-05-27T18:07:12Z",
+          "stale": true,
+          "source": "agent_publish.py"
+        }
+      ]
     },
     "capabilityInventory": {
-      "nodes": []
+      "updatedAt": "2026-06-18T06:00:01Z",
+      "nodes": [
+        {
+          "node": "jaimes-via-josh",
+          "agent": "jaimes",
+          "checkedAt": "2026-06-18T06:00:01Z",
+          "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+          "machine": "arm64",
+          "python": "Python 3.14.3",
+          "workspace": "/Users/jc_agent/.openclaw/workspace",
+          "crontabAvailable": true,
+          "crontabCount": 1,
+          "wrappedCronLines": 0,
+          "ollamaModels": [
+            "gemma4:26b",
+            "llama3.2:latest",
+            "qwen2.5:7b",
+            "mistral:latest",
+            "llama3.1:8b",
+            "nomic-embed-text:latest"
+          ],
+          "geminiCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gemini",
+            "version": "0.38.2",
+            "authMode": "oauth-or-api-key",
+            "dashboardSafe": true,
+            "status": "ready"
+          },
+          "nodeCli": {
+            "available": true,
+            "path": "/Users/jc_agent/.local/bin/node",
+            "version": "v24.16.0",
+            "status": "ready"
+          },
+          "gogCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gog",
+            "version": "0.15.0 (Homebrew 2026-05-05T05:49:37Z)",
+            "status": "ready"
+          },
+          "peekabooCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/peekaboo",
+            "version": "Peekaboo 3.0.0-beta3 (main/69376fa4-dirty, built: 2025-12-29T22:26:53+00:00)",
+            "status": "permissions-needed",
+            "permissions": {
+              "Screen Recording": false,
+              "Accessibility": true
+            },
+            "computerUseReady": false
+          },
+          "onePasswordCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/op",
+            "version": "2.34.0",
+            "status": "ready"
+          },
+          "codexCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/codex",
+            "version": "codex-cli 0.137.0",
+            "status": "ready"
+          },
+          "openclawCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/openclaw",
+            "version": "OpenClaw 2026.6.8 (844f405)",
+            "status": "ready"
+          },
+          "openclawHealth": {
+            "available": true,
+            "status": "ok",
+            "ok": true,
+            "plugins": [],
+            "telegram": {
+              "configured": true,
+              "running": true,
+              "connected": true,
+              "polling": false
+            }
+          },
+          "openclawGateway": {
+            "available": true,
+            "status": "ok",
+            "ok": true,
+            "running": true,
+            "port": 18789,
+            "serverVersion": "2026.6.8",
+            "adminCapable": true
+          },
+          "openclawTaskLedger": {
+            "available": true,
+            "status": "ok",
+            "summary": {
+              "total": 0,
+              "warnings": 0,
+              "errors": 0
+            },
+            "warningCodes": {}
+          },
+          "hermesCli": {
+            "available": true,
+            "path": "/Users/jc_agent/.local/bin/hermes",
+            "version": "Hermes Agent v0.16.0 (2026.6.5) \u00b7 upstream 9c3c5da3",
+            "status": "ready"
+          },
+          "codexMcpServers": [
+            {
+              "name": "computer-use",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "playwright",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "openaiDeveloperDocs",
+              "kind": "http",
+              "status": "enabled"
+            }
+          ],
+          "services": [
+            "ollama",
+            "weaviate",
+            "temporal",
+            "Hermes",
+            "OpenCLAW"
+          ]
+        },
+        {
+          "node": "josh2-lan",
+          "agent": "josh",
+          "checkedAt": "2026-05-07T02:12:12Z",
+          "platform": "macOS-26.3.2-arm64-arm-64bit-Mach-O",
+          "machine": "arm64",
+          "python": "Python 3.14.3",
+          "workspace": "/Users/josh2.0/.openclaw/workspace",
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "wrappedCronLines": 0,
+          "ollamaModels": [
+            "qwen2.5-coder:7b",
+            "nomic-embed-text:latest"
+          ],
+          "geminiCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gemini",
+            "version": "0.35.3",
+            "authMode": "oauth-or-api-key",
+            "dashboardSafe": true,
+            "status": "ready"
+          },
+          "gogCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gog",
+            "version": "v0.15.0 (e0338d5 2026-05-05T05:50:19Z)",
+            "status": "ready"
+          },
+          "onePasswordCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/op",
+            "version": "2.34.0",
+            "status": "ready"
+          },
+          "codexCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/codex",
+            "version": "codex-cli 0.125.0",
+            "status": "ready"
+          },
+          "codexMcpServers": [
+            {
+              "name": "computer-use",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "playwright",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "openaiDeveloperDocs",
+              "kind": "http",
+              "status": "enabled"
+            }
+          ],
+          "services": [
+            "brain_feed_server.py",
+            "ollama",
+            "OpenCLAW"
+          ]
+        },
+        {
+          "node": "joshex",
+          "agent": "joshex",
+          "checkedAt": "2026-05-07T02:09:46Z",
+          "platform": "macOS-26.2-arm64-arm-64bit",
+          "machine": "arm64",
+          "python": "Python 3.9.6",
+          "workspace": "/Users/joshcubell/Documents/New project",
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "wrappedCronLines": 0,
+          "ollamaModels": [],
+          "geminiCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gemini",
+            "version": "0.40.0",
+            "authMode": "oauth-or-api-key",
+            "dashboardSafe": true,
+            "status": "ready"
+          },
+          "gogCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gog",
+            "version": "0.15.0 (Homebrew 2026-05-05T05:49:37Z)",
+            "status": "ready"
+          },
+          "onePasswordCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/op",
+            "version": "2.34.0",
+            "status": "ready"
+          },
+          "codexCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/codex",
+            "version": "codex-cli 0.128.0-alpha.1",
+            "status": "ready"
+          },
+          "codexMcpServers": [
+            {
+              "name": "computer-use",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "playwright",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "xcodebuildmcp",
+              "kind": "stdio",
+              "status": "enabled"
+            },
+            {
+              "name": "openaiDeveloperDocs",
+              "kind": "http",
+              "status": "enabled"
+            }
+          ],
+          "services": []
+        },
+        {
+          "node": "macbook-codex",
+          "agent": "joshex",
+          "checkedAt": "2026-04-30T18:28:25Z",
+          "platform": "macOS-26.2-arm64-arm-64bit",
+          "machine": "arm64",
+          "python": "Python 3.9.6",
+          "workspace": "/Users/joshcubell/Documents/New project",
+          "crontabAvailable": false,
+          "crontabCount": 0,
+          "wrappedCronLines": 0,
+          "ollamaModels": [],
+          "geminiCli": {
+            "available": true,
+            "path": "/opt/homebrew/bin/gemini",
+            "version": "0.40.0",
+            "authMode": "oauth-or-api-key",
+            "dashboardSafe": true,
+            "status": "ready"
+          },
+          "services": []
+        }
+      ]
     },
     "capabilityWatch": {
-      "updatedAt": "2026-06-18T14:42:15Z",
-      "status": "pending",
-      "summary": "Capability Watch has not run yet.",
-      "recommendations": []
+      "updatedAt": "2026-06-17T02:00:50Z",
+      "status": "ready",
+      "summary": "JAIMES capability inventory refreshed.",
+      "recommendations": [],
+      "source": "jaimes_capability_watch.sh fallback watch",
+      "nodeCount": 4,
+      "jaimesRows": 1
     },
     "automationRollout": {
-      "rollouts": []
+      "updatedAt": "2026-05-02T04:56:37Z",
+      "rollouts": [
+        {
+          "id": "josh-j-a-i-n-silence-detector",
+          "agent": "josh",
+          "node": "josh2-lan",
+          "title": "J.A.I.N Silence Detector",
+          "match": "jain_silence_detector.py",
+          "status": "archived_stale",
+          "backup": "/Users/josh2.0/.openclaw/workspace/mission-control/data/crontab-backups/20260430T163013Z-josh-j-a-i-n-silence-detector.crontab",
+          "original": "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1",
+          "wrapped": "0 * * * * HOME=/Users/josh2.0 PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin /Users/josh2.0/.openclaw/workspace/mission-control/scripts/agent_job_wrap.sh josh 'J.A.I.N Silence Detector' jain_silence_detector.py 'Hourly J.A.I.N silence detector wrapped by Phase 4B' -- /bin/zsh -lc '/opt/homebrew/bin/python3 /Users/josh2.0/.openclaw/workspace/scripts/jain_silence_detector.py >> /Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log 2>&1'",
+          "updatedAt": "2026-04-30T16:30:13Z",
+          "archivedAt": "2026-05-02T04:56:37Z",
+          "archiveReason": "Legacy crontab entry no longer present; refreshed adoption checks show no crontab lines to wrap."
+        },
+        {
+          "id": "jain-josh-health-check",
+          "agent": "jain",
+          "node": "jaimes-via-josh",
+          "title": "JOSH Health Check",
+          "match": "check_josh_health.sh",
+          "status": "archived_stale",
+          "backup": "/Users/jc_agent/.openclaw/workspace/mission-control/data/crontab-backups/20260430T163005Z-jain-josh-health-check.crontab",
+          "original": "*/30 * * * * bash /Users/jc_agent/scripts/check_josh_health.sh >> /Users/jc_agent/scripts/logs/josh_health.log 2>&1",
+          "wrapped": "*/30 * * * * /Users/jc_agent/.openclaw/workspace/mission-control/scripts/agent_job_wrap.sh jain 'JOSH Health Check' check_josh_health.sh 'J.A.I.N remote health check to Josh 2.0 wrapped by Phase 4B' -- /bin/zsh -lc 'bash /Users/jc_agent/scripts/check_josh_health.sh >> /Users/jc_agent/scripts/logs/josh_health.log 2>&1'",
+          "updatedAt": "2026-04-30T16:30:11Z",
+          "archivedAt": "2026-05-02T04:56:37Z",
+          "archiveReason": "Legacy crontab entry no longer present; refreshed adoption checks show no crontab lines to wrap."
+        }
+      ],
+      "staleArchivedAt": "2026-05-02T04:56:37Z"
     }
   },
   "visualCanaries": {
     "ok": true,
     "status": "ok",
     "summary": "All canaries passed",
-    "checkedAt": "2026-06-18T06:43:42.076735Z",
+    "checkedAt": "2026-06-13T23:29:28.026553Z",
     "checks": [
       {
         "name": "Live objectives",
@@ -1963,7 +3173,7 @@
       {
         "name": "Today Jobs",
         "ok": true,
-        "detail": "29 today-relevant; 0 active issue(s)",
+        "detail": "28 today-relevant; 0 active issue(s)",
         "severity": "ok"
       },
       {
@@ -1999,7 +3209,7 @@
       {
         "name": "Agent Control lane",
         "ok": true,
-        "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+        "detail": "overall=attention; ready=2/4; source=live-heartbeats",
         "severity": "ok"
       },
       {
@@ -2059,13 +3269,13 @@
       {
         "name": "Josh heartbeat recovery publish",
         "ok": true,
-        "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+        "detail": "healthy Josh 2.0 heartbeat recovery can clear stale status-check attention rows without overwriting real active work",
         "severity": "ok"
       },
       {
         "name": "Brain Feed heartbeat freshness",
         "ok": true,
-        "detail": "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks",
+        "detail": "idle agent cards prefer fresh heartbeat-backed check-ins over old sidecars",
         "severity": "ok"
       },
       {
@@ -2389,7 +3599,7 @@
       {
         "name": "Signal Feed optional source",
         "ok": true,
-        "detail": "10 signal rows; 0 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
+        "detail": "10 signal rows; 5 newsletter trend rows; health=fresh; counts={'live': 5, 'newsletter': 5, 'total': 10, 'publicRssFallbackItems': 5}",
         "severity": "ok"
       },
       {
@@ -2455,7 +3665,7 @@
       {
         "name": "Agentic Crypto summary",
         "ok": true,
-        "detail": "status=fresh; mode=read-only; 15 token rows; 3 chain rows; masked wallets present",
+        "detail": "status=fresh; mode=read-only; 11 token rows; 3 chain rows; masked wallets present",
         "severity": "ok"
       },
       {
@@ -2527,7 +3737,7 @@
       {
         "name": "Today Jobs current-hour routine grouping",
         "ok": true,
-        "detail": "same-time and same-hour background checks collapse into compact rows while priority and attention work stays itemized",
+        "detail": "same-hour background system and calendar sync checks group into one compact row while priority and attention work stays itemized",
         "severity": "ok"
       },
       {
@@ -2551,32 +3761,11 @@
     ]
   },
   "runtimeLayout": {
-    "ok": true,
-    "status": "ok",
-    "checkedAt": "2026-06-15T08:24:21Z",
-    "summary": "Live kiosk layout fits the 24-inch screen",
-    "issues": [],
-    "checks": [
-      {
-        "name": "kiosk",
-        "ok": true,
-        "detail": "HTTP 200"
-      },
-      {
-        "name": "dashboard",
-        "ok": true,
-        "detail": "dashboard JSON parsed"
-      },
-      {
-        "name": "screenshot",
-        "ok": true,
-        "detail": "screenshot advisory: SCREENSHOT_FAILED could not create image from display"
-      }
-    ],
-    "textQuality": {
-      "visibleInternalTextLeaks": []
-    },
-    "source": "mission_control_runtime_layout_check.py"
+    "ok": false,
+    "status": "unknown",
+    "checkedAt": null,
+    "summary": "Live kiosk layout check has not run yet.",
+    "issues": []
   },
   "sorareMlCockpit": {
     "status": "active",
@@ -2596,7 +3785,7 @@
   "voiceRouter": {
     "status": "ready",
     "summary": "Telegram voice notes can become structured tasks",
-    "entrypoint": "/private/tmp/mission-control-grok-finops-pr/scripts/telegram_voice_task_router.py",
+    "entrypoint": "/Users/jc_agent/.openclaw/workspace/mission-control/scripts/telegram_voice_task_router.py",
     "modes": [
       "task",
       "calendar",
@@ -2656,54 +3845,728 @@
     ]
   },
   "agentControl": {
-    "generatedAt": "2026-06-18T14:42:15Z",
+    "generatedAt": "2026-06-18T14:41:57Z",
     "statusSource": "live-heartbeats",
-    "staleSourceSuppressed": false,
+    "staleSourceSuppressed": true,
     "summary": {
       "overall": "attention",
-      "readyAgents": 0,
-      "totalAgents": 0,
-      "offlineAgents": 0,
-      "degradedServices": 0,
+      "readyAgents": 2,
+      "totalAgents": 5,
+      "offlineAgents": 3,
+      "degradedServices": 3,
       "authRequiredServices": 0,
       "failedQueues": 0,
       "dirtyRepos": 0,
-      "localModels": 0,
+      "localModels": 8,
       "source": "live-heartbeats"
     },
-    "agents": {}
+    "agents": {
+      "jaimes": {
+        "id": "jaimes",
+        "label": "JAIMES",
+        "status": "ready",
+        "available": true,
+        "probedAt": "2026-06-18T14:41:56Z",
+        "summary": "Rebuild calibrated Grok usage",
+        "source": "live-heartbeats",
+        "stale": false
+      },
+      "jain": {
+        "id": "jain",
+        "label": "J.A.I.N",
+        "status": "ready",
+        "available": true,
+        "probedAt": "2026-06-18T14:32:01Z",
+        "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+        "source": "live-heartbeats",
+        "stale": false
+      },
+      "josh2": {
+        "id": "josh2",
+        "label": "Josh 2.0",
+        "status": "attention",
+        "available": false,
+        "probedAt": "2026-05-27T18:07:12Z",
+        "summary": "Why: JOSH 2.0 has not published a Brain Feed update for 999h; the freshness limit is 2h. This is a reporting freshness alert, not proof the agent is offline.",
+        "source": "live-heartbeats",
+        "stale": true
+      },
+      "josh2.0": {
+        "id": "josh2.0",
+        "label": "JOSH2.0",
+        "status": "attention",
+        "available": false,
+        "probedAt": "2026-05-07T02:12:12Z",
+        "summary": "No fresh heartbeat yet.",
+        "source": "live-heartbeats",
+        "stale": true
+      },
+      "joshex": {
+        "id": "joshex",
+        "label": "JOSHeX",
+        "status": "attention",
+        "available": false,
+        "probedAt": "2026-06-17T01:16:10Z",
+        "summary": "Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent,...",
+        "source": "live-heartbeats",
+        "stale": true
+      }
+    }
   },
   "agentContextRegistry": {
-    "generatedAt": "2026-06-18T14:42:15Z",
-    "canonicalSource": "Control Tower shared sidecars plus Josh 2.0 local live Brain Feed lane.",
-    "privacy": "dashboard-safe summaries only",
+    "generatedAt": "2026-06-18T14:28:56Z",
+    "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
+    "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
+    "chatSources": {
+      "sources": []
+    },
     "summary": {
-      "status": "unknown",
-      "agents": 0,
+      "agents": 4,
       "staleAgents": [],
       "openTasks": 0,
-      "openHandoffs": 0
+      "openHandoffs": 0,
+      "status": "ready"
     },
-    "agents": {}
+    "agents": {
+      "joshex": {
+        "id": "joshex",
+        "label": "JOSHeX",
+        "role": "trusted coordinator",
+        "node": "macbook-codex",
+        "contextScope": "Private coordinator context, Control Tower implementation, cross-agent handoffs, validation, and sensitive-account routing decisions.",
+        "freshness": "fresh",
+        "control": {
+          "status": "unknown",
+          "probedAt": "",
+          "available": false,
+          "role": ""
+        },
+        "brainFeed": {
+          "status": "done",
+          "objective": "Josh 2.0 screen check clean",
+          "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+          "updatedAt": "2026-06-18T14:25:04Z",
+          "ageMinutes": 3,
+          "currentTool": "Control Tower screen check",
+          "active": false
+        },
+        "heartbeat": {
+          "status": "unknown",
+          "updatedAt": "",
+          "ageMinutes": null,
+          "summary": ""
+        },
+        "openTasks": [],
+        "openHandoffs": [],
+        "recentEvents": [],
+        "pickupPrompt": "Review JOSHeX brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
+      },
+      "josh": {
+        "id": "josh",
+        "label": "Josh 2.0",
+        "role": "front door and Control Tower host",
+        "node": "josh2-lan",
+        "contextScope": "Telegram front door, Control Tower kiosk, OpenCLAW services, Josh-side jobs, user-visible routing, and live dashboard publishing.",
+        "freshness": "fresh",
+        "control": {
+          "status": "ready",
+          "probedAt": "2026-05-07T00:24:57Z",
+          "available": true,
+          "role": "fast-operator"
+        },
+        "brainFeed": {
+          "status": "done",
+          "objective": "Josh 2.0 screen check clean",
+          "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+          "updatedAt": "2026-06-18T14:25:04Z",
+          "ageMinutes": 3,
+          "currentTool": "Control Tower screen check",
+          "active": false
+        },
+        "heartbeat": {
+          "status": "unknown",
+          "updatedAt": "",
+          "ageMinutes": null,
+          "summary": ""
+        },
+        "openTasks": [],
+        "openHandoffs": [],
+        "recentEvents": [],
+        "pickupPrompt": "Review Josh 2.0 brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
+      },
+      "jaimes": {
+        "id": "jaimes",
+        "label": "JAIMES",
+        "role": "Hermes workhorse",
+        "node": "jaimes-via-josh",
+        "contextScope": "Hermes specialist work, Sorare/fantasy workflows, scheduled heavy jobs, reports, and durable work packets.",
+        "freshness": "fresh",
+        "control": {
+          "status": "ready",
+          "probedAt": "2026-05-07T00:24:58Z",
+          "available": true,
+          "role": "heavy-worker"
+        },
+        "brainFeed": {
+          "status": "active",
+          "objective": "Allowance and native ETH drift checks",
+          "detail": "Allowance and native ETH drift checks",
+          "updatedAt": "2026-06-18T14:28:44Z",
+          "ageMinutes": 0,
+          "currentTool": "exec",
+          "active": true
+        },
+        "heartbeat": {
+          "status": "ok",
+          "updatedAt": "2026-06-12T06:36:52Z",
+          "ageMinutes": 9112,
+          "summary": "JAIMES visibility heartbeat: Hermes state refreshed from scheduled jobs.",
+          "stale": true
+        },
+        "openTasks": [],
+        "openHandoffs": [],
+        "recentEvents": [
+          {
+            "id": "jaimes-status-20260618-142802-jaimes-is-working-now",
+            "time": "2026-06-18T14:28:02Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Current holdings route probes."
+          },
+          {
+            "id": "jaimes-status-20260618-142702-jaimes-is-working-now",
+            "time": "2026-06-18T14:27:02Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Executor balance probes."
+          },
+          {
+            "id": "jaimes-status-20260618-142601-jaimes-is-working-now",
+            "time": "2026-06-18T14:26:01Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Route checks on held assets."
+          },
+          {
+            "id": "jaimes-status-20260618-142501-jaimes-is-working-now",
+            "time": "2026-06-18T14:25:01Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Pregate read + path verification."
+          },
+          {
+            "id": "jaimes-status-20260618-141950-jaimes-is-online-and-ready",
+            "time": "2026-06-18T14:19:50Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Sorare Daily Missions complete."
+          },
+          {
+            "id": "jaimes-status-20260618-141747-jaimes-is-working-now",
+            "time": "2026-06-18T14:17:47Z",
+            "type": "status",
+            "status": "active",
+            "title": "JAIMES is working now",
+            "detail": "JAIMES live update: Yes, I fully approve."
+          },
+          {
+            "id": "jaimes-status-20260618-141547-jaimes-is-online-and-ready",
+            "time": "2026-06-18T14:15:47Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Done: Grok FinOps PR opened."
+          },
+          {
+            "id": "jaimes-status-20260618-141347-jaimes-is-online-and-ready",
+            "time": "2026-06-18T14:13:47Z",
+            "type": "status",
+            "status": "ready",
+            "title": "JAIMES is online and ready",
+            "detail": "JAIMES live check: Done: no-trade monitor run; TOESCOIN reject, SPCX69 hold, VVV gated."
+          }
+        ],
+        "pickupPrompt": "Review JAIMES brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
+      },
+      "jain": {
+        "id": "jain",
+        "label": "J.A.I.N",
+        "role": "background intelligence worker",
+        "node": "jaimes-via-josh",
+        "contextScope": "Breaking-news scans, intelligence feeds, X/watchlist monitoring, background automations, and worker health.",
+        "freshness": "fresh",
+        "control": {
+          "status": "ready",
+          "probedAt": "2026-05-07T00:24:58Z",
+          "available": true,
+          "role": "heavy-worker"
+        },
+        "brainFeed": {
+          "status": "ready",
+          "objective": "J.A.I.N is online and ready",
+          "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+          "updatedAt": "2026-06-18T13:31:56Z",
+          "ageMinutes": 57,
+          "currentTool": "status check",
+          "active": false
+        },
+        "heartbeat": {
+          "status": "ok",
+          "updatedAt": "2026-06-13T18:27:00Z",
+          "ageMinutes": 6961,
+          "summary": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
+          "stale": true
+        },
+        "openTasks": [],
+        "openHandoffs": [],
+        "recentEvents": [],
+        "pickupPrompt": "Review J.A.I.N brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
+      }
+    }
   },
   "reliabilityUpgrades": {
-    "updatedAt": "2026-06-18T14:42:15Z",
-    "summary": "Reliability upgrade probes have not run yet.",
-    "items": [],
-    "metrics": []
+    "updatedAt": "2026-06-17T01:18:59Z",
+    "summary": "Reliability Cockpit updated: trade candidate review done, trading monitor prompt gated, and JOSHeX app-canary handoff queued.",
+    "items": [
+      {
+        "id": "agent-routing-matrix",
+        "label": "Agent routing matrix",
+        "owner": "JAIMES + JOSH2",
+        "status": "ready",
+        "signal": "Owner/backup/escalation map installed.",
+        "whyItMatters": "Reduces duplicate work and wrong-host execution.",
+        "evidence": "docs/agent-reliability/agent_routing_matrix.md",
+        "next": "Use for every cross-agent handoff."
+      },
+      {
+        "id": "auth-account-matrix",
+        "label": "Auth/account matrix",
+        "owner": "JAIMES",
+        "status": "ready",
+        "signal": "Account boundaries and approval/resume flow documented.",
+        "whyItMatters": "Expands human-like work without crossing auth/payment boundaries.",
+        "evidence": "docs/agent-reliability/auth_account_matrix.md",
+        "next": "Update when new app auth is enabled."
+      },
+      {
+        "id": "gui-cua-watchdog",
+        "label": "GUI/Cua watchdog",
+        "owner": "JAIMES",
+        "status": "ready",
+        "signal": "Cua daemon, TCC, screen-size, and screenshot probes healthy.",
+        "whyItMatters": "Keeps computer-use automation honest.",
+        "evidence": "data/gui-cua-watchdog.json",
+        "next": "Alert only if desktop automation degrades."
+      },
+      {
+        "id": "gui-app-canaries-jaimes",
+        "label": "JAIMES app canaries",
+        "owner": "JAIMES",
+        "status": "ready",
+        "signal": "Chrome scriptability and Telegram gateway boundary tracked.",
+        "whyItMatters": "Catches app-level GUI drift before a task fails.",
+        "evidence": "data/gui-app-canaries-jaimes.json",
+        "next": "Run hourly as silent no-agent cron."
+      },
+      {
+        "id": "gui-app-canaries-josh2",
+        "label": "JOSH2 app canaries",
+        "owner": "JOSH 2.0",
+        "status": "ready",
+        "signal": "JOSH 2.0 Chrome/screenshot canary installed via LaunchAgent.",
+        "whyItMatters": "Extends computer-use reliability checks to the front-line Mac mini.",
+        "evidence": "data/gui-app-canaries.json",
+        "next": "LaunchAgent runs hourly on JOSH 2.0."
+      },
+      {
+        "id": "polling-guard-status",
+        "label": "Polling guard status",
+        "owner": "JAIMES",
+        "status": "ready",
+        "signal": "High-frequency polling and LLM interval jobs tracked.",
+        "whyItMatters": "Keeps API spend and Telegram noise controlled.",
+        "evidence": "data/polling-guard-status.json",
+        "next": "Convert candidates when deterministic gates are available."
+      },
+      {
+        "id": "trade-opportunity-pregate",
+        "label": "Trade pre-gate",
+        "owner": "JAIMES",
+        "status": "review",
+        "signal": "6 review candidates, 2 watch candidates",
+        "whyItMatters": "Deterministic filter before deeper trade review; no wallet action.",
+        "evidence": "data/trade-opportunity-pregate.json",
+        "next": "Use review candidates for proposal-only trade cards."
+      },
+      {
+        "id": "trade-pregate-review",
+        "label": "Trade candidate review",
+        "owner": "JAIMES + xAI",
+        "status": "ready",
+        "signal": "Top pre-gate candidates reviewed; no autonomous trade opened.",
+        "whyItMatters": "Turns deterministic gate output into actionable but safe trade judgment.",
+        "evidence": "docs/agent-reliability/trade_pregate_review_2026-06-17.md",
+        "next": "Only draft trade cards if Josh asks; no wallet action taken."
+      },
+      {
+        "id": "joshex-app-canary-handoff",
+        "label": "JOSHeX app canary handoff",
+        "owner": "JOSHeX",
+        "status": "watch",
+        "signal": "Install handoff queued because JOSHeX SSH route was unreachable from JAIMES.",
+        "whyItMatters": "Personal-Mac canaries require JOSHeX/local execution.",
+        "evidence": "docs/agent-reliability/joshex_gui_app_canaries_handoff.md",
+        "next": "JOSHeX should install LaunchAgent and sync sidecar when online."
+      },
+      {
+        "id": "codex-worker-plan",
+        "label": "Codex worker plan",
+        "owner": "JAIMES",
+        "status": "ready",
+        "signal": "OpenAI Pro/Codex subscription is the default labor pool.",
+        "whyItMatters": "More work at lower marginal cost.",
+        "evidence": "docs/agent-reliability/codex_worker_saturation_plan.md",
+        "next": "Use 2-3 workers for independent code/audit shards."
+      }
+    ],
+    "metrics": [
+      {
+        "label": "Reliability deep links",
+        "value": 8,
+        "status": "ready",
+        "detail": "docs/data evidence links"
+      },
+      {
+        "label": "GUI canary hosts",
+        "value": 2,
+        "status": "ready",
+        "detail": "JAIMES + JOSH 2.0"
+      },
+      {
+        "label": "Trade pre-gate",
+        "value": "review",
+        "status": "review",
+        "detail": "6 review candidates, 2 watch candidates"
+      },
+      {
+        "label": "No-agent guards",
+        "value": 33,
+        "status": "ready",
+        "detail": "includes trade pre-gate"
+      },
+      {
+        "label": "Trade review",
+        "value": "no trade",
+        "status": "ready",
+        "detail": "candidate review only"
+      },
+      {
+        "label": "JOSHeX handoff",
+        "value": "queued",
+        "status": "watch",
+        "detail": "mini2 SSH unreachable"
+      }
+    ]
   },
   "capabilityInventory": {
-    "updatedAt": "2026-06-18T14:42:15Z",
-    "nodes": []
+    "updatedAt": "2026-06-18T06:00:01Z",
+    "nodes": [
+      {
+        "node": "jaimes-via-josh",
+        "agent": "jaimes",
+        "checkedAt": "2026-06-18T06:00:01Z",
+        "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "Python 3.14.3",
+        "workspace": "/Users/jc_agent/.openclaw/workspace",
+        "crontabAvailable": true,
+        "crontabCount": 1,
+        "wrappedCronLines": 0,
+        "ollamaModels": [
+          "gemma4:26b",
+          "llama3.2:latest",
+          "qwen2.5:7b",
+          "mistral:latest",
+          "llama3.1:8b",
+          "nomic-embed-text:latest"
+        ],
+        "geminiCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gemini",
+          "version": "0.38.2",
+          "authMode": "oauth-or-api-key",
+          "dashboardSafe": true,
+          "status": "ready"
+        },
+        "nodeCli": {
+          "available": true,
+          "path": "/Users/jc_agent/.local/bin/node",
+          "version": "v24.16.0",
+          "status": "ready"
+        },
+        "gogCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gog",
+          "version": "0.15.0 (Homebrew 2026-05-05T05:49:37Z)",
+          "status": "ready"
+        },
+        "peekabooCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/peekaboo",
+          "version": "Peekaboo 3.0.0-beta3 (main/69376fa4-dirty, built: 2025-12-29T22:26:53+00:00)",
+          "status": "permissions-needed",
+          "permissions": {
+            "Screen Recording": false,
+            "Accessibility": true
+          },
+          "computerUseReady": false
+        },
+        "onePasswordCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/op",
+          "version": "2.34.0",
+          "status": "ready"
+        },
+        "codexCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/codex",
+          "version": "codex-cli 0.137.0",
+          "status": "ready"
+        },
+        "openclawCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/openclaw",
+          "version": "OpenClaw 2026.6.8 (844f405)",
+          "status": "ready"
+        },
+        "openclawHealth": {
+          "available": true,
+          "status": "ok",
+          "ok": true,
+          "plugins": [],
+          "telegram": {
+            "configured": true,
+            "running": true,
+            "connected": true,
+            "polling": false
+          }
+        },
+        "openclawGateway": {
+          "available": true,
+          "status": "ok",
+          "ok": true,
+          "running": true,
+          "port": 18789,
+          "serverVersion": "2026.6.8",
+          "adminCapable": true
+        },
+        "openclawTaskLedger": {
+          "available": true,
+          "status": "ok",
+          "summary": {
+            "total": 0,
+            "warnings": 0,
+            "errors": 0
+          },
+          "warningCodes": {}
+        },
+        "hermesCli": {
+          "available": true,
+          "path": "/Users/jc_agent/.local/bin/hermes",
+          "version": "Hermes Agent v0.16.0 (2026.6.5) \u00b7 upstream 9c3c5da3",
+          "status": "ready"
+        },
+        "codexMcpServers": [
+          {
+            "name": "computer-use",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "playwright",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "openaiDeveloperDocs",
+            "kind": "http",
+            "status": "enabled"
+          }
+        ],
+        "services": [
+          "ollama",
+          "weaviate",
+          "temporal",
+          "Hermes",
+          "OpenCLAW"
+        ]
+      },
+      {
+        "node": "josh2-lan",
+        "agent": "josh",
+        "checkedAt": "2026-05-07T02:12:12Z",
+        "platform": "macOS-26.3.2-arm64-arm-64bit-Mach-O",
+        "machine": "arm64",
+        "python": "Python 3.14.3",
+        "workspace": "/Users/josh2.0/.openclaw/workspace",
+        "crontabAvailable": false,
+        "crontabCount": 0,
+        "wrappedCronLines": 0,
+        "ollamaModels": [
+          "qwen2.5-coder:7b",
+          "nomic-embed-text:latest"
+        ],
+        "geminiCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gemini",
+          "version": "0.35.3",
+          "authMode": "oauth-or-api-key",
+          "dashboardSafe": true,
+          "status": "ready"
+        },
+        "gogCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gog",
+          "version": "v0.15.0 (e0338d5 2026-05-05T05:50:19Z)",
+          "status": "ready"
+        },
+        "onePasswordCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/op",
+          "version": "2.34.0",
+          "status": "ready"
+        },
+        "codexCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/codex",
+          "version": "codex-cli 0.125.0",
+          "status": "ready"
+        },
+        "codexMcpServers": [
+          {
+            "name": "computer-use",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "playwright",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "openaiDeveloperDocs",
+            "kind": "http",
+            "status": "enabled"
+          }
+        ],
+        "services": [
+          "brain_feed_server.py",
+          "ollama",
+          "OpenCLAW"
+        ]
+      },
+      {
+        "node": "joshex",
+        "agent": "joshex",
+        "checkedAt": "2026-05-07T02:09:46Z",
+        "platform": "macOS-26.2-arm64-arm-64bit",
+        "machine": "arm64",
+        "python": "Python 3.9.6",
+        "workspace": "/Users/joshcubell/Documents/New project",
+        "crontabAvailable": false,
+        "crontabCount": 0,
+        "wrappedCronLines": 0,
+        "ollamaModels": [],
+        "geminiCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gemini",
+          "version": "0.40.0",
+          "authMode": "oauth-or-api-key",
+          "dashboardSafe": true,
+          "status": "ready"
+        },
+        "gogCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gog",
+          "version": "0.15.0 (Homebrew 2026-05-05T05:49:37Z)",
+          "status": "ready"
+        },
+        "onePasswordCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/op",
+          "version": "2.34.0",
+          "status": "ready"
+        },
+        "codexCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/codex",
+          "version": "codex-cli 0.128.0-alpha.1",
+          "status": "ready"
+        },
+        "codexMcpServers": [
+          {
+            "name": "computer-use",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "playwright",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "xcodebuildmcp",
+            "kind": "stdio",
+            "status": "enabled"
+          },
+          {
+            "name": "openaiDeveloperDocs",
+            "kind": "http",
+            "status": "enabled"
+          }
+        ],
+        "services": []
+      },
+      {
+        "node": "macbook-codex",
+        "agent": "joshex",
+        "checkedAt": "2026-04-30T18:28:25Z",
+        "platform": "macOS-26.2-arm64-arm-64bit",
+        "machine": "arm64",
+        "python": "Python 3.9.6",
+        "workspace": "/Users/joshcubell/Documents/New project",
+        "crontabAvailable": false,
+        "crontabCount": 0,
+        "wrappedCronLines": 0,
+        "ollamaModels": [],
+        "geminiCli": {
+          "available": true,
+          "path": "/opt/homebrew/bin/gemini",
+          "version": "0.40.0",
+          "authMode": "oauth-or-api-key",
+          "dashboardSafe": true,
+          "status": "ready"
+        },
+        "services": []
+      }
+    ]
   },
   "capabilityWatch": {
-    "updatedAt": "2026-06-18T14:42:15Z",
-    "status": "pending",
-    "summary": "Capability Watch has not run yet.",
-    "recommendations": []
+    "updatedAt": "2026-06-17T02:00:50Z",
+    "status": "ready",
+    "summary": "JAIMES capability inventory refreshed.",
+    "recommendations": [],
+    "source": "jaimes_capability_watch.sh fallback watch",
+    "nodeCount": 4,
+    "jaimesRows": 1
   },
   "telegramAiBotFeatures": {
-    "updatedAt": "2026-06-18T14:42:15Z",
+    "updatedAt": "2026-06-18T14:41:57Z",
     "status": "unknown",
     "summary": "Telegram AI bot feature policy has not been generated yet.",
     "features": []
@@ -2741,7 +4604,7 @@
       "id": "agent-control",
       "name": "Agent Control",
       "status": "attention",
-      "summary": "0/0 live lanes ready",
+      "summary": "2/5 live lanes ready",
       "detail": "Fresh Brain Feed heartbeats from the tracked agents"
     },
     {
@@ -2752,82 +4615,126 @@
       "detail": "JOSHeX visibility current; awaiting direct instruction"
     },
     {
+      "id": "runtime-inventory",
+      "name": "Runtime Inventory",
+      "status": "ok",
+      "summary": "1 OpenCLAW \u00b7 1 Hermes \u00b7 3 Codex \u00b7 4 Gemini-ready",
+      "detail": "JAIMES/J.A.I.N 2026.6.8 (844f405)"
+    },
+    {
+      "id": "task-ledger",
+      "name": "Task Ledger",
+      "status": "ok",
+      "summary": "0 active ledger error(s), 0 warning(s)",
+      "detail": "JAIMES/J.A.I.N: 0 errors / 0 warnings"
+    },
+    {
       "id": "capability-watch",
       "name": "Capability Watch",
-      "status": "pending",
-      "summary": "Capability Watch has not run yet.",
-      "detail": "Updated 2026-06-18T14:42:15Z"
+      "status": "ready",
+      "summary": "JAIMES capability inventory refreshed.",
+      "detail": "Updated 2026-06-17T02:00:50Z"
     }
   ],
   "trackedTasks": [],
-  "activeAgents": [],
+  "activeAgents": [
+    {
+      "id": "coding-visibility",
+      "label": "Recently edited: scripts/feedback_offset.json, scripts/intel_feedback_offset.json",
+      "status": "done",
+      "elapsedSecs": 0,
+      "tool": "code",
+      "model": "recent",
+      "agentLabel": "CODING",
+      "agentClass": "agent"
+    }
+  ],
   "agentBrainFeeds": {
     "joshex": {
       "agent": "JOSHeX",
       "active": false,
-      "reportedActive": false,
-      "objective": "JOSHeX visibility current; awaiting direct instruction",
-      "detail": "JAIMES now sees the practical model inventory, Hermes Kanban boards are initialized, two deterministic guard jobs are in no-agent mode, and Mission Control reliability status shows provider/Kanban/no-agent wiring.",
-      "status": "ready",
+      "reportedActive": true,
+      "objective": "Task queued: Install JOSHeX GUI app canaries",
+      "detail": "Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent, write a dashboard-safe gui-app-canaries-joshex.json sidecar, and sync it back t...",
+      "status": "stale",
       "stale": true,
-      "updatedAt": "2026-05-26T03:54:54Z",
+      "updatedAt": "2026-06-17T01:16:10Z",
       "messageReceived": null,
-      "currentTool": "jain-breaking-security-alert-tuning",
+      "currentTool": "agent task",
       "model": null,
-      "steps": []
+      "steps": [
+        {
+          "label": "Task queued: Install JOSHeX GUI app canaries",
+          "status": "active",
+          "tool": "agent task",
+          "kind": "status"
+        },
+        {
+          "label": "Task queued: MacBook no-SSH boundary",
+          "status": "active",
+          "tool": "agent task",
+          "kind": "status"
+        }
+      ]
     },
     "josh": {
       "agent": "JOSH 2.0",
       "active": false,
       "reportedActive": false,
-      "objective": "Josh 2.0 screen check clean",
-      "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+      "objective": "Heartbeat checks complete",
+      "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
       "status": "done",
       "stale": true,
-      "updatedAt": "2026-06-15T08:24:35Z",
+      "updatedAt": "2026-06-07T04:17:05Z",
       "messageReceived": "2026-05-25T00:14:38Z",
-      "currentTool": "Control Tower screen check",
+      "currentTool": "agent publish",
       "model": "GPT-5.5",
       "steps": [
         {
-          "label": "Josh 2.0 screen check clean",
+          "label": "Heartbeat checks complete",
           "status": "done",
-          "tool": "Control Tower screen check",
+          "tool": "agent publish",
           "kind": "complete"
         },
         {
-          "label": "Heartbeat maintenance complete",
-          "status": "done",
-          "tool": "heartbeat",
-          "kind": "complete"
-        },
-        {
-          "label": "Direct chat context high",
-          "status": "info",
-          "tool": "heartbeat",
-          "kind": "note"
-        },
-        {
-          "label": "Fresh direct session recommended",
-          "status": "ready",
-          "tool": "heartbeat",
-          "kind": "handoff"
-        },
-        {
-          "label": "Bring up Josh 2.0 and clear alerts",
-          "status": "done",
+          "label": "Heartbeat checks started",
+          "status": "active",
           "tool": "agent publish",
           "kind": "status"
         },
         {
-          "label": "Kintara tutorial continuation",
-          "status": "ready",
+          "label": "Heartbeat checks complete",
+          "status": "done",
+          "tool": "agent publish",
+          "kind": "complete"
+        },
+        {
+          "label": "Heartbeat checks started",
+          "status": "active",
           "tool": "agent publish",
           "kind": "status"
         },
         {
-          "label": "Kintara training + tutorial assist",
-          "status": "ready",
+          "label": "Heartbeat checks complete",
+          "status": "done",
+          "tool": "agent publish",
+          "kind": "complete"
+        },
+        {
+          "label": "Heartbeat checks started",
+          "status": "active",
+          "tool": "agent publish",
+          "kind": "status"
+        },
+        {
+          "label": "Heartbeat complete",
+          "status": "done",
+          "tool": "agent publish",
+          "kind": "complete"
+        },
+        {
+          "label": "Heartbeat maintenance",
+          "status": "done",
           "tool": "agent publish",
           "kind": "status"
         }
@@ -2840,8 +4747,8 @@
       "objective": "J.A.I.N is online and ready",
       "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
       "status": "ready",
-      "stale": true,
-      "updatedAt": "2026-06-15T19:27:25Z",
+      "stale": false,
+      "updatedAt": "2026-06-18T14:32:01Z",
       "messageReceived": null,
       "currentTool": "status check",
       "model": null,
@@ -2898,55 +4805,61 @@
     },
     "jaimes": {
       "agent": "JAIMES",
-      "active": false,
+      "active": true,
       "reportedActive": true,
-      "objective": "JAIMES is working now",
-      "detail": "JAIMES live update: Sorare missions: locating current scripts.",
-      "status": "stale",
-      "stale": true,
-      "updatedAt": "2026-06-15T20:22:05Z",
-      "messageReceived": "2026-06-15T20:21:33Z",
-      "currentTool": "status check",
-      "model": "gpt-5.5",
+      "objective": "Rebuild calibrated Grok usage",
+      "detail": "Rebuild calibrated Grok usage",
+      "status": "active",
+      "stale": false,
+      "updatedAt": "2026-06-18T14:41:56Z",
+      "messageReceived": "2026-06-18T14:41:56Z",
+      "currentTool": "exec",
+      "model": "gemini-3.1-pro-preview",
       "steps": [
         {
-          "label": "JAIMES is working now",
-          "status": "active",
-          "tool": "status check",
-          "kind": "status"
-        },
-        {
-          "label": "Sorare missions: locating current scripts",
+          "label": "Rebuild calibrated Grok usage",
           "status": "active",
           "tool": "exec",
           "kind": "status"
         },
         {
-          "label": "Kintara: checking progress snapshot",
+          "label": "Calibrate Grok usage from screenshot",
           "status": "active",
-          "tool": "exec",
+          "tool": "telegram",
           "kind": "status"
         },
         {
-          "label": "Sorare missions: verifying setup",
-          "status": "active",
-          "tool": "exec",
-          "kind": "status"
-        },
-        {
-          "label": "Review Sorare request",
+          "label": "Check agent operations",
           "status": "active",
           "tool": "telegram-ingress",
           "kind": "status"
         },
         {
-          "label": "Done: model efficiency guard alert",
+          "label": "Sorare pre-lock loop",
+          "status": "done",
+          "tool": "sorare_prelock_loop",
+          "kind": "status"
+        },
+        {
+          "label": "Sorare Daily Missions watchdog needs attention",
+          "status": "done",
+          "tool": "cron",
+          "kind": "status"
+        },
+        {
+          "label": "Done: no-trade MTM + route check journaled",
           "status": "done",
           "tool": "exec",
           "kind": "status"
         },
         {
-          "label": "Ops: running model efficiency guard",
+          "label": "Allowance and native ETH drift checks",
+          "status": "done",
+          "tool": "exec",
+          "kind": "status"
+        },
+        {
+          "label": "Current holdings route probes",
           "status": "done",
           "tool": "exec",
           "kind": "status"
@@ -2958,54 +4871,60 @@
     "agent": "JOSH 2.0",
     "active": false,
     "reportedActive": false,
-    "objective": "Josh 2.0 screen check clean",
-    "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
+    "objective": "Heartbeat checks complete",
+    "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
     "status": "done",
     "stale": true,
-    "updatedAt": "2026-06-15T08:24:35Z",
+    "updatedAt": "2026-06-07T04:17:05Z",
     "messageReceived": "2026-05-25T00:14:38Z",
-    "currentTool": "Control Tower screen check",
+    "currentTool": "agent publish",
     "model": "GPT-5.5",
     "steps": [
       {
-        "label": "Josh 2.0 screen check clean",
+        "label": "Heartbeat checks complete",
         "status": "done",
-        "tool": "Control Tower screen check",
+        "tool": "agent publish",
         "kind": "complete"
       },
       {
-        "label": "Heartbeat maintenance complete",
-        "status": "done",
-        "tool": "heartbeat",
-        "kind": "complete"
-      },
-      {
-        "label": "Direct chat context high",
-        "status": "info",
-        "tool": "heartbeat",
-        "kind": "note"
-      },
-      {
-        "label": "Fresh direct session recommended",
-        "status": "ready",
-        "tool": "heartbeat",
-        "kind": "handoff"
-      },
-      {
-        "label": "Bring up Josh 2.0 and clear alerts",
-        "status": "done",
+        "label": "Heartbeat checks started",
+        "status": "active",
         "tool": "agent publish",
         "kind": "status"
       },
       {
-        "label": "Kintara tutorial continuation",
-        "status": "ready",
+        "label": "Heartbeat checks complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat checks started",
+        "status": "active",
         "tool": "agent publish",
         "kind": "status"
       },
       {
-        "label": "Kintara training + tutorial assist",
-        "status": "ready",
+        "label": "Heartbeat checks complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat checks started",
+        "status": "active",
+        "tool": "agent publish",
+        "kind": "status"
+      },
+      {
+        "label": "Heartbeat complete",
+        "status": "done",
+        "tool": "agent publish",
+        "kind": "complete"
+      },
+      {
+        "label": "Heartbeat maintenance",
+        "status": "done",
         "tool": "agent publish",
         "kind": "status"
       }
@@ -3018,8 +4937,8 @@
     "objective": "J.A.I.N is online and ready",
     "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
     "status": "ready",
-    "stale": true,
-    "updatedAt": "2026-06-15T19:27:25Z",
+    "stale": false,
+    "updatedAt": "2026-06-18T14:32:01Z",
     "messageReceived": null,
     "currentTool": "status check",
     "model": null,
@@ -3076,55 +4995,61 @@
   },
   "jaimesBrainFeed": {
     "agent": "JAIMES",
-    "active": false,
+    "active": true,
     "reportedActive": true,
-    "objective": "JAIMES is working now",
-    "detail": "JAIMES live update: Sorare missions: locating current scripts.",
-    "status": "stale",
-    "stale": true,
-    "updatedAt": "2026-06-15T20:22:05Z",
-    "messageReceived": "2026-06-15T20:21:33Z",
-    "currentTool": "status check",
-    "model": "gpt-5.5",
+    "objective": "Rebuild calibrated Grok usage",
+    "detail": "Rebuild calibrated Grok usage",
+    "status": "active",
+    "stale": false,
+    "updatedAt": "2026-06-18T14:41:56Z",
+    "messageReceived": "2026-06-18T14:41:56Z",
+    "currentTool": "exec",
+    "model": "gemini-3.1-pro-preview",
     "steps": [
       {
-        "label": "JAIMES is working now",
-        "status": "active",
-        "tool": "status check",
-        "kind": "status"
-      },
-      {
-        "label": "Sorare missions: locating current scripts",
+        "label": "Rebuild calibrated Grok usage",
         "status": "active",
         "tool": "exec",
         "kind": "status"
       },
       {
-        "label": "Kintara: checking progress snapshot",
+        "label": "Calibrate Grok usage from screenshot",
         "status": "active",
-        "tool": "exec",
+        "tool": "telegram",
         "kind": "status"
       },
       {
-        "label": "Sorare missions: verifying setup",
-        "status": "active",
-        "tool": "exec",
-        "kind": "status"
-      },
-      {
-        "label": "Review Sorare request",
+        "label": "Check agent operations",
         "status": "active",
         "tool": "telegram-ingress",
         "kind": "status"
       },
       {
-        "label": "Done: model efficiency guard alert",
+        "label": "Sorare pre-lock loop",
+        "status": "done",
+        "tool": "sorare_prelock_loop",
+        "kind": "status"
+      },
+      {
+        "label": "Sorare Daily Missions watchdog needs attention",
+        "status": "done",
+        "tool": "cron",
+        "kind": "status"
+      },
+      {
+        "label": "Done: no-trade MTM + route check journaled",
         "status": "done",
         "tool": "exec",
         "kind": "status"
       },
       {
-        "label": "Ops: running model efficiency guard",
+        "label": "Allowance and native ETH drift checks",
+        "status": "done",
+        "tool": "exec",
+        "kind": "status"
+      },
+      {
+        "label": "Current holdings route probes",
         "status": "done",
         "tool": "exec",
         "kind": "status"
@@ -3132,63 +5057,71 @@
     ]
   },
   "liveObjectives": {
-    "activeAgents": [],
-    "activeCount": 0,
+    "activeAgents": [
+      "JAIMES"
+    ],
+    "activeCount": 1,
     "primaryAgent": "JAIMES",
     "dualMode": false,
     "dualAgents": [],
     "agents": [
       {
         "agent": "JAIMES",
-        "active": false,
+        "active": true,
         "reportedActive": true,
-        "objective": "JAIMES is working now",
-        "detail": "JAIMES live update: Sorare missions: locating current scripts.",
-        "status": "stale",
-        "stale": true,
-        "updatedAt": "2026-06-15T20:22:05Z",
-        "messageReceived": "2026-06-15T20:21:33Z",
-        "currentTool": "status check",
-        "model": "gpt-5.5",
+        "objective": "Rebuild calibrated Grok usage",
+        "detail": "Rebuild calibrated Grok usage",
+        "status": "active",
+        "stale": false,
+        "updatedAt": "2026-06-18T14:41:56Z",
+        "messageReceived": "2026-06-18T14:41:56Z",
+        "currentTool": "exec",
+        "model": "gemini-3.1-pro-preview",
         "steps": [
           {
-            "label": "JAIMES is working now",
-            "status": "active",
-            "tool": "status check",
-            "kind": "status"
-          },
-          {
-            "label": "Sorare missions: locating current scripts",
+            "label": "Rebuild calibrated Grok usage",
             "status": "active",
             "tool": "exec",
             "kind": "status"
           },
           {
-            "label": "Kintara: checking progress snapshot",
+            "label": "Calibrate Grok usage from screenshot",
             "status": "active",
-            "tool": "exec",
+            "tool": "telegram",
             "kind": "status"
           },
           {
-            "label": "Sorare missions: verifying setup",
-            "status": "active",
-            "tool": "exec",
-            "kind": "status"
-          },
-          {
-            "label": "Review Sorare request",
+            "label": "Check agent operations",
             "status": "active",
             "tool": "telegram-ingress",
             "kind": "status"
           },
           {
-            "label": "Done: model efficiency guard alert",
+            "label": "Sorare pre-lock loop",
+            "status": "done",
+            "tool": "sorare_prelock_loop",
+            "kind": "status"
+          },
+          {
+            "label": "Sorare Daily Missions watchdog needs attention",
+            "status": "done",
+            "tool": "cron",
+            "kind": "status"
+          },
+          {
+            "label": "Done: no-trade MTM + route check journaled",
             "status": "done",
             "tool": "exec",
             "kind": "status"
           },
           {
-            "label": "Ops: running model efficiency guard",
+            "label": "Allowance and native ETH drift checks",
+            "status": "done",
+            "tool": "exec",
+            "kind": "status"
+          },
+          {
+            "label": "Current holdings route probes",
             "status": "done",
             "tool": "exec",
             "kind": "status"
@@ -3202,8 +5135,8 @@
         "objective": "J.A.I.N is online and ready",
         "detail": "J.A.I.N visibility heartbeat: OpenCLAW gateway reachable, Telegram OK, auth OK, and no active queued worker tasks.",
         "status": "ready",
-        "stale": true,
-        "updatedAt": "2026-06-15T19:27:25Z",
+        "stale": false,
+        "updatedAt": "2026-06-18T14:32:01Z",
         "messageReceived": null,
         "currentTool": "status check",
         "model": null,
@@ -3259,75 +5192,94 @@
         ]
       },
       {
-        "agent": "JOSH 2.0",
+        "agent": "JOSHeX",
         "active": false,
-        "reportedActive": false,
-        "objective": "Josh 2.0 screen check clean",
-        "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-        "status": "done",
+        "reportedActive": true,
+        "objective": "Task queued: Install JOSHeX GUI app canaries",
+        "detail": "Josh approved installing silent GUI app canaries on JOSHeX. Use /Users/jc_agent/agent_reliability/joshex_gui_app_canaries_handoff.md as the runbook; install an hourly LaunchAgent, write a dashboard-safe gui-app-canaries-joshex.json sidecar, and sync it back t...",
+        "status": "stale",
         "stale": true,
-        "updatedAt": "2026-06-15T08:24:35Z",
-        "messageReceived": "2026-05-25T00:14:38Z",
-        "currentTool": "Control Tower screen check",
-        "model": "GPT-5.5",
+        "updatedAt": "2026-06-17T01:16:10Z",
+        "messageReceived": null,
+        "currentTool": "agent task",
+        "model": null,
         "steps": [
           {
-            "label": "Josh 2.0 screen check clean",
-            "status": "done",
-            "tool": "Control Tower screen check",
-            "kind": "complete"
-          },
-          {
-            "label": "Heartbeat maintenance complete",
-            "status": "done",
-            "tool": "heartbeat",
-            "kind": "complete"
-          },
-          {
-            "label": "Direct chat context high",
-            "status": "info",
-            "tool": "heartbeat",
-            "kind": "note"
-          },
-          {
-            "label": "Fresh direct session recommended",
-            "status": "ready",
-            "tool": "heartbeat",
-            "kind": "handoff"
-          },
-          {
-            "label": "Bring up Josh 2.0 and clear alerts",
-            "status": "done",
-            "tool": "agent publish",
+            "label": "Task queued: Install JOSHeX GUI app canaries",
+            "status": "active",
+            "tool": "agent task",
             "kind": "status"
           },
           {
-            "label": "Kintara tutorial continuation",
-            "status": "ready",
-            "tool": "agent publish",
-            "kind": "status"
-          },
-          {
-            "label": "Kintara training + tutorial assist",
-            "status": "ready",
-            "tool": "agent publish",
+            "label": "Task queued: MacBook no-SSH boundary",
+            "status": "active",
+            "tool": "agent task",
             "kind": "status"
           }
         ]
       },
       {
-        "agent": "JOSHeX",
+        "agent": "JOSH 2.0",
         "active": false,
         "reportedActive": false,
-        "objective": "JOSHeX visibility current; awaiting direct instruction",
-        "detail": "JAIMES now sees the practical model inventory, Hermes Kanban boards are initialized, two deterministic guard jobs are in no-agent mode, and Mission Control reliability status shows provider/Kanban/no-agent wiring.",
-        "status": "ready",
+        "objective": "Heartbeat checks complete",
+        "detail": "Maintenance clean; memory consolidation checked with no June daily files to promote; canary has known warnings only.",
+        "status": "done",
         "stale": true,
-        "updatedAt": "2026-05-26T03:54:54Z",
-        "messageReceived": null,
-        "currentTool": "jain-breaking-security-alert-tuning",
-        "model": null,
-        "steps": []
+        "updatedAt": "2026-06-07T04:17:05Z",
+        "messageReceived": "2026-05-25T00:14:38Z",
+        "currentTool": "agent publish",
+        "model": "GPT-5.5",
+        "steps": [
+          {
+            "label": "Heartbeat checks complete",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "complete"
+          },
+          {
+            "label": "Heartbeat checks started",
+            "status": "active",
+            "tool": "agent publish",
+            "kind": "status"
+          },
+          {
+            "label": "Heartbeat checks complete",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "complete"
+          },
+          {
+            "label": "Heartbeat checks started",
+            "status": "active",
+            "tool": "agent publish",
+            "kind": "status"
+          },
+          {
+            "label": "Heartbeat checks complete",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "complete"
+          },
+          {
+            "label": "Heartbeat checks started",
+            "status": "active",
+            "tool": "agent publish",
+            "kind": "status"
+          },
+          {
+            "label": "Heartbeat complete",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "complete"
+          },
+          {
+            "label": "Heartbeat maintenance",
+            "status": "done",
+            "tool": "agent publish",
+            "kind": "status"
+          }
+        ]
       }
     ]
   },
@@ -3337,25 +5289,25 @@
       "event": "Personal Codex: ready"
     },
     {
-      "time": "2026-06-18T14:42:26Z",
+      "time": "2026-06-18T14:42:10Z",
       "event": "Session spend: $0.00"
     },
     {
-      "time": "2026-06-18T14:42:23Z",
+      "time": "2026-06-18T14:42:06Z",
+      "event": "Coding: scripts/feedback_offset.json, scripts/intel_feedback_offset.json"
+    },
+    {
+      "time": "2026-06-18T14:42:06Z",
       "event": "CodexBar: Codex auth required"
     },
     {
-      "time": "2026-06-18T14:42:15Z",
+      "time": "2026-06-18T14:41:57Z",
       "event": "Brain: Brain Feed idle"
     },
     {
-      "time": "2026-06-18T14:42:15Z",
+      "time": "2026-06-18T14:41:57Z",
       "event": "35 scheduled jobs healthy"
-    },
-    {
-      "time": "2026-06-18T14:42:15Z",
-      "event": "Device layer nominal"
     }
   ],
-  "lastUpdated": "2026-06-18T14:42:15Z"
+  "lastUpdated": "2026-06-18T14:41:57Z"
 }

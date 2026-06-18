@@ -158,7 +158,7 @@
       "marginalCost": 0.0
     }
   ],
-  "lastUpdated": "2026-06-18T14:42:26Z",
+  "lastUpdated": "2026-06-18T14:42:10Z",
   "jain": {
     "daily": 0.0,
     "session": 0.0,
@@ -239,8 +239,8 @@
       }
     ],
     "usageEquivalentDaily": 0.063297,
-    "usageEquivalentWeekly": 674.316501,
-    "usageEquivalentMonthly": 1352.112196,
+    "usageEquivalentWeekly": 0.063297,
+    "usageEquivalentMonthly": 0.063297,
     "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
   },
   "metered": {
@@ -255,16 +255,16 @@
   },
   "usageEquivalent": {
     "daily": 0.063297,
-    "weekly": 674.316501,
-    "monthly": 1352.112196
+    "weekly": 0.063297,
+    "monthly": 0.063297
   },
   "weeklyRunRate": {
     "total": 0.0,
     "automation": 0.0,
-    "interactive": 674.316501,
+    "interactive": 0.063297,
     "projectedMonthly": 0.0,
-    "subscriptionUsageEquivalentWeekly": 674.316501,
-    "subscriptionUsageEquivalentProjectedMonthly": 2889.93
+    "subscriptionUsageEquivalentWeekly": 0.063297,
+    "subscriptionUsageEquivalentProjectedMonthly": 0.27
   },
   "providerBudgets": [
     {
@@ -355,7 +355,7 @@
       "monthlyUtilizationPct": 0.0,
       "status": "ready",
       "keyPresent": true,
-      "keySuffix": null,
+      "keySuffix": "ygsQ",
       "lastSource": "xai-specialist",
       "whyChosen": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default."
     },
