@@ -1,0 +1,81 @@
+{
+  "updatedAt": "2026-06-18T07:05:00Z",
+  "currency": "USD",
+  "policy": {
+    "defaultProvider": "codex",
+    "reviewProvider": "gemini",
+    "currentEventsProvider": "xai",
+    "fallbackProvider": "openrouter",
+    "codexAllowanceMode": "normal",
+    "codexExhaustedMode": {
+      "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
+      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events, X-native research, outside critique, and batch audits to xAI. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
+      "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
+    },
+    "rule": "Codex/OpenAI remains default execution. JAIMES should use Gemini Pro first for dashboard-safe review, digest, reports, stale-task compression, summaries, and long-context evaluation when sufficient. Use Gemini Flash only as cheap fallback or explicitly lightweight/noisy throughput. xAI handles X-native/current-events specialist work. OpenRouter is fallback only.",
+    "lastModeChangeAt": "2026-06-18T05:48:00Z",
+    "lastModeChangeReason": "make Gemini Pro the default JAIMES-safe synthesis lane"
+  },
+  "providers": [
+    {
+      "id": "codex",
+      "label": "Codex / OpenAI",
+      "role": "Default execution and private-tool owner",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 200,
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "gpt-5.5",
+      "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini",
+      "role": "JAIMES-first reviewer, evaluator, digest, and long-context synthesis lane",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 20,
+      "monthlyCapUsd": 0,
+      "dailyCapUsd": 0,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "gemini-3.1-pro-preview",
+      "preferredModels": {
+        "routine": "gemini-3.1-pro-preview",
+        "deep": "gemini-3.1-pro-preview",
+        "cheapFallback": "gemini-3-flash-preview"
+      },
+      "lastRouteReason": "Use Gemini Pro first for JAIMES dashboard-safe summaries, digests, reports, log summaries, reviews, and stale-task compression; use Flash only as fallback/cheap throughput; never raw secrets, OAuth payloads, raw mail, or private account data."
+    },
+    {
+      "id": "xai",
+      "label": "xAI / Grok",
+      "role": "Current-events, X-native research, outside critique, and batch audit specialist",
+      "budgetType": "prepaid",
+      "monthlyCapUsd": 60,
+      "dailyCapUsd": 5,
+      "reserveUsd": 48.97,
+      "remainingCreditUsd": 108.97,
+      "lastModelUsed": "grok-4.20-reasoning",
+      "authStatus": "configured-local-env",
+      "keyMode": "host-local-env",
+      "lastRouteReason": "Use for X-native, public current-events, creator, crypto/news pulse, and zeitgeist checks. Keep store=false/metadata-only logging where available; never raw secrets or private connector data."
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter",
+      "role": "Fallback route when primary lanes are unavailable or a specific outside model is needed",
+      "budgetType": "metered",
+      "monthlyCapUsd": 10,
+      "dailyCapUsd": 1,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "openrouter/auto",
+      "lastRouteReason": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first."
+    }
+  ],
+  "guardrails": [
+    "Do not route secrets, OAuth payloads, raw connector data, raw emails, or private account contents to Gemini, xAI, or OpenRouter automatically.",
+    "Any provider with a daily cap is blocked once dailySpendUsd is greater than or equal to dailyCapUsd unless Josh explicitly approves an override.",
+    "When Codex allowance mode is exhausted, non-execution dashboard-safe work must leave Codex first; Codex/API/OpenRouter spend is reserved for execution and private actions.",
+    "xAI is not the default brain. It is a specialist lane for current-events, X-native research, outside critique, and batch audits."
+  ]
+}

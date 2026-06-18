@@ -1,0 +1,147 @@
+{
+  "updatedAt": "2026-06-18T00:00:00Z",
+  "owner": "shared-agent-ecosystem",
+  "purpose": "Shared Josh 2.0 / JAIMES model routing policy: model switching means checkpoint + fresh execution lane + verified model disclosure, not mutating the current session.",
+  "coreRule": "A model switch request must launch a fresh lane/session using the requested provider/model, verify the lane before substantive work, then publish the active model/auth and route reason in Telegram and Brain Feed.",
+  "explicitOverridePolicy": {
+    "rule": "Josh's explicit model request overrides automatic routing unless the route is unsafe or unavailable.",
+    "unsafeExamples": [
+      "Sending secrets, OAuth payloads, cookies, raw emails, private account contents, or raw connector/account data to Gemini, Grok/xAI, or OpenRouter",
+      "Using a read/review-only provider for irreversible external actions",
+      "Using metered API spend when Josh requested subscription-only routing"
+    ],
+    "unavailableBehavior": "State the requested route was unavailable, explain the detected reason, then use the approved fallback lane."
+  },
+  "freshLaneContract": {
+    "requiredFor": [
+      "explicit model switch requests",
+      "provider changes",
+      "mid-task escalation or downroute",
+      "Codex exhausted/conserve reroutes",
+      "Gemini/Grok specialist passes"
+    ],
+    "steps": [
+      "Checkpoint objective, repo path, branch/status, blockers, and last verified output.",
+      "Start a new session/lane with the chosen provider/model; do not resume the old session unless continuing the same model.",
+      "Verify the launch command or gateway response contains the requested model/provider before doing substantive work.",
+      "Make the first visible line Active Model/Auth plus a short route reason.",
+      "If verification fails, stop and report fallback options instead of pretending the switch happened."
+    ],
+    "telegramDisclosureTemplate": {
+      "objective": "Objective: <short objective>",
+      "model": "Model: <provider/model> - <requested by Josh | chosen by router>",
+      "reason": "Reason: <execution | review | X/current-events | fallback>"
+    }
+  },
+  "lanes": {
+    "codex": {
+      "label": "OpenAI Codex subscription",
+      "defaultModels": {
+        "execution": "gpt-5.5",
+        "workhorse": "gpt-5.4",
+        "cheap": "gpt-5.4-mini"
+      },
+      "auth": "OpenAI Codex OAuth/subscription",
+      "useFor": [
+        "execution",
+        "code edits",
+        "repo work",
+        "shell tasks",
+        "Control Tower",
+        "OpenCLAW",
+        "auth-sensitive workflows",
+        "tools and verification",
+        "final integration"
+      ],
+      "avoidFor": [
+        "bulk public reading when Gemini is enough",
+        "X-native zeitgeist checks when Grok is available"
+      ],
+      "freshLaunch": {
+        "hermes": "hermes chat --provider openai-codex -m <model> --source model-lane -q <prompt>",
+        "codex": "codex exec -m <model> <prompt>",
+        "openclaw": "openclaw agent --model openai/<model> --session-key agent:<agent>:lane-<stamp> --message <prompt>"
+      }
+    },
+    "gemini": {
+      "label": "Gemini CLI subscription",
+      "defaultModels": {
+        "review": "gemini-3.1-pro-preview",
+        "fast": "gemini-3-flash-preview",
+        "fallback": "gemini-3-flash-preview"
+      },
+      "auth": "Google Gemini CLI OAuth/subscription, not Google API key",
+      "useFor": [
+        "cheap/high-volume reading",
+        "summarizing",
+        "comparison",
+        "second-pass review",
+        "report cleanup",
+        "research digestion",
+        "dashboard-safe long-context synthesis"
+      ],
+      "avoidFor": [
+        "repo mutations",
+        "private/account workflows",
+        "secrets or raw private connector data",
+        "irreversible external actions"
+      ],
+      "freshLaunch": {
+        "hermes": "hermes chat --provider google-gemini-cli -m <model> --source model-lane -q <prompt>",
+        "helper": "~/scripts/hermes_gemini_sub.sh -m <model> <prompt>"
+      }
+    },
+    "grok": {
+      "label": "Grok / xAI specialist",
+      "defaultModels": {
+        "currentEvents": "grok-4.20-reasoning",
+        "fallback": "grok-4.3"
+      },
+      "auth": "xAI/Grok host-local key or X Premium route when configured",
+      "useFor": [
+        "X-native work",
+        "current-events/social signal",
+        "creator posts",
+        "crypto/news pulse",
+        "real-time public reaction",
+        "external zeitgeist checks"
+      ],
+      "avoidFor": [
+        "default execution",
+        "private/account data",
+        "secrets",
+        "repo mutations unless handed back to Codex"
+      ],
+      "freshLaunch": {
+        "script": "scripts/grok_specialist_pass.py <sanitized prompt>",
+        "note": "Currently specialist-only; route remains unavailable until host-local xAI/Grok auth is installed."
+      }
+    },
+    "openrouter": {
+      "label": "OpenRouter fallback/specialist",
+      "defaultModels": {
+        "fallback": "openrouter/auto"
+      },
+      "auth": "metered API",
+      "useFor": [
+        "fallback when primary lanes are unavailable",
+        "specific outside-model comparisons"
+      ],
+      "avoidFor": [
+        "primary spend",
+        "bulk work",
+        "private data without explicit approval"
+      ]
+    }
+  },
+  "routerOrder": [
+    "explicit-request",
+    "safety/privacy gate",
+    "availability/budget gate",
+    "task classifier",
+    "fresh lane launch",
+    "model verification",
+    "work execution",
+    "model disclosure + route reason"
+  ]
+}
