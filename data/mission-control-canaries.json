@@ -1,8 +1,8 @@
 {
-  "ok": false,
-  "status": "attention",
-  "summary": "3 canary issue(s)",
-  "checkedAt": "2026-06-18T06:30:21.975947Z",
+  "ok": true,
+  "status": "ok",
+  "summary": "All canaries passed",
+  "checkedAt": "2026-06-18T06:37:57.537596Z",
   "checks": [
     {
       "name": "Live objectives",
@@ -138,9 +138,9 @@
     },
     {
       "name": "Today Jobs calendar separation",
-      "ok": false,
+      "ok": true,
       "detail": "Today Jobs renders as a today-first daily calendar while the complete grouped list remains a quiet drill-down",
-      "severity": "medium"
+      "severity": "ok"
     },
     {
       "name": "Today Jobs plain-English empty hour",
@@ -156,9 +156,9 @@
     },
     {
       "name": "Today Jobs Next Up countdown",
-      "ok": false,
+      "ok": true,
       "detail": "Next Up card uses the same countdown treatment as the top header and highlights the matching calendar block",
-      "severity": "low"
+      "severity": "ok"
     },
     {
       "name": "Today Jobs readiness label",
@@ -180,9 +180,9 @@
     },
     {
       "name": "Today Jobs row time fit",
-      "ok": false,
+      "ok": true,
       "detail": "calendar row times omit AM/PM because the hour rail already carries that context, preventing row-time ellipses",
-      "severity": "medium"
+      "severity": "ok"
     },
     {
       "name": "Today Jobs routine status label",

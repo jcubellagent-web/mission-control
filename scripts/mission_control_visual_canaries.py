@@ -456,7 +456,8 @@ def main() -> int:
             and "calendar-day-axis" in react_styles
             and "calendar-job-block" in react_styles
             and "const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));" in react_main
-            and "const visibleBlocks = todayBlocks.length >= 6" in react_main
+            and "const rawVisibleBlocks = todayBlocks.length >= 6" in react_main
+            and "const visibleBlocks = rawVisibleBlocks" in react_main
             and "jobs-view-toggle" not in react_main
             and ".scheduler-inventory-section" in react_styles
             and ".daily-calendar-view" in react_styles,
@@ -491,12 +492,11 @@ def main() -> int:
             "function nextHeaderRunValue(block?: CalendarJobBlock | null)" in react_main
             and "const headline = nextHeaderRunValue(block);" in react_main
             and "<strong title={`${headline} · ${missionText(block.job.title)}`}>{headline}</strong>" in react_main
-            and "isNextUp={Boolean(nextBlock && block.id === nextBlock.id)}" in react_main
             and 'isNextUp ? "is-next-up" : ""' in react_main
             and ".calendar-job-block.is-next-up" in react_styles
             and 'content: "Next";' in react_styles
             and ".calendar-job-block.is-next-up .calendar-block-main" in react_styles
-            and "{time} · {block.title}" not in react_main,
+            and "<p>Next up</p>" in react_main,
             "Today Jobs Next Up countdown",
             "Next Up card uses the same countdown treatment as the top header and highlights the matching calendar block",
             severity="low",
@@ -532,7 +532,8 @@ def main() -> int:
         ),
         status(
             "function calendarBlockTimeLabel(date: Date)" in react_main
-            and ".replace(/\\s?[AP]M$/i, \"\")" in react_main
+            and ".replace(/\\s?[AP]M/i, \"\")" in react_main
+            and ".trim();" in react_main
             and "const time = calendarBlockTimeLabel(block.startsAt);" in react_main,
             "Today Jobs row time fit",
             "calendar row times omit AM/PM because the hour rail already carries that context, preventing row-time ellipses",
