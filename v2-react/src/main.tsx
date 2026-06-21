@@ -1501,7 +1501,7 @@ function ControlTower({
       {/* Column 1 (Left): Live Work Board + FinOps */}
       <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Live Work Board and FinOps Dashboard">
         <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
-        <ActivityLedger model={model} />
+        <ActivityLedger model={model} state={state} />
         <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
       </section>
 
@@ -1725,7 +1725,7 @@ function agentPriorityInsights(agent: AgentId, state: MissionControlState, model
   return rows.slice(0, 4);
 }
 
-function ActivityLedger({ model }: { model: ControlTowerModel }) {
+function ActivityLedger({ model, state }: { model: ControlTowerModel; state: MissionControlState }) {
   const rows = activityLedgerRows(model);
   const systemQuiet = activitySystemQuietCount(model);
   const focusRows = activityFocusRows(model);
@@ -1745,7 +1745,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
         </div>
         <span>{model.counts.trackedJobs} tracked jobs</span>
       </header>
-      <ModelRoutingLadderVisual state={model.state} />
+      <ModelRoutingLadderVisual state={state} />
       {concurrent ? (
         <section
           className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 4)}`}
