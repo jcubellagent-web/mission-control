@@ -394,6 +394,11 @@ export type ProviderBudget = {
   subscriptionLabel?: string;
   subscriptionCreditPct?: number;
   whyChosen?: string;
+  fixedMonthlyUsd?: number;
+  fixedWeeklyUsd?: number;
+  allowanceLabel?: string;
+  usageAllowance?: string;
+  displayWhenIdle?: boolean;
 };
 
 export type ModelRouter = {

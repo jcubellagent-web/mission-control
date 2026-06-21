@@ -1,20 +1,30 @@
 {
-  "updatedAt": "2026-06-18T05:48:00Z",
+  "updatedAt": "2026-06-21T15:27:16Z",
   "currency": "USD",
   "policy": {
-    "defaultProvider": "codex",
-    "reviewProvider": "gemini",
+    "defaultProvider": "gemini-flash-frontdesk-plus-codex-execution",
+    "reviewProvider": "gemini-pro-when-judgment-needed",
     "currentEventsProvider": "xai",
     "fallbackProvider": "openrouter",
-    "codexAllowanceMode": "normal",
+    "codexAllowanceMode": "conserve",
     "codexExhaustedMode": {
       "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
       "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events, X-native research, outside critique, and batch audits to xAI. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
       "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
     },
-    "rule": "Codex/OpenAI remains default execution. JAIMES should use Gemini Pro first for dashboard-safe review, digest, reports, stale-task compression, summaries, and long-context evaluation when sufficient. Use Gemini Flash only as cheap fallback or explicitly lightweight/noisy throughput. xAI handles X-native/current-events specialist work. OpenRouter is fallback only.",
-    "lastModeChangeAt": "2026-06-18T05:48:00Z",
-    "lastModeChangeReason": "make Gemini Pro the default JAIMES-safe synthesis lane"
+    "rule": "Deterministic ladder first: Gemini Flash is the dashboard-safe front-desk/router-assist lane, Flash Lite is bounded worker-only and never a router, Gemini Pro is judgment/escalation, JAIMES/Codex owns verified execution, J.A.I.N/OpenClaw is fallback/staging, and Josh approves irreversible external actions.",
+    "tripleConstraint": "Balance speed, routing effectiveness, and token efficiency by task context: mobile/frontdesk favors speed, complex/high-risk work favors route quality, ambient background work favors local/Gemini efficiency.",
+    "failoverTriggers": [
+      "HTTP 429",
+      "ResourceExhausted",
+      "daily quota exhaustion",
+      "provider timeout",
+      "provider latency above task baseline"
+    ],
+    "failoverRule": "Before external fallback, keep ownership on the right internal lane. If Gemini/xAI/OpenRouter fails for dashboard-safe work, preserve a bounded state package and continue through Codex/OpenAI on the selected owner lane.",
+    "statePreservation": "Failover packages may include objective summary, current step, recent safe activity, route decision, task/handoff ids, AGENTS.md/shared-skill pointers, and sanitized memory refs. They must exclude secrets, OAuth payloads, cookies, passwords, tokens, raw emails, raw connector data, and private account contents.",
+    "lastModeChangeAt": "2026-06-19T00:00:00Z",
+    "lastModeChangeReason": "enable Gemini-first orchestration and conserve Codex weekly allowance"
   },
   "providers": [
     {
@@ -22,58 +32,60 @@
       "label": "Codex / OpenAI",
       "role": "Default execution and private-tool owner",
       "budgetType": "subscription",
-      "monthlyFeeUsd": 200,
-      "monthlyCapUsd": 0,
+      "monthlyCapUsd": 200,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "openai-codex",
-      "lastRouteReason": "Default for repo edits, private connectors, auth, terminal execution, approvals, and final integration."
+      "lastModelUsed": "Codex subscription",
+      "lastRouteReason": "Subscription-backed execution lane; token estimates are telemetry, not incremental billable spend.",
+      "fixedMonthlyUsd": 200,
+      "fixedWeeklyUsd": 50.0,
+      "allowanceLabel": "Codex subscription allowance",
+      "usageAllowance": "Subscription-backed; telemetry only, not usage-billed."
     },
     {
       "id": "gemini",
       "label": "Gemini",
-      "role": "JAIMES-first reviewer, evaluator, digest, and long-context synthesis lane",
+      "role": "Front-desk/review/judgment ladder: Flash for fast safe triage, Pro for escalation, Lite worker-only.",
       "budgetType": "subscription",
-      "monthlyFeeUsd": 20,
-      "monthlyCapUsd": 0,
+      "monthlyCapUsd": 20,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "google/gemini-2.5-pro",
+      "lastModelUsed": "Gemini subscription",
+      "authStatus": "available-antigravity-oauth-subscription",
+      "lastAuthCheck": "2026-06-20T16:40:35Z",
+      "lastAuthIssue": null,
       "preferredModels": {
-        "routine": "google/gemini-2.5-pro",
+        "frontdesk": "google/gemini-2.5-flash",
+        "routine": "google/gemini-2.5-flash",
+        "review": "google/gemini-2.5-pro",
         "deep": "google/gemini-2.5-pro",
+        "longContext": "google/gemini-2.5-pro",
+        "tinyWorker": "google/gemini-2.5-flash-lite",
         "cheapFallback": "google/gemini-2.5-flash"
       },
-      "lastRouteReason": "Use Gemini Pro first for JAIMES dashboard-safe summaries, digests, reports, log summaries, reviews, and stale-task compression; use Flash only as fallback/cheap throughput; never raw secrets, OAuth payloads, raw mail, or private account data."
+      "lastRouteReason": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
+      "fixedMonthlyUsd": 20,
+      "fixedWeeklyUsd": 5.0,
+      "allowanceLabel": "Gemini subscription allowance",
+      "usageAllowance": "Google/Gemini subscription-backed route for Flash/Pro/Lite."
     },
     {
       "id": "xai",
-      "label": "Grok OAuth / xAI",
-      "role": "X/SuperGrok subscription CLI lane plus xAI API feed for X-native/current-events research",
-      "budgetType": "subscription",
-      "monthlyCapUsd": 0,
+      "label": "xAI / Grok",
+      "role": "Current-events, X-native research, outside critique, and batch audit specialist",
+      "budgetType": "premium-subscription",
+      "monthlyCapUsd": 8,
       "dailyCapUsd": 0,
-      "reserveUsd": null,
+      "reserveUsd": 48.97,
       "remainingCreditUsd": null,
-      "lastModelUsed": "grok-4.20-reasoning",
-      "authStatus": "grok-cli-oauth-authenticated",
-      "keyMode": "grok-cli-oauth-plus-xai-api-tool",
-      "lastRouteReason": "Use xAI API-backed x_search/Grok reasoning for X/current-events feed; use Grok CLI OAuth for subscription/account-backed CLI tasks. Keep Grok specialist, not default.",
-      "monthlyFeeUsd": 40,
-      "subscriptionLabel": "X subscription flat lane",
-      "subscriptionCreditPct": 2,
-      "usageProbeSummary": "2% used by 50-call probe",
-      "lastTestStatus": "50-call probe passed; ~2,500 call-equivalent window inferred",
-      "feeNote": "Monthly fee is an estimated FinOps placeholder; exact X billing is not available to CLI.",
-      "apiModelUsed": "grok-4.20-reasoning",
-      "cliModelUsed": "grok-composer-2.5-fast",
-      "probeAvgSeconds": 4.8,
-      "probeMaxSeconds": 20.62,
-      "probeRateLimited": false,
-      "probeObservedUsagePct": 2,
-      "probeInferredFullCallEquivalent": 2500,
-      "probeInferredRemainingCallEquivalent": 2450,
-      "probeCalibrationNote": "50 calls consumed 2% per Josh screenshot; linear estimate only."
+      "lastModelUsed": "Grok via X Premium",
+      "authStatus": "pending-local-key-install",
+      "keyMode": "host-local-env-or-secret-file",
+      "lastRouteReason": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
+      "fixedMonthlyUsd": 8,
+      "fixedWeeklyUsd": 2.0,
+      "allowanceLabel": "X Premium / Grok allowance",
+      "usageAllowance": "X Premium/Grok subscription; API calls tracked separately if used."
     },
     {
       "id": "openrouter",
@@ -84,13 +96,40 @@
       "dailyCapUsd": 1,
       "remainingCreditUsd": null,
       "lastModelUsed": "openrouter/auto",
-      "lastRouteReason": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first."
+      "lastRouteReason": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first.",
+      "displayWhenIdle": false,
+      "usageAllowance": "Metered fallback only; hidden unless active or spending."
+    },
+    {
+      "id": "ollama",
+      "label": "Ollama Pro",
+      "role": "Local/Ollama Cloud model lane; GLM-5.2 eval plus local models.",
+      "budgetType": "annual-subscription",
+      "monthlyCapUsd": 16.67,
+      "dailyCapUsd": 0,
+      "remainingCreditUsd": null,
+      "lastModelUsed": "glm-5.2:cloud + local Ollama",
+      "authStatus": "ollama-pro-subscription",
+      "lastRouteReason": "$200/year amortized as $16.67/mo and $4.17/wk; local models remain zero incremental cost.",
+      "fixedMonthlyUsd": 16.67,
+      "fixedWeeklyUsd": 4.17,
+      "allowanceLabel": "Ollama Pro annual allowance",
+      "usageAllowance": "Ollama Pro paid annually; cloud/local usage shown as subscription capacity, not scary token-equivalent spend.",
+      "preferredModels": {
+        "eval": "glm-5.2:cloud",
+        "local": "local Ollama models"
+      },
+      "displayWhenIdle": true
     }
   ],
   "guardrails": [
     "Do not route secrets, OAuth payloads, raw connector data, raw emails, or private account contents to Gemini, xAI, or OpenRouter automatically.",
     "Any provider with a daily cap is blocked once dailySpendUsd is greater than or equal to dailyCapUsd unless Josh explicitly approves an override.",
     "When Codex allowance mode is exhausted, non-execution dashboard-safe work must leave Codex first; Codex/API/OpenRouter spend is reserved for execution and private actions.",
-    "xAI is not the default brain. It is a specialist lane for current-events, X-native research, outside critique, and batch audits."
-  ]
+    "xAI is not the default brain. It is a specialist lane for current-events, X-native research, outside critique, and batch audits.",
+    "Gemini Flash Lite must never be the sole gatekeeper for escalation.",
+    "Execution tasks involving code, files, tools, crons, tests, browser/auth work, trade prep, or account mutation must route to Codex/JAIMES/JOSHeX approval lanes, not Lite/Flash alone.",
+    "Route telemetry must not contain raw prompts, secrets, OAuth payloads, cookies, passwords, tokens, raw emails, or private account contents."
+  ],
+  "billingBasis": "Codex $200/mo, Gemini $20/mo, Grok/X Premium ~$8/mo, Ollama Pro $200/year ($16.67/mo, $4.17/wk). Fixed subscriptions; token/session estimates are telemetry only."
 }

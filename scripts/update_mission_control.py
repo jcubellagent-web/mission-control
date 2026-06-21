@@ -2128,7 +2128,10 @@ def fetch_ollama_usage() -> List[Dict[str, Any]]:
                 "isLocal": True,
                 "sizeGb": round(size_gb, 2),
                 "loaded": loaded,
-                "_note": f"Local Ollama model ({size_gb:.1f}GB). Free — runs on-device.",
+                "billingMode": "subscription",
+                "billableCostUsd": 0.0,
+                "meteredEquivalentUsd": 0.0,
+                "_note": f"Local Ollama model ({size_gb:.1f}GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
             })
     except Exception as exc:
         print(f"[warn] fetch_ollama_usage failed: {exc}", file=sys.stderr)
