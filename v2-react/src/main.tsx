@@ -1745,6 +1745,7 @@ function ActivityLedger({ model }: { model: ControlTowerModel }) {
         </div>
         <span>{model.counts.trackedJobs} tracked jobs</span>
       </header>
+      <ModelRoutingLadderVisual state={model.state} />
       {concurrent ? (
         <section
           className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 4)}`}
@@ -2178,7 +2179,7 @@ function BrainHero({
       <div className="brain-hero-title">
         <div>
           <p>Live agent updates</p>
-          <h2>Brain Feed</h2>
+          <h2>Live Work Board</h2>
         </div>
         <BrainAttentionStrip state={state} quietMode={quietMode} onNavigate={onNavigate} />
         <div className="brain-hero-controls">
