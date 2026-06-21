@@ -17429,3 +17429,205 @@ body::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+
+/* Minimal model ladder shown from Live Work Board details. */
+.routing-ladder-visual {
+  margin-top: 12px;
+  border: 1px solid rgba(85, 215, 255, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(3, 20, 34, 0.78), rgba(3, 35, 48, 0.52));
+  padding: 10px;
+}
+
+.routing-ladder-visual header,
+.agent-ops-mini header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.routing-ladder-visual header span,
+.agent-ops-mini header span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.routing-ladder-visual header strong,
+.agent-ops-mini header strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.routing-ladder-visual header em,
+.agent-ops-mini header em {
+  max-width: 42%;
+  color: var(--green);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.routing-ladder-flow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.routing-ladder-flow article {
+  position: relative;
+  min-width: 0;
+  border: 1px solid rgba(85, 215, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(2, 14, 25, 0.64);
+  padding: 8px 7px;
+}
+
+.routing-ladder-flow article:not(:last-child)::after {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  color: rgba(85, 215, 255, 0.55);
+  content: '›';
+  font-size: 16px;
+  font-weight: 900;
+  transform: translateY(-50%);
+}
+
+.routing-ladder-flow article.is-primary {
+  border-color: rgba(88, 238, 154, 0.38);
+  box-shadow: inset 0 0 18px rgba(88, 238, 154, 0.08);
+}
+
+.routing-ladder-flow span,
+.routing-ladder-flow small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.routing-ladder-flow strong {
+  display: block;
+  overflow: hidden;
+  margin: 3px 0;
+  color: var(--text);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-ops-mini {
+  margin-top: 12px;
+  border: 1px solid rgba(85, 215, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(3, 20, 34, 0.62);
+  padding: 10px;
+}
+
+.agent-ops-mini header em.is-risk { color: var(--red); }
+.agent-ops-mini header em.is-watch { color: var(--watch); }
+.agent-ops-mini header em.is-clear { color: var(--green); }
+
+.agent-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.agent-ops-grid article {
+  min-width: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 7px;
+}
+
+.agent-ops-grid article.is-active {
+  border-color: rgba(85, 215, 255, 0.45);
+  box-shadow: inset 0 0 16px rgba(85, 215, 255, 0.08);
+}
+
+.agent-ops-grid article.is-clear {
+  border-color: rgba(88, 238, 154, 0.28);
+}
+
+.agent-ops-grid article.is-watch {
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.agent-ops-grid article.is-risk {
+  border-color: rgba(247, 120, 115, 0.38);
+}
+
+.agent-ops-grid strong,
+.agent-ops-grid span,
+.agent-ops-grid small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-ops-grid strong {
+  color: var(--text);
+  font-size: 10px;
+}
+
+.agent-ops-grid span {
+  margin-top: 3px;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.agent-ops-grid article.is-watch span { color: var(--watch); }
+.agent-ops-grid article.is-risk span { color: var(--red); }
+.agent-ops-grid article.is-active span { color: var(--cyan); }
+
+.agent-ops-grid small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.agent-ops-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.agent-ops-metrics span {
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  color: var(--muted);
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 1280px) {
+  .routing-ladder-flow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .routing-ladder-flow article:nth-child(3)::after {
+    display: none;
+  }
+}

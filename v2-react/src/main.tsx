@@ -1512,7 +1512,7 @@ function ControlTower({
 
       {/* Column 3 (Right): Scheduled Jobs / Daily Calendar */}
       <aside className="right-rail tower-jobs-rail">
-        <JobsRail jobs={state.jobs} liveCues={liveCues} />
+        <JobsRail state={state} liveCues={liveCues} />
       </aside>
     </section>
   );
@@ -2191,9 +2191,9 @@ function BrainHero({
             className={showDetails ? "selected" : ""}
             onClick={() => setShowDetails((value) => !value)}
             aria-pressed={showDetails}
-            aria-label={showDetails ? "Hide Brain Feed details" : "Show Brain Feed details"}
+            aria-label={showDetails ? "Hide model routing ladder" : "Show model routing ladder"}
           >
-            {showDetails ? "Hide" : "Details"}
+            {showDetails ? "Hide" : "Ladder"}
           </button>
         </div>
       </div>
@@ -2221,8 +2221,57 @@ function BrainHero({
       </div>
 
       {showDetails ? (
-        <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
+        <ModelRoutingLadderVisual state={state} />
       ) : null}
+    </section>
+  );
+}
+
+function modelRouteLadderRows(state: MissionControlState) {
+  const rawRows = Array.isArray(state.modelRouter?.ladder) ? state.modelRouter?.ladder || [] : [];
+  const normalized = rawRows
+    .map((row, index) => {
+      const data = row as Record<string, unknown>;
+      const label = missionText(String(data.label || data.name || data.route || data.tier || `Step ${index + 1}`));
+      const model = missionText(String(data.model || data.provider || data.primary || data.firstStop || ""));
+      const use = missionText(String(data.use || data.reason || data.when || data.description || ""));
+      return { label, model, use };
+    })
+    .filter((row) => row.label || row.model || row.use);
+  if (normalized.length) return normalized.slice(0, 6);
+  return [
+    { label: "Triage", model: "Gemini Flash", use: "fast summaries" },
+    { label: "Review", model: "Gemini Pro", use: "deep judgment" },
+    { label: "Execute", model: "Codex", use: "code + tools" },
+    { label: "Current", model: "Grok", use: "X/public signal" },
+    { label: "Eval", model: "Ollama GLM", use: "test lane" },
+    { label: "Fallback", model: "OpenRouter", use: "only if needed" },
+  ];
+}
+
+function ModelRoutingLadderVisual({ state }: { state: MissionControlState }) {
+  const rows = modelRouteLadderRows(state);
+  const lastRoute = state.modelRouter?.lastRoute || {};
+  const activeRoute = missionText(String(lastRoute.routeLabel || lastRoute.model || lastRoute.provider || "policy ready"));
+  const status = missionText(String(state.modelRouter?.ladderStatus || state.modelRouter?.summary || "subscription-first routing"));
+  return (
+    <section className="routing-ladder-visual" aria-label="Model routing ladder">
+      <header>
+        <div>
+          <span>Model routing ladder</span>
+          <strong>{activeRoute}</strong>
+        </div>
+        <em>{status}</em>
+      </header>
+      <div className="routing-ladder-flow">
+        {rows.map((row, index) => (
+          <article key={`${row.label}-${index}`} className={index === 2 ? "is-primary" : ""}>
+            <span>{row.label}</span>
+            <strong>{row.model}</strong>
+            <small>{row.use}</small>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -5381,8 +5430,69 @@ function sorareGroupSummary(group: ReturnType<typeof sorareDailyGroups>[number])
   return compactText(`${group.items.length} job${group.items.length === 1 ? "" : "s"} · ${names}${extra}`, 68);
 }
 
-function JobsRail({ jobs, liveCues }: { jobs: MissionControlState["jobs"]; liveCues: LiveCueState }) {
-  const trackedJobs = operatorTrackedJobs(jobs);
+function agentOpsTone(status?: AgentStatus) {
+  if (!status) return "is-risk";
+  if (agentNeedsFocus(status)) return "is-risk";
+  if (status.active || String(status.status).toLowerCase() === "active") return "is-active";
+  if (agentIsReady(status)) return "is-clear";
+  return "is-watch";
+}
+
+function agentOpsLabel(status?: AgentStatus) {
+  if (!status) return "missing";
+  if (agentNeedsFocus(status)) return "needs check";
+  if (status.active || String(status.status).toLowerCase() === "active") return "working";
+  if (agentIsReady(status)) return "ready";
+  return missionText(status.status || "watch");
+}
+
+function AgentOpsMiniDashboard({
+  state,
+  trackedJobs,
+  actionCount,
+  activeCount,
+}: {
+  state: MissionControlState;
+  trackedJobs: JobRow[];
+  actionCount: number;
+  activeCount: number;
+}) {
+  const statusMap = new Map(state.statuses.map((status) => [status.agent_id, status]));
+  const readyCount = HERO_AGENT_ORDER.filter((agent) => agentIsReady(statusMap.get(agent))).length;
+  const activeAgents = state.statuses.filter((status) => status.active || String(status.status).toLowerCase() === "active").length;
+  const healthTone = actionCount ? "is-risk" : readyCount >= HERO_AGENT_ORDER.length ? "is-clear" : "is-watch";
+  return (
+    <section className="agent-ops-mini" aria-label="Agent ops health">
+      <header>
+        <div>
+          <span>Agent ops</span>
+          <strong>{actionCount ? `${actionCount} needs focus` : `${readyCount}/${HERO_AGENT_ORDER.length} ready`}</strong>
+        </div>
+        <em className={healthTone}>{activeCount ? `${activeCount} jobs running` : activeAgents ? `${activeAgents} agents active` : "stable"}</em>
+      </header>
+      <div className="agent-ops-grid">
+        {HERO_AGENT_ORDER.map((agent) => {
+          const status = statusMap.get(agent);
+          return (
+            <article key={agent} className={`${agentClass(agent)} ${agentOpsTone(status)}`}>
+              <strong>{AGENTS[agent].label}</strong>
+              <span>{agentOpsLabel(status)}</span>
+              <small>{status ? ageLabel(status.updated_at) : "no row"}</small>
+            </article>
+          );
+        })}
+      </div>
+      <div className="agent-ops-metrics">
+        <span>{trackedJobs.length} jobs</span>
+        <span>{actionCount ? `${actionCount} action` : "0 blockers"}</span>
+        <span>{activeCount ? `${activeCount} running` : "idle ok"}</span>
+      </div>
+    </section>
+  );
+}
+
+function JobsRail({ state, liveCues }: { state: MissionControlState; liveCues: LiveCueState }) {
+  const trackedJobs = operatorTrackedJobs(state.jobs);
   const inventoryGroups = groupedJobs(trackedJobs, "category");
   const actionCount = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const activeCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
@@ -5394,15 +5504,16 @@ function JobsRail({ jobs, liveCues }: { jobs: MissionControlState["jobs"]; liveC
       <div className="panel-title compact calendar-title">
         <div>
           <p>Operating model tracker</p>
-          <h2>Today's Jobs</h2>
+          <h2>Agent Ops &amp; Jobs</h2>
         </div>
         <span>{trackedJobs.length} tracked · {ownerCount} owners</span>
       </div>
-      <div className="jobs-audit-strip" aria-label="Today's Jobs audit summary">
+      <div className="jobs-audit-strip" aria-label="Agent Ops and jobs audit summary">
         <article className={actionCount ? "is-risk" : "is-clear"}><b>{actionCount}</b><span>needs focus</span></article>
         <article className={activeCount ? "is-active" : "is-clear"}><b>{activeCount}</b><span>active now</span></article>
         <article><b>{todayCount}</b><span>today-linked</span></article>
       </div>
+      <AgentOpsMiniDashboard state={state} trackedJobs={trackedJobs} actionCount={actionCount} activeCount={activeCount} />
       <div className="job-list">
         <DailyJobsCalendar jobs={trackedJobs} liveCues={liveCues} />
         <SchedulerInventoryDisclosure groups={inventoryGroups} total={trackedJobs.length} surfaced={trackedJobs.length} liveCues={liveCues} />
