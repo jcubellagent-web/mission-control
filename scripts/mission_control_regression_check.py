@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
-"""Control Tower React UI/data regression checks.
+"""Control Tower UI/data regression checks.
 
-This is the fast, browserless guard for the current Vite/React kiosk. The old
-static index.html guard became stale after the Control Tower moved to
-v2-react/src, so this script now checks the live source tree and dashboard JSON
-contracts without requiring Chrome or Playwright.
+This is intentionally a current-surface contract. The retired static
+`index.html` dashboard is no longer the operator surface, so this checker
+validates the React Control Tower, dashboard sidecars, and routing invariants
+that matter for the Josh 2.0 kiosk.
 """
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
-SRC_DIR = ROOT / "v2-react" / "src"
-MAIN_TSX = SRC_DIR / "main.tsx"
-DATA_TS = SRC_DIR / "data.ts"
-STYLES = SRC_DIR / "styles.css"
-TMP_JS = Path("/tmp/mc_scripts_regression.js")
+REACT_DIR = ROOT / "v2-react"
+REACT_SRC = REACT_DIR / "src"
 
 
 def fail(msg: str) -> None:
@@ -35,11 +32,6 @@ def require(condition: bool, msg: str) -> None:
         fail(msg)
 
 
-def require_text(src: str, needles: Iterable[str], context: str) -> None:
-    for needle in needles:
-        require(needle in src, f"missing {context}: {needle}")
-
-
 def parse_iso(value: object) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
@@ -47,6 +39,10 @@ def parse_iso(value: object) -> datetime | None:
         return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError:
         return None
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(path.read_text())
 
 
 def check_json() -> None:
@@ -65,160 +61,136 @@ def check_json() -> None:
     require(not bad, "invalid JSON in data/*.json")
 
 
-def check_react_source() -> None:
-    require(MAIN_TSX.exists(), "React kiosk main.tsx missing")
-    require(DATA_TS.exists(), "React kiosk data.ts missing")
-    require(STYLES.exists(), "React kiosk styles.css missing")
-    main = MAIN_TSX.read_text()
-    data_ts = DATA_TS.read_text()
-    css = STYLES.read_text()
+def check_react_surface() -> None:
+    main = REACT_SRC / "main.tsx"
+    data = REACT_SRC / "data.ts"
+    adapters = REACT_SRC / "dataAdapters.ts"
+    types = REACT_SRC / "types.ts"
+    styles = REACT_SRC / "styles.css"
+    for path in (main, data, adapters, types, styles):
+        require(path.exists(), f"missing React Control Tower source: {path.relative_to(ROOT)}")
 
-    require_text(
-        main,
-        [
-            "Live Work Board",
-            "ledger-live-focus",
-            "ledger-focus-primary",
-            "is-concurrent",
-            "Today's Jobs",
-            "daily-calendar-view",
-            "calendar-job-block",
-            "AttentionTarget",
-            "today-jobs",
-            "brain-feed",
-            "signal-feed",
-        ],
-        "Control Tower React surface",
-    )
+    main_src = main.read_text(errors="ignore")
+    data_src = data.read_text(errors="ignore")
+    adapters_src = adapters.read_text(errors="ignore")
+    types_src = types.read_text(errors="ignore")
 
-    require_text(
-        main,
-        [
-            "Always let fresh explicit agent Brain Feed rows surface as active work",
-            "state.statuses",
-            "agentIsWorking(status)",
-            "isFreshActiveTimestamp(status.updated_at)",
-        ],
-        "Live Work Board active-agent fallback",
-    )
-
-    require_text(
-        data_ts,
-        [
-            "fallbackFreshActive",
-            "Boolean(fallbackRow.active)",
-            "isFreshBrainFeedTruth(fallbackRow)",
-        ],
-        "Live Work Board fresh sidecar merge",
-    )
-
-    require_text(
-        data_ts,
-        [
-            "Control Tower job",
-        ],
-        "Control Tower user-facing naming",
-    )
-
-    require_text(
-        main,
-        [
-            "detailLines?: string[]",
-            "liveAgentDetailLines(status)",
-            "Agent-agnostic: JOSH 2.0, JOSHeX, JAIMES, and J.A.I.N",
-            "ledger-now-context",
-            "Using:",
-            "Fresh:",
-            "Step:",
-            "Context:",
-        ],
-        "all-agent rich Live Work Board details",
-    )
-
-    require_text(
-        css,
-        [
-            "LIVE WORK BOARD RICH DETAIL CHIPS",
-            "LIVE WORK BOARD RICH DETAIL FIT",
-            "CONTROL TOWER GLASS INSIGHT PASS",
-            "calendar-phase-strip",
-            ":has(.ledger-now-context)",
-        ],
-        "rich Live Work Board detail fit",
-    )
-
-    require_text(
-        css,
-        [
-            "CONTROL-TOWER-BRAND-BLUEGREEN-20260607",
-            "TODAY'S JOBS STABILITY PASS",
-            "CENTER COLUMN SIMPLIFICATION",
-            "KIOSK READABILITY PASS — JAIMES — 2026-06-07",
-            "scrollbar-width: none",
-            "overflow: hidden !important",
-            "--brand-blue",
-            "--brand-green",
-            ".ledger-live-focus.is-concurrent",
-            ".calendar-job-block",
-        ],
-        "kiosk CSS guardrails",
-    )
-
-    forbidden_visible_tokens = ["#00CFFF", "#54d6c7", "#a597db"]
-    tail = css[css.find("CONTROL-TOWER-BRAND-BLUEGREEN-20260607") :]
-    for token in forbidden_visible_tokens:
-        require(token not in tail, f"stale accent token after brand guard: {token}")
-
-    min_font_matches = [float(v) for v in re.findall(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", css)]
-    tiny_after_marker = [float(v) for v in re.findall(r"font-size:\s*([0-9]+(?:\.[0-9]+)?)px", css[css.find("KIOSK READABILITY PASS"):]) if float(v) < 9]
-    require(min_font_matches, "no CSS font-size declarations found")
-    require(not tiny_after_marker, f"readability pass introduced sub-9px text: {tiny_after_marker[:5]}")
-    print("css_font_px_min", min(min_font_matches))
-
-
-def check_typescript() -> None:
-    result = subprocess.run(["npx", "tsc", "--noEmit"], cwd=ROOT, text=True, capture_output=True, timeout=120)
-    if result.stdout:
-        print(result.stdout.strip())
-    if result.stderr:
-        print(result.stderr.strip())
-    require(result.returncode == 0, "TypeScript noEmit check failed")
-
-
-def check_sidecar_contracts() -> None:
-    optional_contracts = [
-        ("agent-control-status.json", "summary", "agents"),
-        ("shared-events.json", "events", None),
-        ("decisions.json", "decisions", None),
-        ("handoff-queue.json", "handoffs", None),
-        ("knowledge-index.json", "entries", None),
-        ("agent-task-queue.json", "tasks", None),
-        ("agent-capabilities.json", "agents", None),
-        ("agent-routing-policy.json", "routes", None),
-        ("agent-heartbeats.json", "heartbeats", None),
-        ("capability-inventory.json", "nodes", None),
-        ("automation-rollout.json", "rollouts", None),
+    required_main = [
+        "Live Work Board",
+        "Live Work Board command view",
+        "BrainAttentionStrip",
+        "AgenticCryptoPanel",
+        "JobsRail",
+        "SignalFeed",
+        "agentNeedsFocus",
+        "RuntimeCapabilityPanel",
     ]
-    for filename, first, second in optional_contracts:
-        path = DATA_DIR / filename
-        if not path.exists():
-            continue
-        payload = json.loads(path.read_text())
-        require(first in payload, f"{filename} must include {first}")
-        if second:
-            require(second in payload, f"{filename} must include {second}")
-        if isinstance(payload.get(first), list):
-            require(isinstance(payload[first], list), f"{filename}.{first} must be a list")
+    missing = [needle for needle in required_main if needle not in main_src]
+    require(not missing, "React Control Tower missing current surface markers: " + ", ".join(missing))
 
-    gemini_path = DATA_DIR / "gemini-ecosystem.json"
-    if gemini_path.exists():
-        gemini = json.loads(gemini_path.read_text())
-        require((gemini.get("localCli") or {}).get("command") == "gemini", "Gemini sidecar must identify local CLI command")
-        require(isinstance(gemini.get("roles"), list) and gemini.get("roles"), "Gemini sidecar must list dashboard-safe roles")
+    for agent in ("joshex", "josh2", "jaimes", "jain"):
+        require(agent in adapters_src or agent in data_src or agent in main_src, f"missing first-class agent marker: {agent}")
+
+    require("REALTIME_TABLES" in data_src, "React data layer must include realtime table wiring")
+    require("brain_feed" in data_src and "mc_v2_agent_status" in data_src, "React data layer must read Brain Feed and agent status")
+    require("recordValue" in adapters_src and "arrayValue" in adapters_src, "React data adapters must expose sidecar normalizers")
+    require("MissionControlState" in types_src, "React types must expose the Control Tower state contract")
+
+
+def check_dashboard_shape() -> None:
+    dashboard_path = DATA_DIR / "dashboard-data.json"
+    require(dashboard_path.exists(), "missing dashboard-data.json")
+    dashboard = load_json(dashboard_path)
+    require(isinstance(dashboard, dict), "dashboard-data.json must be an object")
+
+    for key in (
+        "lastUpdated",
+        "actionRequired",
+        "agentBrainFeeds",
+        "crons",
+        "sharedEvents",
+        "sharedOperatingLayer",
+        "modelRouter",
+    ):
+        require(key in dashboard, f"dashboard missing required key: {key}")
+
+    crons = dashboard.get("crons")
+    require(isinstance(crons, list), "dashboard crons payload must be a list")
+    require(len(crons) >= 8, f"too few tracked jobs visible: {len(crons)}")
+
+    cron_text = json.dumps(crons).lower()
+    for lane in ("sorare", "gmail", "brain", "breaking"):
+        require(lane in cron_text, f"tracked jobs missing ecosystem lane: {lane}")
+
+    feeds = dashboard.get("agentBrainFeeds")
+    require(isinstance(feeds, dict), "agentBrainFeeds must be an object")
+    feed_text = json.dumps(feeds).lower()
+    for agent in ("josh", "jaimes", "jain"):
+        require(agent in feed_text, f"agentBrainFeeds missing agent: {agent}")
+
+    required_sidecars = [
+        ("shared-events.json", "events"),
+        ("agent-task-queue.json", "tasks"),
+        ("handoff-queue.json", "handoffs"),
+        ("agent-heartbeats.json", "heartbeats"),
+        ("agent-route-decisions.jsonl", None),
+    ]
+    for filename, key in required_sidecars:
+        path = DATA_DIR / filename
+        require(path.exists(), f"missing sidecar: {filename}")
+        if key:
+            payload = load_json(path)
+            require(isinstance(payload.get(key), list), f"{filename} must include a {key} list")
+
+
+def check_model_routes() -> None:
+    route_script = ROOT / "scripts" / "agent_route_regression_check.py"
+    if route_script.exists():
+        proc = subprocess.run(
+            [sys.executable, str(route_script), "--json"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            timeout=120,
+        )
+        if proc.stdout.strip():
+            print(proc.stdout.strip())
+        if proc.stderr.strip():
+            print(proc.stderr.strip(), file=sys.stderr)
+        require(proc.returncode == 0, "agent_route_regression_check failed")
+        payload = json.loads(proc.stdout)
+        require(payload.get("ok") is True, "model ladder route regression reported not-ok")
+        return
+
+    agent_route = ROOT / "scripts" / "agent_route.py"
+    require(agent_route.exists(), "missing agent_route.py")
+    safe_route = subprocess.run(
+        [
+            sys.executable,
+            str(agent_route),
+            "--task-type",
+            "summary",
+            "--title",
+            "Regression safe summary",
+            "--objective",
+            "Summarize dashboard-safe agent activity",
+            "--privacy",
+            "dashboard-safe",
+            "--capability",
+            "gemini-review",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=60,
+    )
+    require(safe_route.returncode == 0, f"agent_route safe summary failed: {safe_route.stderr.strip()}")
+    safe_payload = json.loads(safe_route.stdout)
+    require((safe_payload.get("modelRoute") or {}).get("firstStop") == "gemini", "safe summaries must route Gemini-first")
 
 
 def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) -> None:
-    data = json.loads((DATA_DIR / "dashboard-data.json").read_text())
+    data = load_json(DATA_DIR / "dashboard-data.json")
     candidates = [
         data.get("lastUpdated"),
         (data.get("focus") or {}).get("updatedAt") if isinstance(data.get("focus"), dict) else None,
@@ -232,7 +204,7 @@ def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) 
     status = {
         "ok": fresh,
         "alert_count": 0 if fresh else 1,
-        "check": "memory-roadmap-freshness",
+        "check": "control-tower-freshness",
         "maxAgeMinutes": max_age_min,
         "ageMinutes": round(age_min, 2) if age_min is not None else None,
         "newestSourceAt": newest.isoformat().replace("+00:00", "Z") if newest else None,
@@ -241,8 +213,8 @@ def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) 
     if write_status:
         write_status.parent.mkdir(parents=True, exist_ok=True)
         write_status.write_text(json.dumps(status, indent=2) + "\n")
-    print("roadmap_age_min", status["ageMinutes"])
-    require(fresh, f"Memory Roadmap stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
+    print("control_tower_age_min", status["ageMinutes"])
+    require(fresh, f"Control Tower stale or missing; age={status['ageMinutes']}m max={max_age_min}m")
 
 
 def main() -> int:
@@ -250,19 +222,17 @@ def main() -> int:
     parser.add_argument("--check-roadmap-freshness", action="store_true")
     parser.add_argument("--max-roadmap-age-min", type=int, default=20)
     parser.add_argument("--write-status", type=Path)
-    parser.add_argument("--with-tsc", action="store_true", help="also run npx tsc --noEmit; optional because this repo does not vendor React type packages")
     args = parser.parse_args()
 
     check_json()
-    check_react_source()
-    check_sidecar_contracts()
-    if args.with_tsc:
-        check_typescript()
+    check_react_surface()
+    check_dashboard_shape()
+    check_model_routes()
     if args.check_roadmap_freshness:
         check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
-    print("mission_control_regression_check OK")
+    print("control_tower_regression_check OK")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

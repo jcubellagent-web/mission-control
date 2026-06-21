@@ -1,10 +1,10 @@
 {
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5174",
+    "dev": "vite --host 127.0.0.1 --port 5174 --strictPort",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
     "kiosk": "scripts/open_mission_control_kiosk.sh",
-    "dev:v2": "vite --host 127.0.0.1 --port 5174",
+    "dev:v2": "vite --host 127.0.0.1 --port 5174 --strictPort",
     "build:v2": "vite build",
     "preview:v2": "vite preview --host 127.0.0.1 --port 5174",
     "check": "python3 scripts/mission_control_regression_check.py",

@@ -1,6 +1,6 @@
 import type { AgentId } from "./types";
 
-export const AGENT_IDS = ["joshex", "josh", "jaimes", "jain"] as const;
+export const AGENT_IDS = ["joshex", "josh2", "jaimes", "jain"] as const;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));

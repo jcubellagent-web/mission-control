@@ -1,4 +1,4 @@
-export type AgentId = "joshex" | "josh" | "jaimes" | "jain";
+export type AgentId = "joshex" | "josh2" | "jaimes" | "jain";
 
 export type AgentStatus = {
   agent_id: AgentId;
@@ -63,7 +63,6 @@ export type Approval = {
 
 export type MissionControlState = {
   source: string;
-  lastUpdated?: string;
   statuses: AgentStatus[];
   events: AgentEvent[];
   jobs: AgentJob[];
@@ -75,7 +74,6 @@ export type MissionControlState = {
   capabilityStack?: CapabilityStackItem[];
   capabilityInventory?: CapabilityInventory;
   capabilityWatch?: CapabilityWatch;
-  runtimeLayout?: RuntimeLayoutHealth;
   signalHealth?: SignalHealth;
   signals: SignalItem[];
 };
@@ -93,6 +91,8 @@ export type AgenticCryptoWallet = {
     totalEstimatedUsd?: number;
     liquidEstimatedUsd?: number;
     nftEstimatedUsd?: number;
+    nativeLiquidUsd?: number;
+    tokenLiquidUsd?: number;
     lastRefreshed?: string;
     freshnessStatus?: string;
   };
@@ -152,28 +152,6 @@ export type AgenticCryptoWallet = {
     simulationStatus?: string;
     requiredApproval?: string;
   }>;
-  baseMcp?: {
-    status?: "not-connected" | "read-only-ready" | "proposal-ready" | "approval-required" | "error" | string;
-    mode?: "read-only" | "proposal-only" | "approval-required" | "disabled" | string;
-    accountConnection?: "not-connected" | "connected" | "pending-user-approval" | string;
-    lastChecked?: string;
-    summary?: string;
-    owner?: string;
-    capabilities?: string[];
-    guardrails?: string[];
-    pendingProposals?: Array<{
-      id?: string;
-      title: string;
-      status?: "draft" | "needs-review" | "approved" | "rejected" | "expired" | string;
-      chain?: string;
-      risk?: "low" | "medium" | "high" | string;
-      next?: string;
-    }>;
-    links?: Array<{
-      label: string;
-      url: string;
-    }>;
-  };
   guardrails?: {
     chainAllowlist?: string[];
     dailyGasCapUsd?: number;
@@ -212,33 +190,6 @@ export type CapabilityWatch = {
   recommendations?: Array<Record<string, unknown>>;
 };
 
-export type RuntimeLayoutHealth = {
-  ok?: boolean;
-  status?: string;
-  checkedAt?: string;
-  summary?: string;
-  title?: string;
-  url?: string;
-  viewport?: {
-    width?: number;
-    height?: number;
-    scrollWidth?: number;
-    scrollHeight?: number;
-  };
-  visibleCounts?: {
-    agentCards?: number;
-    signalRows?: number;
-    calendarBlocks?: number;
-    tokenRows?: number;
-  };
-  issues?: string[];
-  target?: {
-    title?: string;
-    url?: string;
-    idHash?: string;
-  };
-};
-
 export type ReliabilityUpgradeItem = {
   id: string;
   label: string;
@@ -262,43 +213,6 @@ export type ReliabilityUpgrades = {
   summary?: string;
   items: ReliabilityUpgradeItem[];
   metrics?: ReliabilityUpgradeMetric[];
-};
-
-export type ModelProviderBreakdown = {
-  id: string;
-  label: string;
-  budgetLabel?: string;
-  budgetType?: string;
-  monthlyFeeUsd?: number;
-  fixedMonthlyUsd?: number;
-  meteredDailyUsd?: number;
-  meteredWeeklyUsd?: number;
-  meteredMonthlyUsd?: number;
-  usageEquivalentDailyUsd?: number;
-  usageEquivalentWeeklyUsd?: number;
-  usageEquivalentMonthlyUsd?: number;
-  usagePct?: number;
-  usageSummary?: string;
-  inferredFullCallEquivalent?: number;
-  inferredRemainingCallEquivalent?: number;
-  callsToday?: number;
-  callsWeekly?: number;
-  sessions?: number;
-  totalTokens?: number;
-  inputTokens?: number;
-  outputTokens?: number;
-  summary?: string;
-  topModels?: Array<{
-    name: string;
-    source?: string;
-    weeklyCost?: number;
-    dailyCost?: number;
-    usageEquivalentCost?: number;
-    marginalCost?: number;
-    sessions?: number;
-    callsWeekly?: number;
-    totalTokens?: number;
-  }>;
 };
 
 export type ModelUsage = {
@@ -364,7 +278,6 @@ export type ModelUsage = {
     lastRunAt?: string;
     available?: boolean;
   };
-  providerBreakdown?: ModelProviderBreakdown[];
   providerBudgets?: ProviderBudget[];
   routerPolicy?: Record<string, unknown>;
 };
@@ -374,7 +287,6 @@ export type ProviderBudget = {
   label: string;
   role?: string;
   budgetType?: string;
-  monthlyFeeUsd?: number;
   monthlyCapUsd?: number;
   dailyCapUsd?: number;
   reserveUsd?: number;
@@ -390,9 +302,6 @@ export type ProviderBudget = {
   keySuffix?: string;
   lastTestStatus?: string;
   lastModelUsed?: string;
-  usageProbeSummary?: string;
-  subscriptionLabel?: string;
-  subscriptionCreditPct?: number;
   whyChosen?: string;
   fixedMonthlyUsd?: number;
   fixedWeeklyUsd?: number;
@@ -408,6 +317,13 @@ export type ModelRouter = {
   policy?: Record<string, unknown>;
   providers?: ProviderBudget[];
   guardrails?: string[];
+  ladder?: Array<Record<string, unknown>>;
+  ladderStatus?: string;
+  routeQualityScore?: number | null;
+  efficiencyScore?: number | null;
+  routeMix?: Record<string, number>;
+  routeAlerts?: string[];
+  lastRoute?: Record<string, unknown>;
 };
 
 export type SignalItem = {
@@ -436,8 +352,6 @@ export type SignalHealth = {
   generatedAt?: string;
   status?: string;
   summary?: string;
-  quietHours?: boolean;
-  nextBreakingRun?: string;
   agesMinutes?: Record<string, number | null>;
   counts?: {
     live?: number;
@@ -447,12 +361,9 @@ export type SignalHealth = {
     breakingSourceItems?: number;
     newsfeedSourceItems?: number;
     newsletterTrendItems?: number;
-    publicRssFallbackItems?: number;
   };
   topSources?: Array<{ source?: string; count?: number }>;
   staleSources?: string[];
-  coveredStaleSources?: string[];
-  fallbackFresh?: boolean;
   qualityPolicy?: string;
 };
 
@@ -461,7 +372,6 @@ declare global {
     MC_V2_CONFIG?: {
       supabaseUrl?: string;
       supabaseKey?: string;
-      supabaseMode?: "primary" | "optional" | "disabled";
     };
   }
 }

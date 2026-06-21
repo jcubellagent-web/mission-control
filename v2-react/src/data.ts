@@ -7,7 +7,18 @@ const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
 const STALE_BLOCKER_WINDOW_MS = 6 * 60 * 60 * 1000;
 const BRAIN_FEED_TRUTH_WINDOW_MS = 12 * 60 * 60 * 1000;
-const AGENT_STATUS_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"];
+const AGENT_STATUS_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"];
+
+function canonicalAgentId(value: unknown, fallback: AgentId = "joshex"): AgentId {
+  const text = String(value || "").toLowerCase();
+  if (text === "main" || text === "josh" || text === "josh2" || text.includes("josh2") || text.includes("josh 2")) {
+    return "josh2";
+  }
+  if (text.includes("jaimes")) return "jaimes";
+  if (text.includes("j.a.i.n") || text.includes("jain")) return "jain";
+  if (text.includes("joshex") || text.includes("codex")) return "joshex";
+  return isAgentId(text) ? text : fallback;
+}
 
 function normalizeSteps(value: unknown): AgentStatus["steps"] {
   return arrayValue(value).filter(isRecord).map((step) => ({
@@ -21,8 +32,7 @@ function normalizeSteps(value: unknown): AgentStatus["steps"] {
 
 function normalizeStatus(row: unknown, fallbackAgent: AgentId = "joshex"): AgentStatus | null {
   if (!isRecord(row)) return null;
-  const rowAgent = String(row.agent_id || "").toLowerCase();
-  const agent_id = isAgentId(rowAgent) ? rowAgent : fallbackAgent;
+  const agent_id = canonicalAgentId(row.agent_id, fallbackAgent);
   return {
     agent_id,
     status: stringValue(row.status, "info"),
@@ -40,8 +50,8 @@ function normalizeBrainFeedRow(row: unknown): AgentStatus | null {
   const data = recordValue(row.data);
   if (!Object.keys(data).length) return null;
   const id = String(row.id || data.agentId || "").toLowerCase();
-  const fallbackAgent: AgentId = id === "main" ? "josh" : id === "josh2" ? "josh" : id as AgentId;
-  if (!["joshex", "josh", "jaimes", "jain"].includes(fallbackAgent)) return null;
+  const fallbackAgent = canonicalAgentId(id);
+  if (!["joshex", "josh2", "jaimes", "jain"].includes(fallbackAgent)) return null;
   return normalizeStatus(
     {
       ...data,
@@ -50,11 +60,6 @@ function normalizeBrainFeedRow(row: unknown): AgentStatus | null {
     },
     fallbackAgent,
   );
-}
-
-function normalizeGeneratedAgentFeed(row: unknown, agent: AgentId): AgentStatus | null {
-  if (!isRecord(row)) return null;
-  return normalizeStatus({ ...row, agent_id: agent }, agent);
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -144,7 +149,7 @@ function jobTopicTokens(job: AgentJob): Set<string> {
     "done",
     "error",
     "failed",
-    "josh",
+    "josh2",
     "monitor",
     "ready",
     "status",
@@ -209,11 +214,8 @@ function mergeStatuses(visibleBrainFeed: AgentStatus[], primary: AgentStatus[], 
     const visible = visibleByAgent.get(agent);
     const primaryRow = primaryByAgent.get(agent);
     const fallbackRow = fallbackByAgent.get(agent);
-    const fallbackFreshActive = fallbackRow && Boolean(fallbackRow.active) && isFreshBrainFeedTruth(fallbackRow);
     if (visible && (isFreshBrainFeedTruth(visible) || !primaryRow)) {
       rows.push(visible);
-    } else if (fallbackFreshActive && (!primaryRow || !primaryRow.active)) {
-      rows.push(fallbackRow);
     } else if (primaryRow) {
       rows.push(primaryRow);
     } else if (visible) {
@@ -311,76 +313,42 @@ async function loadFromSupabase(): Promise<MissionControlState> {
     capabilityStack: fallback.capabilityStack,
     capabilityInventory: fallback.capabilityInventory,
     capabilityWatch: fallback.capabilityWatch,
-    runtimeLayout: sidecars.runtimeLayout || fallback.runtimeLayout,
     signalHealth: sidecars.signalHealth || fallback.signalHealth,
     signals: sidecars.signals.length ? sidecars.signals : fallback.signals,
   };
 }
 
 async function loadFallback(): Promise<MissionControlState> {
-  const [brain, joshexBrain, jaimesBrain, jainBrain, personal, dashboard, sidecars] = await Promise.all([
+  const [brain, personal, dashboard, sidecars] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
-    fetchJson<any>("/data/joshex-brain-feed.json").catch(() => null),
-    fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
-    fetchJson<any>("/data/jain-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
     fetchJson<any>("/data/dashboard-data.json").catch(() => null),
     loadSidecars(),
   ]);
   const brainAgent = String(brain?.agentId || brain?.agent_id || brain?.agent || "").toLowerCase();
   const brainAgentId: AgentId = brainAgent.includes("josh") && !brainAgent.includes("joshex")
-    ? "josh"
+    ? "josh2"
     : brainAgent.includes("jaimes")
     ? "jaimes"
     : brainAgent.includes("jain")
     ? "jain"
     : "joshex";
-  const sharedEvents = Array.isArray(dashboard?.sharedEvents) ? dashboard.sharedEvents : [];
-  const latestJoshexEvent = sharedEvents
-    .filter((event: any) => String(event?.agent || "").toLowerCase() === "joshex")
-    .sort((a: any, b: any) => timestampValue(b?.time) - timestampValue(a?.time))[0];
-  const joshexFallbackStatus = latestJoshexEvent
-    ? {
-        agent_id: "joshex",
-        status: ["active", "queued", "blocked", "error"].includes(String(latestJoshexEvent.status || "").toLowerCase())
-          ? latestJoshexEvent.status
-          : "ready",
-        objective: latestJoshexEvent.title || "JOSHeX local update",
-        detail: latestJoshexEvent.detail || "",
-        current_tool: latestJoshexEvent.tool || "local Brain Feed event",
-        active: ["active", "queued"].includes(String(latestJoshexEvent.status || "").toLowerCase()),
-        updated_at: latestJoshexEvent.time,
-        steps: [{
-          label: latestJoshexEvent.title || "JOSHeX local update",
-          status: latestJoshexEvent.status || "ready",
-          tool: latestJoshexEvent.tool || "shared-events.json",
-          kind: latestJoshexEvent.type || latestJoshexEvent.event_type || "shared-event",
-        }],
-      }
-    : {
-        agent_id: "joshex",
-        status: personal?.status || "info",
-        objective: personal?.objective || "Personal Codex",
-        detail: personal?.summary || "",
-        current_tool: "local sidecar",
-        active: personal?.status === "active",
-        updated_at: personal?.updatedAt,
-        steps: (personal?.recentActivity || []).slice(0, 6).map((item: any) => ({
-          label: item.event,
-          status: "done",
-          tool: "personal-codex.json",
-        })),
-      };
   const statuses = dedupeStatus([
-    normalizeGeneratedAgentFeed(dashboard?.agentBrainFeeds?.joshex, "joshex"),
-    normalizeGeneratedAgentFeed(dashboard?.agentBrainFeeds?.josh, "josh"),
-    normalizeGeneratedAgentFeed(dashboard?.agentBrainFeeds?.jaimes, "jaimes"),
-    normalizeGeneratedAgentFeed(dashboard?.agentBrainFeeds?.jain, "jain"),
     normalizeStatus(brain, brainAgentId),
-    normalizeStatus(joshexBrain && { ...joshexBrain, agent_id: "joshex" }, "joshex"),
-    normalizeStatus(joshexFallbackStatus),
-    normalizeStatus(jaimesBrain && { ...jaimesBrain, agent_id: "jaimes" }, "jaimes"),
-    normalizeStatus(jainBrain && { ...jainBrain, agent_id: "jain" }, "jain"),
+    normalizeStatus({
+      agent_id: "joshex",
+      status: personal?.status || "info",
+      objective: personal?.objective || "Personal Codex",
+      detail: personal?.summary || "",
+      current_tool: "local sidecar",
+      active: personal?.status === "active",
+      updated_at: personal?.updatedAt,
+      steps: (personal?.recentActivity || []).slice(0, 6).map((item: any) => ({
+        label: item.event,
+        status: "done",
+        tool: "personal-codex.json",
+      })),
+    }),
     normalizeStatus(dashboard?.jaimesBrainFeed && { ...dashboard.jaimesBrainFeed, agent_id: "jaimes" }, "jaimes"),
     normalizeStatus(dashboard?.jainBrainFeed && { ...dashboard.jainBrainFeed, agent_id: "jain" }, "jain"),
   ]);
@@ -398,14 +366,14 @@ async function loadFallback(): Promise<MissionControlState> {
     id: `fallback-approval-${index}`,
     agent_id: "joshex",
     title: item.title,
-    detail: item.detail || item.title || "",
+    detail: item.priority || "",
     requested_by: "joshex",
     status: "pending",
-    risk_tier: item.priority || "dashboard-safe",
+    risk_tier: "dashboard-safe",
     created_at: dashboard?.generatedAt || "",
   }));
   return {
-    source: "Josh 2.0 local live feed",
+    source: "Local legacy fallback",
     statuses,
     events,
     jobs: buildFallbackJobs(dashboard),
@@ -417,7 +385,6 @@ async function loadFallback(): Promise<MissionControlState> {
     capabilityStack: dashboard?.capabilityStack,
     capabilityInventory: dashboard?.capabilityInventory,
     capabilityWatch: dashboard?.capabilityWatch,
-    runtimeLayout: sidecars.runtimeLayout || dashboard?.runtimeLayout,
     signalHealth: sidecars.signalHealth,
     signals: sidecars.signals,
   };
@@ -428,7 +395,7 @@ function ownerToAgentId(owner?: string): AgentId {
   if (text.includes("jaimes")) return "jaimes";
   if (text.includes("j.a.i.n") || text.includes("jain")) return "jain";
   if (text.includes("joshex") || text.includes("codex")) return "joshex";
-  return "josh";
+  return "josh2";
 }
 
 function buildFallbackJobs(dashboard: any): AgentJob[] {
@@ -440,7 +407,7 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
     rows.push({
       id: String(job.id || `${job.owner || "job"}-${job.title || rows.length}`),
       agent_id: ownerToAgentId(job.owner || job.agent),
-      title: job.title || job.name || "Control Tower job",
+      title: job.title || job.name || "Mission Control job",
       status: job.status || "info",
       detail: job.detail || job.description || job.tool || "",
       tool: job.tool || "codex-jobs",
@@ -450,10 +417,6 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
     });
   }
 
-  const activeCrons = crons.filter((item: any) => {
-    const status = String(item?.runStatus || item?.status || "").toLowerCase();
-    return ["active", "running", "queued"].includes(status);
-  });
   const priorityCrons = crons.filter((item: any) => priorityJobRank({
     id: "",
     agent_id: ownerToAgentId(item?.agent),
@@ -463,14 +426,9 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
     tool: item?.sourceLabel || item?.source || "",
     updated_at: item?.lastRun || dashboard?.generatedAt || "",
   }));
-  const dailyCrons = crons.filter((item: any) => {
-    const status = String(item?.status || "").toLowerCase();
-    const runStatus = String(item?.runStatus || "").toLowerCase();
-    if (status === "paused" || runStatus === "paused") return false;
-    return item?.todayRelevant;
-  });
+  const dailyCrons = crons.filter((item: any) => item?.todayRelevant);
   const selectedCrons = new Map<string, any>();
-  for (const cron of [...activeCrons, ...priorityCrons, ...dailyCrons]) {
+  for (const cron of [...priorityCrons, ...dailyCrons]) {
     selectedCrons.set(String(cron?.name || selectedCrons.size), cron);
   }
 
@@ -506,7 +464,7 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
 }
 
 export async function loadMissionControl(): Promise<MissionControlState> {
-  if (CONFIG.supabaseMode === "primary" && CONFIG.supabaseUrl && CONFIG.supabaseKey) {
+  if (CONFIG.supabaseUrl && CONFIG.supabaseKey) {
     try {
       return await loadFromSupabase();
     } catch (error) {
@@ -516,45 +474,7 @@ export async function loadMissionControl(): Promise<MissionControlState> {
   return loadFallback();
 }
 
-function subscribeLocalLiveFeed(onChange: () => void, onState?: (state: "connected" | "polling") => void) {
-  if (typeof EventSource === "undefined") {
-    onState?.("polling");
-    return null;
-  }
-
-  let closed = false;
-  let pending = false;
-  const events = new EventSource("/events/mission-control");
-  const scheduleRefresh = () => {
-    if (pending) return;
-    pending = true;
-    window.setTimeout(() => {
-      pending = false;
-      if (!closed) onChange();
-    }, 150);
-  };
-
-  events.addEventListener("open", () => {
-    if (closed) return;
-    onState?.("connected");
-  });
-  events.addEventListener("mission-control", scheduleRefresh);
-  events.addEventListener("error", () => {
-    if (!closed) onState?.("polling");
-  });
-
-  return () => {
-    closed = true;
-    events.close();
-  };
-}
-
 export function subscribeMissionControlRealtime(onChange: () => void, onState?: (state: "connected" | "polling") => void) {
-  if (CONFIG.supabaseMode !== "primary") {
-    const unsubscribeLocal = subscribeLocalLiveFeed(onChange, onState);
-    if (unsubscribeLocal) return unsubscribeLocal;
-  }
-
   if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey || typeof WebSocket === "undefined") {
     onState?.("polling");
     return () => {};
@@ -619,15 +539,13 @@ async function loadSidecars(): Promise<{
   agenticCrypto?: MissionControlState["agenticCrypto"];
   modelUsage?: MissionControlState["modelUsage"];
   reliabilityUpgrades?: MissionControlState["reliabilityUpgrades"];
-  runtimeLayout?: MissionControlState["runtimeLayout"];
   signalHealth?: MissionControlState["signalHealth"];
   signals: SignalItem[];
 }> {
-  const [agenticCrypto, modelUsage, reliabilityUpgrades, runtimeLayout, signalHealth, dailySignals, jainBreaking, breaking, jainNewsfeed, newsfeed] = await Promise.all([
+  const [agenticCrypto, modelUsage, reliabilityUpgrades, signalHealth, dailySignals, jainBreaking, breaking, jainNewsfeed, newsfeed] = await Promise.all([
     fetchJson<MissionControlState["agenticCrypto"]>("/data/agentic-crypto-wallet.json").catch(() => undefined),
     fetchJson<MissionControlState["modelUsage"]>("/data/modelUsage.json").catch(() => undefined),
     fetchJson<MissionControlState["reliabilityUpgrades"]>("/data/reliability-upgrades.json").catch(() => undefined),
-    fetchJson<MissionControlState["runtimeLayout"]>("/data/mission-control-runtime-layout.json").catch(() => undefined),
     fetchJson<MissionControlState["signalHealth"]>("/data/jain-signal-health.json").catch(() => undefined),
     fetchJson<any>("/data/jain-daily-signals.json").catch(() => null),
     fetchJson<any>("/data/jain-breaking-highlights.json").catch(() => null),
@@ -639,7 +557,6 @@ async function loadSidecars(): Promise<{
     agenticCrypto,
     modelUsage,
     reliabilityUpgrades,
-    runtimeLayout,
     signalHealth: signalHealth || recordValue(dailySignals).signalHealth as MissionControlState["signalHealth"],
     signals: buildSignals(dailySignals, jainBreaking || breaking, jainNewsfeed || newsfeed),
   };

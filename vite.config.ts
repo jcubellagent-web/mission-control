@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync, statSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 
 const dataRoot = resolve(__dirname, "data");
@@ -56,6 +57,23 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
     res.end(body);
+    return;
+  }
+
+  if (pathname === "/actions/agentic-crypto-refresh") {
+    const result = spawnSync("python3", ["scripts/refresh_agentic_solana_wallet_live.py"], {
+      cwd: __dirname,
+      encoding: "utf8",
+      timeout: 60_000,
+    });
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    if (result.status === 0) {
+      res.end(result.stdout || JSON.stringify({ ok: true }));
+    } else {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ ok: false, error: (result.stderr || result.stdout || "wallet refresh failed").slice(0, 500) }));
+    }
     return;
   }
 
