@@ -2255,7 +2255,7 @@ function ModelRoutingLadderVisual({ state }: { state: MissionControlState }) {
   const activeRoute = missionText(String(lastRoute.routeLabel || lastRoute.model || lastRoute.provider || "policy ready"));
   const status = missionText(String(state.modelRouter?.ladderStatus || state.modelRouter?.summary || "subscription-first routing"));
   return (
-    <section className="routing-ladder-visual" aria-label="Model routing ladder">
+    <section className="routing-ladder-visual" aria-label="Live Work Board command view model routing ladder">
       <header>
         <div>
           <span>Model routing ladder</span>
