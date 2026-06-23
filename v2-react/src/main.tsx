@@ -4095,7 +4095,6 @@ function AgentHeroCard({
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
   const [objectiveScroll, setObjectiveScroll] = useState({ active: false, distance: 0, duration: 18 });
   const freshness = agentCardFreshnessClass(status);
-  const sla = agentSla(status, idleContext);
   const objectiveText = missionText(status.objective);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const statusWorkingFresh = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at);
@@ -4137,16 +4136,6 @@ function AgentHeroCard({
     routineFocus,
     activeWorkDetail?.detail || status.detail || currentStep,
   );
-  const insights = buildAgentInsights(
-    activeFocus,
-    briefRows,
-    idleContext,
-    activeWorkDetail,
-    status,
-    missionText(currentStep),
-    headline.description.replace(/^Next:\s*/i, ""),
-    routineFocus,
-  );
   const nextSupport = compactText(idleContext.countdown ? `${countdownShortText(idleContext.countdown)} + ${idleContext.nextTitle}` : idleContext.nextTitle, 70);
   const lastSupport = readoutFit(idleContext.complete || "No completed task reported yet", 68);
   const nowSupport = readoutSummary(activeWorkDetail?.detail || activeWorkDetail?.title || currentStep, "Working through the current step.", 58);
@@ -4170,7 +4159,6 @@ function AgentHeroCard({
   const railSpeed = routineFocus ? 3.4 : activeFocus ? Math.max(1.6, 2.8 - hotness * 0.7) : 2.8;
   const headerStateLabel = agentHeaderStateLabel(visualState, routineFocus, activeFocus);
   const headerDotClass = agentHeaderDotClass(visualState, routineFocus, activeFocus);
-  const freshCheckin = ageMinutes(status.updated_at) < 5;
   useEffect(() => {
     const measure = () => {
       const node = objectiveRef.current;
@@ -4236,20 +4224,6 @@ function AgentHeroCard({
         </span>
       </h3>
       <p title={supportNote}>{supportNote}</p>
-      <aside className="agent-insight-panel" aria-label={`${AGENTS[agent].label} operating readout`}>
-        <div className={`agent-freshness-pill is-${sla.tone}${freshCheckin ? " is-hot" : ""}`}>
-          <span>{sla.label}</span>
-          <em>{sla.detail}</em>
-        </div>
-        <ul className="agent-insight-grid">
-          {insights.map((item) => (
-            <li key={item.label} className={item.tone ? `is-${item.tone}` : ""}>
-              <b>{agentInsightDisplayLabel(item.label)}</b>
-              <span title={item.text}>{item.text}</span>
-            </li>
-          ))}
-        </ul>
-      </aside>
     </article>
   );
 }
