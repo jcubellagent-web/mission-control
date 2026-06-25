@@ -15,17 +15,17 @@
       "cost": 0.0108933
     },
     {
-      "name": "openai/gpt-5.3-codex",
-      "window": "session",
-      "cost": 0.0
-    },
-    {
       "name": "deepseek/deepseek-v3.2",
       "window": "session",
       "cost": 0.0
     },
     {
       "name": "google/gemini-3-flash-preview",
+      "window": "session",
+      "cost": 0.0
+    },
+    {
+      "name": "google/gemini-3.1-pro-preview",
       "window": "session",
       "cost": 0.0
     }
@@ -56,19 +56,6 @@
       "sessions": 3,
       "isGemini": true,
       "costEstimated": true
-    },
-    {
-      "name": "openai/gpt-5.3-codex",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 1,
-      "isGemini": false,
-      "costEstimated": false
     },
     {
       "name": "deepseek/deepseek-v3.2",
@@ -118,7 +105,7 @@
       "sessionCost": 0.0,
       "dailyCost": 0.0,
       "weeklyCost": 0.0,
-      "sessions": 4,
+      "sessions": 7,
       "isGemini": true,
       "costEstimated": false
     },
@@ -145,6 +132,19 @@
       "dailyCost": 0.0,
       "weeklyCost": 0.0,
       "sessions": 1,
+      "isGemini": false,
+      "costEstimated": false
+    },
+    {
+      "name": "openai/gpt-5.3-codex-spark",
+      "source": "openclaw",
+      "inputTokens": 53574,
+      "outputTokens": 232,
+      "totalTokens": 53806,
+      "sessionCost": 0.0,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.0,
+      "sessions": 3,
       "isGemini": false,
       "costEstimated": false
     },
@@ -205,7 +205,7 @@
       "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
     }
   ],
-  "lastUpdated": "2026-06-25T11:22:41Z",
+  "lastUpdated": "2026-06-25T18:42:32Z",
   "jain": {
     "daily": 0.0,
     "session": 0.0,
@@ -266,15 +266,15 @@
       "plan": "pro",
       "codexbarSource": "oauth",
       "codexbarVersion": "",
-      "codexbarUpdatedAt": "2026-06-25T11:22:39Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:29Z",
       "usageWindows": [
         {
           "id": "codex-primary",
           "label": "Session",
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
-          "resetDescription": "12:22\u202fPM",
-          "resetsAt": "2026-06-25T16:22:38Z",
+          "resetDescription": "7:42\u202fPM",
+          "resetsAt": "2026-06-25T23:42:28Z",
           "windowMinutes": 300,
           "status": "ok"
         },
@@ -293,8 +293,8 @@
           "label": "Codex Spark 5-hour",
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
-          "resetDescription": "12:22\u202fPM",
-          "resetsAt": "2026-06-25T16:22:38Z",
+          "resetDescription": "5:52\u202fPM",
+          "resetsAt": "2026-06-25T21:52:23Z",
           "windowMinutes": 300,
           "status": "ok"
         },
@@ -304,7 +304,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Jul 1 at 11:09\u202fPM",
-          "resetsAt": "2026-07-02T03:09:18Z",
+          "resetsAt": "2026-07-02T03:09:19Z",
           "windowMinutes": 10080,
           "status": "ok"
         },
@@ -325,7 +325,7 @@
       "plan": "Paid",
       "codexbarSource": "oauth-api",
       "codexbarVersion": "{\"type\": \"message\", \"role\": \"assistant\", \"content\": \"\"}",
-      "codexbarUpdatedAt": "2026-06-25T11:22:40Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:30Z",
       "usageWindows": [
         {
           "id": "gemini-primary",
@@ -333,7 +333,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         },
@@ -343,7 +343,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         },
@@ -353,7 +353,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         }
@@ -368,7 +368,7 @@
       "plan": "SuperGrok",
       "codexbarSource": "grok-web",
       "codexbarVersion": "0.2.56",
-      "codexbarUpdatedAt": "2026-06-25T11:22:40Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
       "usageWindows": [
         {
           "id": "xai-primary",
@@ -386,7 +386,7 @@
       "authStatus": "not-available",
       "lastTestStatus": "No available fetch strategy for openrouter.",
       "codexbarSource": "auto",
-      "codexbarUpdatedAt": "2026-06-25T11:22:41Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
       "usageWindows": []
     }
   },
@@ -433,15 +433,15 @@
       "plan": "pro",
       "codexbarSource": "oauth",
       "codexbarVersion": null,
-      "codexbarUpdatedAt": "2026-06-25T11:22:39Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:29Z",
       "usageWindows": [
         {
           "id": "codex-primary",
           "label": "Session",
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
-          "resetDescription": "12:22\u202fPM",
-          "resetsAt": "2026-06-25T16:22:38Z",
+          "resetDescription": "7:42\u202fPM",
+          "resetsAt": "2026-06-25T23:42:28Z",
           "windowMinutes": 300,
           "status": "ok"
         },
@@ -460,8 +460,8 @@
           "label": "Codex Spark 5-hour",
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
-          "resetDescription": "12:22\u202fPM",
-          "resetsAt": "2026-06-25T16:22:38Z",
+          "resetDescription": "5:52\u202fPM",
+          "resetsAt": "2026-06-25T21:52:23Z",
           "windowMinutes": 300,
           "status": "ok"
         },
@@ -471,7 +471,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Jul 1 at 11:09\u202fPM",
-          "resetsAt": "2026-07-02T03:09:18Z",
+          "resetsAt": "2026-07-02T03:09:19Z",
           "windowMinutes": 10080,
           "status": "ok"
         },
@@ -525,7 +525,7 @@
       "plan": "Paid",
       "codexbarSource": "oauth-api",
       "codexbarVersion": "{\"type\": \"message\", \"role\": \"assistant\", \"content\": \"\"}",
-      "codexbarUpdatedAt": "2026-06-25T11:22:40Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:30Z",
       "usageWindows": [
         {
           "id": "gemini-primary",
@@ -533,7 +533,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         },
@@ -543,7 +543,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         },
@@ -553,7 +553,7 @@
           "usedPercent": 0.0,
           "remainingPercent": 100.0,
           "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T11:22:40Z",
+          "resetsAt": "2026-06-26T18:42:30Z",
           "windowMinutes": 1440,
           "status": "ok"
         }
@@ -592,7 +592,7 @@
       "plan": "SuperGrok",
       "codexbarSource": "grok-web",
       "codexbarVersion": "0.2.56",
-      "codexbarUpdatedAt": "2026-06-25T11:22:40Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
       "usageWindows": [
         {
           "id": "xai-primary",
@@ -633,7 +633,7 @@
       "plan": null,
       "codexbarSource": "auto",
       "codexbarVersion": null,
-      "codexbarUpdatedAt": "2026-06-25T11:22:41Z",
+      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
       "usageWindows": []
     },
     {
