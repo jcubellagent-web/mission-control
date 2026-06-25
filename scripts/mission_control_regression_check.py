@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -43,6 +44,23 @@ def parse_iso(value: object) -> datetime | None:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text())
+
+
+def ensure_ci_runtime_sidecars() -> None:
+    """Seed ignored runtime sidecars so CI checks source contracts, not local state."""
+    if not os.environ.get("CI"):
+        return
+
+    defaults: dict[str, Any] = {
+        "shared-events.json": {"events": []},
+        "agent-task-queue.json": {"tasks": []},
+        "handoff-queue.json": {"handoffs": []},
+        "agent-heartbeats.json": {"heartbeats": []},
+    }
+    for filename, payload in defaults.items():
+        path = DATA_DIR / filename
+        if not path.exists():
+            path.write_text(json.dumps(payload, indent=2) + "\n")
 
 
 def check_json() -> None:
@@ -224,6 +242,7 @@ def main() -> int:
     parser.add_argument("--write-status", type=Path)
     args = parser.parse_args()
 
+    ensure_ci_runtime_sidecars()
     check_json()
     check_react_surface()
     check_dashboard_shape()
