@@ -1,24 +1,31 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, EyeOff, GitBranch, Radio, RefreshCw, ShieldCheck, Timer, UserRoundCheck, WalletCards } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, ExternalLink, EyeOff, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sun, Timer, UserRoundCheck, WalletCards } from "lucide-react";
 import { loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import type { AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem } from "./types";
 import "./styles.css";
 
-const AGENTS: Record<AgentId, { label: string; role: string }> = {
-  joshex: { label: "JOSHeX", role: "Private coordination" },
-  josh: { label: "Josh 2.0", role: "Control Tower host" },
-  jaimes: { label: "JAIMES", role: "Hermes workhorse" },
-  jain: { label: "J.A.I.N", role: "Breaking + signals" },
+const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
+  joshex: { label: "JOSHeX", role: "Personal coordination and private-Mac specialist", roleBadge: "Personal" },
+  josh2: { label: "Josh 2.0", role: "Daily Interface Agent", roleBadge: "Interface" },
+  jaimes: { label: "JAIMES", role: "Coding, heavy execution, self-improving workhorse", roleBadge: "Execution" },
+  jain: { label: "J.A.I.N", role: "Support and disaster-recovery agent", roleBadge: "Support/DR" },
 };
-const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"];
+const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"];
 
-type AttentionTarget = "brain-feed" | "today-jobs" | "signal-feed";
+type AttentionTarget = "brain-feed" | "today-jobs";
 type WorkState = "working" | "waiting" | "blocked" | "ready" | "done" | "quiet";
-type AgentVisualState = "working" | "routine" | "ready" | "waiting" | "blocked" | "stale";
+type AgentVisualState = "working" | "ready" | "waiting" | "blocked" | "stale" | "offline";
 type StepTrailState = "done" | "current" | "pending";
-type AgentHeadline = { eyebrow: string; time?: string; title: string; description: string };
+type AgentHeadline = { title: string; description: string };
+type ControlTowerDisplayState = {
+  nightMode?: boolean;
+  mode?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  reason?: string;
+};
 type AgentIdleContext = {
   complete: string;
   nextTitle: string;
@@ -28,7 +35,7 @@ type AgentIdleContext = {
 };
 type AgentBriefRow = { label: string; text: string };
 type AgentInsightRow = { label: string; text: string; tone?: "default" | "good" | "watch" | "active" };
-type AgentCapabilityChip = { label: string; state: "hot" | "warm" | "idle" | "watch"; title: string };
+type RouteLadderStep = { key: string; label: string; model: string; note: string; active: boolean };
 type AttentionItem = {
   id: string;
   label: string;
@@ -50,7 +57,6 @@ type WorkItem = {
   source: "agent" | "job" | "approval";
   target: AttentionTarget;
   priority: number;
-  detailLines?: string[];
 };
 type HandoffBeam = {
   id: string;
@@ -59,7 +65,7 @@ type HandoffBeam = {
   label: string;
   tone: "active" | "watch";
 };
-type SectionCueKey = "brain" | "jobs" | "system" | "signal" | "crypto";
+type SectionCueKey = "brain" | "jobs" | "system";
 type LiveCueState = {
   sections: Partial<Record<SectionCueKey, number>>;
   rows: Record<string, number>;
@@ -98,12 +104,9 @@ function missionText(value?: string | null) {
     host_local_maintenance: "host maintenance",
     sorare_missions: "Sorare mission sweep",
     agent_heartbeat: "status check",
-    "jaimes-ops-drift-check": "JAIMES ops drift check",
-    "jaimes-model-efficiency-guard": "JAIMES model efficiency guard",
-    index: "Control Tower build",
   };
   const humanizeScript = (name: string) => {
-    const stem = name.split("/").pop()?.replace(/\.(py|sh|js|ts|tsx|html)$/i, "") || name;
+    const stem = name.split("/").pop()?.replace(/\.(py|sh|js|ts|tsx)$/i, "") || name;
     return scriptLabels[stem] || stem.replace(/[_-]/g, " ");
   };
   return String(value || "")
@@ -114,10 +117,8 @@ function missionText(value?: string | null) {
     .replace(/\bjosh2-lan\b/gi, "Josh 2.0")
     .replace(/\bjaimes-via-josh\b/gi, "JAIMES")
     .replace(/\bmacbook-codex\b/gi, "JOSHeX")
-    .replace(/\bjaimes-ops-drift-check\b/gi, "JAIMES ops drift check")
-    .replace(/\bjaimes-model-efficiency-guard\b/gi, "JAIMES model efficiency guard")
-    .replace(/current Control Tower/gi, "current Control Tower")
-    .replace(/Control Tower/gi, "Control Tower")
+    .replace(/React v2 Mission Control/gi, "current Control Tower")
+    .replace(/Mission Control v2/gi, "Control Tower")
     .replace(/React v2/gi, "React Control Tower")
     .replace(/v2 refresh/gi, "current refresh")
     .replace(/v2 row/gi, "status row")
@@ -126,16 +127,8 @@ function missionText(value?: string | null) {
     .replace(/v2 state/gi, "status")
     .replace(/JAIMES v2 job smoke/gi, "JAIMES job smoke")
     .replace(/JAIMES v2 handoff smoke/gi, "JAIMES handoff smoke")
-    .replace(/\b([a-z0-9_.-]+)\s+cron:\s+((?:\/[^ ]+\/)?[A-Za-z0-9_.-]+\.(?:py|sh|js|ts|tsx|html))/gi, (_, host, script) => `${host} scheduled: ${humanizeScript(script)}`)
-    .replace(/(?<![\w./-])((?:\/[^ ]+\/)?[A-Za-z0-9_-]+\.(?:py|sh|js|ts|tsx|html))(?![\w./-])/gi, (_, script) => humanizeScript(script));
-}
-
-function sourceTruthLabel(source?: string | null) {
-  const value = missionText(source || "").trim();
-  if (!value) return "Local live source";
-  if (/josh\s*2\.0.*local.*live/i.test(value)) return "Josh 2.0 live source";
-  if (/supabase/i.test(value)) return "Cloud mirror";
-  return value.length > 28 ? `${value.slice(0, 27).trim()}...` : value;
+    .replace(/\b([a-z0-9_.-]+)\s+cron:\s+((?:\/[^ ]+\/)?[A-Za-z0-9_.-]+\.(?:py|sh|js|ts|tsx))/gi, (_, host, script) => `${host} scheduled: ${humanizeScript(script)}`)
+    .replace(/(?<![\w./-])((?:\/[^ ]+\/)?[A-Za-z0-9_-]+\.(?:py|sh|js|ts|tsx))(?![\w./-])/gi, (_, script) => humanizeScript(script));
 }
 
 function statusClass(status?: string) {
@@ -151,7 +144,8 @@ function displayStatus(status?: string) {
   if (value === "blocked" || value === "error") return "Needs focus";
   if (value === "done") return "Done";
   if (value === "ready" || value === "approved" || value === "ok") return "Ready";
-  if (value === "paused" || value === "scheduled" || value === "idle" || value === "stale" || value === "offline") return "Quiet";
+  if (value === "offline") return "Offline";
+  if (value === "paused" || value === "scheduled" || value === "idle" || value === "stale") return "Quiet";
   return missionText(status || "Quiet");
 }
 
@@ -161,50 +155,12 @@ function agentIsReady(status?: AgentStatus) {
   return Boolean(status.active) || ["active", "queued", "ready", "ok", "done", "approved", "stale"].includes(value);
 }
 
-function missionTruthSummary(state: MissionControlState) {
-  const dataIssues = dataQualityIssues(state);
-  const riskDataIssues = dataIssues.filter((issue) => issue.tone === "risk");
-  const softDataIssues = dataIssues.filter((issue) => issue.tone !== "risk");
-  const layoutIssues = state.runtimeLayout?.issues || [];
-  const layoutMissing = !state.runtimeLayout;
-  const layoutRisk = Boolean(state.runtimeLayout && (state.runtimeLayout.ok === false || layoutIssues.length));
-  const layoutOk = !layoutMissing && !layoutRisk;
-  const layoutAge = state.runtimeLayout?.checkedAt ? ageLabel(state.runtimeLayout.checkedAt) : "not checked";
-  const readyAgents = state.statuses.filter((row) => {
-    const value = String(row.status || "").toLowerCase();
-    return !["blocked", "error", "offline", "stale"].includes(value) && ageMinutes(row.updated_at) <= 120;
-  }).length;
-  const trackedAgents = Math.max(4, state.statuses.length);
-  const agentOk = readyAgents >= trackedAgents;
-  const walletOk = !state.agenticCrypto || ["fresh", "ok", "ready"].includes(String(state.agenticCrypto.status || "").toLowerCase());
-  const riskItems = [
-    layoutRisk ? "screen fit" : null,
-    agentOk ? null : "agents",
-    walletOk ? null : "wallet",
-    riskDataIssues.length ? "data guard" : null,
-  ].filter((item): item is string => Boolean(item));
-  const watchItems = [
-    layoutMissing ? "screen check" : null,
-    softDataIssues.length ? "freshness check" : null,
-  ].filter((item): item is string => Boolean(item));
-  const tone = riskItems.length ? "risk" : watchItems.length ? "watch" : "clear";
-  return {
-    tone,
-    label: riskItems.length ? "Needs review" : watchItems.length ? "Watch" : "Live",
-    short: `${readyAgents}/${trackedAgents} agents · kiosk ${layoutOk ? "ready" : "watch"}`,
-    detail: riskItems.length
-      ? `Check ${riskItems.join(", ")}`
-      : watchItems.length
-        ? `${sourceTruthLabel(state.source)} · ${watchItems.join(", ")} · kiosk ${layoutAge}`
-      : `${sourceTruthLabel(state.source)} · kiosk ${layoutAge}`,
-  };
-}
-
 function agentOperatingState(status: AgentStatus) {
   const value = String(status.status || "").toLowerCase();
+  if (isOptionalJoshexOffline(status)) return "Offline";
   if (value === "blocked" || value === "error") return "Needs focus";
-  if (value === "ready" || value === "ok" || value === "done" || value === "approved" || isReadyHeartbeatStatus(status)) return "Ready";
-  if (agentIsWorking(status)) return "Working";
+  if (value === "active" || value === "queued" || (status.active && isFreshActiveTimestamp(status.updated_at))) return "Working";
+  if (value === "ready" || value === "ok" || value === "done" || value === "approved") return "Ready";
   if (value === "stale" || value === "idle" || value === "offline") return "Quiet";
   return displayStatus(status.status);
 }
@@ -225,62 +181,23 @@ function workStateLabel(state?: WorkState) {
   return "Quiet";
 }
 
-function isReadyHeartbeatStatus(status: AgentStatus) {
-  const value = String(status.status || "").toLowerCase();
-  if (value === "blocked" || value === "error") return false;
-  const text = missionText(`${status.objective} ${status.detail} ${status.current_tool}`).toLowerCase();
-  const explicitlyReady = ["ready", "ok", "done", "idle", "info"].includes(value);
-  return (
-    explicitlyReady
-    || text.includes("online and ready")
-    || text.includes("not actively working")
-    || text.includes("no active queued worker tasks")
-    || text.includes("standing by")
-    || text.includes("standby")
-  );
-}
-
-function agentIsWorking(status: AgentStatus) {
-  const value = String(status.status || "").toLowerCase();
-  if (isReadyHeartbeatStatus(status)) return false;
-  return ["active", "working", "running", "queued"].includes(value) || Boolean(status.active);
-}
-
 function statusWorkState(status: AgentStatus): WorkState {
   const value = String(status.status || "").toLowerCase();
   if (value === "blocked" || value === "error") return "blocked";
-  if (agentIsWorking(status)) return "working";
+  if (value === "active" || value === "queued" || status.active) return "working";
   if (value === "ready" || value === "ok" || value === "approved") return "ready";
   if (value === "done") return "done";
   return "quiet";
 }
 
 function jobWorkState(job: MissionControlState["jobs"][number], jobs: MissionControlState["jobs"] = []): WorkState {
-  const rawStatus = String(job.status || "").toLowerCase();
   const value = String(job.runStatus || job.status || "").toLowerCase();
-  if (rawStatus === "paused") return "quiet";
   if (jobNeedsAttention(job, jobs)) return "blocked";
   if (value === "missed") return jobIsSoftMissedAutomation(job) ? "ready" : "blocked";
   if ((value === "active" || value === "running" || value === "queued") && jobIsFreshActive(job)) return "working";
   if (value === "due" || value === "upcoming" || value === "scheduled") return "ready";
   if (value === "done" || value === "completed" || job.verifiedToday || sameLocalDay(job.lastRun || job.completed_at || job.updated_at)) return "done";
   return "quiet";
-}
-
-function jobIsRoutineActivity(job: MissionControlState["jobs"][number]) {
-  const text = missionText(`${job.title} ${job.detail} ${job.tool} ${job.sourceLabel} ${job.schedule}`).toLowerCase();
-  return textIsRoutineActivity(text);
-}
-
-function textIsRoutineActivity(text: string) {
-  const routineMatch = /context sync|brain feed server|control tower refresh|watchdog|heartbeat|health check|agent control checks|automation checks|silence detector|error rate monitor|invite sync|calendar sync|appointment sync|chiro invite/.test(text);
-  const priorityMatch = /gmail|inbox|sorare|fantasy|waiver|lineup|daily mission|breaking news|x watchlist|wallet|crypto/.test(text);
-  return routineMatch && !priorityMatch;
-}
-
-function workItemIsRoutineActivity(work: WorkItem | undefined, status?: AgentStatus) {
-  const text = missionText(`${work?.title || ""} ${work?.detail || ""} ${work?.source || ""} ${status?.objective || ""} ${status?.detail || ""} ${status?.current_tool || ""}`).toLowerCase();
-  return textIsRoutineActivity(text);
 }
 
 function jobIsSoftMissedAutomation(job: MissionControlState["jobs"][number]) {
@@ -315,16 +232,6 @@ function buildWorkItems(state: MissionControlState): WorkItem[] {
       const workState = jobWorkState(job, state.jobs);
       return priority || workState === "blocked" || workState === "working" || workState === "ready";
     })
-    .sort((a, b) => {
-      const rank = (state: WorkState) => state === "blocked" ? 0 : state === "working" ? 1 : state === "ready" ? 2 : 3;
-      const aState = jobWorkState(a, state.jobs);
-      const bState = jobWorkState(b, state.jobs);
-      const stateDelta = rank(aState) - rank(bState);
-      if (stateDelta) return stateDelta;
-      const priorityDelta = (priorityJobKey(b) !== "general" ? 1 : 0) - (priorityJobKey(a) !== "general" ? 1 : 0);
-      if (priorityDelta) return priorityDelta;
-      return timeValue(b.updated_at) - timeValue(a.updated_at);
-    })
     .slice(0, 14)
     .forEach((job) => {
       const workState = jobWorkState(job, state.jobs);
@@ -350,13 +257,12 @@ function buildWorkItems(state: MissionControlState): WorkItem[] {
         id: `agent-${status.agent_id}`,
         agent_id: status.agent_id,
         title: compactText(status.objective || AGENTS[status.agent_id]?.role, 48),
-        detail: compactText(status.detail || status.current_tool || "Current Brain Feed objective", 72),
+        detail: compactText(status.detail || status.current_tool || "Current Live Work Board objective", 72),
         state: workState,
         updated_at: status.updated_at,
         source: "agent",
         target: "brain-feed",
         priority: workState === "blocked" ? 75 : workState === "working" ? 55 : workState === "ready" ? 32 : 12,
-        detailLines: liveAgentDetailLines(status),
       });
     });
 
@@ -401,23 +307,17 @@ function jobNeedsAttention(job: MissionControlState["jobs"][number], jobs: Missi
   return !hasNewerGw12Submit;
 }
 
-function jobSupersedeKey(text: string) {
-  if (/ops gmail|shared ops gmail|gmail monitor/.test(text)) return "ops-gmail";
-  if (/base mcp|base account|mcp oauth/.test(text)) return "base-mcp";
-  return "";
-}
-
 function jobFailureSuperseded(job: MissionControlState["jobs"][number], jobs: MissionControlState["jobs"] = []) {
   const text = `${job.title} ${job.detail} ${job.tool}`.toLowerCase();
   const updated = timeValue(job.updated_at);
-  const key = jobSupersedeKey(text);
-  if (!key || !updated) return false;
+  const isOpsGmail = /ops gmail|shared ops gmail|gmail monitor/.test(text);
+  if (!isOpsGmail || !updated) return false;
   return jobs.some((other) => {
     if (other.id === job.id || other.agent_id !== job.agent_id) return false;
     const otherText = `${other.title} ${other.detail} ${other.tool}`.toLowerCase();
     const otherStatus = String(other.runStatus || other.status || "").toLowerCase();
     return timeValue(other.updated_at) > updated
-      && jobSupersedeKey(otherText) === key
+      && /ops gmail|shared ops gmail|gmail monitor/.test(otherText)
       && !["blocked", "error", "failed", "missed"].includes(otherStatus);
   });
 }
@@ -455,45 +355,6 @@ function ageLabel(value?: string | null) {
   return `${Math.round(hours / 24)}d`;
 }
 
-function updatedFreshnessLabel(value?: string | null) {
-  const label = ageLabel(value);
-  if (label === "no update") return "No update";
-  if (label === "just now") return "Updated just now";
-  return `Updated ${label} ago`;
-}
-
-function latestTimestamp(values: Array<string | null | undefined>) {
-  return values
-    .filter((value): value is string => Boolean(value && timeValue(value)))
-    .sort((a, b) => timeValue(a) - timeValue(b))
-    .pop();
-}
-
-function dashboardFreshnessTimestamp(state: MissionControlState) {
-  return latestTimestamp([
-    state.lastUpdated,
-    ...state.statuses.map((row) => row.updated_at),
-    ...state.events.map((row) => row.created_at),
-    ...state.jobs.flatMap((row) => [row.updated_at, row.lastRun, row.completed_at, row.started_at]),
-    state.signalHealth?.generatedAt,
-    ...(state.signals || []).map((row) => row.time),
-    state.agenticCrypto?.updatedAt,
-    state.agenticCrypto?.summary?.lastRefreshed,
-    state.modelUsage?.lastUpdated,
-    state.capabilityWatch?.updatedAt,
-    state.capabilityWatch?.checkedAt,
-    state.runtimeLayout?.checkedAt,
-    state.reliabilityUpgrades?.updatedAt,
-  ]);
-}
-
-function checkedFreshnessLabel(value?: string | null) {
-  const label = ageLabel(value);
-  if (label === "no update") return "not checked";
-  if (label === "just now") return "checked just now";
-  return `checked ${label} ago`;
-}
-
 function freshnessClass(value?: string | null) {
   const minutes = ageMinutes(value);
   if (!Number.isFinite(minutes) || minutes >= 30) return "is-stale";
@@ -501,21 +362,8 @@ function freshnessClass(value?: string | null) {
   return "is-fresh";
 }
 
-function agentCardFreshnessClass(status: AgentStatus) {
-  const minutes = ageMinutes(status.updated_at);
-  if (!Number.isFinite(minutes)) return "is-stale";
-  if (isReadyHeartbeatStatus(status)) {
-    if (minutes >= 120) return "is-stale";
-    if (minutes >= 5) return "is-aging";
-    return "is-fresh";
-  }
-  return freshnessClass(status.updated_at);
-}
-
 function dataQualityIssues(state: MissionControlState): AttentionItem[] {
   const trackedJobs = operatorTrackedJobs(state.jobs);
-  const runtimeLayout = state.runtimeLayout;
-  const runtimeIssues = runtimeLayout?.issues || [];
   const issues: AttentionItem[] = [];
   if (trackedJobs.length < MIN_EXPECTED_OPERATOR_JOBS) {
     issues.push({
@@ -536,34 +384,9 @@ function dataQualityIssues(state: MissionControlState): AttentionItem[] {
       label: "Data",
       title: "Agent status coverage is low",
       detail: `${state.statuses.length}/3 core agent rows loaded.`,
-      why: "Control Tower is missing at least one core Brain Feed status row.",
+      why: "Control Tower is missing at least one core Live Work Board status row.",
       means: "A visible agent card may be stale even if the agent itself is healthy.",
-      action: "Repair Brain Feed visibility and regenerate Control Tower data.",
-      tone: "watch",
-      target: "brain-feed",
-    });
-  }
-  if (runtimeLayout && (!runtimeLayout.ok || runtimeIssues.length)) {
-    issues.push({
-      id: "data-runtime-layout",
-      label: "Display",
-      title: "Josh 2.0 screen layout needs attention",
-      detail: runtimeIssues.slice(0, 2).join("; ") || runtimeLayout.summary || "The rendered kiosk layout did not pass its live fit check.",
-      why: "Control Tower measured the actual Chrome kiosk and found a fit, overlap, or row-visibility issue.",
-      means: "The data may still be fresh, but the wall display may be hiding or crowding important sections.",
-      action: "Run the runtime layout guard, refresh Control Tower, and inspect the Josh 2.0 display.",
-      tone: "risk",
-      target: "brain-feed",
-    });
-  } else if (runtimeLayout?.checkedAt && ageMinutes(runtimeLayout.checkedAt) >= 45) {
-    issues.push({
-      id: "data-runtime-layout-stale",
-      label: "Display",
-      title: "Josh 2.0 screen check is stale",
-      detail: `Last rendered-layout check was ${ageLabel(runtimeLayout.checkedAt)} ago.`,
-      why: "The dashboard has not recently verified that all modules still fit the live wall display.",
-      means: "Control Tower may still be usable, but the first-view fit guarantee is older than expected.",
-      action: "Run the runtime layout guard and refresh Control Tower.",
+      action: "Repair Live Work Board visibility and regenerate Control Tower data.",
       tone: "watch",
       target: "brain-feed",
     });
@@ -582,28 +405,6 @@ function signalFreshnessSummary(state: MissionControlState) {
   const liveCount = state.signalHealth?.counts?.live ?? state.signals.filter((signal) => !signalIsNewsletter(signal)).length;
   const newsletterCount = state.signalHealth?.counts?.newsletter ?? state.signals.filter(signalIsNewsletter).length;
   const total = state.signalHealth?.counts?.total ?? state.signals.length;
-  const healthStatus = String(state.signalHealth?.status || "").toLowerCase();
-  const quietHours = Boolean(state.signalHealth?.quietHours);
-  const nextBreakingRun = state.signalHealth?.nextBreakingRun;
-  const staleSources = state.signalHealth?.staleSources || [];
-  const fallbackFresh = Boolean(state.signalHealth?.fallbackFresh && (state.signalHealth?.counts?.publicRssFallbackItems || 0) >= 5);
-  const staleSourceLabel = staleSources
-    .map((source) => source
-      .replace(/Minutes$/i, "")
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .toLowerCase())
-    .filter(Boolean)
-    .join(", ");
-  const staleSourceShortLabel = staleSources
-    .map((source) => source
-      .replace(/Minutes$/i, "")
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .toLowerCase()
-      .replace(/^breaking$/, "breaking")
-      .replace(/^newsfeed$/, "newsfeed")
-      .replace(/^newsletter$/, "newsletter"))
-    .filter(Boolean)
-    .join(", ");
   if (!total) {
     return {
       tone: "risk" as const,
@@ -615,46 +416,20 @@ function signalFreshnessSummary(state: MissionControlState) {
     return {
       tone: "risk" as const,
       label: "Signal Feed stale",
-      detail: `Signal Feed last checked ${ageLabel(timestamp)} ago.`,
-    };
-  }
-  if (healthStatus === "quiet" || quietHours) {
-    const detail = nextBreakingRun
-      ? `Quiet hours; next breaking scan ${nextBreakingRun}. ${liveCount} live and ${newsletterCount} newsletter rows loaded.`
-      : state.signalHealth?.summary || `Breaking scanner is paused overnight; checked ${ageLabel(timestamp)} ago.`;
-    return {
-      tone: "clear" as const,
-      label: "Quiet-hours watch",
-      detail,
-    };
-  }
-  if (healthStatus === "attention" || staleSources.length) {
-    return {
-      tone: "watch" as const,
-      label: staleSourceShortLabel ? `${staleSourceShortLabel} stale` : "Source watch",
-      detail: staleSourceLabel
-        ? `Scanner checked ${ageLabel(timestamp)} ago; ${staleSourceLabel} source is stale. ${liveCount} live and ${newsletterCount} newsletter rows loaded.`
-        : state.signalHealth?.summary || `${liveCount} live and ${newsletterCount} newsletter rows loaded; checked ${ageLabel(timestamp)} ago.`,
-    };
-  }
-  if (fallbackFresh) {
-    return {
-      tone: "clear" as const,
-      label: "Fresh sources",
-      detail: state.signalHealth?.summary || `${liveCount} live public rows and ${newsletterCount} newsletter rows loaded; checked ${ageLabel(timestamp)} ago.`,
+      detail: `Signal Feed last refreshed ${ageLabel(timestamp)} ago.`,
     };
   }
   if (minutes > 15 || liveCount < 5 || newsletterCount < 5) {
     return {
       tone: "watch" as const,
-      label: minutes > 15 ? "Scan aging" : "Coverage watch",
-      detail: `${liveCount} live and ${newsletterCount} newsletter rows loaded; checked ${ageLabel(timestamp)} ago.`,
+      label: "Signal Feed aging",
+      detail: `${liveCount} live and ${newsletterCount} newsletter rows loaded; refreshed ${ageLabel(timestamp)} ago.`,
     };
   }
   return {
     tone: "clear" as const,
     label: "Signal Feed fresh",
-    detail: `${liveCount} live and ${newsletterCount} newsletter rows loaded; checked ${ageLabel(timestamp)} ago.`,
+    detail: `${liveCount} live and ${newsletterCount} newsletter rows loaded; refreshed ${ageLabel(timestamp)} ago.`,
   };
 }
 
@@ -674,78 +449,103 @@ function missionFocusCount(state: MissionControlState) {
   return dataIssues + pendingApprovals + riskJobs + blockedAgents;
 }
 
-function agentCadenceDetail(idleContext?: AgentIdleContext) {
-  if (idleContext?.nextAt) {
-    const next = countdownShortText(countdownLabel(idleContext.nextAt));
-    if (next === "now") return "Checking now";
-    return next ? `Next check ${next}` : "Next check soon";
-  }
-  return "Checks every 2h";
+function isOptionalJoshexOffline(status: AgentStatus) {
+  if (status.agent_id !== "joshex") return false;
+  const value = String(status.status || "").toLowerCase();
+  if (value === "offline") return true;
+  const minutes = ageMinutes(status.updated_at);
+  return !Number.isFinite(minutes) || minutes > 120;
 }
 
-function agentSla(status: AgentStatus, idleContext?: AgentIdleContext) {
+function agentSla(status: AgentStatus) {
   const minutes = ageMinutes(status.updated_at);
   const expected = 120;
-  const cadence = agentCadenceDetail(idleContext);
+  if (status.agent_id === "joshex" && isOptionalJoshexOffline(status)) {
+    const age = Number.isFinite(minutes) ? ageLabel(status.updated_at) : "unknown";
+    return { tone: "offline", label: `Offline · last ${age} ago`, detail: "MacBook/Codex optional" };
+  }
+  if (status.agent_id === "joshex") {
+    const age = Number.isFinite(minutes) ? ageLabel(status.updated_at) : "unknown";
+    return { tone: "ok", label: `Online · last ${age} ago`, detail: "MacBook/Codex active" };
+  }
   if (!Number.isFinite(minutes)) {
-    return { tone: "late", label: "No check-in found", detail: cadence };
+    return { tone: "late", label: "No check-in found", detail: "Expected every 2h" };
   }
   const age = ageLabel(status.updated_at);
   if (minutes > expected) {
-    return { tone: "late", label: age === "just now" ? "Check-in stale · just now" : `Check-in stale · ${age} ago`, detail: cadence };
+    return { tone: "late", label: `Late · last ${age} ago`, detail: "Expected every 2h" };
   }
   if (minutes > expected * 0.75) {
-    return { tone: "watch", label: age === "just now" ? "Refresh due · checked just now" : `Refresh due · checked ${age} ago`, detail: cadence };
+    return { tone: "watch", label: `Aging · last ${age} ago`, detail: "Expected every 2h" };
   }
-  return { tone: "ok", label: age === "just now" ? "Checked just now" : `Checked ${age} ago`, detail: cadence };
+  return { tone: "ok", label: `On time · last ${age} ago`, detail: "Expected every 2h" };
+}
+
+function agentRouteText(status: AgentStatus) {
+  const stepText = (status.steps || [])
+    .map((step) => [step.label, step.title, step.tool, step.kind, step.status].filter(Boolean).join(" "))
+    .join(" ");
+  return [
+    status.agent_id,
+    status.status,
+    status.objective,
+    status.detail,
+    status.current_tool,
+    stepText,
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function activeRouteStep(agent: AgentId, status: AgentStatus) {
+  const text = agentRouteText(status);
+  if (/approval|approve|josh approval|external action|irreversible/.test(text)) return "approve";
+  if (/j\.?a\.?i\.?n|jain|fallback|staging|disaster|dr\b/.test(text) || agent === "jain") return "fallback";
+  if (/jaimes|hermes|codex|openclaw|terminal|bash|file edit|execution|tool/.test(text) || agent === "jaimes") return "execute";
+  if (/gemini pro|judge|escalat|deep review|long context/.test(text)) return "judge";
+  if (/gemini|flash|front[- ]?desk|triage|summary|digest/.test(text) || agent === "josh2") return "frontdesk";
+  if (agent === "joshex") return "execute";
+  return "frontdesk";
+}
+
+function routeLadderSteps(agent: AgentId, status: AgentStatus): RouteLadderStep[] {
+  const active = activeRouteStep(agent, status);
+  return [
+    { key: "lite", label: "Lite", model: "Worker", note: "never routes", active: false },
+    { key: "frontdesk", label: "Flash", model: "Front desk", note: "default", active: active === "frontdesk" },
+    { key: "judge", label: "Pro", model: "Judge", note: "escalate", active: active === "judge" },
+    { key: "execute", label: "JAIMES", model: "Execute", note: "tools", active: active === "execute" },
+    { key: "fallback", label: "J.A.I.N", model: "Fallback", note: "DR", active: active === "fallback" },
+    { key: "approve", label: "Josh", model: "Approve", note: "gate", active: active === "approve" },
+  ];
 }
 
 function agentClass(agent: AgentId) {
   return `agent-${agent}`;
 }
 
-function agentVisualState(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem, routineFocus = false): AgentVisualState {
+function agentVisualState(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem): AgentVisualState {
   const value = String(status.status || "").toLowerCase();
+  if (isOptionalJoshexOffline(status)) return "offline";
   if (value === "blocked" || value === "error" || activeWork?.state === "blocked") return "blocked";
   if (activeWork?.state === "waiting") return "waiting";
-  if (routineFocus) return "routine";
-  if (activeFocus && activeWork?.state === "working") return "working";
-  if (!isReadyHeartbeatStatus(status) && activeFocus) return "working";
-  if (agentCardFreshnessClass(status) === "is-stale") return "stale";
+  if (activeFocus || value === "queued" || (value === "active" && isFreshActiveTimestamp(status.updated_at)) || (status.active && isFreshActiveTimestamp(status.updated_at))) return "working";
+  if (freshnessClass(status.updated_at) === "is-stale") return "stale";
   return "ready";
 }
 
-function agentHeaderStateLabel(visualState: AgentVisualState, routineFocus: boolean, activeFocus: boolean) {
-  if (routineFocus) return "Current";
-  if (activeFocus) return "Working";
-  if (visualState === "blocked") return "Needs focus";
-  if (visualState === "waiting") return "Needs Josh";
-  if (visualState === "stale") return "Quiet";
-  return "Ready";
-}
-
-function agentHeaderDotClass(visualState: AgentVisualState, routineFocus: boolean, activeFocus: boolean) {
-  if (routineFocus) return "is-routine";
-  if (activeFocus) return "is-active";
-  if (visualState === "blocked" || visualState === "waiting") return "is-risk";
-  if (visualState === "stale") return "is-muted";
-  return "is-done";
-}
-
-function stepTrailForAgent(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem, routineFocus = false): Array<{ label: string; state: StepTrailState }> {
+function stepTrailForAgent(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem): Array<{ label: string; state: StepTrailState }> {
   const hasUpdate = Boolean(status.updated_at && timeValue(status.updated_at));
   const blocked = activeWork?.state === "blocked" || ["blocked", "error"].includes(String(status.status || "").toLowerCase());
   return [
-    { label: "Start", state: hasUpdate ? "done" : "pending" },
-    { label: blocked ? "Hold" : routineFocus ? "Sync" : "Work", state: activeFocus || blocked ? "current" : hasUpdate ? "done" : "pending" },
-    { label: "Report", state: activeFocus || blocked ? "pending" : hasUpdate ? "current" : "pending" },
+    { label: "In", state: hasUpdate ? "done" : "pending" },
+    { label: blocked ? "Hold" : "Now", state: activeFocus || blocked ? "current" : hasUpdate ? "done" : "pending" },
+    { label: "Out", state: activeFocus || blocked ? "pending" : hasUpdate ? "current" : "pending" },
   ];
 }
 
 function textMentionsAgent(text: string, agent: AgentId) {
   const normalized = text.toLowerCase();
   if (agent === "joshex") return /\bjoshex\b|\bcodex\b/.test(normalized);
-  if (agent === "josh") return /josh\s*2\.0|\bjosh\b|openclaw|host/.test(normalized);
+  if (agent === "josh2") return /josh\s*2\.0|\bjosh\b|openclaw|host/.test(normalized);
   if (agent === "jaimes") return /\bjaimes\b|hermes/.test(normalized);
   return /\bj\.?a\.?i\.?n\b|\bjain\b/.test(normalized);
 }
@@ -820,39 +620,6 @@ function sectionSignatures(state: MissionControlState): Record<SectionCueKey, st
     system: compactSignature({
       reliability: state.reliabilityUpgrades?.items?.map((row) => [row.id, row.status, row.signal, row.next]),
       source: state.source,
-      runtimeLayout: [state.runtimeLayout?.ok, state.runtimeLayout?.checkedAt, state.runtimeLayout?.issues],
-    }),
-    signal: compactSignature({
-      health: [
-        state.signalHealth?.status,
-        state.signalHealth?.generatedAt,
-        state.signalHealth?.counts?.live,
-        state.signalHealth?.counts?.newsletter,
-        state.signalHealth?.counts?.total,
-        state.signalHealth?.staleSources,
-      ],
-      rows: state.signals.slice(0, 10).map((row) => [
-        row.id,
-        row.title,
-        row.reason,
-        row.source,
-        row.score,
-        row.time,
-        row.section,
-      ]),
-    }),
-    crypto: compactSignature({
-      status: state.agenticCrypto?.status,
-      mode: state.agenticCrypto?.walletMode,
-      updatedAt: state.agenticCrypto?.updatedAt,
-      summary: state.agenticCrypto?.summary,
-      tokens: state.agenticCrypto?.tokens?.map((row) => [
-        row.chain,
-        row.symbol,
-        row.amount,
-        row.valueUsd,
-        row.classification,
-      ]),
     }),
   };
 }
@@ -871,54 +638,14 @@ function rowSignatures(state: MissionControlState) {
   buildWorkItems(state).forEach((row) => {
     rows[cueRowKey("work", row.id)] = compactSignature([row.state, row.title, row.detail, row.updated_at, row.agent_id]);
   });
-  state.signals.slice(0, 10).forEach((row) => {
-    rows[cueRowKey("signal", row.id || row.title)] = compactSignature([
-      row.title,
-      row.reason,
-      row.impact,
-      row.source,
-      row.score,
-      row.time,
-      row.section,
-    ]);
-  });
-  if (state.agenticCrypto) {
-    const tokens = [...(state.agenticCrypto.tokens || [])].sort((a, b) => (b.valueUsd || 0) - (a.valueUsd || 0));
-    rows[cueRowKey("crypto", "balance")] = compactSignature([
-      state.agenticCrypto.status,
-      state.agenticCrypto.walletMode,
-      state.agenticCrypto.updatedAt,
-      state.agenticCrypto.summary?.totalEstimatedUsd,
-      state.agenticCrypto.summary?.liquidEstimatedUsd,
-    ]);
-    tokens.slice(0, 5).forEach((token) => {
-      const tokenId = `${token.chain}-${token.symbol}-${token.contractMasked || token.mintMasked || token.source || ""}`;
-      rows[cueRowKey("crypto-token", tokenId)] = compactSignature([
-        token.amount,
-        token.valueUsd,
-        token.classification,
-        token.source,
-      ]);
-    });
-    const hiddenTokens = tokens.slice(5);
-    if (hiddenTokens.length) {
-      rows[cueRowKey("crypto", "smaller-tokens")] = compactSignature([
-        hiddenTokens.length,
-        hiddenTokens.reduce((sum, token) => sum + (token.valueUsd || 0), 0),
-        hiddenTokens.map((token) => [token.chain, token.symbol, token.amount, token.valueUsd]),
-      ]);
-    }
-  }
   return rows;
 }
 
 function focusSection(state: MissionControlState): SectionCueKey | null {
   if (state.approvals.some((row) => row.status === "pending") || state.jobs.some((job) => jobNeedsAttention(job, state.jobs))) return "jobs";
-  const activeAgent = state.statuses.some((row) => agentIsWorking(row) && isFreshActiveTimestamp(row.updated_at));
+  const activeAgent = state.statuses.some((row) => ["active", "working"].includes(String(row.status || "").toLowerCase()) && isFreshActiveTimestamp(row.updated_at));
   const activeWork = buildWorkItems(state).some((item) => item.state === "working" && isFreshActiveTimestamp(item.updated_at));
   if (activeAgent || activeWork) return "brain";
-  const signalStatus = String(state.signalHealth?.status || "").toLowerCase();
-  if (["watch", "stale", "error"].some((term) => signalStatus.includes(term)) || (state.signalHealth?.staleSources || []).length) return "signal";
   return null;
 }
 
@@ -985,1012 +712,56 @@ function SectionCue({ label = "updated" }: { label?: string }) {
   );
 }
 
-type TowerLane = "active" | "needs-josh" | "complete" | "planned";
-type TowerTone = "active" | "watch" | "risk" | "done" | "planned";
-type TowerActivity = {
-  id: string;
-  lane: TowerLane;
-  tone: TowerTone;
-  agent: AgentId;
-  title: string;
-  detail: string;
-  meta: string;
-  time?: string;
-  sortAt: number;
-  detailLines?: string[];
-};
-type ControlTowerModel = {
-  active: TowerActivity[];
-  needsJosh: TowerActivity[];
-  complete: TowerActivity[];
-  planned: TowerActivity[];
-  counts: {
-    agentsReady: number;
-    agentsTotal: number;
-    active: number;
-    needsJosh: number;
-    complete: number;
-    planned: number;
-    trackedJobs: number;
-    systemQuiet: number;
-    meaningfulComplete: number;
-  };
-};
-
-const TOWER_AGENT_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"];
-const TOWER_LANES: Array<{ key: TowerLane; label: string; empty: string }> = [
-  { key: "active", label: "Active", empty: "No agent is actively working right now." },
-  { key: "needs-josh", label: "Needs Josh", empty: "No decisions or repair items need Josh right now." },
-  { key: "complete", label: "Recent", empty: "No recent completion has been reported yet." },
-  { key: "planned", label: "Next Up", empty: "No upcoming planned work is loaded yet." },
-];
-
-function towerLaneItems(model: ControlTowerModel, lane: TowerLane) {
-  if (lane === "active") return model.active;
-  if (lane === "needs-josh") return model.needsJosh;
-  if (lane === "complete") return model.complete;
-  return model.planned;
-}
-
-function towerLaneCount(model: ControlTowerModel, lane: TowerLane) {
-  return towerLaneItems(model, lane).length;
-}
-
-function towerLaneLabel(lane: TowerLane) {
-  return TOWER_LANES.find((item) => item.key === lane)?.label || lane;
-}
-
-function activityLedgerRows(model: ControlTowerModel) {
-  const meaningfulComplete = model.complete.filter((row) => !activityIsRoutineSystem(row));
-  const rows = [
-    ...activityRankedRows(model.needsJosh).slice(0, 3),
-    ...activityRankedRows(model.active).slice(0, 4),
-    ...activityRankedRows(model.planned).slice(0, 8),
-    ...activityRankedRows(meaningfulComplete).slice(0, 5),
-  ];
-  const seen = new Set<string>();
-  return rows.filter((row) => {
-    const key = `${row.lane}-${row.agent}-${missionText(row.title).toLowerCase()}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).slice(0, 8);
-}
-
-function activityText(row: TowerActivity) {
-  return missionText(`${row.title} ${row.detail} ${row.meta}`).toLowerCase();
-}
-
-function activityIsRoutineFocus(row?: TowerActivity) {
-  if (!row) return false;
-  const text = activityText(row);
-  return activityIsRoutineSystem(row) || textIsRoutineActivity(text) || [
-    "agent context sync",
-    "context sync",
-    "live kiosk health",
-    "status check",
-    "heartbeat",
-    "control tower refresh",
-    "scheduled jobs healthy",
-    "rows, sidecars, live path",
-    "agent state current",
-  ].some((term) => text.includes(term));
-}
-
-function activityIsPriorityFocus(row: TowerActivity) {
-  const text = activityText(row);
-  return /gmail|inbox|sorare|fantasy|waiver|lineup|daily mission|breaking news|x watchlist|wallet|crypto|control tower|ui|ux|handoff|deploy|build|verify|approval|josh needs/.test(text);
-}
-
-function activityIsUserFacingFocus(row: TowerActivity) {
-  const text = activityText(row);
-  return activityIsPriorityFocus(row) || /telegram|josh|user|request|asked|approved|handoff|screen|kiosk|dashboard|control tower/.test(text);
-}
-
-function activityFocusRank(row: TowerActivity) {
-  const ageMs = Date.now() - row.sortAt;
-  const isFresh = Number.isFinite(ageMs) && ageMs <= ACTIVE_FOCUS_FRESH_MINUTES * 60_000;
-  const isVeryStale = Number.isFinite(ageMs) && ageMs > 24 * 60 * 60_000;
-  const laneBase = row.lane === "active"
-    ? 980
-    : row.lane === "needs-josh"
-      ? (isFresh ? 900 : 520)
-      : row.lane === "planned" ? 360 : 140;
-  const priorityBoost = activityIsPriorityFocus(row) ? 130 : 0;
-  const userFacingBoost = activityIsUserFacingFocus(row) ? 90 : 0;
-  const agentBoost = row.agent === "joshex" || row.agent === "jaimes" || row.agent === "josh" ? 24 : 12;
-  const freshActiveBoost = row.lane === "active" && isFresh ? 360 : 0;
-  const stalePenalty = isVeryStale ? 720 : Number.isFinite(ageMs) && ageMs > 6 * 60 * 60_000 ? 340 : 0;
-  const routinePenalty = activityIsRoutineFocus(row) ? 260 : 0;
-  const recencyBoost = Math.max(0, Math.min(80, Math.floor((Date.now() - row.sortAt) / -60_000)));
-  return laneBase + priorityBoost + userFacingBoost + agentBoost + freshActiveBoost + recencyBoost - routinePenalty - stalePenalty;
-}
-
-function activityRankedRows(rows: TowerActivity[]) {
-  return [...rows].sort((a, b) => activityFocusRank(b) - activityFocusRank(a) || b.sortAt - a.sortAt);
-}
-
-function activityIsRoutineSystem(row: TowerActivity) {
-  if (row.lane !== "complete") return false;
-  const text = activityText(row);
-  return [
-    "live kiosk health",
-    "kiosk health",
-    "status check",
-    "heartbeat",
-    "codexbar",
-    "session spend",
-    "scheduled jobs healthy",
-    "brain feed idle",
-    "rows, sidecars, live path",
-    "agent context sync",
-    "live agent cards",
-    "j.a.i.n medic",
-  ].some((term) => text.includes(term));
-}
-
-function activitySystemQuietCount(model: ControlTowerModel) {
-  return model.counts.systemQuiet || model.complete.filter(activityIsRoutineSystem).length;
-}
-
-function activityFocusRows(model: ControlTowerModel) {
-  // The Live Work Board is the real-time source of truth: fresh active agent
-  // status must beat stale scheduled/needs-Josh rows such as old Daily Missions.
-  const rawActive = [...model.needsJosh, ...model.active].filter(row => {
-    const text = ((row.title || "") + " " + (row.detail || "")).toLowerCase();
-    const ageMs = Date.now() - row.sortAt;
-    const isStaleFocus = Number.isFinite(ageMs) && ageMs > 6 * 60 * 60_000;
-    // Filter out unhelpful stuck routine jobs.
-    if (text.includes("gmail morninginbox triage")) return false;
-    if (text.includes("routine triage")) return false;
-    // Old attention rows can stay in Priority Queue, but they should never own
-    // the live hero while a fresh agent is actively broadcasting work.
-    if (row.lane === "needs-josh" && isStaleFocus) return false;
-
-    // Filter routine health checks only when the headline itself is routine.
-    // Do not hide real work just because its explanatory detail mentions a
-    // heartbeat/guard being fixed or verified.
-    const titleText = (row.title || "").toLowerCase();
-    if (/heartbeat|kiosk health|status check|agent context sync/.test(titleText)) return false;
-    if (titleText.includes("rows, sidecars, live path")) return false;
-
-    return true;
-  });
-
-  const ordered = activityRankedRows(rawActive);
-  const seen = new Set<string>();
-  return ordered.filter((row) => {
-    const key = `${row.lane}-${row.agent}-${missionText(row.title).toLowerCase()}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).slice(0, 3);
-}
-
-// Multi-agent concurrency: how many DISTINCT agents are genuinely active at once.
-// Used to switch the Live Work Board hero from single-focus to a co-equal grid.
-function concurrentActiveAgents(model: ControlTowerModel): AgentId[] {
-  const seen = new Set<AgentId>();
-  const order: AgentId[] = [];
-  [...model.needsJosh, ...model.active].forEach((row) => {
-    if (row.lane !== "active" && row.lane !== "needs-josh") return;
-    if (activityIsRoutineFocus(row)) return;
-    if (!row.time || isFreshActiveTimestamp(row.time)) {
-      if (!seen.has(row.agent)) {
-        seen.add(row.agent);
-        order.push(row.agent);
-      }
-    }
-  });
-  return order;
-}
-
-// One representative focus row per active agent, ranked — for the concurrent hero grid.
-function perAgentFocusRows(model: ControlTowerModel, agents: AgentId[]): TowerActivity[] {
-  const rawActive = activityRankedRows(
-    [...model.needsJosh, ...model.active].filter((row) => !activityIsRoutineFocus(row)),
-  );
-  const out: TowerActivity[] = [];
-  agents.forEach((agent) => {
-    const row = rawActive.find((r) => r.agent === agent);
-    if (row) out.push(row);
-  });
-  return out.slice(0, 4);
-}
-
-// Contention: two or more agents whose current work targets the same thing.
-function focusContentionKey(row: TowerActivity): string {
-  return missionText(row.title).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").slice(0, 4).join(" ");
-}
-function detectFocusContention(rows: TowerActivity[]): Set<string> {
-  const byKey = new Map<string, Set<AgentId>>();
-  rows.forEach((row) => {
-    const key = focusContentionKey(row);
-    if (!key) return;
-    if (!byKey.has(key)) byKey.set(key, new Set());
-    byKey.get(key)!.add(row.agent);
-  });
-  const contended = new Set<string>();
-  byKey.forEach((agents, key) => {
-    if (agents.size >= 2) contended.add(key);
-  });
-  return contended;
-}
-
-function focusEyebrow(row?: TowerActivity) {
-  if (!row) return "Live status";
-  if (row.lane === "needs-josh") return "Needs Josh";
-  if (row.lane === "active") return "Happening now";
-  if (row.lane === "planned") return "Next focus";
-  return "Latest complete";
-}
-
-function towerActivityKey(seed: string, agent: AgentId, title: string) {
-  return `${seed}-${agent}-${missionText(title).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-}
-
-function pushUniqueActivity(rows: TowerActivity[], row: TowerActivity, seen: Set<string>) {
-  const key = `${row.lane}-${row.agent}-${missionText(row.title).toLowerCase()}`;
-  if (seen.has(key)) return;
-  seen.add(key);
-  rows.push(row);
-}
-
-function statusIsClear(status?: string | null) {
-  return /ready|ok|done|complete|idle|clear/i.test(String(status || ""));
-}
-
-function statusIsProblem(status?: string | null) {
-  return /blocked|error|failed|missed|waiting|attention|needs/i.test(String(status || ""));
-}
-
-function towerActivityFromWork(item: WorkItem): TowerActivity {
-  const lane: TowerLane = item.state === "blocked" || item.state === "waiting" ? "needs-josh" : "active";
-  const tone: TowerTone = item.state === "blocked" ? "risk" : item.state === "waiting" ? "watch" : "active";
-  const isAgentStatus = item.source === "agent";
-  const agentDetail = compactText(item.detail || "Agent is reporting active work.", 128);
-  return {
-    id: item.id,
-    lane,
-    tone,
-    agent: item.agent_id,
-    title: headlineTitle(item.title, 58),
-    detail: isAgentStatus ? agentDetail : readoutSummary(item.detail, "Working through the current step.", 104),
-    meta: item.source === "job" ? "scheduled job" : item.source === "approval" ? "approval flow" : (item.detail ? "live Brain Feed" : "Brain Feed"),
-    time: item.updated_at,
-    sortAt: timeValue(item.updated_at),
-    detailLines: item.detailLines,
-  };
-}
-
-function towerActivityFromJob(job: JobRow, lane: TowerLane, tone: TowerTone): TowerActivity {
-  const run = jobRunCells(job);
-  const next = nextRunTime(job);
-  const last = timeValue(job.lastRun || job.completed_at || job.updated_at);
-  const sortAt = lane === "planned" ? next || last || timeValue(job.updated_at) : last || next || timeValue(job.updated_at);
-  const bullets = expectedNextBullets(job, job.agent_id);
-  const checks = bullets.find((item) => item.label.toLowerCase() === "checks")?.text;
-  const output = bullets.find((item) => item.label.toLowerCase() === "output")?.text;
-  const detail = lane === "planned"
-    ? readoutSummary(checks || job.detail || job.tool, "Checks the next scheduled task.", 104)
-    : lane === "complete"
-      ? readoutSummary(output || job.detail || job.tool, "Reported completion status.", 104)
-      : readoutSummary(job.detail || job.tool, "Agent job status.", 104);
-  const metaParts = [
-    compactCategoryLabel(jobCategory(job)),
-    run.next ? `next ${run.next}` : "",
-    run.last ? `last ${run.last}` : "",
-  ].filter(Boolean);
-  return {
-    id: job.id || towerActivityKey("job", job.agent_id, job.title),
-    lane,
-    tone,
-    agent: job.agent_id,
-    title: compactJobTitle(job),
-    detail,
-    meta: metaParts.join(" · ") || (job.sourceLabel || "scheduled job"),
-    time: job.updated_at || job.lastRun || job.nextRun,
-    sortAt,
-  };
-}
-
-function recentConcreteStep(status: AgentStatus) {
-  const objective = cleanHeadlineText(status.objective || "").toLowerCase();
-  const generic = /^(?:jaimes|josh 2\.0|joshex|j\.a\.i\.n) is (?:working now|online and ready|standing by)$/i;
-  const steps = Array.isArray(status.steps) ? [...status.steps].reverse() : [];
-  let objectiveMatch = "";
-  for (const step of steps) {
-    const label = cleanHeadlineText(step.label || step.title || "");
-    if (!label || generic.test(label)) continue;
-    if (label.toLowerCase() === objective) {
-      if (!objectiveMatch) objectiveMatch = label;
-      continue;
-    }
-    return label;
+async function loadControlTowerDisplayState(): Promise<ControlTowerDisplayState> {
+  try {
+    const response = await fetch("/data/control-tower-display.json", { cache: "no-store" });
+    if (!response.ok) return {};
+    return response.json() as Promise<ControlTowerDisplayState>;
+  } catch (error) {
+    console.warn(error);
+    return {};
   }
-  return objectiveMatch;
 }
 
-function liveAgentWorkDetail(status: AgentStatus) {
-  const objective = cleanHeadlineText(status.objective || "");
-  const rawDetail = cleanHeadlineText(status.detail || "");
-  const recent = recentConcreteStep(status);
-  const tool = compactText(status.current_tool || "", 26);
-  const parts: string[] = [];
-  if (rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() && rawDetail.toLowerCase() !== recent.toLowerCase()) {
-    parts.push(rawDetail);
-  } else if (recent) {
-    parts.push(`Latest: ${recent}`);
-  } else if (tool) {
-    parts.push(`Using ${tool}`);
-  }
-  if (!parts.length && objective) parts.push(`Current objective: ${objective}`);
-  return compactText(parts.join(" · "), 148) || "Agent is reporting active work.";
-}
-
-function liveAgentDetailLines(status: AgentStatus) {
-  // Agent-agnostic: JOSH 2.0, JOSHeX, JAIMES, and J.A.I.N all use this chip builder.
-  const objective = cleanHeadlineText(status.objective || "");
-  const rawDetail = cleanHeadlineText(status.detail || "");
-  const recent = recentConcreteStep(status);
-  const tool = compactText(status.current_tool || "", 30);
-  const lines = [
-    tool ? `Using: ${tool}` : "",
-    status.updated_at ? `Fresh: ${ageLabel(status.updated_at)}` : "",
-    recent ? `Step: ${compactText(recent, 54)}` : "",
-    rawDetail && rawDetail.toLowerCase() !== objective.toLowerCase() ? `Context: ${compactText(rawDetail, 72)}` : "",
-  ].filter(Boolean);
-  return lines.slice(0, 4);
-}
-
-function buildControlTowerModel(state: MissionControlState, statuses: Map<AgentId, AgentStatus>, nowMs = Date.now()): ControlTowerModel {
-  const trackedJobs = operatorTrackedJobs(state.jobs);
-  const seen = new Set<string>();
-  const active: TowerActivity[] = [];
-  const needsJosh: TowerActivity[] = [];
-  const complete: TowerActivity[] = [];
-  const planned: TowerActivity[] = [];
-
-  buildWorkItems(state)
-    .filter((item) => ["working", "waiting", "blocked"].includes(item.state))
-    .forEach((item) => {
-      const row = towerActivityFromWork(item);
-      pushUniqueActivity(row.lane === "needs-josh" ? needsJosh : active, row, seen);
-    });
-
-  state.approvals
-    .filter((approval) => approval.status === "pending")
-    .slice(0, 4)
-    .forEach((approval) => pushUniqueActivity(needsJosh, {
-      id: `approval-${approval.id}`,
-      lane: "needs-josh",
-      tone: String(approval.risk_tier || "").toLowerCase().includes("high") ? "risk" : "watch",
-      agent: approval.requested_by || approval.agent_id || "joshex",
-      title: headlineTitle(approval.title, 54),
-      detail: readoutSummary(approval.detail, "Approval is waiting for Josh.", 104),
-      meta: "approval required",
-      time: approval.created_at,
-      sortAt: timeValue(approval.created_at),
-    }, seen));
-
-  dataQualityIssues(state)
-    .filter((issue) => issue.tone !== "clear")
-    .slice(0, 3)
-    .forEach((issue) => pushUniqueActivity(needsJosh, {
-      id: `data-${issue.id}`,
-      lane: "needs-josh",
-      tone: issue.tone === "risk" ? "risk" : "watch",
-      agent: issue.target === "signal-feed" ? "jain" : issue.target === "today-jobs" ? "josh" : "joshex",
-      title: headlineTitle(issue.title, 54),
-      detail: readoutSummary(issue.detail || issue.why, "Dashboard needs attention.", 104),
-      meta: issue.label,
-      time: state.lastUpdated,
-      sortAt: timeValue(state.lastUpdated),
-    }, seen));
-
-  trackedJobs
-    .filter((job) => jobNeedsAttention(job, trackedJobs))
-    .slice(0, 5)
-    .forEach((job) => pushUniqueActivity(needsJosh, towerActivityFromJob(job, "needs-josh", statusIsProblem(job.runStatus || job.status) ? "risk" : "watch"), seen));
-
-  trackedJobs
-    .filter((job) => jobIsFreshActive(job) || jobWorkState(job, trackedJobs) === "working")
-    .slice(0, 5)
-    .forEach((job) => pushUniqueActivity(active, towerActivityFromJob(job, "active", jobIsRoutineActivity(job) ? "planned" : "active"), seen));
-
-  state.events
-    .filter((event) => /done|complete|ready|ok|info/i.test(event.status || event.event_type || ""))
-    .slice(0, 6)
-    .forEach((event) => pushUniqueActivity(complete, {
-      id: event.id || towerActivityKey("event", event.agent_id, event.title),
-      lane: "complete",
-      tone: statusIsProblem(event.status) ? "watch" : "done",
-      agent: event.agent_id || "joshex",
-      title: headlineTitle(event.title, 54),
-      detail: readoutSummary(event.detail || event.tool, "Recent ecosystem update.", 104),
-      meta: event.tool || "Brain Feed",
-      time: event.created_at,
-      sortAt: timeValue(event.created_at),
-    }, seen));
-
-  trackedJobs
-    .filter((job) => /done|complete|ok|ready/i.test(`${job.status} ${job.runStatus}`))
-    .sort((a, b) => timeValue(b.lastRun || b.completed_at || b.updated_at) - timeValue(a.lastRun || a.completed_at || a.updated_at))
-    .slice(0, 7)
-    .forEach((job) => pushUniqueActivity(complete, towerActivityFromJob(job, "complete", "done"), seen));
-
-  const calendarBlocks = buildCalendarJobBlocks(trackedJobs)
-    .filter((block) => block.startsAt.getTime() >= nowMs - 15 * 60_000)
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-  calendarBlocks.slice(0, 8).forEach((block) => {
-    const row = towerActivityFromJob(block.job, "planned", block.startsAt.getTime() <= nowMs ? "active" : "planned");
-    row.id = `planned-${block.id}`;
-    row.title = block.synthetic && block.count && block.count > 1 ? `${block.count} ${block.title}` : block.title;
-    row.detail = readoutSummary(block.detail, row.detail, 104);
-    row.time = block.startsAt.toISOString();
-    row.sortAt = block.startsAt.getTime();
-    row.meta = `${calendarBlockTimeLabel(block.startsAt)} · ${AGENTS[block.agent]?.label || block.agent}`;
-    pushUniqueActivity(planned, row, seen);
-  });
-
-  // Always let fresh explicit agent Brain Feed rows surface as active work.
-  // Previously this only ran when no active jobs existed; routine active jobs
-  // could fill `active`, get filtered from the hero, and leave the board saying
-  // "No active work right now" while JAIMES/JOSHeX/J.A.I.N were working.
-  state.statuses
-    .filter((status) => agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at))
-    .forEach((status) => pushUniqueActivity(active, {
-      id: `status-${status.agent_id}-${status.updated_at}`,
-      lane: "active",
-      tone: "active",
-      agent: status.agent_id,
-      title: headlineTitle(status.objective || AGENTS[status.agent_id].role, 58),
-      detail: liveAgentWorkDetail(status),
-      meta: status.current_tool ? `tool: ${compactText(status.current_tool, 28)}` : "agent status",
-      time: status.updated_at,
-      sortAt: timeValue(status.updated_at),
-      detailLines: liveAgentDetailLines(status),
-    }, seen));
-
-  const visibleStatuses = TOWER_AGENT_ORDER.map((agent) => statuses.get(agent)).filter(Boolean) as AgentStatus[];
-  const agentsReady = visibleStatuses.length;
-  const systemQuiet = complete.filter(activityIsRoutineSystem).length;
-  const meaningfulComplete = Math.max(0, complete.length - systemQuiet);
+function easternClockParts(now: Date) {
   return {
-    active: active.sort((a, b) => b.sortAt - a.sortAt).slice(0, 6),
-    needsJosh: needsJosh.sort((a, b) => b.sortAt - a.sortAt).slice(0, 6),
-    complete: complete.sort((a, b) => b.sortAt - a.sortAt).slice(0, 8),
-    planned: planned.sort((a, b) => a.sortAt - b.sortAt).slice(0, 8),
-    counts: {
-      agentsReady,
-      agentsTotal: TOWER_AGENT_ORDER.length,
-      active: active.length,
-      needsJosh: needsJosh.length,
-      complete: complete.length,
-      planned: planned.length,
-      trackedJobs: trackedJobs.length,
-      systemQuiet,
-      meaningfulComplete,
-    },
+    time: now.toLocaleTimeString("en-US", {
+      timeZone: "America/New_York",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }),
+    date: now.toLocaleDateString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    }),
   };
 }
 
-function ControlTower({
-  state,
-  statuses,
-  onNavigate,
-  liveCues,
-  loading,
-  onCryptoRefresh,
+function NightModeScreen({
+  now,
+  onToggle,
+  commandSource,
 }: {
-  state: MissionControlState;
-  statuses: Map<AgentId, AgentStatus>;
-  onNavigate: (target: AttentionTarget) => void;
-  liveCues: LiveCueState;
-  loading: boolean;
-  onCryptoRefresh: () => void;
+  now: Date;
+  onToggle: () => void;
+  commandSource?: string;
 }) {
-  const [nowMs, setNowMs] = useState(() => Date.now());
-  useEffect(() => {
-    const timer = window.setInterval(() => setNowMs(Date.now()), 30_000);
-    return () => window.clearInterval(timer);
-  }, []);
-  const model = useMemo(() => buildControlTowerModel(state, statuses, nowMs), [state, statuses, nowMs]);
+  const clock = easternClockParts(now);
   return (
-    <section className="control-tower-grid" aria-label="Josh 2.0 Control Tower">
-      {/* Column 1 (Left): Live Work Board + FinOps */}
-      <section id="brain-feed" className={`tower-column tower-left-column${sectionCueClass("brain", liveCues)}`} aria-label="Live Work Board and FinOps Dashboard">
-        <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
-        <ActivityLedger model={model} state={state} />
-        <ResourceStack state={state} loading={loading} onCryptoRefresh={onCryptoRefresh} liveCues={liveCues} />
-      </section>
-
-      {/* Column 2 (Center): Unified Agent Flight Deck + Priority Queue */}
-      <section className="tower-column tower-center-column" aria-label="Unified agent flight deck and priority queue">
-        <AgentFlightDeck state={state} statuses={statuses} model={model} nowMs={nowMs} liveCues={liveCues} />
-      </section>
-
-      {/* Column 3 (Right): Scheduled Jobs / Daily Calendar */}
-      <aside className="right-rail tower-jobs-rail">
-        <JobsRail state={state} liveCues={liveCues} />
-      </aside>
-    </section>
-  );
-}
-
-function TowerCommandStrip({ model, truth, state }: { model: ControlTowerModel; truth: ReturnType<typeof missionTruthSummary>; state: MissionControlState }) {
-  const walletTotal = state.agenticCrypto?.summary?.totalEstimatedUsd;
-  return (
-    <header className="tower-command-strip">
-      <div>
-        <p>Agent Ecosystem Control Tower</p>
-        <h2>Executive activity view</h2>
-      </div>
-      <article className={model.counts.needsJosh ? "is-risk" : "is-clear"}>
-        <span>Needs Josh</span>
-        <strong>{model.counts.needsJosh}</strong>
-      </article>
-      <article className={model.counts.active ? "is-active" : "is-clear"}>
-        <span>Active</span>
-        <strong>{model.counts.active}</strong>
-      </article>
-      <article>
-        <span>Complete</span>
-        <strong>{model.counts.complete}</strong>
-      </article>
-      <article>
-        <span>Planned</span>
-        <strong>{model.counts.planned}</strong>
-      </article>
-      <article>
-        <span>Agents</span>
-        <strong>{model.counts.agentsReady}/{model.counts.agentsTotal}</strong>
-      </article>
-      <article>
-        <span>Source</span>
-        <strong>Josh 2.0</strong>
-      </article>
-      <article className="is-resource">
-        <span>Wallet</span>
-        <strong>{fmtCurrencyExact(walletTotal)}</strong>
-      </article>
-      <article className={`is-${truth.tone}`}>
-        <span>Truth</span>
-        <strong>{truth.label}</strong>
-      </article>
-    </header>
-  );
-}
-
-function AgentFlightDeck({
-  state,
-  statuses,
-  model,
-  nowMs,
-  liveCues,
-}: {
-  state: MissionControlState;
-  statuses: Map<AgentId, AgentStatus>;
-  model: ControlTowerModel;
-  nowMs: number;
-  liveCues: LiveCueState;
-}) {
-  return (
-    <section className="tower-agent-deck" aria-label="Agent flight deck">
-      <header>
-        <div>
-          <p>Unified Agent Deck</p>
-          <h3>Flight Deck + Priority Queue</h3>
-        </div>
-        <span>{model.counts.agentsReady}/{model.counts.agentsTotal} visible</span>
-      </header>
-      <div className="tower-agent-list">
-        {TOWER_AGENT_ORDER.map((agent) => {
-          const status = statuses.get(agent) || offlineStatus(agent);
-          const idleContext = buildAgentIdleContext(agent, state, nowMs);
-          const insights = agentPriorityInsights(agent, state, model);
-          return <TowerAgentRow key={agent} agent={agent} status={status} idleContext={idleContext} insights={insights} changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])} />;
-        })}
-      </div>
-    </section>
-  );
-}
-
-function agentDeckRole(agent: AgentId) {
-  if (agent === "joshex") return "Private coord";
-  if (agent === "josh") return "Control Tower";
-  if (agent === "jaimes") return "Hermes";
-  if (agent === "jain") return "Signals";
-  return AGENTS[agent]?.role || agent;
-}
-
-function TowerAgentRow({ agent, status, idleContext, insights, changed }: { agent: AgentId; status: AgentStatus; idleContext: AgentIdleContext; insights: AgentInsightRow[]; changed?: boolean }) {
-  const visualState = agentNeedsFocus(status)
-    ? "blocked"
-    : agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
-      ? "working"
-      : statusIsClear(status.status)
-        ? "ready"
-        : "waiting";
-  const freshness = agentSla(status, idleContext);
-  const current = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at)
-    ? headlineTitle(status.objective || status.current_tool || AGENTS[agent].role, 56)
-    : idleContext.nextTitle && !/awaiting instruction/i.test(idleContext.nextTitle)
-      ? `Up next: ${headlineTitle(idleContext.nextTitle, 52)}`
-      : "Awaiting instruction";
-  const complete = readoutSummary(idleContext.complete, "No completed task reported yet.", 72);
-  const next = idleContext.countdown
-    ? `${countdownShortText(idleContext.countdown)} · ${idleContext.nextTitle}`
-    : idleContext.nextTitle;
-  const capabilities = agentCapabilityChips(agent, status, idleContext, insights, visualState);
-  return (
-    <article className={`tower-agent-row ${agentClass(agent)} is-${visualState}${changedRowClass(changed)}`}>
-      <span className="row-change-dot" aria-hidden="true" />
-      <div className="tower-agent-id">
-        <span className={`dot ${agentHeaderDotClass(visualState as AgentVisualState, false, visualState === "working")}`} />
-        <div>
-          <strong>{AGENTS[agent].label}</strong>
-          <em>{agentDeckRole(agent)}</em>
-        </div>
-      </div>
-      <div className="tower-agent-now">
-        <span>{visualState === "working" ? "Now" : "Focus"}</span>
-        <strong title={missionText(status.objective)}>{current}</strong>
-      </div>
-      <div className="tower-agent-readouts">
-        <p title={idleContext.complete}><b>Complete</b>{complete}</p>
-        <p title={next}><b>Next</b>{compactText(next, 76)}</p>
-      </div>
-      <div className={`tower-agent-fresh is-${freshness.tone}`}>
-        <strong>{freshness.label}</strong>
-        <span>{freshness.detail}</span>
-      </div>
-      <div className="tower-agent-capabilities" aria-label={`${AGENTS[agent].label} capability heat map`}>
-        {capabilities.map((chip) => (
-          <span key={chip.label} className={`cap-${chip.state}`} title={chip.title}>{chip.label}</span>
-        ))}
-      </div>
-      <div className="tower-agent-insights" aria-label={`${AGENTS[agent].label} priority insights`}>
-        {insights.slice(0, 2).map((row) => (
-          <p key={`${row.label}-${row.text}`} className={`is-${row.tone || "default"}`}>
-            <b>{row.label}</b><span>{row.text}</span>
-          </p>
-        ))}
-      </div>
-    </article>
-  );
-}
-
-
-
-function agentCapabilityCatalog(agent: AgentId): Array<{ label: string; patterns: RegExp[] }> {
-  if (agent === "joshex") return [
-    { label: "Inbox", patterns: [/gmail|inbox|email|triage/i] },
-    { label: "Review", patterns: [/review|final|approve|decision/i] },
-    { label: "Route", patterns: [/route|handoff|coord/i] },
-    { label: "Private", patterns: [/private|mac/i] },
-  ];
-  if (agent === "josh") return [
-    { label: "Context", patterns: [/context|sync|memory/i] },
-    { label: "Tower", patterns: [/control tower|dashboard|kiosk|screen/i] },
-    { label: "Gateway", patterns: [/telegram|gateway|openclaw/i] },
-    { label: "Medic", patterns: [/medic|health|heartbeat|hourly/i] },
-  ];
-  if (agent === "jaimes") return [
-    { label: "Exec", patterns: [/exec|pipeline|script|build|verify/i] },
-    { label: "Sorare", patterns: [/sorare|lineup|mission|gw/i] },
-    { label: "Trade", patterns: [/trade|wallet|route|crypto|sol/i] },
-    { label: "ML", patterns: [/ml|model|training|prediction/i] },
-  ];
-  return [
-    { label: "Signals", patterns: [/signal|breaking|news|watch/i] },
-    { label: "Fantasy", patterns: [/fantasy|waiver|injury|lineup/i] },
-    { label: "Cron", patterns: [/cron|monitor|watchdog|hourly/i] },
-    { label: "Feed", patterns: [/feed|briefing|digest/i] },
-  ];
-}
-
-function agentCapabilityChips(agent: AgentId, status: AgentStatus, idleContext: AgentIdleContext, insights: AgentInsightRow[], visualState: string): AgentCapabilityChip[] {
-  const liveText = missionText(`${status.objective || ""} ${status.current_tool || ""}`);
-  const nextText = missionText(`${idleContext.nextTitle || ""} ${idleContext.nextBullets?.map((row) => `${row.label} ${row.text}`).join(" ") || ""} ${insights.map((row) => `${row.label} ${row.text}`).join(" ")}`);
-  const isWorking = visualState === "working" && liveText.length > 0;
-  return agentCapabilityCatalog(agent).map((cap) => {
-    const liveHit = isWorking && cap.patterns.some((pattern) => pattern.test(liveText));
-    const nextHit = cap.patterns.some((pattern) => pattern.test(nextText));
-    const stale = /stale|late|blocked|risk/i.test(`${status.status || ""} ${insights.map((row) => row.label + row.text).join(" ")}`);
-    const state: AgentCapabilityChip["state"] = liveHit ? "hot" : nextHit ? "warm" : stale && cap.label === "Inbox" ? "watch" : "idle";
-    const basis = liveHit ? `Live: ${liveText}` : nextHit ? `Next: ${nextText}` : "Standing by";
-    return { label: cap.label, state, title: compactText(basis, 120) };
-  });
-}
-
-function agentPriorityInsights(agent: AgentId, state: MissionControlState, model: ControlTowerModel): AgentInsightRow[] {
-  const trackedJobs = operatorTrackedJobs(state.jobs);
-  const agentJobs = trackedJobs.filter((job) => (job.agent_id || "") === agent);
-  const active = model.active.find((row) => row.agent === agent && row.tone === "active");
-  const risk = agentJobs.find((job) => jobNeedsAttention(job, trackedJobs));
-  const nextJob = agentJobs.find((job) => ["ready", "working"].includes(jobWorkState(job, trackedJobs)) || ["upcoming", "scheduled"].includes(String(job.status || "").toLowerCase())) || agentJobs[0];
-  const work = state.workItems?.find((item) => item.agent_id === agent && ["working", "waiting", "blocked", "ready"].includes(item.state));
-  const approval = state.approvals?.find((row) => row.status === "pending" && (row.agent_id === agent || textMentionsAgent(`${row.title} ${row.detail}`, agent)));
-  const rows: AgentInsightRow[] = [];
-  if (active) rows.push({ label: "Live", text: compactText(active.title, 64), tone: "active" });
-  if (approval) rows.push({ label: "Josh", text: compactText(approval.title || approval.detail, 64), tone: "watch" });
-  if (risk) rows.push({ label: "Risk", text: compactText(compactJobTitle(risk), 64), tone: "watch" });
-  if (work && !rows.some((row) => row.label === "Live")) rows.push({ label: workStateLabel(work.state), text: compactText(work.title, 64), tone: work.state === "working" ? "active" : work.state === "blocked" ? "watch" : "default" });
-  if (nextJob) {
-    const run = jobRunCells(nextJob);
-    rows.push({ label: "Next", text: compactText(`${compactJobTitle(nextJob)} · ${run.next || run.today}`, 72), tone: run.todayClass === "is-risk" ? "watch" : "default" });
-  }
-  rows.push({ label: "Scope", text: agent === "joshex" ? "private Mac + final review" : agent === "josh" ? "front-line + Control Tower" : agent === "jaimes" ? "execution + ML pipelines" : "workers + cron monitors", tone: "good" });
-  return rows.slice(0, 4);
-}
-
-function ActivityLedger({ model, state }: { model: ControlTowerModel; state: MissionControlState }) {
-  const rows = activityLedgerRows(model);
-  const systemQuiet = activitySystemQuietCount(model);
-  const focusRows = activityFocusRows(model);
-  const primaryFocus = focusRows[0];
-  // Multi-agent: when 2+ distinct agents are active at once, show a co-equal grid
-  // instead of a single hero so concurrent workflows are all visible.
-  const activeAgents = concurrentActiveAgents(model);
-  const concurrent = activeAgents.length >= 2;
-  const concurrentRows = concurrent ? perAgentFocusRows(model, activeAgents) : [];
-  const contended = concurrent ? detectFocusContention(concurrentRows) : new Set<string>();
-  return (
-    <section className="tower-module activity-ledger" aria-label="Unified activity ledger">
-      <header>
-        <div>
-          <p>Unified Activity Ledger</p>
-          <h2>Live Work Board</h2>
-        </div>
-        <span>{model.counts.trackedJobs} tracked jobs</span>
-      </header>
-      <ModelRoutingLadderVisual state={state} />
-      {concurrent ? (
-        <section
-          className={`ledger-live-focus is-concurrent cols-${Math.min(concurrentRows.length, 4)}`}
-          aria-label={`Live ecosystem focus — ${concurrentRows.length} agents working`}
-        >
-          {concurrentRows.map((row) => {
-            const inContention = contended.has(focusContentionKey(row));
-            return (
-              <article
-                key={row.id}
-                className={`ledger-focus-primary ledger-focus-concurrent is-${row.tone} ${agentClass(row.agent)} ${activityIsRoutineFocus(row) ? "is-routine-focus" : "is-priority-focus"}${inContention ? " is-contended" : ""}`}
-              >
-                <span className="ledger-now-label">
-                  {AGENTS[row.agent]?.label || row.agent}
-                  {inContention ? <em className="focus-contention-badge" title="Two or more agents are working the same target">shared target</em> : null}
-                </span>
-                <h3 className="ledger-now-title" title={missionText(row.title)}>{row.title}</h3>
-                <p className="ledger-now-detail" title={missionText(row.detail)}>{row.detail}</p>
-                {row.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{row.detailLines.slice(0, 3).map((line) => <span key={line}>{line}</span>)}</div> : null}
-                <footer>
-                  <strong>{focusEyebrow(row)}</strong>
-                  <em>{row.time ? ageLabel(row.time) : "live"}</em>
-                </footer>
-              </article>
-            );
-          })}
-        </section>
-      ) : (
-      <section className="ledger-live-focus" aria-label="Live ecosystem focus">
-        <article className={`ledger-focus-primary ${primaryFocus ? `is-${primaryFocus.tone} ${agentClass(primaryFocus.agent)} ${activityIsRoutineFocus(primaryFocus) ? "is-routine-focus" : "is-priority-focus"}` : "is-done"}`}>
-          <span className="ledger-now-label">{focusEyebrow(primaryFocus)}</span>
-          <h3 className="ledger-now-title" title={missionText(primaryFocus?.title)}>
-            {primaryFocus ? primaryFocus.title : "No active work right now"}
-          </h3>
-          {primaryFocus && primaryFocus.detail && primaryFocus.detail !== primaryFocus.title ? (
-            <p className="ledger-now-detail" title={missionText(primaryFocus.detail)}>{primaryFocus.detail}</p>
-          ) : !primaryFocus ? (
-            <p className="ledger-now-detail">Agents are standing by; next scheduled work will surface here.</p>
-          ) : null}
-          {primaryFocus?.detailLines?.length ? <div className="ledger-now-context" aria-label="Live work detail">{primaryFocus.detailLines.map((line) => <span key={line}>{line}</span>)}</div> : null}
-          <footer>
-            <strong>{primaryFocus ? AGENTS[primaryFocus.agent]?.label || primaryFocus.agent : "Agent ecosystem"}</strong>
-            <em>{primaryFocus?.time ? ageLabel(primaryFocus.time) : "live"}</em>
-          </footer>
-        </article>
-        <div className="ledger-focus-secondary">
-          {focusRows.slice(1, 3).map((row) => (
-            <article key={row.id} className={`ledger-focus-mini is-${row.tone} ${agentClass(row.agent)} ${activityIsRoutineFocus(row) ? "is-routine-focus" : "is-priority-focus"}`}>
-              <span>{focusEyebrow(row)}</span>
-              <strong title={missionText(row.title)}>{row.title}</strong>
-              <em>{AGENTS[row.agent]?.label || row.agent}</em>
-            </article>
-          ))}
-        </div>
-      </section>
-      )}
-      <div className="ledger-summary-strip">
-        {TOWER_LANES.map((lane) => (
-          <article key={lane.key} className={`ledger-summary-card lane-${lane.key}`}>
-            <span>{lane.label}</span>
-            <strong>{towerLaneCount(model, lane.key)}</strong>
-          </article>
-        ))}
-      </div>
-      <div className="ledger-system-summary" aria-label="System status summary">
-        <strong>System OK</strong>
-        <span>{systemQuiet ? `${systemQuiet} routine confirmations collapsed` : "Routine checks quiet"}</span>
-      </div>
-      <div className="ledger-row-list is-flat" role="list">
-        {rows.length ? rows.map((row) => (
-          <ActivityLedgerRow key={row.id} row={row} />
-        )) : <p className="ledger-empty">No live activity rows are loaded yet.</p>}
-      </div>
-    </section>
-  );
-}
-
-function ActivityLedgerRow({ row }: { row: TowerActivity }) {
-  return (
-    <article className={`ledger-row is-${row.tone} ${agentClass(row.agent)}`}>
-      <span className={`ledger-lane-pill lane-${row.lane}`}>{towerLaneLabel(row.lane)}</span>
-      <span className="ledger-agent-dot" aria-hidden="true" />
-      <div>
-        <strong title={missionText(row.title)}>{row.title}</strong>
-        <p title={missionText(row.detail)}>{row.detail}</p>
-      </div>
-      <footer>
-        <span>{AGENTS[row.agent]?.label || row.agent}</span>
-        <em>{row.time ? ageLabel(row.time) : row.meta}</em>
-      </footer>
-    </article>
-  );
-}
-
-function PriorityQueuePanel({ state, model, onNavigate }: { state: MissionControlState; model: ControlTowerModel; onNavigate: (target: AttentionTarget) => void }) {
-  const trackedJobs = operatorTrackedJobs(state.jobs);
-  const { byPriority } = priorityJobGroups(trackedJobs);
-  const priorityRows = [
-    { label: "Gmail", key: "gmail" as PriorityJobKey, agent: "joshex" as AgentId },
-    { label: "Sorare", key: "sorare" as PriorityJobKey, agent: "jaimes" as AgentId },
-    { label: "Fantasy", key: "fantasy" as PriorityJobKey, agent: "jain" as AgentId },
-  ].map((row) => {
-    const items = byPriority.get(row.key) || [];
-    const sample = representativeJob(items, trackedJobs);
-    const next = sample ? jobRunCells(sample).next || sample.nextRun : "";
-    const status = compactJobStatus(items);
-    return { ...row, items, sample, next, status };
-  });
-  return (
-    <section className="tower-priority-queue" aria-label="Priority queue">
-      <header>
-        <div>
-          <p>Priority Queue</p>
-          <h3>What matters most</h3>
-        </div>
-        <button type="button" onClick={() => onNavigate("today-jobs")}>Timeline</button>
-      </header>
-      {model.needsJosh.length ? (
-        <div className="tower-decision-band">
-          <strong>{model.needsJosh.length} needs Josh</strong>
-          <span>{model.needsJosh[0]?.title}</span>
-        </div>
-      ) : (
-        <div className="tower-decision-band is-clear">
-          <strong>No blocking decision</strong>
-          <span>Only new alerts should interrupt Josh.</span>
-        </div>
-      )}
-      <div className="priority-row-list">
-        {priorityRows.map((row) => (
-          <article key={row.key} className={`priority-control-row ${agentClass(row.agent)}`}>
-            <span>{row.label}</span>
-            <strong>{row.status}</strong>
-            <p title={row.sample?.title || ""}>{row.sample ? compactJobTitle(row.sample) : "No tracked job loaded"}</p>
-            <em>{row.next ? `next ${row.next}` : `${row.items.length} tracked`}</em>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: MissionControlState; loading: boolean; onCryptoRefresh: () => void; liveCues: LiveCueState }) {
-  const wallet = state.agenticCrypto;
-  const walletTotal = wallet?.summary?.totalEstimatedUsd;
-  const liquid = wallet?.summary?.liquidEstimatedUsd;
-  const tokenCount = wallet?.tokens?.length || 0;
-  const walletMode = String(wallet?.walletMode || wallet?.refreshMode || "").toLowerCase();
-  const walletIsPlaceholder = walletMode.includes("placeholder") || walletMode.includes("not-connected") || (tokenCount === 0 && (walletTotal || 0) === 0 && (wallet?.errors || []).length > 0);
-  const walletHeadline = walletIsPlaceholder ? "Read-only" : fmtCurrencyExact(walletTotal);
-  const walletDetail = walletIsPlaceholder
-    ? "No connected balance · proposals only"
-    : `${tokenCount} tokens · ${fmtCurrencyExact(liquid)} liquid`;
-  const p2eResearch = wallet?.p2eResearch;
-  const p2eTokens = p2eResearch?.tokens || [];
-  const p2eHeld = p2eTokens.filter((token) => token.held).length;
-  const p2eAlerts = p2eResearch?.alerts || [];
-  const p2eTone = p2eAlerts.length ? "risk" : String(p2eResearch?.status || "watch").toLowerCase().includes("clear") ? "clear" : "watch";
-  const p2eHeadline = p2eResearch?.headline || (p2eTokens.length ? `${p2eHeld}/${p2eTokens.length} held` : "Monitor armed");
-  const p2eDetail = p2eResearch?.detail || (p2eResearch?.updatedAt ? `Updated ${ageLabel(p2eResearch.updatedAt)}` : "Solana P2E scorecard ready");
-  const modelUsageAny = state.modelUsage as any;
-  const providerBreakdown = Array.isArray(modelUsageAny?.providerBreakdown) ? modelUsageAny.providerBreakdown : [];
-  const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
-  const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
-  const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
-  const usageEquivalentMonthly = state.modelUsage?.usageEquivalent?.monthly ?? state.modelUsage?.subscription?.usageEquivalentMonthly;
-  const providerSpend = providerBreakdown
-    .filter((provider: any) => provider?.budgetType === "subscription" && typeof provider?.monthlyFeeUsd === "number")
-    .slice(0, 3)
-    .map((provider: any) => `${provider.label} ${fmtCurrency(provider.monthlyFeeUsd)} · ${Math.round(Number(provider.usagePct || 0))}%`);
-  const topModelLabels = providerBreakdown
-    .flatMap((provider: any) => (provider.topModels || []).slice(0, 1).map((model: any) => `${provider.label}: ${String(model.name || "model").replace(/^anthropic\//, "").replace(/^openai\//, "").replace(/^google\//, "")}`))
-    .slice(0, 3);
-  const modelHeadline = typeof subscriptionFee === "number"
-    ? `${fmtCurrency(subscriptionFee)} sub + ${fmtCurrency(meteredMonthly)}`
-    : fmtCurrency(state.modelUsage?.aggregate?.monthly ?? state.modelUsage?.monthly);
-  const modelDetail = providerSpend.length
-    ? `${providerSpend.join(" + ")} · top ${topModelLabels.join(" · ") || "waiting"}`
-    : typeof subscriptionFee === "number"
-      ? `Usage equiv ${fmtCurrency(usageEquivalentMonthly)} · metered today ${fmtCurrency(meteredDaily)}`
-      : `Today · xAI ${fmtCurrencyExact(state.modelUsage?.xai?.daily)} · GPT-5.5 ready`;
-  const kintara = state.kintaraProgress;
-  const kintaraResources = kintara?.resources || {};
-  const kintaraProgress = typeof kintara?.progressPct === "number" ? `${kintara.progressPct.toFixed(1)}%` : "Syncing";
-  const kintaraPrimary = [
-    `Gold ${Number(kintaraResources.gold || 0).toLocaleString()}`,
-    `Wood ${Number(kintaraResources.wood || 0).toLocaleString()}`,
-    `Stone ${Number(kintaraResources.stone || 0).toLocaleString()}`,
-    `Fish ${Number(kintaraResources.fish || 0).toLocaleString()}`,
-  ].join(" · ");
-  const kintaraTone = kintara?.status === "fresh" ? "clear" : "watch";
-  const runtimeOk = state.runtimeLayout?.ok !== false;
-  const visibleAgents = new Set(state.statuses.map((row) => row.agent_id)).size;
-  const freshAgents = state.statuses.filter((row) => {
-    const value = String(row.status || "").toLowerCase();
-    return !["blocked", "error", "offline"].includes(value) && ageMinutes(row.updated_at) <= 120;
-  }).length;
-  const trackedAgents = Math.max(4, state.statuses.length);
-  const missingAgents = Math.max(0, trackedAgents - visibleAgents);
-  const visibilityDetail = missingAgents
-    ? `${freshAgents} fresh · ${missingAgents} missing source${missingAgents === 1 ? "" : "s"}`
-    : `${freshAgents} fresh · ${sourceTruthLabel(state.source)}`;
-  return (
-    <section className="tower-resource-stack" aria-label="Resources and live sources">
-      <header>
-        <div>
-          <p>FinOps Dashboard</p>
-          <h3>Subscriptions · APIs · Wallet · Runtime limits</h3>
-        </div>
-        <button type="button" onClick={onCryptoRefresh} disabled={loading} title="Refresh read-only wallet inventory">
-          <RefreshCw size={12} className={loading ? "spin" : ""} /> Wallet
-        </button>
-      </header>
-      <div className="resource-card-grid">
-        <article className={`resource-card is-${walletIsPlaceholder ? "watch" : "clear"}${changedRowClass(Boolean(liveCues.rows[cueRowKey("crypto", "balance")]))}`}>
-          <span className="row-change-dot" aria-hidden="true" />
-          <b>Agentic wallet</b>
-          <strong>{walletHeadline}</strong>
-          <p>{walletDetail}</p>
-        </article>
-        <article className="resource-card resource-card-model-usage is-clear">
-          <b>Model usage</b>
-          <strong>{modelHeadline}</strong>
-          <p>{modelDetail}</p>
-        </article>
-        <article className={`resource-card is-${p2eTone}`}>
-          <b>Solana P2E</b>
-          <strong>{p2eHeadline}</strong>
-          <p>{p2eDetail}</p>
-        </article>
-        <article className={`resource-card resource-card-kintara is-${kintaraTone}`}>
-          <b>Kintara progress</b>
-          <strong>{kintara?.levelLabel || "Syncing"} · {kintaraProgress}</strong>
-          <p>{kintaraPrimary}</p>
-        </article>
-        <article className={`resource-card is-${runtimeOk ? "clear" : "risk"}`}>
-          <b>Display fit</b>
-          <strong>{runtimeOk ? "Ready" : "Review"}</strong>
-          <p>{runtimeOk ? "Kiosk layout measured" : (state.runtimeLayout?.issues || []).slice(0, 1).join(", ")}</p>
-        </article>
-        <article className={`resource-card is-${visibleAgents >= trackedAgents ? "clear" : "watch"}`}>
-          <b>Visibility</b>
-          <strong>{visibleAgents}/{trackedAgents} visible</strong>
-          <p>{visibilityDetail}</p>
-        </article>
+    <section className="night-mode-screen" aria-label="Control Tower night mode">
+      <button type="button" className="night-mode-toggle" onClick={onToggle} aria-label="Exit night mode">
+        <Sun size={18} />
+        Exit night mode
+      </button>
+      <div className="night-mode-clock-wrap">
+        <p>Control Tower Night Mode</p>
+        <strong>{clock.time}</strong>
+        <span>{clock.date} ET</span>
+        {commandSource ? <em>Set by {commandSource}</em> : null}
       </div>
     </section>
   );
@@ -2001,6 +772,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
+  const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
+  const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
+  const [clockNow, setClockNow] = useState(() => new Date());
   const liveCues = useLiveCues(state);
 
   const refresh = useCallback(async (showLoading = true) => {
@@ -2013,15 +787,15 @@ function App() {
     }
   }, []);
 
-  const refreshAgenticCrypto = useCallback(async () => {
-    setLoading(true);
+  const refreshAgenticCrypto = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       await fetch("/actions/agentic-crypto-refresh?mode=lightweight", { method: "POST", cache: "no-store" });
     } catch (error) {
       console.warn(error);
     } finally {
       await refresh(false);
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [refresh]);
 
@@ -2040,6 +814,50 @@ function App() {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    const walletTimer = window.setInterval(() => {
+      refreshAgenticCrypto(false).catch((error) => console.warn(error));
+    }, 5 * 60_000);
+    return () => window.clearInterval(walletTimer);
+  }, [refreshAgenticCrypto]);
+
+  useEffect(() => {
+    let active = true;
+    const refreshDisplayState = async () => {
+      const next = await loadControlTowerDisplayState();
+      if (active) setDisplayState(next);
+    };
+    refreshDisplayState().catch((error) => console.warn(error));
+    const timer = window.setInterval(() => {
+      refreshDisplayState().catch((error) => console.warn(error));
+    }, 5_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    setNightModeOverride(null);
+  }, [displayState.updatedAt]);
+
+  const commandNightMode = Boolean(displayState.nightMode || displayState.mode === "night");
+  const nightMode = nightModeOverride ?? commandNightMode;
+
+  useEffect(() => {
+    if (!nightMode) return undefined;
+    setClockNow(new Date());
+    const timer = window.setInterval(() => setClockNow(new Date()), 1_000);
+    return () => window.clearInterval(timer);
+  }, [nightMode]);
+
+  const toggleNightMode = useCallback(() => {
+    setNightModeOverride((current) => {
+      const effective = current ?? commandNightMode;
+      return !effective;
+    });
+  }, [commandNightMode]);
+
   const statusByAgent = useMemo(() => {
     return new Map(state.statuses.map((row) => [row.agent_id, row]));
   }, [state.statuses]);
@@ -2048,42 +866,24 @@ function App() {
   const trackedJobs = operatorTrackedJobs(state.jobs);
   const jobsCount = trackedJobs.length;
   const needsFocusCount = missionFocusCount(state);
-  const activeJobs = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working");
-  const activeJobCount = activeJobs.length;
-  const activeRoutineJobCount = activeJobs.filter(jobIsRoutineActivity).length;
-  const activeFocusJobCount = Math.max(0, activeJobCount - activeRoutineJobCount);
-  const activeAgentCount = state.statuses.filter((row) => agentIsWorking(row) && isFreshActiveTimestamp(row.updated_at)).length;
+  const activeJobCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
+  const activeAgentCount = state.statuses.filter((row) => row.active || row.status === "active").length;
   const workingCount = activeJobCount + activeAgentCount;
-  const priorityLiveWorkCount = activeAgentCount + activeFocusJobCount;
-  const liveConnectionLabel = liveMode === "connected" ? priorityLiveWorkCount ? "Running" : activeRoutineJobCount ? "Live check" : "Live" : "Checking 10s";
-  const liveActivityParts = [
-    activeAgentCount ? `${activeAgentCount} agent${activeAgentCount === 1 ? "" : "s"} working` : "",
-    activeFocusJobCount ? `${activeFocusJobCount} priority job${activeFocusJobCount === 1 ? "" : "s"}` : "",
-    activeRoutineJobCount ? `${activeRoutineJobCount} live check${activeRoutineJobCount === 1 ? "" : "s"} running` : "",
-  ].filter(Boolean);
-  const liveActivityLabel = liveActivityParts.length ? liveActivityParts.join(" · ") : "all clear";
-  const liveActivityTitle = workingCount
-    ? priorityLiveWorkCount
-      ? `Running now: ${liveActivityParts.join(", ")}. Live checks keep agent rows, sidecars, and Brain Feed aligned; it is not an alert.`
-      : `Live checks running: ${liveActivityParts.join(", ")}. This keeps agent rows, sidecars, and Brain Feed aligned; it is not an alert.`
-    : "No active agent or job is currently running";
-  const nextVisibleBlock = nextVisibleCalendarBlock(trackedJobs, quietMode);
-  const nextRunLabel = nextHeaderRunLabel(nextVisibleBlock);
-  const nextRunValue = nextHeaderRunValue(nextVisibleBlock);
-  const actionLabel = decisionCount ? "Needs Josh" : "Decisions";
-  const needsJoshValue = decisionCount ? `${decisionCount} review${decisionCount === 1 ? "" : "s"}` : "Clear";
-  const systemValue = needsFocusCount ? `${needsFocusCount} needs focus` : "All clear";
-  const jobsValue = `${jobsCount} tracked`;
-  const lastUpdate = dashboardFreshnessTimestamp(state);
-  const liveFreshnessLabel = updatedFreshnessLabel(lastUpdate);
-  const liveSummaryLabel = liveActivityLabel === "all clear" ? liveConnectionLabel.toLowerCase() : liveActivityLabel;
-  const liveChipTitle = `${liveFreshnessLabel}. ${liveConnectionLabel}: ${liveActivityTitle}`;
+  const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
+  const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
+  const lastUpdate = [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
+    .filter(Boolean)
+    .sort()
+    .pop();
   const navigateToPanel = useCallback((target: AttentionTarget) => {
     document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   return (
     <main className="app-shell hero-shell">
+      {nightMode ? (
+        <NightModeScreen now={clockNow} onToggle={toggleNightMode} commandSource={displayState.updatedBy} />
+      ) : null}
       <header className="mission-header">
         <div className="brand-lockup">
           <img
@@ -2095,20 +895,19 @@ function App() {
           />
           <div>
             <h1>Josh 2.0 | Control Tower</h1>
-            <p>Control Tower for the agent ecosystem</p>
+            <p>Live Work Board command view for the agent ecosystem</p>
           </div>
         </div>
         <section className="status-ribbon header-status-ribbon" aria-label="Control Tower summary">
-          <Metric icon={<UserRoundCheck size={18} />} label={actionLabel} value={needsJoshValue} tone={decisionCount ? "risk" : "clear"} />
-          <Metric icon={<AlertTriangle size={18} />} label="System" value={systemValue} tone={needsFocusCount ? "watch" : "clear"} />
-          <Metric icon={<ClipboardList size={18} />} label="Jobs" value={jobsValue} tone={workingCount ? "info" : "clear"} />
-          <Metric icon={<Timer size={18} />} label={nextRunLabel} value={nextRunValue} tone="clear" wide />
+          <Metric icon={<UserRoundCheck size={18} />} label="Needs Josh" value={decisionCount ? String(decisionCount) : "None"} tone={decisionCount ? "risk" : "clear"} />
+          <Metric icon={<AlertTriangle size={18} />} label="System" value={needsFocusCount ? `${needsFocusCount} focus` : "All clear"} tone={needsFocusCount ? "watch" : "clear"} />
+          <Metric icon={<ClipboardList size={18} />} label="Jobs" value={String(jobsCount)} tone={workingCount ? "info" : "clear"} />
+          <Metric icon={<Timer size={18} />} label="Next" value={nextRunValue} tone="clear" wide />
         </section>
         <div className="mission-actions">
-          <span className="source-chip" title={state.source || "Local live source"}><ShieldCheck size={15} />{sourceTruthLabel(state.source)}</span>
-          <span className={`source-chip live-chip ${workingCount ? "is-working" : "is-idle"}`} title={liveChipTitle}>
-            <Radio size={15} /> {liveFreshnessLabel} · {liveSummaryLabel}
-          </span>
+          <span className="source-chip"><ShieldCheck size={15} />{state.source}</span>
+          <span className="source-chip">Updated {fmtTime(lastUpdate)}</span>
+          <span className="source-chip live-chip">{liveMode === "connected" ? "Realtime" : "Live • 10s"}</span>
           <button
             type="button"
             className={quietMode ? "mode-button selected" : "mode-button"}
@@ -2116,7 +915,17 @@ function App() {
             aria-pressed={quietMode}
             title="Show only active work, warnings, missed jobs, and pending approvals"
           >
-            <EyeOff size={15} /> {quietMode ? "Focus" : "All jobs"}
+            <EyeOff size={15} /> Quiet
+          </button>
+          <button
+            type="button"
+            className={nightMode ? "night-header-button selected" : "night-header-button"}
+            onClick={toggleNightMode}
+            aria-label={nightMode ? "Exit night mode" : "Enter night mode"}
+            aria-pressed={nightMode}
+            title={nightMode ? "Exit night mode" : "Enter night mode"}
+          >
+            {nightMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <button type="button" onClick={refresh} aria-label="Refresh">
             <RefreshCw size={16} className={loading ? "spin" : ""} />
@@ -2124,14 +933,25 @@ function App() {
         </div>
       </header>
 
-      <ControlTower
-        state={state}
-        statuses={statusByAgent}
-        onNavigate={navigateToPanel}
-        liveCues={liveCues}
-        loading={loading}
-        onCryptoRefresh={refreshAgenticCrypto}
-      />
+      <section className="kiosk-grid">
+        <section id="brain-feed" className={`brain-hero-panel${sectionCueClass("brain", liveCues)}`}>
+          <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
+          <BrainHero state={state} statuses={statusByAgent} quietMode={quietMode} onNavigate={navigateToPanel} liveCues={liveCues} />
+          <section className="support-grid" aria-label="Control Tower support modules">
+            <FinOpsDashboard
+              wallet={state.agenticCrypto}
+              modelUsage={state.modelUsage}
+              modelRouter={state.modelRouter}
+              statuses={state.statuses}
+              loading={loading}
+              onRefresh={() => refreshAgenticCrypto(true)}
+            />
+          </section>
+        </section>
+        <aside className="right-rail">
+          <JobsRail jobs={state.jobs} statuses={state.statuses} quietMode={quietMode} liveCues={liveCues} />
+        </aside>
+      </section>
     </main>
   );
 }
@@ -2166,11 +986,10 @@ function BrainHero({
   const activityScore = Math.min(10, activeAgents * 2 + activeJobs + pendingApprovals.length * 2 + recentActivity);
   const laserSpeed = Math.max(5, 24 - activityScore * 1.9);
   const laserOpacity = Math.min(1, 0.42 + activityScore * 0.06);
-  const truth = missionTruthSummary(state);
   return (
     <section
       className="brain-hero is-flight-deck"
-      aria-label="Brain Feed"
+      aria-label="Live Work Board"
       style={{
         "--laser-speed": `${laserSpeed}s`,
         "--laser-opacity": laserOpacity,
@@ -2178,23 +997,19 @@ function BrainHero({
     >
       <div className="brain-hero-title">
         <div>
-          <p>Live agent updates</p>
+          <p>Real-time agent work</p>
           <h2>Live Work Board</h2>
         </div>
         <BrainAttentionStrip state={state} quietMode={quietMode} onNavigate={onNavigate} />
         <div className="brain-hero-controls">
-          <span className={`brain-truth-pill is-${truth.tone}`} title={truth.detail}>
-            {truth.label} · {truth.short}
-          </span>
-          {!quietMode ? <span>{`${events.slice(0, 6).length} updates`}</span> : null}
+          <span>{quietMode ? "Quiet" : `${events.slice(0, 6).length} updates`}</span>
           <button
             type="button"
             className={showDetails ? "selected" : ""}
             onClick={() => setShowDetails((value) => !value)}
             aria-pressed={showDetails}
-            aria-label={showDetails ? "Hide model routing ladder" : "Show model routing ladder"}
           >
-            {showDetails ? "Hide" : "Ladder"}
+            {showDetails ? "Hide details" : "Show details"}
           </button>
         </div>
       </div>
@@ -2219,61 +1034,101 @@ function BrainHero({
             );
           })}
         </div>
+        <SystemRouteLadder
+          statuses={heroAgents.map((agent) => statuses.get(agent) || offlineStatus(agent))}
+          modelRouter={state.modelRouter}
+          modelUsage={state.modelUsage}
+        />
       </div>
 
       {showDetails ? (
-        <ModelRoutingLadderVisual state={state} />
+        <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
       ) : null}
     </section>
   );
 }
 
-function modelRouteLadderRows(state: MissionControlState) {
-  const rawRows = Array.isArray(state.modelRouter?.ladder) ? state.modelRouter?.ladder || [] : [];
-  const normalized = rawRows
-    .map((row, index) => {
-      const data = row as Record<string, unknown>;
-      const label = missionText(String(data.label || data.name || data.route || data.tier || `Step ${index + 1}`));
-      const model = missionText(String(data.model || data.provider || data.primary || data.firstStop || ""));
-      const use = missionText(String(data.use || data.reason || data.when || data.description || ""));
-      return { label, model, use };
-    })
-    .filter((row) => row.label || row.model || row.use);
-  if (normalized.length) return normalized.slice(0, 6);
+function systemRouteLadderSteps(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]): RouteLadderStep[] {
+  const lastRoute = modelRouter?.lastRoute || {};
+  const routeText = [
+    lastRoute.provider,
+    lastRoute.model,
+    lastRoute.routeLabel,
+    (modelRouter as Record<string, unknown> | undefined)?.activeLane,
+    ...statuses.map((status) => agentRouteText(status)),
+  ].filter(Boolean).join(" ").toLowerCase();
+  const hasActive = statuses.some((status) => {
+    const value = String(status.status || "").toLowerCase();
+    return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
+  });
   return [
-    { label: "Triage", model: "Gemini Flash", use: "fast summaries" },
-    { label: "Review", model: "Gemini Pro", use: "deep judgment" },
-    { label: "Execute", model: "Codex", use: "code + tools" },
-    { label: "Current", model: "Grok", use: "X/public signal" },
-    { label: "Eval", model: "Ollama GLM", use: "test lane" },
-    { label: "Fallback", model: "OpenRouter", use: "only if needed" },
-  ];
+    { key: "lite", label: "Lite", model: "Gemini Flash Lite", note: "Tiny worker only; never routes escalation decisions", active: /flash[- ]?lite|lite_worker/.test(routeText) },
+    { key: "frontdesk", label: "Flash", model: "Gemini Flash", note: "Fast front desk, summaries, triage, safe review", active: /gemini|flash|front[- ]?desk|triage|summary|digest/.test(routeText) && !/flash[- ]?lite/.test(routeText) },
+    { key: "judge", label: "Pro", model: "Gemini Pro", note: "Judgment, long context, escalation checks", active: /gemini pro|judge|escalat|deep review|long context/.test(routeText) },
+    { key: "execute", label: "JAIMES", model: "Codex/OpenAI", note: "Verified tools, code, crons, Sorare, heavy execution", active: /jaimes|hermes|backend|execution|terminal|bash|file edit|tool/.test(routeText) },
+    { key: "fallback", label: "J.A.I.N", model: "OpenCLAW fallback", note: "Staging, support, recovery, disaster response", active: /j\.?a\.?i\.?n|jain|fallback|staging|disaster|dr\b/.test(routeText) },
+    { key: "approve", label: "Josh", model: "Approval gate", note: "External, irreversible, or account-affecting actions", active: /approval|approve|external action|irreversible/.test(routeText) },
+  ].map((step) => ({
+    ...step,
+    active: step.active || (!hasActive && step.key === "frontdesk" && !routeText.trim()),
+  }));
 }
 
-function ModelRoutingLadderVisual({ state }: { state: MissionControlState }) {
-  const rows = modelRouteLadderRows(state);
-  const lastRoute = state.modelRouter?.lastRoute || {};
-  const activeRoute = missionText(String(lastRoute.routeLabel || lastRoute.model || lastRoute.provider || "policy ready"));
-  const status = missionText(String(state.modelRouter?.ladderStatus || state.modelRouter?.summary || "subscription-first routing"));
+function routeOwnerLabel(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]) {
+  const live = statuses.find((status) => {
+    const value = String(status.status || "").toLowerCase();
+    return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
+  });
+  if (live) return `${AGENTS[live.agent_id as AgentId]?.label || missionText(live.agent_id)} active`;
+  const lastRoute = modelRouter?.lastRoute || {};
+  return missionText(String(lastRoute.routeLabel || lastRoute.provider || "standby"));
+}
+
+function SystemRouteLadder({
+  statuses,
+  modelRouter,
+  modelUsage,
+}: {
+  statuses: AgentStatus[];
+  modelRouter?: MissionControlState["modelRouter"];
+  modelUsage?: MissionControlState["modelUsage"];
+}) {
+  const steps = systemRouteLadderSteps(statuses, modelRouter);
+  const active = steps.find((step) => step.active) || steps[1];
+  const lastRoute = modelRouter?.lastRoute || {};
+  const codexMode = missionText(String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "conserve"));
+  const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "tracked";
+  const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "tracked";
   return (
-    <section className="routing-ladder-visual" aria-label="Live Work Board command view model routing ladder">
+    <aside className="system-route-ladder" aria-label="Model routing ladder">
       <header>
-        <div>
-          <span>Model routing ladder</span>
-          <strong>{activeRoute}</strong>
-        </div>
-        <em>{status}</em>
+        <p>Model routing ladder</p>
+        <h3>{active.label}: {active.model}</h3>
+        <span>{routeOwnerLabel(statuses, modelRouter)}</span>
       </header>
-      <div className="routing-ladder-flow">
-        {rows.map((row, index) => (
-          <article key={`${row.label}-${index}`} className={index === 2 ? "is-primary" : ""}>
-            <span>{row.label}</span>
-            <strong>{row.model}</strong>
-            <small>{row.use}</small>
-          </article>
-        ))}
+      <div className="system-route-current">
+        <span>Current route</span>
+        <strong>{missionText(String(lastRoute.provider || active.model || "auto"))}</strong>
+        <em>{missionText(String(lastRoute.model || active.note))}</em>
       </div>
-    </section>
+      <ol className="system-route-steps">
+        {steps.map((step, index) => (
+          <li key={step.key} className={step.active ? "is-active" : ""}>
+            <i>{index + 1}</i>
+            <div>
+              <span>{step.label}</span>
+              <strong>{step.model}</strong>
+              <em>{step.note}</em>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <footer>
+        <span>Codex allowance: {codexMode}</span>
+        <span>Route quality: {routeQuality}</span>
+        <span>Efficiency: {efficiency}</span>
+      </footer>
+    </aside>
   );
 }
 
@@ -2289,70 +1144,6 @@ function signalScoreLabel(signal: SignalItem) {
   return `${Math.max(1, Math.min(10, score))}/10`;
 }
 
-function signalUsesPublicFallback(signal: SignalItem) {
-  return String(signal.kind || signal.label || "").toLowerCase().includes("public_rss")
-    || String(signal.label || "").toLowerCase().includes("live rss");
-}
-
-function signalCategoryText(signal: SignalItem, rawImpact?: string | null) {
-  return missionText(`${signal.title || ""} ${signal.source || ""} ${signal.reason || ""} ${rawImpact || ""}`)
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-}
-
-function signalCategoryKey(signal: SignalItem, rawImpact?: string | null) {
-  if (signalUsesPublicFallback(signal)) return "fresh";
-  const lower = signalCategoryText(signal, rawImpact);
-  if (/(cisa|cve|vulnerability|exploit|nvd|kev)/.test(lower)) return "security";
-  if (/(sanction|ofac|iran military oil|restricted party)/.test(lower)) return "sanctions";
-  if (/(blue origin|new glenn|rocket|launch|space)/.test(lower)) return "space";
-  if (/(anthropic|openai|microsoft|nvidia|blackwell|semiconductor|chip|chips|\bai\b|model)/.test(lower)) return "ai";
-  if (/(bitcoin|ethereum|solana|stablecoin|crypto|virtual|vvv|token)/.test(lower)) return "crypto";
-  if (/(tariff|trade policy|china|export control|import|supply chain)/.test(lower)) return "trade";
-  if (/(treasury|irs|federal reserve|regulation|sovereign investor|state bank of viet nam|policy)/.test(lower)) return "policy";
-  if (/(market|rate|rates|bank|valuation|funding|acquisition|merger|stock|equity)/.test(lower)) return "market";
-  if (/(immediate|significant|material|critical)/.test(lower)) return "material";
-  if (/(context|no new break|isolated|limited)/.test(lower)) return "context";
-  return signalIsNewsletter(signal) ? "context" : "watch";
-}
-
-function signalImpactLabel(signal: SignalItem, rawImpact?: string | null) {
-  switch (signalCategoryKey(signal, rawImpact)) {
-    case "fresh": return "Fresh";
-    case "security": return "Security";
-    case "sanctions": return "Sanctions";
-    case "space": return "Space";
-    case "ai": return "AI";
-    case "crypto": return "Crypto";
-    case "trade": return "Trade";
-    case "policy": return "Policy";
-    case "market": return "Market";
-    case "material": return "Material";
-    case "context": return "Context";
-    default: {
-      const text = missionText(rawImpact || "").replace(/\s+/g, " ").trim();
-      return text ? compactText(text.replace(/^(high|medium|med|low):\s*/i, ""), 34) : "Watch";
-    }
-  }
-}
-
-function signalImpactTone(signal: SignalItem, rawImpact?: string | null) {
-  switch (signalCategoryKey(signal, rawImpact)) {
-    case "fresh": return "tone-signal";
-    case "security": return "tone-security";
-    case "sanctions": return "tone-sanctions";
-    case "space": return "tone-space";
-    case "ai": return "tone-ai";
-    case "crypto": return "tone-crypto";
-    case "trade": return "tone-trade";
-    case "policy": return "tone-policy";
-    case "market": return "tone-market";
-    case "material": return "tone-signal";
-    case "context": return "tone-context";
-    default: return "tone-watch";
-  }
-}
-
 function signalRowClass(signal: SignalItem) {
   const score = Number(signal.score);
   const classes = [signalIsNewsletter(signal) ? "is-newsletter" : "is-strong"];
@@ -2362,103 +1153,23 @@ function signalRowClass(signal: SignalItem) {
   return classes.join(" ");
 }
 
-function signalFreshnessLabel(signal: SignalItem, newsletter: boolean) {
-  const age = ageLabel(signal.time);
-  if (!newsletter) return freshnessClass(signal.time) === "is-fresh" ? "live" : age;
-  if (age === "no update") return "scan pending";
-  if (age === "just now") return "latest scan";
-  return `scan ${age}`;
-}
-
-function signalStoryAgeLabel(signal: SignalItem, newsletter: boolean) {
-  if (newsletter) return signalFreshnessLabel(signal, true);
-  const age = ageLabel(signal.time);
-  if (age === "no update") return "story pending";
-  if (age === "just now") return "story now";
-  return `story ${age}`;
-}
-
-function signalDisplayTitle(signal: SignalItem, newsletter: boolean) {
-  const title = missionText(signal.title)
-    .replace(/\$(\d+(?:\.\d+)?)\s+billion\b/gi, (_match, amount: string) => `$${amount}B`)
-    .replace(/\$(\d+(?:\.\d+)?)\s+million\b/gi, (_match, amount: string) => `$${amount}M`)
-    .replace(/^Joint Statement by the U\.S\. Department of the Treasury and the State Bank of Viet Nam\b.*$/i, "Treasury/Vietnam joint statement")
-    .replace(/^Treasury,\s*IRS Issue Section 892 Proposed Regulations\b.*$/i, "Treasury/IRS sovereign-investor tax rules")
-    .replace(/^U\.\s*S\.\s+imposes fresh sanctions on Iran military oil sales,\s*says Treasury\b.*$/i, "U.S. sanctions Iran military oil sales")
-    .replace(/\bvaluation after raising\b/gi, "valuation after")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!newsletter) return title;
-  const match = title.match(/^(.+?\bwatch):\s*(.+)$/i);
-  if (!match) return title;
-  const topic = match[1].replace(/\s+watch$/i, "").trim().toLowerCase();
-  const detail = match[2].trim().toLowerCase();
-  if (!topic || !detail) return title;
-  if (detail === topic || detail.split(/,\s*/).some((part) => part === topic)) {
-    return match[1];
-  }
-  return title;
-}
-
-function signalDisplayReason(signal: SignalItem) {
-  const raw = missionText(signal.reason);
-  const newsletterMatch = raw.match(/^Newsletter cluster from\s+(\d+)\s+items?\s*,\s*confidence\s+(\d+)%/i);
-  if (newsletterMatch) {
-    const count = newsletterMatch[1];
-    const confidence = newsletterMatch[2];
-    return `Digest trend from ${count} newsletter source${count === "1" ? "" : "s"} · ${confidence}% confidence`;
-  }
-  const withoutLinks = raw.replace(/https?:\/\/\S+/gi, " ").replace(/\s+/g, " ").trim();
-  const readable = withoutLinks || "Source-backed signal crossing the relevance filter.";
-  return readable.replace(/\b(\d+)\s+item\(s\)/gi, (_match, count: string) => {
-    return `${count} item${count === "1" ? "" : "s"}`;
-  });
-}
-
-function signalSourceScanLabel(value?: string | null) {
-  const label = checkedFreshnessLabel(value);
-  if (label === "not checked") return "source not checked";
-  return `source ${label}`;
-}
-
-function signalDedupeKey(signal: SignalItem, newsletter: boolean) {
-  const title = signalDisplayTitle(signal, newsletter).toLowerCase();
-  const money = [...title.matchAll(/\$\d+(?:\.\d+)?\s*[bmk]?/g)].map((match) => match[0].replace(/\s+/g, ""));
-  const stopwords = new Set(["after", "latest", "raising", "valued", "valuation", "secures", "says", "said", "the", "and", "with", "from", "into"]);
-  const words = title
-    .replace(/[^a-z0-9$]+/g, " ")
-    .split(/\s+/)
-    .filter((word) => word && !stopwords.has(word));
-  if (!newsletter && money.length >= 2 && words[0]) return `${words[0]}|${money.slice(0, 3).join("|")}`;
-  return words.slice(0, 7).join(" ");
-}
-
 function signalRows(signals: SignalItem[], newsletter: boolean) {
-  const seenDedupeKeys = new Set<string>();
-  const rows: SignalItem[] = [];
-  const sorted = signals
+  return signals
     .filter((signal) => signalIsNewsletter(signal) === newsletter)
     .sort((a, b) => {
       const rankDelta = (a.rank || 999) - (b.rank || 999);
       if (rankDelta) return rankDelta;
       return timeValue(b.time) - timeValue(a.time);
-    });
-  for (const signal of sorted) {
-    const key = signalDedupeKey(signal, newsletter);
-    if (key && seenDedupeKeys.has(key)) continue;
-    seenDedupeKeys.add(key);
-    rows.push(signal);
-    if (rows.length >= 5) break;
-  }
-  return rows;
+    })
+    .slice(0, 5);
 }
 
 function cryptoFreshness(wallet?: AgenticCryptoWallet) {
-  if (!wallet?.updatedAt) return { label: "Not loaded", status: "stale", tone: "watch" };
+  if (!wallet?.updatedAt) return { label: "not loaded", status: "stale", tone: "watch" };
   const age = Date.now() - timeValue(wallet.updatedAt);
-  if (String(wallet.status).toLowerCase() === "error") return { label: "Error", status: "error", tone: "risk" };
-  if (age > 60 * 60 * 1000) return { label: "Stale", status: "stale", tone: "watch" };
-  return { label: "Fresh", status: "fresh", tone: "clear" };
+  if (String(wallet.status).toLowerCase() === "error") return { label: "error", status: "error", tone: "risk" };
+  if (age > 60 * 60 * 1000) return { label: "stale", status: "stale", tone: "watch" };
+  return { label: "fresh", status: "fresh", tone: "clear" };
 }
 
 function cryptoStatusClass(value?: string | null) {
@@ -2490,26 +1201,19 @@ function AgenticCryptoPanel({
   wallet,
   loading,
   onRefresh,
-  liveCues,
 }: {
   wallet?: AgenticCryptoWallet;
   loading: boolean;
   onRefresh: () => void;
-  liveCues: LiveCueState;
 }) {
   const freshness = cryptoFreshness(wallet);
   const summary = wallet?.summary || {};
-  const tokens = [...(wallet?.tokens || [])].sort((a, b) => (b.valueUsd || 0) - (a.valueUsd || 0));
-  const visibleTokens = tokens.slice(0, 5);
-  const hiddenTokens = tokens.slice(5);
-  const hiddenTokenValue = hiddenTokens.reduce((sum, token) => sum + (token.valueUsd || 0), 0);
-  const balanceChanged = Boolean(liveCues.rows[cueRowKey("crypto", "balance")]);
-  const hiddenChanged = Boolean(liveCues.rows[cueRowKey("crypto", "smaller-tokens")]);
-  const liquidValue = summary.liquidEstimatedUsd;
+  const chains = wallet?.chains || [];
+  const tokens = wallet?.tokens || [];
+  const nfts = wallet?.nfts || [];
   const errors = wallet?.errors || [];
   return (
-    <section id="agentic-crypto" className={`agentic-crypto-panel is-${freshness.tone}${sectionCueClass("crypto", liveCues)}`} aria-label="Agentic Crypto wallet status">
-      <SectionCue label="updated" />
+    <section id="agentic-crypto" className={`agentic-crypto-panel is-${freshness.tone}`} aria-label="Agentic Crypto wallet status">
       <header className="crypto-wallet-header">
         <div className="crypto-wallet-brand">
           <span><WalletCards size={15} /></span>
@@ -2526,56 +1230,98 @@ function AgenticCryptoPanel({
         </div>
       </header>
 
-      <section className={`crypto-balance-card${changedRowClass(balanceChanged)}`}>
-        <span className="row-change-dot" aria-hidden="true" />
-        <span>Full balance</span>
+      <section className="crypto-balance-card">
+        <span>Total balance</span>
         <strong>{fmtCurrencyExact(summary.totalEstimatedUsd)}</strong>
         <div>
-          <em>{tokens.length} token{tokens.length === 1 ? "" : "s"} listed</em>
-          {typeof liquidValue === "number" ? <em>{fmtCurrencyExact(liquidValue)} liquid value</em> : null}
+          <em>{fmtCurrencyExact(summary.liquidEstimatedUsd)} liquid</em>
+          <em>{fmtCurrencyExact(summary.nftEstimatedUsd)} collectibles</em>
           <em>Updated {ageLabel(wallet?.updatedAt)}</em>
         </div>
       </section>
 
+      <div className="crypto-account-chips">
+        <span>EVM {wallet?.wallets?.evmMasked || "not configured"}</span>
+        <span>Solana {wallet?.wallets?.solanaMasked || "not configured"}</span>
+        <em>{wallet?.walletMode || "read-only"}</em>
+      </div>
+
+      <div className="crypto-chain-pills" aria-label="Chain gas balances">
+        {chains.length ? chains.map((chain) => (
+          <article key={chain.chain} className={cryptoStatusClass(chain.gasStatus)}>
+            <span>{chainLabel(chain.chain)}</span>
+            <strong>{amountLabel(chain.gasBalance, chain.gasSymbol)}</strong>
+            <em>{chain.gasStatus || "unknown"} · {fmtCurrencyExact(chain.gasValueUsd)}</em>
+          </article>
+        )) : (
+          <article className="is-watch">
+            <span>Wallet data</span>
+            <strong>Not loaded</strong>
+            <em>Refresh inventory</em>
+          </article>
+        )}
+      </div>
+
       <section className="crypto-wallet-section">
-        <header><Coins size={13} /> Tokens</header>
-        <div className="crypto-wallet-list is-tokens-only">
-          {visibleTokens.map((token) => {
-            const tokenId = `${token.chain}-${token.symbol}-${token.contractMasked || token.mintMasked || token.source || ""}`;
-            const changed = Boolean(liveCues.rows[cueRowKey("crypto-token", tokenId)]);
-            return (
-              <article key={tokenId} className={changedRowClass(changed)}>
-                <span className="row-change-dot" aria-hidden="true" />
-                <span className="crypto-token-icon" aria-hidden="true">{String(token.symbol || "?").slice(0, 1)}</span>
-                <div className="crypto-token-main">
-                  <strong title={token.name || token.symbol}>{token.symbol}</strong>
-                  <span>{chainLabel(token.chain)} · {amountLabel(token.amount, token.symbol)}</span>
-                </div>
-                <em className="crypto-token-value">{fmtCurrencyExact(token.valueUsd)}</em>
-              </article>
-            );
-          })}
-          {hiddenTokens.length ? (
-            <article className={`crypto-token-summary${changedRowClass(hiddenChanged)}`}>
-              <span className="row-change-dot" aria-hidden="true" />
-              <span className="crypto-token-icon is-more" aria-hidden="true">+</span>
-              <div className="crypto-token-main">
-                <strong>+{hiddenTokens.length} smaller token{hiddenTokens.length === 1 ? "" : "s"}</strong>
-                <span>Included in total balance</span>
+        <header><Coins size={13} /> Assets</header>
+        <div className="crypto-wallet-list">
+          {(tokens.length ? tokens : []).slice(0, 4).map((token) => (
+            <article key={`${token.chain}-${token.symbol}-${token.contractMasked || token.mintMasked || ""}`}>
+              <div>
+                <strong title={token.name || token.symbol}>{token.symbol}</strong>
+                <span>{chainLabel(token.chain)} · {amountLabel(token.amount)}</span>
               </div>
-              <em className="crypto-token-value">{fmtCurrencyExact(hiddenTokenValue)}</em>
+              <em>{fmtCurrencyExact(token.valueUsd)}</em>
             </article>
-          ) : null}
+          ))}
           {!tokens.length ? <p>No token rows loaded yet.</p> : null}
         </div>
       </section>
+
+      <div className="crypto-wallet-lower">
+        <section className="crypto-wallet-section is-compact">
+          <header><WalletCards size={13} /> Collectibles</header>
+          <div className="crypto-wallet-list">
+            {(nfts.length ? nfts : []).slice(0, 2).map((nft) => (
+              <article key={`${nft.chain}-${nft.collection}`}>
+                <div>
+                  <strong title={nft.collection}>{compactText(nft.collection, 24)}</strong>
+                  <span>{chainLabel(nft.chain)} · {nft.tokenStandard || "NFT"}</span>
+                </div>
+                <em>{nft.count || 0} held</em>
+              </article>
+            ))}
+            {!nfts.length ? <p>NFT inventory loads on full refresh.</p> : null}
+          </div>
+        </section>
+
+        <section className="crypto-wallet-section is-compact">
+          <header>Activity</header>
+          <div className="crypto-wallet-list">
+            {(wallet?.recentActivity || []).slice(0, 2).map((row, index) => (
+              <article key={`${row.chain}-${row.timestamp}-${index}`}>
+                <div>
+                  <strong title={row.action}>{compactText(row.action, 26)}</strong>
+                  <span>{chainLabel(row.chain)} · {ageLabel(row.timestamp)}</span>
+                </div>
+                {row.explorerUrl ? (
+                  <a href={row.explorerUrl} target="_blank" rel="noreferrer" title="Open block explorer transaction">
+                    {row.explorerLabel || "Explorer"} <ExternalLink size={10} />
+                  </a>
+                ) : <em>{row.status || "read-only"}</em>}
+              </article>
+            ))}
+            {!wallet?.recentActivity?.length ? <p>No activity loaded.</p> : null}
+          </div>
+        </section>
+      </div>
 
       {errors.length ? (
         <footer className="crypto-errors" title="One or more read-only sources were unavailable during refresh.">
           {errors.length} refresh note{errors.length === 1 ? "" : "s"} · wallet view remains read-only.
         </footer>
       ) : (
-        <footer className="crypto-errors is-clear">Read-only. Actions require approval.</footer>
+        <footer className="crypto-errors is-clear">Read-only view. Writes still require simulation and approval.</footer>
       )}
     </section>
   );
@@ -2586,58 +1332,27 @@ function SignalFeed({ state, quietMode, liveCues }: { state: MissionControlState
   const topFive = signalRows(state.signals, false);
   const lastFive = signalRows(state.signals, true);
   const rowsShown = topFive.length + lastFive.length;
-  const rowCapacity = 10;
-  const watchSlots = Math.max(0, rowCapacity - Math.min(rowsShown, rowCapacity));
-  const visibleStoryCount = Math.min(rowsShown, rowCapacity);
-  const storyLabel = `${visibleStoryCount} ${visibleStoryCount === 1 ? "story" : "stories"}`;
-  const visibleRowsLabel = watchSlots
-    ? `${storyLabel} · ${watchSlots} slot${watchSlots === 1 ? "" : "s"} watching`
-    : storyLabel;
-  const signalUpdatedAt = state.signalHealth?.generatedAt || state.signals
-    .map((signal) => signal.time)
-    .filter(Boolean)
-    .sort()
-    .pop();
-  const scanLabel = signalUpdatedAt ? signalSourceScanLabel(signalUpdatedAt) : freshness.label.toLowerCase();
-  const nextBreakingHeader = state.signalHealth?.nextBreakingRun?.replace(":00 ", " ");
-  const fallbackFresh = Boolean(state.signalHealth?.fallbackFresh && (state.signalHealth?.counts?.publicRssFallbackItems || 0) >= 5);
-  const quietHeaderLabel = freshness.label === "Quiet-hours watch"
-    ? nextBreakingHeader
-      ? `quiet hours · next ${nextBreakingHeader}`
-      : `quiet hours · ${scanLabel}`
-    : null;
-  const statusLabel =
-    quietHeaderLabel
-      ? quietHeaderLabel
-      : freshness.tone === "clear"
-      ? scanLabel
-      : freshness.label.toLowerCase();
-  const signalHeaderLabel = freshness.tone === "watch" && freshness.label.includes(" stale")
-    ? `${storyLabel} · ${statusLabel}`
-    : freshness.label === "Coverage watch" && watchSlots
-      ? visibleRowsLabel
-    : `${visibleRowsLabel} · ${statusLabel}`;
   return (
-    <section id="signal-feed" className={`signal-feed${sectionCueClass("signal", liveCues)}`} aria-label="Live intelligence signal feed">
-      <SectionCue label={liveCues.focus === "signal" ? "focus" : "updated"} />
+    <section id="signal-feed" className={`signal-feed${sectionCueClass("system", liveCues)}`} aria-label="J.A.I.N signal archive">
+      <SectionCue label={liveCues.focus === "system" ? "focus" : "updated"} />
       <header className="panel-title compact">
         <div>
-          <p>Live intelligence</p>
-          <h2>Signal Feed</h2>
+          <p>J.A.I.N context</p>
+          <h2>Signal Archive</h2>
         </div>
-        <span className={`signal-freshness is-${freshness.tone}`} title={freshness.detail}>
-          <Radio size={14} /> {signalHeaderLabel}
+        <span className={`signal-freshness is-${freshness.tone}`}>
+          <Radio size={14} /> {rowsShown} showing · {quietMode ? "quiet" : freshness.label}
         </span>
       </header>
       <div className="signal-table">
         <div className="signal-section-label">
           <strong>Top five</strong>
-          <span>{fallbackFresh ? "Fresh public source coverage" : "Breaking and developing stories"}</span>
+          <span>Developing or breaking stories</span>
         </div>
         <SignalFeedRows rows={topFive} liveCues={liveCues} emptyLabel="No live breaking rows loaded." />
         <div className="signal-section-label">
           <strong>Last 5</strong>
-          <span>Newsletter trends from the agent inbox</span>
+          <span>Newsletter subscription trends</span>
         </div>
         <SignalFeedRows rows={lastFive} liveCues={liveCues} emptyLabel="No newsletter trend rows loaded." newsletter />
       </div>
@@ -2646,48 +1361,18 @@ function SignalFeed({ state, quietMode, liveCues }: { state: MissionControlState
 }
 
 function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { rows: SignalItem[]; liveCues: LiveCueState; emptyLabel: string; newsletter?: boolean }) {
-  const reserveCount = Math.max(0, 5 - rows.length);
-  const reserveTitle = newsletter ? "Watching for another newsletter trend" : "Watching for the next breaking signal";
-  const reserveDetail = newsletter
-    ? "Duplicates stay hidden until a distinct trend appears."
-    : "No stronger live item is ranking above the signal threshold right now.";
-  const reserveImpact = newsletter
-    ? "Waiting for a distinct source-backed trend."
-    : "No action unless a fresh material break appears.";
   if (!rows.length) {
-    const quietLabel = newsletter ? "Digest clear" : "Live clear";
-    const quietDetail = newsletter
-      ? "No newsletter trend rows are ready yet."
-      : "No live breaking rows right now.";
     return (
-      <>
-        <article className="signal-live-empty">
-          <span>{quietLabel}</span>
-          <div className="signal-story">
-            <strong>{quietDetail}</strong>
-            <p>{newsletter ? "Waiting for the next newsletter aggregate." : "Latest newsletter trends remain visible below."}</p>
-          </div>
-          <p className="signal-impact">{emptyLabel}</p>
-          <div className="signal-meta">
-            <em className="signal-source">Control Tower</em>
-            <time>clear</time>
-          </div>
-        </article>
-        {Array.from({ length: 4 }).map((_, index) => (
-          <article key={`${newsletter ? "newsletter" : "live"}-empty-reserve-${index}`} className="signal-reserve-row">
-            <span>Open slot</span>
-            <div className="signal-story">
-              <strong>{reserveTitle}</strong>
-              <p>{reserveDetail}</p>
-            </div>
-            <p className="signal-impact">{reserveImpact}</p>
-            <div className="signal-meta">
-              <em className="signal-source">Control Tower</em>
-              <time>watching</time>
-            </div>
-          </article>
-        ))}
-      </>
+      <article className="signal-live-empty">
+        <span>{newsletter ? "Digest" : "Live"}</span>
+        <div className="signal-story">
+          <strong>{emptyLabel}</strong>
+          <p>Refresh the archived signal pipeline to repopulate this lane.</p>
+        </div>
+        <p className="signal-impact">No current summary available.</p>
+        <em className="signal-source">Control Tower</em>
+        <time>--</time>
+      </article>
     );
   }
   return (
@@ -2695,46 +1380,513 @@ function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { ro
       {rows.map((signal) => {
         const changed = Boolean(liveCues.rows[cueRowKey("signal", signal.id || signal.title)]);
         const impact = signal.impact || signal.impactScenarios?.medium || signal.impactScenarios?.med || signal.reason;
-        const impactLabel = signalImpactLabel(signal, impact);
-        const sourceLabel = compactText(signal.source, 34) || "Source pending";
-        const displayTitle = signalDisplayTitle(signal, newsletter);
-        const displayReason = signalDisplayReason(signal);
         return (
           <article key={signal.id || signal.title} className={`${signalRowClass(signal)}${changedRowClass(changed)}`}>
             <span className="row-change-dot" aria-hidden="true" />
             <span>{signalScoreLabel(signal)}</span>
             <div className="signal-story">
-              <strong title={missionText(signal.title)}>{displayTitle}</strong>
-              <p title={missionText(signal.reason)}>{displayReason}</p>
+              <strong title={missionText(signal.title)}>{missionText(signal.title)}</strong>
+              <p title={missionText(signal.reason)}>{missionText(signal.reason)}</p>
             </div>
-            <p className={`signal-impact ${signalImpactTone(signal, impact)}`} title={`${impactLabel} · ${missionText(signal.source)} · ${missionText(impact)}`}>
-              <b>{impactLabel}</b>
-              <span>{sourceLabel}</span>
-            </p>
-            <div className="signal-meta">
-              <time title={fmtTime(signal.time)}>
-                <b>{signalStoryAgeLabel(signal, newsletter)}</b>
-                <span>{fmtTime(signal.time)}</span>
-              </time>
-            </div>
+            <p className="signal-impact" title={missionText(impact)}>{missionText(impact)}</p>
+            <em className="signal-source" title={missionText(signal.source)}>{compactText(signal.source, 22)}</em>
+            <time title={fmtTime(signal.time)}>
+              <b>{freshnessClass(signal.time) === "is-fresh" ? "live" : ageLabel(signal.time)}</b>
+              {fmtTime(signal.time)}
+            </time>
           </article>
         );
       })}
-      {Array.from({ length: reserveCount }).map((_, index) => (
-        <article key={`${newsletter ? "newsletter" : "live"}-reserve-${index}`} className="signal-reserve-row">
-          <span>Open slot</span>
-          <div className="signal-story">
-            <strong>{reserveTitle}</strong>
-            <p>{reserveDetail}</p>
-          </div>
-          <p className="signal-impact">{reserveImpact}</p>
-          <div className="signal-meta">
-            <em className="signal-source">Control Tower</em>
-            <time>watching</time>
-          </div>
-        </article>
-      ))}
     </>
+  );
+}
+
+function providerKey(provider: any) {
+  const text = `${provider?.id || ""} ${provider?.label || ""} ${provider?.role || ""} ${provider?.lastModelUsed || ""}`.toLowerCase();
+  if (/gemini|google/.test(text)) return "gemini";
+  if (/ollama|local/.test(text)) return "ollama";
+  if (/xai|grok/.test(text)) return "xai";
+  if (/openrouter/.test(text)) return "openrouter";
+  if (/anthropic|claude/.test(text)) return "anthropic";
+  if (/openai|codex|gpt/.test(text)) return "openai";
+  return String(provider?.id || provider?.label || "provider").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRouter?: MissionControlState["modelRouter"]) {
+  const lastRoute = modelRouter?.lastRoute || {};
+  const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "conserve");
+  const defaults = [
+    {
+      id: "openai",
+      label: "Codex / OpenAI",
+      role: "Trusted execution, code edits, private connectors, terminal work, and final integration.",
+      whyChosen: "Default when the task needs system access, code changes, approvals, or high-confidence execution.",
+      lastModelUsed: /openai|codex|gpt/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "openai/gpt-5.5",
+      budgetType: "subscription",
+      plan: "OpenAI Pro",
+      subscriptionMonthlyUsd: 200,
+      billingLabel: "$200/mo",
+      billingNote: "Daily driver; usage windows show allowance pressure, not incremental API billing.",
+      status: "ready",
+    },
+    {
+      id: "gemini",
+      label: "Gemini",
+      role: "Low-cost front-desk review, large-context reading, summaries, and secondary checks.",
+      whyChosen: "Use Flash when safe for dashboard-safe synthesis; use Pro for judgment and escalation.",
+      lastModelUsed: /gemini|google/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "gemini flash / pro",
+      budgetType: "subscription",
+      plan: "Gemini Pro",
+      subscriptionMonthlyUsd: 20,
+      billingLabel: "$20/mo",
+      status: "ready",
+    },
+    {
+      id: "ollama",
+      label: "Ollama",
+      role: "Local/private helper lane for drafts, compression, and low-risk offline utility work.",
+      whyChosen: "Use when local model quality is sufficient and cloud subscription quota should be preserved.",
+      lastModelUsed: /ollama|local/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "local/ollama",
+      budgetType: "subscription",
+      plan: "Ollama Pro",
+      subscriptionMonthlyUsd: 16.67,
+      subscriptionAnnualUsd: 200,
+      subscriptionCadence: "annual",
+      billingLabel: "$200/yr",
+      status: "ready",
+    },
+    {
+      id: "xai",
+      label: "xAI / Grok",
+      role: "X-native, current-events, social signal, and fast outside-world scans.",
+      whyChosen: "Use when the task benefits from X context, current public signal, or Grok-specific subscription capacity.",
+      lastModelUsed: /xai|grok/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "grok subscription",
+      budgetType: "subscription",
+      plan: "X Premium",
+      subscriptionMonthlyUsd: 8,
+      billingLabel: "$8/mo",
+      status: "ready",
+    },
+    {
+      id: "openrouter",
+      label: "OpenRouter",
+      role: "Fallback and specialist reserve when primary lanes are unavailable or a niche model is needed.",
+      whyChosen: "Keep dim unless actively selected by failover or a specialist workflow.",
+      lastModelUsed: /openrouter/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "fallback pool",
+      budgetType: "fallback cap",
+      status: "reserve",
+    },
+  ];
+  const rows = [...defaults, ...(modelRouter?.providers || []), ...(modelUsage?.providerBudgets || [])];
+  const byKey = new Map<string, any>();
+  rows.forEach((row) => {
+    const key = providerKey(row);
+    const existing = byKey.get(key);
+    byKey.set(key, existing ? {
+      ...existing,
+      ...row,
+      id: row?.id || existing.id,
+      label: row?.label || existing.label,
+      role: row?.role || existing.role,
+      whyChosen: row?.whyChosen || existing.whyChosen,
+      lastModelUsed: row?.lastModelUsed || existing.lastModelUsed,
+      budgetType: row?.budgetType || existing.budgetType,
+    } : row);
+  });
+  const preferred = ["openai", "gemini", "ollama", "xai", "openrouter"];
+  const ordered = preferred.map((key) => byKey.get(key)).filter(Boolean);
+  const extras = [...byKey.entries()].filter(([key]) => !preferred.includes(key)).map(([, row]) => row);
+  return [...ordered, ...extras];
+}
+
+function activeProviderKeys(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]) {
+  const keys = new Set<string>();
+  statuses
+    .filter((status) => {
+      const value = String(status.status || "").toLowerCase();
+      return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
+    })
+    .forEach((status) => {
+    const text = `${status.objective} ${status.detail} ${status.current_tool} ${status.steps?.map((step) => `${step.tool || ""} ${step.label || ""}`).join(" ")}`.toLowerCase();
+    if (/gemini|google/.test(text)) keys.add("gemini");
+    if (/ollama|local model|local\/ollama/.test(text)) keys.add("ollama");
+    if (/xai|grok/.test(text)) keys.add("xai");
+      if (/openrouter/.test(text)) keys.add("openrouter");
+      if (/anthropic|claude/.test(text)) keys.add("anthropic");
+      if (/openai|codex|gpt/.test(text)) keys.add("openai");
+    });
+  const lastRoute = modelRouter?.lastRoute || {};
+  const routeFresh = isFreshActiveTimestamp(String(lastRoute.updatedAt || modelRouter?.updatedAt || ""));
+  if (routeFresh) {
+    const text = `${lastRoute.provider || ""} ${lastRoute.model || ""} ${lastRoute.routeLabel || ""}`.toLowerCase();
+    if (/gemini|google/.test(text)) keys.add("gemini");
+    if (/ollama|local/.test(text)) keys.add("ollama");
+    if (/xai|grok/.test(text)) keys.add("xai");
+    if (/openrouter/.test(text)) keys.add("openrouter");
+    if (/anthropic|claude/.test(text)) keys.add("anthropic");
+    if (/openai|codex|gpt/.test(text)) keys.add("openai");
+  }
+  return keys;
+}
+
+function providerUtilizationPct(provider: any) {
+  const explicit = Number(provider?.dailyUtilizationPct ?? provider?.monthlyUtilizationPct);
+  if (Number.isFinite(explicit) && explicit > 0) return Math.min(100, Math.round(explicit));
+  const windows = providerLimitRows(provider);
+  const windowPct = Math.max(...windows.map((window) => Number(window?.usedPercent || 0)).filter(Number.isFinite), 0);
+  if (windowPct > 0) return Math.min(100, Math.round(windowPct));
+  const spend = Number(provider?.dailySpendUsd ?? provider?.monthlySpendUsd ?? 0);
+  const cap = Number(provider?.dailyCapUsd ?? provider?.monthlyCapUsd ?? 0);
+  if (Number.isFinite(spend) && Number.isFinite(cap) && cap > 0) return Math.min(100, Math.round((spend / cap) * 100));
+  return 0;
+}
+
+function providerLimitRows(provider: any) {
+  const windows = Array.isArray(provider?.usageWindows) ? provider.usageWindows : [];
+  return windows
+    .filter((window: any) => window && (window.label || window.remainingLabel || Number.isFinite(Number(window.usedPercent))))
+    .slice(0, 5);
+}
+
+function providerWindowValue(window: any) {
+  if (window?.remainingLabel) return missionText(String(window.remainingLabel));
+  const remaining = Number(window?.remainingPercent);
+  if (Number.isFinite(remaining)) return `${Math.round(remaining)}% left`;
+  const used = Number(window?.usedPercent);
+  if (Number.isFinite(used)) return `${Math.round(used)}% used`;
+  return missionText(String(window?.status || "tracked"));
+}
+
+function providerSpendLabel(provider: any) {
+  const windows = providerLimitRows(provider);
+  if (windows.length) {
+    return windows.slice(0, 2).map((window) => `${missionText(String(window.label || "Limit"))} ${providerWindowValue(window)}`).join(" · ");
+  }
+  const spend = Number(provider?.dailySpendUsd ?? 0);
+  const cap = Number(provider?.dailyCapUsd ?? provider?.monthlyCapUsd ?? 0);
+  if (provider?.remainingCreditUsd != null) return `${fmtCurrencyExact(provider.remainingCreditUsd)} remaining`;
+  if (cap) return `${fmtCurrencyExact(spend)} used / ${fmtCurrencyExact(cap)} cap`;
+  if (provider?.budgetType) return `${missionText(provider.budgetType)} usage tracked`;
+  return "Usage tracked from route telemetry";
+}
+
+function providerDisplayBlurb(provider: any) {
+  const key = providerKey(provider);
+  if (key === "openai") return "Execution lane for code, tools, auth, private connectors, and final changes.";
+  if (key === "gemini") return "Low-cost reading, review, summaries, and judgment escalation.";
+  if (key === "ollama") return "Local drafts, compression, and low-risk offline utility.";
+  if (key === "xai") return "X-native signal, current events, and Grok context.";
+  if (key === "openrouter") return "Fallback or specialist reserve when primary lanes are unavailable.";
+  const raw = missionText(String(provider?.whyChosen || provider?.role || "Available when route policy selects it."));
+  return raw.length > 84 ? `${raw.slice(0, 81).trim()}...` : raw;
+}
+
+function providerSubscriptionMonthly(provider: any) {
+  const monthly = Number(provider?.subscriptionMonthlyUsd ?? provider?.monthlySubscriptionUsd);
+  if (Number.isFinite(monthly) && monthly > 0) return monthly;
+  const annual = Number(provider?.subscriptionAnnualUsd);
+  if (Number.isFinite(annual) && annual > 0) return annual / 12;
+  if (String(provider?.budgetType || "").toLowerCase() === "subscription") {
+    const cap = Number(provider?.monthlyCapUsd);
+    if (Number.isFinite(cap) && cap > 0) return cap;
+  }
+  return 0;
+}
+
+function providerBillingLabel(provider: any) {
+  if (provider?.billingLabel) return missionText(String(provider.billingLabel));
+  const annual = Number(provider?.subscriptionAnnualUsd);
+  if (Number.isFinite(annual) && annual > 0) return `${fmtCurrencyExact(annual)}/yr`;
+  const monthly = providerSubscriptionMonthly(provider);
+  if (monthly > 0) return `${fmtCurrencyExact(monthly)}/mo`;
+  return providerSpendLabel(provider);
+}
+
+function subscriptionBaselineUsd(providers: any[]) {
+  return providers.reduce((total, provider) => total + providerSubscriptionMonthly(provider), 0);
+}
+
+function usagePressureLabel(providers: any[]) {
+  const codex = providers.find((provider) => providerKey(provider) === "openai");
+  const windows = providerLimitRows(codex);
+  const weekly = windows.find((window: any) => /week/i.test(String(window?.label || window?.id || "")));
+  const session = windows.find((window: any) => /session/i.test(String(window?.label || window?.id || "")));
+  const target = weekly || session || windows[0];
+  if (target) return `${missionText(String(target.label || "Limit"))} ${providerWindowValue(target)}`;
+  return "allowance tracked";
+}
+
+function providerTone(provider: any) {
+  const text = `${provider?.status || ""} ${provider?.authStatus || ""} ${provider?.lastTestStatus || ""}`.toLowerCase();
+  if (/blocked|error|missing|failed/.test(text)) return "risk";
+  if (/watch|reserve|limited|stale|attention/.test(text)) return "watch";
+  return "clear";
+}
+
+function providerEvidenceLabel(provider: any) {
+  const account = provider?.accountEmail || provider?.accountLabel;
+  if (provider?.plan || account) return [provider?.plan, account].filter(Boolean).map((part) => missionText(String(part))).join(" · ");
+  if (provider?.codexbarSource) return `CodexBar ${missionText(String(provider.codexbarSource))}`;
+  const status = provider?.authStatus || provider?.lastTestStatus || provider?.status;
+  if (status) return missionText(String(status));
+  if (provider?.keyPresent === true) return "verified key present";
+  if (provider?.keyPresent === false) return "no key expected";
+  return "estimated from route telemetry";
+}
+
+function numericOrZero(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function walletTradingGoal(wallet?: AgenticCryptoWallet) {
+  const raw = wallet?.tradingGoal || {};
+  const solToken = wallet?.tokens?.find((token) => String(token.symbol || "").toUpperCase() === "SOL");
+  const current = numericOrZero(raw.current ?? (raw as any).lockedProfitSol ?? (raw as any).profitLockedSol ?? solToken?.amount);
+  const target = numericOrZero(raw.target || 3) || 3;
+  const unit = raw.unit || "SOL";
+  const percent = Math.max(0, Math.min(100, Math.round((current / target) * 100)));
+  return {
+    title: raw.title || "3 SOL net-profit target",
+    description: raw.description || "Trade toward 3 SOL net profit and lock realized gains as SOL.",
+    current,
+    target,
+    unit,
+    percent,
+    status: missionText(raw.status || "tracking"),
+  };
+}
+
+function walletTradeRows(wallet?: AgenticCryptoWallet) {
+  const explicit = wallet?.tradeLedger;
+  if (explicit?.length) return explicit.slice(0, 2);
+  return (wallet?.recentActivity || []).slice(0, 2).map((row) => ({
+    timestamp: row.timestamp,
+    side: String(row.action || "").toLowerCase().includes("approve") ? "approve" : "activity",
+    action: row.action || "Wallet activity",
+    amount: row.valueSummary || "not classified",
+    pnl: null,
+    status: row.status,
+    chain: row.chain,
+    explorerLabel: row.explorerLabel,
+    explorerUrl: row.explorerUrl,
+  }));
+}
+
+function tradeSideLabel(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) {
+  const side = String(row.side || row.action || "activity").toLowerCase();
+  if (side.includes("open")) return "Open";
+  if (side.includes("close")) return "Close";
+  if (side.includes("swap")) return "Swap";
+  if (side.includes("rebalance") || side.includes("bridge")) return "Rebalance";
+  if (side.includes("approve")) return "Approve";
+  return "Activity";
+}
+
+function tradeAmountLabel(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) {
+  if (row.amount != null && row.amount !== "") return String(row.amount);
+  if (typeof row.valueUsd === "number") return fmtCurrencyExact(row.valueUsd);
+  return "amount n/a";
+}
+
+function tradePnl(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) {
+  const pnlSol = typeof row.pnlSol === "number" ? `${row.pnlSol >= 0 ? "+" : ""}${amountLabel(row.pnlSol, "SOL")}` : "";
+  const pnlUsd = typeof row.pnlUsd === "number" ? `${row.pnlUsd >= 0 ? "+" : ""}${fmtCurrencyExact(row.pnlUsd)}` : "";
+  const raw = row.pnl != null ? String(row.pnl) : "";
+  const label = pnlSol || pnlUsd || raw || "PnL n/a";
+  const numeric = numericOrZero(row.pnlSol ?? row.pnlUsd ?? row.pnl);
+  const tone = numeric > 0 ? "positive" : numeric < 0 ? "negative" : "neutral";
+  return { label, tone };
+}
+
+function FinOpsDashboard({
+  wallet,
+  modelUsage,
+  modelRouter,
+  statuses,
+  loading,
+  onRefresh,
+}: {
+  wallet?: AgenticCryptoWallet;
+  modelUsage?: MissionControlState["modelUsage"];
+  modelRouter?: MissionControlState["modelRouter"];
+  statuses: AgentStatus[];
+  loading: boolean;
+  onRefresh: () => void;
+}) {
+  const freshness = cryptoFreshness(wallet);
+  const summary = wallet?.summary || {};
+  const goal = walletTradingGoal(wallet);
+  const trades = walletTradeRows(wallet);
+  const providers = providerRows(modelUsage, modelRouter);
+  const activeKeys = activeProviderKeys(statuses, modelRouter);
+  const subscriptionBaseline = subscriptionBaselineUsd(providers);
+  const usagePressure = usagePressureLabel(providers);
+  const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "--";
+  const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "--";
+  const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
+  const lastRoute = modelRouter?.lastRoute || {};
+  const lastRouteLabel = missionText(String(lastRoute.routeLabel || lastRoute.provider || "no active route"));
+  return (
+    <section id="finops-dashboard" className={`finops-dashboard is-${freshness.tone}`} aria-label="FinOps dashboard">
+      <header className="finops-header">
+        <div>
+          <p>FinOps Dashboard</p>
+          <h2>Subscription baseline, model load, and wallet guardrails</h2>
+        </div>
+        <div className="finops-actions">
+          <span className={`crypto-status ${cryptoStatusClass(freshness.status)}`}><ShieldCheck size={13} />Wallet {freshness.label}</span>
+          <span><Timer size={13} />Auto-refresh 5m</span>
+          <button type="button" onClick={onRefresh} disabled={loading} title="Refresh read-only wallet inventory">
+            <RefreshCw size={13} className={loading ? "spin" : ""} /> Refresh wallet
+          </button>
+        </div>
+      </header>
+
+      <div className="finops-body">
+        <section className="finops-wallet">
+          <div className="finops-wallet-total">
+            <span>Crypto wallet</span>
+            <strong>{fmtCurrencyExact(summary.totalEstimatedUsd)}</strong>
+            <p>{fmtCurrencyExact(summary.liquidEstimatedUsd)} liquid · {fmtCurrencyExact(summary.nftEstimatedUsd)} collectibles</p>
+          </div>
+          <div className="finops-wallet-target">
+            <div className="wallet-target-head">
+              <div>
+                <span>Current target</span>
+                <strong>{goal.title}</strong>
+              </div>
+              <em>{goal.status}</em>
+            </div>
+            <div className="wallet-target-progress" style={{ "--pct": goal.percent } as React.CSSProperties}>
+              <span />
+            </div>
+            <div className="wallet-target-meta">
+              <b>{amountLabel(goal.current, goal.unit)} / {amountLabel(goal.target, goal.unit)}</b>
+              <small>{goal.percent}% complete</small>
+            </div>
+            <p>{goal.description}</p>
+          </div>
+          <div className="finops-trade-ledger">
+            <header>
+              <div>
+                <span>Recent wallet trades</span>
+                <strong>Open / close ledger</strong>
+              </div>
+              <em>{trades.length || 0} rows</em>
+            </header>
+            <div className="trade-ledger-list">
+              {trades.length ? trades.map((trade, index) => {
+                const pnl = tradePnl(trade);
+                return (
+                  <article key={`${trade.timestamp || "trade"}-${trade.explorerLabel || index}`} className="trade-ledger-row">
+                    <span className={`trade-side-pill is-${String(trade.side || "activity").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                      {tradeSideLabel(trade)}
+                    </span>
+                    <div className="trade-main">
+                      <strong>{missionText(trade.action || trade.pair || trade.asset || "Wallet activity")}</strong>
+                      <small>{chainLabel(trade.chain)} · {tradeAmountLabel(trade)}</small>
+                    </div>
+                    <span className={`trade-pnl is-${pnl.tone}`}>{pnl.label}</span>
+                    {trade.explorerUrl ? (
+                      <a href={trade.explorerUrl} target="_blank" rel="noreferrer" title={trade.explorerLabel || "Open transaction"}>
+                        <ExternalLink size={12} />
+                      </a>
+                    ) : <i />}
+                  </article>
+                );
+              }) : (
+                <p className="wallet-empty-state">No trade ledger is loaded yet. Wallet activity will appear after the next refresh.</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="finops-models">
+          <div className="finops-model-summary">
+            <article>
+              <span>Subscriptions</span>
+              <strong>{fmtCurrencyExact(subscriptionBaseline)}/mo</strong>
+            </article>
+            <article>
+              <span>Daily driver</span>
+              <strong>OpenAI Pro</strong>
+            </article>
+            <article>
+              <span>Usage pressure</span>
+              <strong>{usagePressure}</strong>
+            </article>
+            <article>
+              <span>Route / efficiency</span>
+              <strong>{routeQuality} · {efficiency}</strong>
+            </article>
+          </div>
+          <div className="finops-route-strip">
+            <span>Codex allowance: {missionText(codexMode)}</span>
+            <span>Last route: {lastRouteLabel}</span>
+            <span>Updated {fmtTime(modelUsage?.lastUpdated || modelRouter?.updatedAt)}</span>
+          </div>
+          <div className="finops-provider-grid">
+            {providers.length ? providers.slice(0, 4).map((provider) => {
+              const key = providerKey(provider);
+              const active = activeKeys.has(key);
+              const pct = providerUtilizationPct(provider);
+              const tone = providerTone(provider);
+              const limits = providerLimitRows(provider);
+              return (
+                <article key={provider.id || key} data-provider={key} className={`finops-provider-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
+                  <header>
+                    <span className="provider-glow-dot" />
+                    <div>
+                      <strong>{provider.label || provider.id || key}</strong>
+                      <em>{active ? "in use now" : "idle"}</em>
+                    </div>
+                  </header>
+                  <p>{providerDisplayBlurb(provider)}</p>
+                  {limits.length ? (
+                    <div className="provider-limit-list">
+                      {limits.map((window: any) => {
+                        const windowPct = Number(window?.usedPercent || 0);
+                        const meterPct = Number.isFinite(windowPct) ? Math.max(0, Math.min(100, Math.round(windowPct))) : 0;
+                        return (
+                          <div key={window.id || window.label} className={`provider-limit-row is-${window.status || "ok"}`}>
+                            <span>{missionText(String(window.label || "Limit"))}</span>
+                            <div className="provider-limit-meter" style={{ "--pct": meterPct } as React.CSSProperties}>
+                              <i />
+                            </div>
+                            <em>{providerWindowValue(window)}</em>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
+                      <span />
+                    </div>
+                  )}
+                  <footer>
+                    <span>{provider.lastModelUsed || "model route available"}</span>
+                    <em>{providerBillingLabel(provider)}</em>
+                  </footer>
+                  <small>{providerEvidenceLabel(provider)}</small>
+                </article>
+              );
+            }) : (
+              <article className="finops-provider-card is-watch">
+                <header>
+                  <span className="provider-glow-dot" />
+                  <div>
+                    <strong>Provider budgets</strong>
+                    <em>not loaded</em>
+                  </div>
+                </header>
+                <p>Route telemetry will appear after the next model-usage refresh.</p>
+              </article>
+            )}
+          </div>
+        </section>
+      </div>
+    </section>
   );
 }
 
@@ -2748,21 +1900,15 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
 
   dataQualityIssues(state).forEach((issue) => items.push(issue));
   pendingApprovals.slice(0, 2).forEach((approval) => {
-    const isHardDecision = ["high", "critical", "risk"].includes(String(approval.risk_tier || "").toLowerCase());
-    const tone: AttentionItem["tone"] = isHardDecision ? "risk" : "watch";
     items.push({
       id: `approval-${approval.id}`,
-      label: isHardDecision ? "Decision" : "Focus",
+      label: "Decision",
       title: missionText(approval.title),
       detail: approvalAlertReason(approval),
       why: approvalAlertReason(approval),
-      means: isHardDecision
-        ? "An agent is waiting before it should continue. This alert needs a Josh decision."
-        : "Control Tower is highlighting a current setup or follow-up item. This is not an agent outage.",
-      action: isHardDecision
-        ? "Open the related job or approval lane, then approve, hold, or deny from the source that requested it."
-        : "Open Today's Jobs when you are ready to finish the setup or clear the follow-up.",
-      tone,
+      means: "An agent is waiting before it should continue. This is the only class of alert that needs a Josh decision.",
+      action: "Open the related job or approval lane, then approve, hold, or deny from the source that requested it.",
+      tone: "risk",
       target: "today-jobs",
     });
   });
@@ -2770,10 +1916,8 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
     const firstJob = riskJobs[0];
     items.push({
       id: `jobs-${firstJob.id}`,
-      label: "Focus",
-      title: riskJobs.length === 1
-        ? compactJobTitle(firstJob)
-        : `${riskJobs.length} jobs need focus`,
+      label: "Needs focus",
+      title: `${riskJobs.length} job${riskJobs.length === 1 ? "" : "s"} need focus`,
       detail: jobAlertReason(firstJob),
       why: jobAlertReason(firstJob),
       means: "A scheduled or priority job reported blocked, error, or missed. Control Tower is surfacing the first affected row so you can inspect it quickly.",
@@ -2791,7 +1935,7 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
       detail: agentAlertReason(firstAgent),
       why: agentAlertReason(firstAgent),
       means: `${AGENTS[firstAgent.agent_id]?.label || firstAgent.agent_id} reported a blocked state or stopped giving a healthy status signal.`,
-      action: "Open Brain Feed, check the agent tile, and send a test message if the last check-in is late.",
+      action: "Open Live Work Board, check the agent tile, and send a test message if the last check-in is late.",
       tone: "risk",
       target: "brain-feed",
     });
@@ -2800,25 +1944,26 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
   const overflowCount = Math.max(0, items.length - visibleItems.length);
   const selected = visibleItems.find((item) => item.id === selectedId) || null;
 
-  if (!visibleItems.length) {
-    return <div className="brain-attention-strip is-empty" aria-hidden="true" />;
-  }
-
   return (
     <section className="brain-attention-strip" aria-label="What needs attention">
-      {visibleItems.map((item) => (
+      {visibleItems.length ? visibleItems.map((item) => (
           <button
             key={item.id}
             type="button"
             className={`brain-attention-item is-${item.tone} ${selected?.id === item.id ? "selected" : ""}`}
             onClick={() => setSelectedId((current) => current === item.id ? null : item.id)}
-            title={overflowCount ? `Show why this alert is here. ${overflowCount} more focus item${overflowCount === 1 ? "" : "s"} are tracked in the related sections.` : "Show why this alert is here"}
+            title="Show why this alert is here"
           >
             <span>{item.label}</span>
-            <strong>{item.title}</strong>
+            <strong>{overflowCount ? `${item.title} · +${overflowCount}` : item.title}</strong>
             <p>{item.detail}</p>
           </button>
-        ))}
+        )) : (
+          <article className="brain-alerts-clear">
+            <span>{quietMode ? "Quiet mode" : "All clear"}</span>
+            <strong>No alerts</strong>
+          </article>
+        )}
       {selected ? (
         <article className={`attention-detail-drawer is-${selected.tone}`}>
           <header>
@@ -3175,24 +2320,8 @@ function BrainOperationsSummary({
     || workItems.find((item) => item.state === "working")
     || workItems.find((item) => item.state === "done");
   const focusTarget: AttentionTarget = firstDataIssue ? firstDataIssue.target : riskJobs || pendingApprovals ? "today-jobs" : "brain-feed";
-  const layoutIssues = state.runtimeLayout?.issues || [];
-  const layoutOk = state.runtimeLayout ? state.runtimeLayout.ok !== false && layoutIssues.length === 0 : false;
-  const layoutAgeLabel = state.runtimeLayout?.checkedAt ? ageLabel(state.runtimeLayout.checkedAt) : "not checked";
-  const signalTotal = state.signalHealth?.counts?.total || state.signals.length;
-  const signalOk = ["ok", "fresh", "ready", "quiet"].includes(String(state.signalHealth?.status || "").toLowerCase()) && signalTotal >= 10;
-  const walletOk = !state.agenticCrypto || ["fresh", "ok", "ready"].includes(String(state.agenticCrypto.status || "").toLowerCase());
-  const truthWatchItems = [
-    layoutOk ? null : "screen fit",
-    signalOk ? null : "signals",
-    walletOk ? null : "wallet",
-    dataIssues.length ? "data guard" : null,
-  ].filter((item): item is string => Boolean(item));
-  const truthTitle = truthWatchItems.length ? `${truthWatchItems.length} item${truthWatchItems.length === 1 ? "" : "s"} to review` : "All current";
-  const truthDetail = truthWatchItems.length
-    ? `Check ${truthWatchItems.join(", ")}`
-    : `${sourceTruthLabel(state.source)} · kiosk ${layoutAgeLabel} · ${signalTotal || 0} signals`;
   return (
-    <section className={`brain-summary-strip is-${decision.tone}${sectionCueClass("system", liveCues)}`} aria-label="Brain Feed mission snapshot">
+    <section className={`brain-summary-strip is-${decision.tone}${sectionCueClass("system", liveCues)}`} aria-label="Live Work Board mission snapshot">
       <SectionCue label={liveCues.focus === "system" ? "focus" : "updated"} />
       <button
         type="button"
@@ -3214,10 +2343,10 @@ function BrainOperationsSummary({
         <strong>{nextItem ? nextItem.title : quietMode ? "Quiet mode" : "Awaiting instruction"}</strong>
         <p>{nextItem ? `${AGENTS[nextItem.agent_id]?.label || nextItem.agent_id} · ${workStateLabel(nextItem.state)}` : "No upcoming handoff"}</p>
       </article>
-      <article className={`summary-chip summary-confidence truth-chip is-${truthWatchItems.length ? "watch" : "clear"}`} title={`${freshnessLabelText} · ${overall}% confidence. ${confidenceReason}`}>
-        <span>Live check</span>
-        <strong>{truthTitle}</strong>
-        <p>{truthDetail}</p>
+      <article className="summary-chip summary-confidence">
+        <span>Freshness</span>
+        <strong>{freshnessLabelText} · {overall}%</strong>
+        <p>{ageLabel(lastUpdate)} · {confidenceReason}</p>
       </article>
     </section>
   );
@@ -3272,17 +2401,6 @@ function ReliabilityUpgradesPanel({ upgrades }: { upgrades?: MissionControlState
               </header>
               <p>{missionText(item.signal)}</p>
               <small>{missionText(item.next)}</small>
-              {item.evidence ? (
-                <a
-                  className="reliability-evidence"
-                  href={item.evidence.startsWith("http") ? item.evidence : `/${item.evidence}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  title={`Open ${item.evidence}`}
-                >
-                  {missionText(item.evidence)}
-                </a>
-              ) : null}
             </div>
           </article>
         ))}
@@ -3354,7 +2472,7 @@ function WorkItemRow({ item, onNavigate, changed }: { item: WorkItem; onNavigate
       type="button"
       className={`work-item-row ${agentClass(item.agent_id)} ${workStateClass(item.state)}${changedRowClass(changed)}`}
       onClick={() => onNavigate(item.target)}
-      title={`Open ${item.target === "today-jobs" ? "Today's Jobs" : "Brain Feed"}`}
+      title={`Open ${item.target === "today-jobs" ? "Today's Jobs" : "Live Work Board"}`}
     >
       <span className="row-change-dot" aria-hidden="true" />
       <span className={`status-dot ${workStateClass(item.state)} ${agentClass(item.agent_id)}`} aria-hidden="true" />
@@ -3370,12 +2488,12 @@ function WorkItemRow({ item, onNavigate, changed }: { item: WorkItem; onNavigate
 function AgentEcosystemMap({ statuses }: { statuses: Map<AgentId, AgentStatus> }) {
   const nodes: Array<{ agent: AgentId; x: number; y: number }> = [
     { agent: "joshex", x: 50, y: 24 },
-    { agent: "josh", x: 20, y: 68 },
+    { agent: "josh2", x: 20, y: 68 },
     { agent: "jaimes", x: 58, y: 72 },
     { agent: "jain", x: 84, y: 46 },
   ];
   const links = [
-    ["joshex", "josh"],
+    ["joshex", "josh2"],
     ["joshex", "jaimes"],
     ["jaimes", "jain"],
   ] as Array<[AgentId, AgentId]>;
@@ -3420,20 +2538,20 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
     <section className="brain-cost-card">
       <div className="panel-title compact">
         <h2>Model Cost</h2>
-        <span>{fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered today</span>
+        <span>{fmtCurrency(modelUsage?.daily)} daily</span>
       </div>
       <div className="cost-snapshot">
         <article>
-          <span>Metered week</span>
-          <strong>{fmtCurrency(modelUsage?.metered?.weekly ?? modelUsage?.weekly)}</strong>
+          <span>Weekly</span>
+          <strong>{fmtCurrency(modelUsage?.weekly)}</strong>
         </article>
         <article>
-          <span>Sub/month</span>
-          <strong>{fmtCurrency(modelUsage?.subscription?.monthlyFee ?? modelUsage?.monthly)}</strong>
+          <span>Monthly</span>
+          <strong>{fmtCurrency(modelUsage?.monthly)}</strong>
         </article>
         <article>
-          <span>Usage equiv</span>
-          <strong>{fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly)}</strong>
+          <span>Projected</span>
+          <strong>{fmtCurrency(modelUsage?.weeklyRunRate?.projectedMonthly)}</strong>
         </article>
       </div>
       <div className="brain-model-list">
@@ -3448,12 +2566,8 @@ function BrainCostCard({ modelUsage }: { modelUsage?: MissionControlState["model
   );
 }
 
-function compactTaskText(value?: string | null, fallback = "No completed task reported yet") {
+function compactTaskText(value?: string | null, fallback = "No recent completion reported") {
   return compactText(missionText(value || fallback), 74);
-}
-
-function classifierText(value: string) {
-  return value.toLowerCase().replace(/\bhigh[-\s]signal\b/g, "high value");
 }
 
 function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, agent?: AgentId): AgentIdleContext["nextBullets"] {
@@ -3461,33 +2575,14 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     return [
       { label: "Input", text: "Direct instruction or the next scheduled agent event." },
       { label: "Checks", text: "Confirm owner, objective, and whether approval is needed." },
-      { label: "Output", text: "A visible Brain Feed update with the next concrete step." },
+      { label: "Output", text: "A visible Live Work Board update with the next concrete step." },
       { label: "Alert", text: "Only if a blocker, missing route, or decision appears." },
     ];
   }
 
   const title = missionText(job.title);
-  const text = classifierText(`${title} ${job.detail} ${job.tool} ${job.schedule}`);
-  const titleTopic = classifierText(title);
+  const text = `${title} ${job.detail} ${job.tool} ${job.schedule}`.toLowerCase();
   const owner = AGENTS[job.agent_id || agent || "joshex"]?.label || "Agent";
-
-  if (/daily agent readiness|daily readiness|system-health|system health|health pass|agent readiness/.test(text)) {
-    return [
-      { label: "Input", text: "JAIMES/Hermes heartbeat, recent run state, and handoff queue." },
-      { label: "Checks", text: "Confirms agent readiness and flags handoff or system issues." },
-      { label: "Output", text: "Ready/watch status plus any needed repair or handoff." },
-      { label: "Alert", text: "Only if the agent route, auth, or scheduled job is blocked." },
-    ];
-  }
-
-  if (/context sync|agent context|j\.?a\.?i\.?n context/.test(text)) {
-    return [
-      { label: "Input", text: "Latest agent memory, task state, and shared context sidecars." },
-      { label: "Checks", text: "Confirms each agent has a fresh plain-English status." },
-      { label: "Output", text: "Keeps Brain Feed, Telegram, and Control Tower reading the same state." },
-      { label: "Alert", text: "Only if an agent state file is stale or disagrees with the kiosk." },
-    ];
-  }
 
   if (/gmail|inbox|email|mail triage|unread/.test(text)) {
     return [
@@ -3498,7 +2593,7 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     ];
   }
 
-  if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(titleTopic)) {
+  if (/signal|intelligence|news|newsletter|breaking/.test(text)) {
     return [
       { label: "Input", text: "Latest J.A.I.N breaking rows, newsfeed rows, and newsletter trends." },
       { label: "Checks", text: "Dedupes stories and scores relevance without crowding Control Tower." },
@@ -3516,24 +2611,6 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     ];
   }
 
-  if (/control tower|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(text)) {
-    return [
-      { label: "Input", text: "Dashboard data, sidecars, kiosk server, and the live display." },
-      { label: "Checks", text: "Verifies data freshness, layout fit, readable labels, and alerts." },
-      { label: "Output", text: "A cleaner Control Tower surface with current live status." },
-      { label: "Alert", text: "Only if the display, data, or refresh path needs repair." },
-    ];
-  }
-
-  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) {
-    return [
-      { label: "Input", text: "Roster state, injury news, waiver pool, and matchup context." },
-      { label: "Checks", text: "Compares add/drop edge, ownership, role changes, and claim timing." },
-      { label: "Output", text: "Candidate, reason, and decision timing." },
-      { label: "Alert", text: "Only if a roster move looks time-sensitive or high-confidence." },
-    ];
-  }
-
   if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(text)) {
     return [
       { label: "Input", text: "Gameweek schedule, card eligibility, probable starters, and lineups." },
@@ -3543,21 +2620,30 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     ];
   }
 
+  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) {
+    return [
+      { label: "Input", text: "Roster state, injury news, waiver pool, and matchup context." },
+      { label: "Checks", text: "Compares add/drop edge, ownership, role changes, and claim timing." },
+      { label: "Output", text: "Actionable candidate, reason, and when Josh must decide." },
+      { label: "Alert", text: "Only if a roster move looks time-sensitive or high-confidence." },
+    ];
+  }
+
   if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) {
     return [
-      { label: "Input", text: "Local live Brain Feed rows, sidecars, and agent heartbeats." },
+      { label: "Input", text: "Live Work Board rows, local sidecars, and agent heartbeats." },
       { label: "Checks", text: "Confirms each agent is fresh, readable, and mapped to the right tile." },
       { label: "Output", text: "Updated agent cards with current Complete, Next, and live status." },
       { label: "Alert", text: "Only if a visible row is stale or an agent stops reporting." },
     ];
   }
 
-  if (/signal|intelligence|news|newsletter|breaking/.test(text)) {
+  if (/mission control|kiosk|dashboard|react|watchdog|refresh/.test(text)) {
     return [
-      { label: "Input", text: "Latest J.A.I.N breaking rows, newsfeed rows, and newsletter trends." },
-      { label: "Checks", text: "Dedupes stories and scores relevance without crowding Control Tower." },
-      { label: "Output", text: "Telegram push or archived source data when something is worth attention." },
-      { label: "Alert", text: "Only if a source is broken or a high-confidence item needs Josh." },
+      { label: "Input", text: "Dashboard data, sidecars, kiosk server, and Chrome display state." },
+      { label: "Checks", text: "Verifies build health, data freshness, layout canaries, and alerts." },
+      { label: "Output", text: "A refreshed Control Tower surface and clean kiosk health status." },
+      { label: "Alert", text: "Only if the display, data, or refresh path needs repair." },
     ];
   }
 
@@ -3574,7 +2660,7 @@ function expectedNextBullets(job?: MissionControlState["jobs"][number] | null, a
     return [
       { label: "Input", text: `${owner} heartbeat, task queue, command route, and capability state.` },
       { label: "Checks", text: "Confirms the route is reachable and the next job has a clear owner." },
-      { label: "Output", text: "Ready/watch result, next owner, and any needed handoff." },
+      { label: "Output", text: "Ready/watch status plus the next handoff or repair instruction." },
       { label: "Alert", text: "Only if auth, routing, or command execution blocks the job." },
     ];
   }
@@ -3597,8 +2683,6 @@ function nextScheduleFromJob(job: MissionControlState["jobs"][number], nowMs: nu
   if (intervalMatch) {
     const interval = Number(intervalMatch[1]) * 60_000;
     if (!interval) return null;
-    const windowed = nextWindowedInterval(schedule, interval, last, nowMs);
-    if (windowed) return windowed;
     if (!last) return nowMs + interval;
     const elapsed = Math.max(0, nowMs - last);
     return last + (Math.floor(elapsed / interval) + 1) * interval;
@@ -3622,60 +2706,9 @@ function nextScheduleFromJob(job: MissionControlState["jobs"][number], nowMs: nu
   return candidate.getTime();
 }
 
-function parseClockMinutes(value?: string | null) {
-  const match = missionText(value || "").match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
-  if (!match) return null;
-  const hour12 = Number(match[1]);
-  const minute = Number(match[2] || 0);
-  const ampm = match[3].toUpperCase();
-  if (!hour12 || minute < 0 || minute > 59) return null;
-  let hour = hour12 % 12;
-  if (ampm === "PM") hour += 12;
-  return hour * 60 + minute;
-}
-
-function scheduleWindowMinutes(schedule: string) {
-  const match = schedule.match(/\(([^()]+?)\s*(?:to|-|\u2013|\u2014)\s*([^()]+?)(?:\s+ET|\s+EST|\s+EDT)?\)/i);
-  if (!match) return null;
-  const start = parseClockMinutes(match[1]);
-  const end = parseClockMinutes(match[2]);
-  if (start === null || end === null) return null;
-  return { start, end };
-}
-
-function dateAtClockMinutes(baseMs: number, minutes: number, dayOffset = 0) {
-  const date = new Date(baseMs);
-  date.setDate(date.getDate() + dayOffset);
-  date.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
-  return date.getTime();
-}
-
-function nextWindowedInterval(schedule: string, interval: number, last: number, nowMs: number) {
-  const window = scheduleWindowMinutes(schedule);
-  if (!window) return null;
-  const startToday = dateAtClockMinutes(nowMs, window.start);
-  let endToday = dateAtClockMinutes(nowMs, window.end);
-  if (endToday <= startToday) endToday += 24 * 60 * 60_000;
-
-  if (nowMs < startToday) return startToday;
-  if (nowMs > endToday) return dateAtClockMinutes(nowMs, window.start, 1);
-
-  if (!last || last < startToday || last > endToday) {
-    const firstCandidate = nowMs + interval;
-    return firstCandidate <= endToday ? firstCandidate : dateAtClockMinutes(nowMs, window.start, 1);
-  }
-
-  const elapsed = Math.max(0, nowMs - last);
-  const candidate = last + (Math.floor(elapsed / interval) + 1) * interval;
-  if (candidate < startToday) return startToday;
-  if (candidate > endToday) return dateAtClockMinutes(nowMs, window.start, 1);
-  return candidate;
-}
-
 function countdownLabel(targetMs?: number, nowMs = Date.now()) {
   if (!targetMs) return "";
-  const diff = targetMs - nowMs;
-  if (diff <= 0) return "now";
+  const diff = Math.max(0, targetMs - nowMs);
   const mins = Math.ceil(diff / 60_000);
   if (mins < 60) return `t-${mins}mins`;
   const hours = Math.floor(mins / 60);
@@ -3688,44 +2721,20 @@ function jobIsSchedulable(job: MissionControlState["jobs"][number]) {
   const status = String(job.status || "").toLowerCase();
   if (!job.schedule || status === "error" || status === "blocked") return false;
   if (/test|smoke|placeholder/.test(text)) return false;
-  if (/feedback loop|intel_feedback_loop/.test(text)) return false;
-  if (/health check|medic|silence detector/.test(text)) return false;
   return true;
 }
 
 function buildAgentIdleContext(agent: AgentId, state: MissionControlState, nowMs: number): AgentIdleContext {
   const agentJobs = state.jobs.filter((job) => job.agent_id === agent);
-  const agentStatus = state.statuses.find((status) => status.agent_id === agent);
-  const agentStatusValue = String(agentStatus?.status || "").toLowerCase();
-  const agentStatusDone = ["done", "complete", "completed"].includes(agentStatusValue);
-  const completedStatusStep = agentStatus?.steps.find((step) => {
-    const stepStatus = String(step.status || "").toLowerCase();
-    const stepKind = String(step.kind || "").toLowerCase();
-    const stepTitle = missionText(step.label || step.title || "");
-    const genericReadyStep = /online and ready|status check|visibility heartbeat/i.test(stepTitle);
-    return ["done", "complete", "completed"].includes(stepStatus)
-      && (agentStatusDone || stepKind === "complete" || agentStatusValue === "idle")
-      && !genericReadyStep;
-  });
   const completedJob = [...agentJobs]
     .filter((job) => ["done", "completed", "ok"].includes(String(job.status || "").toLowerCase()) || Boolean(job.completed_at))
     .sort((a, b) => timeValue(b.completed_at || b.lastRun || b.updated_at) - timeValue(a.completed_at || a.lastRun || a.updated_at))[0];
   const completedEvent = [...state.events]
     .filter((event) => event.agent_id === agent && ["done", "complete", "completed"].includes(String(event.status || event.event_type || "").toLowerCase()))
     .sort((a, b) => timeValue(b.created_at) - timeValue(a.created_at))[0];
-  const completedJobTime = timeValue(completedJob?.completed_at || completedJob?.lastRun || completedJob?.updated_at);
-  const completedEventTime = timeValue(completedEvent?.created_at);
-  const completedStatusStepTime = completedStatusStep ? timeValue(agentStatus?.updated_at) : 0;
-  const latestCompletionTitle = [
-    { title: completedStatusStep?.label || completedStatusStep?.title, time: completedStatusStepTime },
-    { title: completedEvent?.title, time: completedEventTime },
-    { title: completedJob?.title, time: completedJobTime },
-  ]
-    .filter((candidate) => Boolean(candidate.title))
-    .sort((a, b) => b.time - a.time)[0]?.title;
   const complete = compactTaskText(
-    latestCompletionTitle,
-    "No completed task reported yet",
+    completedJob?.title || completedEvent?.title,
+    agent === "joshex" ? "No recent JOSHeX completion reported" : `No recent ${AGENTS[agent].label} completion reported`,
   );
   const nextCandidates = agentJobs
     .filter(jobIsSchedulable)
@@ -3743,7 +2752,7 @@ function buildAgentIdleContext(agent: AgentId, state: MissionControlState, nowMs
   }
   return {
     complete,
-    nextTitle: compactJobTitle(next.job),
+    nextTitle: compactTaskText(next.job.title, "scheduled task"),
     nextBullets: expectedNextBullets(next.job, agent),
     nextAt: next.nextAt,
     countdown: countdownLabel(next.nextAt, nowMs),
@@ -3786,7 +2795,7 @@ function buildActiveAgentBrief(
     || looseStatus.route
     || "Agent runtime";
   const next = idleContext.countdown
-    ? `${countdownShortText(idleContext.countdown)} + ${idleContext.nextTitle}`
+    ? `${idleContext.countdown} + ${idleContext.nextTitle}`
     : idleContext.nextTitle;
   const issue = looseStatus.blocker || looseStatus.issue || looseStatus.error || "None";
   const steps = liveStepRows(status);
@@ -3796,7 +2805,7 @@ function buildActiveAgentBrief(
     ...stepRows,
   ];
   if (String(route).trim() && String(route).trim() !== "Agent runtime") {
-    rows.push({ label: "Tool", text: compactText(cleanHeadlineText(String(route)), 84) });
+    rows.push({ label: "Tool", text: compactText(String(route), 84) });
   }
   rows.push({ label: "Next", text: compactText(next, 84) });
   if (String(issue).trim() && !/^none$/i.test(String(issue).trim())) {
@@ -3814,15 +2823,6 @@ function nextClockLabel(nextAt?: number) {
   return day === "Today" ? time : `${day} ${time}`;
 }
 
-function nextCountdownClockLabel(nextAt?: number) {
-  const clock = nextClockLabel(nextAt);
-  if (!nextAt || !clock) return "";
-  const countdown = nextAt > Date.now()
-    ? countdownShortText(countdownLabel(nextAt))
-    : "";
-  return countdown ? `${countdown} · ${clock}` : clock;
-}
-
 function headlineShortText(value: string, maxLength = 54) {
   const text = missionText(value).replace(/\s+/g, " ").trim();
   if (text.length <= maxLength) return text;
@@ -3836,50 +2836,30 @@ function headlineShortText(value: string, maxLength = 54) {
   return kept.join(" ") || text.slice(0, maxLength).trim();
 }
 
-function cleanHeadlineText(value: string) {
-  return missionText(value)
+function headlineTitle(value: string) {
+  return headlineShortText(value
     .replace(/\s*\([^)]*\)/g, "")
-    .replace(/^(?:JOSHeX|Josh 2\.0|JAIMES|J\.A\.I\.N)\s+scheduled:\s*/i, "")
-    .replace(/^(?:Task|Step|Done):\s*/i, "")
     .replace(/^make\s+/i, "")
     .replace(/^fix\s+/i, "")
     .replace(/^improve\s+/i, "")
-    .replace(/\bbreaking news scanner\b/i, "Breaking News Scanner")
-    .replace(/\bx watchlist monitor\b/i, "X Watchlist Monitor")
     .replace(/distance-readable/i, "readability")
     .replace(/information density/i, "info density")
     .replace(/\bMorning Inbox Triage\b/i, "Inbox Triage")
     .replace(/\bFantasy Waiver Review\b/i, "Fantasy Waivers")
-    .replace(/\bControl Tower Refresh\b/i, "Control Tower Refresh")
-    .replace(/\bBrain Feed Server\b/i, "Brain Feed Refresh")
-    .replace(/\bintelligence feed\b/i, "Intelligence Feed")
-    .replace(/\bintelligence feedback loop\b/i, "Intelligence Feedback Loop")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function headlineTitle(value: string, maxLength = 46) {
-  return headlineShortText(cleanHeadlineText(value), maxLength);
-}
-
-function activeHeadlineTitle(value: string) {
-  return cleanHeadlineText(value) || "Active work";
+    .replace(/\bMission Control Refresh\b/i, "Control Tower Refresh")
+    .replace(/\bBrain Feed Server\b/i, "Live Work Board Refresh"), 34);
 }
 
 function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
-  const titleTopic = classifierText(title);
-  const text = classifierText(`${title} ${rows.map((row) => row.text).join(" ")}`);
-  if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(titleTopic)) return "Source-backed signals.";
-  if (/control tower|kiosk|dashboard|react|watchdog|refresh|live display|visual|readability|layout|ui/.test(titleTopic)) return "Dashboard health check.";
+  const text = `${title} ${rows.map((row) => row.text).join(" ")}`.toLowerCase();
   if (/gmail|inbox|email|mail triage|unread/.test(text)) return "Urgent-only inbox review.";
-  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Injuries, waivers, roster risk.";
-  if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Mission choices or blockers.";
-  if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(text)) return "Slots, deadlines, risk.";
-  if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Live agent status.";
-  if (/context sync|agent context|shared context/.test(text)) return "Keeps agent state aligned.";
-  if (/control tower|kiosk|dashboard|react|watchdog|refresh/.test(text)) return "Dashboard health.";
-  if (/signal|intelligence|news|newsletter|breaking/.test(text)) return "Source-backed signals.";
-  if (/memory|backup|sync|manifest|recovery/.test(text)) return "Confirms sync status or repair note.";
+  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Checks injuries, waivers, and roster moves.";
+  if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Checks missions, rewards, and blockers.";
+  if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(text)) return "Validates slots, deadlines, and risk.";
+  if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Confirms each agent is fresh and mapped.";
+  if (/mission control|kiosk|dashboard|react|watchdog|refresh/.test(text)) return "Refreshes data and checks kiosk health.";
+  if (/signal|intelligence|news|newsletter|breaking/.test(text)) return "Dedupes sources into high-signal alerts.";
+  if (/memory|backup|sync|manifest|recovery/.test(text)) return "Checks memory freshness and sync.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Checks routes, ownership, and handoffs.";
   const row = rows.find((item) => item.label.toLowerCase() === "output")
     || rows.find((item) => item.label.toLowerCase() === "checks")
@@ -3890,7 +2870,6 @@ function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
 function readoutFit(value: string, maxLength = 68) {
   const text = missionText(value)
     .replace(/\s+/g, " ")
-    .replace(/^(?:last|complete|completed):\s*/i, "")
     .replace(/\.$/, "")
     .trim();
   if (!text) return "";
@@ -3899,42 +2878,30 @@ function readoutFit(value: string, maxLength = 68) {
 
 function readoutSummary(value?: string | null, fallback = "Scheduled check.", maxLength = 68) {
   const text = compactText(value || fallback, 160).replace(/\.\.\.$/, "").trim();
-  const lower = classifierText(text);
+  const lower = text.toLowerCase();
   if (!text) return fallback;
-  if (/concise triage status|items josh actually needs/i.test(lower)) return "Triage summary.";
-  if (/mission choices|submission\/claim status|blocked action/i.test(lower)) return "Mission status.";
-  if (/updated agent cards|current complete, next|live status/i.test(lower)) return "Live agent cards.";
-  if (/refreshed control tower surface|clean kiosk health/i.test(lower)) return "Dashboard health.";
-  if (/high-confidence item|source is broken|worth attention/i.test(lower)) return "Source-backed signals.";
-  if (/confirmed backup state|clear repair note|sync fails/i.test(lower)) return "Confirmed sync status or repair note.";
+  if (/concise triage status|items josh actually needs/i.test(lower)) return "Triage summary plus Josh-only items.";
   if (/telegram push|archived source data|source data/i.test(lower)) return "Publishes or archives source updates.";
-  if (/gmail|inbox|email|mail triage|unread/.test(lower)) return "Urgent Gmail + Josh asks.";
-  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(lower)) return "Waivers, injuries, roster risk.";
-  if (/daily mission|missions|claim|reward|sorare/.test(lower)) return "Missions, rewards, blockers.";
-  if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(lower)) return "Lineups, deadlines, risk.";
-  if (/brain feed|heartbeat|visibility|agent status|status check/.test(lower)) return "Rows, sidecars, live path.";
-  if (/agent card|agent row|complete, next|readout|text fit|objective/.test(lower)) return "Readable live rows.";
-  if (/context sync|agent context|shared context/.test(lower)) return "Shared agent status.";
-  if (/daily readiness|system-health|system health|health pass|agent readiness/.test(lower)) return "Readiness + handoff risks.";
-  if (/next readout|next job|top next|calendar block|daily calendar|visible calendar/.test(lower)) return "Next job and owner.";
-  if (/today'?s jobs|today jobs|daily calendar|calendar fit|scheduler inventory/.test(lower)) return "Daily calendar fit.";
-  if (/(?:live|current)(?: josh 2\.0)? display|wall display|screen balance|visual hierarchy|visual audit|kiosk audit|display balance|scanability|readability improvement|clutter reduction|visual noise|minimal, high value cleanup|source-of-truth|source of truth|trust at a glance|professional personal assistant/.test(lower)) return "Live layout cleanup.";
-  if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Breaking + newsletter signals.";
-  if (/control tower|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";
-  if (/memory|backup|sync|manifest|recovery/.test(lower)) return "Memory + sync health.";
-  if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(lower)) return "Routes and handoffs.";
-  if (/google|calendar|drive|auth|oauth|scope/.test(lower)) return "Google auth health.";
+  if (/gmail|inbox|email|mail triage|unread/.test(lower)) return "Urgent Gmail triage and Josh-only asks.";
+  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(lower)) return "Checks waivers, injuries, and roster moves.";
+  if (/daily mission|missions|claim|reward|sorare/.test(lower)) return "Checks Sorare missions, rewards, and blockers.";
+  if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(lower)) return "Validates Sorare lineups, deadlines, and risk.";
+  if (/brain feed|heartbeat|visibility|agent status|status check/.test(lower)) return "Checks agent rows, sidecars, and live publish path.";
+  if (/agent card|agent row|complete, next|readout|text fit|objective/.test(lower)) return "Summarizes agent work into readable live rows.";
+  if (/mission control|kiosk|dashboard|react|watchdog|refresh|ui/.test(lower)) return "Updates data and verifies the live kiosk.";
+  if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Refreshes breaking and newsletter signals.";
+  if (/memory|backup|sync|manifest|recovery/.test(lower)) return "Checks memory freshness and recovery sync.";
+  if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(lower)) return "Checks routes, ownership, and handoffs.";
+  if (/google|calendar|drive|auth|oauth|scope/.test(lower)) return "Checks Google access and auth health.";
   if (/xai|grok|gemini|model|provider|usage|cost/.test(lower)) return "Tracks model route, usage, and provider health.";
   return readoutFit(text, maxLength);
 }
 
 function countdownShortText(value: string) {
-  const text = value.trim();
-  if (/^now$/i.test(text)) return "now";
-  return text
-    .replace(/^t-(\d+)mins?$/i, "in $1m")
-    .replace(/^t-(\d+)h\s+(\d+)m$/i, "in $1h $2m")
-    .replace(/^t-(\d+)h$/i, "in $1h");
+  return value
+    .replace(/^t-(\d+)mins?$/i, "$1m")
+    .replace(/^t-(\d+)h\s+(\d+)m$/i, "$1h $2m")
+    .replace(/^t-(\d+)h$/i, "$1h");
 }
 
 function nextReadoutSummary(value?: string | null) {
@@ -3952,42 +2919,6 @@ function briefText(rows: AgentBriefRow[], labels: string[], fallback: string, ma
   return readoutSummary(match?.text || fallback, fallback, maxLength);
 }
 
-function idleAgentTopic(idleContext: AgentIdleContext, rows: AgentBriefRow[]) {
-  const title = classifierText(idleContext.nextTitle);
-  if (title && !/no upcoming|awaiting instruction/.test(title)) return title;
-  return classifierText(rows.map((row) => `${row.label} ${row.text}`).join(" "));
-}
-
-function idleChecksSummary(agent: AgentId, idleContext: AgentIdleContext, rows: AgentBriefRow[]) {
-  const text = idleAgentTopic(idleContext, rows);
-  if (/gmail|inbox|email|mail triage|unread/.test(text)) return "Urgent Gmail + Josh asks.";
-  if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Missions, rewards, blockers.";
-  if (/lineup|lineups|gw|game-week|pre-lock|deadline|submit/.test(text)) return "Lineups, deadlines, risk.";
-  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Waivers, injuries, roster risk.";
-  if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(text)) return "Source-backed signals.";
-  if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Rows, sidecars, live path.";
-  if (/context sync|agent context|shared context/.test(text)) return "Shared agent status.";
-  if (/control tower|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Live kiosk health.";
-  if (/memory|backup|sync|manifest|recovery/.test(text)) return "Memory + sync health.";
-  if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Routes and handoffs.";
-  return briefText(rows, ["Checks", "Input"], `${AGENTS[agent].label} schedule, sidecars, and latest state.`, 72);
-}
-
-function idleOutputSummary(agent: AgentId, idleContext: AgentIdleContext, rows: AgentBriefRow[], fallback: string) {
-  const text = idleAgentTopic(idleContext, rows);
-  if (/gmail|inbox|email|mail triage|unread/.test(text)) return "Triage summary.";
-  if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Mission status.";
-  if (/lineup|lineups|gw|game-week|pre-lock|deadline|submit/.test(text)) return "Draft/submit status.";
-  if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Move, reason, timing.";
-  if (/signal feed|intelligence|news|newsletter|breaking|scanner|x watchlist/.test(text)) return "Source-backed updates.";
-  if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Current live cards.";
-  if (/context sync|agent context|shared context/.test(text)) return "Aligned agent state.";
-  if (/control tower|kiosk|dashboard|react|watchdog|refresh|layout|ui/.test(text)) return "Dashboard health.";
-  if (/memory|backup|sync|manifest|recovery/.test(text)) return "Sync or repair note.";
-  if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Ready/watch status.";
-  return briefText(rows, ["Output"], fallback, 72);
-}
-
 function buildAgentInsights(
   activeFocus: boolean,
   briefRows: AgentBriefRow[],
@@ -3996,85 +2927,51 @@ function buildAgentInsights(
   status: AgentStatus,
   currentStep: string,
   nextOutput: string,
-  routineFocus = false,
 ): AgentInsightRow[] {
-  const currentSource = activeWork?.title || status.objective || currentStep || activeWork?.detail || status.detail;
-  const currentSummary = readoutSummary(currentSource, "Working through the current step.", 72);
-  const activeOutputSummary = activeWork?.title
-    ? briefOutputForHeadline(activeWork.title, briefRows)
-    : readoutSummary(
-        status.detail || currentStep || nextOutput,
-        "Reports the result.",
-        72,
-      );
-  const outputSummary = activeOutputSummary.toLowerCase() === currentSummary.toLowerCase()
-    ? routineFocus
-      ? "Aligned; only reports mismatches."
-      : "Result or blocker."
-    : activeOutputSummary;
+  const next = idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle;
+  const nextSummary = nextReadoutSummary(next);
+  const currentSummary = readoutSummary(activeWork?.detail || activeWork?.title || currentStep || status.detail, "Working through the current step.", 72);
   if (activeFocus) {
-    const actionLabel = routineFocus ? "Routine" : "Doing";
-    const actionTone: AgentInsightRow["tone"] = routineFocus ? "default" : "active";
     const issue = String((status as AgentStatus & Record<string, unknown>).blocker || (status as AgentStatus & Record<string, unknown>).issue || "").trim();
     if (issue) {
       return [
-        { label: actionLabel, text: currentSummary, tone: actionTone },
+        { label: "Doing", text: currentSummary, tone: "active" },
         { label: "Watch", text: readoutSummary(issue, "Needs review.", 72), tone: "watch" },
+        { label: "Next", text: nextSummary },
       ];
     }
     return [
-      { label: actionLabel, text: currentSummary, tone: actionTone },
-      { label: "Output", text: outputSummary, tone: "good" },
+      { label: "Doing", text: currentSummary, tone: "active" },
+      { label: "Output", text: readoutSummary(nextOutput, "Reports the result.", 72), tone: "good" },
+      { label: "Next", text: nextSummary },
     ];
   }
   return [
-    { label: "Checks", text: idleChecksSummary(status.agent_id, idleContext, briefRows) },
-    { label: "Output", text: idleOutputSummary(status.agent_id, idleContext, briefRows, nextOutput), tone: "good" },
+    { label: "Checks", text: briefText(briefRows, ["Checks", "Input"], "Scheduled inputs and agent state.", 72) },
+    { label: "Output", text: briefText(briefRows, ["Output"], nextOutput, 72), tone: "good" },
+    { label: "Next", text: nextSummary },
   ];
 }
 
-function agentInsightDisplayLabel(label: string) {
-  if (label === "Checks") return "Watches";
-  if (label === "Output") return "Reports";
-  if (label === "Routine") return "Watches";
-  return label;
-}
-
-function agentHeadline(
-  activeFocus: boolean,
-  objectiveText: string,
-  idleContext: AgentIdleContext,
-  idleRows: AgentBriefRow[],
-  routineFocus = false,
-  activeDetail = "",
-): AgentHeadline {
+function agentHeadline(activeFocus: boolean, objectiveText: string, idleContext: AgentIdleContext, idleRows: AgentBriefRow[]): AgentHeadline {
   const nextTitle = headlineTitle(idleContext.nextTitle);
   const nextOutput = briefOutputForHeadline(nextTitle, idleRows);
   if (activeFocus) {
-    const current = activeHeadlineTitle(objectiveText || "Active work");
-    const routineDescription = readoutSummary(
-      activeDetail || objectiveText,
-      "Keeps background status current.",
-      86,
-    );
+    const current = headlineTitle(objectiveText || "Active work");
     return {
-      eyebrow: routineFocus ? "Keeping current" : "Active now",
-      title: current,
-      description: routineFocus ? routineDescription : `Next: ${nextTitle} - ${nextOutput}`,
+      title: `Now: ${current}`,
+      description: `Next: ${nextTitle} - ${nextOutput}`,
     };
   }
   if (!idleContext.nextAt && /awaiting instruction/i.test(idleContext.nextTitle)) {
     return {
-      eyebrow: "Ready",
-      title: "Awaiting instruction",
-      description: "Next task will publish progress to Brain Feed.",
+      title: "Ready: awaiting instruction",
+      description: "Next task will publish progress to the Live Work Board.",
     };
   }
-  const when = nextCountdownClockLabel(idleContext.nextAt) || idleContext.countdown || "soon";
+  const when = nextClockLabel(idleContext.nextAt) || idleContext.countdown || "soon";
   return {
-    eyebrow: "Up next",
-    time: when,
-    title: nextTitle,
+    title: `Next ${when}: ${nextTitle}`,
     description: nextOutput,
   };
 }
@@ -4094,71 +2991,37 @@ function AgentHeroCard({
 }) {
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
   const [objectiveScroll, setObjectiveScroll] = useState({ active: false, distance: 0, duration: 18 });
-  const freshness = agentCardFreshnessClass(status);
+  const freshness = freshnessClass(status.updated_at);
   const objectiveText = missionText(status.objective);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
-  const statusWorkingFresh = agentIsWorking(status) && isFreshActiveTimestamp(status.updated_at);
+  const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase()) && isFreshActiveTimestamp(status.updated_at);
   const activeFocus = activeWorkFresh || statusWorkingFresh;
+  const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
   const currentStep = status.steps?.find((step) => step.label || step.title)?.label
     || status.steps?.find((step) => step.label || step.title)?.title
     || status.current_tool
     || status.detail
     || AGENTS[agent].role;
-  const statusHasFreshObjective = Boolean(objectiveText)
-    && isFreshActiveTimestamp(status.updated_at)
-    && !isReadyHeartbeatStatus(status);
-  const statusActiveWork: WorkItem | undefined = (statusWorkingFresh || (activeFocus && statusHasFreshObjective)) ? {
-    id: `status-${agent}`,
-    agent_id: agent,
-    title: compactText(status.objective || currentStep || AGENTS[agent].role, 72),
-    detail: compactText(status.detail || status.current_tool || status.objective || currentStep || "Current Brain Feed objective", 96),
-    state: "working",
-    updated_at: status.updated_at,
-    source: "agent",
-    target: "brain-feed",
-    priority: 90,
-  } : undefined;
-  const activeWorkDetail = statusActiveWork || (activeWorkFresh ? activeWork : undefined);
-  const routineFocus = activeFocus && workItemIsRoutineActivity(activeWorkDetail, status);
   const idleBriefRows = [
     ...idleContext.nextBullets.slice(0, 4),
     { label: "Last", text: compactText(idleContext.complete, 84) },
-    { label: "Next", text: compactText(idleContext.countdown ? `${countdownShortText(idleContext.countdown)} + ${idleContext.nextTitle}` : idleContext.nextTitle, 84) },
+    { label: "Next", text: compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 84) },
   ];
-  const briefRows = activeFocus
-    ? buildActiveAgentBrief(status, activeWorkDetail, idleContext, missionText(currentStep))
-    : idleBriefRows;
-  const headline = agentHeadline(
-    activeFocus,
-    activeWorkDetail?.title || objectiveText,
-    idleContext,
-    idleBriefRows,
-    routineFocus,
-    activeWorkDetail?.detail || status.detail || currentStep,
-  );
-  const nextSupport = compactText(idleContext.countdown ? `${countdownShortText(idleContext.countdown)} + ${idleContext.nextTitle}` : idleContext.nextTitle, 70);
-  const lastSupport = readoutFit(idleContext.complete || "No completed task reported yet", 68);
-  const nowSupport = readoutSummary(activeWorkDetail?.detail || activeWorkDetail?.title || currentStep, "Working through the current step.", 58);
+  const headline = agentHeadline(activeFocus, objectiveText, idleContext, idleBriefRows);
   const supportNote = activeFocus
-    ? routineFocus
-      ? `Now: keeping live status current · Next: ${nextSupport}`
-      : `Now: ${nowSupport} · Next: ${nextSupport}`
-    : `Last: ${lastSupport} · Next: ${nextSupport}`;
-  const visualState = agentVisualState(status, activeFocus, activeWork, routineFocus);
-  const stepTrail = stepTrailForAgent(status, activeFocus, activeWork, routineFocus);
+    ? `Current: ${readoutSummary(activeWorkDetail?.detail || activeWorkDetail?.title || currentStep, "Working through the current step.", 78)}`
+    : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`;
+  const visualState = agentVisualState(status, activeFocus, activeWork);
+  const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
   const hotness = Math.max(0, 1 - Math.min(updateAgeMs, 12 * 60_000) / (12 * 60_000));
-  const pulseSpeed = routineFocus
-    ? Math.max(2.2, 3.1 - hotness * 0.35)
-    : activeFocus
+  const pulseSpeed = activeFocus
     ? Math.max(1.05, 1.75 - hotness * 0.45)
     : visualState === "waiting" || visualState === "blocked"
       ? 2.35
       : 0;
-  const railSpeed = routineFocus ? 3.4 : activeFocus ? Math.max(1.6, 2.8 - hotness * 0.7) : 2.8;
-  const headerStateLabel = agentHeaderStateLabel(visualState, routineFocus, activeFocus);
-  const headerDotClass = agentHeaderDotClass(visualState, routineFocus, activeFocus);
+  const railSpeed = activeFocus ? Math.max(1.6, 2.8 - hotness * 0.7) : 2.8;
   useEffect(() => {
     const measure = () => {
       const node = objectiveRef.current;
@@ -4180,7 +3043,7 @@ function AgentHeroCard({
   }, [headline.title, headline.description]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${routineFocus ? "is-routine-focus" : activeFocus ? "is-working-focus" : "is-up-next-focus"}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"}${changedRowClass(changed)}`}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,
@@ -4190,9 +3053,12 @@ function AgentHeroCard({
       <span className="agent-pulse-ring" aria-hidden="true" />
       <span className="agent-live-rail" aria-hidden="true" />
       <header>
-        <span className={`dot ${headerDotClass}`} />
-        <strong>{AGENTS[agent].label}</strong>
-        <em>{headerStateLabel}</em>
+        <span className={`dot ${statusClass(status.status)}`} />
+        <span className="agent-name-lockup">
+          <b className="agent-role-badge">{AGENTS[agent].roleBadge}</b>
+          <strong>{AGENTS[agent].label}</strong>
+        </span>
+        <em>{agentOperatingState(status)} · {ageLabel(status.updated_at)}</em>
       </header>
       <div
         className={`agent-step-trail ${showStepTrail ? "" : "is-empty"}`}
@@ -4215,10 +3081,6 @@ function AgentHeroCard({
         } as React.CSSProperties}
       >
         <span className="agent-objective-text">
-          <span className="agent-objective-meta">
-            <b>{headline.eyebrow}</b>
-            {headline.time ? <em>{headline.time}</em> : null}
-          </span>
           <span className="agent-objective-main">{headline.title}</span>
           <span className="agent-objective-description">{headline.description}</span>
         </span>
@@ -4265,6 +3127,7 @@ function AgentRail({ selected, statuses, onSelect }: { selected: AgentId; status
           >
             <span className={`dot ${statusClass(status?.status)}`} />
             <span>
+              <b className="agent-role-badge">{AGENTS[agent].roleBadge}</b>
               <strong>{AGENTS[agent].label}</strong>
               <small>{AGENTS[agent].role}</small>
             </span>
@@ -4281,7 +3144,7 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
     <section className="brain-feed">
       <div className="panel-title">
         <div>
-          <p>Brain Feed</p>
+          <p>Live Work Board</p>
           <h2>{missionText(selectedStatus.objective)}</h2>
         </div>
         <span className={`status-pill ${statusClass(selectedStatus.status)}`}>{selectedStatus.status}</span>
@@ -4313,7 +3176,7 @@ function BrainFeed({ events, selectedStatus }: { events: MissionControlState["ev
 type JobRow = MissionControlState["jobs"][number];
 
 const JOB_CATEGORY_RULES: Array<{ key: string; label: string; matcher: (job: JobRow, text: string) => boolean }> = [
-  { key: "mission-control", label: "Control Tower", matcher: (_job, text) => /control tower|dashboard|brain feed|react|kiosk|v2/.test(text) },
+  { key: "mission-control", label: "Control Tower", matcher: (_job, text) => /mission control|control tower|dashboard|brain feed|live work board|react|kiosk|v2/.test(text) },
   { key: "inbox", label: "Inbox & Handoffs", matcher: (_job, text) => /inbox|approval|handoff|ledger/.test(text) },
   { key: "sorare", label: "Sorare MLB", matcher: (_job, text) => /sorare|mlb|baseball/.test(text) },
   { key: "fantasy", label: "Fantasy Ops", matcher: (_job, text) => /fantasy|lineup|waiver|roster|pitcher|player/.test(text) },
@@ -4326,19 +3189,6 @@ const JOB_CATEGORY_ORDER = [...JOB_CATEGORY_RULES.map((rule) => rule.key), "othe
 function jobCategory(job: JobRow) {
   const text = `${job.title} ${job.detail} ${job.tool} ${job.agent_id}`.toLowerCase();
   return JOB_CATEGORY_RULES.find((rule) => rule.matcher(job, text)) || { key: "other", label: "Other", matcher: () => true };
-}
-
-function compactCategoryLabel(category: { key: string; label: string }) {
-  const labels: Record<string, string> = {
-    "mission-control": "Mission",
-    inbox: "Inbox",
-    sorare: "Sorare",
-    fantasy: "Fantasy",
-    "agent-control": "Agents",
-    automation: "Auto",
-    other: "Ops",
-  };
-  return labels[category.key] || category.label;
 }
 
 function categoryClass(job: JobRow) {
@@ -4479,9 +3329,7 @@ function compactJobDetail(job: JobRow, fallback?: string, categoryLabel?: string
   const lower = raw.toLowerCase();
   let detail = raw;
 
-  if (lower.includes("keeps j.a.i.n alert state") || lower.includes("agent context")) {
-    detail = "Keeps agent status aligned";
-  } else if (lower.includes("backing up recovery memory bundle") || lower.includes("scheduled memory/context backup")) {
+  if (lower.includes("backing up recovery memory bundle") || lower.includes("scheduled memory/context backup")) {
     detail = "Memory backup verification";
   } else if (lower.includes("no-submit game-week draft report")) {
     detail = "Builds no-submit GW draft";
@@ -4510,11 +3358,9 @@ function compactJobDetail(job: JobRow, fallback?: string, categoryLabel?: string
   } else if (lower.includes("17:00 et memory backup")) {
     detail = "Memory backup verification";
   } else if (lower.includes("brain feed alerts") || lower.includes("alert strip")) {
-    detail = "Brain Feed alert layout polish";
+    detail = "Live Work Board alert layout polish";
   } else if (lower.includes("post-waiver scan")) {
     detail = "Post-waiver review window";
-  } else if (lower.includes("agent readiness") || lower.includes("system-health") || lower.includes("system health")) {
-    detail = "Checks agent readiness and handoffs";
   } else if (lower.includes("live blocker triage")) {
     detail = "Live blocker triage and refresh fixes";
   } else if (lower.includes("accessibility") && lower.includes("resilience")) {
@@ -4527,7 +3373,6 @@ function compactJobDetail(job: JobRow, fallback?: string, categoryLabel?: string
 function compactJobTitle(job: JobRow) {
   const title = missionText(job.title);
   const lower = title.toLowerCase();
-  if (lower.includes("j.a.i.n context sync") || lower.includes("agent context sync")) return "Agent Context Sync";
   if (lower.includes("sorare pre-lock monitor")) return "Pre-lock monitor";
   if (lower.includes("sorare gw draft report")) return "GW draft report";
   if (lower.includes("gw12 rp t-90")) return "RP T-90 check";
@@ -4547,7 +3392,7 @@ function compactJobTitle(job: JobRow) {
   if (lower.includes("fantasy waiver scan")) return "Fantasy waiver scan";
   if (lower.includes("memory sync")) return "Memory sync";
   if (lower.includes("memory backup")) return "Memory backup";
-  if (lower.includes("moving brain feed")) return "Brain Feed alert strip";
+  if (lower.includes("moving brain feed")) return "Live Work Board alert strip";
   return compactText(title, 42);
 }
 
@@ -4579,19 +3424,18 @@ function localDayLabel(value: string) {
     && date.getMonth() === tomorrow.getMonth()
     && date.getDate() === tomorrow.getDate();
   if (isToday) return "Today";
-  if (isTomorrow) return "Tomorrow";
+  if (isTomorrow) return "Tmrw";
   return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
 function todayRunLabel(job: JobRow) {
   const status = jobStatusValue(job);
-  const rawStatus = String(job.status || "").toLowerCase();
   const next = nextRunTime(job);
   const evidenceTime = job.lastRun || job.completed_at || (["done", "completed"].includes(status) ? job.updated_at : undefined);
   if (status === "missed") return jobIsSoftMissedAutomation(job) ? "Ready" : "Missed today";
   if (job.verifiedToday || sameLocalDay(evidenceTime)) return "Ran today";
   if (status === "active" || status === "running" || status === "queued") return "Now";
-  if (status === "due") return rawStatus === "paused" ? "Ready" : "Ready";
+  if (status === "due") return "Due now";
   if (next && next >= Date.now() - 15 * 60 * 1000) return "Planned today";
   if (status === "upcoming" || status === "scheduled") return "Planned today";
   return job.todayRelevant ? "No run log" : "Not scheduled today";
@@ -4619,7 +3463,7 @@ function nextRunLabel(job: JobRow) {
   if (ampm === "PM") hour += 12;
   const next = new Date();
   next.setHours(hour, minute, 0, 0);
-  const day = next.getTime() > Date.now() ? "Today" : "Tomorrow";
+  const day = next.getTime() > Date.now() ? "Today" : "Tmrw";
   const clock = `${hour12}${minute ? `:${String(minute).padStart(2, "0")}` : ""} ${ampm}`;
   return `Next: ${day} ${clock}`;
 }
@@ -4658,26 +3502,10 @@ function jobRunCells(job: JobRow) {
   };
 }
 
-function calendarBlockRunLabel(block: CalendarJobBlock, run: ReturnType<typeof jobRunCells>) {
-  if (block.tone === "working") return "Now";
-  if (block.tone === "attention") return "Focus";
-  if (block.tone === "done") return block.synthetic ? `${block.count} done` : "Done";
-  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
-  if (status === "missed") return "Overdue";
-  if (status === "paused") return "Paused";
-  if (block.tone === "planned") return block.synthetic ? `${block.count} scheduled` : "Planned";
-  if (block.tone === "ready") return block.synthetic ? `${block.count} ready` : "Ready";
-  return run.today;
-}
-
 function nextRunTime(job: JobRow) {
   const explicit = timeValue(job.nextRun);
   if (explicit) return explicit;
   const schedule = missionText(job.schedule || "");
-  const intervalRun = nextIntervalWindowRunTime(schedule);
-  if (intervalRun) return intervalRun;
-  const simpleIntervalRun = nextSimpleIntervalRunTime(job, schedule);
-  if (simpleIntervalRun) return simpleIntervalRun;
   const timeMatch = schedule.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
   if (!timeMatch) return 0;
   const hour12 = Number(timeMatch[1]);
@@ -4689,59 +3517,6 @@ function nextRunTime(job: JobRow) {
   next.setHours(hour, minute, 0, 0);
   if (next.getTime() < Date.now() - 15 * 60 * 1000) next.setDate(next.getDate() + 1);
   return next.getTime();
-}
-
-function nextSimpleIntervalRunTime(job: JobRow, schedule: string) {
-  const intervalMatch = schedule.match(/\bevery\s+(\d+)\s*(min|mins|minute|minutes|hour|hours|hr|hrs)\b/i);
-  if (!intervalMatch) return 0;
-  const amount = Math.max(1, Number(intervalMatch[1]));
-  const unit = intervalMatch[2].toLowerCase();
-  const intervalMs = /hour|hr/.test(unit) ? amount * 60 * 60 * 1000 : amount * 60 * 1000;
-  const now = Date.now();
-  const last = timeValue(job.lastRun || job.completed_at);
-  if (!last) return now + intervalMs;
-  let next = last + intervalMs;
-  while (next < now - 15 * 60 * 1000) next += intervalMs;
-  return next;
-}
-
-function clockMatchToMinutes(match: RegExpMatchArray) {
-  const hour12 = Number(match[1]);
-  const minute = Number(match[2] || 0);
-  const ampm = match[3].toUpperCase();
-  let hour = hour12 % 12;
-  if (ampm === "PM") hour += 12;
-  return hour * 60 + minute;
-}
-
-function dateAtLocalMinute(day: Date, minuteOfDay: number) {
-  const date = new Date(day);
-  date.setHours(Math.floor(minuteOfDay / 60), minuteOfDay % 60, 0, 0);
-  return date;
-}
-
-function nextIntervalWindowRunTime(schedule: string) {
-  const intervalMatch = schedule.match(/\bevery\s+(\d+)\s*min/i);
-  if (!intervalMatch) return 0;
-  const clocks = [...schedule.matchAll(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi)];
-  if (clocks.length < 2) return 0;
-  const interval = Math.max(1, Number(intervalMatch[1]));
-  const startMinute = clockMatchToMinutes(clocks[0]);
-  const endMinute = clockMatchToMinutes(clocks[1]);
-  const now = new Date();
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
-  if (nowMinute < startMinute) return dateAtLocalMinute(now, startMinute).getTime();
-  if (nowMinute > endMinute) {
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return dateAtLocalMinute(tomorrow, startMinute).getTime();
-  }
-  const elapsed = Math.max(0, nowMinute - startMinute);
-  const nextMinute = startMinute + Math.ceil(elapsed / interval) * interval;
-  if (nextMinute <= endMinute) return dateAtLocalMinute(now, nextMinute).getTime();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return dateAtLocalMinute(tomorrow, startMinute).getTime();
 }
 
 function jobIsSoon(job: JobRow, hours = 4) {
@@ -4783,526 +3558,6 @@ function visibleTimelineJobs(jobs: JobRow[]) {
   const recent = now - windowMs;
   const rows = jobs.filter((job) => jobIsActiveOrNeedsAttention(job, jobs) || timeValue(job.updated_at) >= recent);
   return (rows.length ? rows : jobs.slice(0, 8)).slice(0, 14);
-}
-
-type CalendarBlockTone = "working" | "attention" | "done" | "planned" | "ready";
-
-type CalendarJobBlock = {
-  id: string;
-  job: JobRow;
-  startsAt: Date;
-  hourKey: number;
-  title: string;
-  detail: string;
-  agent: AgentId;
-  category: ReturnType<typeof jobCategory>;
-  tone: CalendarBlockTone;
-  count?: number;
-  synthetic?: boolean;
-  agents?: AgentId[];
-  groupKind?: "system" | "routine";
-};
-
-function startOfLocalDay(date = new Date()) {
-  const value = new Date(date);
-  value.setHours(0, 0, 0, 0);
-  return value;
-}
-
-function calendarWindow() {
-  const start = startOfLocalDay();
-  start.setHours(5, 0, 0, 0);
-  const end = new Date(start);
-  end.setHours(23, 59, 0, 0);
-  return { start, end };
-}
-
-function dateFromTimestamp(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? date : null;
-}
-
-function parseScheduleClockMinutes(schedule?: string | null) {
-  const match = missionText(schedule || "").match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM|A|P)\b/i);
-  if (!match) return null;
-  const hour12 = Number(match[1]);
-  const minute = Number(match[2] || 0);
-  const ampm = match[3].toUpperCase()[0];
-  if (!hour12 || hour12 > 12 || minute < 0 || minute > 59) return null;
-  let hour = hour12 % 12;
-  if (ampm === "P") hour += 12;
-  return hour * 60 + minute;
-}
-
-function scheduledDateToday(job: JobRow) {
-  if (!job.todayRelevant) return null;
-  const schedule = missionText(job.schedule || "");
-  if (!schedule || /on boot|on demand/i.test(schedule)) return null;
-  const minuteOfDay = parseScheduleClockMinutes(schedule);
-  if (minuteOfDay === null) return null;
-  const date = startOfLocalDay();
-  date.setHours(Math.floor(minuteOfDay / 60), minuteOfDay % 60, 0, 0);
-  return date;
-}
-
-function calendarDateForJob(job: JobRow, now = new Date()) {
-  const status = jobStatusValue(job);
-  if (jobIsFreshActive(job) || ["active", "running", "queued"].includes(status)) return now;
-  const scheduled = scheduledDateToday(job);
-  if (scheduled) return scheduled;
-  const last = dateFromTimestamp(job.lastRun || job.completed_at);
-  if (last && sameLocalDay(last.toISOString())) return last;
-  const next = nextRunTime(job);
-  if (next) return new Date(next);
-  const updated = dateFromTimestamp(job.updated_at);
-  if (updated && sameLocalDay(updated.toISOString())) return updated;
-  return null;
-}
-
-function calendarHourKey(date: Date) {
-  const day = startOfLocalDay(date).getTime();
-  const today = startOfLocalDay().getTime();
-  const dayOffset = Math.round((day - today) / (24 * 60 * 60 * 1000));
-  return dayOffset * 24 + date.getHours();
-}
-
-function calendarHourDate(hourKey: number) {
-  const date = startOfLocalDay();
-  date.setDate(date.getDate() + Math.floor(hourKey / 24));
-  date.setHours(((hourKey % 24) + 24) % 24, 0, 0, 0);
-  return date;
-}
-
-function compactCalendarDayLabel(date: Date, dayLabel: string) {
-  if (dayLabel === "Today") return "";
-  return date.toLocaleDateString([], { weekday: "short" });
-}
-
-function calendarHourLabel(hourKey: number) {
-  const date = calendarHourDate(hourKey);
-  const dayLabel = localDayLabel(date.toISOString());
-  const timeLabel = date.toLocaleTimeString([], { hour: "numeric" }).replace(/\s/g, "");
-  const compactDayLabel = compactCalendarDayLabel(date, dayLabel);
-  const compactTimeLabel = dayLabel === "Today" ? timeLabel : timeLabel.replace(/[AP]M$/i, (suffix) => suffix[0].toLowerCase());
-  return dayLabel === "Today" ? compactTimeLabel : `${compactDayLabel} ${compactTimeLabel}`;
-}
-
-function calendarTone(job: JobRow, allJobs: JobRow[]): CalendarBlockTone {
-  if (jobNeedsAttention(job, allJobs)) return "attention";
-  if (jobIsFreshActive(job)) return "working";
-  if (job.verifiedToday || sameLocalDay(job.lastRun || job.completed_at || "")) return "done";
-  const scheduled = scheduledDateToday(job);
-  if (scheduled) {
-    return scheduled.getTime() >= Date.now() - 15 * 60 * 1000 ? "planned" : "ready";
-  }
-  if (nextRunTime(job) >= Date.now() - 15 * 60 * 1000) return "planned";
-  return "ready";
-}
-
-function groupedRoutineDetail(items: CalendarJobBlock[]) {
-  const category = items[0]?.category;
-  const count = items.length;
-  const noun = count === 1 ? "check" : "checks";
-  const groupedText = missionText(items.map((item) => `${item.title} ${item.detail} ${item.job.title} ${item.job.detail}`).join(" ")).toLowerCase();
-  if (items.some((item) => routineCalendarGroupKey(item).endsWith("-system-checks"))) {
-    const agentCount = new Set(items.map((item) => item.agent)).size;
-    const agentLabel = agentCount > 1 ? `${agentCount} agents` : (AGENTS[items[0]?.agent]?.label || "system");
-    return `${count} routine ${noun} · ${agentLabel}`;
-  }
-  if (/breaking news|x watchlist|briefing|feedback loop/.test(groupedText)) {
-    return `${count} signal ${noun} · J.A.I.N`;
-  }
-  const labels: Record<string, string> = {
-    "mission-control": "dashboard checks",
-    "agent-control": "agent readiness checks",
-    automation: "automation checks",
-    inbox: "inbox checks",
-    sorare: "Sorare checks",
-    fantasy: "fantasy checks",
-  };
-  return `${count} ${labels[category?.key || ""] || `${category?.label || "routine"} ${noun}`}`;
-}
-
-function routineCalendarGroupKey(block: CalendarJobBlock) {
-  const text = missionText(`${block.title} ${block.detail} ${block.job.title} ${block.job.detail} ${block.job.tool}`).toLowerCase();
-  const systemRoutine = jobIsRoutineActivity(block.job) && (
-    ["mission-control", "agent-control", "automation"].includes(block.category.key)
-    || /context sync|brain feed server|control tower refresh|agent control checks|automation checks|watchdog|heartbeat|health check|silence detector|error rate|invite sync|calendar sync|appointment sync|chiro invite/.test(text)
-  );
-  if (systemRoutine) return `${block.hourKey}-system-checks`;
-  return `${block.hourKey}-${block.category.key}-${block.agent}`;
-}
-
-function groupedRoutineTitle(items: CalendarJobBlock[], firstBlock: CalendarJobBlock, isSystemGroup: boolean) {
-  if (items.length === 1) return firstBlock.title;
-  if (isSystemGroup) return "System checks";
-  const groupedText = missionText(items.map((item) => `${item.title} ${item.detail} ${item.job.title} ${item.job.detail}`).join(" ")).toLowerCase();
-  if (/breaking news|x watchlist|briefing|feedback loop/.test(groupedText)) return "Signal checks";
-  return `${firstBlock.category.label} checks`;
-}
-
-function buildCalendarJobBlocks(jobs: JobRow[]) {
-  const { start, end } = calendarWindow();
-  const startMs = start.getTime();
-  const endMs = end.getTime();
-  const raw = operatorSortedJobs(jobs, jobs)
-    .map((job) => {
-      const startsAt = calendarDateForJob(job);
-      if (!startsAt) return null;
-      const stamp = startsAt.getTime();
-      if (!Number.isFinite(stamp) || stamp < startMs || stamp > endMs) return null;
-      const category = jobCategory(job);
-      return {
-        id: job.id || `${job.agent_id}-${job.title}-${stamp}`,
-        job,
-        startsAt,
-        hourKey: calendarHourKey(startsAt),
-        title: compactJobTitle(job),
-        detail: compactJobDetail(job, undefined, category.label),
-        agent: job.agent_id,
-        category,
-        tone: calendarTone(job, jobs),
-      } satisfies CalendarJobBlock;
-    })
-    .filter(Boolean) as CalendarJobBlock[];
-
-  const important: CalendarJobBlock[] = [];
-  const routine = new Map<string, CalendarJobBlock[]>();
-  for (const block of raw) {
-    const isPriority = priorityJobKey(block.job) !== "general";
-    const isFocus = block.tone === "attention" || (block.tone === "working" && !jobIsRoutineActivity(block.job));
-    if (isPriority || isFocus) {
-      important.push(block);
-      continue;
-    }
-    const key = routineCalendarGroupKey(block);
-    const rows = routine.get(key) || [];
-    rows.push(block);
-    routine.set(key, rows);
-  }
-
-  const groupedRoutine = [...routine.values()].map((items) => {
-    const first = operatorSortedJobs(items.map((item) => item.job), jobs)[0];
-    const firstBlock = items.find((item) => item.job === first) || items[0];
-    const isSystemGroup = items.some((item) => routineCalendarGroupKey(item).endsWith("-system-checks"));
-    return {
-      ...firstBlock,
-      id: isSystemGroup
-        ? `routine-${firstBlock.hourKey}-system-checks`
-        : `routine-${firstBlock.hourKey}-${firstBlock.category.key}-${firstBlock.agent}`,
-      title: groupedRoutineTitle(items, firstBlock, isSystemGroup),
-      detail: items.length === 1 ? firstBlock.detail : groupedRoutineDetail(items),
-      tone: items.some((item) => item.tone === "working")
-        ? "working"
-        : items.some((item) => item.tone === "done") ? "done" : "ready",
-      count: items.length,
-      synthetic: items.length > 1,
-      agents: Array.from(new Set(items.map((item) => item.agent))),
-      groupKind: isSystemGroup ? "system" : "routine",
-    } satisfies CalendarJobBlock;
-  });
-
-  return [...important, ...groupedRoutine]
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime() || priorityScore(b.job) - priorityScore(a.job))
-    .slice(0, 48);
-}
-
-function calendarJobsForMode(jobs: JobRow[], quietMode: boolean) {
-  if (!quietMode) return jobs;
-  return jobs.filter((job) => (
-    priorityJobKey(job) !== "general"
-    || jobIsActiveOrNeedsAttention(job, jobs)
-    || jobIsSoon(job, 8)
-    || job.todayRelevant
-  ));
-}
-
-function nextVisibleCalendarBlock(jobs: JobRow[], quietMode: boolean) {
-  const now = Date.now();
-  const blocks = buildCalendarJobBlocks(calendarJobsForMode(jobs, quietMode));
-  const running = blocks.find((block) => (
-    block.tone === "working"
-    && !jobIsRoutineActivity(block.job)
-    && block.startsAt.getTime() >= now - 15 * 60 * 1000
-    && block.startsAt.getTime() <= now + 5 * 60 * 1000
-  ));
-  if (running) return running;
-  const nextPriority = blocks.find((block) => block.startsAt.getTime() >= now && !jobIsRoutineActivity(block.job));
-  if (nextPriority) return nextPriority;
-  const runningRoutine = blocks.find((block) => (
-    block.tone === "working"
-    && jobIsRoutineActivity(block.job)
-    && block.startsAt.getTime() >= now - 15 * 60 * 1000
-    && block.startsAt.getTime() <= now + 5 * 60 * 1000
-  ));
-  if (runningRoutine) return runningRoutine;
-  return blocks.find((block) => block.startsAt.getTime() >= now)
-    || blocks.find((block) => block.startsAt.getTime() >= now - 15 * 60 * 1000)
-    || null;
-}
-
-function nextCalendarClockValue(block?: CalendarJobBlock | null) {
-  if (!block) return "None";
-  const startsAt = block.startsAt;
-  const day = localDayLabel(startsAt.toISOString());
-  const clock = startsAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return day === "Today" ? clock : `${day} ${clock}`;
-}
-
-function headerJobTitle(block: CalendarJobBlock) {
-  const title = block.synthetic && block.count && block.count > 1
-    ? `${block.count} ${block.title}`
-    : block.title;
-  return headlineTitle(title, 32);
-}
-
-function nextHeaderRunValue(block?: CalendarJobBlock | null) {
-  if (!block) return "No jobs";
-  const clock = nextCalendarClockValue(block);
-  const target = block.startsAt.getTime();
-  const title = headerJobTitle(block);
-  if (target <= Date.now()) return title || `Now · ${clock}`;
-  const countdown = target > Date.now()
-    ? countdownShortText(countdownLabel(target))
-    : "";
-  return countdown ? `${countdown} · ${title}` : `${clock} · ${title}`;
-}
-
-function nextHeaderRunLabel(block?: CalendarJobBlock | null) {
-  if (!block) return "Next up";
-  if (jobIsRoutineActivity(block.job)) {
-    return block.startsAt.getTime() <= Date.now() ? "Background" : "Next sync";
-  }
-  return block.startsAt.getTime() <= Date.now() ? "Job focus" : "Next up";
-}
-
-function calendarBlockTimeLabel(date: Date) {
-  return date
-    .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    .replace(/\s?[AP]M$/i, "")
-    .replace(/\s/g, " ")
-    .toUpperCase();
-}
-
-function calendarClearUntilLabel(hourKey: number) {
-  return `Clear until ${calendarHourLabel(hourKey)}`;
-}
-
-function calendarSlots(blocks: CalendarJobBlock[]) {
-  const nowKey = calendarHourKey(new Date());
-  const keys = Array.from(new Set([...blocks.map((block) => block.hourKey), nowKey]))
-    .sort((a, b) => a - b);
-  return keys.map((key, index) => ({
-    key,
-    label: calendarHourLabel(key),
-    gapBefore: index > 0 ? Math.max(0, key - keys[index - 1] - 1) : 0,
-    isCurrent: key === nowKey,
-    blocks: blocks.filter((block) => block.hourKey === key),
-  }));
-}
-
-function calendarPhaseKey(block: CalendarJobBlock) {
-  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
-  if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return "needs";
-  if (block.tone === "working" || /running|active|in.progress/.test(status)) return "now";
-  if (/paused|disabled/.test(status)) return "next";
-  if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "done";
-  if (block.tone === "ready" || /ready|due/.test(status)) return "ready";
-  return "next";
-}
-
-function calendarPhaseLabel(key: string) {
-  if (key === "needs") return "Needs Josh";
-  if (key === "now") return "Now";
-  if (key === "done") return "Done";
-  if (key === "ready") return "Ready";
-  return "Next";
-}
-
-function CalendarPhaseStrip({ blocks }: { blocks: CalendarJobBlock[] }) {
-  const order = ["needs", "now", "ready", "next", "done"];
-  const counts = new Map<string, number>();
-  blocks.forEach((block) => counts.set(calendarPhaseKey(block), (counts.get(calendarPhaseKey(block)) || 0) + 1));
-  return (
-    <div className="calendar-phase-strip" aria-label="Today's Jobs grouped by state">
-      {order.filter((key) => counts.get(key)).map((key) => (
-        <span key={key} className={`phase-${key}`}><b>{calendarPhaseLabel(key)}</b><em>{counts.get(key)}</em></span>
-      ))}
-    </div>
-  );
-}
-
-function DailyJobsCalendar({ jobs, liveCues }: { jobs: JobRow[]; liveCues: LiveCueState }) {
-  const calendarJobs = jobs;
-  const blocks = buildCalendarJobBlocks(calendarJobs);
-  const todayBlocks = blocks.filter((block) => sameLocalDay(block.startsAt.toISOString()));
-  const futureBlocks = blocks.filter((block) => !sameLocalDay(block.startsAt.toISOString()));
-  const visibleBlocks = todayBlocks.length >= 6
-    ? [...todayBlocks].sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime()).slice(0, 20)
-    : [...todayBlocks, ...futureBlocks.slice(0, Math.max(0, 6 - todayBlocks.length))]
-      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
-      .slice(0, 20);
-  const slots = calendarSlots(visibleBlocks);
-  const nowMs = Date.now();
-  const nextBlock = blocks.find((block) => block.startsAt.getTime() > nowMs + 5 * 60 * 1000)
-    || blocks.find((block) => block.startsAt.getTime() >= nowMs - 15 * 60 * 1000)
-    || null;
-  const workingBlocks = visibleBlocks.filter((block) => block.tone === "working");
-  const routineRunning = workingBlocks.filter((block) => jobIsRoutineActivity(block.job)).length;
-  const priorityRunning = Math.max(0, workingBlocks.length - routineRunning);
-  const attention = visibleBlocks.filter((block) => block.tone === "attention").length;
-  const completed = visibleBlocks.filter((block) => block.tone === "done").length;
-  const planned = visibleBlocks.filter((block) => block.tone === "planned").length;
-  const attentionValue = attention ? `${attention} review${attention === 1 ? "" : "s"}` : "Clear";
-  const activeLabel = priorityRunning ? "Now" : routineRunning ? "Background" : "Now";
-  const activeValue = priorityRunning
-    ? `${priorityRunning} priority active`
-    : routineRunning
-      ? `${routineRunning} normal check${routineRunning === 1 ? "" : "s"}`
-      : "Idle";
-  const activeClass = priorityRunning ? "is-active" : routineRunning ? "is-routine" : "is-idle";
-  const now = new Date();
-  const nowLabel = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  return (
-    <section className="daily-calendar-view" aria-label="Today's Jobs daily calendar">
-      <div className="calendar-control-strip">
-        <article className={attention ? "is-risk" : "is-clear"}>
-          <span>Focus</span>
-          <strong>{attentionValue}</strong>
-        </article>
-        <article className={activeClass}>
-          <span>{activeLabel}</span>
-          <strong>{activeValue}</strong>
-        </article>
-        <article>
-          <span>Done</span>
-          <strong>{completed}</strong>
-        </article>
-        <article>
-          <span>Planned</span>
-          <strong>{planned}</strong>
-        </article>
-      </div>
-      <CalendarPhaseStrip blocks={visibleBlocks} />
-      <div className="calendar-legend" aria-label="Calendar legend">
-        <span><i className="agent-joshex" />JOSHeX</span>
-        <span><i className="agent-josh" />Josh 2.0</span>
-        <span><i className="agent-jaimes" />JAIMES</span>
-        <span><i className="agent-jain" />J.A.I.N</span>
-      </div>
-      <div className="jobs-table-head" aria-hidden="true">
-        <span>Time</span>
-        <span>State</span>
-        <span>Job</span>
-        <span>Owner</span>
-      </div>
-      <div className="calendar-day-axis">
-        {slots.map((slot) => {
-          const nowBlockLabel = slot.blocks.length
-            ? `${slot.blocks.length} job${slot.blocks.length === 1 ? "" : "s"}`
-            : "clear";
-          const currentHourLabel = slot.blocks.length
-            ? `${slot.blocks.length} scheduled`
-            : "clear";
-          return (
-            <section key={slot.key} className={`calendar-hour-slot ${slot.isCurrent ? "is-current" : ""}`}>
-              {slot.gapBefore > 0 ? <div className="calendar-gap">{calendarClearUntilLabel(slot.key)}</div> : null}
-              <time>{slot.label}</time>
-              <div className="calendar-hour-content">
-                {slot.isCurrent ? (
-                  <div className="calendar-now-marker" title={`Now: ${nowBlockLabel}`}>
-                    <span />
-                    <strong>Now · {currentHourLabel}</strong>
-                    <em>{nowLabel}</em>
-                  </div>
-                ) : null}
-                {slot.blocks.length ? slot.blocks.map((block) => (
-                  <CalendarJobBlockCard
-                    key={block.id}
-                    block={block}
-                    liveCues={liveCues}
-                    isNextUp={Boolean(nextBlock && block.id === nextBlock.id)}
-                  />
-                )) : (
-                  <article className="calendar-empty-block">
-                    <strong>Current hour clear</strong>
-                    <p>No scheduled work in this hour.</p>
-                  </article>
-                )}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-      <CalendarNextBrief block={nextBlock} />
-    </section>
-  );
-}
-
-function calendarBlockStateLabel(block: CalendarJobBlock, run: ReturnType<typeof jobRunCells>) {
-  const status = String(block.job.runStatus || block.job.status || "").toLowerCase();
-  if (block.tone === "working" || /running|active|in.progress/.test(status)) return "IN PROGRESS";
-  if (block.tone === "attention" || /missed|overdue|failed|error|blocked/.test(status)) return /missed|overdue/.test(status) ? "OVERDUE" : "NEEDS JOSH";
-  if (/paused|disabled/.test(status)) return "PAUSED";
-  if (block.tone === "done" || /done|complete|ok|success/.test(status)) return "COMPLETE";
-  if (block.tone === "ready" || /ready|due/.test(status)) return "READY";
-  if (block.tone === "planned" || block.startsAt.getTime() > Date.now()) return "UPCOMING";
-  return calendarBlockRunLabel(block, run).toUpperCase();
-}
-
-function CalendarNextBrief({ block }: { block: CalendarJobBlock | null }) {
-  if (!block) {
-    return (
-      <article className="calendar-next-brief is-clear">
-        <p>Next up</p>
-        <strong>No remaining scheduled job</strong>
-        <span>Agents are monitoring; new work will surface in Brain Feed.</span>
-      </article>
-    );
-  }
-  const owner = AGENTS[block.agent]?.label || block.agent;
-  const headline = nextHeaderRunValue(block);
-  const bullets = expectedNextBullets(block.job, block.agent);
-  const checks = bullets.find((item) => item.label.toLowerCase() === "checks")?.text;
-  const output = bullets.find((item) => item.label.toLowerCase() === "output")?.text;
-  return (
-    <article className={`calendar-next-brief tone-${block.tone} ${agentClass(block.agent)} ${categoryClass(block.job)}`}>
-      <p>Next up</p>
-      <strong title={`${headline} · ${missionText(block.job.title)}`}>{headline}</strong>
-      <span>{owner} · {readoutSummary(checks || block.detail, "Checks the next scheduled task.", 74)}</span>
-      <em>{readoutSummary(output || block.detail, "Publishes a status update when complete.", 74)}</em>
-    </article>
-  );
-}
-
-function CalendarJobBlockCard({ block, liveCues, isNextUp }: { block: CalendarJobBlock; liveCues: LiveCueState; isNextUp?: boolean }) {
-  const run = jobRunCells(block.job);
-  const changed = Boolean(liveCues.rows[cueRowKey("job", block.job.id || block.job.title)]);
-  const time = calendarBlockTimeLabel(block.startsAt);
-  const owner = block.synthetic && block.agents && block.agents.length > 1
-    ? `${block.agents.length} agents`
-    : AGENTS[block.agent]?.label || block.agent;
-  return (
-    <article data-phase={calendarPhaseKey(block)} className={`calendar-job-block tone-${block.tone} phase-${calendarPhaseKey(block)} ${isNextUp ? "is-next-up" : ""} ${block.synthetic ? "is-synthetic" : ""} ${agentClass(block.agent)} ${categoryClass(block.job)}${changedRowClass(changed)}`}>
-      <span className="row-change-dot" aria-hidden="true" />
-      <div className="calendar-block-time">
-        <strong>{time}</strong>
-        <em>{calendarBlockRunLabel(block, run)}</em>
-      </div>
-      <div className="calendar-block-state">
-        <strong>{calendarBlockStateLabel(block, run)}</strong>
-      </div>
-      <div className="calendar-block-main">
-        <strong title={missionText(block.job.title)}>{block.title}</strong>
-        <p title={missionText(block.job.detail || block.job.tool)}>{block.detail}</p>
-      </div>
-      <div className="calendar-block-meta">
-        <span>{owner}</span>
-        <em title={block.category.label}>{compactCategoryLabel(block.category)}</em>
-      </div>
-    </article>
-  );
 }
 
 function priorityScore(job: JobRow) {
@@ -5405,93 +3660,88 @@ function sorareGroupSummary(group: ReturnType<typeof sorareDailyGroups>[number])
   return compactText(`${group.items.length} job${group.items.length === 1 ? "" : "s"} · ${names}${extra}`, 68);
 }
 
-function agentOpsTone(status?: AgentStatus) {
-  if (!status) return "is-risk";
-  if (agentNeedsFocus(status)) return "is-risk";
-  if (status.active || String(status.status).toLowerCase() === "active") return "is-active";
-  if (agentIsReady(status)) return "is-clear";
-  return "is-watch";
-}
-
-function agentOpsLabel(status?: AgentStatus) {
-  if (!status) return "missing";
-  if (agentNeedsFocus(status)) return "needs check";
-  if (status.active || String(status.status).toLowerCase() === "active") return "working";
-  if (agentIsReady(status)) return "ready";
-  return missionText(status.status || "watch");
-}
-
-function AgentOpsMiniDashboard({
-  state,
-  trackedJobs,
-  actionCount,
-  activeCount,
-}: {
-  state: MissionControlState;
-  trackedJobs: JobRow[];
-  actionCount: number;
-  activeCount: number;
-}) {
-  const statusMap = new Map(state.statuses.map((status) => [status.agent_id, status]));
-  const readyCount = HERO_AGENT_ORDER.filter((agent) => agentIsReady(statusMap.get(agent))).length;
-  const activeAgents = state.statuses.filter((status) => status.active || String(status.status).toLowerCase() === "active").length;
-  const healthTone = actionCount ? "is-risk" : readyCount >= HERO_AGENT_ORDER.length ? "is-clear" : "is-watch";
+function AgentOpsHealth({ statuses }: { statuses: AgentStatus[] }) {
+  const byAgent = new Map(statuses.map((status) => [status.agent_id, status]));
   return (
-    <section className="agent-ops-mini" aria-label="Agent ops health">
-      <header>
-        <div>
-          <span>Agent ops</span>
-          <strong>{actionCount ? `${actionCount} needs focus` : `${readyCount}/${HERO_AGENT_ORDER.length} ready`}</strong>
-        </div>
-        <em className={healthTone}>{activeCount ? `${activeCount} jobs running` : activeAgents ? `${activeAgents} agents active` : "stable"}</em>
-      </header>
-      <div className="agent-ops-grid">
-        {HERO_AGENT_ORDER.map((agent) => {
-          const status = statusMap.get(agent);
-          return (
-            <article key={agent} className={`${agentClass(agent)} ${agentOpsTone(status)}`}>
+    <section className="agent-ops-health" aria-label="Agent operations health">
+      {HERO_AGENT_ORDER.map((agent) => {
+        const status = byAgent.get(agent) || offlineStatus(agent);
+        const operating = agentOperatingState(status);
+        return (
+          <article key={agent} className={`agent-ops-chip ${agentClass(agent)} ${statusClass(status.status)}`}>
+            <span className={`dot ${statusClass(status.status)}`} />
+            <div>
+              <b>{AGENTS[agent].roleBadge}</b>
               <strong>{AGENTS[agent].label}</strong>
-              <span>{agentOpsLabel(status)}</span>
-              <small>{status ? ageLabel(status.updated_at) : "no row"}</small>
-            </article>
-          );
-        })}
-      </div>
-      <div className="agent-ops-metrics">
-        <span>{trackedJobs.length} jobs</span>
-        <span>{actionCount ? `${actionCount} action` : "0 blockers"}</span>
-        <span>{activeCount ? `${activeCount} running` : "idle ok"}</span>
-      </div>
+            </div>
+            <em>{operating} · {ageLabel(status.updated_at)}</em>
+          </article>
+        );
+      })}
     </section>
   );
 }
 
-function JobsRail({ state, liveCues }: { state: MissionControlState; liveCues: LiveCueState }) {
-  const trackedJobs = operatorTrackedJobs(state.jobs);
+function JobsRail({
+  jobs,
+  statuses,
+  quietMode,
+  liveCues,
+}: {
+  jobs: MissionControlState["jobs"];
+  statuses: AgentStatus[];
+  quietMode: boolean;
+  liveCues: LiveCueState;
+}) {
+  const trackedJobs = operatorTrackedJobs(jobs);
+  const visibleJobs = quietMode
+    ? trackedJobs.filter((job) => jobIsActiveOrNeedsAttention(job, trackedJobs) || priorityJobKey(job) !== "general")
+    : trackedJobs;
   const inventoryGroups = groupedJobs(trackedJobs, "category");
-  const actionCount = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
-  const activeCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
-  const todayCount = trackedJobs.filter((job) => job.todayRelevant || sameLocalDay(job.lastRun || job.completed_at || job.updated_at)).length;
-  const ownerCount = new Set(trackedJobs.map((job) => job.agent_id || "unknown")).size;
+  const attentionJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
+  const focusCount = visibleJobs.length;
+  const quietInventoryCount = Math.max(0, trackedJobs.length - focusCount);
+  const workingCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
+  const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
+  const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
+  const railSummary = attentionJobs
+    ? `${attentionJobs} need Josh`
+    : workingCount
+      ? `${workingCount} running · next ${nextRunValue}`
+      : `All clear · next ${nextRunValue}`;
   return (
     <aside id="today-jobs" className={`jobs-rail${sectionCueClass("jobs", liveCues)}`}>
       <SectionCue label={liveCues.focus === "jobs" ? "focus" : "updated"} />
-      <div className="panel-title compact calendar-title">
-        <div>
-          <p>Operating model tracker</p>
-          <h2>Agent Ops &amp; Jobs</h2>
-        </div>
-        <span>{trackedJobs.length} tracked · {ownerCount} owners</span>
+      <div className="panel-title compact">
+        <h2>Agent Ops & Jobs</h2>
+          <span>{quietMode ? "Quiet focus" : railSummary}</span>
       </div>
-      <div className="jobs-audit-strip" aria-label="Agent Ops and jobs audit summary">
-        <article className={actionCount ? "is-risk" : "is-clear"}><b>{actionCount}</b><span>needs focus</span></article>
-        <article className={activeCount ? "is-active" : "is-clear"}><b>{activeCount}</b><span>active now</span></article>
-        <article><b>{todayCount}</b><span>today-linked</span></article>
+      <AgentOpsHealth statuses={statuses} />
+      <div className="jobs-stats-strip" aria-label="Agent Ops & Jobs summary">
+        <article className={attentionJobs ? "is-risk" : "is-clear"}>
+          <span>Action</span>
+          <strong>{attentionJobs ? String(attentionJobs) : "None"}</strong>
+        </article>
+        <article>
+          <span>Running</span>
+          <strong>{workingCount ? String(workingCount) : "Idle"}</strong>
+        </article>
+        <article>
+          <span>Next</span>
+          <strong>{nextRunValue}</strong>
+        </article>
+        <article>
+          <span>Inventory</span>
+          <strong>{trackedJobs.length}</strong>
+        </article>
       </div>
-      <AgentOpsMiniDashboard state={state} trackedJobs={trackedJobs} actionCount={actionCount} activeCount={activeCount} />
+      <div className="jobs-operator-note" aria-label="Today jobs display policy">
+        <strong>Operator view</strong>
+        <span>{focusCount} surfaced · {quietInventoryCount} quiet in inventory</span>
+      </div>
       <div className="job-list">
-        <DailyJobsCalendar jobs={trackedJobs} liveCues={liveCues} />
-        <SchedulerInventoryDisclosure groups={inventoryGroups} total={trackedJobs.length} surfaced={trackedJobs.length} liveCues={liveCues} />
+        <JobFocusView jobs={visibleJobs} allJobs={trackedJobs} quietMode={quietMode} liveCues={liveCues} />
+        <SchedulerInventoryDisclosure groups={inventoryGroups} total={trackedJobs.length} surfaced={focusCount} liveCues={liveCues} />
       </div>
     </aside>
   );
@@ -5533,7 +3783,7 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
       <div className="priority-jobs">
         <header>
           <strong>Today matters</strong>
-          <span>{quietMode ? "priority view" : "Gmail · Sorare · Fantasy"}</span>
+          <span>{quietMode ? "quiet focus" : "Gmail · Sorare · Fantasy"}</span>
         </header>
         <div className="operator-queue-list priority-job-list">
           {PRIORITY_JOB_RULES.map((rule) => {
@@ -5576,13 +3826,13 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
           {visibleGeneral.length ? visibleGeneral.map((job) => <JobFocusRow key={job.id} job={job} liveCues={liveCues} />) : (
             <article className="maintenance-summary-card">
               <strong>Routine jobs ready</strong>
-              <p>{quietMode ? "Routine maintenance is summarized below." : "Only priority work is active right now."}</p>
+              <p>{quietMode ? "Quiet mode is hiding routine maintenance." : "Only priority work is active right now."}</p>
             </article>
           )}
           {readyCount > 0 ? (
             <article className="quiet-jobs-row">
               <strong>{readyCount} additional routine jobs ready</strong>
-              <p>{quietMode ? "Focus view shows priority, active, missed, or blocked work." : "Completed or low-signal maintenance is collapsed from the focus view."}</p>
+              <p>{quietMode ? "Quiet mode is showing only priority, active, missed, or blocked work." : "Completed or low-signal maintenance is collapsed from the focus view."}</p>
             </article>
           ) : null}
         </div>
@@ -5602,16 +3852,15 @@ function SchedulerInventoryDisclosure({
   surfaced: number;
   liveCues: LiveCueState;
 }) {
-  const hidden = Math.max(0, total - surfaced);
   return (
     <details className="scheduler-inventory-section">
       <summary>
-        <strong>All scheduled jobs</strong>
-        <span>{hidden ? `${hidden} hidden · ` : ""}{total} tracked · by category</span>
+        <strong>Scheduler inventory</strong>
+        <span>{total} tracked · {Math.max(0, total - surfaced)} quiet · audit only</span>
       </summary>
       <div className="scheduler-inventory-note">
-        <strong>All scheduled jobs</strong>
-        <p>Every tracked job grouped by category. The calendar above shows what matters first.</p>
+        <strong>Full scheduler list</strong>
+        <p>Use this for audit/debugging. The operator queue above is the source for what needs attention.</p>
       </div>
       <JobCategoryView groups={groups} liveCues={liveCues} />
     </details>
@@ -5802,18 +4051,52 @@ function ModelUsageCard({
   const topModels = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
   const providers = modelRouter?.providers || modelUsage?.providerBudgets || [];
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
+  const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "--";
+  const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "--";
+  const lastRoute = modelRouter?.lastRoute || {};
+  const lastRouteLabel = String(lastRoute.routeLabel || lastRoute.provider || "no route yet");
+  const routeMix = Object.entries(modelRouter?.routeMix || {})
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 3);
+  const routeAlerts = modelRouter?.routeAlerts || [];
   return (
     <section className="model-usage-card">
       <div className="panel-title compact">
         <h2>Model Cost & Usage</h2>
-        <span><DollarSign size={14} />{codexMode === "normal" ? `${fmtCurrency(modelUsage?.metered?.daily ?? modelUsage?.daily)} metered` : `Codex ${codexMode}`}</span>
+        <span><DollarSign size={14} />{codexMode === "normal" ? `${fmtCurrency(modelUsage?.daily)} daily` : `Codex ${codexMode}`}</span>
       </div>
       <div className="cost-grid">
-        <MetricMini label="Sub/month" value={fmtCurrency(modelUsage?.subscription?.monthlyFee ?? 200)} />
-        <MetricMini label="Metered week" value={fmtCurrency(modelUsage?.metered?.weekly ?? modelUsage?.weekly)} />
-        <MetricMini label="Metered month" value={fmtCurrency(modelUsage?.metered?.monthly ?? 0)} />
-        <MetricMini label="Usage equiv" value={fmtCurrency(modelUsage?.usageEquivalent?.monthly ?? modelUsage?.monthly)} />
+        <MetricMini label="Session" value={fmtCurrency(modelUsage?.session)} />
+        <MetricMini label="Weekly" value={fmtCurrency(modelUsage?.weekly)} />
+        <MetricMini label="Monthly" value={fmtCurrency(modelUsage?.monthly)} />
+        <MetricMini label="Projected" value={fmtCurrency(modelUsage?.weeklyRunRate?.projectedMonthly)} />
       </div>
+      <div className={`model-ladder-strip is-${modelRouter?.ladderStatus || "pending"}`}>
+        <article>
+          <span>Route quality</span>
+          <strong>{routeQuality}</strong>
+        </article>
+        <article>
+          <span>Efficiency</span>
+          <strong>{efficiency}</strong>
+        </article>
+        <article>
+          <span>Last lane</span>
+          <strong>{missionText(lastRouteLabel)}</strong>
+        </article>
+      </div>
+      {routeMix.length ? (
+        <div className="route-mix-row" aria-label="Recent model ladder route mix">
+          {routeMix.map(([label, count]) => (
+            <span key={label}>{missionText(label.replace(/_/g, " "))}: {count}</span>
+          ))}
+        </div>
+      ) : null}
+      {routeAlerts.length ? (
+        <div className="route-alert-row">
+          {routeAlerts.slice(0, 2).map((alert) => <span key={alert}>{missionText(alert)}</span>)}
+        </div>
+      ) : null}
       <div className="model-list">
         {topModels.slice(0, 5).map((model: any) => (
           <article key={`${model.name}-${model.source || model.window || ""}`}>

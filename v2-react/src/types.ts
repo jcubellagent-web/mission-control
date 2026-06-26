@@ -91,10 +91,17 @@ export type AgenticCryptoWallet = {
     totalEstimatedUsd?: number;
     liquidEstimatedUsd?: number;
     nftEstimatedUsd?: number;
-    nativeLiquidUsd?: number;
-    tokenLiquidUsd?: number;
     lastRefreshed?: string;
     freshnessStatus?: string;
+  };
+  tradingGoal?: {
+    title?: string;
+    description?: string;
+    current?: number;
+    target?: number;
+    unit?: string;
+    status?: string;
+    updatedAt?: string;
   };
   chains?: Array<{
     chain: string;
@@ -140,6 +147,22 @@ export type AgenticCryptoWallet = {
     status?: string;
     chain?: string;
     valueSummary?: string;
+    explorerLabel?: string;
+    explorerUrl?: string;
+  }>;
+  tradeLedger?: Array<{
+    timestamp?: string;
+    side?: "open" | "close" | "swap" | "rebalance" | "approve" | string;
+    action?: string;
+    asset?: string;
+    pair?: string;
+    amount?: string | number;
+    valueUsd?: number;
+    pnl?: string | number | null;
+    pnlUsd?: number | null;
+    pnlSol?: number | null;
+    status?: string;
+    chain?: string;
     explorerLabel?: string;
     explorerUrl?: string;
   }>;
@@ -287,6 +310,14 @@ export type ProviderBudget = {
   label: string;
   role?: string;
   budgetType?: string;
+  plan?: string;
+  subscriptionMonthlyUsd?: number;
+  subscriptionAnnualUsd?: number;
+  subscriptionCadence?: string;
+  billingLabel?: string;
+  billingNote?: string;
+  overagePolicy?: string;
+  requiresApiKey?: boolean;
   monthlyCapUsd?: number;
   dailyCapUsd?: number;
   reserveUsd?: number;
@@ -303,11 +334,21 @@ export type ProviderBudget = {
   lastTestStatus?: string;
   lastModelUsed?: string;
   whyChosen?: string;
-  fixedMonthlyUsd?: number;
-  fixedWeeklyUsd?: number;
-  allowanceLabel?: string;
-  usageAllowance?: string;
-  displayWhenIdle?: boolean;
+  accountEmail?: string;
+  accountLabel?: string;
+  codexbarSource?: string;
+  codexbarUpdatedAt?: string;
+  usageWindows?: Array<{
+    id?: string;
+    label: string;
+    usedPercent?: number;
+    remainingPercent?: number;
+    resetDescription?: string;
+    resetsAt?: string;
+    windowMinutes?: number;
+    status?: string;
+    remainingLabel?: string;
+  }>;
 };
 
 export type ModelRouter = {
