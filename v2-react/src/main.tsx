@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, EyeOff, GitBranch, Radio, RefreshCw, ShieldCheck, Timer, UserRoundCheck, WalletCards } from "lucide-react";
 import { loadMissionControl, subscribeMissionControlRealtime } from "./data";
@@ -1892,8 +1892,13 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const wallet = state.agenticCrypto;
   const walletTotal = wallet?.summary?.totalEstimatedUsd;
   const liquid = wallet?.summary?.liquidEstimatedUsd;
-  const tokenCount = wallet?.tokens?.length || 0;
+  const tokenCount = (wallet?.summary as any)?.tokenCount ?? wallet?.tokens?.length ?? 0;
   const walletMode = String(wallet?.walletMode || wallet?.refreshMode || "").toLowerCase();
+  const resourceTrades = ([...(wallet?.tradeLedger || [])] as NonNullable<AgenticCryptoWallet["tradeLedger"]>)
+    .sort((a, b) => timeValue(b.timestamp) - timeValue(a.timestamp));
+  const resourceActivityTrades = (wallet?.recentActivity || [])
+    .filter((row) => /trade|swap|transaction|bridge|jaimes/i.test(`${row.action || ""} ${row.valueSummary || ""}`));
+  const latestTrade = (resourceTrades[0] || resourceActivityTrades[0]) as any;
   const walletIsPlaceholder = walletMode.includes("placeholder") || walletMode.includes("not-connected") || (tokenCount === 0 && (walletTotal || 0) === 0 && (wallet?.errors || []).length > 0);
   const walletHeadline = walletIsPlaceholder ? "Read-only" : fmtCurrencyExact(walletTotal);
   const walletDetail = walletIsPlaceholder
@@ -1908,6 +1913,11 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
   const p2eDetail = p2eResearch?.detail || (p2eResearch?.updatedAt ? `Updated ${ageLabel(p2eResearch.updatedAt)}` : "Solana P2E scorecard ready");
   const modelUsageAny = state.modelUsage as any;
   const providerBreakdown = Array.isArray(modelUsageAny?.providerBreakdown) ? modelUsageAny.providerBreakdown : [];
+  const modelBreakdown = Array.isArray(modelUsageAny?.breakdown) ? modelUsageAny.breakdown : [];
+  const ollamaRows = modelBreakdown.filter((row: any) => row?.isLocal || String(row?.source || "").toLowerCase().includes("ollama") || String(row?.name || "").toLowerCase().includes("ollama"));
+  const ollamaLoaded = ollamaRows.filter((row: any) => row?.loaded).length;
+  const ollamaSizeGb = ollamaRows.reduce((sum: number, row: any) => sum + Number(row?.sizeGb || 0), 0);
+  const ollamaTop = ollamaRows.slice(0, 2).map((row: any) => String(row.name || "local model").replace(/^local\//, ""));
   const subscriptionFee = state.modelUsage?.subscription?.monthlyFee;
   const meteredMonthly = state.modelUsage?.metered?.monthly ?? 0;
   const meteredDaily = state.modelUsage?.metered?.daily ?? state.modelUsage?.aggregate?.daily ?? state.modelUsage?.daily;
@@ -1966,10 +1976,20 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
           <strong>{walletHeadline}</strong>
           <p>{walletDetail}</p>
         </article>
+        <article className={`resource-card resource-card-wallet-trades is-${latestTrade ? "clear" : "watch"}`}>
+          <b>Recent trades</b>
+          <strong>{latestTrade ? latestTrade.action || latestTrade.side || "Logged" : "No rows"}</strong>
+          <p>{latestTrade ? `${chainLabel(latestTrade.chain)} · ${fmtTime(latestTrade.timestamp)} · ${latestTrade.status || "logged"}` : "Ledger waiting for first trade"}</p>
+        </article>
         <article className="resource-card resource-card-model-usage is-clear">
           <b>Model usage</b>
           <strong>{modelHeadline}</strong>
           <p>{modelDetail}</p>
+        </article>
+        <article className={`resource-card resource-card-ollama is-${ollamaRows.length ? "clear" : "watch"}`}>
+          <b>Ollama local</b>
+          <strong>{ollamaRows.length ? `${ollamaRows.length} model${ollamaRows.length === 1 ? "" : "s"}` : "Not seen"}</strong>
+          <p>{ollamaRows.length ? `${ollamaLoaded} loaded · ${ollamaSizeGb.toFixed(1)}GB · $0 metered · ${ollamaTop.join(" / ")}` : "Local lane not reporting yet"}</p>
         </article>
         <article className={`resource-card is-${p2eTone}`}>
           <b>Solana P2E</b>
@@ -1994,6 +2014,39 @@ function ResourceStack({ state, loading, onCryptoRefresh, liveCues }: { state: M
       </div>
     </section>
   );
+}
+
+class ErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("Control Tower crash:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-boundary-fallback">
+          <h2>Control Tower crashed</h2>
+          <p>{this.state.error?.message || "An unexpected error occurred."}</p>
+          <button onClick={() => window.location.reload()}>
+            Reload dashboard
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function App() {
@@ -2502,6 +2555,11 @@ function AgenticCryptoPanel({
   const tokens = [...(wallet?.tokens || [])].sort((a, b) => (b.valueUsd || 0) - (a.valueUsd || 0));
   const visibleTokens = tokens.slice(0, 5);
   const hiddenTokens = tokens.slice(5);
+  const walletTrades = ([...(wallet?.tradeLedger || [])] as NonNullable<AgenticCryptoWallet["tradeLedger"]>)
+    .sort((a, b) => timeValue(b.timestamp) - timeValue(a.timestamp));
+  const activityTrades = (wallet?.recentActivity || [])
+    .filter((row) => /trade|swap|transaction|bridge|jaimes/i.test(`${row.action || ""} ${row.valueSummary || ""}`));
+  const recentTrades = (walletTrades.length ? walletTrades : activityTrades).slice(0, 3);
   const hiddenTokenValue = hiddenTokens.reduce((sum, token) => sum + (token.valueUsd || 0), 0);
   const balanceChanged = Boolean(liveCues.rows[cueRowKey("crypto", "balance")]);
   const hiddenChanged = Boolean(liveCues.rows[cueRowKey("crypto", "smaller-tokens")]);
@@ -2567,6 +2625,28 @@ function AgenticCryptoPanel({
             </article>
           ) : null}
           {!tokens.length ? <p>No token rows loaded yet.</p> : null}
+        </div>
+      </section>
+
+      <section className="crypto-wallet-section crypto-wallet-trades">
+        <header><GitBranch size={13} /> Recent wallet trades</header>
+        <div className="crypto-wallet-list is-trades-only">
+          {recentTrades.map((trade, index) => {
+            const label = "side" in trade && trade.side ? `${trade.side}: ${trade.action || trade.asset || "trade"}` : trade.action || "Wallet trade";
+            const value = "amount" in trade && trade.amount ? trade.amount : trade.valueSummary || trade.asset || "trade event";
+            const href = trade.explorerUrl;
+            return (
+              <article key={("id" in trade && trade.id) || trade.explorerUrl || `${trade.timestamp}-${index}`}>
+                <span className="crypto-token-icon" aria-hidden="true">{chainLabel(trade.chain).slice(0, 1)}</span>
+                <div className="crypto-token-main">
+                  <strong title={label}>{label}</strong>
+                  <span>{chainLabel(trade.chain)} · {fmtTime(trade.timestamp)} · {trade.status || "logged"}</span>
+                </div>
+                {href ? <a href={href} target="_blank" rel="noreferrer">{trade.explorerLabel || value}</a> : <em className="crypto-token-value">{value}</em>}
+              </article>
+            );
+          })}
+          {!recentTrades.length ? <p>No recent trade rows loaded yet.</p> : null}
         </div>
       </section>
 
@@ -5963,4 +6043,8 @@ function offlineStatus(agent: AgentId): AgentStatus {
   };
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
