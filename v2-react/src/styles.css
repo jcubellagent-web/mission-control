@@ -5480,8 +5480,7 @@ p {
 }
 
 .crypto-wallet-list.is-assets-only,
-.crypto-wallet-list.is-tokens-only,
-.crypto-wallet-list.is-trades-only {
+.crypto-wallet-list.is-tokens-only {
   max-height: none;
   overflow-y: auto;
   padding-right: 2px;
@@ -5615,26 +5614,6 @@ p {
 
 .crypto-wallet-lower .crypto-wallet-list strong {
   font-size: 9px;
-}
-
-.crypto-wallet-trades {
-  min-height: 86px;
-}
-
-.crypto-wallet-list.is-trades-only article {
-  grid-template-columns: 24px minmax(0, 1fr) minmax(74px, auto);
-  min-height: 28px;
-  border-color: rgba(114, 217, 166, 0.13);
-  background: rgba(10, 32, 54, 0.58);
-  padding: 4px 7px;
-}
-
-.crypto-wallet-list.is-trades-only strong {
-  font-size: 9px;
-}
-
-.crypto-wallet-list.is-trades-only span {
-  font-size: 7.8px;
 }
 
 .crypto-wallet-lower .crypto-wallet-list span,
@@ -7678,50 +7657,36 @@ body {
 .resource-card-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 6px;
   min-height: 0;
-  overflow: hidden;
 }
 
 .resource-card {
   position: relative;
   display: grid;
-  align-content: start;
-  gap: 2px;
+  align-content: center;
+  gap: 4px;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   border: 1px solid rgba(104, 151, 194, 0.12);
   border-radius: 8px;
   background: #0a2036;
-  padding: 6px 8px;
+  padding: 7px 8px;
 }
 
 .resource-card strong {
   color: var(--text);
-  font-size: 14px;
+  font-size: 17px;
   line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .resource-card p {
   color: rgba(213, 229, 241, 0.7);
-  font-size: 8.6px;
+  font-size: 9px;
   font-weight: 760;
-  line-height: 1.05;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.resource-card b {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.1;
 }
 
 .resource-card.is-risk {
@@ -7730,26 +7695,6 @@ body {
 
 .resource-card.is-clear {
   border-color: rgba(121, 230, 168, 0.2);
-}
-
-.resource-card-ollama {
-  background:
-    radial-gradient(circle at 92% 10%, rgba(121, 230, 168, 0.12), transparent 42%),
-    #0a2036;
-}
-
-.resource-card-ollama strong {
-  color: #9df3bd;
-}
-
-.resource-card-wallet-trades {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(91, 181, 255, 0.11), transparent 40%),
-    #0a2036;
-}
-
-.resource-card-wallet-trades strong {
-  color: #a9e7ff;
 }
 
 .tower-center-stack .signal-feed {
@@ -17692,110 +17637,3 @@ body::before {
     display: none;
   }
 }
-/* JAIMES FinOps card density override — compact kiosk cards. */
-.tower-resource-stack .resource-card {
-  min-height: 54px !important;
-  padding: 7px 9px !important;
-  align-content: start !important;
-  gap: 2px !important;
-}
-
-.tower-resource-stack .resource-card strong,
-.tower-resource-stack .resource-card strong:first-of-type {
-  font-size: 13px !important;
-  line-height: 1.02 !important;
-  letter-spacing: -0.01em !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.tower-resource-stack .resource-card p,
-.tower-resource-stack .resource-card b,
-.tower-resource-stack .resource-card span {
-  font-size: 9px !important;
-  line-height: 1.08 !important;
-}
-
-.tower-resource-stack .resource-card p {
-  overflow: hidden !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-}
-
-/* === JAIMES AUDIT FIXES 2026-06-25 === */
-
-/* P5: Make "Needs Josh" visually disruptive with pulse animation */
-@keyframes needs-josh-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(224, 152, 163, 0.5);
-    border-color: rgba(224, 152, 163, 0.6) !important;
-  }
-  50% {
-    box-shadow: 0 0 16px 3px rgba(224, 152, 163, 0.3);
-    border-color: rgba(224, 152, 163, 0.9) !important;
-  }
-}
-
-.tower-decision-band:not(.is-clear) {
-  animation: needs-josh-pulse 2.5s ease-in-out infinite !important;
-}
-
-.tower-command-strip article.is-risk {
-  animation: needs-josh-pulse 3s ease-in-out infinite !important;
-}
-
-/* P5: Empty state for sparse FinOps cards */
-.resource-card.resource-card-ollama.is-watch strong::after {
-  content: " · No active sessions";
-  font-size: 0.7em;
-  opacity: 0.6;
-}
-
-/* P5: Increase truncation threshold for 24" display readability */
-.tower-resource-stack .resource-card p {
-  -webkit-line-clamp: 3 !important;
-  line-clamp: 3 !important;
-}
-
-/* P4: Error boundary fallback styling */
-.error-boundary-fallback {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--bg, #0a1118);
-  color: #e098a3;
-  font-family: var(--font-body, Inter, system-ui, sans-serif);
-  text-align: center;
-  padding: 2rem;
-}
-
-.error-boundary-fallback h2 {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.error-boundary-fallback p {
-  font-size: 0.9rem;
-  opacity: 0.7;
-  max-width: 400px;
-}
-
-.error-boundary-fallback button {
-  margin-top: 1rem;
-  padding: 0.5rem 1.5rem;
-  background: rgba(157, 185, 232, 0.15);
-  border: 1px solid rgba(157, 185, 232, 0.3);
-  border-radius: 6px;
-  color: #9db9e8;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.error-boundary-fallback button:hover {
-  background: rgba(157, 185, 232, 0.25);
-}
-
