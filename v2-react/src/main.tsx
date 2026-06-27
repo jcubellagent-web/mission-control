@@ -767,9 +767,60 @@ function NightModeScreen({
   );
 }
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  state = { hasError: false, error: undefined as Error | undefined };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("Control Tower render error:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <main className="app-shell hero-shell">
+          <header className="mission-header">
+            <div className="brand-lockup">
+              <div>
+                <h1>Josh 2.0 | Control Tower</h1>
+                <p>Connection issue — retrying automatically</p>
+              </div>
+            </div>
+            <div className="mission-actions">
+              <button
+                type="button"
+                className="mode-button selected"
+                onClick={() => this.setState({ hasError: false, error: undefined })}
+                aria-label="Retry"
+              >
+                <RefreshCw size={15} /> Retry
+              </button>
+            </div>
+          </header>
+          <section className="kiosk-grid" style={{ alignItems: "center", justifyContent: "center", minHeight: "50vh" }}>
+            <article className="empty-row" style={{ textAlign: "center", padding: "2rem" }}>
+              <strong>Control Tower hit a render error</strong>
+              <p>The dashboard will retry on the next data refresh (10s).</p>
+              <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "0.5rem" }}>{this.state.error?.message || "Unknown error"}</p>
+            </article>
+          </section>
+        </main>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   const [state, setState] = useState<MissionControlState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
   const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
@@ -782,6 +833,10 @@ function App() {
     try {
       const next = await loadMissionControl();
       setState(next);
+      setDataError(null);
+    } catch (error) {
+      console.warn("Control Tower data fetch error:", error);
+      setDataError(error instanceof Error ? error.message : "Data fetch failed");
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -862,19 +917,19 @@ function App() {
     return new Map(state.statuses.map((row) => [row.agent_id, row]));
   }, [state.statuses]);
 
-  const decisionCount = state.approvals.filter((row) => row.status === "pending").length;
-  const trackedJobs = operatorTrackedJobs(state.jobs);
+  const decisionCount = useMemo(() => state.approvals.filter((row) => row.status === "pending").length, [state.approvals]);
+  const trackedJobs = useMemo(() => operatorTrackedJobs(state.jobs), [state.jobs]);
   const jobsCount = trackedJobs.length;
-  const needsFocusCount = missionFocusCount(state);
-  const activeJobCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
-  const activeAgentCount = state.statuses.filter((row) => row.active || row.status === "active").length;
+  const needsFocusCount = useMemo(() => missionFocusCount(state), [state]);
+  const activeJobCount = useMemo(() => trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length, [trackedJobs]);
+  const activeAgentCount = useMemo(() => state.statuses.filter((row) => row.active || row.status === "active").length, [state.statuses]);
   const workingCount = activeJobCount + activeAgentCount;
-  const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
+  const nextJob = useMemo(() => upcomingTodayJobs(trackedJobs, 1)[0], [trackedJobs]);
   const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
-  const lastUpdate = [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
+  const lastUpdate = useMemo(() => [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
     .filter(Boolean)
     .sort()
-    .pop();
+    .pop(), [state.statuses, state.events]);
   const navigateToPanel = useCallback((target: AttentionTarget) => {
     document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
@@ -938,7 +993,7 @@ function App() {
           <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
           <BrainHero state={state} statuses={statusByAgent} quietMode={quietMode} onNavigate={navigateToPanel} liveCues={liveCues} />
           <section className="support-grid" aria-label="Control Tower support modules">
-            <FinOpsDashboard
+            <MemoizedFinOpsDashboard
               wallet={state.agenticCrypto}
               modelUsage={state.modelUsage}
               modelRouter={state.modelRouter}
@@ -4246,4 +4301,8 @@ function offlineStatus(agent: AgentId): AgentStatus {
   };
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const MemoizedFinOpsDashboard = React.memo(FinOpsDashboard);
+const MemoizedAgenticCryptoPanel = React.memo(AgenticCryptoPanel);
+const MemoizedSignalFeed = React.memo(SignalFeed);
+
+createRoot(document.getElementById("root")!).render(<ErrorBoundary><App /></ErrorBoundary>);
