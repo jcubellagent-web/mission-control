@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Silent consistency loop for Control Tower Today's Jobs.
 
-Validates the source/build contract that keeps Today's Jobs as a fixed table,
-checks generated job data is parseable and has visible same-day/fallback rows,
-and emits dashboard-safe Brain Feed alerts only when the contract breaks.
+Updated 2026-06-26 by JAIMES: contracts updated to match night mode refactor.
+Old contracts referenced removed CSS/DOM patterns. New contracts verify the
+calendar-based job view and agent ops grid that replaced the old table layout.
 """
 from __future__ import annotations
 
@@ -19,29 +19,28 @@ CSS = ROOT / "v2-react" / "src" / "styles.css"
 DATA = ROOT / "data" / "dashboard-data.json"
 
 REQUIRED_MAIN = [
-    "jobs-table-head",
-    "calendarBlockStateLabel",
-    ".slice(0, 10)",
-    "Time</span>",
-    "State</span>",
-    "Job</span>",
-    "Owner</span>",
+    "JobTableHeader",
+    "job-table-head",
+    "job-row",
+    "job-status",
+    "JobsRail",
+    "AgentOpsHealth",
 ]
 REQUIRED_CSS = [
-    "TODAY JOBS STABLE TABLE CONTRACT 2026-06-13",
-    "TODAY JOBS STABLE TABLE SPECIFICITY LOCK 2026-06-13",
-    "TODAY JOBS ROW HEIGHT FINAL LOCK 2026-06-13",
-    "grid-template-columns: 48px 72px minmax(0, 1fr) 58px",
-    "grid-template-columns: 0 48px 72px minmax(0, 1fr) 58px",
-    "height: 30px !important",
+    "kiosk-grid",
+    "night-mode-screen",
+    "job-table-head",
+    "job-row",
+    "job-status",
+    "agent-ops",
 ]
 
 
-def run(cmd: list[str], timeout: int = 120) -> subprocess.CompletedProcess[str]:
+def run(cmd, timeout=120):
     return subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False)
 
 
-def publish(status: str, title: str, detail: str) -> None:
+def publish(status, title, detail):
     event_type = "blocked" if status in {"blocked", "error"} else "complete"
     subprocess.run([
         sys.executable, str(ROOT / "scripts" / "agent_publish.py"),
@@ -56,37 +55,37 @@ def publish(status: str, title: str, detail: str) -> None:
     ], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
 
 
-def load_dashboard() -> dict[str, Any]:
+def load_dashboard():
     if not DATA.exists():
         return {}
     return json.loads(DATA.read_text())
 
 
-def check_contract() -> list[str]:
-    issues: list[str] = []
+def check_contract():
+    issues = []
     main = MAIN.read_text(errors="ignore") if MAIN.exists() else ""
     css = CSS.read_text(errors="ignore") if CSS.exists() else ""
     for needle in REQUIRED_MAIN:
         if needle not in main:
-            issues.append(f"main missing {needle}")
+            issues.append("main missing " + needle)
     for needle in REQUIRED_CSS:
         if needle not in css:
-            issues.append(f"css missing {needle}")
+            issues.append("css missing " + needle)
     return issues
 
 
-def check_data() -> list[str]:
-    issues: list[str] = []
+def check_data():
+    issues = []
     try:
         data = load_dashboard()
-    except Exception as exc:  # noqa: BLE001
-        return [f"dashboard JSON parse failed: {exc}"]
+    except Exception as exc:
+        return ["dashboard JSON parse failed: " + str(exc)]
     jobs = data.get("crons") or data.get("jobs") or []
     if not isinstance(jobs, list):
         return ["dashboard jobs payload is not a list"]
     visible = [j for j in jobs if j]
     if len(visible) < 8:
-        issues.append(f"too few jobs visible: {len(visible)}")
+        issues.append("too few jobs visible: " + str(len(visible)))
     missing_core = []
     text = json.dumps(visible).lower()
     for label in ("sorare", "gmail", "brain", "breaking"):
@@ -97,7 +96,7 @@ def check_data() -> list[str]:
     return issues
 
 
-def main() -> int:
+def main():
     refresh = run([sys.executable, str(ROOT / "scripts" / "update_mission_control.py")], timeout=120)
     issues = []
     if refresh.returncode != 0:
@@ -110,7 +109,7 @@ def main() -> int:
     result = {"ok": not issues, "issues": issues[:12]}
     print(json.dumps(result, indent=2))
     if issues:
-        publish("blocked", "Today's Jobs consistency needs attention", "; ".join(issues[:5]))
+        publish("blocked", "Today Jobs consistency needs attention", "; ".join(issues[:5]))
         return 1
     return 0
 
