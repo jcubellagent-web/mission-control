@@ -1498,7 +1498,7 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
     },
     {
       id: "ollama",
-      label: "Ollama",
+      label: "Ollama Pro",
       role: "Local/private helper lane for drafts, compression, and low-risk offline utility work.",
       whyChosen: "Use when local model quality is sufficient and cloud subscription quota should be preserved.",
       lastModelUsed: /ollama|local/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "local/ollama",
@@ -1532,12 +1532,28 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       status: "reserve",
     },
   ];
-  const rows = [...defaults, ...(modelRouter?.providers || []), ...(modelUsage?.providerBudgets || [])];
+
+  const providerBreakdownRows = (modelUsage?.providerBreakdown || []).map((row) => ({
+    ...row,
+    id: row?.id || "provider",
+    label: row?.budgetLabel || row?.label,
+  }));
+  const codexbarRows = Object.entries(modelUsage?.codexbarLimits || {}).map(([id, row]) => ({
+    ...(row || {}),
+    id,
+  }));
+  const rows = [
+    ...defaults,
+    ...(modelRouter?.providers || []),
+    ...(modelUsage?.providerBudgets || []),
+    ...providerBreakdownRows,
+    ...codexbarRows,
+  ];
   const byKey = new Map<string, any>();
   rows.forEach((row) => {
     const key = providerKey(row);
     const existing = byKey.get(key);
-    byKey.set(key, existing ? {
+    const next = existing ? {
       ...existing,
       ...row,
       id: row?.id || existing.id,
@@ -1546,7 +1562,24 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       whyChosen: row?.whyChosen || existing.whyChosen,
       lastModelUsed: row?.lastModelUsed || existing.lastModelUsed,
       budgetType: row?.budgetType || existing.budgetType,
-    } : row);
+      plan: row?.plan || existing.plan,
+      billingLabel: row?.billingLabel || existing.billingLabel,
+      accountEmail: row?.accountEmail || existing.accountEmail,
+      accountLabel: row?.accountLabel || existing.accountLabel,
+      codexbarSource: row?.codexbarSource || existing.codexbarSource,
+      codexbarUpdatedAt: row?.codexbarUpdatedAt || existing.codexbarUpdatedAt,
+      usageWindows: Array.isArray(row?.usageWindows) && row.usageWindows.length ? row.usageWindows : existing.usageWindows,
+      topModels: Array.isArray(row?.topModels) && row.topModels.length ? row.topModels : existing.topModels,
+      summary: row?.summary || row?.usageSummary || existing.summary,
+      usageSummary: row?.usageSummary || existing.usageSummary,
+      callsToday: row?.callsToday ?? existing.callsToday,
+      callsWeekly: row?.callsWeekly ?? existing.callsWeekly,
+      sessions: row?.sessions ?? existing.sessions,
+      totalTokens: row?.totalTokens ?? existing.totalTokens,
+      inputTokens: row?.inputTokens ?? existing.inputTokens,
+      outputTokens: row?.outputTokens ?? existing.outputTokens,
+    } : row;
+    byKey.set(key, next);
   });
   const preferred = ["openai", "gemini", "ollama", "xai", "openrouter"];
   const ordered = preferred.map((key) => byKey.get(key)).filter(Boolean);
@@ -1615,7 +1648,7 @@ function providerWindowValue(window: any) {
 function providerSpendLabel(provider: any) {
   const windows = providerLimitRows(provider);
   if (windows.length) {
-    return windows.slice(0, 2).map((window) => `${missionText(String(window.label || "Limit"))} ${providerWindowValue(window)}`).join(" · ");
+    return windows.slice(0, 2).map((window: any) => `${missionText(String(window.label || "Limit"))} ${providerWindowValue(window)}`).join(" · ");
   }
   const spend = Number(provider?.dailySpendUsd ?? 0);
   const cap = Number(provider?.dailyCapUsd ?? provider?.monthlyCapUsd ?? 0);
@@ -1687,6 +1720,73 @@ function providerEvidenceLabel(provider: any) {
   if (provider?.keyPresent === true) return "verified key present";
   if (provider?.keyPresent === false) return "no key expected";
   return "estimated from route telemetry";
+}
+
+function compactInt(value: unknown) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return null;
+  if (numeric >= 1000000) return `${(numeric / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (numeric >= 1000) return `${(numeric / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return `${Math.round(numeric)}`;
+}
+
+function providerSummaryLabel(provider: any) {
+  const explicit = missionText(String(provider?.summary || provider?.usageSummary || "")).trim();
+  if (explicit) return explicit;
+  const parts = [
+    Number(provider?.callsWeekly) > 0 ? `${provider.callsWeekly} calls/wk` : null,
+    Number(provider?.sessions) > 0 ? `${provider.sessions} sessions` : null,
+    compactInt(provider?.totalTokens) ? `${compactInt(provider?.totalTokens)} tokens` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "usage tracked live";
+}
+
+function providerUpdatedLabel(provider: any) {
+  if (provider?.codexbarUpdatedAt) return `Updated ${fmtTime(provider.codexbarUpdatedAt)}`;
+  return provider?.codexbarSource ? `Source ${missionText(String(provider.codexbarSource))}` : "Route telemetry";
+}
+
+function providerTopModels(provider: any) {
+  const key = providerKey(provider);
+  const fallbackPreferred = Object.values(provider?.preferredModels || {}).map((name) => ({ name, source: "preferred" }));
+  const belongs = (model: any) => {
+    const name = String(model?.name || "").toLowerCase();
+    const source = String(model?.source || "").toLowerCase();
+    if (key === "openai") return /codex|openai|gpt/.test(`${name} ${source}`) && !/ollama|gemma|llama|glm/.test(`${name} ${source}`);
+    if (key === "gemini") return /gemini|google|flash|pro/.test(`${name} ${source}`);
+    if (key === "ollama") return /ollama|local|gemma|llama|glm|qwen/.test(`${name} ${source}`);
+    if (key === "xai") return /xai|grok/.test(`${name} ${source}`);
+    return true;
+  };
+  const normalized = new Set<string>();
+  return ([...(Array.isArray(provider?.topModels) ? provider.topModels : []), ...fallbackPreferred])
+    .filter((model: any) => belongs(model))
+    .filter((model: any) => {
+      const keyName = String(model?.name || "")
+        .replace(/^local\//i, "")
+        .replace(/^openai\//i, "")
+        .replace(/^google\//i, "")
+        .replace(/^xai\//i, "")
+        .trim()
+        .toLowerCase();
+      if (!keyName || normalized.has(keyName)) return false;
+      normalized.add(keyName);
+      return true;
+    })
+    .slice(0, 3);
+}
+
+function providerModelLabel(model: any) {
+  return missionText(String(model?.name || "model").replace(/^local\//i, "").replace(/^openai\//i, "").replace(/^google\//i, "").replace(/^xai\//i, ""));
+}
+
+function providerModelMeta(model: any) {
+  const parts = [
+    Number(model?.sessions) > 0 ? `${model.sessions} sess` : null,
+    Number(model?.callsWeekly) > 0 ? `${model.callsWeekly} calls` : null,
+    compactInt(model?.totalTokens) ? `${compactInt(model?.totalTokens)} tok` : null,
+  ].filter(Boolean);
+  return parts.join(" · ") || missionText(String(model?.source || "tracked"));
 }
 
 function numericOrZero(value: unknown) {
@@ -1888,6 +1988,7 @@ function FinOpsDashboard({
               const pct = providerUtilizationPct(provider);
               const tone = providerTone(provider);
               const limits = providerLimitRows(provider);
+              const topModels = providerTopModels(provider);
               return (
                 <article key={provider.id || key} data-provider={key} className={`finops-provider-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
                   <header>
@@ -1919,6 +2020,20 @@ function FinOpsDashboard({
                       <span />
                     </div>
                   )}
+                  <div className="provider-stat-strip">
+                    <span>{providerSummaryLabel(provider)}</span>
+                    <em>{providerUpdatedLabel(provider)}</em>
+                  </div>
+                  {topModels.length ? (
+                    <div className="provider-model-list">
+                      {topModels.map((model: any) => (
+                        <div key={String(model?.name || "model")} className="provider-model-row">
+                          <span>{providerModelLabel(model)}</span>
+                          <em>{providerModelMeta(model)}</em>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                   <footer>
                     <span>{provider.lastModelUsed || "model route available"}</span>
                     <em>{providerBillingLabel(provider)}</em>

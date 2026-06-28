@@ -2405,6 +2405,12 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "daily":   round(metered_daily,   6),
             "weekly":  round(metered_weekly,  6),
             "monthly": round(total_monthly, 6),
+            "codexbarLimits": {
+                "codex": fetch_codexbar_limits("codex"),
+                "gemini": fetch_codexbar_limits("gemini"),
+                "ollama": fetch_codexbar_limits("ollama"),
+                "xai": fetch_codexbar_limits("grok"),
+            },
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "providerBreakdown": provider_breakdown,
@@ -3715,6 +3721,92 @@ def fetch_context_watchdog_status() -> Dict[str, Any]:
     return status
 
 
+def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
+    empty: Dict[str, Any] = {
+        "available": False,
+        "provider": provider,
+        "status": "unknown",
+        "authStatus": "unknown",
+        "usageWindows": [],
+        "codexbarSource": "auto",
+        "codexbarUpdatedAt": utc_iso(),
+    }
+    try:
+        proc = subprocess.run(
+            ["/opt/homebrew/bin/codexbar", "usage", "--provider", provider, "--json"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if proc.returncode != 0 or not proc.stdout.strip():
+            return empty
+        raw = json.loads(proc.stdout)
+        entry = raw[0] if isinstance(raw, list) and raw else raw if isinstance(raw, dict) else {}
+        if not isinstance(entry, dict):
+            return empty
+        usage = entry.get("usage") if isinstance(entry.get("usage"), dict) else {}
+        identity = usage.get("identity") if isinstance(usage.get("identity"), dict) else {}
+
+        windows: List[Dict[str, Any]] = []
+
+        def push_window(window_id: str, label: str, payload: Dict[str, Any] | None) -> None:
+            if not isinstance(payload, dict):
+                return
+            used = float(payload.get("usedPercent") or 0.0)
+            remaining = payload.get("remainingPercent")
+            if remaining is None:
+                remaining = max(0.0, round(100.0 - used, 2))
+            windows.append({
+                "id": window_id,
+                "label": label,
+                "usedPercent": round(used, 2),
+                "remainingPercent": round(float(remaining), 2),
+                "resetDescription": payload.get("resetDescription"),
+                "resetsAt": payload.get("resetsAt"),
+                "windowMinutes": payload.get("windowMinutes"),
+                "status": "limited" if float(remaining) <= 0 else "ok",
+            })
+
+        push_window(f"{provider}-primary", "Session", usage.get("primary"))
+        push_window(f"{provider}-secondary", "Weekly", usage.get("secondary"))
+        for extra in usage.get("extraRateWindows") or []:
+            if not isinstance(extra, dict):
+                continue
+            extra_id = str(extra.get("id") or f"{provider}-extra-{len(windows)}")
+            push_window(extra_id, str(extra.get("title") or extra_id), extra.get("window"))
+
+        credits = entry.get("credits") if isinstance(entry.get("credits"), dict) else {}
+        reset_credits = usage.get("codexResetCredits") if isinstance(usage.get("codexResetCredits"), dict) else {}
+        reset_count = int(reset_credits.get("availableCount") or 0)
+        windows.append({
+            "id": f"{provider}-credits",
+            "label": "Credits",
+            "remainingLabel": f"{reset_count} manual reset available" if reset_count == 1 else f"{reset_count} manual resets available",
+            "status": "ok" if reset_count > 0 else ("limited" if credits.get("remaining") == 0 else "ok"),
+        })
+
+        rate_windows = [w for w in windows if isinstance(w, dict) and w.get("usedPercent") is not None]
+        exhausted = any(float(w.get("remainingPercent") or 0) <= 0 for w in rate_windows)
+        watch = any(float(w.get("remainingPercent") or 100) <= 3 for w in rate_windows)
+
+        return {
+            "available": True,
+            "status": "limited" if exhausted else "watch" if watch else "ready",
+            "authStatus": "ok",
+            "accountEmail": usage.get("accountEmail") or identity.get("accountEmail") or "",
+            "accountLabel": identity.get("providerID") or "",
+            "plan": usage.get("loginMethod") or identity.get("loginMethod") or "",
+            "codexbarSource": entry.get("source") or "auto",
+            "codexbarVersion": entry.get("version"),
+            "codexbarUpdatedAt": usage.get("updatedAt") or entry.get("updatedAt") or utc_iso(),
+            "usageWindows": windows,
+            "dataConfidence": usage.get("dataConfidence"),
+            "creditsRemaining": credits.get("remaining"),
+            "codexResetCredits": reset_credits,
+        }
+    except Exception as exc:
+        empty["lastError"] = str(exc)
+        return empty
+
+
 def fetch_coding_visibility() -> Dict[str, Any]:
     def recent_code_files() -> List[str]:
         cutoff = dt.datetime.now(dt.timezone.utc).timestamp() - (3 * 60 * 60)
@@ -3756,47 +3848,28 @@ def fetch_coding_visibility() -> Dict[str, Any]:
         except Exception:
             return 0
 
-    codexbar_summary = "CodexBar available"
-    codexbar_data: Dict[str, Any] = {"available": False}
-    try:
-        proc = subprocess.run(
-            ["/bin/zsh", "-lc", "/opt/homebrew/bin/codexbar usage --provider codex --pretty | sed -n '1,8p'"],
-            capture_output=True, text=True, timeout=8,
-        )
-        output = "\n".join([proc.stdout.strip(), proc.stderr.strip()]).strip()
-        lines = [line.strip() for line in output.splitlines() if line.strip()]
-        if lines:
-            codexbar_data = {"available": True, "raw": lines[:8]}
-            resets: list[str] = []
-            for line in lines:
-                if line.startswith("Session:"):
-                    codexbar_data["session"] = line.split(":", 1)[1].strip().split("[")[0].strip()
-                elif line.startswith("Weekly:"):
-                    codexbar_data["weekly"] = line.split(":", 1)[1].strip().split("[")[0].strip()
-                elif line.startswith("Resets in"):
-                    resets.append(line.replace("Resets in", "").strip())
-                elif line.startswith("Credits:"):
-                    codexbar_data["credits"] = line.split(":", 1)[1].strip()
-                elif line.startswith("Account:"):
-                    codexbar_data["account"] = line.split(":", 1)[1].strip()
-                elif line.startswith("Plan:"):
-                    codexbar_data["plan"] = line.split(":", 1)[1].strip()
-            if resets:
-                codexbar_data["sessionReset"] = resets[0]
-            if len(resets) > 1:
-                codexbar_data["weeklyReset"] = resets[1]
-            codexbar_summary = " · ".join(
-                part for part in [
-                    codexbar_data.get("plan"),
-                    codexbar_data.get("session"),
-                    f"wk {codexbar_data.get('weekly')}" if codexbar_data.get("weekly") else None,
-                ] if part
-            ) or "CodexBar available"
-            codexbar_data["summary"] = codexbar_summary
-        else:
-            codexbar_summary = "Codex auth required"
-    except Exception:
-        codexbar_summary = "Codex auth required"
+    codexbar_data = fetch_codexbar_limits("codex")
+    codexbar_summary = "Codex auth required"
+    if codexbar_data.get("available"):
+        session_left = None
+        weekly_left = None
+        for window in codexbar_data.get("usageWindows") or []:
+            label = str(window.get("label") or "").lower()
+            remaining = window.get("remainingPercent")
+            if remaining is None:
+                continue
+            if label == "session":
+                session_left = f"{round(float(remaining))}% left"
+            elif label == "weekly":
+                weekly_left = f"{round(float(remaining))}% left"
+        codexbar_summary = " · ".join(
+            part for part in [
+                str(codexbar_data.get("plan") or "").upper() or None,
+                session_left,
+                f"wk {weekly_left}" if weekly_left else None,
+            ] if part
+        ) or "CodexBar available"
+        codexbar_data["summary"] = codexbar_summary
 
     recent_files = [plain_dashboard_text(path, 120) for path in recent_code_files()]
     return {

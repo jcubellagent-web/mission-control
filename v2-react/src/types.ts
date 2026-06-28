@@ -301,7 +301,9 @@ export type ModelUsage = {
     lastRunAt?: string;
     available?: boolean;
   };
+  providerBreakdown?: ProviderBudget[];
   providerBudgets?: ProviderBudget[];
+  codexbarLimits?: Record<string, Partial<ProviderBudget> & { available?: boolean }>;
   routerPolicy?: Record<string, unknown>;
 };
 
@@ -338,6 +340,33 @@ export type ProviderBudget = {
   accountLabel?: string;
   codexbarSource?: string;
   codexbarUpdatedAt?: string;
+  usagePct?: number;
+  summary?: string;
+  usageSummary?: string;
+  fixedMonthlyUsd?: number;
+  meteredDailyUsd?: number;
+  meteredWeeklyUsd?: number;
+  meteredMonthlyUsd?: number;
+  usageEquivalentDailyUsd?: number;
+  usageEquivalentWeeklyUsd?: number;
+  usageEquivalentMonthlyUsd?: number;
+  callsToday?: number;
+  callsWeekly?: number;
+  sessions?: number;
+  totalTokens?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  topModels?: Array<{
+    name: string;
+    source?: string;
+    weeklyCost?: number;
+    dailyCost?: number;
+    usageEquivalentCost?: number;
+    marginalCost?: number;
+    sessions?: number;
+    callsWeekly?: number;
+    totalTokens?: number;
+  }>;
   usageWindows?: Array<{
     id?: string;
     label: string;

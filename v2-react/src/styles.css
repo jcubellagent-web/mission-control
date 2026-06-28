@@ -9261,6 +9261,49 @@ body {
   box-shadow: 0 0 10px rgba(63, 255, 177, 0.2);
 }
 
+.provider-stat-strip,
+.provider-model-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.provider-stat-strip span,
+.provider-model-row span,
+.provider-model-row em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.provider-stat-strip span {
+  color: rgba(188, 231, 255, 0.92);
+  font-size: 8.5px;
+  font-weight: 850;
+}
+
+.provider-stat-strip em,
+.provider-model-row em {
+  color: rgba(166, 210, 235, 0.72);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.provider-model-list {
+  display: grid;
+  gap: 3px;
+  min-height: 0;
+}
+
+.provider-model-row span {
+  color: rgba(244, 251, 255, 0.92);
+  font-size: 8.5px;
+  font-weight: 850;
+}
+
 /* Cohesive Control Tower visual system: deep blue surface, green primary state, per-agent accents. */
 .hero-shell,
 .app-shell {
