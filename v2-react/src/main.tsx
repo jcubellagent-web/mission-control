@@ -1773,7 +1773,7 @@ function providerTopModels(provider: any) {
       normalized.add(keyName);
       return true;
     })
-    .slice(0, 3);
+    .slice(0, 2);
 }
 
 function providerModelLabel(model: any) {
@@ -2028,17 +2028,17 @@ function FinOpsDashboard({
                     <div className="provider-model-list">
                       {topModels.map((model: any) => (
                         <div key={String(model?.name || "model")} className="provider-model-row">
-                          <span>{providerModelLabel(model)}</span>
-                          <em>{providerModelMeta(model)}</em>
+                          <span className="provider-model-name">{providerModelLabel(model)}</span>
+                          <small className="provider-model-meta">{providerModelMeta(model)}</small>
                         </div>
                       ))}
                     </div>
                   ) : null}
-                  <footer>
-                    <span>{provider.lastModelUsed || "model route available"}</span>
-                    <em>{providerBillingLabel(provider)}</em>
+                  <footer className="provider-card-footer">
+                    <span className="provider-route-pill">{provider.lastModelUsed || "model route available"}</span>
+                    <em className="provider-billing-pill">{providerBillingLabel(provider)}</em>
                   </footer>
-                  <small>{providerEvidenceLabel(provider)}</small>
+                  <small className="provider-evidence-line">{providerEvidenceLabel(provider)}</small>
                 </article>
               );
             }) : (

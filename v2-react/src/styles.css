@@ -9271,21 +9271,27 @@ body {
 }
 
 .provider-stat-strip span,
-.provider-model-row span,
-.provider-model-row em {
+.provider-model-name,
+.provider-model-meta,
+.provider-route-pill,
+.provider-billing-pill,
+.provider-evidence-line {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.provider-stat-strip {
+  padding: 2px 0 1px;
+}
+
 .provider-stat-strip span {
   color: rgba(188, 231, 255, 0.92);
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 850;
 }
 
-.provider-stat-strip em,
-.provider-model-row em {
+.provider-stat-strip em {
   color: rgba(166, 210, 235, 0.72);
   font-size: 8px;
   font-style: normal;
@@ -9294,14 +9300,80 @@ body {
 
 .provider-model-list {
   display: grid;
-  gap: 3px;
+  gap: 6px;
   min-height: 0;
 }
 
-.provider-model-row span {
+.provider-model-row {
+  display: grid;
+  justify-content: stretch;
+  gap: 3px;
+  padding: 7px 9px;
+  border: 1px solid rgba(101, 186, 235, 0.12);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(8, 26, 48, 0.72), rgba(4, 15, 29, 0.84));
+  align-items: start;
+}
+
+.provider-model-name {
   color: rgba(244, 251, 255, 0.92);
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 850;
+}
+
+.provider-model-meta {
+  color: rgba(164, 212, 236, 0.74);
+  font-size: 7.8px;
+  font-weight: 780;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.provider-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.provider-route-pill,
+.provider-billing-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 178, 231, 0.16);
+  white-space: nowrap !important;
+}
+
+.finops-provider-card .provider-route-pill {
+  color: rgba(184, 224, 247, 0.76);
+  background: rgba(10, 25, 46, 0.82);
+  font-size: 7.8px;
+  font-weight: 760;
+  max-width: 64%;
+}
+
+.finops-provider-card .provider-billing-pill {
+  color: rgba(108, 255, 193, 0.94);
+  background: linear-gradient(180deg, rgba(11, 45, 39, 0.78), rgba(7, 29, 28, 0.84));
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 860;
+  border-color: rgba(95, 236, 171, 0.18);
+}
+
+.finops-provider-card .provider-evidence-line {
+  display: block;
+  color: rgba(145, 191, 219, 0.62);
+  font-size: 7.7px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  white-space: normal !important;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 /* Cohesive Control Tower visual system: deep blue surface, green primary state, per-agent accents. */
