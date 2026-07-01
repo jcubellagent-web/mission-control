@@ -109,8 +109,8 @@ def check_react_surface() -> None:
     for agent in ("joshex", "josh2", "jaimes", "jain"):
         require(agent in adapters_src or agent in data_src or agent in main_src, f"missing first-class agent marker: {agent}")
 
-    require("REALTIME_TABLES" in data_src, "React data layer must include realtime table wiring")
-    require("brain_feed" in data_src and "mc_v2_agent_status" in data_src, "React data layer must read Brain Feed and agent status")
+    require("subscribeMissionControlRealtime" in data_src and '"polling"' in data_src, "React data layer must expose the current polling-based realtime bridge")
+    require("brain-feed.json" in data_src and "dashboard-data.json" in data_src, "React data layer must read Brain Feed and dashboard sidecars")
     require("recordValue" in adapters_src and "arrayValue" in adapters_src, "React data adapters must expose sidecar normalizers")
     require("MissionControlState" in types_src, "React types must expose the Control Tower state contract")
 
