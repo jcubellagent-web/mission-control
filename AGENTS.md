@@ -1,3 +1,5 @@
+#JAIMES: shared handoff rule refreshed on 2026-07-01. When you change shared code/docs here, leave one short `#JAIMES:` note near the touched logic summarizing the latest meaningful change. Update the existing note instead of stacking stale ones.
+
 # Control Tower Agent Instructions
 
 An unqualified user-facing reference to the dashboard should say "Control Tower". The legacy repo/path name remains `mission-control`.

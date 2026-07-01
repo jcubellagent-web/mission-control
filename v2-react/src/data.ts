@@ -7,6 +7,8 @@ const STALE_BLOCKER_WINDOW_MS = 6 * 60 * 60 * 1000;
 const BRAIN_FEED_TRUTH_WINDOW_MS = 12 * 60 * 60 * 1000;
 const AGENT_STATUS_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"];
 
+// #JAIMES: prefer the freshest visible Brain Feed row when it is current; only fall back to sidecar status when the visible lane is stale or missing.
+
 function canonicalAgentId(value: unknown, fallback: AgentId = "joshex"): AgentId {
   const text = String(value || "").toLowerCase();
   if (text === "main" || text === "josh" || text === "josh2" || text.includes("josh2") || text.includes("josh 2")) {

@@ -71,6 +71,7 @@ GOG_KEYRING_ENV_PATHS = [
     WORKSPACE_ROOT / "secrets" / "gog-keyring.env",
 ]
 
+# #JAIMES: keep Control Tower text plain, dashboard-safe, and operator-readable when raw heartbeats or script paths leak into shared surfaces.
 PLAIN_TEXT_REPLACEMENTS = {
     "Heartbeat: josh2-lan": "Josh 2.0 is online and ready",
     "Heartbeat: jaimes-via-josh": "JAIMES is online and ready",
