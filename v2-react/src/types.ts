@@ -438,10 +438,5 @@ export type SignalHealth = {
 };
 
 declare global {
-  interface Window {
-    MC_V2_CONFIG?: {
-      supabaseUrl?: string;
-      supabaseKey?: string;
-    };
-  }
+  interface Window {}
 }

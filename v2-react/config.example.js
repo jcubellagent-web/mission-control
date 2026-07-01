@@ -1,4 +1,1 @@
-window.MC_V2_CONFIG = {
-  supabaseUrl: "https://your-project.supabase.co",
-  supabaseKey: "sb_publishable_...",
-};
+// No runtime config needed. Local/shared JSON is the canonical data lane.
