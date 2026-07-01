@@ -1,8 +1,6 @@
 import { arrayValue, booleanValue, isAgentId, isRecord, recordValue, stringValue } from "./dataAdapters";
 import type { AgentEvent, AgentId, AgentJob, AgentStatus, Approval, MissionControlState, SignalItem } from "./types";
 
-const CONFIG = window.MC_V2_CONFIG || {};
-const REALTIME_TABLES = ["brain_feed", "mc_v2_agent_status", "mc_v2_events", "mc_v2_jobs", "mc_v2_approvals"];
 const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
 const STALE_BLOCKER_WINDOW_MS = 6 * 60 * 60 * 1000;
@@ -65,18 +63,6 @@ function normalizeBrainFeedRow(row: unknown): AgentStatus | null {
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`${path}: ${response.status}`);
-  return response.json() as Promise<T>;
-}
-
-async function supabaseFetch<T>(path: string): Promise<T> {
-  const response = await fetch(`${CONFIG.supabaseUrl}/rest/v1/${path}`, {
-    headers: {
-      apikey: CONFIG.supabaseKey || "",
-      Authorization: `Bearer ${CONFIG.supabaseKey || ""}`,
-    },
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error(`Supabase ${path}: ${response.status}`);
   return response.json() as Promise<T>;
 }
 
@@ -263,61 +249,6 @@ function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
     .slice(0, JOB_ROW_LIMIT);
 }
 
-function selectLiveSupabaseJobs(jobs: AgentJob[]): AgentJob[] {
-  const now = Date.now();
-  const liveRows = jobs.filter((job) => {
-    const updated = timestampValue(job.updated_at);
-    if (isBlockingJobStatus(job)) return !blockedJobSuperseded(job, jobs, now);
-    if (!["active", "running", "queued"].includes(jobStatusText(job))) return false;
-    return Boolean(updated) && now - updated <= LIVE_ROW_WINDOW_MS;
-  });
-  const rows = new Map<string, AgentJob>();
-  for (const job of liveRows) {
-    const key = jobMergeKey(job);
-    const existing = rows.get(key);
-    if (!existing || timestampValue(job.updated_at) >= timestampValue(existing.updated_at)) {
-      rows.set(key, job);
-    }
-  }
-  return [...rows.values()]
-    .sort((a, b) => timestampValue(b.updated_at) - timestampValue(a.updated_at))
-    .slice(0, 8);
-}
-
-async function loadFromSupabase(): Promise<MissionControlState> {
-  const [statuses, brainFeedRows, events, jobs, approvals, sidecars] = await Promise.all([
-    supabaseFetch<AgentStatus[]>("mc_v2_agent_status?select=*&order=updated_at.desc"),
-    supabaseFetch<any[]>("brain_feed?select=id,data,updated_at&id=in.(joshex,josh,josh2,main,jaimes,jain)").catch(() => []),
-    supabaseFetch<AgentEvent[]>("mc_v2_events?select=*&order=created_at.desc&limit=40"),
-    supabaseFetch<AgentJob[]>(`mc_v2_jobs?select=*&order=updated_at.desc&limit=${JOB_ROW_LIMIT}`),
-    supabaseFetch<Approval[]>("mc_v2_approvals?select=*&risk_tier=eq.dashboard-safe&order=created_at.desc&limit=20"),
-    loadSidecars(),
-  ]);
-  const fallback = await loadFallback();
-  const normalizedStatuses = statuses.map((row) => normalizeStatus(row)).filter(Boolean) as AgentStatus[];
-  const brainFeedStatuses = brainFeedRows.map((row) => normalizeBrainFeedRow(row)).filter(Boolean) as AgentStatus[];
-  const mergedJobs = mergeJobs(selectLiveSupabaseJobs(jobs), fallback.jobs);
-  const visibleApprovals = approvals.filter((row) => row.status === "pending" && !isLowSignalApproval(row));
-  return {
-    source: jobs.length && fallback.jobs.length ? "Supabase + local jobs" : jobs.length ? "Supabase" : "Local jobs fallback",
-    statuses: normalizedStatuses.length || brainFeedStatuses.length
-      ? mergeStatuses(brainFeedStatuses, normalizedStatuses, fallback.statuses)
-      : fallback.statuses,
-    events: events.length ? events : fallback.events,
-    jobs: mergedJobs.length ? mergedJobs : fallback.jobs,
-    approvals: visibleApprovals,
-    agenticCrypto: sidecars.agenticCrypto || fallback.agenticCrypto,
-    modelUsage: sidecars.modelUsage || fallback.modelUsage,
-    modelRouter: fallback.modelRouter,
-    reliabilityUpgrades: sidecars.reliabilityUpgrades || fallback.reliabilityUpgrades,
-    capabilityStack: fallback.capabilityStack,
-    capabilityInventory: fallback.capabilityInventory,
-    capabilityWatch: fallback.capabilityWatch,
-    signalHealth: sidecars.signalHealth || fallback.signalHealth,
-    signals: sidecars.signals.length ? sidecars.signals : fallback.signals,
-  };
-}
-
 async function loadFallback(): Promise<MissionControlState> {
   const [brain, personal, dashboard, sidecars] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
@@ -464,75 +395,14 @@ function buildFallbackJobs(dashboard: any): AgentJob[] {
 }
 
 export async function loadMissionControl(): Promise<MissionControlState> {
-  if (CONFIG.supabaseUrl && CONFIG.supabaseKey) {
-    try {
-      return await loadFromSupabase();
-    } catch (error) {
-      console.warn(error);
-    }
-  }
   return loadFallback();
 }
 
-export function subscribeMissionControlRealtime(onChange: () => void, onState?: (state: "connected" | "polling") => void) {
-  if (!CONFIG.supabaseUrl || !CONFIG.supabaseKey || typeof WebSocket === "undefined") {
-    onState?.("polling");
-    return () => {};
-  }
-  const url = `${CONFIG.supabaseUrl.replace(/^http/i, "ws")}/realtime/v1/websocket?apikey=${encodeURIComponent(CONFIG.supabaseKey)}&vsn=1.0.0`;
-  const socket = new WebSocket(url);
-  const topic = "realtime:mission-control";
-  let ref = 0;
-  let closed = false;
-  let heartbeat: number | undefined;
-  let pending = false;
-
-  const send = (event: string, payload: Record<string, unknown>, target = topic) => {
-    if (socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify({ topic: target, event, payload, ref: String(++ref) }));
-  };
-  const scheduleRefresh = () => {
-    if (pending) return;
-    pending = true;
-    window.setTimeout(() => {
-      pending = false;
-      onChange();
-    }, 250);
-  };
-
-  socket.addEventListener("open", () => {
-    if (closed) return;
-    send("phx_join", {
-      config: {
-        broadcast: { self: false },
-        presence: { key: "" },
-        postgres_changes: REALTIME_TABLES.map((table) => ({ event: "*", schema: "public", table })),
-      },
-      access_token: CONFIG.supabaseKey,
-    });
-    heartbeat = window.setInterval(() => send("heartbeat", {}, "phoenix"), 25_000);
-  });
-  socket.addEventListener("message", (event) => {
-    try {
-      const message = JSON.parse(event.data);
-      if (message.event === "phx_reply" && message.payload?.status === "ok") onState?.("connected");
-      if (message.event === "postgres_changes") scheduleRefresh();
-    } catch {
-      // Ignore malformed realtime frames and keep polling as fallback.
-    }
-  });
-  socket.addEventListener("close", () => {
-    if (heartbeat) window.clearInterval(heartbeat);
-    if (!closed) onState?.("polling");
-  });
-  socket.addEventListener("error", () => onState?.("polling"));
-
-  return () => {
-    closed = true;
-    if (heartbeat) window.clearInterval(heartbeat);
-    if (socket.readyState === WebSocket.OPEN) send("phx_leave", {});
-    socket.close();
-  };
+export function subscribeMissionControlRealtime(_onChange: () => void, onState?: (state: "connected" | "polling") => void) {
+  // Control Tower now uses local/shared JSON as the only live lane on JOSH2.
+  // main.tsx already refreshes every 10s, so report polling mode and no-op here.
+  onState?.("polling");
+  return () => {};
 }
 
 async function loadSidecars(): Promise<{
