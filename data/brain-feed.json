@@ -1,61 +1,24 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": false,
-  "reportedActive": false,
+  "active": true,
+  "reportedActive": true,
   "status": "done",
-  "objective": "Josh 2.0 screen check clean",
-  "detail": "Kiosk endpoint, dashboard data, and screen capture checked.; reopened Chrome kiosk when repair is needed",
-  "updatedAt": "2026-06-15T08:24:35Z",
-  "checkedAt": "2026-06-15T08:24:35Z",
-  "currentTool": "Control Tower screen check",
+  "objective": "Done: reported healthy",
+  "detail": "Objective confirmed; provider=codex; model=GPT-5.5 / local OpenCLAW session; lane=codex; why=execution/private fit; fallback=Gemini was not selected; router_reason=task is not synthesis/review/digest classified; task requires execution or trusted integration;",
+  "updatedAt": "2026-07-02T01:45:26Z",
+  "checkedAt": "2026-07-02T01:45:26Z",
+  "currentTool": "exec",
   "steps": [
     {
-      "label": "Josh 2.0 screen check clean",
+      "label": "Done - reported healthy",
       "status": "done",
-      "tool": "Control Tower screen check",
-      "kind": "complete"
-    },
-    {
-      "label": "Heartbeat maintenance complete",
-      "status": "done",
-      "tool": "heartbeat",
-      "kind": "complete"
-    },
-    {
-      "label": "Direct chat context high",
-      "status": "info",
-      "tool": "heartbeat",
-      "kind": "note"
-    },
-    {
-      "label": "Fresh direct session recommended",
-      "status": "ready",
-      "tool": "heartbeat",
-      "kind": "handoff"
-    },
-    {
-      "label": "Bring up Josh 2.0 and clear alerts",
-      "status": "done",
-      "tool": "agent publish",
-      "kind": "status"
-    },
-    {
-      "label": "Kintara tutorial continuation",
-      "status": "ready",
-      "tool": "agent publish",
-      "kind": "status"
-    },
-    {
-      "label": "Kintara training + tutorial assist",
-      "status": "ready",
-      "tool": "agent publish",
-      "kind": "status"
+      "tool": "exec"
     }
   ],
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
-  "model": "GPT-5.5",
+  "model": "gemini-3-flash-preview",
   "messageReceived": "2026-05-25T00:14:38Z",
   "localLiveFeed": true
 }
