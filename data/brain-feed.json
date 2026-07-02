@@ -4,21 +4,21 @@
   "active": true,
   "reportedActive": true,
   "status": "done",
-  "objective": "Done: reported healthy",
-  "detail": "Objective confirmed; provider=codex; model=GPT-5.5 / local OpenCLAW session; lane=codex; why=execution/private fit; fallback=Gemini was not selected; router_reason=task is not synthesis/review/digest classified; task requires execution or trusted integration;",
-  "updatedAt": "2026-07-02T01:45:26Z",
-  "checkedAt": "2026-07-02T01:45:26Z",
+  "objective": "Done: context refreshed",
+  "detail": "Objective confirmed; provider=codex; model=gpt-5.4-mini; lane=codex; why=execution/private fit; fallback=Gemini was not selected; router_reason=task is not synthesis/review/digest classified; task requires execution or trusted integration; skill=none",
+  "updatedAt": "2026-07-02T01:47:10Z",
+  "checkedAt": "2026-07-02T01:47:10Z",
   "currentTool": "exec",
   "steps": [
     {
-      "label": "Done - reported healthy",
+      "label": "Done - context refreshed",
       "status": "done",
       "tool": "exec"
     }
   ],
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
-  "model": "gemini-3-flash-preview",
+  "model": "GPT-5.4-mini",
   "messageReceived": "2026-05-25T00:14:38Z",
   "localLiveFeed": true
 }
