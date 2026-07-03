@@ -155,7 +155,7 @@ CRON_TARGETS = [
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
     {"name": "Control Tower Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Control Tower data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Context Sync", "pattern": "com.josh20.mission-control-signal-refresh", "schedule": "Every 5 min", "description": "Keeps J.A.I.N alert state available for Telegram and agent context", "category": "Agent Context", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log"},
-    {"name": "Brain Feed Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the live Brain Feed endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Live Work Board Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the Live Work Board endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
@@ -1281,7 +1281,7 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
         status = str(brain_feed.get("status") or "").strip().lower()
         if brain_feed.get("active"):
             return {
-                "status": "Brain Feed live",
+                "status": "Live Work Board live",
                 "context": objective or "Agent task is currently in motion.",
                 "updatedAt": updated_at,
             }
@@ -1292,7 +1292,7 @@ def build_focus_fallback(brain_feed: Dict[str, Any] | None, now_iso: str) -> Dic
             elif status in {"error", "failed"}:
                 context = f"Last task needs review: {objective}"
             return {
-                "status": "Brain Feed idle",
+                "status": "Live Work Board idle",
                 "context": context,
                 "updatedAt": updated_at,
             }
@@ -2662,7 +2662,7 @@ et = ZoneInfo('America/New_York')
     jobs = {
     'Control Tower Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
     'J.A.I.N Context Sync': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log',
-    'Brain Feed Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
+    'Live Work Board Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
     'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
@@ -2696,7 +2696,7 @@ PY"""
             local_jobs = {
                 'Control Tower Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
                 'J.A.I.N Context Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log'),
-                'Brain Feed Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
+                'Live Work Board Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
                 'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
@@ -3621,7 +3621,7 @@ def build_capability_stack(
             "name": "Agent Control",
             "status": agent_summary.get("overall") or "unknown",
             "summary": f"{ready}/{total} live lanes ready" if live_heartbeat_source else f"{ready}/{total} agent nodes ready",
-            "detail": "Fresh Brain Feed heartbeats from the tracked agents" if live_heartbeat_source else f"{failed} queue item(s) · {dirty} dirty repo(s)",
+            "detail": "Fresh Live Work Board heartbeats from the tracked agents" if live_heartbeat_source else f"{failed} queue item(s) · {dirty} dirty repo(s)",
         })
     if personal_codex and personal_codex.get("status") != "offline":
         stack.append({
@@ -4035,9 +4035,10 @@ def build_recent_activity(
     items: List[Dict[str, str]] = []
 
     if focus and focus.get("status"):
+        #JAIMES: Control Tower now calls this surface Live Work Board; keep brain-feed file keys as compatibility plumbing only.
         items.append({
             "time": focus.get("updatedAt") or now_iso,
-            "event": f"Brain: {focus.get('status')}",
+            "event": f"Live Work Board: {focus.get('status')}",
         })
 
     if events:
@@ -4436,7 +4437,7 @@ def main() -> None:
     dashboard["agentControl"] = load_agent_control_status(now_iso)
     dashboard["agentContextRegistry"] = load_json_file(AGENT_CONTEXT_REGISTRY_PATH, {
         "generatedAt": now_iso,
-        "canonicalSource": "Control Tower shared sidecars plus Josh 2.0 local live Brain Feed lane.",
+        "canonicalSource": "Control Tower shared sidecars plus Josh 2.0 local Live Work Board lane.",
         "privacy": "dashboard-safe summaries only",
         "summary": {"status": "unknown", "agents": 0, "staleAgents": [], "openTasks": 0, "openHandoffs": 0},
         "agents": {},

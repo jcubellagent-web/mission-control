@@ -52,8 +52,8 @@ OPEN_HANDOFF_STATUSES = {"open", "accepted", "blocked"}
 PLAIN_TEXT_REPLACEMENTS = {
     "jaimes-model-efficiency-guard": "JAIMES model efficiency guard",
     "jaimes-ops-drift-check": "JAIMES ops drift check",
-    "jaimes-brain-feed-self-test": "JAIMES Brain Feed self-test",
-    "jaimes-brain-feed-stale-alert": "JAIMES Brain Feed stale alert",
+    "jaimes-brain-feed-self-test": "JAIMES Live Work Board self-test",
+    "jaimes-brain-feed-stale-alert": "JAIMES Live Work Board stale alert",
     "sorare-canonical-reflector": "Sorare canonical sync",
 }
 
@@ -261,12 +261,12 @@ def build_registry() -> dict[str, Any]:
             "openHandoffs": handoffs,
             "recentEvents": events,
             "pickupPrompt": (
-                f"Review {config['label']} brainFeed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
+                f"Review {config['label']} Live Work Board feed, heartbeat, openTasks, openHandoffs, and recentEvents from this registry before taking over."
             ),
         }
     return {
         "generatedAt": generated,
-        "canonicalSource": "Control Tower shared sidecars plus visible Brain Feed lane; Josh 2.0 live Control Tower is the operational source of truth.",
+        "canonicalSource": "Control Tower shared sidecars plus visible Live Work Board lane; Josh 2.0 live Control Tower is the operational source of truth.",
         "privacy": "dashboard-safe summaries only; no raw emails, tokens, OAuth payloads, cookies, or private account contents.",
         "chatSources": read_json(CHAT_SOURCES_PATH, {"sources": []}),
         "summary": {
