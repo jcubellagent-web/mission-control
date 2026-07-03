@@ -242,8 +242,8 @@ def main() -> int:
             'const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"]' in react_main
             and ".brain-hero.is-flight-deck .brain-agent-grid" in react_styles
             and "grid-template-rows: repeat(4, minmax(0, 1fr))" in react_styles,
-            "All-agent Brain Feed",
-            "JOSHeX, Josh 2.0, JAIMES, and J.A.I.N all render as first-class Brain Feed cards",
+            "All-agent Live Work Board",
+            "JOSHeX, Josh 2.0, JAIMES, and J.A.I.N all render as first-class Live Work Board cards",
             severity="medium",
         ),
         status(
@@ -310,7 +310,7 @@ def main() -> int:
             and ".jobs-rail::before" in react_styles
             and ".support-grid .signal-feed::before" in react_styles,
             "Blue support modules",
-            "Today Jobs and Signal Feed have a distinct flat blue shell while Brain Feed stays glassy",
+            "Today Jobs and Signal Feed have a distinct flat blue shell while Live Work Board stays glassy",
             severity="medium",
         ),
         status(
@@ -325,8 +325,8 @@ def main() -> int:
             and "BrainUsageStrip" not in react_main
             and "activity-heat-strip" not in react_styles
             and "brain-usage-strip" not in react_styles,
-            "Brain Feed strip cleanup",
-            "Last 60m and model usage strips are removed from Brain Feed",
+            "Live Work Board strip cleanup",
+            "Last 60m and model usage strips are removed from Live Work Board",
             severity="medium",
         ),
         status(
@@ -373,7 +373,7 @@ def main() -> int:
             and "Josh 2.0 screen layout needs attention" in react_main
             and "Signal Feed needs refresh" not in react_main,
             "Data freshness guardrails",
-            "Brain Feed surfaces stale jobs, agent coverage, and live kiosk display fit without treating optional news as a blocker",
+            "Live Work Board surfaces stale jobs, agent coverage, and live kiosk display fit without treating optional news as a blocker",
             severity="high",
         ),
         status(
@@ -401,7 +401,7 @@ def main() -> int:
             and "heartbeat_ts > explicit_ts" in update_script
             and bool(parse_ts(josh_feed.get("updatedAt")))
             and (datetime.now(timezone.utc) - parse_ts(josh_feed.get("updatedAt"))).total_seconds() <= 2 * 3600,
-            "Brain Feed heartbeat freshness",
+            "Live Work Board heartbeat freshness",
             "idle agent cards prefer fresh heartbeat-backed check-ins over old sidecars",
             severity="medium",
         ),
@@ -428,8 +428,8 @@ def main() -> int:
             and "letter-spacing: 0.01em;\n  text-overflow: ellipsis;\n  text-transform: none;" in react_styles
             and ".truth-chip.is-clear" in react_styles
             and ".truth-chip.is-watch" in react_styles,
-            "Brain Feed truth chip",
-            "visible Brain Feed header separates clean, watch, and needs-review states in calm plain-English controls",
+            "Live Work Board truth chip",
+            "visible Live Work Board header separates clean, watch, and needs-review states in calm plain-English controls",
             severity="medium",
         ),
         status(
@@ -595,7 +595,7 @@ def main() -> int:
             "ACTIVE_FOCUS_FRESH_MINUTES" in react_main
             and "activeWorkFresh" in react_main
             and "statusWorkingFresh" in react_main,
-            "Brain Feed stale-active guard",
+            "Live Work Board stale-active guard",
             "old working rows age out before driving the green active state",
             severity="medium",
         ),
@@ -661,7 +661,7 @@ def main() -> int:
             and "rank(aState) - rank(bState)" in react_main
             and "activeWorkDetail?.title || objectiveText" in react_main
             and "const headerStateLabel = agentHeaderStateLabel(visualState, routineFocus, activeFocus);" in react_main,
-            "Brain Feed active-work truth",
+            "Live Work Board active-work truth",
             (
                 f"{len(active_crons)} active scheduled job(s) can promote owning agent cards"
                 if active_crons
@@ -692,7 +692,7 @@ def main() -> int:
             and 'routineFocus ? "is-routine-focus" : activeFocus ? "is-working-focus"' in react_main
             and ".agent-hero-card.is-routine-focus h3" in react_styles
             and ".agent-hero-card.is-state-routine .dot" in react_styles,
-            "Brain Feed routine check state",
+            "Live Work Board routine check state",
             "routine background checks keep a short status label while the main headline explains that live status is staying current",
             severity="medium",
         ),
@@ -704,7 +704,7 @@ def main() -> int:
                 in react_main
             and react_main.find('if (/signal|intelligence|news|newsletter|breaking/.test(lower)) return "Breaking + newsletter signals.";')
                 < react_main.find('if (/control tower|kiosk|dashboard|react|watchdog|ui/.test(lower)) return "Live kiosk health.";'),
-            "Brain Feed active-detail classification",
+            "Live Work Board active-detail classification",
             "signal/news refresh work stays described as signal work instead of generic kiosk verification",
             severity="medium",
         ),
@@ -719,7 +719,7 @@ def main() -> int:
             and "if (!isReadyHeartbeatStatus(status) && activeFocus) return \"working\";" in react_main
             and "activeFocus || agentIsWorking(status)" not in react_main
             and "const headerDotClass = agentHeaderDotClass(visualState, routineFocus, activeFocus);" in react_main,
-            "Brain Feed stale-active label guard",
+            "Live Work Board stale-active label guard",
             "stale active rows age out of working, while healthy idle agents stay Ready until the visibility SLA is actually missed",
             severity="high",
         ),
@@ -728,7 +728,7 @@ def main() -> int:
             and 'freshCheckin ? " is-hot" : ""' in react_main
             and ".agent-freshness-pill.is-hot" in react_styles
             and ".agent-freshness-pill.is-hot::before" in react_styles,
-            "Brain Feed fresh check-in cue",
+            "Live Work Board fresh check-in cue",
             "fresh agent check-ins get a subtle durable visual cue after refresh without adding more text or modules",
             severity="medium",
         ),
@@ -793,7 +793,7 @@ def main() -> int:
              or ("flex-direction: column;" in react_styles and "margin-top: auto;" in react_styles))
             and ("min-height: 292px" in react_styles or "min-height: 270px" in react_styles or "height: 100%;" in react_styles)
             and ".brain-hero .agent-idle-readout p" in react_styles,
-            "Brain Feed text rails",
+            "Live Work Board text rails",
             "agent panels keep objective, complete, next, and footer in fixed lanes",
             severity="medium",
         ),
@@ -820,14 +820,14 @@ def main() -> int:
             and '{ label: "Next", text: nextSummary }' not in react_main
             and "Checks" in react_main
             and "Output" in react_main,
-            "Brain Feed next-job context",
+            "Live Work Board next-job context",
             "agent cards keep readable checks and output rows while next timing stays in the header and footer",
             severity="medium",
         ),
         status(
             "<em>{headerStateLabel}</em>" in react_main
             and "{headerStateLabel} · {ageLabel" not in react_main,
-            "Brain Feed status dedupe",
+            "Live Work Board status dedupe",
             "agent card headers keep only the state while the right-side freshness rail owns timing",
             severity="medium",
         ),
@@ -836,7 +836,7 @@ def main() -> int:
             and "`Refresh due · checked ${age} ago`" in react_main
             and '"Aging · checked just now"' not in react_main
             and "`Aging · checked ${age} ago`" not in react_main,
-            "Brain Feed freshness wording",
+            "Live Work Board freshness wording",
             "watch-level agent check-ins use refresh-due language instead of warning-like aging language",
             severity="medium",
         ),
@@ -844,7 +844,7 @@ def main() -> int:
             "function nextCountdownClockLabel(nextAt?: number)" in react_main
             and "const when = nextCountdownClockLabel(idleContext.nextAt) || idleContext.countdown || \"soon\";" in react_main
             and "return countdown ? `${countdown} · ${clock}` : clock;" in react_main,
-            "Brain Feed up-next countdown",
+            "Live Work Board up-next countdown",
             "agent card Up Next pills show countdown plus clock time instead of static clock-only timing",
             severity="low",
         ),
@@ -852,7 +852,7 @@ def main() -> int:
             ".brain-hero.is-flight-deck .agent-objective-meta em" in react_styles
             and "text-transform: none;" in react_styles
             and "letter-spacing: 0.03em;" in react_styles,
-            "Brain Feed countdown typography",
+            "Live Work Board countdown typography",
             "agent card countdown chips keep natural case while compact labels stay uppercase",
             severity="low",
         ),
@@ -862,7 +862,7 @@ def main() -> int:
             and "standing by until the next scheduled task" not in react_main
             and "No recent JOSHeX completion reported" not in react_main
             and "No recent ${AGENTS[agent].label} completion reported" not in react_main,
-            "Brain Feed idle fallback wording",
+            "Live Work Board idle fallback wording",
             "idle agent cards distinguish missing completion reports from true completed work in plain English",
             severity="medium",
         ),
@@ -877,7 +877,7 @@ def main() -> int:
             and "Next: ${nextSupport}" in react_main
             and "Now: ${nowSupport}" in react_main
             and ".replace(/^(?:last|complete|completed):\\s*/i, \"\")" in react_main,
-            "Brain Feed completion line readability",
+            "Live Work Board completion line readability",
             "agent cards keep a readable Last plus Next line without changing the card layout",
             severity="low",
         ),
@@ -893,14 +893,14 @@ def main() -> int:
             and "Last: ${lastSupport}" in react_main
             and "Next: ${nextSupport}" in react_main
             and "kind: latestJoshexEvent.type || latestJoshexEvent.event_type || \"shared-event\"" in react_data,
-            "Brain Feed latest completion truth",
-            "idle agent Last lines preserve the newest completed local Brain Feed step, event, or job title instead of generic job-category summaries",
+            "Live Work Board latest completion truth",
+            "idle agent Last lines preserve the newest completed local Live Work Board step, event, or job title instead of generic job-category summaries",
             severity="medium",
         ),
         status(
             'replace(/\\bintelligence feed\\b/i, "Intelligence Feed")' in react_main
             and 'compactText(cleanHeadlineText(String(route)), 84)' in react_main,
-            "Brain Feed active label polish",
+            "Live Work Board active label polish",
             "active tool labels render as plain-English title case instead of raw lowercase source values",
             severity="medium",
         ),
@@ -910,7 +910,7 @@ def main() -> int:
             and '.replace(/\\bjaimes-ops-drift-check\\b/gi, "JAIMES ops drift check")' in react_main
             and '.replace(/\\bjaimes-model-efficiency-guard\\b/gi, "JAIMES model efficiency guard")' in react_main
             and not raw_job_leaks,
-            "Brain Feed raw job label cleanup",
+            "Live Work Board raw job label cleanup",
             (
                 "JAIMES scheduled job IDs render as plain-English work labels in code and current dashboard data"
                 if not raw_job_leaks
@@ -1071,8 +1071,8 @@ def main() -> int:
             and "--privacy dashboard-safe" in run_watchdog
             and 'event_type="complete"' in run_watchdog
             and "Control Tower watchdog" in run_watchdog,
-            "Watchdog Brain Feed fallback",
-            "scheduled Control Tower watchdog publishes through the local-first Brain Feed path if the older publisher is missing or fails",
+            "Watchdog Live Work Board fallback",
+            "scheduled Control Tower watchdog publishes through the local-first Live Work Board path if the older publisher is missing or fails",
             severity="medium",
         ),
         status(
@@ -1306,7 +1306,7 @@ def main() -> int:
             and ".agentic-crypto-panel.has-section-update > .section-update-cue" in react_styles
             and ".support-grid .signal-feed.has-section-update > .section-update-cue" in react_styles,
             "Module update sweep",
-            "Brain Feed, Today's Jobs, Agentic Crypto, and Signal Feed show a thin top-edge sweep when their data changes",
+            "Live Work Board, Today's Jobs, Agentic Crypto, and Signal Feed show a thin top-edge sweep when their data changes",
             severity="low",
         ),
         status(
@@ -1415,7 +1415,7 @@ def main() -> int:
         "Today Jobs live merge policy",
         "React favicon",
         "Agent Control lane",
-        "Brain Feed heartbeat freshness",
+        "Live Work Board heartbeat freshness",
     }
     for check in checks:
         if not check.get("ok") and check.get("name") in retired_source_contracts:
