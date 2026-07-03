@@ -38,7 +38,7 @@ Purpose:
 Initial agents:
 
 - `joshex`: sensitive coordination, repo edits, Control Tower patches, connected account triage, planning.
-- `josh`: dashboard host, fast local ops, OpenCLAW services, Brain Feed server, health checks.
+- `josh`: dashboard host, fast local ops, OpenCLAW services, Live Work Board server, health checks.
 - `jaimes`: Hermes/specialist workflows, Sorare ML, fantasy workflows, reports, specialist background jobs.
 - `jain`: scheduled workers, intelligence scans, X/watchlist monitors, cron-heavy automation.
 
@@ -86,7 +86,7 @@ Statuses:
 Acceptance criteria:
 
 - Any agent can create, accept, update, block, complete, and hand off a task through `agent_task.py`.
-- Task updates also write shared events and optionally Brain Feed.
+- Task updates also write shared events and optionally Live Work Board.
 - Control Tower can show active/blocked/queued tasks.
 
 ### 3. Permission Tiers
@@ -130,7 +130,7 @@ python3 scripts/agent_task.py handoff --id TASK_ID --to jain --reason "..."
 Acceptance criteria:
 
 - Every command appends to `shared-events.json`.
-- Status changes can publish Brain Feed when requested.
+- Status changes can publish Live Work Board when requested.
 - Jobs/tasks can be tied to Today Jobs.
 
 ### 5. Control Tower UI
@@ -168,7 +168,7 @@ Rules:
 - active task without update for N minutes => stale
 - accepted task with no start => stale
 - handoff open too long => attention
-- active Brain Feed lane stale => attention
+- active Live Work Board lane stale => attention
 - job start without completion => attention
 
 Acceptance criteria:
@@ -190,7 +190,7 @@ Responsibilities:
 
 - create tasks
 - route sensitive work
-- update `joshex` Brain Feed
+- update `joshex` Live Work Board
 - write decisions
 - validate dashboard changes
 - keep Control Tower accurate
@@ -213,14 +213,14 @@ Responsibilities:
 - dashboard hosting
 - local services
 - OpenCLAW health
-- Brain Feed server
+- Live Work Board server
 - safe local ops
 - first low-risk cron wrapping
 
 Initial wrapping candidates:
 
 - Control Tower refresh
-- Brain Feed server keepalive
+- Live Work Board server keepalive
 - context watchdog/health checks
 
 Do not initially wrap:
@@ -299,13 +299,13 @@ Do not initially wrap:
 
 1. Install task helper shims on both minis.
 2. Smoke-test task create/update/complete from each node.
-3. Publish completion to each agent's Brain Feed lane.
+3. Publish completion to each agent's Live Work Board lane.
 4. Add adoption report fields for task helper readiness.
 
 ### Phase 4C - Safe Automation Wrapping
 
 1. Wrap one Josh 2.0 low-risk job.
-2. Verify exit code, logs, Today Jobs, Brain Feed, and dashboard.
+2. Verify exit code, logs, Today Jobs, Live Work Board, and dashboard.
 3. Wrap one JAIMES low-risk job.
 4. Wrap one J.A.I.N low-risk job.
 5. Stop and review before broad rollout.
@@ -345,7 +345,7 @@ Phase 4 is complete when:
 - Josh 2.0 and JAIMES/J.A.I.N have task helper/shims installed
 - at least one safe task lifecycle has been tested from each node
 - no secrets appear in dashboard-visible data
-- Brain Feed lanes update correctly for task lifecycle events
+- Live Work Board lanes update correctly for task lifecycle events
 
 ## Known Dependencies
 

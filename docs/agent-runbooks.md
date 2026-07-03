@@ -6,11 +6,11 @@ Owns sensitive account connectors, approval decisions, Control Tower code, dashb
 
 Must publish meaningful work to:
 
-- Brain Feed as agent `joshex`
+- Live Work Board as agent `joshex`
 - Today Jobs for automation or substantial execution
 - `data/personal-codex.json` for local dashboard context
 
-When delegating work to another agent, use `scripts/agent_delegate.py` rather than only sending an out-of-band message. The delegate wrapper publishes the JOSHeX request, writes/syncs the task queue, and asks the receiving host to publish its own Brain Feed receipt. Example:
+When delegating work to another agent, use `scripts/agent_delegate.py` rather than only sending an out-of-band message. The delegate wrapper publishes the JOSHeX request, writes/syncs the task queue, and asks the receiving host to publish its own Live Work Board receipt. Example:
 
 ```bash
 python3 scripts/agent_delegate.py --to josh2 --title "Check kiosk health" --objective "Confirm the Josh 2.0 Control Tower kiosk is reachable and current." --job
@@ -26,7 +26,7 @@ Recovery:
 
 ## Josh 2.0
 
-Owns Control Tower hosting, Brain Feed server health, local OpenCLAW services, Josh-side crons, and host operations.
+Owns Control Tower hosting, Live Work Board server health, local OpenCLAW services, Josh-side crons, and host operations.
 
 Use:
 
@@ -38,7 +38,7 @@ Use:
 
 On receipt of a delegated instruction, Josh 2.0 should publish receipt immediately, then use `agent_task.py start` and `agent_job_wrap.sh` for execution so the Josh tile moves from received to active to done/error.
 
-`agent_task.py` publishes to Brain Feed by default. Use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
+`agent_task.py` publishes to Live Work Board by default. Use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
 
 Do not perform destructive maintenance, auth refresh, account mutation, or sensitive account action without an approved task.
 
@@ -62,7 +62,7 @@ Use:
 
 On receipt of a delegated instruction, JAIMES should publish receipt immediately, then use `agent_task.py start` and `agent_job_wrap.sh` for execution so the JAIMES tile moves from received to active to done/error.
 
-`agent_task.py` publishes to Brain Feed by default. Use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
+`agent_task.py` publishes to Live Work Board by default. Use `--no-brain-feed` only for dry-runs, local render tests, or explicit maintenance overrides.
 
 Do not treat J.A.I.N monitor/cron work as JAIMES work unless the task is assigned to `jaimes`.
 
