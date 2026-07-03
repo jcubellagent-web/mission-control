@@ -2,16 +2,16 @@
   "agentId": "josh2",
   "agent": "JOSH 2.0",
   "active": true,
-  "reportedActive": true,
+  "reportedActive": false,
   "status": "done",
-  "objective": "Done: firewall off, SSH on, Gatekeeper still blocked by Apple confirmation",
-  "detail": "Applied firewall-off and remote-access-on changes; Gatekeeper remains on because macOS requires separate confirmation",
-  "updatedAt": "2026-07-03T20:16:57Z",
-  "checkedAt": "2026-07-03T20:16:57Z",
+  "objective": "Done: created SystemPolicyControl.mobileconfig and copied it to Downloads",
+  "detail": "Created the profile file and copied it to Downloads",
+  "updatedAt": "2026-07-03T20:56:40Z",
+  "checkedAt": "2026-07-03T20:56:40Z",
   "currentTool": "exec",
   "steps": [
     {
-      "label": "Done - firewall off, SSH on, Gatekeeper still blocked by Apple confirmation",
+      "label": "Done - created SystemPolicyControl.mobileconfig and copied it to Downloads",
       "status": "done",
       "tool": "exec"
     }
@@ -19,6 +19,6 @@
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "model": "GPT-5.4-mini",
-  "messageReceived": "2026-07-03T20:13:35Z",
+  "messageReceived": "2026-07-03T20:56:40Z",
   "localLiveFeed": true
 }
