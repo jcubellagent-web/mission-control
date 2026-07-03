@@ -2,16 +2,16 @@
   "agentId": "josh2",
   "agent": "JOSH 2.0",
   "active": true,
-  "reportedActive": false,
+  "reportedActive": true,
   "status": "done",
-  "objective": "Done: mapped macOS/OpenClaw boundaries and drafted 3 levels",
-  "detail": "None",
-  "updatedAt": "2026-07-03T20:10:14Z",
-  "checkedAt": "2026-07-03T20:10:14Z",
+  "objective": "Done: firewall off, SSH on, Gatekeeper still blocked by Apple confirmation",
+  "detail": "Applied firewall-off and remote-access-on changes; Gatekeeper remains on because macOS requires separate confirmation",
+  "updatedAt": "2026-07-03T20:16:57Z",
+  "checkedAt": "2026-07-03T20:16:57Z",
   "currentTool": "exec",
   "steps": [
     {
-      "label": "Done - mapped macOS/OpenClaw boundaries and drafted 3 levels",
+      "label": "Done - firewall off, SSH on, Gatekeeper still blocked by Apple confirmation",
       "status": "done",
       "tool": "exec"
     }
@@ -19,6 +19,6 @@
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "model": "GPT-5.4-mini",
-  "messageReceived": "2026-07-03T20:09:57Z",
+  "messageReceived": "2026-07-03T20:13:35Z",
   "localLiveFeed": true
 }
