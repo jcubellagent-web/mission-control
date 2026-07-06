@@ -42,3 +42,7 @@ This document records the Telegram topic routing protocol Josh asked JAIMES to i
 - Telegram cannot reliably list all per-topic pins through the Bot API, so manifest cleanup is the auditable source of truth.
 - Do not print bot tokens in logs or reports. The helper reads local secret files and only prints topic/message IDs.
 - If Josh changes the operating protocol, update both this doc and `TOPIC_MESSAGES` in the helper, then rerun the helper and commit/push/deploy through the normal Mission Control path.
+
+## Quick Inbox routing tags
+
+If Josh starts in `Inbox` but wants to hint the destination, prefix the message with the topic name or hashtag, for example `#sorare`, `#crypto`, `#approvals`, `#mission`, `#news`, `#jaimes`, or `#josh2`. Telegram does not natively move an existing human message between topics for us; agents should copy/summarize the work into the correct topic when the route matters. Topic buttons on the pinned messages are navigation shortcuts only.

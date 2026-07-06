@@ -99,6 +99,38 @@ TOPIC_MESSAGES: dict[str, str] = {
 }
 
 
+def topic_url(chat_id: str, thread_id: int) -> str:
+    """Return a Telegram client link for a known Control Center topic.
+
+    Telegram's web/client topic links use the internal chat id without the
+    `-100` prefix and the topic starter message id. Our stored thread IDs are
+    those starter ids for this forum.
+    """
+    internal_id = str(chat_id)
+    if internal_id.startswith("-100"):
+        internal_id = internal_id[4:]
+    elif internal_id.startswith("-"):
+        internal_id = internal_id[1:]
+    return f"https://t.me/c/{internal_id}/{thread_id}"
+
+
+def topic_keyboard(chat_id: str, topics: dict[str, int]) -> str:
+    """Build a compact inline keyboard for jumping between topics.
+
+    The buttons are URL buttons, not commands. They are safe to attach to every
+    pinned topic-purpose message because tapping one only opens the target
+    topic in Telegram; it does not trigger an agent action.
+    """
+    ordered = [name for name in TOPIC_MESSAGES if name in topics]
+    rows = []
+    for i in range(0, len(ordered), 2):
+        row = []
+        for name in ordered[i:i + 2]:
+            row.append({"text": name, "url": topic_url(chat_id, int(topics[name]))})
+        rows.append(row)
+    return json.dumps({"inline_keyboard": rows}, separators=(",", ":"))
+
+
 def load_token() -> str:
     token = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("HERMES_TELEGRAM_BOT_TOKEN")
     if token:
@@ -146,6 +178,7 @@ def main() -> int:
             "chat_id": chat_id,
             "text": text,
             "disable_web_page_preview": "true",
+            "reply_markup": topic_keyboard(chat_id, topics),
         }
         # Telegram's default/general forum topic is addressed by omitting
         # message_thread_id. Passing the stored General topic id (`1`) returns
