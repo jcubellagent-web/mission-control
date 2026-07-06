@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dashboard-safe Gemini CLI broker for local agent workflows."""
+"""Dashboard-safe Antigravity Gemini broker for local agent workflows."""
 from __future__ import annotations
 
 import argparse
@@ -73,7 +73,11 @@ def cli_status() -> dict[str, Any]:
         "available": bool(path),
         "path": path or "",
         "version": "",
-        "authMode": "Google login or GEMINI_API_KEY",
+        "authMode": "Antigravity-authenticated Gemini subscription",
+        "accessRoute": "antigravity",
+        "transportCommand": "gemini",
+        "displayName": "Antigravity Gemini",
+        "legacyName": "gemini-cli",
         "checkedAt": utc_now(),
     }
     if not path:
@@ -81,8 +85,23 @@ def cli_status() -> dict[str, Any]:
         return status
     code, out, err = run([path, "--version"], timeout=6)
     text = (out or err).strip()
-    status["version"] = text.splitlines()[0] if code == 0 and text else ""
-    status["status"] = "installed" if code == 0 else "version-check-failed"
+    lower = text.lower()
+    auth_failed = "auth failed" in lower or "auth login" in lower or "authentication" in lower
+    if code == 0 and text and not auth_failed and not text.lstrip().startswith("{"):
+        status["version"] = text.splitlines()[0]
+        status["status"] = "installed"
+    elif auth_failed:
+        status["version"] = ""
+        status["status"] = "antigravity-auth-required"
+        status["warning"] = "Antigravity shell auth is not usable from this host session."
+    elif code == 0:
+        status["version"] = ""
+        status["status"] = "installed-version-unknown"
+        status["warning"] = "Antigravity command exists, but version probe returned non-version output."
+    else:
+        status["version"] = ""
+        status["status"] = "installed-version-unknown"
+        status["warning"] = "Antigravity command exists, but version probe did not return cleanly."
     return status
 
 
@@ -107,11 +126,20 @@ def classify_smoke(code: int, out: str, err: str) -> str:
 def update_sidecar(status: dict[str, Any], smoke: dict[str, Any] | None = None) -> dict[str, Any]:
     payload = read_json(STATUS_PATH, {"provider": "Gemini"})
     payload["updatedAt"] = status["checkedAt"]
+    payload["accessRoute"] = "antigravity"
+    payload["antigravityGemini"] = {
+        "command": "gemini",
+        "path": status.get("path", ""),
+        "version": status.get("version", ""),
+        "authMode": status.get("authMode", "Antigravity-authenticated Gemini subscription"),
+        "status": status.get("status", "unknown"),
+        "checkedAt": status.get("checkedAt"),
+    }
     payload["localCli"] = {
         "command": "gemini",
         "path": status.get("path", ""),
         "version": status.get("version", ""),
-        "authMode": status.get("authMode", "Google login or GEMINI_API_KEY"),
+        "authMode": status.get("authMode", "Antigravity-authenticated Gemini subscription"),
         "status": status.get("status", "unknown"),
     }
     if smoke:
@@ -122,7 +150,7 @@ def update_sidecar(status: dict[str, Any], smoke: dict[str, Any] | None = None) 
 
 def cmd_status(args: argparse.Namespace) -> int:
     status = cli_status()
-    payload: dict[str, Any] = {"ok": status.get("status") == "installed", "geminiCli": status}
+    payload: dict[str, Any] = {"ok": status.get("status") == "installed", "antigravityGemini": status, "geminiCli": status}
     if args.write_status:
         payload["sidecar"] = update_sidecar(status).get("localCli", {})
     print(json.dumps(payload, indent=2))
@@ -133,7 +161,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     status = cli_status()
     prompt = args.prompt.strip()
     if not status.get("available"):
-        print(json.dumps({"ok": False, "error": "gemini CLI missing", "geminiCli": status}, indent=2))
+        print(json.dumps({"ok": False, "error": "Antigravity Gemini transport missing", "antigravityGemini": status, "geminiCli": status}, indent=2))
         return 1
     if not args.allow_private and prompt_is_sensitive(prompt):
         print(json.dumps({"ok": False, "error": "prompt blocked by privacy guardrail"}, indent=2))
@@ -162,7 +190,7 @@ def cmd_smoke(args: argparse.Namespace) -> int:
         update_sidecar(status, smoke)
     result = {
         "ok": smoke["status"] == "pass",
-        "geminiCli": status,
+        "antigravityGemini": status, "geminiCli": status,
         "smoke": smoke,
     }
     if args.show_output:
@@ -172,10 +200,10 @@ def cmd_smoke(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run dashboard-safe Gemini CLI checks for Control Tower.")
+    parser = argparse.ArgumentParser(description="Run dashboard-safe Antigravity Gemini checks for Control Tower.")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    status_p = sub.add_parser("status", help="Check local Gemini CLI installation.")
+    status_p = sub.add_parser("status", help="Check Antigravity-backed Gemini installation.")
     status_p.add_argument("--write-status", action="store_true")
     status_p.set_defaults(func=cmd_status)
 

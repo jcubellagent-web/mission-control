@@ -1,6 +1,6 @@
 # Gemini Agent Ecosystem Wiring
 
-Gemini is available to the agent ecosystem through the local Gemini CLI and CodexBar visibility. Treat it as a specialist model layer, not as a replacement for the agent owner.
+Gemini is available to the agent ecosystem through the Antigravity-backed Gemini and CodexBar visibility. Treat it as a specialist model layer, not as a replacement for the agent owner.
 
 ## Routing
 

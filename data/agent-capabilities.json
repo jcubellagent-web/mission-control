@@ -13,9 +13,9 @@
         "Mission Control and Agent Control code changes",
         "Task routing and architecture decisions",
         "Validation, docs, and handoffs",
-        "Gemini CLI brokering for approved dashboard-safe specialist tasks"
+        "Antigravity Gemini brokering for approved dashboard-safe specialist tasks"
       ],
-      "capabilities": ["repo-edit", "dashboard-validation", "connected-account-triage", "architecture", "agent-routing", "computer-use-gui", "peekaboo-gui", "gemini-cli", "gemini-review", "gemini-long-context", "gemini-research", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli", "codex-cloud-handoff"],
+      "capabilities": ["repo-edit", "dashboard-validation", "connected-account-triage", "architecture", "agent-routing", "computer-use-gui", "peekaboo-gui", "gemini-antigravity", "gemini-review", "gemini-long-context", "gemini-research", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli", "codex-cloud-handoff"],
       "safeTaskTypes": ["planning", "repo-patch", "dashboard-update", "decision-record", "handoff", "validation", "gui-computer-use", "gemini-review", "gemini-long-context", "gemini-research", "model-fallback", "docs-lookup", "browser-verification", "google-workspace-shared-inbox"],
       "restrictedTaskTypes": ["raw-secret-handling", "destructive-git", "unapproved-account-mutation", "raw-private-data-forwarding"],
       "preferredTools": ["agent_publish.py", "agent_task.py", "gemini_agent.py", "mission_control_regression_check.py", "gog", "op", "codex mcp"],
@@ -30,7 +30,7 @@
       "privacyTier": "worker-scoped",
       "brainFeedAgent": "josh",
       "responsibilities": ["Mission Control hosting", "OpenCLAW services", "Live Work Board server", "local health checks", "fast local ops"],
-      "capabilities": ["ssh-host", "mission-control-refresh", "openclaw", "ollama", "service-health", "computer-use-gui", "peekaboo-gui", "gemini-cli-health", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli"],
+      "capabilities": ["ssh-host", "mission-control-refresh", "openclaw", "ollama", "service-health", "computer-use-gui", "peekaboo-gui", "gemini-antigravity-health", "openai-docs-mcp", "playwright-mcp", "gog-cli", "onepassword-cli"],
       "safeTaskTypes": ["dashboard-refresh", "health-check", "service-status", "non-sensitive-log-review", "gui-computer-use", "gemini-health-check", "docs-lookup", "browser-verification", "shared-google-workspace-status"],
       "restrictedTaskTypes": ["auth-cookie-refresh", "destructive-maintenance", "sensitive-account-action"],
       "preferredTools": ["agent_publish.py", "agent_job_wrap.sh", "agent_task.py", "gog", "op", "codex mcp"],

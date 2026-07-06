@@ -46,7 +46,8 @@ GEMINI_FIRST_TASK_TYPES = {
 }
 
 GEMINI_FIRST_CAPABILITIES = {
-    "gemini-cli",
+    "gemini-antigravity",
+    "gemini-cli",  # legacy compatibility alias
     "gemini-review",
     "gemini-long-context",
     "gemini-research",
@@ -154,7 +155,9 @@ REQUESTED_PROVIDER_ALIASES = {
     "openai-codex": "codex",
     "gemini": "gemini",
     "google": "gemini",
-    "google-gemini-cli": "gemini",
+    "google-gemini-cli": "gemini",  # legacy Hermes/OpenCLAW provider id
+    "gemini-antigravity": "gemini",
+    "antigravity": "gemini",
     "grok": "xai",
     "xai": "xai",
     "x": "xai",
@@ -170,7 +173,7 @@ PROVIDER_DEFAULT_MODELS = {
 
 PROVIDER_AUTH_LABELS = {
     "codex": "OpenAI Codex OAuth/subscription",
-    "gemini": "Google Gemini CLI OAuth/subscription",
+    "gemini": "Antigravity-authenticated Gemini subscription",
     "xai": "Grok CLI OAuth + xAI API feed",
     "openrouter": "OpenRouter metered API",
 }
@@ -336,7 +339,7 @@ def explicit_model_request(args: argparse.Namespace) -> tuple[str, str, str]:
 
 def explicit_route_unavailable(provider: str) -> str:
     if provider == "gemini":
-        return "" if (Path.home() / "scripts" / "hermes_gemini_sub.sh").exists() else "Gemini CLI helper is not installed on this host"
+        return "" if (Path.home() / "scripts" / "hermes_gemini_sub.sh").exists() else "Antigravity Gemini helper is not installed on this host"
     if provider == "xai":
         row = provider_budget("xai")
         auth = str(row.get("authStatus") or "").lower()

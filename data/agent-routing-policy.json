@@ -47,7 +47,7 @@
     ],
     "providerRoles": {
       "codex": "OpenAI Codex OAuth/subscription: default for execution, code edits, repo work, shell/tools, Control Tower/OpenCLAW, auth-sensitive workflows, and final verification.",
-      "gemini": "Gemini CLI OAuth/subscription: default for dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion.",
+      "gemini": "Antigravity-authenticated Gemini subscription: default for dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion.",
       "xai": "Grok/xAI specialist: X-native, current-events/social signal, creator posts, crypto/news pulse, public reaction, and zeitgeist checks.",
       "openrouter": "Fallback/specialist route only; not primary spend."
     },
@@ -205,7 +205,7 @@
         "architecture",
         "agent-routing",
         "gemini-scheduled-summary",
-        "gemini-cli",
+        "gemini-antigravity",
         "gemini-review",
         "gemini-long-context",
         "gemini-research",
@@ -250,7 +250,7 @@
         "connected-account-triage",
         "macos-keychain",
         "device-alert",
-        "gemini-cli-health"
+        "gemini-antigravity-health"
       ],
       "privacyTiers": [
         "dashboard-safe",
@@ -290,7 +290,7 @@
         "temporal",
         "report-generation",
         "non-sensitive-log-review",
-        "gemini-cli",
+        "gemini-antigravity",
         "gemini-review",
         "gemini-long-context",
         "gemini-scheduled-summary",
