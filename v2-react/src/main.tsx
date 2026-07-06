@@ -1854,6 +1854,7 @@ function tradePnl(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) 
   return { label, tone };
 }
 
+// #JAIMES: FinOps cleanup slice uses shared card anatomy classes so future visual passes tune structure before color.
 function FinOpsDashboard({
   wallet,
   modelUsage,
@@ -1976,10 +1977,10 @@ function FinOpsDashboard({
               <strong>{routeQuality} · {efficiency}</strong>
             </article>
           </div>
-          <div className="finops-route-strip">
-            <span>Codex allowance: {missionText(codexMode)}</span>
-            <span>Last route: {lastRouteLabel}</span>
-            <span>Updated {fmtTime(modelUsage?.lastUpdated || modelRouter?.updatedAt)}</span>
+          <div className="finops-route-strip" aria-label="Model route posture">
+            <span><b>Allowance</b>{missionText(codexMode)}</span>
+            <span><b>Last route</b>{lastRouteLabel}</span>
+            <span><b>Updated</b>{fmtTime(modelUsage?.lastUpdated || modelRouter?.updatedAt)}</span>
           </div>
           <div className="finops-provider-grid">
             {providers.length ? providers.slice(0, 4).map((provider) => {
@@ -1990,17 +1991,17 @@ function FinOpsDashboard({
               const limits = providerLimitRows(provider);
               const topModels = providerTopModels(provider);
               return (
-                <article key={provider.id || key} data-provider={key} className={`finops-provider-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
-                  <header>
+                <article key={provider.id || key} data-provider={key} className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
+                  <header className="provider-card-head">
                     <span className="provider-glow-dot" />
                     <div>
                       <strong>{provider.label || provider.id || key}</strong>
                       <em>{active ? "in use now" : "idle"}</em>
                     </div>
                   </header>
-                  <p>{providerDisplayBlurb(provider)}</p>
+                  <p className="provider-card-blurb">{providerDisplayBlurb(provider)}</p>
                   {limits.length ? (
-                    <div className="provider-limit-list">
+                    <div className="provider-card-primary provider-limit-list" aria-label={`${provider.label || key} usage limits`}>
                       {limits.map((window: any) => {
                         const windowPct = Number(window?.usedPercent || 0);
                         const meterPct = Number.isFinite(windowPct) ? Math.max(0, Math.min(100, Math.round(windowPct))) : 0;
@@ -2016,11 +2017,11 @@ function FinOpsDashboard({
                       })}
                     </div>
                   ) : (
-                    <div className="provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
+                    <div className="provider-card-primary provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
                       <span />
                     </div>
                   )}
-                  <div className="provider-stat-strip">
+                  <div className="provider-stat-strip provider-card-support">
                     <span>{providerSummaryLabel(provider)}</span>
                     <em>{providerUpdatedLabel(provider)}</em>
                   </div>
@@ -2034,7 +2035,7 @@ function FinOpsDashboard({
                       ))}
                     </div>
                   ) : null}
-                  <footer className="provider-card-footer">
+                  <footer className="provider-card-footer provider-card-actions">
                     <span className="provider-route-pill">{provider.lastModelUsed || "model route available"}</span>
                     <em className="provider-billing-pill">{providerBillingLabel(provider)}</em>
                   </footer>
@@ -2042,8 +2043,8 @@ function FinOpsDashboard({
                 </article>
               );
             }) : (
-              <article className="finops-provider-card is-watch">
-                <header>
+              <article className="finops-provider-card finops-anatomy-card is-watch">
+                <header className="provider-card-head">
                   <span className="provider-glow-dot" />
                   <div>
                     <strong>Provider budgets</strong>

@@ -8987,6 +8987,7 @@ body {
 .finops-wallet-identities em,
 .finops-route-strip span {
   display: inline-flex;
+  align-items: center;
   max-width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -9000,6 +9001,15 @@ body {
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.finops-route-strip b {
+  margin-right: 6px;
+  color: rgba(135, 219, 255, 0.88);
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .finops-chain-row,
@@ -9073,7 +9083,7 @@ body {
 .finops-provider-card {
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(34px, auto) auto auto;
+  grid-template-rows: auto minmax(28px, auto) minmax(0, 1fr) auto auto auto;
   gap: 6px;
   min-height: 108px;
   min-width: 0;
@@ -9085,6 +9095,16 @@ body {
     linear-gradient(180deg, rgba(6, 26, 47, 0.92), rgba(3, 14, 29, 0.96));
   padding: 8px 9px;
   transition: opacity 180ms ease, border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.finops-anatomy-card {
+  grid-template-areas:
+    "head"
+    "blurb"
+    "primary"
+    "support"
+    "actions"
+    "evidence";
 }
 
 .finops-provider-card.is-active {
@@ -9120,6 +9140,30 @@ body {
 .finops-provider-card header div {
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.provider-card-head {
+  grid-area: head;
+}
+
+.provider-card-blurb {
+  grid-area: blurb;
+}
+
+.provider-card-primary {
+  grid-area: primary;
+}
+
+.provider-card-support {
+  grid-area: support;
+}
+
+.provider-card-actions {
+  grid-area: actions;
+}
+
+.provider-evidence-line {
+  grid-area: evidence;
 }
 
 .provider-glow-dot {
@@ -9345,7 +9389,7 @@ body {
   padding: 4px 8px;
   border-radius: 999px;
   border: 1px solid rgba(96, 178, 231, 0.16);
-  white-space: nowrap !important;
+  white-space: nowrap;
 }
 
 .finops-provider-card .provider-route-pill {
@@ -9371,7 +9415,7 @@ body {
   font-size: 7.7px;
   line-height: 1.35;
   letter-spacing: 0.02em;
-  white-space: normal !important;
+  white-space: normal;
   overflow: visible;
   text-overflow: clip;
 }
