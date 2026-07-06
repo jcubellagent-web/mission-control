@@ -36,6 +36,44 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+
+def load_previous_manifest() -> dict[str, Any]:
+    """Return the last pin manifest if present.
+
+    Telegram does not expose a reliable per-topic pin listing through the Bot
+    API, so the safest replay path is manifest-based: unpin the exact message
+    IDs this helper previously created, then post/pin the replacement one-line
+    summaries. Missing/deleted old pins are treated as already clean.
+    """
+    if not OUT.exists():
+        return {"pins": {}}
+    try:
+        return json.loads(OUT.read_text())
+    except Exception as exc:  # keep side effects conservative if state is bad
+        raise SystemExit(f"Could not parse prior pin manifest {OUT}: {exc}") from exc
+
+
+def unpin_previous_manifest_pins(token: str, chat_id: str, previous: dict[str, Any]) -> list[int]:
+    """Unpin pins recorded by the prior manifest and return cleaned IDs.
+
+    Telegram returns errors when a message is already unpinned/deleted; that is
+    non-fatal for this cleanup because the desired end state is simply that old
+    protocol pins no longer remain pinned.
+    """
+    cleaned: list[int] = []
+    for name, meta in sorted((previous.get("pins") or {}).items()):
+        msg_id = meta.get("message_id")
+        if not msg_id:
+            continue
+        try:
+            api(token, "unpinChatMessage", {"chat_id": chat_id, "message_id": msg_id})
+            cleaned.append(int(msg_id))
+            print(f"unpinned prior {name}: message={msg_id}")
+        except Exception as exc:
+            print(f"prior pin already clean or unavailable {name}: message={msg_id} ({exc})")
+        time.sleep(0.2)
+    return cleaned
+
 TOPIC_MAP = Path.home() / ".hermes/state/jain_control_center_topics.json"
 OUT = Path.home() / ".hermes/state/jain_control_center_pinned_protocol.json"
 SECRET_CANDIDATES = [
@@ -89,11 +127,14 @@ def main() -> int:
     chat_id = topics_doc["chat_id"]
     topics = topics_doc["topics"]
     token = load_token()
+    previous = load_previous_manifest()
+    unpinned = unpin_previous_manifest_pins(token, chat_id, previous)
     manifest: dict[str, Any] = {
         "chat_id": chat_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "source_topic_map": str(TOPIC_MAP),
         "pins": {},
+        "unpinned_prior_message_ids": unpinned,
     }
     missing = sorted(set(TOPIC_MESSAGES) - set(topics))
     if missing:

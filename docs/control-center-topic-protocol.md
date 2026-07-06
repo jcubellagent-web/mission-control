@@ -37,6 +37,8 @@ This document records the Telegram topic routing protocol Josh asked JAIMES to i
 - Josh specifically asked the visible pinned messages to be short statements about what each chat is used for. Keep detailed protocol here, not in the pinned text.
 - Telegram Bot API can post/pin into known topic IDs, but it cannot reliably list all forum topics. Keep the JSON topic map current.
 - If a topic is recreated, update the topic ID before rerunning the pin helper.
-- The helper intentionally posts short one-line purpose messages; Telegram clients display the latest pinned message per topic.
+- The helper intentionally posts short one-line purpose messages.
+- Before posting replacements, the helper unpins message IDs from the prior manifest so old protocol pins do not accumulate.
+- Telegram cannot reliably list all per-topic pins through the Bot API, so manifest cleanup is the auditable source of truth.
 - Do not print bot tokens in logs or reports. The helper reads local secret files and only prints topic/message IDs.
 - If Josh changes the operating protocol, update both this doc and `TOPIC_MESSAGES` in the helper, then rerun the helper and commit/push/deploy through the normal Mission Control path.
