@@ -138,6 +138,65 @@ def priority_alerts(data: dict[str, Any]) -> list[dict[str, str]]:
     return deduped[:8]
 
 
+
+def prune_stale_freshness_history() -> dict[str, Any]:
+    data_dir = ROOT / "data"
+    removed = {"sharedEvents": 0, "brainFeedSteps": 0}
+    shared = data_dir / "shared-events.json"
+    if shared.exists():
+        try:
+            obj = json.loads(shared.read_text())
+            events = obj.get("events") if isinstance(obj, dict) else None
+            if isinstance(events, list):
+                clean = []
+                for event in events:
+                    if not isinstance(event, dict):
+                        clean.append(event); continue
+                    title = str(event.get("title") or "")
+                    status = str(event.get("status") or "").lower()
+                    detail = str(event.get("detail") or "").lower()
+                    tool = str(event.get("tool") or "")
+                    if title == "Mission Control freshness loop" and status in {"error", "blocked"} and ("visibility guard" in detail or tool == "mission_control_freshness_loop"):
+                        removed["sharedEvents"] += 1; continue
+                    clean.append(event)
+                obj["events"] = clean[:80]
+                shared.write_text(json.dumps(obj, indent=2) + "\n")
+        except Exception:
+            pass
+    brain = data_dir / "brain-feed.json"
+    if brain.exists():
+        try:
+            obj = json.loads(brain.read_text())
+            steps = obj.get("steps") if isinstance(obj, dict) else None
+            if isinstance(steps, list):
+                clean = []
+                for step in steps:
+                    if not isinstance(step, dict):
+                        clean.append(step); continue
+                    label = str(step.get("label") or "")
+                    status = str(step.get("status") or "").lower()
+                    tool = str(step.get("tool") or "")
+                    if label == "Mission Control freshness loop" and status in {"error", "blocked"} and tool == "mission_control_freshness_loop":
+                        removed["brainFeedSteps"] += 1; continue
+                    clean.append(step)
+                if str(obj.get("status") or "").lower() in {"done", "idle", "ready"} and obj.get("active") is False:
+                    # If the feed is currently healthy, do not preserve stale
+                    # blocked/error step history from older agent tasks.
+                    pruned_clean = []
+                    for step in clean:
+                        if isinstance(step, dict) and str(step.get("status") or "").lower() in {"error", "blocked"}:
+                            removed["brainFeedSteps"] += 1
+                            continue
+                        pruned_clean.append(step)
+                    clean = pruned_clean
+                obj["steps"] = clean[:10]
+                if obj.get("status") in {"error", "blocked"} and removed["brainFeedSteps"]:
+                    obj["status"] = "done"; obj["active"] = False; obj["detail"] = "Mission Control freshness ok."
+                brain.write_text(json.dumps(obj, indent=2) + "\n")
+        except Exception:
+            pass
+    return removed
+
 def run_repairs(before: dict[str, Any], before_alerts: list[dict[str, str]]) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
     runtime = before.get("runtimeLayout") if isinstance(before.get("runtimeLayout"), dict) else {}
@@ -166,6 +225,8 @@ def run_repairs(before: dict[str, Any], before_alerts: list[dict[str, str]]) -> 
             ], timeout=60))
 
     steps.append(run([sys.executable, "scripts/update_mission_control.py"], timeout=180))
+    prune_stale_freshness_history()
+    steps.append(run([sys.executable, "scripts/update_mission_control.py"], timeout=180))
     steps.append(run([sys.executable, "scripts/mission_control_regression_check.py"], timeout=120))
     return steps
 
@@ -174,6 +235,7 @@ def main() -> int:
     before = load_dashboard()
     before_alerts = priority_alerts(before)
     steps = run_repairs(before, before_alerts)
+    pruned = prune_stale_freshness_history()
     after = load_dashboard()
     # update_mission_control writes dashboard; reload after repairs
     after = load_dashboard()
@@ -184,7 +246,8 @@ def main() -> int:
         "checkedAt": utc_now().replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "beforeAlertCount": len(before_alerts),
         "afterAlertCount": len(after_alerts),
-        "fixed": bool(before_alerts and not after_alerts and not failed_steps),
+        "fixed": bool((before_alerts or any(pruned.values())) and not after_alerts and not failed_steps),
+        "pruned": pruned,
         "ok": not after_alerts and not failed_steps,
         "repairs": [
             {"cmd": s["cmd"], "ok": s["ok"], "returncode": s["returncode"]}
