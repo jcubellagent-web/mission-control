@@ -51,10 +51,18 @@ After Josh approved the next pass, JAIMES tightened the wallet/trade rail:
 - Gave recent trade rows slightly stronger scan rhythm and PnL treatment.
 - Rebuilt and regression-checked before deploy.
 
+## Brain hero primitive slice
+After the next approval, JAIMES tightened the Brain hero card primitive:
+
+- Replaced a dead flight-deck column override with explicit agent-card row anatomy.
+- Kept the existing operator layout, copy, and live status logic intact.
+- Preserved the 164px objective readout row and 28px support note row.
+- Rebuilt and regression-checked before deploy.
+
 ## Next visual pass
 Once imagegen is enabled, generate 2–3 screenshots from this spec, choose the least decorative concept, then continue with:
 
-1. Brain hero primitive cleanup.
-2. Today's Jobs focus-row rewrite.
-3. Chip severity role cleanup.
-4. FinOps route strip de-clutter if it still feels noisy.
+1. Today's Jobs focus-row rewrite.
+2. Chip severity role cleanup.
+3. FinOps route strip de-clutter if it still feels noisy.
+4. Reduce remaining late-stage `!important` overrides by area.

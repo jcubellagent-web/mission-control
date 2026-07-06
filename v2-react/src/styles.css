@@ -10644,8 +10644,16 @@ body {
   font-size: 11px !important;
 }
 
+/* Brain hero v2: explicit operator-card anatomy for the flight deck rows. */
 .brain-hero.is-flight-deck .agent-hero-card {
-  grid-template-columns: 176px minmax(0, 1fr) !important;
+  display: grid !important;
+  grid-template-rows: minmax(34px, auto) 12px minmax(164px, 1fr) 28px !important;
+  align-content: stretch !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card h3,
+.brain-hero.is-flight-deck .agent-hero-card p {
+  flex: unset !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card header {
