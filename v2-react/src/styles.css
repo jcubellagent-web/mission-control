@@ -11003,6 +11003,17 @@ body {
   white-space: nowrap !important;
 }
 
+#finops-dashboard .wallet-card-primary {
+  box-shadow:
+    inset 0 0 0 1px rgba(67, 247, 164, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.16) !important;
+}
+
+#finops-dashboard .wallet-card-secondary,
+#finops-dashboard .finops-trade-ledger {
+  box-shadow: inset 0 1px 0 rgba(235, 252, 255, 0.035) !important;
+}
+
 #finops-dashboard .finops-wallet-identities {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -11101,7 +11112,7 @@ body {
 #finops-dashboard .finops-trade-ledger {
   display: grid !important;
   grid-template-rows: auto minmax(0, 1fr) !important;
-  min-height: 104px !important;
+  min-height: 114px !important;
   padding: 7px !important;
   border-color: rgba(86, 214, 255, 0.12) !important;
   background: rgba(2, 20, 39, 0.66) !important;
@@ -11136,12 +11147,14 @@ body {
 }
 
 #finops-dashboard .trade-ledger-row {
-  grid-template-columns: 42px minmax(0, 1fr) minmax(38px, auto) 14px !important;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(42px, auto) 14px !important;
   gap: 5px !important;
-  min-height: 29px !important;
-  padding: 4px 5px !important;
+  min-height: 31px !important;
+  padding: 5px 6px !important;
   border-color: rgba(86, 214, 255, 0.1) !important;
-  background: rgba(1, 14, 28, 0.64) !important;
+  background:
+    linear-gradient(90deg, rgba(77, 226, 255, 0.035), transparent 42%),
+    rgba(1, 14, 28, 0.64) !important;
 }
 
 #finops-dashboard .trade-side-pill {
@@ -11183,7 +11196,10 @@ body {
 #finops-dashboard .trade-pnl {
   align-self: center !important;
   justify-self: end !important;
-  max-width: 58px !important;
+  max-width: 64px !important;
+  padding: 2px 4px !important;
+  border-radius: 6px !important;
+  background: rgba(232, 248, 255, 0.035) !important;
   color: rgba(229, 247, 255, 0.72) !important;
   font-size: 7.8px !important;
   font-weight: 900 !important;

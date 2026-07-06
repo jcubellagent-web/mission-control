@@ -1901,12 +1901,12 @@ function FinOpsDashboard({
 
       <div className="finops-body">
         <section className="finops-wallet">
-          <div className="finops-wallet-total">
-            <span>Crypto wallet</span>
-            <strong>{fmtCurrencyExact(summary.totalEstimatedUsd)}</strong>
-            <p>{fmtCurrencyExact(summary.liquidEstimatedUsd)} liquid · {fmtCurrencyExact(summary.nftEstimatedUsd)} collectibles</p>
+          <div className="finops-wallet-total wallet-card-primary" aria-label="Liquid crypto wallet value">
+            <span>Liquid wallet</span>
+            <strong>{fmtCurrencyExact(summary.liquidEstimatedUsd)}</strong>
+            <p>{fmtCurrencyExact(summary.tokenLiquidUsd ?? summary.liquidEstimatedUsd)} tokens/native · {fmtCurrencyExact(summary.nftEstimatedUsd)} collectibles excluded</p>
           </div>
-          <div className="finops-wallet-target">
+          <div className="finops-wallet-target wallet-card-secondary">
             <div className="wallet-target-head">
               <div>
                 <span>Current target</span>

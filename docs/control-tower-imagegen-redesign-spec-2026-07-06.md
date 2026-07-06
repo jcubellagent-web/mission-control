@@ -42,10 +42,19 @@ Because imagegen was blocked, JAIMES implemented the low-risk structure-first sl
 - Removed two local `!important` declarations from provider pill/evidence white-space rules.
 - Added a short `#JAIMES:` handoff note near the touched FinOps component.
 
+## Follow-up slice implemented
+After Josh approved the next pass, JAIMES tightened the wallet/trade rail:
+
+- Changed the wallet headline from total estimated value to **liquid wallet** value.
+- Marked NFT/collectible value as excluded from the headline.
+- Added wallet card anatomy hooks: `wallet-card-primary`, `wallet-card-secondary`.
+- Gave recent trade rows slightly stronger scan rhythm and PnL treatment.
+- Rebuilt and regression-checked before deploy.
+
 ## Next visual pass
 Once imagegen is enabled, generate 2–3 screenshots from this spec, choose the least decorative concept, then continue with:
 
-1. FinOps wallet/trade card anatomy alignment.
-2. Brain hero primitive cleanup.
-3. Today's Jobs focus-row rewrite.
-4. Chip severity role cleanup.
+1. Brain hero primitive cleanup.
+2. Today's Jobs focus-row rewrite.
+3. Chip severity role cleanup.
+4. FinOps route strip de-clutter if it still feels noisy.
