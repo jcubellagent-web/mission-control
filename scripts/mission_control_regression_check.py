@@ -137,7 +137,7 @@ def check_dashboard_shape() -> None:
     require(len(crons) >= 8, f"too few tracked jobs visible: {len(crons)}")
 
     cron_text = json.dumps(crons).lower()
-    for lane in ("sorare", "gmail", "brain", "breaking"):
+    for lane in ("sorare", "gmail", "maintenance", "breaking"):
         require(lane in cron_text, f"tracked jobs missing ecosystem lane: {lane}")
 
     feeds = dashboard.get("agentBrainFeeds")

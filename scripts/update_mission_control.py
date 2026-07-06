@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import socket
 import re
 import subprocess
 import sys
@@ -59,7 +60,14 @@ RUNTIME_LAYOUT_PATH = ROOT.parent / "data" / "mission-control-runtime-layout.jso
 CODEX_AUTOMATIONS_DIR = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "automations"
 CODEX_AUTOMATION_STATUS_PATH = DATA_DIR / "codex-automation-status.json"
 JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
-NEXT_BASE = "http://127.0.0.1:3030"
+def _default_control_tower_base() -> str:
+    host = socket.gethostname().lower()
+    if host.startswith("josh2"):
+        return "http://127.0.0.1:5174"
+    return "http://josh2.local:5174"
+
+
+NEXT_BASE = os.environ.get("CONTROL_TOWER_BASE", _default_control_tower_base()).rstrip("/")
 WORKSPACE_ROOT = ROOT.parent.parent
 KIOSK_MODEL_USAGE_PATH = WORKSPACE_ROOT / "kiosk-dashboard" / "data" / "modelUsage.json"
 CONTEXT_WATCHDOG_STATE_PATH = WORKSPACE_ROOT / "memory" / "context-watchdog-state.json"
@@ -243,9 +251,13 @@ def fetch_next(endpoint: str) -> Dict[str, Any] | None:
     url = f"{NEXT_BASE}{endpoint}"
     try:
         with urllib.request.urlopen(url, timeout=5) as resp:  # nosec B310
-            return json.load(resp)
-    except urllib.error.URLError as exc:  # pragma: no cover - diagnostics only
-        if '127.0.0.1:3030' in url and 'Connection refused' in str(exc):
+            try:
+                return json.load(resp)
+            except json.JSONDecodeError as exc:
+                print(f"[warn] non-json response from {url}: {exc}", file=sys.stderr)
+                return None
+    except (urllib.error.URLError, TimeoutError) as exc:  # pragma: no cover - diagnostics only
+        if endpoint.startswith("/api/") and "Connection refused" in str(exc):
             return None
         print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
         return None
@@ -3271,6 +3283,33 @@ def build_devices() -> List[Dict[str, str]]:
     return [airpoint_status()]
 
 
+def visual_canary_requires_action(canaries: Dict[str, Any]) -> bool:
+    """Only page Josh for live/critical canary failures.
+
+    Visual canaries also track design debt and legacy-contract drift. Those should
+    remain inspectable in Control Tower data without becoming Action Required noise.
+    """
+    checks = canaries.get("checks") if isinstance(canaries, dict) else None
+    if not isinstance(checks, list):
+        return False
+    live_terms = (
+        "kiosk unavailable",
+        "runtime unavailable",
+        "http 500",
+        "blank screen",
+        "fatal",
+        "crash",
+    )
+    for check in checks:
+        if not isinstance(check, dict) or check.get("ok", True):
+            continue
+        severity = str(check.get("severity", "")).lower()
+        blob = " ".join(str(check.get(k, "")) for k in ("name", "title", "detail", "message")).lower()
+        if severity == "critical" or any(term in blob for term in live_terms):
+            return True
+    return False
+
+
 def fetch_visual_canaries() -> Dict[str, Any]:
     data = load_json_file(DATA_DIR / "mission-control-canaries.json", {})
     if isinstance(data, dict) and data:
@@ -3651,7 +3690,7 @@ def check_http_ok(url: str) -> bool:
 
 def build_products(now_iso: str) -> List[Dict[str, str]]:
     mission_control_url = "https://jcubellagent-web.github.io/mission-control/"
-    kiosk_url = "http://192.168.4.40:3030"
+    kiosk_url = os.environ.get("CONTROL_TOWER_KIOSK_URL", NEXT_BASE)
     kiosk_live = check_http_ok(kiosk_url)
     return [
         {
@@ -4487,7 +4526,7 @@ def main() -> None:
             "url": item.get("url") or "#personal-codex",
         })
     dashboard["actionRequired"] = dashboard["actionRequired"][:8]
-    if dashboard["visualCanaries"].get("status") == "attention":
+    if visual_canary_requires_action(dashboard["visualCanaries"]):
         dashboard["actionRequired"].insert(0, {
             "priority": "high",
             "title": f"Control Tower canary issue: {dashboard['visualCanaries'].get('summary', 'check dashboard')}",
