@@ -2,9 +2,10 @@
 """Create and update one editable Josh-facing Telegram work card.
 
 This file is intended to be synced to Josh 2.0's workspace `scripts/` folder.
-It uses the direct Bot API lane through `send_josh_reply.py`, which lives next
-to this script on Josh 2.0.
+It uses the Bot API lane through `send_josh_reply.py`, which lives next to this
+script on Josh 2.0.
 """
+#JAIMES: topic-aware routing lives here so forum topics and JAIMES-managed chats can reuse the same work-card helper.
 from __future__ import annotations
 
 import argparse
@@ -22,6 +23,8 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
+SESSIONS_PATH = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
+DIRECT_SESSION_KEY = "agent:main:telegram:direct:6218150306"
 if str(WORKSPACE / "scripts") not in sys.path:
     sys.path.insert(0, str(WORKSPACE / "scripts"))
 
@@ -71,6 +74,20 @@ def load_json(path: Path, fallback: dict) -> dict:
         return value if isinstance(value, dict) else fallback
     except Exception:
         return fallback
+
+
+def current_direct_session_model() -> str:
+    sessions = load_json(SESSIONS_PATH, {})
+    if not isinstance(sessions, dict):
+        return ""
+    session = sessions.get(DIRECT_SESSION_KEY) or {}
+    if not isinstance(session, dict):
+        return ""
+    provider = clean_live_text(str(session.get("modelProvider") or ""))
+    model = clean_live_text(str(session.get("model") or ""))
+    if provider and model:
+        return f"{provider}/{model}"
+    return model
 
 
 def save_json(path: Path, data: dict) -> None:
@@ -213,6 +230,17 @@ def operator_objective(title: str) -> str:
     return compact(text, limit=150)
 
 
+def resolve_auth_path(raw: str) -> str:
+    normalized = (raw or "").strip().lower()
+    if normalized.startswith("openai/") or normalized.startswith("openai-codex/"):
+        return "subscription"
+    if normalized.startswith("google-gemini-cli/"):
+        return "subscription"
+    if normalized.startswith("xai/"):
+        return "oauth"
+    return "auth-path"
+
+
 def friendly_model_line(model: str) -> str:
     text = clean_live_text(model)
     lower = text.lower()
@@ -226,6 +254,20 @@ def friendly_model_line(model: str) -> str:
         return "JAIMES support lane"
     if "jain" in lower:
         return "J.AI.N worker support"
+    
+    route_match = re.search(r"provider=([^;]+);\s*model=([^;]+)", text, re.I)
+    if route_match:
+        provider = clean_live_text(route_match.group(1))
+        model_name = clean_live_text(route_match.group(2))
+        if provider and model_name:
+            if "/" in model_name:
+                return compact(model_name, limit=90)
+            return compact(f"{provider}/{model_name}", limit=90)
+    if "/" in text:
+        return compact(text, limit=90)
+    session_model = current_direct_session_model()
+    if session_model and text in {"gpt-5.4", "gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex-spark"}:
+        return session_model.replace(f"/{text}", f"/{text}")
     return compact(text, limit=90)
 
 
@@ -330,30 +372,30 @@ def live_line(item: str) -> str:
     text = clean_live_text(item)
     lower = text.lower()
     if not text:
-        return "- waiting: first update"
+        return f"- {html.escape('waiting: first update')}"
     if lower.startswith("received"):
-        return f"📥 received: {text.removeprefix('Received').strip() or 'task'}"
+        return f"📥 received: {html.escape(text.removeprefix('Received').strip() or 'task')}"
     if lower.startswith("objective determined:"):
-        return f"📌 objective: {text.split(':', 1)[1].strip()}"
+        return f"📌 objective: {html.escape(text.split(':', 1)[1].strip())}"
     if lower.startswith("model selected:"):
-        return f"🤖 model: {text.split(':', 1)[1].strip()}"
+        return f"🤖 model: {html.escape(text.split(':', 1)[1].strip())}"
     if lower.startswith("skill selected:"):
-        return f"🧭 skill: {text.split(':', 1)[1].strip()}"
+        return f"🧭 skill: {html.escape(text.split(':', 1)[1].strip())}"
     if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
-        return f"🔧 tool: {simplify_live_detail(text)}"
+        return f"🔧 tool: {html.escape(simplify_live_detail(text))}"
     if lower.startswith(("local check | completed", "system check | completed")):
-        return f"✅ done: {simplify_live_detail(text)}"
+        return f"✅ done: {html.escape(simplify_live_detail(text))}"
     if lower.startswith(("running ", "checking ", "tool:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("tool:") else text
-        return f"🔧 tool: {simplify_live_detail(detail)}"
+        return f"🔧 tool: {html.escape(simplify_live_detail(detail))}"
     if lower.startswith(("finished ", "completed checking ", "completed ", "done:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("done:") else text
-        return f"✅ done: {simplify_live_detail(detail)}"
+        return f"✅ done: {html.escape(simplify_live_detail(detail))}"
     if lower.startswith("final response"):
         return "🏁 final: summary sent"
     if lower.startswith("still working"):
         return "⏳ working: waiting for the current model or tool step to finish"
-    return f"• {compact(text, limit=90)}"
+    return f"• {html.escape(compact(text, limit=90))}"
 
 
 def is_empty_issue(value: str | None) -> bool:
@@ -382,6 +424,7 @@ def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int =
         clean = [fallback]
     return [f"- {item}" for item in clean[:limit]]
 
+
 def live_lines(items: list[str], *, fallback: str = "waiting: first update", limit: int = 12) -> list[str]:
     clean = []
     for item in items:
@@ -389,7 +432,7 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
         if text and text not in clean:
             clean.append(text)
     if not clean:
-        clean = [f"- {fallback}"]
+        clean = [f"- {html.escape(fallback)}"]
     if len(clean) <= limit:
         return clean
     earlier = clean[:-limit]
@@ -402,7 +445,7 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
         parts.append(f"{check_count} checks")
     if not parts:
         parts.append(f"{len(earlier)} earlier updates")
-    return [f"Earlier: {', '.join(parts)} consolidated so the card stays readable.", "", *clean[-limit:]]
+    return [f"Earlier: {html.escape(', '.join(parts))} consolidated so the card stays readable.", "", *clean[-limit:]]
 
 
 COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
@@ -483,10 +526,10 @@ def build_completion_summary(
     if not next_steps:
         next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
     approval_needed = next_steps if issues else ["n/a"]
-    model_line = os.environ.get("JOSH_WORK_CARD_MODEL") or "Josh 2.0 Telegram task card"
+    model_line = os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
 
     lines = [
-        f"Model: {html.escape(friendly_model_line(model_line))}",
+        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))} ({html.escape(resolve_auth_path(model_line))})",
         "",
         "<b>Complete:</b>",
         f"{complete} - {html.escape(complete_detail)}",
@@ -520,49 +563,51 @@ def build_card(
     updated: str | None = None,
 ) -> str:
     done = done or []
-    model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or "Josh 2.0 Telegram task card"
+    model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
     issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
     next_steps = parse_list(next_step) or default_next_steps(status, bool(issues))
     live_items = append_log(done, [now] if now else [])
+    
     card_title = {
-        "running": "Live work - in progress",
-        "done": "Work complete",
-        "failed": "Work needs attention",
-        "paused": "Work paused",
-    }.get(status, "Live work")
+        "running": "⏳ <b>Live work - in progress</b>",
+        "done": "✅ <b>Work complete</b>",
+        "failed": "⚠️ <b>Work needs attention</b>",
+        "paused": "⏸️ <b>Work paused</b>",
+    }.get(status, f"<b>Live work status: {status}</b>")
+    
+    divider = "────────────────────────"
+    
     lines = [
-        f"Model: {friendly_model_line(model_line)}",
-        "",
+        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))} ({html.escape(resolve_auth_path(model_line))})",
+        f"🧭 <b>Path:</b> {html.escape(friendly_route_line(route))}",
+        divider,
         card_title,
+        divider,
+        "📌 <b>Objective:</b>",
+        f"- {html.escape(operator_objective(title))}",
         "",
-        "Objective:",
-        f"- {operator_objective(title)}",
-        "",
-        "Current step:",
-        f"- {current_step_text(status, now, live_items)}",
-        "",
-        "Done so far:",
+        "⚡️ <b>Current step:</b>",
+        f"- <code>{html.escape(current_step_text(status, now, live_items))}</code>",
+        divider,
+        "📈 <b>Progress:</b>",
         *progress_lines(live_items, status),
         *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=10),
+        divider,
+        "⚠️ <b>Issues:</b>",
+        *bullet_lines(issues, fallback="None", limit=4),
         "",
-        "Issues:",
-        *plain_bullet_lines(issues, fallback="None", limit=4),
-        "",
-        "Next:",
-        *plain_bullet_lines(next_steps, fallback="No action needed.", limit=4),
-        "",
-        f"Status: {status_label(status)}",
-        f"Running on: {friendly_model_line(model_line)}",
-        f"Path: {friendly_route_line(route)}",
-        f"Updated: {updated or now_label()}",
+        "⏭️ <b>Next:</b>",
+        *bullet_lines(next_steps, fallback="No action needed.", limit=4),
+        divider,
+        f"🕒 <b>Updated:</b> <code>{updated or now_label()}</code>",
     ]
     if eta:
-        lines.append(f"ETA: {compact(eta)}")
+        lines.append(f"⏳ <b>ETA:</b> <code>{html.escape(compact(eta))}</code>")
     return "\n".join(lines)
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
-    if not API_BASE or not TARGET:
+    if not API_BASE:
         return {"ok": False, "error": "send_josh_reply.py helper is unavailable in this workspace"}
     cooldown = telegram_cooldown_active()
     if cooldown:
@@ -585,24 +630,42 @@ def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
         return {"ok": False, "error": str(exc)}
 
 
-def send_card(text: str, buttons: list | None, timeout: int) -> dict:
-    payload = build_payload(text, buttons, silent=True)
+def send_card(
+    text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = build_payload(text, buttons, silent=True, chat_id=chat_id, thread_id=thread_id)
+    payload["parse_mode"] = "HTML"
     return api_call("sendMessage", payload, timeout=timeout)
 
 
-def edit_card(message_id: int | str, text: str, buttons: list | None, timeout: int) -> dict:
-    payload = {
-        "chat_id": TARGET,
-        "message_id": message_id,
-        "text": text,
-    }
+def edit_card(
+    message_id: int | str,
+    text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = build_payload(text, buttons, silent=True, chat_id=chat_id, thread_id=thread_id)
+    payload["message_id"] = message_id
+    payload["parse_mode"] = "HTML"
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("editMessageText", payload, timeout=timeout)
 
 
-def send_final_summary(text: str, timeout: int, buttons: list | None = None) -> dict:
-    payload = build_payload(text, buttons, silent=True)
+def send_final_summary(
+    text: str,
+    timeout: int,
+    buttons: list | None = None,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = build_payload(text, buttons, silent=True, chat_id=chat_id, thread_id=thread_id)
     payload["parse_mode"] = "HTML"
     payload["disable_web_page_preview"] = True
     return api_call("sendMessage", payload, timeout=timeout)
@@ -614,15 +677,16 @@ def send_rich_message(
     timeout: int,
     buttons: list | None = None,
     silent: bool = True,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
 ) -> dict:
-    payload = {
-        "chat_id": TARGET,
+    payload = build_payload("", buttons, silent=silent, chat_id=chat_id, thread_id=thread_id)
+    payload.update({
         "rich_message": {
             "html": rich_html,
             "skip_entity_detection": True,
         },
-        "disable_notification": silent,
-    }
+    })
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     result = api_call("sendRichMessage", payload, timeout=timeout)
@@ -630,7 +694,7 @@ def send_rich_message(
         result["native_rich_message"] = True
         return result
 
-    fallback_payload = build_payload(fallback_text, buttons, silent=silent)
+    fallback_payload = build_payload(fallback_text, buttons, silent=silent, chat_id=chat_id, thread_id=thread_id)
     fallback_payload["disable_web_page_preview"] = True
     fallback = api_call("sendMessage", fallback_payload, timeout=timeout)
     fallback["native_rich_message"] = False
@@ -638,26 +702,40 @@ def send_rich_message(
     return fallback
 
 
-def edit_final_summary(message_id: int | str, text: str, timeout: int, buttons: list | None = None) -> dict:
-    payload = {
-        "chat_id": TARGET,
-        "message_id": message_id,
-        "text": text,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": True,
-    }
+def edit_final_summary(
+    message_id: int | str,
+    text: str,
+    timeout: int,
+    buttons: list | None = None,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = build_payload(text, buttons, silent=True, chat_id=chat_id, thread_id=thread_id)
+    payload["message_id"] = message_id
+    payload["parse_mode"] = "HTML"
+    payload["disable_web_page_preview"] = True
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("editMessageText", payload, timeout=timeout)
 
 
-def edit_objective_message(message_id: int | str, title: str, model: str, timeout: int) -> dict:
+def edit_objective_message(
+    message_id: int | str,
+    title: str,
+    model: str,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
     model_line = compact(model or "Auto route selecting best fit", limit=180)
-    payload = {
-        "chat_id": TARGET,
-        "message_id": message_id,
-        "text": f"Objective: {compact(title, limit=180)}\nModel: {model_line}",
-    }
+    payload = build_payload(
+        f"Objective: {compact(title, limit=180)}\nModel: {model_line}",
+        None,
+        silent=True,
+        chat_id=chat_id,
+        thread_id=thread_id,
+    )
+    payload["message_id"] = message_id
     return api_call("editMessageText", payload, timeout=timeout)
 
 
@@ -732,6 +810,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     route = args.route or existing.get("route") or ""
     model = args.model or existing.get("model") or ""
     ack_message_id = args.ack_message_id or existing.get("ack_message_id")
+    chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("JOSH_TELEGRAM_CHAT_ID")
+    thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("JOSH_TELEGRAM_THREAD_ID")
     if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
         ack_message_id = claim_pending_ack(args.key)
     text = build_card(
@@ -766,10 +846,10 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     final_buttons = buttons if status in {"done", "failed"} else None
 
     if existing.get("message_id"):
-        result = edit_card(existing["message_id"], text, card_buttons, args.timeout)
+        result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "edited"
     else:
-        result = send_card(text, card_buttons, args.timeout)
+        result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "sent"
 
     if not result.get("ok"):
@@ -784,13 +864,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     final_action = None
     if final_text:
         if final_message_id:
-            final_result = edit_final_summary(final_message_id, final_text, args.timeout)
+            final_result = edit_final_summary(final_message_id, final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "edited"
             if not final_result.get("ok"):
-                final_result = send_final_summary(final_text, args.timeout)
+                final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
                 final_action = "sent"
         else:
-            final_result = send_final_summary(final_text, args.timeout)
+            final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "sent"
         if not final_result.get("ok"):
             print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
@@ -800,12 +880,12 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
     approval_message_id = existing.get("approval_message_id")
     if final_buttons:
-        approval_result = send_card("Approval options:", final_buttons, args.timeout)
+        approval_result = send_card("Approval options:", final_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         if approval_result.get("ok"):
             approval_message_id = approval_result.get("result", {}).get("message_id")
 
     if ack_message_id and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        edit_objective_message(ack_message_id, title, model, args.timeout)
+        edit_objective_message(ack_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
 
     cards[args.key] = {
         "title": title,
@@ -819,6 +899,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         "work_log": done,
         "route": route,
         "model": model,
+        "chat_id": chat_id,
+        "thread_id": thread_id,
         "next_step": args.next or existing.get("next_step") or "",
     }
     save_state(state)
@@ -858,6 +940,8 @@ def main() -> int:
     parser.add_argument("--no-buttons", action="store_true")
     parser.add_argument("--no-final-summary", action="store_true", help="Update the card status without sending a separate final summary")
     parser.add_argument("--timeout", type=int, default=15)
+    parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
+    parser.add_argument("--thread-id", help="Telegram forum topic id override for group-topic routing")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-brain-feed", action="store_true", help="Skip Brain Feed only for dry-runs or ALLOW_NO_BRAIN_FEED=1 maintenance")
     parser.add_argument("--status-button", action="store_true", help="Deprecated; buttons are attached by default")

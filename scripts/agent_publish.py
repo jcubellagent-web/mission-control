@@ -630,16 +630,23 @@ def mirror_publish_heartbeat(event: dict[str, Any]) -> None:
 
 
 def should_mirror_supabase_brain_feed() -> bool:
-    return os.environ.get("MISSION_CONTROL_SUPABASE_BRAIN_FEED", "").lower() in {"1", "true", "yes", "on"}
+    return False
 
 
 def should_publish_v2(args: argparse.Namespace) -> bool:
-    has_v2_key = bool(os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_SERVICE_KEY"))
     return bool(
         args.v2
         or os.environ.get("MISSION_CONTROL_V2_DUAL_WRITE") in {"1", "true", "yes", "on"}
-        or (args.brain_feed and has_v2_key)
     )
+
+
+def retired_v2_result() -> dict[str, Any]:
+    return {
+        "ok": True,
+        "skipped": True,
+        "reason": "retired-local-sidecar-path",
+        "detail": "Control Tower uses local Brain Feed and JSON sidecars; Supabase/v2 mirroring is no longer a dependency.",
+    }
 
 
 def publish_v2(event: dict[str, Any], job: bool, handoff_to: str = "") -> dict[str, Any]:
@@ -745,7 +752,7 @@ def main() -> int:
     parser.add_argument("--handoff-to", default="", help="Write a markdown handoff doc for this target")
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
-    parser.add_argument("--v2", action="store_true", help="Also publish dashboard-safe state to Control Tower canonical tables")
+    parser.add_argument("--v2", action="store_true", help="Retired compatibility flag; local Control Tower sidecars remain the source of truth")
     args = parser.parse_args()
 
     agent = canonical_agent(args.agent)
@@ -778,16 +785,11 @@ def main() -> int:
     if args.brain_feed:
         publish_local_brain_feed(event)
         mirror_publish_heartbeat(event)
-        if should_mirror_supabase_brain_feed():
-            try:
-                publish_brain_feed(event)
-            except (urllib.error.URLError, TimeoutError) as exc:
-                print(f"Optional Supabase Brain Feed mirror failed; Josh 2.0 local live feed was updated: {exc}", file=sys.stderr)
     if args.rollup:
         generate_daily_rollup()
     v2_result = None
     if should_publish_v2(args):
-        v2_result = publish_v2(event, args.job or args.type == "job", args.handoff_to)
+        v2_result = retired_v2_result()
 
     response = {"ok": True, "event": event}
     if v2_result is not None:

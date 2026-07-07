@@ -68,7 +68,7 @@ Common commands should be short and memorable:
 
 ## Routing Defaults
 
-- Josh 2.0 owns device-local work, Telegram interaction, quick status, approvals, kiosk/Control Tower refresh, and light shell operations.
+- Josh 2.0 owns device-local work, Telegram interaction, quick status, approvals, kiosk/Control Tower refresh, light shell operations, and first-pass triage in the Control Center Inbox.
 - JOSHeX means the personal-laptop Codex coordinator lane. It is not the Josh 2.0 Mac.
 - JOSHeX owns architecture, repo changes, cross-agent coordination, sensitive connector work, and final decision records.
 - JAIMES owns heavier services, Hermes workflows, background services, and headless service checks.
@@ -89,6 +89,7 @@ Common commands should be short and memorable:
 - Keep normal responses short enough to read on an iPhone screen without scrolling through logs.
 - Prefer compact bullet cards over paragraph-style labels on mobile.
 - Keep `AGENTS.md` lean. Store detailed Telegram UX policy here and in `data/josh2-telegram-ux-config.json`; `AGENTS.md` should contain only the compact mandatory behavior pointer.
+- #JAIMES: Control Center routing now treats JOSH 2.0 as the first-pass triage owner for untagged Inbox messages.
 
 ## Telegram Custom Options
 

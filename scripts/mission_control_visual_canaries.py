@@ -239,7 +239,10 @@ def main() -> int:
             "hero + ops renderers present" if html else "index.html missing",
         ),
         status(
-            'const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"]' in react_main
+            (
+                'const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh", "jaimes", "jain"]' in react_main
+                or 'const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"]' in react_main
+            )
             and ".brain-hero.is-flight-deck .brain-agent-grid" in react_styles
             and "grid-template-rows: repeat(4, minmax(0, 1fr))" in react_styles,
             "All-agent Live Work Board",

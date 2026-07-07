@@ -247,14 +247,20 @@ DAY_NAME_TO_INDEX = {
 }
 
 
-def fetch_next(endpoint: str) -> Dict[str, Any] | None:
+def fetch_next(endpoint: str, *, warn_non_json: bool = True) -> Dict[str, Any] | None:
     url = f"{NEXT_BASE}{endpoint}"
     try:
         with urllib.request.urlopen(url, timeout=5) as resp:  # nosec B310
+            content_type = resp.headers.get("Content-Type", "")
+            if "json" not in content_type.lower():
+                if warn_non_json:
+                    print(f"[warn] non-json response from {url}: content-type={content_type or 'unknown'}", file=sys.stderr)
+                return None
             try:
                 return json.load(resp)
             except json.JSONDecodeError as exc:
-                print(f"[warn] non-json response from {url}: {exc}", file=sys.stderr)
+                if warn_non_json:
+                    print(f"[warn] non-json response from {url}: {exc}", file=sys.stderr)
                 return None
     except (urllib.error.URLError, TimeoutError) as exc:  # pragma: no cover - diagnostics only
         if endpoint.startswith("/api/") and "Connection refused" in str(exc):
@@ -264,7 +270,7 @@ def fetch_next(endpoint: str) -> Dict[str, Any] | None:
 
 
 def fetch_brain_feed() -> Dict[str, Any] | None:
-    data = fetch_next("/api/brain-feed")
+    data = fetch_next("/data/brain-feed.json", warn_non_json=False)
     if not data:
         return None
     now_iso = utc_iso()

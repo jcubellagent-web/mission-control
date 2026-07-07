@@ -72,7 +72,18 @@ type LiveCueState = {
   focus: SectionCueKey | null;
 };
 
+type KioskPulse = {
+  tone: "clear" | "watch" | "risk";
+  headline: string;
+  detail: string;
+  agentLine: string;
+  jobsLine: string;
+  finopsLine: string;
+  freshnessLine: string;
+};
+
 const CHANGE_CUE_MS = 3200;
+const LIVE_REFRESH_MS = 5_000;
 const MIN_EXPECTED_OPERATOR_JOBS = 12;
 
 const JOSH_HEADSHOT_URL = new URL("../../assets/josh-headshot.jpg", import.meta.url).href;
@@ -153,6 +164,55 @@ function agentIsReady(status?: AgentStatus) {
   if (!status) return false;
   const value = String(status.status || "").toLowerCase();
   return Boolean(status.active) || ["active", "queued", "ready", "ok", "done", "approved", "stale"].includes(value);
+}
+
+function freshnessTone(minutes: number) {
+  if (!Number.isFinite(minutes) || minutes > 30) return "risk" as const;
+  if (minutes > 10) return "watch" as const;
+  return "clear" as const;
+}
+
+function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdate?: string | null): KioskPulse {
+  const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
+  const focusCount = missionFocusCount(state);
+  const activeAgents = state.statuses.filter((row) => row.active || String(row.status).toLowerCase() === "active").length;
+  const readyAgents = state.statuses.filter((row) => agentIsReady(row)).length;
+  const workingJobs = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
+  const blockedJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
+  const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
+  const lastMs = timeValue(lastUpdate);
+  const minutes = lastMs ? (Date.now() - lastMs) / 60000 : Number.POSITIVE_INFINITY;
+  const freshTone = freshnessTone(minutes);
+  const wallet = state.agenticCrypto;
+  const finopsFresh = cryptoFreshness(wallet);
+  const tone = focusCount || freshTone === "risk" ? "risk" : freshTone === "watch" || String(finopsFresh.tone) === "watch" ? "watch" : "clear";
+  const activeWorkstreams = activeAgents + workingJobs;
+  const headline = freshTone === "risk"
+    ? "Dashboard data stale"
+    : freshTone === "watch"
+      ? "Dashboard data lagging"
+      : pendingApprovals
+        ? `${pendingApprovals} decision${pendingApprovals === 1 ? "" : "s"} waiting`
+        : blockedJobs
+          ? `${blockedJobs} job${blockedJobs === 1 ? "" : "s"} need focus`
+          : activeWorkstreams
+            ? `${activeWorkstreams} active workstream${activeWorkstreams === 1 ? "" : "s"}`
+            : "Control Tower clear";
+  return {
+    tone,
+    headline,
+    detail: freshTone === "risk"
+      ? "Live source has not updated recently; verify publisher."
+      : freshTone === "watch"
+        ? "Live source is slower than expected."
+        : focusCount
+          ? "Open the highlighted rail first."
+          : "Glance mode is safe: nothing urgent is waiting.",
+    agentLine: `${readyAgents}/${Math.max(HERO_AGENT_ORDER.length, state.statuses.length)} agents reporting`,
+    jobsLine: nextJob ? `Next: ${compactJobTitle(nextJob)} · ${jobRunCells(nextJob).next}` : `${trackedJobs.length} jobs tracked`,
+    finopsLine: `${fmtCurrencyExact(wallet?.summary?.liquidEstimatedUsd)} liquid · wallet ${finopsFresh.label}`,
+    freshnessLine: lastUpdate ? `${ageLabel(lastUpdate)} · ${state.source}` : "No live timestamp yet",
+  };
 }
 
 function agentOperatingState(status: AgentStatus) {
@@ -447,6 +507,55 @@ function missionFocusCount(state: MissionControlState) {
   const riskJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const blockedAgents = state.statuses.filter(agentNeedsFocus).length;
   return dataIssues + pendingApprovals + riskJobs + blockedAgents;
+}
+
+function controlTowerTruth(state: MissionControlState): { tone: MetricTone; label: string; detail: string } {
+  const trackedJobs = operatorTrackedJobs(state.jobs);
+  const dataIssues = dataQualityIssues(state);
+  const riskDataIssues = dataIssues.filter((issue) => issue.tone === "risk");
+  const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
+  const riskJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
+  const blockedAgents = state.statuses.filter(agentNeedsFocus).length;
+  const latestTimestamp = [...state.statuses.map((row) => row.updated_at), ...trackedJobs.map((job) => job.updated_at || job.lastRun)]
+    .filter(Boolean)
+    .sort()
+    .pop();
+
+  if (riskDataIssues.length || pendingApprovals || riskJobs || blockedAgents) {
+    const reasons = [
+      pendingApprovals ? `${pendingApprovals} decision${pendingApprovals === 1 ? "" : "s"}` : "",
+      riskJobs ? `${riskJobs} job${riskJobs === 1 ? "" : "s"} need focus` : "",
+      blockedAgents ? `${blockedAgents} agent${blockedAgents === 1 ? "" : "s"} blocked` : "",
+      riskDataIssues[0]?.title || "",
+    ].filter(Boolean);
+    return {
+      tone: "risk",
+      label: "Needs review",
+      detail: reasons.join(" · "),
+    };
+  }
+
+  if (dataIssues.length) {
+    return {
+      tone: "watch",
+      label: "Watching",
+      detail: dataIssues[0]?.title || "A non-blocking data layer looks thin.",
+    };
+  }
+
+  if (ageMinutes(latestTimestamp) > 15) {
+    return {
+      tone: "watch",
+      label: "Aging",
+      detail: `Last visible operator update ${ageLabel(latestTimestamp)} ago.`,
+    };
+  }
+
+  return {
+    tone: "clear",
+    label: "Healthy",
+    detail: `${trackedJobs.length} jobs tracked · last update ${ageLabel(latestTimestamp)} ago.`,
+  };
 }
 
 function isOptionalJoshexOffline(status: AgentStatus) {
@@ -806,7 +915,7 @@ class ErrorBoundary extends React.Component<
           <section className="kiosk-grid" style={{ alignItems: "center", justifyContent: "center", minHeight: "50vh" }}>
             <article className="empty-row" style={{ textAlign: "center", padding: "2rem" }}>
               <strong>Control Tower hit a render error</strong>
-              <p>The dashboard will retry on the next data refresh (10s).</p>
+              <p>The dashboard will retry on the next data refresh (5s).</p>
               <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "0.5rem" }}>{this.state.error?.message || "Unknown error"}</p>
             </article>
           </section>
@@ -815,6 +924,37 @@ class ErrorBoundary extends React.Component<
     }
     return this.props.children;
   }
+}
+
+function KioskPulseStrip({ pulse, liveMode, dataError }: { pulse: KioskPulse; liveMode: "connected" | "polling"; dataError: string | null }) {
+  return (
+    <section className={`kiosk-pulse-strip is-${dataError ? "risk" : pulse.tone}`} aria-label="Control Tower glance summary">
+      <article className="kiosk-pulse-primary">
+        <span className="pulse-dot" aria-hidden="true" />
+        <div>
+          <p>{liveMode === "connected" ? "Realtime stream" : "Realtime polling"}</p>
+          <strong>{dataError ? "Data refresh issue" : pulse.headline}</strong>
+          <em>{dataError || pulse.detail}</em>
+        </div>
+      </article>
+      <article>
+        <span>Live Work</span>
+        <strong>{pulse.agentLine}</strong>
+      </article>
+      <article>
+        <span>Today</span>
+        <strong>{pulse.jobsLine}</strong>
+      </article>
+      <article>
+        <span>FinOps</span>
+        <strong>{pulse.finopsLine}</strong>
+      </article>
+      <article>
+        <span>Freshness</span>
+        <strong>{pulse.freshnessLine}</strong>
+      </article>
+    </section>
+  );
 }
 
 function App() {
@@ -858,7 +998,7 @@ function App() {
     refresh();
     const timer = window.setInterval(() => {
       refresh(false).catch((error) => console.warn(error));
-    }, 10_000);
+    }, LIVE_REFRESH_MS);
     const unsubscribe = subscribeMissionControlRealtime(
       () => refresh(false).catch((error) => console.warn(error)),
       setLiveMode,
@@ -926,10 +1066,13 @@ function App() {
   const workingCount = activeJobCount + activeAgentCount;
   const nextJob = useMemo(() => upcomingTodayJobs(trackedJobs, 1)[0], [trackedJobs]);
   const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
+  const truth = useMemo(() => controlTowerTruth(state), [state]);
   const lastUpdate = useMemo(() => [...state.statuses.map((row) => row.updated_at), ...state.events.map((row) => row.created_at)]
     .filter(Boolean)
     .sort()
     .pop(), [state.statuses, state.events]);
+  // #JAIMES: kiosk pulse condenses Live Work, Today's Jobs, FinOps, and data freshness into one glanceable always-on strip.
+  const pulse = useMemo(() => kioskPulse(state, trackedJobs, lastUpdate), [state, trackedJobs, lastUpdate]);
   const navigateToPanel = useCallback((target: AttentionTarget) => {
     document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
@@ -960,9 +1103,14 @@ function App() {
           <Metric icon={<Timer size={18} />} label="Next" value={nextRunValue} tone="clear" wide />
         </section>
         <div className="mission-actions">
+          <span className={`source-chip truth-chip is-${truth.tone}`} title={truth.detail}>
+            <Radio size={15} />{truth.label}
+          </span>
           <span className="source-chip"><ShieldCheck size={15} />{state.source}</span>
           <span className="source-chip">Updated {fmtTime(lastUpdate)}</span>
-          <span className="source-chip live-chip">{liveMode === "connected" ? "Realtime" : "Live • 10s"}</span>
+          <span className="source-chip live-chip" title="Control Tower polls local sidecars every 5 seconds">
+            {liveMode === "connected" ? "Realtime" : "Live • 5s"}
+          </span>
           <button
             type="button"
             className={quietMode ? "mode-button selected" : "mode-button"}
@@ -987,6 +1135,8 @@ function App() {
           </button>
         </div>
       </header>
+
+      <KioskPulseStrip pulse={pulse} liveMode={liveMode} dataError={dataError} />
 
       <section className="kiosk-grid">
         <section id="brain-feed" className={`brain-hero-panel${sectionCueClass("brain", liveCues)}`}>
@@ -1170,7 +1320,7 @@ function SystemRouteLadder({
         {steps.map((step, index) => (
           <li key={step.key} className={step.active ? "is-active" : ""}>
             <i>{index + 1}</i>
-            <div>
+            <div className="route-step-copy">
               <span>{step.label}</span>
               <strong>{step.model}</strong>
               <em>{step.note}</em>
@@ -1776,6 +1926,42 @@ function providerTopModels(provider: any) {
     .slice(0, 2);
 }
 
+function modelUsageBreakdownRows(modelUsage?: MissionControlState["modelUsage"]) {
+  const rows = modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [];
+  return rows
+    .filter((model: any) => model && String(model.name || "").trim())
+    .slice(0, 9);
+}
+
+function modelUsageCost(model: any) {
+  return Number(model?.dailyCost || model?.weeklyCost || model?.usageEquivalentCost || model?.marginalCost || model?.cost || model?.sessionCost || 0);
+}
+
+function modelUsageWindowLabel(model: any) {
+  if (Number(model?.dailyCost) > 0) return "day";
+  if (Number(model?.weeklyCost) > 0) return "week";
+  if (Number(model?.usageEquivalentCost) > 0) return "equiv";
+  if (Number(model?.marginalCost) > 0) return "meter";
+  if (Number(model?.sessionCost) > 0) return "session";
+  return missionText(String(model?.billingMode || model?.window || "tracked"));
+}
+
+function providerMetricValue(provider: any, key: string) {
+  const value = Number(provider?.[key]);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function providerUsageEquivalentLabel(provider: any) {
+  const weekly = providerMetricValue(provider, "usageEquivalentWeeklyUsd");
+  const monthly = providerMetricValue(provider, "usageEquivalentMonthlyUsd");
+  const daily = providerMetricValue(provider, "usageEquivalentDailyUsd");
+  if (weekly > 0) return `${fmtCurrencyExact(weekly)} usage-equiv/wk`;
+  if (monthly > 0) return `${fmtCurrencyExact(monthly)} usage-equiv/mo`;
+  if (daily > 0) return `${fmtCurrencyExact(daily)} usage-equiv/day`;
+  const metered = providerMetricValue(provider, "meteredWeeklyUsd") || providerMetricValue(provider, "weeklySpendUsd");
+  return metered > 0 ? `${fmtCurrencyExact(metered)} metered/wk` : providerBillingLabel(provider);
+}
+
 function providerModelLabel(model: any) {
   return missionText(String(model?.name || "model").replace(/^local\//i, "").replace(/^openai\//i, "").replace(/^google\//i, "").replace(/^xai\//i, ""));
 }
@@ -1854,7 +2040,7 @@ function tradePnl(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) 
   return { label, tone };
 }
 
-// #JAIMES: FinOps cleanup slice uses shared card anatomy classes so future visual passes tune structure before color.
+// #JAIMES: FinOps card now preserves CodexBar provider/model detail in bounded rows instead of hiding it in compact tiles.
 function FinOpsDashboard({
   wallet,
   modelUsage,
@@ -1878,6 +2064,9 @@ function FinOpsDashboard({
   const activeKeys = activeProviderKeys(statuses, modelRouter);
   const subscriptionBaseline = subscriptionBaselineUsd(providers);
   const usagePressure = usagePressureLabel(providers);
+  const modelRows = modelUsageBreakdownRows(modelUsage);
+  const meteredDaily = numericOrZero((modelUsage as any)?.metered?.daily ?? modelUsage?.daily);
+  const usageEquivalentWeekly = numericOrZero((modelUsage as any)?.usageEquivalent?.weekly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentWeekly);
   const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "--";
   const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "--";
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
@@ -1965,12 +2154,12 @@ function FinOpsDashboard({
               <strong>{fmtCurrencyExact(subscriptionBaseline)}/mo</strong>
             </article>
             <article>
-              <span>Daily driver</span>
-              <strong>OpenAI Pro</strong>
+              <span>Metered today</span>
+              <strong>{fmtCurrencyExact(meteredDaily)}</strong>
             </article>
             <article>
-              <span>Usage pressure</span>
-              <strong>{usagePressure}</strong>
+              <span>Usage equivalent</span>
+              <strong>{fmtCurrencyExact(usageEquivalentWeekly)}/wk</strong>
             </article>
             <article>
               <span>Route / efficiency</span>
@@ -1982,78 +2171,120 @@ function FinOpsDashboard({
             <span><b>Last route</b>{lastRouteLabel}</span>
             <span><b>Updated</b>{fmtTime(modelUsage?.lastUpdated || modelRouter?.updatedAt)}</span>
           </div>
-          <div className="finops-provider-grid">
-            {providers.length ? providers.slice(0, 4).map((provider) => {
-              const key = providerKey(provider);
-              const active = activeKeys.has(key);
-              const pct = providerUtilizationPct(provider);
-              const tone = providerTone(provider);
-              const limits = providerLimitRows(provider);
-              const topModels = providerTopModels(provider);
-              return (
-                <article key={provider.id || key} data-provider={key} className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
+          <div className="finops-usage-band">
+            <article>
+              <span>Codex pressure</span>
+              <strong>{usagePressure}</strong>
+            </article>
+            <article>
+              <span>Projected equivalent</span>
+              <strong>{fmtCurrencyExact(modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly ?? modelUsage?.weeklyRunRate?.projectedMonthly)}/mo</strong>
+            </article>
+            <article>
+              <span>Models tracked</span>
+              <strong>{modelRows.length}</strong>
+            </article>
+          </div>
+          <div className="finops-detail-grid">
+            <div className="finops-provider-grid">
+              {providers.length ? providers.map((provider) => {
+                const key = providerKey(provider);
+                const active = activeKeys.has(key);
+                const pct = providerUtilizationPct(provider);
+                const tone = providerTone(provider);
+                const limits = providerLimitRows(provider);
+                const topModels = providerTopModels(provider);
+                return (
+                  <article key={provider.id || key} data-provider={key} className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
+                    <header className="provider-card-head">
+                      <span className="provider-glow-dot" />
+                      <div>
+                        <strong>{provider.label || provider.id || key}</strong>
+                        <em>{active ? "in use now" : "idle"}</em>
+                      </div>
+                    </header>
+                    <p className="provider-card-blurb">{providerDisplayBlurb(provider)}</p>
+                    {limits.length ? (
+                      <div className="provider-card-primary provider-limit-list" aria-label={`${provider.label || key} usage limits`}>
+                        {limits.map((window: any) => {
+                          const windowPct = Number(window?.usedPercent || 0);
+                          const meterPct = Number.isFinite(windowPct) ? Math.max(0, Math.min(100, Math.round(windowPct))) : 0;
+                          return (
+                            <div key={window.id || window.label} className={`provider-limit-row is-${window.status || "ok"}`}>
+                              <span>{missionText(String(window.label || "Limit"))}</span>
+                              <div className="provider-limit-meter" style={{ "--pct": meterPct } as React.CSSProperties}>
+                                <i />
+                              </div>
+                              <em>{providerWindowValue(window)}</em>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="provider-card-primary provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
+                        <span />
+                      </div>
+                    )}
+                    <div className="provider-stat-strip provider-card-support">
+                      <span>{providerSummaryLabel(provider)}</span>
+                      <em>{providerUpdatedLabel(provider)}</em>
+                    </div>
+                    <div className="provider-money-strip">
+                      <span>{providerUsageEquivalentLabel(provider)}</span>
+                      <em>{provider?.accountEmail || provider?.accountLabel || provider?.plan || provider?.authStatus || "route ready"}</em>
+                    </div>
+                    {topModels.length ? (
+                      <div className="provider-model-list">
+                        {topModels.map((model: any) => (
+                          <div key={String(model?.name || "model")} className="provider-model-row">
+                            <span className="provider-model-name">{providerModelLabel(model)}</span>
+                            <small className="provider-model-meta">{providerModelMeta(model)}</small>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    <footer className="provider-card-footer provider-card-actions">
+                      <span className="provider-route-pill">{provider.lastModelUsed || "model route available"}</span>
+                      <em className="provider-billing-pill">{providerBillingLabel(provider)}</em>
+                    </footer>
+                    <small className="provider-evidence-line">{providerEvidenceLabel(provider)}</small>
+                  </article>
+                );
+              }) : (
+                <article className="finops-provider-card finops-anatomy-card is-watch">
                   <header className="provider-card-head">
                     <span className="provider-glow-dot" />
                     <div>
-                      <strong>{provider.label || provider.id || key}</strong>
-                      <em>{active ? "in use now" : "idle"}</em>
+                      <strong>Provider budgets</strong>
+                      <em>not loaded</em>
                     </div>
                   </header>
-                  <p className="provider-card-blurb">{providerDisplayBlurb(provider)}</p>
-                  {limits.length ? (
-                    <div className="provider-card-primary provider-limit-list" aria-label={`${provider.label || key} usage limits`}>
-                      {limits.map((window: any) => {
-                        const windowPct = Number(window?.usedPercent || 0);
-                        const meterPct = Number.isFinite(windowPct) ? Math.max(0, Math.min(100, Math.round(windowPct))) : 0;
-                        return (
-                          <div key={window.id || window.label} className={`provider-limit-row is-${window.status || "ok"}`}>
-                            <span>{missionText(String(window.label || "Limit"))}</span>
-                            <div className="provider-limit-meter" style={{ "--pct": meterPct } as React.CSSProperties}>
-                              <i />
-                            </div>
-                            <em>{providerWindowValue(window)}</em>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="provider-card-primary provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
-                      <span />
-                    </div>
-                  )}
-                  <div className="provider-stat-strip provider-card-support">
-                    <span>{providerSummaryLabel(provider)}</span>
-                    <em>{providerUpdatedLabel(provider)}</em>
-                  </div>
-                  {topModels.length ? (
-                    <div className="provider-model-list">
-                      {topModels.map((model: any) => (
-                        <div key={String(model?.name || "model")} className="provider-model-row">
-                          <span className="provider-model-name">{providerModelLabel(model)}</span>
-                          <small className="provider-model-meta">{providerModelMeta(model)}</small>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                  <footer className="provider-card-footer provider-card-actions">
-                    <span className="provider-route-pill">{provider.lastModelUsed || "model route available"}</span>
-                    <em className="provider-billing-pill">{providerBillingLabel(provider)}</em>
-                  </footer>
-                  <small className="provider-evidence-line">{providerEvidenceLabel(provider)}</small>
+                  <p>Route telemetry will appear after the next model-usage refresh.</p>
                 </article>
-              );
-            }) : (
-              <article className="finops-provider-card finops-anatomy-card is-watch">
-                <header className="provider-card-head">
-                  <span className="provider-glow-dot" />
-                  <div>
-                    <strong>Provider budgets</strong>
-                    <em>not loaded</em>
-                  </div>
-                </header>
-                <p>Route telemetry will appear after the next model-usage refresh.</p>
-              </article>
-            )}
+              )}
+            </div>
+            <div className="finops-model-ledger" aria-label="CodexBar model usage ledger">
+              <header>
+                <div>
+                  <span>CodexBar model ledger</span>
+                  <strong>Provider, tokens, sessions, and usage-equivalent cost</strong>
+                </div>
+                <em>{fmtTime(modelUsage?.lastUpdated)}</em>
+              </header>
+              <div className="model-ledger-list">
+                {modelRows.length ? modelRows.map((model: any) => (
+                  <article key={`${model.source || "source"}-${model.name}`} className="model-ledger-row">
+                    <strong>{providerModelLabel(model)}</strong>
+                    <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
+                    <span>{compactInt(model.totalTokens) || "0"} tok</span>
+                    <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
+                    <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
+                  </article>
+                )) : (
+                  <p className="wallet-empty-state">No model ledger rows are loaded yet. CodexBar data will appear after the next model-usage sync.</p>
+                )}
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -3690,6 +3921,16 @@ function nextRunTime(job: JobRow) {
   return next.getTime();
 }
 
+function jobOperatorPurpose(job: JobRow) {
+  const text = `${job.title} ${job.detail} ${job.tool}`.toLowerCase();
+  if (/gmail|inbox|email/.test(text)) return "Checks Josh's personal inbox and surfaces anything that needs a reply or handoff.";
+  if (/sorare|daily mission|missions|lineup|game-week|draft/.test(text)) return "Keeps Sorare prep, submissions, and mission windows from slipping past their live deadlines.";
+  if (/fantasy|waiver|roster|pitcher|baseball/.test(text)) return "Runs fantasy roster maintenance and flags any move that could require Josh's input.";
+  if (/control tower|dashboard|brain feed|live work board|kiosk|watchdog|refresh/.test(text)) return "Keeps the kiosk, live work board, and ecosystem visibility surfaces current and readable.";
+  if (/health|heartbeat|monitor|watchdog|consistency|audit/.test(text)) return "Runs background guardrails so issues surface before they become visible on the wall.";
+  return "Runs scheduled ecosystem maintenance and reports if Josh needs to step in.";
+}
+
 function jobIsSoon(job: JobRow, hours = 4) {
   const next = nextRunTime(job);
   if (!next) return false;
@@ -3876,16 +4117,16 @@ function JobsRail({
   const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
   const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
   const railSummary = attentionJobs
-    ? `${attentionJobs} need Josh`
+    ? `${attentionJobs} need attention now`
     : workingCount
-      ? `${workingCount} running · next ${nextRunValue}`
-      : `All clear · next ${nextRunValue}`;
+      ? `${workingCount} running now`
+      : `Next window ${nextRunValue}`;
   return (
     <aside id="today-jobs" className={`jobs-rail${sectionCueClass("jobs", liveCues)}`}>
       <SectionCue label={liveCues.focus === "jobs" ? "focus" : "updated"} />
-      <div className="panel-title compact">
-        <h2>Agent Ops & Jobs</h2>
-          <span>{quietMode ? "Quiet focus" : railSummary}</span>
+      <div className="panel-title compact calendar-title">
+        <h2>Today's Jobs</h2>
+        <span>{quietMode ? "Quiet focus view" : railSummary}</span>
       </div>
       <AgentOpsHealth statuses={statuses} />
       <div className="jobs-stats-strip" aria-label="Agent Ops & Jobs summary">
@@ -3907,8 +4148,8 @@ function JobsRail({
         </article>
       </div>
       <div className="jobs-operator-note" aria-label="Today jobs display policy">
-        <strong>Operator view</strong>
-        <span>{focusCount} surfaced · {quietInventoryCount} quiet in inventory</span>
+        <strong>First screen</strong>
+        <span>{focusCount} surfaced now · {quietInventoryCount} quiet in scheduler</span>
       </div>
       <div className="job-list">
         <JobFocusView jobs={visibleJobs} allJobs={trackedJobs} quietMode={quietMode} liveCues={liveCues} />
@@ -3924,6 +4165,7 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
   const actionJobs = operatorSortedJobs(allJobs.filter((job) => jobNeedsAttention(job, allJobs)), allJobs).slice(0, 2);
   const visibleGeneral = general.filter((job) => jobIsVisibleMaintenance(job, allJobs)).slice(0, quietMode ? 4 : 3);
   const upcoming = upcomingTodayJobs(allJobs, quietMode ? 5 : 6);
+  const nextUp = upcoming[0];
   const runningGeneral = visibleGeneral.filter((job) => jobWorkState(job, allJobs) === "working").length;
   const readyGeneral = Math.max(0, general.length - visibleGeneral.length);
   const readyCount = Math.max(0, allJobs.length - visibleGeneral.length - PRIORITY_JOB_RULES.reduce((sum, rule) => {
@@ -3974,10 +4216,11 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
           })}
         </div>
       </div>
+      <NextUpCard job={nextUp} allJobs={allJobs} />
       <div className="upcoming-jobs-section">
         <header>
-          <strong>Up next</strong>
-          <span>{upcoming.length ? `${upcoming.length} scheduled` : "No scheduled jobs found"}</span>
+          <strong>Today's timeline</strong>
+          <span>{upcoming.length ? `${upcoming.length} scheduled windows` : "No scheduled jobs found"}</span>
         </header>
         <div className="operator-queue-list upcoming-job-list">
           {upcoming.length ? upcoming.map((job) => <JobFocusRow key={`upcoming-${job.id}`} job={job} liveCues={liveCues} />) : (
@@ -4009,6 +4252,45 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
         </div>
       </details>
     </section>
+  );
+}
+
+function NextUpCard({ job, allJobs }: { job?: JobRow; allJobs: JobRow[] }) {
+  if (!job) {
+    return (
+      <article className="jobs-next-hero is-empty">
+        <span className="status-dot is-muted" aria-hidden="true" />
+        <div className="jobs-next-hero-copy">
+          <strong>No upcoming job found</strong>
+          <p>The priority queue above remains the source of truth until the next scheduled window appears.</p>
+        </div>
+      </article>
+    );
+  }
+  const category = jobCategory(job);
+  const run = jobRunCells(job);
+  const nextAt = nextRunTime(job);
+  return (
+    <article className={`jobs-next-hero ${jobStatusClass(job, allJobs)} ${agentClass(job.agent_id)} ${categoryClass(job)}`}>
+      <div className="jobs-next-hero-head">
+        <span className={`status-dot ${jobStatusClass(job, allJobs)} ${agentClass(job.agent_id)}`} aria-hidden="true" />
+        <div>
+          <span>Next up</span>
+          <strong title={missionText(job.title)}>{compactJobTitle(job)}</strong>
+        </div>
+        <em>{countdownLabel(nextAt)}</em>
+      </div>
+      <div className="jobs-next-hero-body">
+        <div className="jobs-next-hero-copy">
+          <p>{jobOperatorPurpose(job)}</p>
+          <small>{AGENTS[job.agent_id]?.label || job.agent_id} · {category.label} · Last {run.last}</small>
+        </div>
+        <div className="jobs-next-hero-meta">
+          <span>{run.today}</span>
+          <strong>{run.next}</strong>
+        </div>
+      </div>
+    </article>
   );
 }
 

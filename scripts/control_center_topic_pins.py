@@ -87,14 +87,15 @@ SECRET_CANDIDATES = [
 
 # Keep these summaries stable and concise. They are meant to teach agents
 # and humans where work belongs before anyone replies in the wrong topic.
+#JAIMES: Inbox now tells people that JOSH 2.0 triages first and hands backend work to JAIMES.
 TOPIC_MESSAGES: dict[str, str] = {
-    "Inbox": "Use this chat for general asks, triage, and anything that does not clearly belong in another topic.",
+    "Inbox": "Use this chat for general asks and triage; JOSH 2.0 answers first here and routes backend work to JAIMES.",
     "JAIMES Ops": "Use this chat for JAIMES backend work: crons, scripts, SSH, system alerts, and repairs.",
     "JOSH 2.0": "Use this chat for JOSH 2.0 status, protocol updates, recovery, and cross-agent handoffs.",
     "Sorare": "Use this chat for Sorare MLB lineups, missions, gameweek locks, and player-risk alerts.",
     "Crypto Alerts": "Use this chat for wallet, token, watchlist, and trade-signal alerts that still need review.",
     "Approvals": "Use this chat for actions that need Josh to approve, reject, or adjust before execution.",
-    "Mission Control": "Use this chat for Control Tower, Live Work Board, Brain Feed, and dashboard visibility issues.",
+    "Mission Control": "Use this chat for Control Tower, Live Work Board, and dashboard visibility issues.",
     "News": "Use this chat for J.A.I.N breaking-news alerts and scheduled intelligence digests.",
 }
 

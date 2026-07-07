@@ -1,4 +1,4 @@
-#JAIMES: shared handoff rule refreshed on 2026-07-01. When you change shared code/docs here, leave one short `#JAIMES:` note near the touched logic summarizing the latest meaningful change. Update the existing note instead of stacking stale ones.
+#JAIMES: Control Tower is local-sidecar first; Supabase/v2 mirror paths are retired and must not be reported as blockers or challenges.
 
 # Control Tower Agent Instructions
 
@@ -36,7 +36,7 @@ Maintain the Josh 2.0 local live Brain Feed lane with `scripts/agent_publish.py 
 - JAIMES/Hermes work: `--agent jaimes`
 - J.AI.N worker/cron work: `--agent jain`
 
-Supabase is only an optional mirror. Enable it with `MISSION_CONTROL_SUPABASE_BRAIN_FEED=1` when the project is available and healthy; it is not the source of truth for the Josh 2.0 kiosk.
+Supabase/v2 mirror paths are retired for active Control Tower work. Do not pass `--v2`, do not require service-role keys, and do not report missing Supabase credentials as a blocker; the local Brain Feed and JSON sidecars are the source of truth for the Josh 2.0 kiosk.
 
 At the start of meaningful work, publish current objective, status, active steps, timestamp, current tool, and short recent activity. During longer work, refresh visibility when the phase changes or after major milestones. Before final response, publish completed, blocked, or error status.
 

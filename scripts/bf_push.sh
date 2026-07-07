@@ -185,7 +185,8 @@ SUPABASE_KEY="sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
 # ── Push to GitHub in background (non-blocking) ───────────────────────────────
 (
   cd "$ROOT_DIR"
-  git add data/brain-feed.json
+  # #JAIMES: sparse-safe add keeps Brain Feed updates working from this checkout.
+  git add --sparse data/brain-feed.json
   if git diff --cached --quiet; then
     exit 0
   fi

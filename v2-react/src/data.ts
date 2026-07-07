@@ -252,11 +252,15 @@ function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
 }
 
 async function loadFallback(): Promise<MissionControlState> {
-  const [brain, personal, dashboard, sidecars] = await Promise.all([
+  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, codexJobs] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
     fetchJson<any>("/data/dashboard-data.json").catch(() => null),
     loadSidecars(),
+    fetchJson<any>("/data/joshex-brain-feed.json").catch(() => null),
+    fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
+    fetchJson<any>("/data/jain-brain-feed.json").catch(() => null),
+    fetchJson<any>("/data/codex-jobs.json").catch(() => null),
   ]);
   const brainAgent = String(brain?.agentId || brain?.agent_id || brain?.agent || "").toLowerCase();
   const brainAgentId: AgentId = brainAgent.includes("josh") && !brainAgent.includes("joshex")
@@ -268,6 +272,7 @@ async function loadFallback(): Promise<MissionControlState> {
     : "joshex";
   const statuses = dedupeStatus([
     normalizeStatus(brain, brainAgentId),
+    normalizeStatus(joshexFeed, "joshex"),
     normalizeStatus({
       agent_id: "joshex",
       status: personal?.status || "info",
@@ -282,10 +287,26 @@ async function loadFallback(): Promise<MissionControlState> {
         tool: "personal-codex.json",
       })),
     }),
+    normalizeStatus(jaimesFeed, "jaimes"),
+    normalizeStatus(jainFeed, "jain"),
     normalizeStatus(dashboard?.jaimesBrainFeed && { ...dashboard.jaimesBrainFeed, agent_id: "jaimes" }, "jaimes"),
     normalizeStatus(dashboard?.jainBrainFeed && { ...dashboard.jainBrainFeed, agent_id: "jain" }, "jain"),
   ]);
-  const events = (dashboard?.recentActivity || []).slice(0, 16).map((event: any, index: number) => ({
+  const statusEvents = statuses
+    .filter((status) => timestampValue(status.updated_at))
+    .sort((a, b) => timestampValue(b.updated_at) - timestampValue(a.updated_at))
+    .slice(0, 6)
+    .map((status, index) => ({
+      id: `live-status-${status.agent_id}-${index}`,
+      agent_id: status.agent_id,
+      event_type: "status",
+      status: status.status || "info",
+      title: status.objective || `${status.agent_id} status`,
+      detail: status.detail || status.current_tool || "Live status update",
+      tool: status.current_tool || "live sidecar",
+      created_at: status.updated_at || "",
+    }));
+  const dashboardEvents = (dashboard?.recentActivity || []).slice(0, 16).map((event: any, index: number) => ({
     id: `fallback-event-${index}`,
     agent_id: "joshex",
     event_type: "note",
@@ -295,6 +316,9 @@ async function loadFallback(): Promise<MissionControlState> {
     tool: "dashboard-data.json",
     created_at: event.time || dashboard?.generatedAt || "",
   }));
+  const events = [...statusEvents, ...dashboardEvents]
+    .sort((a, b) => timestampValue(b.created_at) - timestampValue(a.created_at))
+    .slice(0, 16);
   const approvals = (dashboard?.actionRequired || []).slice(0, 8).map((item: any, index: number) => ({
     id: `fallback-approval-${index}`,
     agent_id: "joshex",
@@ -309,7 +333,7 @@ async function loadFallback(): Promise<MissionControlState> {
     source: "Local legacy fallback",
     statuses,
     events,
-    jobs: buildFallbackJobs(dashboard),
+    jobs: buildFallbackJobs(dashboard, codexJobs),
     approvals,
     agenticCrypto: sidecars.agenticCrypto,
     modelUsage: dashboard?.modelUsage || sidecars.modelUsage,
@@ -331,8 +355,12 @@ function ownerToAgentId(owner?: string): AgentId {
   return "josh2";
 }
 
-function buildFallbackJobs(dashboard: any): AgentJob[] {
-  const codexJobs = Array.isArray(dashboard?.codexJobs) ? dashboard.codexJobs : [];
+function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
+  const codexJobs = Array.isArray(directCodexJobs?.jobs)
+    ? directCodexJobs.jobs
+    : Array.isArray(dashboard?.codexJobs)
+      ? dashboard.codexJobs
+      : [];
   const crons = Array.isArray(dashboard?.crons) ? dashboard.crons : [];
   const rows: AgentJob[] = [];
 

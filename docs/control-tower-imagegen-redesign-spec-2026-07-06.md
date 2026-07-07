@@ -1,4 +1,4 @@
-#JAIMES: imagegen backend was unavailable, so this captures the implementable Control Tower redesign direction from the approved workflow.
+#JAIMES: imagegen workflow is now active for Control Tower; latest pass uses generated mockup direction for scan-speed CSS polish.
 
 # Control Tower Imagegen Redesign Spec — 2026-07-06
 
@@ -66,3 +66,19 @@ Once imagegen is enabled, generate 2–3 screenshots from this spec, choose the 
 2. Chip severity role cleanup.
 3. FinOps route strip de-clutter if it still feels noisy.
 4. Reduce remaining late-stage `!important` overrides by area.
+
+## Imagegen workflow pass applied
+After Josh approved applying the steipete workflow, Josh 2.0 captured the live kiosk, generated a practical operator-command-center mockup, then implemented the strongest visual moves in `v2-react/src/styles.css`:
+
+- Flattened the header, Live Work Board, route ladder, FinOps, and jobs rail toward the generated concept.
+- Reduced Live Work Board objective type scale so agent rows scan faster and stop dominating the panel.
+- Added clearer left-agent/right-objective row anatomy with vertical dividers and tighter status labels.
+- Reduced rounded pill/card feel across kiosk chrome in favor of sharper operator-table primitives.
+- Added a mobile header override after screenshot QA caught the status ribbon overflowing on narrow viewports.
+
+Verification:
+
+- `npm run build`
+- `npm run check:control-tower`
+- Desktop screenshot: `tmp/control-tower-imagegen-final-desktop.png`
+- Mobile screenshot: `tmp/control-tower-imagegen-final-mobile.png`
