@@ -234,8 +234,15 @@ function isLowSignalApproval(row: Approval): boolean {
 
 function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
   const rows = new Map<string, AgentJob>();
+  const now = Date.now();
   for (const job of [...primary, ...fallback]) {
     if (!job?.title) continue;
+    const updated = timestampValue(job.updated_at);
+    const staleLiveBlocker = isBlockingJobStatus(job)
+      && Boolean(updated)
+      && now - updated > STALE_BLOCKER_WINDOW_MS
+      && !hasScheduledJobFingerprint(job);
+    if (staleLiveBlocker) continue;
     const key = jobMergeKey(job);
     const existing = rows.get(key);
     if (!existing || timestampValue(job.updated_at) >= timestampValue(existing.updated_at)) {
@@ -243,6 +250,7 @@ function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
     }
   }
   return [...rows.values()]
+    .filter((job, _index, jobs) => !blockedJobSuperseded(job, jobs, now))
     .sort((a, b) => {
       const rankDelta = priorityJobRank(b) - priorityJobRank(a);
       if (rankDelta) return rankDelta;
