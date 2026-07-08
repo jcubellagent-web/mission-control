@@ -364,6 +364,7 @@ function ownerToAgentId(owner?: string): AgentId {
 }
 
 function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
+  const now = Date.now();
   const codexJobs = Array.isArray(directCodexJobs?.jobs)
     ? directCodexJobs.jobs
     : Array.isArray(dashboard?.codexJobs)
@@ -423,7 +424,16 @@ function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
   }
 
   return rows
-    .filter((row) => row.title)
+    .filter((row) => {
+      if (!row.title) return false;
+      const updated = timestampValue(row.updated_at);
+      const staleLiveBlocker = isBlockingJobStatus(row)
+        && Boolean(updated)
+        && now - updated > STALE_BLOCKER_WINDOW_MS
+        && !hasScheduledJobFingerprint(row);
+      return !staleLiveBlocker;
+    })
+    .filter((row, _index, jobs) => !blockedJobSuperseded(row, jobs, now))
     .sort((a, b) => {
       const rankDelta = priorityJobRank(b) - priorityJobRank(a);
       if (rankDelta) return rankDelta;
