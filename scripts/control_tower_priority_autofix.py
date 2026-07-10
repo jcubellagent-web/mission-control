@@ -6,6 +6,7 @@ Josh-facing summary only when a Priority Queue alert remains unresolved.
 """
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import json
 import subprocess
@@ -15,9 +16,14 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "dashboard-data.json"
+STATE_PATH = ROOT / "data" / "control-tower-autofresh-ops.json"
 MIN_EXPECTED_OPERATOR_JOBS = 30
 MIN_EXPECTED_AGENT_ROWS = 3
 RUNTIME_STALE_MINUTES = 45
+STATE_WINDOW_HOURS = 48
+STATE_HISTORY_LIMIT = 36
+
+#JAIMES: keep a short local incident ledger so repeated Control Tower drift turns into concrete next fixes instead of one-off repairs.
 
 
 def utc_now() -> dt.datetime:
@@ -65,6 +71,110 @@ def load_dashboard() -> dict[str, Any]:
 
 def job_title(job: dict[str, Any]) -> str:
     return str(job.get("title") or job.get("name") or job.get("id") or "Scheduled job")
+
+
+def alert_key(alert: dict[str, str]) -> str:
+    title = str(alert.get("title") or "").strip().lower()
+    detail = str(alert.get("detail") or "").strip().lower()
+    return f"{title}|{detail}"
+
+
+def summarize_alerts(alerts: list[dict[str, str]]) -> list[str]:
+    return [f'{alert.get("title", "Alert")}: {alert.get("detail", "").strip()}'.strip(": ") for alert in alerts[:6]]
+
+
+def load_ops_state() -> dict[str, Any]:
+    try:
+        payload = json.loads(STATE_PATH.read_text())
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_ops_state(payload: dict[str, Any]) -> None:
+    STATE_PATH.write_text(json.dumps(payload, indent=2) + "\n")
+
+
+def recommendation_for_title(title: str) -> str:
+    lower = title.lower()
+    if "screen check" in lower or "layout" in lower or "kiosk" in lower:
+        return "Review kiosk watchdog and runtime layout checks."
+    if "job data" in lower or "refresh" in lower:
+        return "Review dashboard regeneration or publish path drift."
+    if "agent status coverage" in lower or "shared layer" in lower:
+        return "Review heartbeats, agent publishers, and shared sidecars."
+    return "Promote this repeat incident into a dedicated watchdog or skill update."
+
+
+def update_ops_state(before_alerts: list[dict[str, str]], after_alerts: list[dict[str, str]], fixed: bool, ok: bool) -> dict[str, Any]:
+    now = utc_now()
+    prior = load_ops_state()
+    history = prior.get("history") if isinstance(prior.get("history"), list) else []
+    fresh_history: list[dict[str, Any]] = []
+    cutoff = now - dt.timedelta(hours=STATE_WINDOW_HOURS)
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        seen_at = parse_ts(row.get("checkedAt"))
+        if seen_at and seen_at >= cutoff:
+            fresh_history.append(row)
+
+    current_alerts = after_alerts or before_alerts
+    fresh_history.append({
+        "checkedAt": now.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "ok": ok,
+        "fixed": fixed,
+        "beforeAlerts": summarize_alerts(before_alerts),
+        "afterAlerts": summarize_alerts(after_alerts),
+        "alertKeys": [alert_key(alert) for alert in current_alerts],
+    })
+    fresh_history = fresh_history[-STATE_HISTORY_LIMIT:]
+
+    counts: dict[str, dict[str, Any]] = {}
+    for row in fresh_history:
+        row_ok = bool(row.get("ok"))
+        for key in row.get("alertKeys") or []:
+            if not isinstance(key, str) or not key:
+                continue
+            item = counts.setdefault(key, {"key": key, "count": 0, "unresolvedCount": 0, "lastSeen": row.get("checkedAt", "")})
+            item["count"] += 1
+            item["lastSeen"] = row.get("checkedAt", "")
+            if not row_ok:
+                item["unresolvedCount"] += 1
+
+    recurring: list[dict[str, Any]] = []
+    recommendations: list[str] = []
+    lookup = {alert_key(alert): alert for alert in current_alerts}
+    for key, item in sorted(counts.items(), key=lambda pair: (-pair[1]["unresolvedCount"], -pair[1]["count"], pair[0])):
+        if item["count"] < 2:
+            continue
+        title, _, detail = key.partition("|")
+        alert = lookup.get(key, {})
+        entry = {
+            "key": key,
+            "title": alert.get("title") or title.title(),
+            "detail": alert.get("detail") or detail,
+            "count": item["count"],
+            "unresolvedCount": item["unresolvedCount"],
+            "lastSeen": item["lastSeen"],
+            "recommendation": recommendation_for_title(str(alert.get("title") or title)),
+        }
+        recurring.append(entry)
+        if key in lookup and item["unresolvedCount"] >= 2:
+            recommendations.append(f'{entry["title"]}: {entry["recommendation"]}')
+
+    payload = {
+        "checkedAt": now.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "status": "ok" if ok else "attention",
+        "fixed": fixed,
+        "beforeAlerts": summarize_alerts(before_alerts),
+        "afterAlerts": summarize_alerts(after_alerts),
+        "history": fresh_history,
+        "recurringAlerts": recurring[:8],
+        "recommendations": recommendations[:6],
+    }
+    save_ops_state(payload)
+    return payload
 
 
 def job_attention_items(data: dict[str, Any]) -> list[dict[str, str]]:
@@ -232,6 +342,10 @@ def run_repairs(before: dict[str, Any], before_alerts: list[dict[str, str]]) -> 
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--quiet-ok", action="store_true", help="Suppress JSON output for clean no-op runs.")
+    args = parser.parse_args()
+
     before = load_dashboard()
     before_alerts = priority_alerts(before)
     steps = run_repairs(before, before_alerts)
@@ -259,7 +373,15 @@ def main() -> int:
             for s in failed_steps[:3]
         ],
     }
-    print(json.dumps(result, indent=2))
+    ops_state = update_ops_state(before_alerts, after_alerts, result["fixed"], result["ok"])
+    result["opsState"] = {
+        "status": ops_state.get("status"),
+        "recurringAlerts": ops_state.get("recurringAlerts", [])[:4],
+        "recommendations": ops_state.get("recommendations", [])[:4],
+    }
+    should_print = not args.quiet_ok or not result["ok"] or result["fixed"] or bool(result["opsState"]["recommendations"])
+    if should_print:
+        print(json.dumps(result, indent=2))
     return 0 if result["ok"] else 2
 
 

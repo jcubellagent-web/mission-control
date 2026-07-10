@@ -567,39 +567,31 @@ def build_card(
 ) -> str:
     done = done or []
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
-    issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
-    next_steps = parse_list(next_step) or default_next_steps(status, bool(issues))
     live_items = append_log(done, [now] if now else [])
     card_title = {
-        "running": "Live work - in progress",
-        "done": "Work complete",
-        "failed": "Work needs attention",
-        "paused": "Work paused",
-    }.get(status, "Live work")
+        "running": "⏳ <b>Live work - in progress</b>",
+        "done": "✅ <b>Work complete</b>",
+        "failed": "⚠️ <b>Work needs attention</b>",
+        "paused": "⏸️ <b>Work paused</b>",
+    }.get(status, f"<b>Live work status: {status}</b>")
+    divider = "────────────────────────"
+    # #JAIMES: keep JAIMES topic cards aligned with the shared compact topic workflow so every forum thread uses one consistent live-card layout.
     lines = [
-        f"Model: {friendly_model_line(model_line)}",
-        "",
+        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))}",
+        f"🧭 <b>Path:</b> {html.escape(friendly_route_line(route))}",
+        divider,
         card_title,
+        divider,
+        "📌 <b>Objective:</b>",
+        f"- {html.escape(operator_objective(title))}",
         "",
-        "Objective:",
-        f"- {operator_objective(title)}",
-        "",
-        "Current step:",
-        f"- {current_step_text(status, now, live_items)}",
-        "",
-        "Done so far:",
+        "⚡️ <b>Current step:</b>",
+        f"- {html.escape(current_step_text(status, now, live_items))}",
+        divider,
+        "📈 <b>Progress:</b>",
         *progress_lines(live_items, status),
-        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=6),
+        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=10),
         "",
-        "Issues:",
-        *plain_bullet_lines(issues, fallback="None", limit=4),
-        "",
-        "Next:",
-        *plain_bullet_lines(next_steps, fallback="No action needed.", limit=4),
-        "",
-        f"Status: {status_label(status)}",
-        f"Running on: {friendly_model_line(model_line)}",
-        f"Path: {friendly_route_line(route)}",
         f"Updated: {updated or now_label()}",
     ]
     if eta:
@@ -627,50 +619,101 @@ def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
         return {"ok": False, "error": str(exc)}
 
 
-def send_card(text: str, buttons: list | None, timeout: int) -> dict:
-    payload = {"chat_id": telegram_target(), "text": text, "disable_notification": True}
+def send_card(
+    text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = {
+        "chat_id": chat_id or telegram_target(),
+        "text": text,
+        "disable_notification": True,
+        "parse_mode": "HTML",
+    }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("sendMessage", payload, timeout=timeout)
 
 
-def edit_card(message_id: int | str, text: str, buttons: list | None, timeout: int) -> dict:
-    payload = {"chat_id": telegram_target(), "message_id": message_id, "text": text}
+def edit_card(
+    message_id: int | str,
+    text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = {
+        "chat_id": chat_id or telegram_target(),
+        "message_id": message_id,
+        "text": text,
+        "parse_mode": "HTML",
+    }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("editMessageText", payload, timeout=timeout)
 
 
-def send_final_summary(text: str, timeout: int, buttons: list | None = None) -> dict:
+def send_final_summary(
+    text: str,
+    timeout: int,
+    buttons: list | None = None,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
     payload = {
-        "chat_id": telegram_target(),
+        "chat_id": chat_id or telegram_target(),
         "text": text,
         "disable_notification": True,
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("sendMessage", payload, timeout=timeout)
 
 
-def edit_final_summary(message_id: int | str, text: str, timeout: int, buttons: list | None = None) -> dict:
+def edit_final_summary(
+    message_id: int | str,
+    text: str,
+    timeout: int,
+    buttons: list | None = None,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
     payload = {
-        "chat_id": telegram_target(),
+        "chat_id": chat_id or telegram_target(),
         "message_id": message_id,
         "text": text,
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("editMessageText", payload, timeout=timeout)
 
 
-def edit_objective_message(message_id: int | str, title: str, model: str, timeout: int) -> dict:
+def edit_objective_message(
+    message_id: int | str,
+    title: str,
+    model: str,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
     payload = {
-        "chat_id": telegram_target(),
+        "chat_id": chat_id or telegram_target(),
         "message_id": message_id,
         "text": (
             f"Model: {friendly_model_line(model_line)}\n\n"
@@ -681,6 +724,8 @@ def edit_objective_message(message_id: int | str, title: str, model: str, timeou
             "- I’ll send one final Complete summary when the work is done."
         ),
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     return api_call("editMessageText", payload, timeout=timeout)
 
 
@@ -757,6 +802,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     route = args.route or existing.get("route") or ""
     model = args.model or existing.get("model") or ""
     ack_message_id = args.ack_message_id or existing.get("ack_message_id")
+    chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("TELEGRAM_TARGET_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID")
+    thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("TELEGRAM_THREAD_ID")
     if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
         ack_message_id = claim_pending_ack(args.key)
     text = build_card(
@@ -791,10 +838,10 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     final_buttons = buttons if status in {"done", "failed"} else None
 
     if existing.get("message_id"):
-        result = edit_card(existing["message_id"], text, card_buttons, args.timeout)
+        result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "edited"
     else:
-        result = send_card(text, card_buttons, args.timeout)
+        result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "sent"
 
     if not result.get("ok"):
@@ -808,13 +855,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     final_action = None
     if final_text:
         if final_message_id:
-            final_result = edit_final_summary(final_message_id, final_text, args.timeout)
+            final_result = edit_final_summary(final_message_id, final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "edited"
             if not final_result.get("ok"):
-                final_result = send_final_summary(final_text, args.timeout)
+                final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
                 final_action = "sent"
         else:
-            final_result = send_final_summary(final_text, args.timeout)
+            final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "sent"
         if not final_result.get("ok"):
             print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
@@ -824,12 +871,12 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
     approval_message_id = existing.get("approval_message_id")
     if final_buttons:
-        approval_result = send_card("Approval options:", final_buttons, args.timeout)
+        approval_result = send_card("Approval options:", final_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         if approval_result.get("ok"):
             approval_message_id = approval_result.get("result", {}).get("message_id")
 
     if ack_message_id and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        edit_objective_message(ack_message_id, title, model, args.timeout)
+        edit_objective_message(ack_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
 
     cards[args.key] = {
         "title": title,
@@ -844,6 +891,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         "route": route,
         "model": model,
         "next_step": args.next or existing.get("next_step") or "",
+        "chat_id": chat_id,
+        "thread_id": thread_id,
     }
     save_state(state)
     publish_brain_feed(args, status)
@@ -875,6 +924,8 @@ def main() -> int:
     parser.add_argument("--blocker", default="None")
     parser.add_argument("--eta")
     parser.add_argument("--ack-message-id")
+    parser.add_argument("--chat-id")
+    parser.add_argument("--thread-id")
     parser.add_argument("--buttons")
     parser.add_argument("--buttons-file")
     parser.add_argument("--routing-buttons", action="store_true", help="Show routing/model buttons on active cards only when steering is useful")

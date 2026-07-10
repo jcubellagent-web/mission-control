@@ -395,7 +395,7 @@ def live_line(item: str) -> str:
         return "🏁 final: summary sent"
     if lower.startswith("still working"):
         return "⏳ working: waiting for the current model or tool step to finish"
-    return f"• {html.escape(compact(text, limit=90))}"
+    return f"- {html.escape(compact(text, limit=90))}"
 
 
 def is_empty_issue(value: str | None) -> bool:

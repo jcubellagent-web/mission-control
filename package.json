@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "doctor:paths": "python3 scripts/control_tower_path_guard.py",
     "dev": "vite --host 127.0.0.1 --port 5174 --strictPort",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4174",

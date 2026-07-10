@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +21,7 @@ CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 BUDGETS_PATH = DATA_DIR / "model-provider-budgets.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 JAIMES_GEMINI_POLICY_PATH = DATA_DIR / "jaimes-gemini-policy.json"
+ROUTE_TELEMETRY_PATH = DATA_DIR / "agent-route-decisions.jsonl"
 
 GEMINI_FIRST_TASK_TYPES = {
     "review",
@@ -190,6 +194,62 @@ def read_json(path: Path, default: Any) -> Any:
 def compact(value: Any, limit: int = 220) -> str:
     text = " ".join(str(value or "").split())
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "..."
+
+
+def optional_ms(value: Optional[float]) -> Optional[int]:
+    if value is None:
+        return None
+    return max(0, round(float(value)))
+
+
+def append_route_telemetry(
+    args: argparse.Namespace,
+    result: dict[str, Any],
+    routing_duration_ms: int,
+) -> None:
+    """Append one dashboard-safe routing decision without storing prompt text."""
+    model_route = result.get("modelRoute") if isinstance(result.get("modelRoute"), dict) else {}
+    provider = str(model_route.get("provider") or model_route.get("firstStop") or "unknown")
+    model = str(model_route.get("model") or PROVIDER_DEFAULT_MODELS.get(provider) or "unknown")
+    signature_source = "\x1f".join(
+        [args.task_type, args.title, args.objective, args.privacy, result.get("agent", "")]
+    )
+    record = {
+        "timestamp": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+        "requestSignature": hashlib.sha256(signature_source.encode("utf-8")).hexdigest()[:16],
+        "sourceAgent": args.requester,
+        "owner": result.get("agent"),
+        "taskType": args.task_type,
+        "privacy": args.privacy,
+        "priority": args.priority,
+        "provider": provider,
+        "model": model,
+        "firstStop": model_route.get("firstStop"),
+        "role": model_route.get("role"),
+        "approval": result.get("approval"),
+        "needsApproval": bool(result.get("needsApproval")),
+        "outcome": "routed",
+        "routeLabel": model_route.get("role") or model_route.get("firstStop") or provider,
+        "queueDurationMs": optional_ms(args.queue_duration_ms),
+        "routingDurationMs": routing_duration_ms,
+        "routeDurationMs": routing_duration_ms,
+        "memoryDurationMs": optional_ms(args.memory_duration_ms),
+        "toolDurationMs": optional_ms(args.tool_duration_ms),
+        "modelDurationMs": optional_ms(args.model_duration_ms),
+        "timingComplete": all(
+            value is not None
+            for value in (
+                args.queue_duration_ms,
+                args.memory_duration_ms,
+                args.tool_duration_ms,
+                args.model_duration_ms,
+            )
+        ),
+        "telemetryPolicy": "no raw prompts, secrets, OAuth payloads, cookies, passwords, tokens, raw emails, or private account contents",
+    }
+    ROUTE_TELEMETRY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with ROUTE_TELEMETRY_PATH.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True) + "\n")
 
 
 def score_route(route: dict[str, Any], task_type: str, capabilities: set[str], privacy: str, requester: str = "") -> int:
@@ -585,8 +645,14 @@ def main() -> int:
     parser.add_argument("--create-task", action="store_true")
     parser.add_argument("--brain-feed", action="store_true")
     parser.add_argument("--job", action="store_true")
+    parser.add_argument("--queue-duration-ms", type=float, default=None)
+    parser.add_argument("--memory-duration-ms", type=float, default=None)
+    parser.add_argument("--tool-duration-ms", type=float, default=None)
+    parser.add_argument("--model-duration-ms", type=float, default=None)
+    parser.add_argument("--no-telemetry", action="store_true", help="Skip the route-decision telemetry append.")
     args = parser.parse_args()
 
+    route_started = time.perf_counter()
     agent, route, needs_approval = choose_agent(args)
     approval = "approved" if args.approval == "approved" else "required" if needs_approval else args.approval
     model_route = choose_model_route(args, agent, needs_approval)
@@ -607,6 +673,9 @@ def main() -> int:
     }
     if args.create_task:
         result["task"] = create_task(args, agent, approval, model_route).get("task")
+    if not args.no_telemetry:
+        routing_duration_ms = max(0, round((time.perf_counter() - route_started) * 1000))
+        append_route_telemetry(args, result, routing_duration_ms)
     print(json.dumps(result, indent=2))
     return 0
 

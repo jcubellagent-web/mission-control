@@ -50,27 +50,32 @@ except Exception:  # noqa: BLE001
     write_selection = None
 
 
-def send_initial_ack(text: str, timeout: int = 15) -> str:
+def send_initial_ack(text: str, timeout: int = 15, chat_id: str | int | None = None, thread_id: str | int | None = None) -> str:
     if work_card is None:
         return ""
     payload = {
-        "chat_id": work_card.telegram_target(),
+        "chat_id": chat_id or work_card.telegram_target(),
         "text": text,
         "disable_notification": True,
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     result = work_card.api_call("sendMessage", payload, timeout=timeout)
     return str(result.get("result", {}).get("message_id") or "") if result.get("ok") else ""
 
 
-def send_chat_action(action: str = "typing") -> None:
-    if os.environ.get("JAIMES_TELEGRAM_TYPING_ACTIONS", "").lower() not in {"1", "true", "yes"}:
+def send_chat_action(action: str = "typing", chat_id: str | int | None = None, thread_id: str | int | None = None) -> None:
+    if os.environ.get("JAIMES_TELEGRAM_TYPING_ACTIONS", "1").lower() in {"0", "false", "no"}:
         return
     if work_card is None:
         return
-    work_card.api_call("sendChatAction", {"chat_id": work_card.telegram_target(), "action": action}, timeout=6)
+    payload = {"chat_id": chat_id or work_card.telegram_target(), "action": action}
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
+    work_card.api_call("sendChatAction", payload, timeout=6)
 
 
-def send_message_draft(draft_id: int, text: str = "") -> None:
+def send_message_draft(draft_id: int, text: str = "", chat_id: str | int | None = None, thread_id: str | int | None = None) -> None:
     """Optionally update Telegram draft text.
 
     Disabled by default. The custom draft lane has rendered badly in Telegram
@@ -82,11 +87,10 @@ def send_message_draft(draft_id: int, text: str = "") -> None:
     if work_card is None:
         return
     safe = clean_prompt(text).replace("\n", " · ")[:280]
-    work_card.api_call(
-        "sendMessageDraft",
-        {"chat_id": work_card.telegram_target(), "draft_id": draft_id, "text": safe},
-        timeout=6,
-    )
+    payload = {"chat_id": chat_id or work_card.telegram_target(), "draft_id": draft_id, "text": safe}
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
+    work_card.api_call("sendMessageDraft", payload, timeout=6)
 
 
 def objective_card_text(objective: str, model: str = DEFAULT_MODEL) -> str:
@@ -100,28 +104,32 @@ def objective_card_text(objective: str, model: str = DEFAULT_MODEL) -> str:
     )
 
 
-def edit_message(message_id: str, text: str, timeout: int = 15) -> bool:
+def edit_message(message_id: str, text: str, timeout: int = 15, chat_id: str | int | None = None, thread_id: str | int | None = None) -> bool:
     if work_card is None or not message_id:
         return False
     payload = {
-        "chat_id": work_card.telegram_target(),
+        "chat_id": chat_id or work_card.telegram_target(),
         "message_id": message_id,
         "text": text,
         "disable_notification": True,
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     result = work_card.api_call("editMessageText", payload, timeout=timeout)
     return bool(result.get("ok"))
 
 
-def send_buttons_message(text: str, buttons: list, timeout: int = 15) -> str:
+def send_buttons_message(text: str, buttons: list, timeout: int = 15, chat_id: str | int | None = None, thread_id: str | int | None = None) -> str:
     if work_card is None:
         return ""
     payload = {
-        "chat_id": work_card.telegram_target(),
+        "chat_id": chat_id or work_card.telegram_target(),
         "text": text,
         "reply_markup": {"inline_keyboard": buttons},
         "disable_notification": True,
     }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
     result = work_card.api_call("sendMessage", payload, timeout=timeout)
     return str(result.get("result", {}).get("message_id") or "") if result.get("ok") else ""
 
@@ -358,7 +366,13 @@ def approval_button_label(step: str) -> str:
     return f"Approve: {label or 'next action'}"
 
 
-def send_approval_options(objective: str, final_text: str, dry_run: bool = False) -> str:
+def send_approval_options(
+    objective: str,
+    final_text: str,
+    dry_run: bool = False,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> str:
     steps = [step for step in mitigation_steps_from_text(final_text) if actionable_approval_step(step)]
     if not steps:
         return ""
@@ -377,12 +391,27 @@ def send_approval_options(objective: str, final_text: str, dry_run: bool = False
     if dry_run:
         return "dry-run-approval-buttons"
     save_approval_actions(actions)
-    return send_buttons_message("Approval options:", buttons)
+    return send_buttons_message("Approval options:", buttons, chat_id=chat_id, thread_id=thread_id)
 
 
 def clean_prompt(prompt: str) -> str:
     text = TELEGRAM_META_PATTERN.sub("", prompt or "").strip()
     return text or "Handle latest Telegram task"
+
+
+def prompt_telegram_target(prompt: str) -> tuple[str, str]:
+    match = re.search(r"Conversation info \(untrusted metadata\):\s*```json\s*(\{.*?\})\s*```", prompt or "", re.S)
+    if not match:
+        return "", ""
+    try:
+        info = json.loads(match.group(1))
+    except Exception:
+        return "", ""
+    chat_id = str(info.get("chat_id") or "").strip()
+    thread_id = str(info.get("topic_id") or "").strip()
+    if chat_id.startswith("telegram:"):
+        chat_id = chat_id.split(":", 1)[1]
+    return chat_id, thread_id
 
 
 def objective_from_prompt(prompt: str) -> str:
@@ -598,12 +627,13 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False) -> dict[s
     if skill.get("label"):
         display_model = f"{display_model}; skill: {skill['label']}"
         display_route = f"{display_route}; runbook={skill['id']}"
+    chat_id, thread_id = prompt_telegram_target(prompt)
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
-    ack_message_id = "dry-run-message" if dry_run else send_initial_ack("received — determining objective")
+    ack_message_id = "dry-run-message" if dry_run else send_initial_ack("received — determining objective", chat_id=chat_id, thread_id=thread_id)
     if not dry_run and ack_message_id:
-        send_chat_action()
-        send_message_draft(draft_id, objective_card_text(objective, display_model))
-        edit_message(ack_message_id, objective_card_text(objective, display_model))
+        send_chat_action(chat_id=chat_id, thread_id=thread_id)
+        send_message_draft(draft_id, objective_card_text(objective, display_model), chat_id=chat_id, thread_id=thread_id)
+        edit_message(ack_message_id, objective_card_text(objective, display_model), chat_id=chat_id, thread_id=thread_id)
         run_cmd([
             "python3",
             "mission-control/scripts/jaimes_work_card.py",
@@ -624,6 +654,10 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False) -> dict[s
             "Work automatically; show buttons only for final approval steps if needed",
             "--ack-message-id",
             ack_message_id,
+            "--chat-id",
+            chat_id,
+            "--thread-id",
+            thread_id,
         ])
         publish_jaimes(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
     return {
@@ -636,6 +670,8 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False) -> dict[s
         "objective": objective,
         "run_id": event.get("run_id") or "",
         "last_card_update_at": utc_now(),
+        "chat_id": chat_id,
+        "thread_id": thread_id,
     }
 
 
@@ -683,7 +719,13 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             if not dry_run:
                 publish_jaimes(objective, "done", "Final response sent in JAIMES Telegram.")
                 if event.get("final_text") and event_id not in approval_sent:
-                    approval_message_id = send_approval_options(objective, event["final_text"], dry_run=dry_run)
+                    approval_message_id = send_approval_options(
+                        objective,
+                        event["final_text"],
+                        dry_run=dry_run,
+                        chat_id=card.get("chat_id"),
+                        thread_id=card.get("thread_id"),
+                    )
                     if approval_message_id:
                         approval_sent.add(event_id)
                         card["approval_message_id"] = approval_message_id
@@ -692,7 +734,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             card["last_progress_at"] = card["last_card_update_at"]
         else:
             if not dry_run:
-                send_chat_action()
+                send_chat_action(chat_id=card.get("chat_id"), thread_id=card.get("thread_id"))
             cmd = [
                 "python3",
                 "mission-control/scripts/jaimes_work_card.py",
@@ -709,6 +751,10 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 event["summary"],
                 "--done",
                 event["summary"],
+                "--chat-id",
+                str(card.get("chat_id") or ""),
+                "--thread-id",
+                str(card.get("thread_id") or ""),
             ]
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
@@ -754,6 +800,10 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "--blocker",
                 "None",
                 "--no-final-summary",
+                "--chat-id",
+                str(card.get("chat_id") or ""),
+                "--thread-id",
+                str(card.get("thread_id") or ""),
             ]
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
@@ -780,11 +830,15 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             str(card.get("model") or DEFAULT_MODEL),
             "--route",
             str(card.get("route") or DEFAULT_ROUTE),
-            "--now",
-            summary,
-            "--done",
-            summary,
-        ]
+                "--now",
+                summary,
+                "--done",
+                summary,
+                "--chat-id",
+                str(card.get("chat_id") or ""),
+                "--thread-id",
+                str(card.get("thread_id") or ""),
+            ]
         result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
         if not dry_run:
             publish_jaimes(objective, "active", summary)
@@ -835,6 +889,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "model": result.get("model"),
                     "route": result.get("route"),
                     "ack_message_id": result.get("ack_message_id"),
+                    "chat_id": result.get("chat_id"),
+                    "thread_id": result.get("thread_id"),
                     "started_at": result.get("last_card_update_at"),
                     "last_progress_at": result.get("last_card_update_at"),
                     "last_card_update_at": result.get("last_card_update_at"),
