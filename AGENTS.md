@@ -143,13 +143,14 @@ Session reset rule:
 
 Josh approved this default policy for Josh 2.0 Telegram work:
 
-- Use `openai/gpt-5.5` with adaptive/high thinking as the default route.
-- Downshift routine status, tiny edits, summaries, and quick checks to
-  low/minimal thinking or a fast mini lane when speed matters more than depth.
-- Use medium/high thinking for normal operations, debugging, repo edits,
+- Use `openai/gpt-5.6-terra` with medium thinking as the default trusted execution route.
+- Downshift routine status, tiny edits, quick checks, and bounded low-risk work to
+  `openai/gpt-5.6-luna` with low/medium thinking when speed matters more than depth.
+- Use Terra with medium/high thinking for normal operations, debugging, repo edits,
   Control Tower work, and multi-step coordination.
-- Upshift to xhigh/max thinking only for hard architecture, gnarly failures,
+- Upshift to `openai/gpt-5.6-sol` only for hard architecture, gnarly failures,
   security-sensitive review, high-blast-radius changes, or earned judgment.
+- Keep `openai/gpt-5.5` as a stable compatibility fallback, not the normal default.
 - Prefer subscription-auth Codex lanes. Use metered providers only when Josh
   explicitly asks for that route or a standing temporary credit-burn policy is
   active.
