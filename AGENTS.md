@@ -151,6 +151,10 @@ Josh approved this default policy for Josh 2.0 Telegram work:
 - Upshift to `openai/gpt-5.6-sol` only for hard architecture, gnarly failures,
   security-sensitive review, high-blast-radius changes, or earned judgment.
 - Keep `openai/gpt-5.5` as a stable compatibility fallback, not the normal default.
+- Until the stable Codex channel supports GPT-5.6, keep Josh 2.0 on
+  `@openai/codex@alpha` and point the OpenCLAW Codex plugin app server at
+  `/opt/homebrew/bin/codex`. Do not run bare `codex update`, which currently
+  installs stable `0.144.1` and breaks GPT-5.6 turns.
 - Prefer subscription-auth Codex lanes. Use metered providers only when Josh
   explicitly asks for that route or a standing temporary credit-burn policy is
   active.
