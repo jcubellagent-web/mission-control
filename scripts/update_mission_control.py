@@ -50,6 +50,7 @@ XAI_SPECIALIST_RUNS_PATH = ROOT.parent / "data" / "xai-specialist-runs.json"
 ECOSYSTEM_HEALTH_SWEEP_PATH = ROOT.parent / "data" / "ecosystem-health-sweep.json"
 AGENT_HEARTBEATS_PATH = ROOT.parent / "data" / "agent-heartbeats.json"
 AGENT_CONTEXT_REGISTRY_PATH = ROOT.parent / "data" / "agent-context-registry.json"
+MEMORY_OPERATIONS_PATH = ROOT.parent / "data" / "memory-operations.json"
 AGENT_BRAIN_FEED_STALE_HOURS = 4
 CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
 CAPABILITY_WATCH_PATH = ROOT.parent / "data" / "capability-watch.json"
@@ -4486,6 +4487,15 @@ def main() -> None:
         "privacy": "dashboard-safe summaries only",
         "summary": {"status": "unknown", "agents": 0, "staleAgents": [], "openTasks": 0, "openHandoffs": 0},
         "agents": {},
+    })
+    dashboard["memoryOperations"] = load_json_file(MEMORY_OPERATIONS_PATH, {
+        "updatedAt": now_iso,
+        "status": "not-configured",
+        "summary": "Shared memory registry has not published health yet.",
+        "registry": {"active": 0, "superseded": 0, "expired": 0, "sources": 0},
+        "review": {"pending": 0, "disputed": 0, "lastRun": None, "lastStatus": "not-run"},
+        "retrieval": {"queries7d": 0, "hits7d": 0, "hitRate": None, "avgLatencyMs": 0},
+        "agentAccess": {},
     })
     dashboard["reliabilityUpgrades"] = load_json_file(RELIABILITY_UPGRADES_PATH, {
         "updatedAt": now_iso,

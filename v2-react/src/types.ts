@@ -82,6 +82,7 @@ export type MissionControlState = {
   sharedOperatingLayer?: Record<string, unknown>;
   agentControl?: Record<string, unknown>;
   agentContextRegistry?: Record<string, unknown>;
+  memoryOperations?: Record<string, unknown>;
   codingVisibility?: Record<string, unknown>;
   trackedTasks?: Array<Record<string, unknown>>;
   agentBus?: Array<Record<string, unknown>>;

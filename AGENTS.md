@@ -76,6 +76,18 @@ Before an agent picks up work from another agent, check:
 
 Use `scripts/reconcile_agent_context.py` to close stale/superseded task and handoff noise without deleting history.
 
+## Shared Memory Control Plane
+
+Checked-in `AGENTS.md`, `MEMORY.md`, and `agent-skills` remain authoritative. The shared memory registry adds typed retrieval, provenance, validity, conflict review, and cross-agent continuity; it does not replace those files.
+
+- Before repeating work, asking Josh for known context, or accepting a cross-agent handoff, query shared memory:
+  `python3 scripts/memory_registry.py retrieve --agent <agent> --query "<specific question>"`
+- Cite the returned source and confidence when memory materially changes a decision.
+- Propose durable learning with `memory_registry.py propose`; do not directly convert model inference into policy.
+- Preferences, procedures, policy, sensitive facts, and conflicts always require review. Only verified low-risk facts, lessons, entities, and relationships may be auto-promoted by the nightly review.
+- Never send raw private prompts or private memory contents to Control Tower. `data/memory-operations.json` contains health, counts, latency, and provenance coverage only.
+- Josh 2.0 owns the registry and nightly review. JAIMES, J.A.I.N, and JOSHeX use `scripts/ecosystem_memory_client.py` (or SSH to the same CLI) so all agents share one governed memory surface.
+
 Use `agent-skills` as the durable source for shared agent skills/runbooks. When these skills change, sync them into each active host's `~/.codex/skills` directory and update `data/agent-skill-inventory.json`.
 
 ## JOSHeX Device Resource Guardrail

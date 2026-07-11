@@ -1250,6 +1250,7 @@ function BrainHero({
         <>
           <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
           <EcosystemOperationsPanel state={state} workItems={workItems} />
+          <MemoryOperationsPanel state={state} />
         </>
       ) : null}
     </section>
@@ -1365,6 +1366,54 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
           {state.statuses.slice(0, 4).map((row) => (
             <p key={row.agent_id}><b>{AGENTS[row.agent_id]?.label || row.agent_id}</b><span>{ageLabel(row.updated_at)} · {row.source || "Live Work Board"}</span><em>{row.model ? missionText(row.model) : missionText(row.current_tool || "heartbeat")}</em></p>
           ))}
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function MemoryOperationsPanel({ state }: { state: MissionControlState }) {
+  const memory = recordRow(state.memoryOperations);
+  const registry = recordRow(memory.registry);
+  const review = recordRow(memory.review);
+  const retrieval = recordRow(memory.retrieval);
+  const governance = recordRow(memory.governance);
+  const access = recordRow(memory.agentAccess);
+  const tone = supportTone(memory.status);
+  const hitRate = retrieval.hitRate == null ? "Learning" : `${retrieval.hitRate}%`;
+  const agents = Object.entries(access).slice(0, 4);
+  return (
+    <section className={`memory-ops-panel is-${tone}`} aria-label="Memory operations">
+      <header>
+        <div><span>Shared context and recall</span><strong>Memory Operations</strong></div>
+        <em>{missionText(memory.summary || "Memory registry initializing")}</em>
+      </header>
+      <div className="memory-ops-metrics">
+        <article><span>Durable records</span><strong>{registry.active ?? 0}</strong><p>{registry.sources ?? 0} governed sources</p></article>
+        <article><span>Review queue</span><strong>{review.pending ?? 0}</strong><p>{review.disputed ?? 0} conflict{Number(review.disputed || 0) === 1 ? "" : "s"}</p></article>
+        <article><span>Recall hit rate</span><strong>{hitRate}</strong><p>{retrieval.queries7d ?? 0} queries in 7 days</p></article>
+        <article><span>Recall latency</span><strong>{retrieval.avgLatencyMs ?? 0} ms</strong><p>Local hybrid retrieval</p></article>
+      </div>
+      <div className="memory-ops-detail">
+        <article>
+          <strong>Governance</strong>
+          <p>{missionText(governance.sourceOfTruth || "Files and skills remain authoritative")}</p>
+          <small>{missionText(governance.autoPromote || "Low-risk verified memories only")}</small>
+        </article>
+        <article>
+          <strong>Nightly review</strong>
+          <p>{review.lastRun ? `${ageLabel(review.lastRun)} · ${missionText(review.lastStatus)}` : "First review pending"}</p>
+          <small>Dedupes, expires, detects conflicts, and proposes durable learning.</small>
+        </article>
+        <article>
+          <strong>Agent access</strong>
+          <p>{agents.length ? agents.map(([agent]) => agent.toUpperCase()).join(" · ") : "JOSH2 · JAIMES · JAIN · JOSHEX"}</p>
+          <small>One registry, scoped retrieval, provenance returned with every result.</small>
+        </article>
+        <article>
+          <strong>Privacy boundary</strong>
+          <p>Counts and health only</p>
+          <small>{missionText(governance.privacy || "No private memory contents on Control Tower")}</small>
         </article>
       </div>
     </section>

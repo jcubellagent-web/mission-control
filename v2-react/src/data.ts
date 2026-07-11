@@ -357,6 +357,7 @@ async function loadFallback(): Promise<MissionControlState> {
     sharedOperatingLayer: dashboard?.sharedOperatingLayer,
     agentControl: dashboard?.agentControl,
     agentContextRegistry: dashboard?.agentContextRegistry,
+    memoryOperations: dashboard?.memoryOperations,
     codingVisibility: dashboard?.codingVisibility,
     trackedTasks: Array.isArray(dashboard?.trackedTasks) ? dashboard.trackedTasks : [],
     agentBus: Array.isArray(dashboard?.agentBus) ? dashboard.agentBus : [],

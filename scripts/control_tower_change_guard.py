@@ -19,6 +19,8 @@ LOCK_PATH = STATE_DIR / "control-tower-change-lock.json"
 BACKUP_ROOT = Path.home() / ".openclaw" / "backups" / "control-tower-changes"
 SOURCE_PATHS = (
     "AGENTS.md",
+    ".gitignore",
+    "agent-skills/shared-memory-retrieval",
     "v2-react/src",
     "v2-react/index.html",
     "vite.config.ts",
@@ -26,6 +28,11 @@ SOURCE_PATHS = (
     "scripts/update_mission_control.py",
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
+    "scripts/memory_registry.py",
+    "scripts/memory_sleep_review.py",
+    "scripts/memory_registry_smoke_test.py",
+    "scripts/ecosystem_memory_client.py",
+    "scripts/run_sleep_memory_review.sh",
     "scripts/mission_control_regression_check.py",
     "scripts/mission_control_runtime_layout_check.py",
 )
@@ -123,12 +130,20 @@ def status() -> None:
     print(json.dumps({"ok": True, "lease": read_lock() or None, "sourceChanges": source_changes()}, indent=2))
 
 
+def renew(token: str) -> None:
+    payload = require_token(token)
+    payload["expiresAt"] = iso(now() + dt.timedelta(minutes=LEASE_MINUTES))
+    LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
+    print(json.dumps({"ok": True, "lease": payload}, indent=2))
+
+
 def verify(token: str) -> None:
     payload = require_token(token)
     env = dict(os.environ)
     env["CONTROL_TOWER_ALLOW_GENERATED"] = "1"
     checks = [
         ([sys.executable, "scripts/control_tower_path_guard.py"], env),
+        ([sys.executable, "scripts/memory_registry_smoke_test.py"], None),
         (["npm", "run", "build"], None),
         ([sys.executable, "scripts/update_mission_control.py"], None),
         ([sys.executable, "scripts/mission_control_regression_check.py"], None),
@@ -180,12 +195,13 @@ def main() -> None:
     start.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
     start.add_argument("--objective", required=True)
     sub.add_parser("status")
-    for name in ("verify", "finish", "abort"):
+    for name in ("renew", "verify", "finish", "abort"):
         command = sub.add_parser(name)
         command.add_argument("--token", required=True)
     args = parser.parse_args()
     if args.command == "begin": begin(args.agent, args.objective)
     elif args.command == "status": status()
+    elif args.command == "renew": renew(args.token)
     elif args.command == "verify": verify(args.token)
     elif args.command == "finish": finish(args.token)
     elif args.command == "abort": abort(args.token)
