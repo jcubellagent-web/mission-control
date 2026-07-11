@@ -1247,8 +1247,126 @@ function BrainHero({
       </div>
 
       {showDetails ? (
-        <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
+        <>
+          <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
+          <EcosystemOperationsPanel state={state} workItems={workItems} />
+        </>
       ) : null}
+    </section>
+  );
+}
+
+function objectRows(value: unknown): Array<Record<string, any>> {
+  return Array.isArray(value) ? value.filter((row) => row && typeof row === "object") : [];
+}
+
+function recordRow(value: unknown): Record<string, any> {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function supportTone(status: unknown): "clear" | "watch" | "risk" {
+  const value = String(status || "").toLowerCase();
+  if (["blocked", "error", "failed", "attention", "offline"].includes(value)) return "risk";
+  if (["watch", "stale", "aging", "partial", "unknown"].includes(value)) return "watch";
+  return "clear";
+}
+
+function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlState; workItems: WorkItem[] }) {
+  const runtime = recordRow(state.runtimeLayout);
+  const control = recordRow(state.agentControl);
+  const controlSummary = recordRow(control.summary);
+  const shared = recordRow(state.sharedOperatingLayer);
+  const sharedCounts = recordRow(shared.counts);
+  const machine = recordRow(state.machineHealth);
+  const route = recordRow(state.modelRouter?.lastRoute);
+  const routeAlerts = state.modelRouter?.routeAlerts || [];
+  const activeTasks = workItems.filter((item) => ["working", "waiting", "blocked"].includes(item.state)).slice(0, 4);
+  const openHandoffs = objectRows(shared.openHandoffs).slice(0, 3);
+  const busRows = objectRows(state.agentBus).filter((row) => ["queued", "accepted", "active", "running", "blocked"].includes(String(row.status || "").toLowerCase())).slice(0, 3);
+  const hostRows = Object.entries(machine).filter(([, value]) => value && typeof value === "object");
+  const readyAgents = Number(controlSummary.readyAgents || 0);
+  const totalAgents = Number(controlSummary.totalAgents || state.statuses.length || 4);
+  const support = [
+    {
+      label: "Control Tower runtime",
+      status: runtime.ok === false ? "error" : runtime.status || "ok",
+      detail: runtime.summary || "Port 5174, dashboard JSON, and kiosk capture",
+      meta: runtime.checkedAt ? `Checked ${fmtTime(runtime.checkedAt)}` : "Host-local verification",
+    },
+    {
+      label: "Agent reporting",
+      status: readyAgents < totalAgents ? "watch" : "ok",
+      detail: `${readyAgents || state.statuses.filter(agentIsReady).length}/${totalAgents} lanes ready`,
+      meta: control.statusSource || "Live heartbeats",
+    },
+    {
+      label: "Dedicated hosts",
+      status: hostRows.some(([, value]) => recordRow(value).available === false) ? "attention" : "ok",
+      detail: `${hostRows.length || 2} hosts observed`,
+      meta: hostRows.map(([name]) => name.toUpperCase()).join(" · ") || "Josh 2.0 · J.A.I.N",
+    },
+    {
+      label: "Schedulers",
+      status: state.jobs.some((job) => ["blocked", "error", "failed"].includes(String(job.status).toLowerCase())) ? "attention" : "ok",
+      detail: `${state.jobs.length} surfaced jobs`,
+      meta: "Routine inventory remains collapsed",
+    },
+    {
+      label: "Routing control",
+      status: routeAlerts.length ? "watch" : "ok",
+      detail: route.model || route.provider || "No active route",
+      meta: route.whyChosen || route.reason || state.modelRouter?.summary || "Policy ready",
+    },
+    {
+      label: "Shared work bus",
+      status: Number(sharedCounts.blocked || sharedCounts.attentionHandoffs || 0) ? "attention" : "ok",
+      detail: `${openHandoffs.length} handoff${openHandoffs.length === 1 ? "" : "s"} · ${busRows.length} active bus item${busRows.length === 1 ? "" : "s"}`,
+      meta: "Queues, receipts, and returns",
+    },
+  ];
+  return (
+    <section className="ecosystem-ops-panel" aria-label="Ecosystem operations detail">
+      <header>
+        <div><span>Supporting functions</span><strong>Ecosystem Operations</strong></div>
+        <em>{support.filter((item) => supportTone(item.status) === "clear").length}/{support.length} healthy</em>
+      </header>
+      <div className="ecosystem-support-grid">
+        {support.map((item) => (
+          <article key={item.label} className={`is-${supportTone(item.status)}`}>
+            <span>{item.label}</span>
+            <strong>{missionText(item.detail)}</strong>
+            <p>{missionText(item.meta)}</p>
+          </article>
+        ))}
+      </div>
+      <div className="ecosystem-detail-grid">
+        <article>
+          <header><strong>Task lifecycle</strong><span>{activeTasks.length} active</span></header>
+          {activeTasks.length ? activeTasks.map((item) => {
+            const owner = AGENTS[item.agent_id]?.label || item.agent_id;
+            const status = state.statuses.find((row) => row.agent_id === item.agent_id);
+            return <p key={item.id}><b>{owner}</b><span>{missionText(item.title)} · {workStateLabel(item.state)} · {ageLabel(item.updated_at)}</span><em>{status?.current_tool || status?.model || "Awaiting next tool update"}</em></p>;
+          }) : <p><b>Clear</b><span>No active task claims</span><em>New work will appear with owner, phase, age, and tool.</em></p>}
+        </article>
+        <article>
+          <header><strong>Handoffs</strong><span>{openHandoffs.length + busRows.length} open</span></header>
+          {[...openHandoffs, ...busRows].slice(0, 4).map((row, index) => (
+            <p key={String(row.id || index)}><b>{missionText(row.from || row.owner || row.agent || "Agent bus")}</b><span>{missionText(row.title || row.objective || row.task || "Tracked handoff")}</span><em>{missionText(row.status || "open")} · {row.to ? `to ${missionText(row.to)}` : "receipt tracked"}</em></p>
+          ))}
+          {!openHandoffs.length && !busRows.length ? <p><b>Standing by</b><span>No open handoffs</span><em>Delegations will show send, receipt, execution, and return state.</em></p> : null}
+        </article>
+        <article>
+          <header><strong>Route evidence</strong><span>{route.provider || "policy"}</span></header>
+          <p><b>{missionText(route.model || "No active model")}</b><span>{missionText(route.lane || route.routeLabel || "Routing ladder ready")}</span><em>{missionText(route.whyChosen || route.reason || "No active task currently requires a route")}</em></p>
+          <p><b>Quality</b><span>{state.modelRouter?.routeQualityScore ?? "tracked"} · efficiency {state.modelRouter?.efficiencyScore ?? "tracked"}</span><em>{routeAlerts.length ? missionText(routeAlerts[0]) : "No current routing alerts"}</em></p>
+        </article>
+        <article>
+          <header><strong>Source freshness</strong><span>{state.statuses.length} lanes</span></header>
+          {state.statuses.slice(0, 4).map((row) => (
+            <p key={row.agent_id}><b>{AGENTS[row.agent_id]?.label || row.agent_id}</b><span>{ageLabel(row.updated_at)} · {row.source || "Live Work Board"}</span><em>{row.model ? missionText(row.model) : missionText(row.current_tool || "heartbeat")}</em></p>
+          ))}
+        </article>
+      </div>
     </section>
   );
 }

@@ -10,6 +10,30 @@ An unqualified user-facing reference to the dashboard should say "Control Tower"
 - Current build: `npm run build`
 - Current dev server: `npm run dev`
 
+## Control Tower Change Control
+
+Control Tower source edits require an exclusive change lease. This rule applies to JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.
+
+Before editing canonical source, run:
+
+```bash
+python3 scripts/control_tower_change_guard.py begin --agent <agent> --objective "<specific change>"
+```
+
+- The command must report a clean canonical source tree and return a lease token.
+- Do not edit if another agent owns the lease. Handoff or wait for that lease to finish.
+- Edit only `v2-react/` and explicitly named supporting scripts. Never hand-edit `dist/`, legacy `index.html`, or legacy `v2/`.
+- Preserve the returned backup path and token for verification or rollback.
+- Runtime JSON, logs, and generated build artifacts are not source ownership signals.
+
+Before reporting completion, run:
+
+```bash
+python3 scripts/control_tower_change_guard.py finish --token <token>
+```
+
+This performs the canonical build, data regeneration, regression checks, and host-local kiosk layout screenshot before releasing the lease. If validation fails, keep the lease, repair the issue, and verify again. Use `abort --token <token>` to restore the pre-edit source backup. Production pushes and merges still require Josh approval unless the task explicitly includes that approval.
+
 Legacy surfaces are not the default:
 
 - `index.html` is the legacy static dashboard and rollback/debug surface.
@@ -175,26 +199,17 @@ Keep the two paths separate in Brain Feed, work cards, and final reports.
 
 For Josh 2.0 and JAIMES Telegram tasks:
 
-- Immediate acknowledgement must be exactly short: `recieved, determining objective`.
-- The fast-ack watcher owns that acknowledgement. The model/agent must not output only that acknowledgement or stop after it; it must continue to execute the objective and provide a real result.
-- As soon as the objective is known, edit that acknowledgement to `Objective: <objective>`.
-- Objectives must be specific enough for Josh to understand the exact work at a glance: include the target system, the concrete change/check, and the intended outcome. Do not use vague placeholders such as "Sync agent ecosystem state" when the user asked for a specific bug fix, audit, cleanup, or UX change.
-- Do not create a work card until the objective is known. Once known, immediately start exactly one editable work card for the objective. Maintain one consolidated card through the task: show Objective, Progress/Done so far, Decisions, Issues, Next steps, Status, Route, Using, and Updated. Do not fragment long work into multiple tiny live cards; if the transport cannot edit, send replacement cards with the same title and current full state.
+- For group/forum work, react `👀` first. For direct work, the fast-ack watcher may acknowledge receipt; the model must continue through the real result.
+- Once the objective is known, make it specific enough to identify the target, concrete change/check, and intended outcome.
+- Do not create a work card until the objective is known. For multi-step work, use exactly one editable card with Model, Path, status, Objective, Current step, and Progress. Do not fragment it into tiny cards.
 - If no new tool/model event is visible for a longer-running task, update the card with a short "still working" heartbeat instead of letting the card look frozen.
 - Publish Brain Feed under the agent that received the Telegram task. If the task was in Josh 2.0 Telegram, publish as `--agent josh2`; if it was in JAIMES Telegram, publish as `--agent jaimes`.
 - Do not show routing/model buttons by default. Only show routing buttons when it is useful for Josh to steer the objective toward a specific model or agent.
-- Do not send the final Telegram template until all local/tool work is complete, or until there is a blocker that needs Josh's attention or approval. After sending the final template, do not keep running follow-up cleanup that can generate more Telegram cards; finish cleanup first, then send the final.
-- The final Telegram message must be a separate catch-up summary after the card, using this exact structure with bold headers:
-  - `Model:` as the first line, showing the model used for the turn.
-  - Put each bold section header on its own line, then put the section content on the next line. Do not compress sections into `Header: sentence` blocks.
-  - `Complete:` then `Yes` or `No` plus the specific objective in plain language.
-  - `What was done:` with 3-5 tight user-facing bullets that explain the outcome and verification, not internal implementation trivia.
-  - `Issues:` with issue bullets, or `n/a`.
-  - `Appropriate next steps:` with the next useful action, or `No action needed.`
-  - `Approval needed:` with one approval bullet per issue when approval is needed, or `n/a`.
-  - Keep each bullet short enough for Telegram mobile. Avoid long inline code/progress strings in final summaries; describe the outcome in plain English unless the exact string is the point.
-- After the final message, show buttons only if they map directly to real mitigation/approval steps in `Approval needed:`. Never create approval buttons for `n/a`, `Context`, status metadata, or routine no-action summaries.
-- Do not end a non-trivial Telegram task with a freeform paragraph when a work card was used.
+- Complete the live work card after local/tool work is finished or a blocker needs Josh, then send one separate final summary card. Do not send a second native completion message.
+- Start every native reply and work-card model field from verified runtime state. Use the compact format `Model: <provider/model> — <lane>` in native replies.
+- Show buttons only for real approvals or mitigations. Never add routine model-routing, status, or `n/a` controls.
+
+#JAIMES: this section preserves one live card plus one separate completion card; native completion replies remain suppressed.
 
 ## Shared Tooling Preferences
 

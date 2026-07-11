@@ -6,6 +6,8 @@ export type AgentStatus = {
   objective: string;
   detail: string;
   current_tool: string;
+  model?: string;
+  source?: string;
   active: boolean;
   updated_at: string;
   steps: Array<{
@@ -75,6 +77,14 @@ export type MissionControlState = {
   capabilityInventory?: CapabilityInventory;
   capabilityWatch?: CapabilityWatch;
   signalHealth?: SignalHealth;
+  machineHealth?: Record<string, unknown>;
+  runtimeLayout?: Record<string, unknown>;
+  sharedOperatingLayer?: Record<string, unknown>;
+  agentControl?: Record<string, unknown>;
+  agentContextRegistry?: Record<string, unknown>;
+  codingVisibility?: Record<string, unknown>;
+  trackedTasks?: Array<Record<string, unknown>>;
+  agentBus?: Array<Record<string, unknown>>;
   signals: SignalItem[];
 };
 

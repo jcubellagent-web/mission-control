@@ -102,6 +102,7 @@ def check_react_surface() -> None:
         "SignalFeed",
         "agentNeedsFocus",
         "RuntimeCapabilityPanel",
+        "EcosystemOperationsPanel",
     ]
     missing = [needle for needle in required_main if needle not in main_src]
     require(not missing, "React Control Tower missing current surface markers: " + ", ".join(missing))
@@ -113,6 +114,13 @@ def check_react_surface() -> None:
     require("brain-feed.json" in data_src and "dashboard-data.json" in data_src, "React data layer must read Brain Feed and dashboard sidecars")
     require("recordValue" in adapters_src and "arrayValue" in adapters_src, "React data adapters must expose sidecar normalizers")
     require("MissionControlState" in types_src, "React types must expose the Control Tower state contract")
+
+    change_guard = ROOT / "scripts" / "control_tower_change_guard.py"
+    require(change_guard.exists(), "missing Control Tower change-control guard")
+    package = load_json(ROOT / "package.json")
+    package_scripts = package.get("scripts") if isinstance(package.get("scripts"), dict) else {}
+    for command in ("guard:begin", "guard:status", "guard:verify", "guard:finish", "guard:abort"):
+        require(command in package_scripts, f"package.json missing change-control command: {command}")
 
 
 def check_dashboard_shape() -> None:

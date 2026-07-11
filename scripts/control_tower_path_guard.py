@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -51,7 +52,8 @@ def main() -> int:
     forbidden_changes = []
     for path in changed_paths():
         normalized = path.replace("\\", "/")
-        if normalized == "index.html" or normalized.startswith("v2/") or normalized.startswith("dist/"):
+        generated_allowed = os.environ.get("CONTROL_TOWER_ALLOW_GENERATED") == "1"
+        if normalized == "index.html" or normalized.startswith("v2/") or (normalized.startswith("dist/") and not generated_allowed):
             forbidden_changes.append(normalized)
     if forbidden_changes:
         issues.append(
