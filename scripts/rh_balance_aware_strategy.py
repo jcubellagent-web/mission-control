@@ -81,8 +81,18 @@ def account_snapshot() -> dict[str, Any]:
     eth_usd = eth_price()
     cashcat_market = dex_price(CASHCAT)
     cashcat_usd = cashcat * float(cashcat_market.get("price_usd") or 0)
+    manual_positions = []
+    manual_positions_usd = 0.0
+    for row in (load(Path("/Users/jc_agent/reports/rh_manual_strategy_positions.json"), {}).get("positions") or []):
+        if row.get("status") != "OPEN":
+            continue
+        token = str(row.get("token") or "")
+        market = dex_price(token) if token else {}
+        value_usd = float(row.get("token_units") or 0) * float(market.get("price_usd") or 0)
+        manual_positions_usd += value_usd
+        manual_positions.append({"symbol": row.get("symbol"), "token": token, "horizon": row.get("horizon"), "value_usd": value_usd, "market": market})
     liquid = native + weth
-    total = liquid * eth_usd + cashcat_usd
+    total = liquid * eth_usd + cashcat_usd + manual_positions_usd
     reserve = float(load(CONFIG, {}).get("capital_policy", {}).get("native_gas_reserve_eth", 0.005))
     return {
         "wallet": WALLET,
