@@ -18,9 +18,12 @@ Before repeating work or asking for known context, run the host-appropriate comm
 
 Use the returned source, confidence, validity, and status. If a record conflicts with current tool evidence, trust current evidence and propose a correction.
 
-Keep the returned `retrievalId`. After the memory materially affects a decision or result, record one outcome:
+Keep the returned `retrievalId`. After the memory materially affects a decision or result, record one outcome with the same host wrapper used for retrieval:
 
-- Helpful: `memory_registry.py feedback --agent <agent> --retrieval-id <retrieval-id> --memory-id <memory-id> --outcome helpful --reason "<observed benefit>"`
+- Josh 2.0: `python3 mission-control/scripts/memory_registry.py feedback ...`
+- JAIMES/J.A.I.N: `~/scripts/ecosystem_memory.py feedback ...`
+- JOSHeX: run `memory_registry.py feedback ...` through the Josh 2.0 SSH path.
+- Helpful: use `--outcome helpful --reason "<observed benefit>"`.
 - Ignored: use `--outcome ignored` when the result was valid but not used.
 - Harmful: use `--outcome harmful` with the affected `--memory-id` when following it caused a bad result.
 - Corrected: use `--outcome corrected --correction "<verified replacement>"`; this creates a governed candidate and never overwrites durable memory directly.
@@ -46,3 +49,7 @@ Never promote raw model inference directly. Preferences, policy, procedures, sen
 - Outcome history is aggregated into recall quality; raw reasons and memory contents are not displayed in Control Tower.
 
 Do not publish raw memory content to Control Tower. It receives health, counts, retrieval latency/hit rate, review state, and source coverage only.
+
+## Telegram Integration
+
+Inbox and JAIMES Ops must use shared memory before asking Josh to repeat ecosystem context. Retrieval is silent unless provenance or a conflict matters to the answer. Outcome feedback is recorded after the task result, not shown as an approval step unless a policy correction genuinely needs review.
