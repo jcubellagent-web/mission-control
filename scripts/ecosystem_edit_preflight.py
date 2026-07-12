@@ -42,7 +42,17 @@ def main() -> int:
     if args.fetch:
         run(root, "git", "fetch", "origin")
 
-    status = run(root, "git", "status", "--porcelain").splitlines()
+    status_proc = subprocess.run(
+        ("git", "status", "--porcelain"),
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    # Preserve the leading index/worktree status columns. Stripping the output
+    # turns ` M data/...` into `M data/...` and silently drops the first path
+    # character when slicing below.
+    status = status_proc.stdout.splitlines()
     paths = [line[3:] for line in status if len(line) > 3]
     source_changes = [p for p in paths if not p.startswith(RUNTIME_PREFIXES)]
     branch = run(root, "git", "branch", "--show-current")
