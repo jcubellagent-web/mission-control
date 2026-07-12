@@ -2246,7 +2246,7 @@ function FinOpsDashboard({
       <header className="finops-header">
         <div>
           <p>FinOps Dashboard</p>
-          <h2>Subscription baseline, model load, and wallet guardrails</h2>
+          <h2>Provider usage, subscriptions, and wallet</h2>
         </div>
         <div className="finops-actions">
           <span className={`crypto-status ${cryptoStatusClass(freshness.status)}`}><ShieldCheck size={13} />Wallet {freshness.label}</span>

@@ -13958,3 +13958,314 @@ a:focus-visible,
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Control Tower kiosk visibility contract: distance-readable work first, complete FinOps second. */
+@media (min-width: 1361px) and (min-height: 850px) {
+  .app-shell.hero-shell {
+    box-sizing: border-box !important;
+    width: calc(100vw - 16px) !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding: 7px 0 8px !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+  }
+
+  .mission-header {
+    min-height: 68px !important;
+    max-height: 68px !important;
+    padding: 6px 9px !important;
+  }
+
+  .kiosk-pulse-strip {
+    min-height: 72px !important;
+    max-height: 72px !important;
+  }
+
+  .kiosk-grid {
+    min-height: 0 !important;
+    height: calc(100vh - 161px) !important;
+    overflow: hidden !important;
+  }
+
+  .kiosk-grid > .brain-hero-panel,
+  .kiosk-grid > .right-rail {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .brain-hero-panel {
+    grid-template-rows: minmax(0, 57fr) minmax(0, 43fr) !important;
+    gap: 7px !important;
+  }
+
+  .brain-hero,
+  .support-grid,
+  .support-grid > .finops-dashboard {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .brain-hero {
+    grid-template-rows: 55px minmax(0, 1fr) !important;
+    padding: 7px !important;
+  }
+
+  .brain-hero-title {
+    min-height: 55px !important;
+    padding: 7px 11px !important;
+  }
+
+  .brain-hero-title h2 {
+    font-size: 27px !important;
+    line-height: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .brain-agent-stage {
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 25%, 340px) !important;
+    gap: 8px !important;
+    padding: 5px !important;
+    overflow: hidden !important;
+  }
+
+  .brain-hero.is-flight-deck .brain-agent-grid {
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    min-height: 0 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card {
+    grid-template-columns: minmax(142px, 0.24fr) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) 13px !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 8px 11px !important;
+    column-gap: 14px !important;
+    row-gap: 4px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-name-lockup strong {
+    font-size: 18px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-role-badge {
+    max-width: 116px !important;
+    font-size: 8.5px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card header em {
+    font-size: 9px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective {
+    align-self: center !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-text {
+    gap: 5px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-main {
+    max-height: 61px !important;
+    font-size: clamp(25px, 1.55vw, 30px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: 0 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-description {
+    max-height: 37px !important;
+    font-size: clamp(14px, 0.82vw, 16px) !important;
+    line-height: 1.12 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card p {
+    font-size: 10px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-step-trail {
+    height: 9px !important;
+    min-height: 9px !important;
+  }
+
+  .brain-hero.is-flight-deck .system-route-ladder {
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  .brain-hero.is-flight-deck .system-route-ladder header h3 {
+    max-height: 38px !important;
+    font-size: 16px !important;
+  }
+
+  .brain-hero.is-flight-deck .system-route-current {
+    min-height: 36px !important;
+    padding: 5px 7px !important;
+  }
+
+  .brain-hero.is-flight-deck .system-route-steps {
+    grid-template-rows: repeat(6, minmax(27px, 1fr)) !important;
+    gap: 3px !important;
+  }
+
+  .brain-hero.is-flight-deck .system-route-steps li {
+    min-height: 27px !important;
+    padding: 3px 5px !important;
+  }
+
+  #finops-dashboard.finops-dashboard {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 7px 9px !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .finops-header {
+    min-height: 43px !important;
+    max-height: 43px !important;
+    padding-bottom: 5px !important;
+  }
+
+  #finops-dashboard .finops-header h2 {
+    font-size: 20px !important;
+  }
+
+  #finops-dashboard .finops-actions span,
+  #finops-dashboard .finops-actions button {
+    min-height: 25px !important;
+    padding: 4px 7px !important;
+    font-size: 8px !important;
+  }
+
+  #finops-dashboard .finops-body {
+    grid-template-columns: 248px minmax(0, 1fr) !important;
+    gap: 7px !important;
+    height: calc(100% - 48px) !important;
+    min-height: 0 !important;
+  }
+
+  #finops-dashboard .finops-wallet,
+  #finops-dashboard .finops-models {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 6px !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .finops-wallet {
+    grid-template-rows: 58px 70px minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  #finops-dashboard .finops-models {
+    grid-template-rows: 42px 25px 35px minmax(0, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total,
+  #finops-dashboard .finops-wallet-target,
+  #finops-dashboard .finops-trade-ledger {
+    padding: 5px 7px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total strong {
+    font-size: 25px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total p,
+  #finops-dashboard .finops-wallet-target p {
+    font-size: 7px !important;
+    line-height: 1.1 !important;
+  }
+
+  #finops-dashboard .finops-model-summary {
+    gap: 4px !important;
+  }
+
+  #finops-dashboard .finops-model-summary article {
+    min-height: 42px !important;
+    padding: 5px 6px !important;
+  }
+
+  #finops-dashboard .finops-model-summary span {
+    font-size: 7px !important;
+  }
+
+  #finops-dashboard .finops-model-summary strong {
+    font-size: 12px !important;
+  }
+
+  #finops-dashboard .finops-route-strip,
+  #finops-dashboard .finops-usage-band {
+    gap: 4px !important;
+  }
+
+  #finops-dashboard .finops-detail-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(290px, 0.65fr) !important;
+    gap: 6px !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .finops-provider-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(0, 1fr) !important;
+    gap: 4px !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .finops-provider-card {
+    grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+    gap: 3px !important;
+    padding: 5px 6px !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .provider-card-head strong {
+    font-size: 9px !important;
+  }
+
+  #finops-dashboard .provider-card-head em,
+  #finops-dashboard .provider-card-blurb,
+  #finops-dashboard .provider-evidence-line,
+  #finops-dashboard .provider-money-strip,
+  #finops-dashboard .provider-model-list,
+  #finops-dashboard .finops-provider-card footer {
+    display: none !important;
+  }
+
+  #finops-dashboard .provider-limit-list {
+    gap: 2px !important;
+  }
+
+  #finops-dashboard .provider-limit-row {
+    min-height: 14px !important;
+    padding: 1px 3px !important;
+  }
+
+  #finops-dashboard .provider-limit-row span,
+  #finops-dashboard .provider-limit-row em,
+  #finops-dashboard .provider-stat-strip span,
+  #finops-dashboard .provider-stat-strip em {
+    font-size: 6.8px !important;
+  }
+
+  #finops-dashboard .finops-model-ledger,
+  #finops-dashboard .model-ledger-list {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #finops-dashboard .model-ledger-row {
+    min-height: 18px !important;
+    padding: 2px 4px !important;
+  }
+}
