@@ -119,6 +119,34 @@ def parse_activity(text):
     unique={e['event_id']:e for e in out}
     return list(unique.values())
 
+def chainwide_mint_activity(max_pages=3):
+    """Capture recent ERC-721 mints directly from Blockscout, including projects not indexed by OpenSea yet."""
+    rows=[];params={}
+    for _ in range(max_pages):
+        query=urllib.parse.urlencode({'type':'ERC-721',**params})
+        try:data=getj(f'{BLOCK}/token-transfers?{query}',tries=3,timeout=35)
+        except Exception:break
+        rows.extend(data.get('items') or [])
+        params=data.get('next_page_params') or {}
+        if not params:break
+    cutoff=time.time()-1800;mint_rows=[]
+    for x in rows:
+        frm=x.get('from') or {};frm=str(frm.get('hash') if isinstance(frm,dict) else frm or '').lower()
+        if frm!=ZERO:continue
+        try:seen=datetime.fromisoformat(str(x.get('timestamp')).replace('Z','+00:00')).timestamp()
+        except Exception:continue
+        if seen<cutoff:continue
+        token=x.get('token') or {};total=x.get('total') or {};inst=total.get('token_instance') or {};to=x.get('to') or {};to=str(to.get('hash') if isinstance(to,dict) else to or '').lower();contract=str(token.get('address_hash') or '').lower();token_id=str(total.get('token_id') or inst.get('id') or '')
+        if not contract or not token_id:continue
+        mint_rows.append((x,contract,token_id,to,seen))
+    tx_counts=Counter(str(x[0].get('transaction_hash') or '').lower() for x in mint_rows)
+    out=[]
+    for x,contract,token_id,to,seen in mint_rows:
+        h=str(x.get('transaction_hash') or '').lower();detail=tx_detail(h);value=detail.get('value') or 0;unit=(int(value,0) if isinstance(value,str) else int(value))/1e18/max(1,tx_counts[h]);token=x.get('token') or {};collection=token.get('name') or token.get('symbol') or contract[:10]
+        e={'type':'MINT','contract':contract,'token_id':token_id,'collection':collection,'slug':'','price_text':f'{unit:.8f} ETH','price_eth':unit,'from':ZERO,'to':to,'tx_hash':h,'tx_actor':str(detail.get('from') or '').lower(),'age_text':'chain','age_seconds':max(0,int(time.time()-seen))}
+        e['event_id']=f"{h}:{contract}:{token_id}:MINT";out.append(e)
+    return out
+
 def wallet_inventory():
     data=getj(f'{BLOCK}/addresses/{WALLET}/tokens?type=ERC-721',tries=6,timeout=30)
     rows=[]
@@ -375,8 +403,8 @@ def attach_wallet_position(row,owned):
 
 def format_nft_alert(kind: str, row: dict[str, Any]) -> str:
     """Render a mobile-first NFT decision card."""
-    label={'holding_change':'OWNED MOVEMENT','owned_activity':'OWNED COLLECTION','mint_ready':'MINT READY','secondary':'SECONDARY TRACTION'}[kind]
-    status={'holding_change':'VERIFY WALLET MOVEMENT','owned_activity':'MONITOR OWNED EXPOSURE','mint_ready':'GUARDED EXECUTOR ELIGIBLE','secondary':'TRACTION CONFIRMED'}[kind]
+    label={'holding_change':'OWNED MOVEMENT','owned_activity':'OWNED COLLECTION','mint_watch':'EARLY MINT WATCH','mint_ready':'MINT READY','secondary':'SECONDARY TRACTION'}[kind]
+    status={'holding_change':'VERIFY WALLET MOVEMENT','owned_activity':'MONITOR OWNED EXPOSURE','mint_watch':'FREE/CHEAP MINT GAINING TRACTION','mint_ready':'GUARDED EXECUTOR ELIGIBLE','secondary':'TRACTION CONFIRMED'}[kind]
     a=row.get('analytics') or {};s=a.get('scores') or {};m=a.get('market') or {};h=a.get('holders') or {};p=row.get('wallet_position') or {}
     decision=s.get('decision') or status
     action='n/a' if s.get('action_score') is None else f"{float(s['action_score']):.0f}/100"
@@ -411,7 +439,7 @@ def main():
         mint_future=pool.submit(fetch,MINT_ACTIVITY,tries=3,timeout=55)
         sale_future=pool.submit(fetch,SALE_ACTIVITY,tries=3,timeout=55)
         mint_text=mint_future.result();sale_text=sale_future.result()
-    parsed=parse_activity(mint_text)+parse_activity(sale_text)
+    parsed=parse_activity(mint_text)+parse_activity(sale_text)+chainwide_mint_activity()
     events=resolve_event_wallets(list({e['event_id']:e for e in parsed}.values()))
     seen=state.setdefault('seen_events',{});new_events=[e for e in events if e['event_id'] not in seen]
     if new_events:
@@ -419,10 +447,10 @@ def main():
             for e in new_events:f.write(json.dumps({'observed_at':ts,**e},sort_keys=True)+'\n');seen[e['event_id']]=ts
     price=eth_usd();db=update_wallet_db(events,db);collections=group_collections(events,db,price)
     owned_activity=[r for r in collections if r['contract'] in owned and (r['sales_15m']>=3 or r['mints_15m']>=8 or r['legitimacy_score']>=70)]
-    mint_watch=[r for r in collections if r['price_qualified'] and r['mints_15m']>=5]
+    mint_watch=[r for r in collections if r['price_qualified'] and r['mints_15m']>=5 and r['unique_collectors']>=4 and r['wash_risk']<=.35 and r['legitimacy_score']>=55]
     secondary=[r for r in collections if r['sales_15m']>=4 and r['unique_collectors']>=3 and r['wash_risk']<=.25 and r['legitimacy_score']>=60]
     ready=[r for r in collections if r['auto_mint_ready']]
-    alert_rows=holding_changes+owned_activity[:3]+ready[:1]+secondary[:2]
+    alert_rows=holding_changes+owned_activity[:3]+mint_watch[:2]+ready[:1]+secondary[:2]
     analytics_history=state.setdefault('analytics_history',{})
     for row in alert_rows:
         attach_wallet_position(row,owned)
@@ -440,6 +468,7 @@ def main():
     alerts=[]
     for x in holding_changes:alerts.append(('holding_change',x))
     for r in owned_activity[:3]:alerts.append(('owned_activity',r))
+    for r in [x for x in mint_watch if not x['auto_mint_ready']][:2]:alerts.append(('mint_watch',r))
     for r in ready[:1]:alerts.append(('mint_ready',r))
     for r in secondary[:2]:alerts.append(('secondary',r))
     # Cool down collection/category alerts for 30 minutes.
