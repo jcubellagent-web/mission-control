@@ -1,0 +1,111 @@
+{
+  "strategy_id": "rh-balance-aware-tactical-v2",
+  "mode": "SHADOW_CANARY",
+  "wallet": "0xa8Fed22B1DF934370B7E9E0F611a3A894Fc257d8",
+  "goal": "Maximize risk-adjusted upside without emotional sizing, revenge trades, or unvalidated live entries.",
+  "capital_policy": {
+    "position_sizing_basis": "liquid_native_eth_plus_weth_only",
+    "exclude_inventory_from_entry_budget": true,
+    "native_gas_reserve_eth": 0.005,
+    "entry_eth": 0.003,
+    "max_open_positions": 2,
+    "max_open_per_theme": 1,
+    "max_new_exposure_eth": 0.006,
+    "no_average_down": true,
+    "no_size_increase_after_loss": true
+  },
+  "inventory": {
+    "CASHCAT": {
+      "contract": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+      "mode": "PROTECT_RUNNER_NO_ADD",
+      "baseline_price_usd": 0.1729,
+      "baseline_units": 950.4217392707409,
+      "profit_trims": [
+        {"gain_pct": 25, "trim_fraction": 0.15},
+        {"gain_pct": 60, "trim_fraction": 0.20},
+        {"gain_pct": 120, "trim_fraction": 0.25}
+      ],
+      "remaining_runner_fraction": 0.40,
+      "risk_review": {
+        "drawdown_pct": -25,
+        "requires_tape_breakdown": true,
+        "max_defensive_trim_fraction": 0.25
+      },
+      "automatic_signing": false
+    }
+  },
+  "entry_lanes": [
+    {
+      "id": "C_SETTLED_REBOUND",
+      "priority": 1,
+      "market_cap_usd": [50000, 1500000],
+      "edge_percentile_min": 0.90,
+      "holistic_score_min": 90,
+      "coverage_min": 0.85,
+      "reverse_ratio_min": 0.94,
+      "requires_two_confirmations": true,
+      "requires_sellers": true
+    },
+    {
+      "id": "B_WINNER_CONTINUATION",
+      "priority": 2,
+      "market_cap_usd": [300000, 1500000],
+      "edge_percentile_min": 0.92,
+      "holistic_score_min": 92,
+      "coverage_min": 0.89,
+      "reverse_ratio_min": 0.95,
+      "requires_reclaim": true,
+      "requires_sellers": true
+    }
+  ],
+  "hard_blocks": [
+    "shadow_gate_not_ready",
+    "post_gas_expectancy_not_positive",
+    "profit_factor_below_1.30",
+    "p95_drawdown_above_3_entry_units",
+    "winner_concentration_above_50_percent",
+    "stale_signal",
+    "missing_exit_allowance",
+    "roundtrip_impact_above_6_percent",
+    "holder_or_creator_hard_risk",
+    "social_scam_or_contract_confusion"
+  ],
+  "promotion": {
+    "closed_trades_min": 30,
+    "positive_expectancy_probability_min": 0.75,
+    "profit_factor_min": 1.30,
+    "p95_drawdown_entry_units_max": 3.0,
+    "top_winner_contribution_max": 0.50,
+    "archetype_closed_min": 20,
+    "require_manual_activation_approval": true
+  },
+  "exit_policy": {
+    "soft_failure_pct": -12,
+    "hard_invalidation_pct": -22,
+    "tp0": {"gain_pct": 25, "trim_fraction": 0.25},
+    "tp1": {"gain_pct": 60, "trim_fraction": 0.25},
+    "tp2": {"gain_pct": 120, "trim_fraction": 0.25},
+    "runner_fraction": 0.25,
+    "runner_trail_giveback_pct": 35,
+    "stagnation_review_minutes": 75,
+    "thesis_decay_review_minutes": 150
+  },
+  "self_improvement": {
+    "journal_every_trade_and_no_trade": true,
+    "champion_challenger_only": true,
+    "auto_tighten_allowed": true,
+    "auto_loosen_allowed": false,
+    "review_every_closed_trades": 10,
+    "mistake_labels": [
+      "late_entry",
+      "weak_route",
+      "stop_slippage",
+      "missing_sellers",
+      "concentration",
+      "stale_signal",
+      "theme_overfit",
+      "premature_exit",
+      "thesis_decay"
+    ]
+  }
+}
