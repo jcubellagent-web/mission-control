@@ -25,10 +25,11 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 SESSIONS_PATH = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
 DIRECT_SESSION_KEY = "agent:main:telegram:direct:6218150306"
-if str(WORKSPACE / "scripts") not in sys.path:
-    sys.path.insert(0, str(WORKSPACE / "scripts"))
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 
 try:
     from send_josh_reply import API_BASE, TARGET, build_payload  # type: ignore
@@ -36,8 +37,17 @@ except Exception:  # noqa: BLE001 - dry-run and local validation can run without
     API_BASE = ""
     TARGET = ""
 
-    def build_payload(text: str, buttons: list | None, silent: bool = True) -> dict:
-        payload = {"chat_id": TARGET, "text": text, "disable_notification": silent}
+    def build_payload(
+        text: str,
+        buttons: list | None,
+        silent: bool = True,
+        *,
+        chat_id: str | int | None = None,
+        thread_id: str | int | None = None,
+    ) -> dict:
+        payload = {"chat_id": chat_id or TARGET, "text": text, "disable_notification": silent}
+        if thread_id not in {None, ""}:
+            payload["message_thread_id"] = int(thread_id) if str(thread_id).isdigit() else thread_id
         if buttons:
             payload["reply_markup"] = {"inline_keyboard": buttons}
         return payload
