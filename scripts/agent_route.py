@@ -455,10 +455,17 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
-    xai_first = bool(xai_hint and not codex_only and not unsafe_privacy and not needs_approval)
+    xai_enabled = os.environ.get("XAI_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
+    xai_first = bool(xai_hint and xai_enabled and not codex_only and not unsafe_privacy and not needs_approval)
+    if xai_hint and not xai_enabled and not codex_only and not unsafe_privacy and not needs_approval:
+        gemini_first = True
     openrouter_fallback = bool(openrouter_hint and not codex_only and not unsafe_privacy and not needs_approval)
 
     requested_provider, requested_model, requested_reason = explicit_model_request(args)
+    if requested_provider == "xai" and not xai_enabled:
+        requested_provider = "gemini"
+        requested_model = PROVIDER_DEFAULT_MODELS["gemini"]
+        requested_reason = "xAI/Grok disabled while credits are exhausted; using subscription Gemini for no-cost public-web analysis"
     if requested_provider:
         unavailable = explicit_route_unavailable(requested_provider)
         unsafe_specialist = requested_provider in {"gemini", "xai", "openrouter"} and (unsafe_privacy or needs_approval or codex_only)
