@@ -14,6 +14,35 @@
     "no_average_down": true,
     "no_size_increase_after_loss": true
   },
+  "holding_horizons": {
+    "quick_flip": {"duration": "0-6 hours", "target_allocation_pct": 15, "use": "event spikes and immediately executable breakouts"},
+    "short_term": {"duration": "6-48 hours", "target_allocation_pct": 25, "use": "confirmed continuation and catalyst follow-through"},
+    "medium_term": {"duration": "2-7 days", "target_allocation_pct": 35, "use": "validated products, ecosystem traction, and settled rebounds"},
+    "long_term": {"duration": "7-14 days", "target_allocation_pct": 25, "use": "highest-conviction ecosystem leaders only", "absolute_max_days": 14}
+  },
+  "free_mint_lane": {
+    "enabled": true,
+    "max_mint_price_usd": 0.10,
+    "max_total_cost_usd": 0.15,
+    "max_quantity": 1,
+    "require_verified_mint_path": true,
+    "require_contract_and_sellability_checks": true,
+    "require_chain_label": true,
+    "avoid_unlimited_approvals": true,
+    "default_horizon": "0-48 hours",
+    "extend_to_medium_only_on_real_secondary_demand": true,
+    "absolute_max_days": 14
+  },
+  "virtuals_lane": {
+    "enabled": true,
+    "entry_route_required": "verified WETH-VIRTUAL-token route",
+    "minimum_traction_score": 70,
+    "minimum_liquidity_usd": 50000,
+    "maximum_roundtrip_impact_pct": 6,
+    "default_horizon": "2-7 days",
+    "require_product_or_utility_evidence": true,
+    "named_team_absence_adds_risk": true
+  },
   "inventory": {
     "CASHCAT": {
       "contract": "0x020bfc650a365f8bb26819deaabf3e21291018b4",

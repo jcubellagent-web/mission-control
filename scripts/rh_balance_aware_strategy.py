@@ -215,6 +215,11 @@ def main() -> int:
         "live_entry_authorized": False,
         "authorization_reason": "manual activation required after every statistical gate passes" if gate["ready"] else "statistical promotion gate failed",
         "inventory_action": "MONITOR_CASHCAT_NO_ADD_NO_AUTOMATIC_SELL",
+        "portfolio_plan": {
+            "holding_horizons": cfg.get("holding_horizons") or {},
+            "free_mint_lane": cfg.get("free_mint_lane") or {},
+            "virtuals_lane": cfg.get("virtuals_lane") or {},
+        },
         "candidates": candidates,
         "policy": {"signing": False, "broadcast": False, "incremental_api_spend_usd": 0},
     }
