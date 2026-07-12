@@ -31,10 +31,16 @@ def main() -> int:
         found = run(env, "retrieve", "--agent", "jain", "--query", "Acceptance memory ready", "--limit", "2")
         run(env, *common, "--value", "not-ready", "--evidence", "conflict test")
         second = run(env, "review", "--apply-safe")
+        policy = run(env, "propose", "--agent", "josh2", "--type", "procedure", "--subject", "Manual policy", "--predicate", "requires", "--value", "human review", "--owner", "ecosystem", "--visibility", "shared", "--privacy", "dashboard-safe", "--source", "smoke:user-stated", "--confidence", "0.99")
+        third = run(env, "review", "--apply-safe")
+        pending = run(env, "candidates", "--status", "candidate")
+        rejected = run(env, "reject", "--id", policy["id"], "--reviewer", "joshex", "--reason", "smoke cleanup")
         assert first["promoted"] == 1, first
         assert found["results"] and found["results"][0]["value"] == "ready", found
         assert second["disputed"] == 1, second
-    print(json.dumps({"ok": True, "promotion": True, "retrieval": True, "conflictDetection": True}, indent=2))
+        assert third["pending"] == 1 and pending["candidates"], (third, pending)
+        assert rejected["status"] == "rejected", rejected
+    print(json.dumps({"ok": True, "promotion": True, "retrieval": True, "conflictDetection": True, "manualReview": True}, indent=2))
     return 0
 
 

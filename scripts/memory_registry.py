@@ -311,6 +311,66 @@ def review(db: sqlite3.Connection, *, apply_safe: bool) -> dict[str, Any]:
     return report
 
 
+def candidate_rows(db: sqlite3.Connection, status: str = "candidate") -> dict[str, Any]:
+    rows = db.execute(
+        "SELECT * FROM memory_candidates WHERE status = ? ORDER BY proposed_at LIMIT 100",
+        (status,),
+    ).fetchall()
+    return {
+        "status": status,
+        "candidates": [
+            {
+                "id": row["id"], "type": row["memory_type"], "subject": row["subject"],
+                "predicate": row["predicate"], "value": row["object_text"], "owner": row["owner"],
+                "visibility": row["visibility"], "privacy": row["privacy"], "source": row["source_path"],
+                "evidence": row["evidence"], "confidence": row["confidence"], "proposedBy": row["proposed_by"],
+                "proposedAt": row["proposed_at"], "reviewReason": row["review_reason"],
+            }
+            for row in rows
+        ],
+    }
+
+
+def approve_candidate(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
+    row = db.execute("SELECT * FROM memory_candidates WHERE id = ?", (args.id,)).fetchone()
+    if not row or row["status"] not in {"candidate", "disputed"}:
+        raise SystemExit(f"Candidate {args.id} is not pending review.")
+    conflicts = db.execute(
+        "SELECT id FROM memory_records WHERE subject=? AND predicate=? AND status='active' AND object_text!=?",
+        (row["subject"], row["predicate"], row["object_text"]),
+    ).fetchall()
+    conflict_ids = [item["id"] for item in conflicts]
+    if conflict_ids and not args.supersedes:
+        raise SystemExit(f"Candidate conflicts with {', '.join(conflict_ids)}; pass --supersedes <id> after verification.")
+    if args.supersedes and args.supersedes not in conflict_ids:
+        raise SystemExit("--supersedes must identify the active conflicting record.")
+    record_id, _ = upsert_record(
+        db, memory_type=row["memory_type"], subject=row["subject"], predicate=row["predicate"],
+        value=row["object_text"], owner=row["owner"], visibility=row["visibility"], privacy=row["privacy"],
+        source_path=row["source_path"], evidence=row["evidence"] or "", confidence=float(row["confidence"]),
+        supersedes=args.supersedes or "",
+    )
+    if args.supersedes:
+        db.execute("UPDATE memory_records SET status='superseded' WHERE id=?", (args.supersedes,))
+    db.execute(
+        "UPDATE memory_candidates SET status='active',reviewed_at=?,review_reason=? WHERE id=?",
+        (iso(), f"Approved by {args.reviewer}", args.id),
+    )
+    db.commit()
+    return {"id": args.id, "recordId": record_id, "status": "active", "reviewer": args.reviewer, "supersedes": args.supersedes}
+
+
+def reject_candidate(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
+    changed = db.execute(
+        "UPDATE memory_candidates SET status='rejected',reviewed_at=?,review_reason=? WHERE id=? AND status IN ('candidate','disputed')",
+        (iso(), f"Rejected by {args.reviewer}: {args.reason}", args.id),
+    ).rowcount
+    if not changed:
+        raise SystemExit(f"Candidate {args.id} is not pending review.")
+    db.commit()
+    return {"id": args.id, "status": "rejected", "reviewer": args.reviewer, "reason": args.reason}
+
+
 def retrieve(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
     terms = [token.lower() for token in TOKEN_RE.findall(args.query)][:16]
@@ -403,6 +463,16 @@ def main() -> int:
     sub.add_parser("build")
     review_cmd = sub.add_parser("review")
     review_cmd.add_argument("--apply-safe", action="store_true")
+    candidates_cmd = sub.add_parser("candidates")
+    candidates_cmd.add_argument("--status", default="candidate", choices=sorted(ALLOWED_STATUS))
+    approve_cmd = sub.add_parser("approve")
+    approve_cmd.add_argument("--id", required=True)
+    approve_cmd.add_argument("--reviewer", required=True, choices=["joshex", "josh2", "jaimes", "jain", "josh"])
+    approve_cmd.add_argument("--supersedes", default="")
+    reject_cmd = sub.add_parser("reject")
+    reject_cmd.add_argument("--id", required=True)
+    reject_cmd.add_argument("--reviewer", required=True, choices=["joshex", "josh2", "jaimes", "jain", "josh"])
+    reject_cmd.add_argument("--reason", required=True)
     propose_cmd = sub.add_parser("propose")
     propose_cmd.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
     propose_cmd.add_argument("--type", required=True, choices=sorted(ALLOWED_TYPES))
@@ -427,6 +497,9 @@ def main() -> int:
     if args.command == "init": result = {"ok": True, "database": str(DB_PATH)}
     elif args.command == "build": result = build(db)
     elif args.command == "review": result = review(db, apply_safe=args.apply_safe)
+    elif args.command == "candidates": result = candidate_rows(db, args.status)
+    elif args.command == "approve": result = approve_candidate(db, args)
+    elif args.command == "reject": result = reject_candidate(db, args)
     elif args.command == "propose": result = propose(db, args)
     elif args.command == "retrieve": result = retrieve(db, args)
     elif args.command == "status": result = status_payload(db)

@@ -27,6 +27,10 @@ Never promote raw model inference directly. Preferences, policy, procedures, sen
 ## Maintain
 
 - Status: `memory_registry.py status`
+- Review queue: `memory_registry.py candidates --status candidate` and `--status disputed`
+- Approve: `memory_registry.py approve --id <candidate-id> --reviewer <agent>`
+- Supersede a verified conflict: add `--supersedes <active-memory-id>` to approval
+- Reject: `memory_registry.py reject --id <candidate-id> --reviewer <agent> --reason "<reason>"`
 - Rebuild deterministic sources: `memory_registry.py build`
 - Governed review: `memory_registry.py review --apply-safe`
 - Refresh Control Tower sidecar: `memory_registry.py export`
