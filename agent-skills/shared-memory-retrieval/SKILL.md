@@ -18,6 +18,15 @@ Before repeating work or asking for known context, run the host-appropriate comm
 
 Use the returned source, confidence, validity, and status. If a record conflicts with current tool evidence, trust current evidence and propose a correction.
 
+Keep the returned `retrievalId`. After the memory materially affects a decision or result, record one outcome:
+
+- Helpful: `memory_registry.py feedback --agent <agent> --retrieval-id <retrieval-id> --memory-id <memory-id> --outcome helpful --reason "<observed benefit>"`
+- Ignored: use `--outcome ignored` when the result was valid but not used.
+- Harmful: use `--outcome harmful` with the affected `--memory-id` when following it caused a bad result.
+- Corrected: use `--outcome corrected --correction "<verified replacement>"`; this creates a governed candidate and never overwrites durable memory directly.
+
+Record feedback only after a meaningful outcome is known. Do not grade every lookup, infer feedback from silence, or include private task content in the reason.
+
 ## Propose
 
 Use `propose` for a durable fact, decision, preference, procedure, lesson, entity, relationship, or episode. Include a specific subject, predicate, value, source, evidence, owner, visibility, privacy, and confidence.
@@ -34,5 +43,6 @@ Never promote raw model inference directly. Preferences, policy, procedures, sen
 - Rebuild deterministic sources: `memory_registry.py build`
 - Governed review: `memory_registry.py review --apply-safe`
 - Refresh Control Tower sidecar: `memory_registry.py export`
+- Outcome history is aggregated into recall quality; raw reasons and memory contents are not displayed in Control Tower.
 
 Do not publish raw memory content to Control Tower. It receives health, counts, retrieval latency/hit rate, review state, and source coverage only.

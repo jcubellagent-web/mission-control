@@ -27,6 +27,7 @@ INDEX_PATH = DATA / "agent-semantic-memory-index.json"
 ALLOWED_TYPES = {"fact", "decision", "preference", "procedure", "lesson", "entity", "relationship", "episode"}
 ALLOWED_STATUS = {"candidate", "active", "disputed", "superseded", "expired", "rejected"}
 AUTO_PROMOTE_TYPES = {"fact", "lesson", "entity", "relationship"}
+FEEDBACK_OUTCOMES = {"helpful", "ignored", "corrected", "harmful"}
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{2,}", re.I)
 
 
@@ -116,6 +117,19 @@ def connect() -> sqlite3.Connection:
           memory_ids_json TEXT NOT NULL,
           outcome TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS memory_feedback (
+          id TEXT PRIMARY KEY,
+          time TEXT NOT NULL,
+          agent TEXT NOT NULL,
+          retrieval_id TEXT,
+          memory_id TEXT,
+          outcome TEXT NOT NULL,
+          reason TEXT NOT NULL,
+          correction_candidate_id TEXT,
+          metadata_json TEXT NOT NULL DEFAULT '{}'
+        );
+        CREATE INDEX IF NOT EXISTS memory_feedback_retrieval ON memory_feedback(retrieval_id, time);
+        CREATE INDEX IF NOT EXISTS memory_feedback_memory ON memory_feedback(memory_id, time);
         CREATE TABLE IF NOT EXISTS memory_reviews (
           id TEXT PRIMARY KEY,
           started_at TEXT NOT NULL,
@@ -388,13 +402,14 @@ def retrieve(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]
     visible = [row for row in rows if visibility_allowed(args.agent, row["visibility"], row["privacy"])][: args.limit]
     latency = round((time.perf_counter() - started) * 1000, 2)
     ids = [row["id"] for row in visible]
+    retrieval_id = f"retrieval-{uuid.uuid4().hex[:14]}"
     db.execute(
         "INSERT INTO retrieval_events VALUES (?,?,?,?,?,?,?,?,?,?)",
-        (f"retrieval-{uuid.uuid4().hex[:14]}", iso(), args.agent, args.scope, stable_hash(args.query), len(terms), len(ids), latency, json.dumps(ids), "hit" if ids else "miss"),
+        (retrieval_id, iso(), args.agent, args.scope, stable_hash(args.query), len(terms), len(ids), latency, json.dumps(ids), "hit" if ids else "miss"),
     )
     db.commit()
     return {
-        "query": args.query, "agent": args.agent, "scope": args.scope, "latencyMs": latency,
+        "retrievalId": retrieval_id, "query": args.query, "agent": args.agent, "scope": args.scope, "latencyMs": latency,
         "results": [
             {
                 "id": row["id"], "type": row["memory_type"], "subject": row["subject"],
@@ -407,6 +422,56 @@ def retrieve(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]
     }
 
 
+def record_feedback(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
+    if not args.retrieval_id and not args.memory_id:
+        raise SystemExit("Feedback requires --retrieval-id or --memory-id.")
+    retrieval = None
+    if args.retrieval_id:
+        retrieval = db.execute("SELECT * FROM retrieval_events WHERE id=?", (args.retrieval_id,)).fetchone()
+        if not retrieval:
+            raise SystemExit(f"Unknown retrieval {args.retrieval_id}.")
+    memory = None
+    if args.memory_id:
+        memory = db.execute("SELECT * FROM memory_records WHERE id=?", (args.memory_id,)).fetchone()
+        if not memory:
+            raise SystemExit(f"Unknown memory {args.memory_id}.")
+        if retrieval and args.memory_id not in json.loads(retrieval["memory_ids_json"] or "[]"):
+            raise SystemExit("The memory was not returned by the specified retrieval.")
+    if args.outcome in {"corrected", "harmful"} and not args.memory_id:
+        raise SystemExit(f"{args.outcome} feedback requires --memory-id.")
+    if args.outcome == "corrected" and not args.correction:
+        raise SystemExit("Corrected feedback requires --correction.")
+
+    candidate_id = None
+    if args.outcome == "corrected":
+        proposal = argparse.Namespace(
+            agent=args.agent, type=memory["memory_type"], subject=memory["subject"],
+            predicate=memory["predicate"], value=args.correction, owner=memory["owner"],
+            visibility=memory["visibility"], privacy=memory["privacy"],
+            source=f"feedback:{args.retrieval_id or args.memory_id}",
+            evidence=f"Outcome correction: {clean_text(args.reason, 600)}", confidence=0.95,
+        )
+        candidate_id = propose(db, proposal)["id"]
+
+    feedback_id = f"feedback-{uuid.uuid4().hex[:14]}"
+    db.execute(
+        """INSERT INTO memory_feedback(
+          id,time,agent,retrieval_id,memory_id,outcome,reason,correction_candidate_id,metadata_json
+        ) VALUES (?,?,?,?,?,?,?,?,?)""",
+        (
+            feedback_id, iso(), args.agent, args.retrieval_id or None, args.memory_id or None,
+            args.outcome, clean_text(args.reason, 800), candidate_id,
+            json.dumps({"correctionProvided": bool(args.correction)}),
+        ),
+    )
+    db.commit()
+    return {
+        "id": feedback_id, "status": "recorded", "agent": args.agent, "outcome": args.outcome,
+        "retrievalId": args.retrieval_id or None, "memoryId": args.memory_id or None,
+        "correctionCandidateId": candidate_id,
+    }
+
+
 def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
     counts = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_records GROUP BY status")}
     candidates = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_candidates GROUP BY status")}
@@ -415,11 +480,26 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
                   AVG(latency_ms) AS avg_latency FROM retrieval_events WHERE time >= ?""",
         (iso(utc_now() - dt.timedelta(days=7)),),
     ).fetchone()
+    feedback = db.execute(
+        """SELECT COUNT(*) AS total,
+                  SUM(CASE WHEN outcome='helpful' THEN 1 ELSE 0 END) AS helpful,
+                  SUM(CASE WHEN outcome='ignored' THEN 1 ELSE 0 END) AS ignored,
+                  SUM(CASE WHEN outcome='corrected' THEN 1 ELSE 0 END) AS corrected,
+                  SUM(CASE WHEN outcome='harmful' THEN 1 ELSE 0 END) AS harmful
+           FROM memory_feedback WHERE time >= ?""",
+        (iso(utc_now() - dt.timedelta(days=30)),),
+    ).fetchone()
     last_review = db.execute("SELECT * FROM memory_reviews ORDER BY completed_at DESC LIMIT 1").fetchone()
     total = int(retrieval["total"] or 0)
     hits = int(retrieval["hits"] or 0)
     pending = int(candidates.get("candidate", 0))
     disputed = int(candidates.get("disputed", 0)) + int(counts.get("disputed", 0))
+    feedback_total = int(feedback["total"] or 0)
+    helpful = int(feedback["helpful"] or 0)
+    ignored = int(feedback["ignored"] or 0)
+    corrected = int(feedback["corrected"] or 0)
+    harmful = int(feedback["harmful"] or 0)
+    graded = helpful + corrected + harmful
     status = "attention" if disputed else "watch" if pending else "ok"
     return {
         "updatedAt": iso(), "status": status,
@@ -436,6 +516,9 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
         "retrieval": {
             "queries7d": total, "hits7d": hits, "hitRate": round(hits / total * 100, 1) if total else None,
             "avgLatencyMs": round(float(retrieval["avg_latency"] or 0), 1),
+            "feedback30d": feedback_total, "helpful30d": helpful, "ignored30d": ignored,
+            "corrected30d": corrected, "harmful30d": harmful,
+            "qualityRate": round(helpful / graded * 100, 1) if graded else None,
         },
         "governance": {
             "sourceOfTruth": "Checked-in AGENTS.md, MEMORY.md, and skills",
@@ -490,6 +573,13 @@ def main() -> int:
     retrieve_cmd.add_argument("--query", required=True)
     retrieve_cmd.add_argument("--scope", default="ecosystem")
     retrieve_cmd.add_argument("--limit", type=int, default=6)
+    feedback_cmd = sub.add_parser("feedback")
+    feedback_cmd.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
+    feedback_cmd.add_argument("--outcome", required=True, choices=sorted(FEEDBACK_OUTCOMES))
+    feedback_cmd.add_argument("--retrieval-id", default="")
+    feedback_cmd.add_argument("--memory-id", default="")
+    feedback_cmd.add_argument("--reason", required=True)
+    feedback_cmd.add_argument("--correction", default="")
     sub.add_parser("status")
     sub.add_parser("export")
     args = parser.parse_args()
@@ -502,6 +592,7 @@ def main() -> int:
     elif args.command == "reject": result = reject_candidate(db, args)
     elif args.command == "propose": result = propose(db, args)
     elif args.command == "retrieve": result = retrieve(db, args)
+    elif args.command == "feedback": result = record_feedback(db, args)
     elif args.command == "status": result = status_payload(db)
     else: result = export_status(db)
     if args.command not in {"retrieve", "status", "export"}:

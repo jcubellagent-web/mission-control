@@ -1381,6 +1381,7 @@ function MemoryOperationsPanel({ state }: { state: MissionControlState }) {
   const access = recordRow(memory.agentAccess);
   const tone = supportTone(memory.status);
   const hitRate = retrieval.hitRate == null ? "Learning" : `${retrieval.hitRate}%`;
+  const qualityRate = retrieval.qualityRate == null ? "Learning" : `${retrieval.qualityRate}%`;
   const agents = Object.entries(access).slice(0, 4);
   return (
     <section className={`memory-ops-panel is-${tone}`} aria-label="Memory operations">
@@ -1392,6 +1393,7 @@ function MemoryOperationsPanel({ state }: { state: MissionControlState }) {
         <article><span>Durable records</span><strong>{registry.active ?? 0}</strong><p>{registry.sources ?? 0} governed sources</p></article>
         <article><span>Review queue</span><strong>{review.pending ?? 0}</strong><p>{review.disputed ?? 0} conflict{Number(review.disputed || 0) === 1 ? "" : "s"}</p></article>
         <article><span>Recall hit rate</span><strong>{hitRate}</strong><p>{retrieval.queries7d ?? 0} queries in 7 days</p></article>
+        <article><span>Recall quality</span><strong>{qualityRate}</strong><p>{retrieval.feedback30d ?? 0} outcomes · {retrieval.corrected30d ?? 0} corrected</p></article>
         <article><span>Recall latency</span><strong>{retrieval.avgLatencyMs ?? 0} ms</strong><p>Local hybrid retrieval</p></article>
       </div>
       <div className="memory-ops-detail">

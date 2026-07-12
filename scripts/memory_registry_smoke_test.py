@@ -29,18 +29,24 @@ def main() -> int:
         run(env, *common, "--value", "ready", "--evidence", "smoke test")
         first = run(env, "review", "--apply-safe")
         found = run(env, "retrieve", "--agent", "jain", "--query", "Acceptance memory ready", "--limit", "2")
-        run(env, *common, "--value", "not-ready", "--evidence", "conflict test")
+        memory_id = found["results"][0]["id"]
+        helpful = run(env, "feedback", "--agent", "jain", "--retrieval-id", found["retrievalId"], "--memory-id", memory_id, "--outcome", "helpful", "--reason", "Retrieved the expected governed fact")
+        corrected = run(env, "feedback", "--agent", "jain", "--retrieval-id", found["retrievalId"], "--memory-id", memory_id, "--outcome", "corrected", "--reason", "Tool evidence changed the state", "--correction", "not-ready")
         second = run(env, "review", "--apply-safe")
         policy = run(env, "propose", "--agent", "josh2", "--type", "procedure", "--subject", "Manual policy", "--predicate", "requires", "--value", "human review", "--owner", "ecosystem", "--visibility", "shared", "--privacy", "dashboard-safe", "--source", "smoke:user-stated", "--confidence", "0.99")
         third = run(env, "review", "--apply-safe")
         pending = run(env, "candidates", "--status", "candidate")
         rejected = run(env, "reject", "--id", policy["id"], "--reviewer", "joshex", "--reason", "smoke cleanup")
+        status = run(env, "status")
         assert first["promoted"] == 1, first
         assert found["results"] and found["results"][0]["value"] == "ready", found
+        assert helpful["outcome"] == "helpful", helpful
+        assert corrected["correctionCandidateId"], corrected
         assert second["disputed"] == 1, second
         assert third["pending"] == 1 and pending["candidates"], (third, pending)
         assert rejected["status"] == "rejected", rejected
-    print(json.dumps({"ok": True, "promotion": True, "retrieval": True, "conflictDetection": True, "manualReview": True}, indent=2))
+        assert status["retrieval"]["feedback30d"] == 2 and status["retrieval"]["qualityRate"] == 50.0, status
+    print(json.dumps({"ok": True, "promotion": True, "retrieval": True, "outcomeFeedback": True, "correctionGovernance": True, "conflictDetection": True, "manualReview": True}, indent=2))
     return 0
 
 

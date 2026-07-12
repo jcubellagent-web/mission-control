@@ -190,7 +190,8 @@ body {
 .memory-ops-panel > header span { color: var(--cyan); font-size: var(--fs-xs); font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .memory-ops-panel > header strong { font-size: var(--fs-lg); }
 .memory-ops-panel > header em { overflow: hidden; color: var(--green); font-size: var(--fs-xs); font-style: normal; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
-.memory-ops-metrics, .memory-ops-detail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.memory-ops-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+.memory-ops-detail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
 .memory-ops-metrics article, .memory-ops-detail article { min-width: 0; padding: 8px; border: 1px solid var(--line); background: rgba(7, 25, 41, 0.72); }
 .memory-ops-metrics span { color: var(--muted); font-size: var(--fs-xs); font-weight: 850; text-transform: uppercase; }
 .memory-ops-metrics strong { display: block; margin-top: 3px; color: var(--text); font-size: var(--fs-lg); }
