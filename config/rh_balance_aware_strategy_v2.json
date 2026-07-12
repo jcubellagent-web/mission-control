@@ -7,12 +7,18 @@
     "position_sizing_basis": "liquid_native_eth_plus_weth_only",
     "exclude_inventory_from_entry_budget": true,
     "native_gas_reserve_eth": 0.005,
-    "entry_eth": 0.003,
+    "entry_eth": 0.0075,
     "max_open_positions": 2,
     "max_open_per_theme": 1,
-    "max_new_exposure_eth": 0.006,
+    "max_new_exposure_eth": 0.02,
     "no_average_down": true,
     "no_size_increase_after_loss": true
+  },
+  "sizing_by_horizon_eth": {
+    "quick_flip": 0.005,
+    "short_term": 0.0075,
+    "medium_term": 0.01,
+    "long_term": 0.0125
   },
   "holding_horizons": {
     "quick_flip": {"duration": "0-6 hours", "target_allocation_pct": 15, "use": "event spikes and immediately executable breakouts"},
@@ -48,7 +54,7 @@
       "contract": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
       "mode": "PROTECT_RUNNER_NO_ADD",
       "baseline_price_usd": 0.1729,
-      "baseline_units": 950.4217392707409,
+      "baseline_units": 237.60543481768522,
       "profit_trims": [
         {"gain_pct": 25, "trim_fraction": 0.15},
         {"gain_pct": 60, "trim_fraction": 0.20},
