@@ -190,12 +190,56 @@ def clean_live_text(value: str, fallback: str = "") -> str:
     return " ".join((value or fallback).replace("...", "").replace("…", "").split())
 
 
+def estimate_initial_plan(title: str) -> tuple[int, str]:
+    """Give the first bubble a conservative phase count and ETA range."""
+    text = clean_live_text(title).lower()
+    heavy = ("build", "implement", "deep", "migrate", "deploy", "refactor", "integrate")
+    medium = ("fix", "repair", "audit", "review", "test", "verify", "configure", "update", "change", "switch")
+    if any(word in text for word in heavy):
+        return 4, "~8–15 min"
+    if any(word in text for word in medium):
+        return 3, "~5–10 min"
+    if text.endswith("?") and not any(word in text for word in ("can you", "could you", "please")):
+        return 1, "<2 min"
+    return 2, "~3–6 min"
+
+
 def operator_objective(title: str) -> str:
+    """Convert conversational Telegram text into a short intent statement."""
     text = clean_live_text(title, "Handle the current Telegram task")
+    text = re.sub(r"^\[[A-Za-z]\|[^\]]+\]\s*", "", text).strip()
     lowered = text.lower()
     if lowered in {"latest telegram task received", "determining objective", "handle latest telegram task"}:
         return "Work out the real objective and start the right check."
-    return compact(text, limit=90)
+
+    #JAIMES: Objective cards summarize intent; never display a clipped copy of
+    # the Telegram prompt or its conversational/courtesy preamble.
+    if "button" in lowered and ("approval" in lowered or "steps" in lowered):
+        return "Check whether the unexpected approval button was intentional."
+    if "card" in lowered and "summar" in lowered and "objective" in lowered:
+        return "Make objective cards summarize intent instead of quoting prompts."
+    if "alert" in lowered and any(word in lowered for word in ("hard to read", "format", "section")):
+        return "Reformat alerts into clear, easy-to-scan sections."
+    if "market cap" in lowered and any(word in lowered for word in ("bought", "buy", "sold", "sell")):
+        return "Investigate the matching buy and sell market-cap labels."
+
+    # Prefer the sentence containing the actual ask over acknowledgements such
+    # as "much better, thank you" that often precede it.
+    parts = [p.strip(" ,.-") for p in re.split(r"(?<=[.!?])\s+|\n+", text) if p.strip()]
+    request_markers = ("please", "can you", "could you", "would you", "why ", "did you", "fix ", "make ", "change ", "add ", "remove ", "check ", "find ", "build ", "run ", "verify ")
+    candidates = [p for p in parts if any(marker in p.lower() for marker in request_markers)]
+    intent = candidates[-1] if candidates else text
+    intent = re.sub(r"^(?:okay|ok|perfect|great|thanks|thank you|much better)[,! .-]*", "", intent, flags=re.I)
+    intent = re.sub(r"^(?:can|could|would) you\s+", "", intent, flags=re.I)
+    intent = re.sub(r"^please\s+(?:actually\s+)?", "", intent, flags=re.I)
+    intent = re.sub(r"^why\s+(?:does|did|is|are)\s+", "Investigate why ", intent, flags=re.I)
+    intent = re.sub(r"^did you mean to\s+", "Confirm whether to ", intent, flags=re.I)
+    intent = intent.strip(" ?.!,-")
+    if intent:
+        intent = intent[0].upper() + intent[1:]
+        if not intent.endswith("."):
+            intent += "."
+    return compact(intent or "Handle the current Telegram task.", limit=90)
 
 
 def friendly_model_line(model: str) -> str:
@@ -203,6 +247,17 @@ def friendly_model_line(model: str) -> str:
     lower = text.lower()
     if not text:
         return "JAIMES"
+    # Preserve an authoritative runtime provider/model identifier. Generic
+    # labels such as "JAIMES / OpenCLAW" hide tier changes and made Terra or
+    # Sol sessions appear to still be GPT-5.5.
+    runtime_match = re.search(
+        r"(?:provider=)?(openai-codex|openai|google-gemini-cli|gemini|xai|grok|openrouter)"
+        r"[/; ,]+(?:model=)?([a-z0-9][a-z0-9._:\-]+)",
+        text,
+        re.I,
+    )
+    if runtime_match:
+        return compact(f"{runtime_match.group(1)}/{runtime_match.group(2)}", limit=90)
     if "gemini" in lower and ("safe summary" in lower or "review" in lower):
         return "JAIMES, with a summary helper if needed"
     if "codex" in lower or "openclaw" in lower:
@@ -376,7 +431,7 @@ def live_line(item: str) -> str:
         return f"🔧 step: {simplify_live_detail(text)}"
     if lower.startswith(("local check | completed", "system check | completed")):
         return f"✅ done: {simplify_live_detail(text)}"
-    if lower.startswith(("running ", "checking ", "tool:")):
+    if lower.startswith(("running ", "checking ", "reading ", "tracing ", "updating ", "loading ", "reloading ", "publishing ", "researching ", "using ", "tool:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("tool:") else text
         return f"🔧 step: {simplify_live_detail(detail)}"
     if lower.startswith(("finished ", "completed checking ", "completed ", "done:")):
@@ -400,8 +455,10 @@ def plain_progress_text(item: str) -> str:
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:
+    source = now or (live_items[-1] if live_items else "")
+    text = plain_progress_text(source)
     if status == "done":
-        return "Finished and verified the result."
+        return text or "Finished and verified the result."
     if status == "failed":
         return "Stopped on an issue that needs attention."
     if status == "paused":
@@ -437,7 +494,7 @@ def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int =
             clean.append(text)
     if not clean:
         clean = [fallback]
-    return [f"- {item}" for item in clean[:limit]]
+    return [f"- {html.escape(item)}" for item in clean[:limit]]
 
 
 def live_lines(items: list[str], *, fallback: str = "waiting: first update", limit: int = 6) -> list[str]:
@@ -470,7 +527,7 @@ def is_complete_status(status: str) -> bool:
     return str(status or "").strip().lower() in COMPLETE_STATUSES
 
 
-def progress_lines(items: list[str], status: str) -> list[str]:
+def progress_lines(items: list[str], status: str, planned_steps: int = 0) -> list[str]:
     clean = []
     for item in items:
         text = live_line(item)
@@ -480,26 +537,27 @@ def progress_lines(items: list[str], status: str) -> list[str]:
     if not clean:
         if complete_status:
             return ["Progress: ██████████ 100% - complete", ""]
-        return ["Progress: ░░░░░░░░░░ 0% - waiting for first update", ""]
+        return ["Progress: ░░░░░░░░░░ 0% - starting", ""]
 
     done_count = sum(1 for line in clean if line.startswith(("✅", "🏁")))
     active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳")))
-    total = max(done_count + active_count, 1)
+    total = max(int(planned_steps or 0), done_count + (1 if active_count else 0), 1)
     if complete_status:
         percent = 100
     elif status == "failed":
         percent = min(95, round((done_count / total) * 100))
-    else:
+    elif done_count:
         percent = min(95, round((done_count / total) * 100))
+    else:
+        percent = 5 if active_count else 0
     filled = max(0, min(10, round(percent / 10)))
     bar = "█" * filled + "░" * (10 - filled)
     if complete_status:
-        complete_count = max(done_count, total)
-        detail = f"{complete_count}/{total} steps complete" if total > 1 else "complete"
+        detail = f"{done_count}/{max(done_count, total)} checkpoints complete" if total > 1 else "complete"
     elif active_count:
-        detail = f"{done_count}/{total} steps complete, {active_count} active/checking"
+        detail = f"{done_count}/{total} checkpoints complete"
     else:
-        detail = f"{done_count}/{total} updates complete"
+        detail = f"{done_count}/{total} checkpoints complete"
     return [f"Progress: {bar} {percent}% - {detail}", ""]
 
 
@@ -513,43 +571,71 @@ def build_completion_summary(
     next_step: str = "",
     blocker: str = "None",
 ) -> str:
-    complete = "Yes" if status == "done" else "No"
-    complete_title = compact(title, fallback="objective", limit=120)
-    complete_detail = f"{complete_title} complete" if complete == "Yes" else f"{complete_title} not complete"
-
+    complete = status == "done"
     steps = list(done or [])
     if now:
         steps.append(now)
     steps = [plain_progress_text(step) for step in steps if plain_progress_text(step)]
-    if len(steps) < 3:
-        steps.append(f"Closed out: {title}")
-
-    issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
+    unique_steps = []
+    for step in steps:
+        if step not in unique_steps:
+            unique_steps.append(step)
+    issues = [] if is_empty_issue(blocker) else (parse_list(blocker) or [blocker])
     next_steps = parse_list(next_step)
     if not next_steps:
-        next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
-    approval_needed = next_steps if issues else ["n/a"]
+        next_steps = ["Approve the next safe step."] if issues else []
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
 
+    def final_lines(items: list[str], fallback: str) -> list[str]:
+        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
+        return [f"- {html.escape(item)}" for item in clean[:5]] or [f"- {fallback}"]
+
+    approval_needed = next_steps if issues else []
     lines = [
-        f"Model: {html.escape(friendly_model_line(model_line))}",
+        f"Model: {html.escape(friendly_model_line(model_line))} | Route: Hermes workhorse | Why: verified task execution",
         "",
-        "<b>Complete:</b>",
-        f"{complete} - {html.escape(complete_detail)}",
+        f"Complete: {'Yes' if complete else 'No'} - {html.escape(compact(title, limit=120))}",
         "",
-        "<b>What was done:</b>",
-        *bullet_lines(steps, fallback=f"Closed out: {title}", limit=5),
+        "What was done:",
+        *final_lines(unique_steps[-5:], f"Closed out: {title}"),
         "",
-        "<b>Issues:</b>",
-        *bullet_lines(issues, fallback="n/a", limit=5),
+        "Issues:",
+        *final_lines(issues, "n/a"),
         "",
-        "<b>Appropriate next steps:</b>",
-        *bullet_lines(next_steps, fallback="No action needed.", limit=5),
+        "Appropriate next steps:",
+        *final_lines(next_steps, "No action needed."),
         "",
-        "<b>Approval needed:</b>",
-        *bullet_lines(approval_needed, fallback="n/a", limit=5),
+        "Approval needed:",
+        *final_lines(approval_needed, "n/a"),
     ]
     return "\n".join(lines)
+
+
+def live_phase(status: str, current: str) -> str:
+    if status == "done":
+        return "Complete"
+    if status == "failed":
+        return "Blocked"
+    if status == "paused":
+        return "Paused"
+    lowered = current.lower()
+    if any(word in lowered for word in ("test", "verify", "canary", "check", "audit")):
+        return "Verification"
+    if any(word in lowered for word in ("patch", "build", "implement", "write", "edit", "apply")):
+        return "Implementation"
+    if any(word in lowered for word in ("research", "inspect", "read", "review", "locate", "diagnos")):
+        return "Investigation"
+    return "Execution"
+
+
+def check_lines(items: list[str], *, fallback: str, limit: int = 4) -> list[str]:
+    clean: list[str] = []
+    for item in items:
+        text = re.sub(r"^[^\w]+(?:done|final|received|objective|model|skill|step)?:?\s*", "", clean_live_text(item), flags=re.I)
+        text = compact(text, limit=120)
+        if text and text not in clean:
+            clean.append(text)
+    return [f"✓ {html.escape(item)}" for item in clean[-limit:]] if clean else [fallback]
 
 
 def build_card(
@@ -563,40 +649,64 @@ def build_card(
     next_step: str = "",
     blocker: str = "none",
     eta: str = "",
+    planned_steps: int = 0,
     updated: str | None = None,
 ) -> str:
     done = done or []
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
     live_items = append_log(done, [now] if now else [])
-    card_title = {
-        "running": "⏳ <b>Live work - in progress</b>",
-        "done": "✅ <b>Work complete</b>",
-        "failed": "⚠️ <b>Work needs attention</b>",
-        "paused": "⏸️ <b>Work paused</b>",
-    }.get(status, f"<b>Live work status: {status}</b>")
-    divider = "────────────────────────"
-    # #JAIMES: keep JAIMES topic cards aligned with the shared compact topic workflow so every forum thread uses one consistent live-card layout.
+    status_line = {
+        "running": "⚙️ <b>JAIMES — Working</b>",
+        "done": "✅ <b>JAIMES — Complete</b>",
+        "failed": "⚠️ <b>JAIMES — Blocked</b>",
+        "paused": "⏸️ <b>JAIMES — Paused</b>",
+    }.get(status, f"<b>JAIMES — {html.escape(status.title())}</b>")
+    current = current_step_text(status, now, live_items)
+    phase = live_phase(status, current)
+    completed = [plain_progress_text(item) for item in done if live_line(item).startswith(("✅", "🏁"))]
+    if not completed:
+        completed = [plain_progress_text(item) for item in done if clean_live_text(item)][-2:]
+    evidence = [
+        plain_progress_text(item) for item in done
+        if any(marker in clean_live_text(item).lower() for marker in ("test", "verified", "passed", "healthy", "built", "deployed", "saved"))
+    ][-3:]
+    blocker_items = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
+    next_items = parse_list(next_step) or default_next_steps(status, bool(blocker_items))
+    progress_raw = progress_lines(live_items, status, planned_steps=planned_steps)[0].replace("Progress:", "").strip()
+    progress = progress_raw.split(" - ", 1)[0] + f" · {phase}"
+
     lines = [
-        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))}",
-        f"🧭 <b>Path:</b> {html.escape(friendly_route_line(route))}",
-        divider,
-        card_title,
-        divider,
-        "📌 <b>Objective:</b>",
-        f"- {html.escape(operator_objective(title))}",
+        status_line,
+        f"🤖 {html.escape(friendly_model_line(model_line))}",
         "",
-        "⚡️ <b>Current step:</b>",
-        f"- {html.escape(current_step_text(status, now, live_items))}",
-        divider,
-        "📈 <b>Progress:</b>",
-        *progress_lines(live_items, status),
-        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=10),
+        "<b>Objective</b>",
+        html.escape(operator_objective(title)),
         "",
-        f"Updated: {updated or now_label()}",
+        "<b>Progress</b>",
+        html.escape(progress),
+        "",
+        "<b>Now</b>",
+        html.escape(current),
+        "",
+        "<b>Completed</b>",
+        *check_lines(completed, fallback="Nothing completed yet", limit=4),
+    ]
+    if evidence:
+        lines += ["", "<b>Evidence</b>", *check_lines(evidence, fallback="", limit=3)]
+    lines += [
+        "",
+        "<b>Blocker</b>",
+        *(plain_bullet_lines(blocker_items, limit=2) if blocker_items else ["None"]),
+        "",
+        "<b>Next</b>",
+        *plain_bullet_lines(next_items, limit=2),
+        "",
+        f"Updated {updated or now_label()}",
     ]
     if eta:
-        lines.append(f"ETA: {compact(eta)}")
-    return "\n".join(lines)
+        lines.insert(-1, f"ETA {html.escape(compact(eta))}")
+    rendered = "\n".join(lines).replace("<b>", "").replace("</b>", "")
+    return f"<pre>{rendered}</pre>"
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
@@ -712,17 +822,18 @@ def edit_objective_message(
     thread_id: str | int | None = None,
 ) -> dict:
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
+    steps, eta = estimate_initial_plan(title)
+    compact_text = "\n".join([
+        f"Model: {friendly_model_line(model_line)}",
+        f"Objective: {operator_objective(title)}",
+        f"Steps: {steps}",
+        f"ETA: {eta}",
+    ])
     payload = {
         "chat_id": chat_id or telegram_target(),
         "message_id": message_id,
-        "text": (
-            f"Model: {friendly_model_line(model_line)}\n\n"
-            "Objective:\n"
-            f"- {operator_objective(title)}\n\n"
-            "Working pattern:\n"
-            "- I’ll update one live work card as tools, skills, and decisions happen.\n"
-            "- I’ll send one final Complete summary when the work is done."
-        ),
+        "text": f"<pre>{html.escape(compact_text)}</pre>",
+        "parse_mode": "HTML",
     }
     if thread_id not in {None, ""}:
         payload["message_thread_id"] = int(thread_id)
@@ -798,7 +909,24 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     existing = cards.get(args.key, {})
     title = args.title or existing.get("title") or args.key
     new_done = parse_list(args.done)
+    previous_current = str(existing.get("current_step") or "").strip()
+    incoming_current = str(args.now or "").strip()
+    # A manual phase transition closes the prior concrete phase. Tool-result
+    # updates already supply an explicit completion and must not double-count.
+    if (
+        status == "running"
+        and incoming_current
+        and previous_current
+        and incoming_current != previous_current
+        and not new_done
+        and not previous_current.lower().startswith(("task received", "still working", "waiting"))
+    ):
+        new_done = [previous_current]
     done = append_log(existing.get("work_log", existing.get("done", [])), new_done)
+    planned_steps = int(existing.get("planned_steps") or estimate_initial_plan(title)[0])
+    render_now = incoming_current
+    if status == "done" and not render_now:
+        render_now = (new_done[-1] if new_done else previous_current) or "Finished and verified the result"
     route = args.route or existing.get("route") or ""
     model = args.model or existing.get("model") or ""
     ack_message_id = args.ack_message_id or existing.get("ack_message_id")
@@ -811,11 +939,12 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         status=status,
         model=model,
         route=route,
-        now=args.now or "",
+        now=render_now,
         done=done,
         next_step=args.next or "",
         blocker=args.blocker or "None",
         eta=args.eta or "",
+        planned_steps=planned_steps,
     )
     buttons = load_buttons(args, status)
     final_text = ""
@@ -824,7 +953,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             title=title,
             status=status,
             model=model,
-            now=args.now or "",
+            now=render_now,
             done=done,
             next_step=args.next or "",
             blocker=args.blocker or "None",
@@ -888,6 +1017,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "done": done,
         "work_log": done,
+        "current_step": render_now,
+        "planned_steps": planned_steps,
         "route": route,
         "model": model,
         "next_step": args.next or existing.get("next_step") or "",

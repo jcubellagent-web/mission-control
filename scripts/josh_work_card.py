@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+from contextlib import contextmanager
+import fcntl
 import html
 import json
 import os
@@ -41,8 +43,10 @@ except Exception:  # noqa: BLE001 - dry-run and local validation can run without
         return payload
 
 STATE_PATH = Path(os.environ.get("JOSH_WORK_CARD_STATE", "memory/josh_work_cards.json"))
+LOCK_PATH = STATE_PATH.with_suffix(STATE_PATH.suffix + ".lock")
 ACK_STATE_PATH = Path(os.environ.get("JOSH_FAST_ACK_STATE", str(Path.home() / ".openclaw" / "telegram" / "fast_ack_state.json")))
 TELEGRAM_COOLDOWN_PATH = Path(os.environ.get("JOSH_TELEGRAM_COOLDOWN_STATE", "memory/josh_telegram_cooldown.json"))
+IMMUTABLE_TERMINAL_STATUSES = {"done", "failed"}
 DEFAULT_BUTTONS = [
     [{"text": "1. Gemini review", "callback_data": "model:gemini_flash"}],
     [{"text": "2. JAIMES workhorse", "callback_data": "route:jaimes"}],
@@ -53,6 +57,7 @@ DEFAULT_BUTTONS = [
     [{"text": "Show model choices", "callback_data": "next:show_models"}],
     [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
+SECTION_SPACER = "⠀"
 
 
 def now_label() -> str:
@@ -76,11 +81,18 @@ def load_json(path: Path, fallback: dict) -> dict:
         return fallback
 
 
-def current_direct_session_model() -> str:
+def current_session_model(chat_id: str = "", thread_id: str = "") -> str:
+    #JAIMES: resolve the exact group-topic session first; never borrow a direct-chat model for a visible card.
     sessions = load_json(SESSIONS_PATH, {})
     if not isinstance(sessions, dict):
         return ""
-    session = sessions.get(DIRECT_SESSION_KEY) or {}
+    normalized_chat = str(chat_id or "").removeprefix("telegram:")
+    session_key = (
+        f"agent:main:telegram:group:{normalized_chat}:topic:{thread_id}"
+        if normalized_chat and thread_id
+        else DIRECT_SESSION_KEY
+    )
+    session = sessions.get(session_key) or {}
     if not isinstance(session, dict):
         return ""
     provider = clean_live_text(str(session.get("modelProvider") or ""))
@@ -88,6 +100,10 @@ def current_direct_session_model() -> str:
     if provider and model:
         return f"{provider}/{model}"
     return model
+
+
+def current_direct_session_model() -> str:
+    return current_session_model()
 
 
 def save_json(path: Path, data: dict) -> None:
@@ -148,6 +164,17 @@ def save_state(state: dict) -> None:
     tmp = STATE_PATH.with_suffix(STATE_PATH.suffix + ".tmp")
     tmp.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     tmp.replace(STATE_PATH)
+
+
+@contextmanager
+def state_lock():
+    LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with LOCK_PATH.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def parse_list(value: str | None) -> list[str]:
@@ -275,7 +302,7 @@ def friendly_route_line(route: str) -> str:
     text = clean_live_text(route)
     lower = text.lower()
     if not text:
-        return "Josh 2.0 direct chat"
+        return "Josh 2.0 Telegram task"
     if "jaimes" in lower:
         return "Josh 2.0 coordinating with JAIMES"
     if "gemini" in lower:
@@ -334,7 +361,7 @@ def describe_shell_command(value: str) -> str:
 def simplify_live_detail(value: str) -> str:
     text = clean_live_text(value)
     lower = text.lower()
-    for prefix in ("completed checking ", "completed ", "finished ", "checking ", "running "):
+    for prefix in ("completed checking ", "completed ", "checking ", "running "):
         if lower.startswith(prefix):
             text = text[len(prefix):].strip()
             lower = text.lower()
@@ -381,6 +408,9 @@ def live_line(item: str) -> str:
         return f"🤖 model: {html.escape(text.split(':', 1)[1].strip())}"
     if lower.startswith("skill selected:"):
         return f"🧭 skill: {html.escape(text.split(':', 1)[1].strip())}"
+    if lower.startswith(("decision:", "decided:", "approved:", "choose ")):
+        detail = text.split(":", 1)[1].strip() if ":" in text else text
+        return f"🧠 decision: {html.escape(simplify_live_detail(detail))}"
     if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
         return f"🔧 tool: {html.escape(simplify_live_detail(text))}"
     if lower.startswith(("local check | completed", "system check | completed")):
@@ -395,12 +425,26 @@ def live_line(item: str) -> str:
         return "🏁 final: summary sent"
     if lower.startswith("still working"):
         return "⏳ working: waiting for the current model or tool step to finish"
-    return f"- {html.escape(compact(text, limit=90))}"
+    return f"📝 update: {html.escape(compact(text, limit=90))}"
 
 
 def is_empty_issue(value: str | None) -> bool:
     text = " ".join((value or "").strip().lower().split())
     return text in {"", "none", "no", "n/a", "na", "not applicable"}
+
+
+def hanging_bullet_lines(item: str, *, width: int = 58) -> list[str]:
+    #JAIMES: Telegram cards use real nonbreaking spaces for hanging indents; Bot API HTML does not reliably render `&nbsp;`.
+    wrapped = textwrap.wrap(
+        item,
+        width=width,
+        break_long_words=False,
+        break_on_hyphens=False,
+    ) or [item]
+    return [
+        f"- {html.escape(wrapped[0])}",
+        *(f"\u00a0\u00a0{html.escape(line)}" for line in wrapped[1:]),
+    ]
 
 
 def bullet_lines(items: list[str], *, fallback: str = "n/a", limit: int = 5) -> list[str]:
@@ -411,7 +455,27 @@ def bullet_lines(items: list[str], *, fallback: str = "n/a", limit: int = 5) -> 
             clean.append(text)
     if not clean:
         clean = [fallback]
-    return [f"- {html.escape(item)}" for item in clean[:limit]]
+    lines = []
+    for item in clean[:limit]:
+        lines.extend(hanging_bullet_lines(item))
+    return lines
+
+
+def numbered_lines(items: list[str], *, fallback: str = "n/a", limit: int = 7) -> list[str]:
+    clean = []
+    for item in items:
+        text = clean_live_text(item)
+        if text and text not in clean:
+            clean.append(text)
+    if not clean:
+        clean = [fallback]
+
+    lines = []
+    for index, item in enumerate(clean[:limit], start=1):
+        wrapped = textwrap.wrap(item, width=54, break_long_words=False, break_on_hyphens=False) or [item]
+        lines.append(f"{index}. {html.escape(wrapped[0])}")
+        lines.extend(f"\u00a0\u00a0\u00a0{html.escape(line)}" for line in wrapped[1:])
+    return lines
 
 
 def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int = 10) -> list[str]:
@@ -432,9 +496,9 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
         if text and text not in clean:
             clean.append(text)
     if not clean:
-        clean = [f"- {html.escape(fallback)}"]
+        clean = [fallback]
     if len(clean) <= limit:
-        return clean
+        return [line for item in clean for line in hanging_bullet_lines(item)]
     earlier = clean[:-limit]
     done_count = sum(1 for line in earlier if line.startswith("✅"))
     check_count = sum(1 for line in earlier if line.startswith("🔧"))
@@ -445,7 +509,11 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
         parts.append(f"{check_count} checks")
     if not parts:
         parts.append(f"{len(earlier)} earlier updates")
-    return [f"Earlier: {html.escape(', '.join(parts))} consolidated so the card stays readable.", "", *clean[-limit:]]
+    summary = f"Earlier: {', '.join(parts)} consolidated so the card stays readable."
+    return [
+        *hanging_bullet_lines(summary),
+        *(line for item in clean[-limit:] for line in hanging_bullet_lines(item)),
+    ]
 
 
 COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
@@ -453,6 +521,52 @@ COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "succ
 
 def is_complete_status(status: str) -> bool:
     return str(status or "").strip().lower() in COMPLETE_STATUSES
+
+
+def progress_phase(items: list[str], status: str) -> tuple[int, str]:
+    if is_complete_status(status):
+        return 100, "complete"
+    if status == "failed":
+        return 90, "blocked near completion"
+    if status == "paused":
+        return 60, "paused"
+    if not items:
+        return 0, "waiting for first update"
+
+    percent = 10
+    detail = "task received"
+    for item in items:
+        text = live_line(item)
+        lower = text.lower()
+        if text.startswith(("📥", "👀")):
+            percent = max(percent, 10)
+            detail = "task received"
+        elif text.startswith(("📌", "🤖")):
+            percent = max(percent, 20)
+            detail = "objective confirmed"
+        elif text.startswith(("🧭", "🧠")):
+            percent = max(percent, 35)
+            detail = "triage and decisions"
+        elif text.startswith(("🔧", "🛠️")):
+            percent = max(percent, 55)
+            detail = "tool work in progress"
+        elif text.startswith("🤝"):
+            percent = max(percent, 65)
+            detail = "delegation in progress"
+        elif text.startswith("✅"):
+            if any(token in lower for token in ("verified", "canary", "passed", "success", "fixed")):
+                percent = max(percent, 85)
+                detail = "verification in progress"
+            else:
+                percent = max(percent, 75)
+                detail = "implementation complete"
+        elif text.startswith("🏁"):
+            percent = max(percent, 95)
+            detail = "wrapping up"
+
+    # Nudge progress forward within the current phase as more distinct updates arrive.
+    percent = min(95, percent + max(0, min(10, len(items) - 1)))
+    return percent, detail
 
 
 def progress_lines(items: list[str], status: str) -> list[str]:
@@ -464,28 +578,11 @@ def progress_lines(items: list[str], status: str) -> list[str]:
     complete_status = is_complete_status(status)
     if not clean:
         if complete_status:
-            return ["Progress: ██████████ 100% - complete", ""]
-        return ["Progress: ░░░░░░░░░░ 0% - waiting for first update", ""]
+            return ["100% complete", ""]
+        return ["0% complete - waiting for first update", ""]
 
-    done_count = sum(1 for line in clean if line.startswith(("✅", "🏁")))
-    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳")))
-    total = max(done_count + active_count, 1)
-    if complete_status:
-        percent = 100
-    elif status == "failed":
-        percent = min(95, round((done_count / total) * 100))
-    else:
-        percent = min(95, round((done_count / total) * 100))
-    filled = max(0, min(10, round(percent / 10)))
-    bar = "█" * filled + "░" * (10 - filled)
-    if complete_status:
-        complete_count = max(done_count, total)
-        detail = f"{complete_count}/{total} steps complete" if total > 1 else "complete"
-    elif active_count:
-        detail = f"{done_count}/{total} steps complete, {active_count} active/checking"
-    else:
-        detail = f"{done_count}/{total} updates complete"
-    return [f"Progress: {bar} {percent}% - {detail}", ""]
+    percent, detail = progress_phase(clean, status)
+    return [f"{percent}% complete - {detail}", ""]
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:
@@ -502,6 +599,25 @@ def current_step_text(status: str, now: str, live_items: list[str]) -> str:
     return default_current_step(status)
 
 
+def status_chip(status: str) -> str:
+    return {
+        "running": "🟡 Working",
+        "done": "🟢 Complete",
+        "failed": "🔴 Needs attention",
+        "paused": "⚪️ Waiting",
+    }.get(status, f"⚪️ {status.title()}")
+
+
+def latest_change_text(status: str, now: str, done: list[str]) -> str:
+    if now:
+        return compact(simplify_live_detail(now), limit=150)
+    if done:
+        return compact(simplify_live_detail(done[-1]), limit=150)
+    if status == "done":
+        return "Marked complete."
+    return "Card created; no new update yet."
+
+
 def build_completion_summary(
     *,
     title: str,
@@ -510,13 +626,14 @@ def build_completion_summary(
     done: list[str] | None = None,
     next_step: str = "",
     blocker: str = "None",
+    model: str = "",
 ) -> str:
     complete = "Yes" if status == "done" else "No"
     complete_title = compact(title, fallback="objective", limit=120)
     complete_detail = f"{complete_title} complete" if complete == "Yes" else f"{complete_title} not complete"
 
     steps = list(done or [])
-    if now:
+    if now and now not in steps:
         steps.append(now)
     if len(steps) < 3:
         steps.append(f"Closed out: {title}")
@@ -525,26 +642,29 @@ def build_completion_summary(
     next_steps = parse_list(next_step)
     if not next_steps:
         next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
-    approval_needed = next_steps if issues else ["n/a"]
-    model_line = os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
+    approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["n/a"]
+    model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or "unverified"
+
+    def final_lines(items: list[str], fallback: str) -> list[str]:
+        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
+        return [f"- {html.escape(item)}" for item in clean[:5]] or [f"- {fallback}"]
 
     lines = [
-        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))} ({html.escape(resolve_auth_path(model_line))})",
+        f"Model: {html.escape(friendly_model_line(model_line))} | Route: {html.escape(resolve_auth_path(model_line))} | Why: verified task execution",
         "",
-        "<b>Complete:</b>",
-        f"{complete} - {html.escape(complete_detail)}",
+        f"Complete: {complete} - {html.escape(complete_detail)}",
         "",
-        "<b>What was done:</b>",
-        *bullet_lines(steps, fallback=f"Closed out: {title}", limit=5),
+        "What was done:",
+        *final_lines(steps, f"Closed out: {title}"),
         "",
-        "<b>Issues:</b>",
-        *bullet_lines(issues, fallback="n/a", limit=5),
+        "Issues:",
+        *final_lines(issues, "n/a"),
         "",
-        "<b>Appropriate next steps:</b>",
-        *bullet_lines(next_steps, fallback="No action needed.", limit=5),
+        "Appropriate next steps:",
+        *final_lines(next_steps, "No action needed."),
         "",
-        "<b>Approval needed:</b>",
-        *bullet_lines(approval_needed, fallback="n/a", limit=5),
+        "Approval needed:",
+        *final_lines(approval_needed, "n/a"),
     ]
     return "\n".join(lines)
 
@@ -564,46 +684,31 @@ def build_card(
 ) -> str:
     done = done or []
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
-    issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
-    next_steps = parse_list(next_step) or default_next_steps(status, bool(issues))
     live_items = append_log(done, [now] if now else [])
     
     card_title = {
-        "running": "⏳ <b>Live work - in progress</b>",
-        "done": "✅ <b>Work complete</b>",
-        "failed": "⚠️ <b>Work needs attention</b>",
-        "paused": "⏸️ <b>Work paused</b>",
-    }.get(status, f"<b>Live work status: {status}</b>")
+        "running": "⏳ Live work - in progress",
+        "done": "✅ Work complete",
+        "failed": "⚠️ Work needs attention",
+        "paused": "⏸️ Work paused",
+    }.get(status, f"Live work status: {status}")
     
-    divider = "────────────────────────"
-    
+    #JAIMES: live cards use the stable six-section mobile layout inside a Telegram code block; progress detail belongs under one shared timeline.
     lines = [
-        f"🤖 <b>Model:</b> {html.escape(friendly_model_line(model_line))} ({html.escape(resolve_auth_path(model_line))})",
-        f"🧭 <b>Path:</b> {html.escape(friendly_route_line(route))}",
-        divider,
+        f"🤖 Model: {friendly_model_line(model_line)} ({resolve_auth_path(model_line)})",
+        f"🧭 Path: {friendly_route_line(route)}",
         card_title,
-        divider,
-        "📌 <b>Objective:</b>",
-        f"- {html.escape(operator_objective(title))}",
+        "📌 Objective:",
+        *hanging_bullet_lines(operator_objective(title)),
         "",
-        "⚡️ <b>Current step:</b>",
-        f"- <code>{html.escape(current_step_text(status, now, live_items))}</code>",
-        divider,
-        "📈 <b>Progress:</b>",
+        "⚡️ Current step:",
+        *hanging_bullet_lines(current_step_text(status, now, live_items)),
+        "",
+        "📈 Progress:",
         *progress_lines(live_items, status),
-        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=10),
-        divider,
-        "⚠️ <b>Issues:</b>",
-        *bullet_lines(issues, fallback="None", limit=4),
-        "",
-        "⏭️ <b>Next:</b>",
-        *bullet_lines(next_steps, fallback="No action needed.", limit=4),
-        divider,
-        f"🕒 <b>Updated:</b> <code>{updated or now_label()}</code>",
+        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=5),
     ]
-    if eta:
-        lines.append(f"⏳ <b>ETA:</b> <code>{html.escape(compact(eta))}</code>")
-    return "\n".join(lines)
+    return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
@@ -777,13 +882,16 @@ def approval_buttons(args: argparse.Namespace) -> list | None:
     steps = parse_list(args.next)
     if not steps:
         return None
-    rows = []
-    for index, step in enumerate(steps[:5], start=1):
-        label = compact(step, limit=42)
-        if label.lower().startswith("approve "):
-            label = label[8:].strip()
-        rows.append([{"text": f"Approve {index}: {label}", "callback_data": f"approve:{args.key}:{index}"}])
-    return rows or None
+    buttons = [
+        {"text": f"Approve {index}", "callback_data": f"approve:{args.key}:{index}"}
+        for index, _ in enumerate(steps[:5], start=1)
+    ]
+    buttons.extend([
+        {"text": "Adjust plan", "callback_data": f"adjust:{args.key}"},
+        {"text": "Cancel task", "callback_data": f"cancel:{args.key}"},
+    ])
+    #JAIMES: terminal controls have explicit labels and remain on the final card so selection never looks detached or ambiguous.
+    return [buttons[index:index + 2] for index in range(0, len(buttons), 2)]
 
 
 def load_buttons(args: argparse.Namespace, status: str) -> list | None:
@@ -801,112 +909,124 @@ def load_buttons(args: argparse.Namespace, status: str) -> list | None:
 
 
 def upsert_card(args: argparse.Namespace, status: str) -> int:
-    state = load_state()
-    cards = state.setdefault("cards", {})
-    existing = cards.get(args.key, {})
-    title = args.title or existing.get("title") or args.key
-    new_done = parse_list(args.done)
-    done = append_log(existing.get("work_log", existing.get("done", [])), new_done)
-    route = args.route or existing.get("route") or ""
-    model = args.model or existing.get("model") or ""
-    ack_message_id = args.ack_message_id or existing.get("ack_message_id")
-    chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("JOSH_TELEGRAM_CHAT_ID")
-    thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("JOSH_TELEGRAM_THREAD_ID")
-    if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        ack_message_id = claim_pending_ack(args.key)
-    text = build_card(
-        title=title,
-        status=status,
-        model=model,
-        route=route,
-        now=args.now or "",
-        done=done,
-        next_step=args.next or "",
-        blocker=args.blocker or "None",
-        eta=args.eta or "",
-    )
-    buttons = load_buttons(args, status)
-    final_text = ""
-    if status in {"done", "failed"}:
-        if not args.no_final_summary:
-            final_text = build_completion_summary(
-                title=title,
-                status=status,
-                now=args.now or "",
-                done=done,
-                next_step=args.next or "",
-                blocker=args.blocker or "None",
-            )
+    with state_lock():
+        state = load_state()
+        cards = state.setdefault("cards", {})
+        existing = cards.get(args.key, {})
+        existing_status = str(existing.get("status") or "")
+        if status == "running" and existing_status in IMMUTABLE_TERMINAL_STATUSES:
+            print(json.dumps({
+                "ok": True,
+                "action": "skipped",
+                "reason": f"stale_running_after_{existing_status}",
+                "key": args.key,
+                "message_id": existing.get("message_id"),
+                "final_message_id": existing.get("final_message_id"),
+            }, indent=2))
+            return 0
 
-    if args.dry_run:
-        print(json.dumps({"ok": True, "dry_run": True, "text": text, "final_text": final_text, "buttons": buttons, "existing": existing}, indent=2))
-        return 0
+        title = args.title or existing.get("title") or args.key
+        new_done = parse_list(args.done)
+        done = append_log(existing.get("work_log", existing.get("done", [])), new_done, [args.now] if args.now else [])
+        route = args.route or existing.get("route") or ""
+        model = args.model or existing.get("model") or ""
+        ack_message_id = args.ack_message_id or existing.get("ack_message_id")
+        chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("JOSH_TELEGRAM_CHAT_ID")
+        thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("JOSH_TELEGRAM_THREAD_ID")
+        model = model or current_session_model(str(chat_id or ""), str(thread_id or "")) or "unverified"
+        if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
+            ack_message_id = claim_pending_ack(args.key)
+        terminal_status = status in {"done", "failed"}
+        #JAIMES: keep the live card visible through completion, then send one distinct final card for its concise outcome.
+        text = build_card(
+            title=title,
+            status=status,
+            model=model,
+            route=route,
+            now=args.now or "",
+            done=done,
+            next_step=args.next or "",
+            blocker=args.blocker or "None",
+            eta=args.eta or "",
+        )
+        buttons = load_buttons(args, status)
+        final_text = build_completion_summary(
+            title=title,
+            status=status,
+            now=args.now or "",
+            done=done,
+            next_step=args.next or "",
+            blocker=args.blocker or "None",
+            model=model,
+        ) if terminal_status and not args.no_final_summary else ""
 
-    card_buttons = buttons if status == "running" else None
-    final_buttons = buttons if status in {"done", "failed"} else None
+        if args.dry_run:
+            print(json.dumps({"ok": True, "dry_run": True, "text": text, "final_text": final_text, "buttons": buttons, "existing": existing}, indent=2))
+            return 0
 
-    if existing.get("message_id"):
-        result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
-        action = "edited"
-    else:
-        result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
-        action = "sent"
+        # Approval controls govern the outcome, so they belong only on the separate final summary card.
+        card_buttons = buttons if not terminal_status else None
 
-    if not result.get("ok"):
-        print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
-        return 1
-
-    message_id = existing.get("message_id")
-    if action == "sent":
-        message_id = result.get("result", {}).get("message_id")
-
-    final_message_id = existing.get("final_message_id")
-    final_action = None
-    if final_text:
-        if final_message_id:
-            final_result = edit_final_summary(final_message_id, final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
-            final_action = "edited"
-            if not final_result.get("ok"):
-                final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
-                final_action = "sent"
+        if existing.get("message_id"):
+            result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
+            action = "edited"
         else:
-            final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
-            final_action = "sent"
-        if not final_result.get("ok"):
-            print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
+            result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
+            action = "sent"
+
+        # A retry can encounter an already-updated live card after a later final-card send failed.
+        # Treat Telegram's idempotent "not modified" response as success so the terminal flow can resume.
+        if not result.get("ok") and "message is not modified" in str(result.get("error", "")).lower():
+            result = {"ok": True, "result": {"message_id": existing.get("message_id")}}
+        if not result.get("ok"):
+            print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
             return 1
-        if final_action == "sent":
-            final_message_id = final_result.get("result", {}).get("message_id")
 
-    approval_message_id = existing.get("approval_message_id")
-    if final_buttons:
-        approval_result = send_card("Approval options:", final_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
-        if approval_result.get("ok"):
-            approval_message_id = approval_result.get("result", {}).get("message_id")
+        message_id = existing.get("message_id")
+        if action == "sent":
+            message_id = result.get("result", {}).get("message_id")
 
-    if ack_message_id and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        edit_objective_message(ack_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
+        final_message_id = existing.get("final_message_id")
+        final_action = None
 
-    cards[args.key] = {
-        "title": title,
-        "message_id": message_id,
-        "ack_message_id": ack_message_id,
-        "final_message_id": final_message_id,
-        "approval_message_id": approval_message_id,
-        "status": status,
-        "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "done": done,
-        "work_log": done,
-        "route": route,
-        "model": model,
-        "chat_id": chat_id,
-        "thread_id": thread_id,
-        "next_step": args.next or existing.get("next_step") or "",
-    }
-    save_state(state)
-    publish_brain_feed(args, status)
-    print(json.dumps({"ok": True, "action": action, "final_action": final_action, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
-    return 0
+        if final_text:
+            if final_message_id:
+                final_result = edit_final_summary(final_message_id, final_text, args.timeout, buttons, chat_id=chat_id, thread_id=thread_id)
+                final_action = "edited"
+            else:
+                final_result = send_final_summary(final_text, args.timeout, buttons, chat_id=chat_id, thread_id=thread_id)
+                final_action = "sent"
+            if not final_result.get("ok"):
+                print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
+                return 1
+            if final_action == "sent":
+                final_message_id = final_result.get("result", {}).get("message_id")
+
+        approval_message_id = None
+
+        if ack_message_id and title and title.lower() not in {"latest telegram task received", "determining objective"}:
+            edit_objective_message(ack_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
+
+        cards[args.key] = {
+            "title": title,
+            "message_id": message_id,
+            "ack_message_id": ack_message_id,
+            "final_message_id": final_message_id,
+            "approval_message_id": approval_message_id,
+            "status": status,
+            "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "done": done,
+            "work_log": done,
+            "route": route,
+            "model": model,
+            "chat_id": chat_id,
+            "thread_id": thread_id,
+            "next_step": args.next or existing.get("next_step") or "",
+        }
+        save_state(state)
+        publish_brain_feed(args, status)
+        print(json.dumps({"ok": True, "action": action, "final_action": final_action, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
+        return 0
 
 
 def main() -> int:
@@ -938,7 +1058,9 @@ def main() -> int:
     parser.add_argument("--routing-buttons", action="store_true", help="Show routing/model buttons on active cards only when steering is useful")
     parser.add_argument("--approval-buttons", action="store_true", help="Show approval buttons on the final summary when issues require approval")
     parser.add_argument("--no-buttons", action="store_true")
-    parser.add_argument("--no-final-summary", action="store_true", help="Update the card status without sending a separate final summary")
+    #JAIMES: default lifecycle preserves the live card and emits one final outcome card; opt out only for deliberately card-only runs.
+    parser.add_argument("--no-final-summary", action="store_true", help="Complete the live card without a separate final summary card")
+    parser.add_argument("--separate-final-summary", action="store_true", help="Compatibility no-op; separate final summary cards are the default")
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
     parser.add_argument("--thread-id", help="Telegram forum topic id override for group-topic routing")
