@@ -39,6 +39,6 @@ def main():
  out={'as_of':datetime.now(timezone.utc).isoformat(),'status':status,'balance_kaleido':balance,'target_kaleido':1.0,'price_native':price,'peak_native':peak,'drawdown_pct':dd,'hype_ok':hype,'liquidity_usd':liq,'volume_1h_usd':v1,'volume_5m_usd':v5,'trades_1h':trades,'checks':checks,'spent_eth':st.get('spent_eth',0)};save(OUT,out)
  ex=load(EXEC,{});buyhash=(ex.get('tx_hashes') or {}).get('buy')
  if buyhash and st.get('last_reported_tx')!=buyhash:
-  print(f"KALEIDO ACCUMULATED | +{float(ex['acquired_kaleido']):.4f} | total {float(ex['balance_kaleido']):.4f}/1.0000 | spent {float(ex['spent_weth']):.5f} WETH | {buyhash}");st['last_reported_tx']=buyhash
+  print(f"```text\nKALEIDO ACCUMULATED | +{float(ex['acquired_kaleido']):.4f} | total {float(ex['balance_kaleido']):.4f}/1.0000 | spent {float(ex['spent_weth']):.5f} WETH | {buyhash}\n```");st['last_reported_tx']=buyhash
  save(STATE,st);return 0
 if __name__=='__main__':raise SystemExit(main())

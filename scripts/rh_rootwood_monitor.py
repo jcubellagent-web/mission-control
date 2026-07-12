@@ -48,6 +48,6 @@ def main():
   if redeem is not None and oldr and abs(redeem/oldr-1)>=.20:alerts.append(f'redemption quote moved {(redeem/oldr-1)*100:+.1f}% to {redeem:.6f} ETH')
   if sec['sales_1h'] and not int((st.get('secondary') or {}).get('sales_1h') or 0):alerts.append(f'first observed secondary sales: {sec["sales_1h"]} in 1h')
  save(STATE,{**out,'milestone':milestone})
- if alerts:print('ROOTWOOD MATERIAL UPDATE\n- '+'\n- '.join(alerts))
+ if alerts:print('```text\nROOTWOOD MATERIAL UPDATE\n- '+'\n- '.join(alerts)+'\n```')
  return 0
 if __name__=='__main__':raise SystemExit(main())

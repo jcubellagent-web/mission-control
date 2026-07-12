@@ -39,6 +39,6 @@ def main():
   if r['action']!='WAIT_FOR_SECONDARY' and st.get(key)!=sig:
    alerts.append(f"NFT SECONDARY EXIT PREP | {r['collection']} #{r['token_id']} | {r['action']} | target {r.get('target_eth') or 0:.5f} ETH | {r['reason']}");st[key]=sig
  STATE.parent.mkdir(parents=True,exist_ok=True);STATE.write_text(json.dumps(st,indent=2))
- if alerts:print('\n'.join(alerts))
+ if alerts:print('```text\n'+'\n'.join(alerts)+'\n```')
  return 0
 if __name__=='__main__':raise SystemExit(main())
