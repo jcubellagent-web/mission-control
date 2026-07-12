@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "updated": "2026-07-12",
+  "identity": {
+    "handle": "AgentJc11443",
+    "url": "https://x.com/AgentJc11443",
+    "mode": "curated-intake",
+    "manual_account_actions_only": true
+  },
+  "policy": {
+    "xai_api": "exhausted-disabled",
+    "grok_subscription": "unavailable-until-health-reset",
+    "logged_in_x_scraping": false,
+    "automated_account_mutations": false,
+    "purchase_credits": false,
+    "auto_recharge": false,
+    "discovery": ["forwarded-x-links", "public-web-search", "primary-source-verification"],
+    "routine_success_delivery": "local-only"
+  },
+  "topic_routes": {
+    "breaking_news": 56,
+    "implementation": 17,
+    "actionable_crypto": 20,
+    "unclear": 1
+  },
+  "categories": [
+    {
+      "id": "ai_agents",
+      "label": "AI, models, and agent tooling",
+      "accounts": ["OpenAI", "AnthropicAI", "GoogleDeepMind", "huggingface", "NousResearch", "LangChainAI"],
+      "search_phrases": ["agent framework release", "model release weights", "tool calling security", "AI agent benchmark"],
+      "topic": 56
+    },
+    {
+      "id": "ecosystem_tools",
+      "label": "OpenClaw, Hermes, Codex, Gemini, and Ollama",
+      "accounts": ["NousResearch", "OpenAI", "GoogleAI", "ollama"],
+      "search_phrases": ["Hermes Agent release", "OpenClaw gateway", "Codex CLI release", "Gemini CLI release", "Ollama release"],
+      "topic": 17
+    },
+    {
+      "id": "crypto_chains",
+      "label": "Crypto, Base, Solana, and Robinhood Chain",
+      "accounts": ["base", "solana", "RobinhoodApp", "coinbase", "phantom"],
+      "search_phrases": ["Robinhood Chain launch", "Base security incident", "Solana outage", "token contract migration", "bridge exploit"],
+      "topic": 20
+    },
+    {
+      "id": "breaking_geo",
+      "label": "Breaking news and geopolitics",
+      "accounts": ["Reuters", "AP", "NATO", "WhiteHouse", "federalreserve"],
+      "search_phrases": ["breaking official statement", "sanctions announcement", "central bank emergency", "cybersecurity incident"],
+      "topic": 56
+    },
+    {
+      "id": "sorare_mlb",
+      "label": "Sorare, MLB, and fantasy sports",
+      "accounts": ["SorareMLB", "MLB", "MLBNetwork", "FanGraphs", "baseball_ref"],
+      "search_phrases": ["Sorare MLB game week", "MLB lineup scratch", "pitcher injury update", "closer role change"],
+      "topic": 19
+    }
+  ],
+  "source_tiers": {
+    "primary": {"score": 0.95, "examples": ["official documentation", "GitHub release", "company blog", "filing", "direct announcement"]},
+    "reputable": {"score": 0.75, "examples": ["Reuters", "AP", "established beat reporter"]},
+    "community": {"score": 0.5, "examples": ["known researcher", "project community account"]},
+    "unknown": {"score": 0.3, "examples": ["unverified account", "anonymous screenshot"]}
+  }
+}

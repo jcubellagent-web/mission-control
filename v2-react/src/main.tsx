@@ -1832,14 +1832,15 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
     {
       id: "xai",
       label: "xAI / Grok",
-      role: "X-native, current-events, social signal, and fast outside-world scans.",
-      whyChosen: "Use when the task benefits from X context, current public signal, or Grok-specific subscription capacity.",
-      lastModelUsed: /xai|grok/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "grok subscription",
+      role: "Grok is disabled while credits are exhausted; X Signal continues through forwarded links, public web, and primary-source verification.",
+      whyChosen: "No-cost X intake routes analysis through Gemini, Ollama, or Codex without logged-in X scraping.",
+      lastModelUsed: "disabled — credits exhausted",
       budgetType: "subscription",
       plan: "X Premium",
       subscriptionMonthlyUsd: 8,
       billingLabel: "$8/mo",
-      status: "ready",
+      billingNote: "Existing subscription baseline only; no incremental API spend, credit purchases, or auto-recharge.",
+      status: "blocked",
     },
     {
       id: "openrouter",
@@ -1982,7 +1983,7 @@ function providerDisplayBlurb(provider: any) {
   if (key === "openai") return "Execution lane for code, tools, auth, private connectors, and final changes.";
   if (key === "gemini") return "Low-cost reading, review, summaries, and judgment escalation.";
   if (key === "ollama") return "Local drafts, compression, and low-risk offline utility.";
-  if (key === "xai") return "X-native signal, current events, and Grok context.";
+  if (key === "xai") return "X Signal operational via forwarded links, public web, and primary verification; Grok disabled.";
   if (key === "openrouter") return "Fallback or specialist reserve when primary lanes are unavailable.";
   const raw = missionText(String(provider?.whyChosen || provider?.role || "Available when route policy selects it."));
   return raw.length > 84 ? `${raw.slice(0, 81).trim()}...` : raw;
