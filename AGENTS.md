@@ -214,6 +214,7 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - For group/forum work, react `👀` first. For direct work, the fast-ack watcher may acknowledge receipt; the model must continue through the real result.
 - Once the objective is known, make it specific enough to identify the target, concrete change/check, and intended outcome.
 - Do not create a work card until the objective is known. For multi-step work, use exactly one editable card with Model, Path, status, Objective, Current step, and Progress. Do not fragment it into tiny cards.
+- Across JAIMES, JOSH 2.0, J.A.I.N, and JOSHeX, render live cards in Telegram HTML `<pre>` blocks at 38 fixed-width columns. Emoji/check rows use three ASCII spaces on continuation lines; plain `- ` rows use two. Pre-wrap server-side and never use proportional-text spacing or nonbreaking spaces as a substitute.
 - If no new tool/model event is visible for a longer-running task, update the card with a short "still working" heartbeat instead of letting the card look frozen.
 - Publish Brain Feed under the agent that received the Telegram task. If the task was in Josh 2.0 Telegram, publish as `--agent josh2`; if it was in JAIMES Telegram, publish as `--agent jaimes`.
 - Do not show routing/model buttons by default. Only show routing buttons when it is useful for Josh to steer the objective toward a specific model or agent.

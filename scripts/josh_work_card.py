@@ -68,6 +68,11 @@ DEFAULT_BUTTONS = [
     [{"text": "Hold / no action", "callback_data": "next:hold"}],
 ]
 SECTION_SPACER = "⠀"
+#JAIMES: every ecosystem live card uses the same Telegram <pre> geometry.
+# Proportional-text spacing is not visually equivalent in fixed-width blocks.
+CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "38")))
+CARD_CONTINUATION_INDENT = "   "
+CARD_BULLET_INDENT = "  "
 
 
 def now_label() -> str:
@@ -410,6 +415,8 @@ def live_line(item: str) -> str:
     lower = text.lower()
     if not text:
         return f"- {html.escape('waiting: first update')}"
+    if text.startswith(("🧭 ", "🧰 ", "⚙️ ", "🧠 ", "🧪 ", "✅ ", "🏁 ", "🔧 ", "⏳ ", "📝 ")):
+        return html.escape(text)
     if lower.startswith("received"):
         return f"📥 received: {html.escape(text.removeprefix('Received').strip() or 'task')}"
     if lower.startswith("objective determined:"):
@@ -443,18 +450,26 @@ def is_empty_issue(value: str | None) -> bool:
     return text in {"", "none", "no", "n/a", "na", "not applicable"}
 
 
-def hanging_bullet_lines(item: str, *, width: int = 58) -> list[str]:
-    #JAIMES: Telegram cards use real nonbreaking spaces for hanging indents; Bot API HTML does not reliably render `&nbsp;`.
-    wrapped = textwrap.wrap(
-        item,
+def hanging_lines(item: str, *, prefix: str = "", width: int = CARD_WRAP_WIDTH) -> list[str]:
+    """Pre-wrap one fixed-width Telegram row with the ecosystem indent policy."""
+    text = clean_live_text(item)
+    first = f"{prefix}{text}"
+    indent = CARD_BULLET_INDENT if prefix == "- " else (" " * len(prefix) if prefix else CARD_CONTINUATION_INDENT)
+    return textwrap.wrap(
+        first,
         width=width,
+        subsequent_indent=indent,
         break_long_words=False,
         break_on_hyphens=False,
-    ) or [item]
-    return [
-        f"- {html.escape(wrapped[0])}",
-        *(f"\u00a0\u00a0{html.escape(line)}" for line in wrapped[1:]),
-    ]
+    ) or [first]
+
+
+def hanging_bullet_lines(item: str, *, width: int = CARD_WRAP_WIDTH) -> list[str]:
+    return [html.escape(line) for line in hanging_lines(item, prefix="- ", width=width)]
+
+
+def hanging_status_lines(item: str, *, width: int = CARD_WRAP_WIDTH) -> list[str]:
+    return [html.escape(line) for line in hanging_lines(html.unescape(item), width=width)]
 
 
 def bullet_lines(items: list[str], *, fallback: str = "n/a", limit: int = 5) -> list[str]:
@@ -482,9 +497,8 @@ def numbered_lines(items: list[str], *, fallback: str = "n/a", limit: int = 7) -
 
     lines = []
     for index, item in enumerate(clean[:limit], start=1):
-        wrapped = textwrap.wrap(item, width=54, break_long_words=False, break_on_hyphens=False) or [item]
-        lines.append(f"{index}. {html.escape(wrapped[0])}")
-        lines.extend(f"\u00a0\u00a0\u00a0{html.escape(line)}" for line in wrapped[1:])
+        prefix = f"{index}. "
+        lines.extend(html.escape(line) for line in hanging_lines(item, prefix=prefix))
     return lines
 
 
@@ -508,7 +522,7 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
     if not clean:
         clean = [fallback]
     if len(clean) <= limit:
-        return [line for item in clean for line in hanging_bullet_lines(item)]
+        return [line for item in clean for line in hanging_status_lines(item)]
     earlier = clean[:-limit]
     done_count = sum(1 for line in earlier if line.startswith("✅"))
     check_count = sum(1 for line in earlier if line.startswith("🔧"))
@@ -521,8 +535,8 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
         parts.append(f"{len(earlier)} earlier updates")
     summary = f"Earlier: {', '.join(parts)} consolidated so the card stays readable."
     return [
-        *hanging_bullet_lines(summary),
-        *(line for item in clean[-limit:] for line in hanging_bullet_lines(item)),
+        *hanging_status_lines(summary),
+        *(line for item in clean[-limit:] for line in hanging_status_lines(item)),
     ]
 
 
@@ -592,7 +606,7 @@ def progress_lines(items: list[str], status: str) -> list[str]:
         return ["0% complete - waiting for first update", ""]
 
     percent, detail = progress_phase(clean, status)
-    return [f"{percent}% complete - {detail}", ""]
+    return [*hanging_status_lines(f"{percent}% complete - {detail}"), ""]
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:
@@ -705,8 +719,8 @@ def build_card(
     
     #JAIMES: live cards use the stable six-section mobile layout inside a Telegram code block; progress detail belongs under one shared timeline.
     lines = [
-        f"🤖 Model: {friendly_model_line(model_line)} ({resolve_auth_path(model_line)})",
-        f"🧭 Path: {friendly_route_line(route)}",
+        *hanging_status_lines(f"🤖 Model: {friendly_model_line(model_line)} ({resolve_auth_path(model_line)})"),
+        *hanging_status_lines(f"🧭 Path: {friendly_route_line(route)}"),
         card_title,
         "📌 Objective:",
         *hanging_bullet_lines(operator_objective(title)),
