@@ -18,7 +18,9 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
-STATE_PATH = Path(os.environ.get("JAIMES_WORK_CARD_STATE", "memory/jaimes_work_cards.json"))
+#JAIMES: one absolute state path prevents completion calls launched from a
+#different cwd from rebuilding the card with only the last "summary sent" row.
+STATE_PATH = Path(os.environ.get("JAIMES_WORK_CARD_STATE", str(ROOT.parent / "memory" / "jaimes_work_cards.json")))
 ACK_STATE_PATH = Path(os.environ.get("JAIMES_FAST_ACK_STATE", str(Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json")))
 ENV_PATHS = [
     HOME / ".hermes" / ".env",
@@ -451,7 +453,7 @@ def live_line(item: str) -> str:
     if lower.startswith(("finished ", "completed checking ", "completed ", "done:")):
         detail = text.split(":", 1)[1].strip() if lower.startswith("done:") else text
         return f"✅ done: {simplify_live_detail(detail)}"
-    if lower.startswith("final response"):
+    if lower in {"summary sent", "final summary sent"} or lower.startswith("final response"):
         return "🏁 final: summary sent"
     if lower.startswith("still working"):
         return "⏳ working: waiting for the current model or tool step to finish"
@@ -652,8 +654,8 @@ def check_lines(items: list[str], *, fallback: str, limit: int = 4) -> list[str]
     return [f"✓ {html.escape(item)}" for item in clean[-limit:]] if clean else [fallback]
 
 
-def activity_lines(items: list[str], *, fallback: str, limit: int = 7) -> list[str]:
-    """Render categorized activity without collapsing it to filenames."""
+def activity_lines(items: list[str], *, fallback: str, limit: int = 12) -> list[str]:
+    """Render cumulative categorized activity while retaining key early choices."""
     clean: list[str] = []
     for item in items:
         text = live_line(item)
@@ -662,7 +664,15 @@ def activity_lines(items: list[str], *, fallback: str, limit: int = 7) -> list[s
         text = compact(text, limit=132)
         if text and text not in clean:
             clean.append(text)
-    return [html.escape(item) for item in clean[-limit:]] if clean else [fallback]
+    if len(clean) > limit:
+        anchors: list[str] = []
+        for prefix in ("🧭", "🧠"):
+            match = next((item for item in clean if item.startswith(prefix)), None)
+            if match and match not in anchors:
+                anchors.append(match)
+        recent = clean[-max(1, limit - len(anchors)):]
+        clean = anchors + [item for item in recent if item not in anchors]
+    return [html.escape(item) for item in clean] if clean else [fallback]
 
 
 def build_card(
@@ -717,7 +727,7 @@ def build_card(
         html.escape(current),
         "",
         "<b>✅ Completed</b>",
-        *activity_lines(completed, fallback="Nothing completed yet", limit=7),
+        *activity_lines(completed, fallback="Nothing completed yet", limit=12),
     ]
     if evidence:
         lines += ["", "<b>🔎 Evidence</b>", *check_lines(evidence, fallback="", limit=3)]

@@ -17,6 +17,11 @@ def load_module():
 card = load_module()
 
 
+def test_default_state_path_is_absolute_and_workspace_scoped():
+    assert card.STATE_PATH.is_absolute()
+    assert str(card.STATE_PATH).endswith("/.openclaw/workspace/memory/jaimes_work_cards.json")
+
+
 def test_ack_message_is_adopted_instead_of_sending_duplicate():
     args = SimpleNamespace(
         key="single-card", title="Fix duplicate cards", model="model", route="route",
@@ -72,3 +77,44 @@ def test_live_card_shows_skills_tools_actions_and_decisions():
         "✅ action:", "✅ verify:", "⏭️ Next",
     ):
         assert expected in text
+
+
+def test_complete_card_keeps_cumulative_major_steps_and_final_marker():
+    steps = [
+        "Skill applied: telegram-task-flow — loaded the workflow",
+        "Decision: preserve cumulative major-step history",
+        "Tool result: search_files — located the completion path",
+        "Action completed: patch — fixed state continuity",
+        "Verification passed: terminal — regression checks",
+        "summary sent",
+    ]
+    text = card.build_card(
+        title="Preserve cumulative completion history",
+        status="done",
+        model="openai-codex/gpt-5.6-sol",
+        now="summary sent",
+        done=steps,
+        next_step="No action needed.",
+        blocker="None",
+    )
+    for expected in (
+        "🧭 skill: telegram-task-flow",
+        "🧠 decision: preserve cumulative major-step history",
+        "✅ tool: search_files",
+        "✅ action: patch",
+        "✅ verify: terminal",
+        "🏁 final: summary sent",
+    ):
+        assert expected in text
+
+
+def test_long_history_keeps_early_skill_and_decision_plus_recent_steps():
+    steps = [
+        "Skill applied: telegram-task-flow — workflow",
+        "Decision: keep the cumulative ledger",
+    ] + [f"Action completed: phase {i} — result" for i in range(1, 16)]
+    lines = card.activity_lines(steps, fallback="none", limit=12)
+    assert any("🧭 skill:" in line for line in lines)
+    assert any("🧠 decision:" in line for line in lines)
+    assert any("phase 15" in line for line in lines)
+    assert len(lines) == 12
