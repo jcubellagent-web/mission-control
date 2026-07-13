@@ -76,3 +76,53 @@ def test_direct_objective_summary_request_still_maps_normally():
     watcher = load_module()
     prompt = "Please make objective cards summarize intent instead of quoting prompts."
     assert watcher.objective_from_prompt(prompt) == "Make objective cards summarize task intent"
+
+
+def _stable_surface_stubs(watcher, monkeypatch):
+    monkeypatch.setattr(watcher, "set_eyes_reaction", lambda *args, **kwargs: True)
+    monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: {})
+    monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: {"id": "telegram-task-flow", "label": "Telegram task flow"})
+    monkeypatch.setattr(watcher, "runtime_route", lambda model: ("JAIMES verified execution", "stable test route"))
+    monkeypatch.setattr(watcher, "work_card_target_args", lambda meta: [])
+    monkeypatch.setattr(watcher, "send_chat_action", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "publish_jaimes", lambda *args, **kwargs: None)
+
+
+def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
+    watcher = load_module()
+    _stable_surface_stubs(watcher, monkeypatch)
+    calls = []
+    monkeypatch.setattr(watcher, "should_start_visible_card", lambda *args, **kwargs: True)
+    monkeypatch.setattr(watcher, "run_cmd", lambda command: calls.append(command) or {"ok": True, "message_id": 444})
+    monkeypatch.setattr(watcher, "send_initial_ack", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("placeholder/objective bubble must not be sent")))
+    monkeypatch.setattr(watcher, "edit_message", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("initial Telegram surface must not be edited")))
+    result = watcher.send_ack(
+        {"platform_message_id": "42", "db_message_id": "7", "ts": "2026-07-13T20:00:00Z", "prompt": "Please stabilize the live card", "run_id": "telegram-message-7"},
+        model="openai-codex/gpt-5.6-sol",
+        state={},
+        meta={"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17"},
+    )
+    assert result["ack_message_id"] == "444"
+    assert len(calls) == 1
+    assert "--ack-message-id" not in calls[0]
+    assert "--separate-message" not in calls[0]
+
+
+def test_non_card_ack_is_sent_once_at_final_objective_text(monkeypatch):
+    watcher = load_module()
+    _stable_surface_stubs(watcher, monkeypatch)
+    sent = []
+    monkeypatch.setattr(watcher, "should_start_visible_card", lambda *args, **kwargs: False)
+    monkeypatch.setattr(watcher, "run_cmd", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("work card must not start")))
+    monkeypatch.setattr(watcher, "send_initial_ack", lambda text, **kwargs: sent.append(text) or {"ok": True, "result": {"message_id": 555}})
+    monkeypatch.setattr(watcher, "edit_message", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("single objective surface must not be edited")))
+    result = watcher.send_ack(
+        {"platform_message_id": "43", "db_message_id": "8", "ts": "2026-07-13T20:00:01Z", "prompt": "Quick status check", "run_id": "telegram-message-8"},
+        model="openai-codex/gpt-5.6-sol",
+        state={},
+        meta={"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17"},
+    )
+    assert result["ack_message_id"] == "555"
+    assert len(sent) == 1
+    assert "confirming model and objective" not in sent[0]
+    assert "Objective" in sent[0]

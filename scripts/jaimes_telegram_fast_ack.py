@@ -1137,32 +1137,10 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         }
     prompt = event.get("prompt", "")
     objective = objective_from_prompt(prompt)
-    draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
-    # Hermes' message table currently omits platform_message_id. The active
-    # Telegram session metadata carries the latest inbound Telegram ID, which is
-    # safe here because the watcher cursor processes only fresh direct turns.
     inbound_message_id = event.get("platform_message_id") or str(((meta or {}).get("origin") or {}).get("message_id") or "")
     reaction_ok = False
     if not dry_run:
         reaction_ok = set_eyes_reaction(inbound_message_id, state, meta=meta)
-    ack_result = {"ok": True, "result": {"message_id": "dry-run-message"}} if dry_run else send_initial_ack("👀 JAIMES — Received\n🤖 confirming model and objective", meta=meta)
-    if not dry_run:
-        record_api_result(state, "sendMessage", ack_result)
-    ack_message_id = str(ack_result.get("result", {}).get("message_id") or "") if ack_result.get("ok") else ""
-    if not dry_run and not ack_message_id:
-        # Do not silently mark this event deduplicated when Telegram did not
-        # confirm the durable acknowledgement.
-        record_api_result(state, "sendMessage", {"ok": False, "error": "No message_id returned by initial acknowledgement"})
-    if not dry_run and ack_message_id:
-        # Fast acknowledgement must not wait for a route subprocess. This is
-        # the active Hermes session model, not a claimed model switch.
-        active_lane, active_reason = runtime_route(model)
-        fast_edit = edit_message(
-            ack_message_id,
-            f"🤖 {model}\n\n👀 Objective\n{objective}\n\nRoute: {active_lane} | Why: {active_reason}",
-            meta=meta,
-        )
-        record_api_result(state, "editMessageText", fast_edit)
 
     route = auto_route_for_prompt(prompt, model or DEFAULT_MODEL)
     skill = skill_for_prompt(prompt)
@@ -1173,39 +1151,58 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     display_route = f"{active_lane} | Why: {active_reason}"
     if skill.get("label"):
         display_route = f"{display_route}; runbook={skill['id']}"
-    if not dry_run and ack_message_id:
+    cards_flag = os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower()
+    start_visible_card = should_start_visible_card(prompt, meta, cards_flag)
+
+    #JAIMES: send the first stable surface once. The previous placeholder ->
+    # objective -> live-card edit chain forced Telegram to remove/redraw the same
+    # bubble several times in two seconds, which looked like cards disappearing.
+    ack_message_id = "dry-run-message" if dry_run else ""
+    if not dry_run and start_visible_card:
+        card_result = run_cmd([
+            "python3",
+            "mission-control/scripts/jaimes_work_card.py",
+            "start",
+            "--key",
+            key,
+            "--title",
+            objective,
+            "--model",
+            display_model,
+            "--route",
+            display_route,
+            "--now",
+            "Objective, model route, and runbook confirmed",
+            "--done",
+            f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
+            "--next",
+            "Work automatically; show buttons only for final approval steps if needed",
+        ] + work_card_target_args(meta))
+        ack_message_id = str(
+            card_result.get("message_id")
+            or (card_result.get("result") or {}).get("message_id")
+            or ""
+        )
+        record_api_result(state, "sendMessage", {
+            "ok": bool(card_result.get("ok") and ack_message_id),
+            "error": card_result.get("error") or "",
+        })
+    elif not dry_run:
+        ack_result = send_initial_ack(
+            f"🤖 {display_model}\n\n👀 Objective\n{objective}",
+            meta=meta,
+        )
+        record_api_result(state, "sendMessage", ack_result)
+        ack_message_id = str(ack_result.get("result", {}).get("message_id") or "") if ack_result.get("ok") else ""
+
+    if not dry_run and not ack_message_id:
+        # Do not silently mark this event deduplicated when Telegram did not
+        # confirm the durable acknowledgement or live card.
+        record_api_result(state, "sendMessage", {"ok": False, "error": "No message_id returned by initial Telegram surface"})
+    if not dry_run:
         send_chat_action(meta=meta)
-        send_message_draft(draft_id, f"Objective: {objective}\nModel: {display_model}", meta=meta)
-        edit_result = edit_message(ack_message_id, f"🤖 {display_model}\n\n👀 Objective\n{objective}", meta=meta)
-        record_api_result(state, "editMessageText", edit_result)
-        # The originating chat/topic is the only valid work-card surface.
-        # Never fall back to Josh's DM for a Control Center topic task.
-        cards_flag = os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower()
-        start_visible_card = should_start_visible_card(prompt, meta, cards_flag)
-        if start_visible_card:
-            run_cmd([
-                "python3",
-                "mission-control/scripts/jaimes_work_card.py",
-                "start",
-                "--key",
-                key,
-                "--title",
-                objective,
-                "--model",
-                display_model,
-                "--route",
-                display_route,
-                "--ack-message-id",
-                ack_message_id,
-                "--separate-message",
-                "--now",
-                "Objective, model route, and runbook confirmed",
-                "--done",
-                f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'direct execution'}|Decision: Apply {skill.get('label') or 'direct verified execution'} while preserving one origin-scoped live card",
-                "--next",
-                "Work automatically; show buttons only for final approval steps if needed",
-            ] + work_card_target_args(meta))
         publish_jaimes(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
+
     return {
         "ok": bool(dry_run or ack_message_id),
         "ack_message_id": ack_message_id,
