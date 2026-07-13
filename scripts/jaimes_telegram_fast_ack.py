@@ -881,26 +881,64 @@ LEADING_REQUEST_RE = re.compile(
 
 def summarize_objective(text: str) -> str:
     clean = " ".join((text or "").split())
-    lowered = clean.lower()
 
-    #JAIMES: Summarize the user's intent before broad routing rules; clipping
-    # the first eight words surfaced courtesy text instead of the actual task.
-    if "button" in lowered and ("approval" in lowered or "steps" in lowered):
-        return "Check the unexpected approval button"
-    if "card" in lowered and "summar" in lowered and "objective" in lowered:
-        return "Make objective cards summarize task intent"
-    if "alert" in lowered and any(word in lowered for word in ("hard to read", "format", "section")):
-        return "Reformat alerts into clear sections"
-    if "market cap" in lowered and any(word in lowered for word in ("bought", "buy", "sold", "sell")):
-        return "Investigate matching trade market-cap labels"
-
-    parts = [p.strip(" ,.-") for p in re.split(r"(?<=[.!?])\s+|\n+", clean) if p.strip()]
+    #JAIMES: objective cards must describe the current request, not a quoted
+    # objective/final-card example pasted below it. Structured card rows are
+    # evidence for the task, never candidate task instructions.
+    embedded_card_row = re.compile(
+        r"^(?:[🎯🤖📊⏱️✅⚠️➡️🔐]\s*)?"
+        r"(?:objective|model|steps?|eta|complete|what was done|issues|"
+        r"appropriate next steps|approval needed|status|progress)\s*(?::|$)",
+        re.I,
+    )
+    eligible_lines: list[str] = []
+    skip_objective_value = False
+    for raw_line in (text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if re.fullmatch(r"(?:🎯\s*)?objective\s*", line, re.I):
+            skip_objective_value = True
+            continue
+        if skip_objective_value:
+            skip_objective_value = False
+            continue
+        if embedded_card_row.match(line) or line.startswith(("```", "- ")):
+            continue
+        eligible_lines.append(line)
+    parts = [
+        p.strip(" ,.-")
+        for p in re.split(r"(?<=[.!?])\s+|\n+", "\n".join(eligible_lines))
+        if p.strip()
+    ]
     request_markers = ("please", "can you", "could you", "would you", "why ", "did you", "fix ", "make ", "change ", "add ", "remove ", "check ", "find ", "build ", "run ", "verify ")
-    candidates = [p for p in parts if any(marker in p.lower() for marker in request_markers)]
+    candidates = [
+        p for p in parts
+        if not embedded_card_row.match(p)
+        and any(marker in p.lower() for marker in request_markers)
+    ]
     intent = candidates[-1] if candidates else clean
     intent = re.sub(r"^(?:okay|ok|perfect|great|thanks|thank you|much better)[,! .-]*", "", intent, flags=re.I)
-
     intent_lower = intent.lower()
+    request_context = " ".join(eligible_lines).lower()
+
+    if "old objective" in request_context and any(
+        marker in request_context for marker in ("current task", "correct objective", "mapping", "mapped")
+    ):
+        return "Fix current-task objective mapping"
+    if "button" in intent_lower and ("approval" in intent_lower or "steps" in intent_lower):
+        return "Check the unexpected approval button"
+    if "card" in intent_lower and "summar" in intent_lower and "objective" in intent_lower:
+        return "Make objective cards summarize task intent"
+    if "final" in intent_lower and "summar" in intent_lower and any(
+        marker in intent_lower for marker in ("code block", "format")
+    ):
+        return "Format final summaries as code blocks"
+    if "alert" in intent_lower and any(word in intent_lower for word in ("hard to read", "format", "section")):
+        return "Reformat alerts into clear sections"
+    if "market cap" in intent_lower and any(word in intent_lower for word in ("bought", "buy", "sold", "sell")):
+        return "Investigate matching trade market-cap labels"
+
     for markers, summary in OBJECTIVE_RULES:
         if any(marker in intent_lower for marker in markers):
             return summary

@@ -46,3 +46,33 @@ def test_compression_child_without_marker_suppresses_copied_prompt(tmp_path, mon
     assert not watcher.internal_replay_prompt(prompt)
     assert watcher.session_has_compaction_marker("child")
     assert watcher.replayed_prompt_from_other_session(event)
+
+
+def test_objective_uses_current_request_not_quoted_old_card():
+    watcher = load_module()
+    prompt = """I think this was a very old objective but you still showed it as if it were live. Please fix and make sure you map the correct objective to the current task.
+
+🎯 Objective
+Make objective cards summarize intent instead of quoting prompts.
+
+Model: openai-codex/gpt-5.6-sol
+Objective: Make objective cards summarize intent instead of quoting prompts.
+Steps: 2
+ETA: ~3–6 min"""
+    assert watcher.objective_from_prompt(prompt) == "Fix current-task objective mapping"
+
+
+def test_quoted_objective_does_not_override_new_formatting_request():
+    watcher = load_module()
+    prompt = """Please turn the final response summary into code block formatting as well.
+
+🎯 Objective
+Make objective cards summarize intent instead of quoting prompts.
+Steps: 2"""
+    assert watcher.objective_from_prompt(prompt) == "Format final summaries as code blocks"
+
+
+def test_direct_objective_summary_request_still_maps_normally():
+    watcher = load_module()
+    prompt = "Please make objective cards summarize intent instead of quoting prompts."
+    assert watcher.objective_from_prompt(prompt) == "Make objective cards summarize task intent"
