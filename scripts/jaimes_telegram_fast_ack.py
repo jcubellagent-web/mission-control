@@ -1181,6 +1181,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         "last_card_update_at": utc_now(),
         "telegram_chat_id": (meta or {}).get("telegram_chat_id"),
         "telegram_thread_id": (meta or {}).get("telegram_thread_id"),
+        "retention": "persistent-edit-only",
     }
 
 
@@ -1583,6 +1584,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "last_progress_at": result.get("last_card_update_at"),
                     "last_card_update_at": result.get("last_card_update_at"),
                     "status": "active",
+                    "retention": str(result.get("retention") or "persistent-edit-only"),
                 }
             sent.append({"event": event_id, "result": result})
         else:

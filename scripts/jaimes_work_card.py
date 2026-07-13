@@ -738,6 +738,11 @@ def build_card(
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
+    #JAIMES: live cards are persistent, edit-only records. Automatic cleanup
+    # must never make a work card disappear; deletion requires an explicit
+    # maintenance override tied to Josh's request.
+    if method == "deleteMessage" and os.environ.get("JAIMES_ALLOW_EXPLICIT_CARD_DELETE") != "1":
+        return {"ok": False, "error": "blocked by persistent live-card retention policy"}
     base = api_base()
     if not base or not telegram_target():
         return {"ok": False, "error": "JAIMES Telegram token or target chat is unavailable"}
@@ -1057,6 +1062,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         "route": route,
         "model": model,
         "next_step": args.next or existing.get("next_step") or "",
+        "retention": "persistent-edit-only",
         "chat_id": chat_id,
         "thread_id": thread_id,
     }

@@ -38,6 +38,16 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     assert edit.call_args.args[0] == "100"
     send.assert_not_called()
     assert saved["cards"]["single-card"]["message_id"] == "100"
+    assert saved["cards"]["single-card"]["retention"] == "persistent-edit-only"
+
+
+def test_live_card_delete_is_blocked_without_explicit_override():
+    with patch.dict(card.os.environ, {"JAIMES_ALLOW_EXPLICIT_CARD_DELETE": "0"}), \
+         patch.object(card.urllib.request, "urlopen") as urlopen:
+        result = card.api_call("deleteMessage", {"chat_id": -1003589561528, "message_id": 100})
+    assert result["ok"] is False
+    assert "retention policy" in result["error"]
+    urlopen.assert_not_called()
 
 
 def test_live_card_shows_skills_tools_actions_and_decisions():
