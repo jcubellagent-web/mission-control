@@ -145,16 +145,34 @@ def test_long_history_keeps_early_skill_and_decision_plus_recent_steps():
     assert len(lines) == 12
 
 
-def test_emoji_rows_use_six_space_hanging_indent():
+def test_emoji_rows_use_code_block_hanging_indent():
     wrapped = card.hanging_wrap(
         "✅ tool: web_search — researching "
         "site:inspect.aisi.org.uk custom eval task datasets and scorers"
     )
     rows = wrapped.splitlines()
     assert rows[0] == "✅ tool: web_search — researching"
-    assert rows[1] == "      site:inspect.aisi.org.uk custom eval"
-    assert all(row.startswith("      ") for row in rows[1:])
+    assert rows[1] == "   site:inspect.aisi.org.uk custom"
+    assert all(row.startswith("   ") for row in rows[1:])
+    assert card.CARD_WRAP_WIDTH == 38
+    assert card.CARD_CONTINUATION_INDENT == "   "
     assert max(map(len, rows)) <= card.CARD_WRAP_WIDTH
+
+
+def test_preformatted_code_block_row_is_not_prefixed_with_bullet():
+    row = "✅ action: terminal — running a bounded system operation"
+    assert card.live_line(row) == row
+    rendered = card.build_card(
+        title="Fix code-block alignment",
+        status="running",
+        model="openai-codex/gpt-5.6-sol",
+        now=row,
+        done=[],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    assert "\n✅ action: terminal — running a bounded\n   system operation\n" in rendered
+    assert "• ✅ action" not in rendered
 
 
 def test_dash_rows_use_two_space_hanging_indent():

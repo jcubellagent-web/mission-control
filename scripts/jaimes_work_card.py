@@ -18,8 +18,11 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
-CARD_WRAP_WIDTH = max(32, int(os.environ.get("JAIMES_CARD_WRAP_WIDTH", "42")))
-CARD_CONTINUATION_INDENT = "      "
+#JAIMES: Telegram <pre> cards use fixed-width glyph cells. Three spaces
+# visually match the emoji/check prefix there; six spaces only matched
+# proportional text and pushed continuation rows too far right.
+CARD_WRAP_WIDTH = max(32, int(os.environ.get("JAIMES_CARD_WRAP_WIDTH", "38")))
+CARD_CONTINUATION_INDENT = "   "
 #JAIMES: one absolute state path prevents completion calls launched from a
 #different cwd from rebuilding the card with only the last "summary sent" row.
 STATE_PATH = Path(os.environ.get("JAIMES_WORK_CARD_STATE", str(ROOT.parent / "memory" / "jaimes_work_cards.json")))
@@ -440,6 +443,10 @@ def live_line(item: str) -> str:
     lower = text.lower()
     if not text:
         return "- waiting: first update"
+    # Already-categorized rows must remain idempotent. Adding a bullet here
+    # shifts fixed-width code-block rows and breaks their hanging indent.
+    if text.startswith(("🧭 ", "🧰 ", "⚙️ ", "🧠 ", "🧪 ", "✅ ", "🏁 ", "🔧 ", "⏳ ")):
+        return text
     if lower.startswith("received"):
         return f"📥 received: {text.removeprefix('Received').strip() or 'task'}"
     if lower.startswith("objective determined:"):
