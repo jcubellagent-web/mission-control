@@ -565,43 +565,58 @@ def short_progress_text(value: str, limit: int = 58) -> str:
 
 
 def summarize_tool_progress(name: str, arguments: dict[str, Any] | None, completed: bool) -> str:
-    """Turn a Hermes tool event into a concrete operator-facing phase."""
+    """Turn a Hermes tool event into a categorized operator-facing activity."""
     args = arguments or {}
     raw = str(name or "tool").split(".")[-1]
     path = str(args.get("path") or args.get("file_path") or "")
     filename = Path(path).name if path else ""
+    category = "Tool"
     if raw == "skill_view":
-        detail = f"Loading the {args.get('name') or 'relevant'} workflow"
+        category, detail = "Skill", f"{args.get('name') or 'relevant workflow'} — workflow guidance"
     elif raw == "read_file":
-        detail = f"Reading {filename or 'the target file'}"
+        detail = f"read_file — inspecting {filename or 'the target file'}"
     elif raw == "search_files":
-        pattern = short_progress_text(str(args.get("pattern") or "target logic"), limit=42)
-        detail = f"Tracing {pattern} in {Path(str(args.get('path') or '.')).name or 'the workspace'}"
+        pattern = short_progress_text(str(args.get("pattern") or "target logic"), limit=38)
+        detail = f"search_files — tracing {pattern}"
     elif raw in {"patch", "write_file"}:
-        detail = f"Updating {filename or 'the implementation'}"
+        category, detail = "Action", f"{raw} — updating {filename or 'the implementation'}"
     elif raw == "todo":
-        detail = "Updating the task checklist"
+        category, detail = "Action", "todo — updating the task checklist"
     elif raw == "terminal":
         command = str(args.get("command") or "")
         lower = command.lower()
-        if "unittest" in lower or "pytest" in lower:
-            detail = "Running live-card regression tests"
+        if "unittest" in lower or "pytest" in lower or "py_compile" in lower:
+            category, detail = "Verification", "terminal — running focused regression checks"
         elif "launchctl" in lower:
-            detail = "Reloading and checking the Telegram watcher"
+            category, detail = "Action", "launchctl — reloading and checking the Telegram watcher"
         elif "jaimes_live_card.py" in lower:
-            detail = "Updating the live Telegram work card"
+            category, detail = "Action", "live-card helper — refreshing this work card"
         elif "jaimes_bf_push.sh" in lower:
-            detail = "Publishing the current phase to Brain Feed"
+            category, detail = "Action", "Brain Feed — publishing the current phase"
+        elif "git " in lower or lower.strip().startswith("git"):
+            category, detail = "Action", "git — validating and syncing the shared source"
+        elif "ssh " in lower or "scp " in lower:
+            detail = "remote shell — checking or syncing the canonical host"
         else:
-            first = command.strip().splitlines()[0] if command.strip() else "system verification"
-            detail = f"Running {short_progress_text(first, limit=58)}"
+            category, detail = "Action", "terminal — running a bounded system operation"
     elif raw in {"web_search", "web_extract", "x_search"}:
-        detail = f"Researching {short_progress_text(str(args.get('query') or (args.get('urls') or ['the source'])[0]), limit=58)}"
+        subject = short_progress_text(str(args.get("query") or (args.get("urls") or ["the source"])[0]), limit=48)
+        detail = f"{raw} — researching {subject}"
+    elif raw in {"memory", "honcho_search", "session_search"}:
+        detail = f"{raw} — checking durable context"
+    elif raw.startswith("browser_"):
+        detail = f"{raw} — inspecting the live page"
     else:
-        detail = f"Using {friendly_tool_name(raw)}"
+        detail = f"{friendly_tool_name(raw)} — executing the current step"
     if completed:
-        return re.sub(r"^(Loading|Reading|Tracing|Updating|Running|Reloading|Publishing|Researching|Using)\b", "Completed", detail, count=1)
-    return detail
+        completed_label = {
+            "Skill": "Skill applied",
+            "Tool": "Tool result",
+            "Action": "Action completed",
+            "Verification": "Verification passed",
+        }[category]
+        return f"{completed_label}: {detail}"
+    return f"{category}: {detail}"
 
 
 def recent_progress_events(session_id: str) -> list[dict[str, str]]:
@@ -1147,7 +1162,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
                 "--now",
                 "Objective, model route, and runbook confirmed",
                 "--done",
-                f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
+                f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'direct execution'}|Decision: Apply {skill.get('label') or 'direct verified execution'} while preserving one origin-scoped live card",
                 "--next",
                 "Work automatically; show buttons only for final approval steps if needed",
             ] + work_card_target_args(meta))

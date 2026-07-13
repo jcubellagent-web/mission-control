@@ -38,3 +38,27 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     assert edit.call_args.args[0] == "100"
     send.assert_not_called()
     assert saved["cards"]["single-card"]["message_id"] == "100"
+
+
+def test_live_card_shows_skills_tools_actions_and_decisions():
+    text = card.build_card(
+        title="Improve live-card transparency",
+        status="running",
+        model="openai-codex/gpt-5.6-sol",
+        now="Tool: search_files — tracing live-card rendering",
+        done=[
+            "Skill applied: telegram-task-flow — workflow guidance",
+            "Decision: preserve one card while increasing operator detail",
+            "Tool result: read_file — inspected the renderer",
+            "Action completed: patch — updated the card format",
+            "Verification passed: terminal — regression checks",
+        ],
+        next_step="Reload and verify the watcher",
+        blocker="None",
+    )
+    for expected in (
+        "🔄 Now", "🧰 tool: search_files", "✅ Completed",
+        "🧭 skill:", "🧠 decision:", "✅ tool:",
+        "✅ action:", "✅ verify:", "⏭️ Next",
+    ):
+        assert expected in text

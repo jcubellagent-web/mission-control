@@ -425,8 +425,22 @@ def live_line(item: str) -> str:
         return f"📌 objective: {text.split(':', 1)[1].strip()}"
     if lower.startswith("model selected:"):
         return f"🤖 model: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("skill selected:"):
+    if lower.startswith(("skill selected:", "skill:", "skill applied:")):
         return f"🧭 skill: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("decision:"):
+        return f"🧠 decision: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("tool result:"):
+        return f"✅ tool: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("tool:"):
+        return f"🧰 tool: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("action completed:"):
+        return f"✅ action: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("action:"):
+        return f"⚙️ action: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("verification passed:"):
+        return f"✅ verify: {text.split(':', 1)[1].strip()}"
+    if lower.startswith("verification:"):
+        return f"🧪 verify: {text.split(':', 1)[1].strip()}"
     if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
         return f"🔧 step: {simplify_live_detail(text)}"
     if lower.startswith(("local check | completed", "system check | completed")):
@@ -638,6 +652,19 @@ def check_lines(items: list[str], *, fallback: str, limit: int = 4) -> list[str]
     return [f"✓ {html.escape(item)}" for item in clean[-limit:]] if clean else [fallback]
 
 
+def activity_lines(items: list[str], *, fallback: str, limit: int = 7) -> list[str]:
+    """Render categorized activity without collapsing it to filenames."""
+    clean: list[str] = []
+    for item in items:
+        text = live_line(item)
+        if text.startswith(("📥", "📌", "🤖")):
+            continue
+        text = compact(text, limit=132)
+        if text and text not in clean:
+            clean.append(text)
+    return [html.escape(item) for item in clean[-limit:]] if clean else [fallback]
+
+
 def build_card(
     *,
     title: str,
@@ -661,11 +688,12 @@ def build_card(
         "failed": "⚠️ <b>JAIMES — Blocked</b>",
         "paused": "⏸️ <b>JAIMES — Paused</b>",
     }.get(status, f"<b>JAIMES — {html.escape(status.title())}</b>")
-    current = current_step_text(status, now, live_items)
-    phase = live_phase(status, current)
-    completed = [plain_progress_text(item) for item in done if live_line(item).startswith(("✅", "🏁"))]
+    current_plain = current_step_text(status, now, live_items)
+    current = live_line(now or current_plain)
+    phase = live_phase(status, current_plain)
+    completed = [item for item in done if live_line(item).startswith(("🧭", "🧠", "🧰", "⚙️", "🧪", "✅", "🏁"))]
     if not completed:
-        completed = [plain_progress_text(item) for item in done if clean_live_text(item)][-2:]
+        completed = [item for item in done if clean_live_text(item)][-3:]
     evidence = [
         plain_progress_text(item) for item in done
         if any(marker in clean_live_text(item).lower() for marker in ("test", "verified", "passed", "healthy", "built", "deployed", "saved"))
@@ -679,26 +707,26 @@ def build_card(
         status_line,
         f"🤖 {html.escape(friendly_model_line(model_line))}",
         "",
-        "<b>Objective</b>",
+        "<b>🎯 Objective</b>",
         html.escape(operator_objective(title)),
         "",
-        "<b>Progress</b>",
+        "<b>📊 Progress</b>",
         html.escape(progress),
         "",
-        "<b>Now</b>",
+        "<b>🔄 Now</b>",
         html.escape(current),
         "",
-        "<b>Completed</b>",
-        *check_lines(completed, fallback="Nothing completed yet", limit=4),
+        "<b>✅ Completed</b>",
+        *activity_lines(completed, fallback="Nothing completed yet", limit=7),
     ]
     if evidence:
-        lines += ["", "<b>Evidence</b>", *check_lines(evidence, fallback="", limit=3)]
+        lines += ["", "<b>🔎 Evidence</b>", *check_lines(evidence, fallback="", limit=3)]
     lines += [
         "",
-        "<b>Blocker</b>",
+        "<b>🚧 Blocker</b>",
         *(plain_bullet_lines(blocker_items, limit=2) if blocker_items else ["None"]),
         "",
-        "<b>Next</b>",
+        "<b>⏭️ Next</b>",
         *plain_bullet_lines(next_items, limit=2),
         "",
         f"Updated {updated or now_label()}",
