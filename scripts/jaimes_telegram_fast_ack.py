@@ -38,6 +38,8 @@ STALE_BOOTSTRAP_SECONDS = 120
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 45 * 60
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
+X_INTELLIGENCE_QUEUE = WORKSPACE / "memory" / "x_intelligence_intake_queue.jsonl"
+X_STATUS_URL_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/[A-Za-z0-9_]{1,15}/status/\d+", re.I)
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
 
 if str(WORKSPACE / "mission-control" / "scripts") not in sys.path:
@@ -231,6 +233,31 @@ def save_json(path: Path, data: Any) -> None:
             pass
 
 
+def queue_forwarded_x_intelligence(event: dict[str, Any], meta: dict[str, Any]) -> int:
+    """Queue public X status URLs without opening, scraping, or mutating X."""
+    urls = list(dict.fromkeys(X_STATUS_URL_RE.findall(str(event.get("prompt") or ""))))
+    if not urls:
+        return 0
+    X_INTELLIGENCE_QUEUE.parent.mkdir(parents=True, exist_ok=True)
+    queued = 0
+    with X_INTELLIGENCE_QUEUE.open("a", encoding="utf-8") as handle:
+        for url in urls:
+            fingerprint = hashlib.sha256(f"{event.get('session_id')}:{event.get('ts')}:{url}".encode()).hexdigest()[:20]
+            handle.write(json.dumps({
+                "fingerprint": fingerprint,
+                "url": url,
+                "received_at": utc_now(),
+                "session_id": event.get("session_id"),
+                "source_timestamp": event.get("ts"),
+                "telegram_chat_id": meta.get("telegram_chat_id"),
+                "telegram_thread_id": meta.get("telegram_thread_id"),
+                "status": "pending_public_verification",
+                "policy": {"logged_in_x_scraping": False, "xai_enabled": False, "account_mutation": False},
+            }, sort_keys=True) + "\n")
+            queued += 1
+    return queued
+
+
 def local_time_label() -> str:
     return dt.datetime.now().astimezone().strftime("%H:%M:%S %Z")
 
@@ -266,13 +293,19 @@ def session_metadata() -> dict[str, Any]:
     return candidates[0][1]
 
 
-def active_hermes_session_metadata() -> dict[str, Any]:
+def active_hermes_sessions_metadata() -> list[dict[str, Any]]:
+    """Return every active Telegram session owned by JAIMES.
+
+    #JAIMES: Telegram rollover can keep routing a fresh prompt into an older
+    # owned session, so the live-card watcher must scan all owned sessions
+    # instead of trusting only the most recently started session.
+    """
     if not HERMES_STATE_DB.exists():
-        return {}
+        return []
     try:
         with sqlite3.connect(HERMES_STATE_DB) as conn:
             conn.row_factory = sqlite3.Row
-            row = conn.execute(
+            rows = conn.execute(
                 """
                 SELECT id, model, model_config, session_key, chat_id, thread_id,
                        started_at, origin_json
@@ -284,39 +317,44 @@ def active_hermes_session_metadata() -> dict[str, Any]:
                         OR (chat_id = ? AND thread_id IN ('17','19','20','56'))
                    )
               ORDER BY started_at DESC
-                 LIMIT 1
                 """,
                 (CONTROL_CENTER_CHAT_ID,),
-            ).fetchone()
+            ).fetchall()
     except (OSError, sqlite3.Error):
-        return {}
-    if row is None:
-        return {}
-    try:
-        model_config = json.loads(str(row["model_config"] or "{}"))
-    except (TypeError, ValueError):
-        model_config = {}
-    runtime = model_config.get("gateway_runtime") if isinstance(model_config, dict) else {}
-    provider = str((runtime or {}).get("provider") or "openai-codex")
-    model = str(row["model"] or DEFAULT_MODEL.split("/", 1)[-1])
-    session_key = str(row["session_key"] or "")
-    target = parse_telegram_target_from_key(session_key)
-    target.update({
-        "sessionId": str(row["id"]),
-        "channel": "telegram",
-        "model": f"{provider}/{model}",
-        "provider": provider,
-        "runtime_model": model,
-        "session_key": session_key,
-        "telegram_chat_id": str(row["chat_id"] or target.get("telegram_chat_id") or ""),
-    })
-    if row["thread_id"] is not None:
-        target["telegram_thread_id"] = str(row["thread_id"])
-    try:
-        target["origin"] = json.loads(str(row["origin_json"] or "{}"))
-    except (TypeError, ValueError):
-        target["origin"] = {}
-    return target
+        return []
+    sessions: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            model_config = json.loads(str(row["model_config"] or "{}"))
+        except (TypeError, ValueError):
+            model_config = {}
+        runtime = model_config.get("gateway_runtime") if isinstance(model_config, dict) else {}
+        provider = str((runtime or {}).get("provider") or "openai-codex")
+        model = str(row["model"] or DEFAULT_MODEL.split("/", 1)[-1])
+        session_key = str(row["session_key"] or "")
+        target = parse_telegram_target_from_key(session_key)
+        target.update({
+            "sessionId": str(row["id"]),
+            "channel": "telegram",
+            "model": f"{provider}/{model}",
+            "provider": provider,
+            "runtime_model": model,
+            "session_key": session_key,
+            "telegram_chat_id": str(row["chat_id"] or target.get("telegram_chat_id") or ""),
+        })
+        if row["thread_id"] is not None:
+            target["telegram_thread_id"] = str(row["thread_id"])
+        try:
+            target["origin"] = json.loads(str(row["origin_json"] or "{}"))
+        except (TypeError, ValueError):
+            target["origin"] = {}
+        sessions.append(target)
+    return sessions
+
+
+def active_hermes_session_metadata() -> dict[str, Any]:
+    sessions = active_hermes_sessions_metadata()
+    return sessions[0] if sessions else {}
 
 
 def normalize_session_metadata(value: Any, assume_telegram: bool = False) -> dict[str, Any]:
@@ -470,23 +508,27 @@ def bootstrap_direct_message_cursor(session_id: str) -> int:
         return 0
     con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
     try:
-        row = con.execute(
+        rows = con.execute(
             """
             SELECT id, timestamp
               FROM messages
              WHERE session_id = ? AND role = 'user'
              ORDER BY id DESC
-             LIMIT 1
+             LIMIT 2
             """,
             (session_id,),
-        ).fetchone()
+        ).fetchall()
     finally:
         con.close()
-    if not row:
+    if not rows:
         return 0
-    message_id, timestamp = int(row[0]), float(row[1])
+    message_id, timestamp = int(rows[0][0]), float(rows[0][1])
     age = max(0.0, time.time() - timestamp)
-    return message_id - 1 if age <= STALE_BOOTSTRAP_SECONDS else message_id
+    if age > STALE_BOOTSTRAP_SECONDS:
+        return message_id
+    # Include the preceding user row when available so a compaction marker and
+    # its replayed prompt are classified together on a newly observed session.
+    return max(0, int(rows[1][0]) - 1) if len(rows) > 1 else max(0, message_id - 1)
 
 
 def first_existing_session_path(session_id: str) -> Path:
@@ -1033,7 +1075,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     reaction_ok = False
     if not dry_run:
         reaction_ok = set_eyes_reaction(inbound_message_id, state, meta=meta)
-    ack_result = {"ok": True, "result": {"message_id": "dry-run-message"}} if dry_run else send_initial_ack("received — determining objective", meta=meta)
+    ack_result = {"ok": True, "result": {"message_id": "dry-run-message"}} if dry_run else send_initial_ack("👀 JAIMES — Received\n🤖 confirming model and objective", meta=meta)
     if not dry_run:
         record_api_result(state, "sendMessage", ack_result)
     ack_message_id = str(ack_result.get("result", {}).get("message_id") or "") if ack_result.get("ok") else ""
@@ -1047,7 +1089,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         active_lane, active_reason = runtime_route(model)
         fast_edit = edit_message(
             ack_message_id,
-            f"Objective: {objective}\nModel: {model} | Route: {active_lane} | Why: {active_reason}",
+            f"🤖 {model}\n\n👀 Objective\n{objective}\n\nRoute: {active_lane} | Why: {active_reason}",
             meta=meta,
         )
         record_api_result(state, "editMessageText", fast_edit)
@@ -1064,7 +1106,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     if not dry_run and ack_message_id:
         send_chat_action(meta=meta)
         send_message_draft(draft_id, f"Objective: {objective}\nModel: {display_model}", meta=meta)
-        edit_result = edit_message(ack_message_id, f"Objective: {objective}\nModel: {display_model}", meta=meta)
+        edit_result = edit_message(ack_message_id, f"🤖 {display_model}\n\n👀 Objective\n{objective}", meta=meta)
         record_api_result(state, "editMessageText", edit_result)
         # The originating chat/topic is the only valid work-card surface.
         # Never fall back to Josh's DM for a Control Center topic task.
@@ -1089,8 +1131,6 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
                 f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
                 "--next",
                 "Work automatically; show buttons only for final approval steps if needed",
-                "--ack-message-id",
-                ack_message_id,
             ] + work_card_target_args(meta))
         publish_jaimes(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
     return {
@@ -1156,11 +1196,23 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     processed = set(state.get("processed_progress_events") or [])
     approval_sent = set(state.get("approval_buttons_sent") or [])
     updates: list[dict[str, Any]] = []
+    pending_by_run: dict[str, dict[str, Any]] = {}
     for event in recent_progress_events(session_id):
         event_id = event["event_id"]
         if event_id in processed:
             continue
         processed.add(event_id)
+        card = active.get(event["run_id"])
+        if not card or card.get("status") == "done":
+            continue
+        if card.get("session_id") and str(card.get("session_id")) != session_id:
+            continue
+        # Coalesce a burst of tool/model events into one visible edit. Replaying
+        # every micro-event after rollover can time out the work-card helper and
+        # makes Telegram look noisy rather than live.
+        pending_by_run[event["run_id"]] = event
+    for event in pending_by_run.values():
+        event_id = event["event_id"]
         card = active.get(event["run_id"])
         if not card:
             continue
@@ -1301,57 +1353,184 @@ def retire_noncurrent_active_cards(state: dict[str, Any], current_run_id: str) -
     return retired
 
 
+def retire_for_genuine_events(state: dict[str, Any], events: list[dict[str, Any]]) -> int:
+    """Retire cards only when an actual ingested Telegram user turn exists."""
+    if not events:
+        return 0
+    return retire_noncurrent_active_cards(state, str(events[-1]["run_id"]))
+
+
+def internal_replay_prompt(prompt: str) -> bool:
+    lowered = (prompt or "").lstrip().lower()
+    return lowered.startswith((
+        "[context compaction",
+        "[async delegation",
+        "[your active task list was preserved",
+    ))
+
+
+def session_has_compaction_marker(session_id: str) -> bool:
+    """Detect rollover sessions even when their cursor starts after the marker."""
+    if not HERMES_STATE_DB.exists():
+        return False
+    con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
+    try:
+        row = con.execute(
+            """
+            SELECT 1 FROM messages
+             WHERE session_id = ? AND role = 'user'
+               AND LOWER(LTRIM(COALESCE(content, ''))) LIKE '[context compaction%'
+             LIMIT 1
+            """,
+            (session_id,),
+        ).fetchone()
+        return bool(row)
+    finally:
+        con.close()
+
+
+def replayed_prompt_from_other_session(event: dict[str, Any]) -> bool:
+    """Suppress exact historical prompts copied into a compaction session."""
+    prompt = str(event.get("prompt") or "").strip()
+    session_id = str(event.get("session_id") or "")
+    message_id = int(event.get("db_message_id") or 0)
+    if not prompt or not session_id or not message_id or not HERMES_STATE_DB.exists():
+        return False
+    con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
+    try:
+        row = con.execute(
+            """
+            SELECT 1 FROM messages
+             WHERE role = 'user' AND session_id != ? AND id < ?
+               AND TRIM(COALESCE(content, '')) = ?
+             LIMIT 1
+            """,
+            (session_id, message_id, prompt),
+        ).fetchone()
+        return bool(row)
+    finally:
+        con.close()
+
+
+def media_only_prompt(prompt: str) -> bool:
+    """Return True for attachment-only continuation rows with no user request."""
+    lines = [line.strip() for line in str(prompt or "").splitlines() if line.strip()]
+    meaningful = []
+    for line in lines:
+        lower = line.lower()
+        if re.fullmatch(r"\[j(?:\|\d+)?\]", lower):
+            continue
+        if lower.startswith(("[image attached at:", "[file attached at:", "[audio attached at:")):
+            continue
+        if lower in {"[screenshot]", "[image]", "[attachment]"}:
+            continue
+        meaningful.append(line)
+    return bool(lines) and not meaningful
+
+
+def recent_active_card_for_meta(state: dict[str, Any], meta: dict[str, Any], max_age_seconds: float = 90.0) -> dict[str, Any] | None:
+    """Resolve the current turn's card for multipart attachment continuation."""
+    now = dt.datetime.now(dt.timezone.utc)
+    candidates = []
+    for card in (state.get("active_cards") or {}).values():
+        if not isinstance(card, dict) or card.get("status") != "active":
+            continue
+        if str(card.get("telegram_chat_id") or "") != str(meta.get("telegram_chat_id") or ""):
+            continue
+        if str(card.get("telegram_thread_id") or "") != str(meta.get("telegram_thread_id") or ""):
+            continue
+        raw_started = str(card.get("started_at") or "")
+        try:
+            started = dt.datetime.fromisoformat(raw_started.replace("Z", "+00:00"))
+            if started.tzinfo is None:
+                started = started.replace(tzinfo=dt.timezone.utc)
+        except (TypeError, ValueError):
+            started = None
+        if started and (now - started).total_seconds() <= max_age_seconds:
+            candidates.append(card)
+    return max(candidates, key=lambda card: str(card.get("started_at") or "")) if candidates else None
+
+
 def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state = load_json(STATE_PATH, {})
     if not isinstance(state, dict):
         state = {}
     acked = set(state.get("acked_prompt_events") or [])
-    meta = session_metadata()
-    session_id = str(meta.get("sessionId") or "")
-    model = str(meta.get("model") or DEFAULT_MODEL)
-    if not session_id:
+    metas = active_hermes_sessions_metadata()
+    if not metas:
+        fallback = session_metadata()
+        metas = [fallback] if fallback else []
+    if not metas:
         state["last_checked_at"] = utc_now()
         state["direct_session_id"] = ""
-        state["model"] = model
         state["last_result"] = {"ok": False, "status": "no-direct-session"}
         state["status"] = "no-direct-session"
         if not dry_run:
             save_json(STATE_PATH, state)
         return {"ok": False, "status": "no-direct-session"}
 
-    sent: list[dict[str, Any]] = []
     state.setdefault("active_cards", {})
-    # Migration is cursor-based. Preserve the newest fresh turn so a first
-    # image-only message is acknowledged after watcher/session bootstrap.
-    cursor_key = f"direct_db_cursor:{session_id}"
-    if cursor_key not in state:
-        state[cursor_key] = bootstrap_direct_message_cursor(session_id)
-        state["direct_db_cursor_initialized_at"] = utc_now()
-    events = recent_prompt_events_from_state_db(session_id, int(state.get(cursor_key) or 0))
-    # A restart/catch-up can expose several historical user rows at once. Only
-    # the newest turn may create visible Telegram UX; older rows are consumed
-    # silently so they can never be replayed as fresh live cards.
+    candidates: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
+    session_ids: list[str] = []
+    # Scan every owned live Telegram session. A rollover can leave the gateway
+    # writing new prompts into an older session for several minutes.
+    for session_meta in metas:
+        sid = str(session_meta.get("sessionId") or "")
+        if not sid:
+            continue
+        session_ids.append(sid)
+        cursor_key = f"direct_db_cursor:{sid}"
+        if cursor_key not in state:
+            state[cursor_key] = bootstrap_direct_message_cursor(sid)
+            state["direct_db_cursor_initialized_at"] = utc_now()
+        batch = recent_prompt_events_from_state_db(sid, int(state.get(cursor_key) or 0))
+        replay_times = [
+            float(dt.datetime.fromisoformat(e["ts"].replace("Z", "+00:00")).timestamp())
+            for e in batch if internal_replay_prompt(e.get("prompt") or "")
+        ]
+        compaction_session = session_has_compaction_marker(sid)
+        for event in batch:
+            event_id = f"{event['session_id']}:{event['ts']}"
+            state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
+            age = event_age_seconds(event["ts"])
+            event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
+            replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
+            replay_duplicate = compaction_session and replayed_prompt_from_other_session(event)
+            if internal_replay_prompt(event.get("prompt") or "") or replay_adjacent or replay_duplicate or (age is not None and age > STALE_BOOTSTRAP_SECONDS):
+                acked.add(event_id)
+                continue
+            if event_id not in acked:
+                candidates.append((event_ts, event, session_meta))
+
+    # Preserve the existing anti-replay rule: if multiple genuine turns arrive
+    # during one catch-up pass, only the newest creates visible Telegram UX.
+    candidates.sort(key=lambda item: item[0])
+    if candidates:
+        _, newest_event, newest_meta = candidates[-1]
+        attached_card = recent_active_card_for_meta(state, newest_meta) if media_only_prompt(newest_event.get("prompt") or "") else None
+        if attached_card:
+            attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
+            acked.add(attached_id)
+            attached_card.setdefault("attachment_message_ids", []).append(str(newest_event.get("db_message_id") or ""))
+            state["multipart_rows_attached"] = int(state.get("multipart_rows_attached") or 0) + 1
+            candidates.pop()
+    selected = candidates[-1:] if candidates else []
+    for _, stale_event, _ in candidates[:-1]:
+        acked.add(f"{stale_event['session_id']}:{stale_event['ts']}")
+
+    sent: list[dict[str, Any]] = []
+    selected_meta = selected[0][2] if selected else metas[0]
+    selected_session_id = str(selected_meta.get("sessionId") or "")
+    selected_model = str(selected_meta.get("model") or DEFAULT_MODEL)
+    events = [selected[0][1]] if selected else []
     if events:
-        for stale_event in events[:-1]:
-            stale_id = f"{stale_event['session_id']}:{stale_event['ts']}"
-            acked.add(stale_id)
-            state[cursor_key] = max(int(state.get(cursor_key) or 0), int(stale_event.get("db_message_id") or 0))
-        events = [events[-1]]
-    current_run_id = events[-1]["run_id"] if events else f"telegram-message-{latest_direct_message_id(session_id)}"
-    state["silently_retired_cards"] = int(state.get("silently_retired_cards") or 0) + retire_noncurrent_active_cards(
-        state, current_run_id
-    )
-    first_bootstrap = False
+        state["silently_retired_cards"] = int(state.get("silently_retired_cards") or 0) + retire_for_genuine_events(state, events)
     for event in events:
         event_id = f"{event['session_id']}:{event['ts']}"
-        if event_id in acked:
-            continue
-        age = event_age_seconds(event["ts"])
-        if first_bootstrap and age is not None and age > STALE_BOOTSTRAP_SECONDS:
-            acked.add(event_id)
-            continue
-        result = send_ack(event, model=model, state=state, dry_run=dry_run, meta=meta)
-        state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
+        queued_x = 0 if dry_run else queue_forwarded_x_intelligence(event, selected_meta)
+        result = send_ack(event, model=selected_model, state=state, dry_run=dry_run, meta=selected_meta)
+        if queued_x:
+            result["x_intelligence_queued"] = queued_x
         if result.get("ok"):
             acked.add(event_id)
             if result.get("run_id"):
@@ -1361,8 +1540,9 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "model": result.get("model"),
                     "route": result.get("route"),
                     "ack_message_id": result.get("ack_message_id"),
-                    "telegram_chat_id": meta.get("telegram_chat_id"),
-                    "telegram_thread_id": meta.get("telegram_thread_id"),
+                    "telegram_chat_id": selected_meta.get("telegram_chat_id"),
+                    "telegram_thread_id": selected_meta.get("telegram_thread_id"),
+                    "session_id": selected_session_id,
                     "started_at": result.get("last_card_update_at"),
                     "last_progress_at": result.get("last_card_update_at"),
                     "last_card_update_at": result.get("last_card_update_at"),
@@ -1373,11 +1553,14 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             sent.append({"event": event_id, "result": result})
             break
 
-    state["acked_prompt_events"] = sorted(acked)[-200:]
+    state["acked_prompt_events"] = sorted(acked)[-300:]
     state["last_checked_at"] = utc_now()
-    state["direct_session_id"] = session_id
-    state["model"] = model
+    state["direct_session_id"] = selected_session_id
+    state["owned_session_ids"] = session_ids
+    state["model"] = selected_model
     state["status"] = "ok"
+    state.pop("last_error", None)
+    state.pop("last_error_at", None)
     if sent:
         state["last_sent_at"] = utc_now()
         state["last_result"] = sent[-1]["result"]
@@ -1386,19 +1569,20 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             "key": sent[-1]["result"].get("key"),
             "event": sent[-1]["event"],
             "created_at": utc_now(),
-            "model": model,
+            "model": selected_model,
         }
     else:
-        # Do not leave a historical ``no-direct-session`` result looking like a
-        # fresh outage after this poll has resolved the direct Hermes session.
-        state["last_result"] = {"ok": True, "status": "watching", "session_id": session_id}
-    state["cards_completed_from_final"] = int(state.get("cards_completed_from_final") or 0) + complete_cards_from_final_responses(
-        state, session_id, dry_run=dry_run
-    )
-    updates = update_active_cards(state, session_id, dry_run=dry_run)
+        state["last_result"] = {"ok": True, "status": "watching", "session_ids": session_ids}
+
+    updates: list[dict[str, Any]] = []
+    for sid in session_ids:
+        state["cards_completed_from_final"] = int(state.get("cards_completed_from_final") or 0) + complete_cards_from_final_responses(
+            state, sid, dry_run=dry_run
+        )
+        updates.extend(update_active_cards(state, sid, dry_run=dry_run))
     if not dry_run:
         save_json(STATE_PATH, state)
-    return {"ok": True, "session_id": session_id, "sent": sent, "updates": updates, "dry_run": dry_run}
+    return {"ok": True, "session_id": selected_session_id, "session_ids": session_ids, "sent": sent, "updates": updates, "dry_run": dry_run}
 
 
 def main() -> int:
