@@ -56,6 +56,7 @@ CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
 CAPABILITY_WATCH_PATH = ROOT.parent / "data" / "capability-watch.json"
 AUTOMATION_ROLLOUT_PATH = ROOT.parent / "data" / "automation-rollout.json"
 RELIABILITY_UPGRADES_PATH = ROOT.parent / "data" / "reliability-upgrades.json"
+AGENT_TRACE_SUMMARY_PATH = ROOT.parent / "data" / "agent-trace-summary.json"
 TELEGRAM_AI_BOT_FEATURES_PATH = ROOT.parent / "data" / "telegram-ai-bot-features.json"
 RUNTIME_LAYOUT_PATH = ROOT.parent / "data" / "mission-control-runtime-layout.json"
 CODEX_AUTOMATIONS_DIR = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "automations"
@@ -4502,6 +4503,19 @@ def main() -> None:
         "summary": "Reliability upgrade probes have not run yet.",
         "items": [],
         "metrics": [],
+    })
+    dashboard["agentTraceSummary"] = load_json_file(AGENT_TRACE_SUMMARY_PATH, {
+        "generatedAt": now_iso,
+        "status": "not-configured",
+        "summary": "Privacy-safe agent trace summaries have not been published yet.",
+        "privacy": {
+            "contentIncluded": False,
+            "reasoningIncluded": False,
+            "toolArgumentsIncluded": False,
+            "sessionIdsHashed": True,
+        },
+        "metrics": {},
+        "recentTraces": [],
     })
     dashboard["capabilityInventory"] = load_json_file(CAPABILITY_INVENTORY_PATH, {
         "updatedAt": now_iso,
