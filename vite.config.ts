@@ -61,7 +61,7 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
   }
 
   if (pathname === "/actions/agentic-crypto-refresh") {
-    const result = spawnSync("python3", ["scripts/refresh_agentic_solana_wallet_live.py"], {
+    const result = spawnSync("python3", ["scripts/refresh_agentic_robinhood_wallet_live.py"], {
       cwd: __dirname,
       encoding: "utf8",
       timeout: 60_000,

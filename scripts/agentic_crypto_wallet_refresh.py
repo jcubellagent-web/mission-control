@@ -22,7 +22,7 @@ PRIVATE_RAW = Path.home() / ".openclaw" / "private" / "mission-control" / "agent
 
 ALLOWED_KEYS = {
     "updatedAt", "status", "walletMode", "refreshMode", "wallets", "summary",
-    "chains", "tokens", "nfts", "approvals", "recentActivity", "opportunities",
+    "chains", "tokens", "nfts", "approvals", "recentActivity", "activityLedger", "tradeLedger", "tradingGoal", "opportunities",
     "baseMcp", "guardrails", "errors", "lastFullRefreshAt",
 }
 

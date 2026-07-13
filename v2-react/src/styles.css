@@ -14269,3 +14269,48 @@ a:focus-visible,
     padding: 2px 4px !important;
   }
 }
+
+/* #JAIMES: Robinhood FinOps activity ledger keeps eight P&L rows scrollable without expanding the kiosk column. */
+#finops-dashboard .finops-trade-ledger { min-height: 112px !important; }
+#finops-dashboard .trade-ledger-list { max-height: 104px !important; overflow-y: auto !important; overscroll-behavior: contain !important; }
+
+/* #JAIMES: Separate all-action journal for the tracked Robinhood wallet. */
+#finops-dashboard .finops-activity-journal { border: 1px solid var(--border); border-radius: 10px; background: rgba(10, 22, 40, .64); padding: 8px 9px; min-height: 86px; }
+#finops-dashboard .finops-activity-journal > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+#finops-dashboard .finops-activity-journal > header div { display: grid; gap: 1px; }
+#finops-dashboard .finops-activity-journal > header span, #finops-dashboard .finops-activity-journal > header em { color: var(--muted); font-size: 9px; font-style: normal; text-transform: uppercase; letter-spacing: .08em; }
+#finops-dashboard .finops-activity-journal > header strong { font-size: 11px; }
+#finops-dashboard .activity-journal-list { display: grid; gap: 3px; max-height: 74px; overflow-y: auto; overscroll-behavior: contain; }
+#finops-dashboard .activity-journal-row { display: grid; grid-template-columns: minmax(0, 1fr) 18px; align-items: center; gap: 6px; padding: 4px 5px; border-radius: 6px; background: rgba(255, 255, 255, .025); }
+#finops-dashboard .activity-journal-row div { min-width: 0; display: grid; gap: 1px; }
+#finops-dashboard .activity-journal-row strong, #finops-dashboard .activity-journal-row small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#finops-dashboard .activity-journal-row strong { font-size: 10px; }
+#finops-dashboard .activity-journal-row small { color: var(--muted); font-size: 9px; }
+#finops-dashboard .activity-journal-row a { display: inline-grid; place-items: center; color: var(--muted); }
+
+/* #JAIMES: 1080p wallet journal fit: four non-overlapping rows in the fixed-height FinOps rail. */
+@media (min-width: 1500px) and (max-height: 1100px) {
+  #finops-dashboard .finops-wallet { grid-template-rows: 48px 48px minmax(44px, 1fr) minmax(44px, 1fr) !important; gap: 4px !important; padding: 6px !important; }
+  #finops-dashboard .finops-wallet-total { min-height: 0 !important; padding: 5px 7px !important; }
+  #finops-dashboard .finops-wallet-total strong { font-size: 23px !important; line-height: .95 !important; }
+  #finops-dashboard .finops-wallet-total p { font-size: 7px !important; line-height: 1 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+  #finops-dashboard .finops-wallet-target { min-height: 0 !important; gap: 3px !important; padding: 5px 7px !important; }
+  #finops-dashboard .finops-wallet-target > p { display: none !important; }
+  #finops-dashboard .wallet-target-head strong { font-size: 9px !important; }
+  #finops-dashboard .wallet-target-progress { height: 3px !important; }
+  #finops-dashboard .wallet-target-meta b, #finops-dashboard .wallet-target-meta small { font-size: 7px !important; }
+  #finops-dashboard .finops-trade-ledger { min-height: 0 !important; padding: 4px 5px !important; }
+  #finops-dashboard .finops-trade-ledger header { min-height: 16px !important; margin: 0 0 2px !important; padding: 0 0 2px !important; }
+  #finops-dashboard .finops-trade-ledger header span, #finops-dashboard .finops-trade-ledger header em { font-size: 7px !important; }
+  #finops-dashboard .finops-trade-ledger header strong { font-size: 8px !important; }
+  #finops-dashboard .trade-ledger-list { max-height: none !important; min-height: 0 !important; gap: 2px !important; padding-top: 0 !important; overflow-y: auto !important; }
+  #finops-dashboard .trade-ledger-row { min-height: 20px !important; padding: 2px 3px !important; grid-template-columns: 34px minmax(0, 1fr) minmax(36px, auto) 12px !important; }
+  #finops-dashboard .trade-side-pill, #finops-dashboard .trade-main strong, #finops-dashboard .trade-main small, #finops-dashboard .trade-pnl { font-size: 7px !important; }
+  #finops-dashboard .finops-activity-journal { min-height: 0 !important; padding: 4px 5px !important; overflow: hidden !important; }
+  #finops-dashboard .finops-activity-journal > header { min-height: 16px !important; margin-bottom: 2px !important; }
+  #finops-dashboard .finops-activity-journal > header span, #finops-dashboard .finops-activity-journal > header em { font-size: 7px !important; }
+  #finops-dashboard .finops-activity-journal > header strong { font-size: 8px !important; }
+  #finops-dashboard .activity-journal-list { max-height: none !important; min-height: 0 !important; gap: 2px !important; overflow-y: auto !important; }
+  #finops-dashboard .activity-journal-row { min-height: 20px !important; padding: 2px 3px !important; }
+  #finops-dashboard .activity-journal-row strong, #finops-dashboard .activity-journal-row small { font-size: 7px !important; }
+}

@@ -2170,8 +2170,8 @@ function walletTradingGoal(wallet?: AgenticCryptoWallet) {
 
 function walletTradeRows(wallet?: AgenticCryptoWallet) {
   const explicit = wallet?.tradeLedger;
-  if (explicit?.length) return explicit.slice(0, 2);
-  return (wallet?.recentActivity || []).slice(0, 2).map((row) => ({
+  if (explicit?.length) return explicit;
+  return (wallet?.recentActivity || []).map((row) => ({
     timestamp: row.timestamp,
     side: String(row.action || "").toLowerCase().includes("approve") ? "approve" : "activity",
     action: row.action || "Wallet activity",
@@ -2230,6 +2230,7 @@ function FinOpsDashboard({
   const summary = wallet?.summary || {};
   const goal = walletTradingGoal(wallet);
   const trades = walletTradeRows(wallet);
+  const activity = (((wallet as any)?.activityLedger as AgenticCryptoWallet["recentActivity"]) || wallet?.recentActivity || []);
   const providers = providerRows(modelUsage, modelRouter);
   const activeKeys = activeProviderKeys(statuses, modelRouter);
   const subscriptionBaseline = subscriptionBaselineUsd(providers);
@@ -2263,7 +2264,7 @@ function FinOpsDashboard({
           <div className="finops-wallet-total wallet-card-primary" aria-label="Liquid crypto wallet value">
             <span>Liquid wallet</span>
             <strong>{fmtCurrencyExact(summary.liquidEstimatedUsd)}</strong>
-            <p>{fmtCurrencyExact(summary.tokenLiquidUsd ?? summary.liquidEstimatedUsd)} tokens/native · {fmtCurrencyExact(summary.nftEstimatedUsd)} collectibles excluded</p>
+            <p>{fmtCurrencyExact(summary.tokenLiquidUsd ?? 0)} tokens · {fmtCurrencyExact(summary.nativeLiquidUsd ?? 0)} native</p>
           </div>
           <div className="finops-wallet-target wallet-card-secondary">
             <div className="wallet-target-head">
@@ -2285,8 +2286,8 @@ function FinOpsDashboard({
           <div className="finops-trade-ledger">
             <header>
               <div>
-                <span>Recent wallet trades</span>
-                <strong>Open / close ledger</strong>
+                <span>Robinhood wallet activity</span>
+                <strong>Trades + live P&amp;L</strong>
               </div>
               <em>{trades.length || 0} rows</em>
             </header>
@@ -2313,6 +2314,30 @@ function FinOpsDashboard({
               }) : (
                 <p className="wallet-empty-state">No trade ledger is loaded yet. Wallet activity will appear after the next refresh.</p>
               )}
+            </div>
+          </div>
+          <div className="finops-activity-journal">
+            <header>
+              <div>
+                <span>Wallet activity journal</span>
+                <strong>All on-chain actions</strong>
+              </div>
+              <em>{activity.length || 0} recent</em>
+            </header>
+            <div className="activity-journal-list">
+              {activity.length ? activity.map((row, index) => (
+                <article key={`${row.timestamp || "activity"}-${row.explorerLabel || index}`} className="activity-journal-row">
+                  <div>
+                    <strong>{missionText(row.action || "Wallet activity")}</strong>
+                    <small>{chainLabel(row.chain)} · {missionText(row.valueSummary || row.status || "confirmed")}</small>
+                  </div>
+                  {row.explorerUrl ? (
+                    <a href={row.explorerUrl} target="_blank" rel="noreferrer" title={row.explorerLabel || "Open transaction"}>
+                      <ExternalLink size={12} />
+                    </a>
+                  ) : <i />}
+                </article>
+              )) : <p className="wallet-empty-state">No on-chain activity is loaded yet.</p>}
             </div>
           </div>
         </section>
