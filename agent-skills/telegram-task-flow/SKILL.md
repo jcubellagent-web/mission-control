@@ -11,9 +11,9 @@ Use this whenever a Telegram-facing task needs to feel clear, live, and low-nois
 
 1. Acknowledge an owned Telegram task immediately with an eyes reaction. A runtime may use one short editable acknowledgement when reactions are unavailable, but it must not leave a duplicate acknowledgement bubble.
 2. Resolve the objective to a short task summary. Do not repeat the user's full prompt or expose media/file identifiers as the objective.
-3. Start one editable live work card only after the objective is known.
+3. Start one editable live work card only after the objective is known. Context compaction, session rollover, replayed history, and framework continuation markers are not new tasks: never send a new objective/acknowledgement or card. Resume by editing the existing origin-scoped card, append work cumulatively, close it at 100%, then send only the final summary.
 4. Keep the live work card concise and plain-English. Render it inside a Telegram HTML `<pre>` block and pre-wrap for mobile at 38 fixed-width columns: emoji/check rows use a three-space hanging indent on every continuation line, while plain `- ` bullets use two spaces. These code-block values are intentional; proportional-text spacing is not visually equivalent in Telegram. Do not expose raw shell commands, file paths, JSON flags, or tool internals unless needed to explain a blocker.
-5. Append useful progress lines as work happens instead of replacing the whole story. If the log gets too long, consolidate older finished checks into one short "Earlier:" line and keep the latest readable steps visible.
+5. Append useful progress lines as work happens instead of replacing the whole story. Preserve the same card across compaction and restart recovery. If the log gets too long, consolidate older finished checks into one short "Earlier:" line and keep the latest readable steps visible.
 6. Do not show routing buttons by default. Auto-route unless the user truly needs to steer.
 7. End with the agreed final summary template.
 8. Show buttons only for concrete approval or mitigation steps from the final summary.

@@ -10,6 +10,7 @@ All Josh-facing live work cards use one fixed-width Telegram rendering contract.
 - Plain `- ` continuation indent: 2 ASCII spaces
 - Numbered continuation indent: length of the numeric prefix
 - Final summaries use the same fixed-width `<pre>` geometry
+- Compaction, replayed history, and framework continuation markers reuse the existing origin-scoped card; they never create an objective or another card
 
 Do not use proportional-text spacing, `&nbsp;`, or Unicode nonbreaking spaces to simulate alignment. Telegram code blocks use fixed-width cells, so values that look correct in proportional text do not render one-to-one.
 

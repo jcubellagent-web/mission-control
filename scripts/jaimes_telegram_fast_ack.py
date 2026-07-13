@@ -1406,7 +1406,13 @@ def internal_replay_prompt(prompt: str) -> bool:
 
 
 def session_has_compaction_marker(session_id: str) -> bool:
-    """Detect rollover sessions even when their cursor starts after the marker."""
+    """Detect a compression continuation even when no marker row was copied.
+
+    Hermes rotates to a child session during compaction. Depending on the
+    provider/rotation path, the child can begin with copied history but no
+    synthetic ``[context compaction ...]`` user row. The parent link and its
+    ``end_reason='compression'`` are the durable signal in that case.
+    """
     if not HERMES_STATE_DB.exists():
         return False
     con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
@@ -1416,6 +1422,21 @@ def session_has_compaction_marker(session_id: str) -> bool:
             SELECT 1 FROM messages
              WHERE session_id = ? AND role = 'user'
                AND LOWER(LTRIM(COALESCE(content, ''))) LIKE '[context compaction%'
+             LIMIT 1
+            """,
+            (session_id,),
+        ).fetchone()
+        if row:
+            return True
+        #JAIMES: a compression child may carry replayed user turns without a
+        # marker. Treat the parent compression edge as equivalent so poll_once
+        # keeps extending the existing card instead of creating a new pair.
+        row = con.execute(
+            """
+            SELECT 1
+              FROM sessions AS child
+              JOIN sessions AS parent ON parent.id = child.parent_session_id
+             WHERE child.id = ? AND parent.end_reason = 'compression'
              LIMIT 1
             """,
             (session_id,),
