@@ -46,6 +46,31 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     assert saved["cards"]["single-card"]["retention"] == "persistent-edit-only"
 
 
+def test_pending_ack_is_claimed_only_for_matching_origin(tmp_path):
+    state_path = tmp_path / "ack.json"
+    state_path.write_text('{"latest_pending_ack":{"message_id":"100","telegram_chat_id":"-1003589561528","telegram_thread_id":"17"}}')
+    with patch.object(card, "ACK_STATE_PATH", state_path):
+        assert card.claim_pending_ack("matching-card", "-1003589561528", "17") == "100"
+    saved = card.load_json_file(state_path, {})["latest_pending_ack"]
+    assert saved["claimed_by"] == "matching-card"
+
+
+def test_pending_ack_from_another_topic_is_not_claimed(tmp_path):
+    state_path = tmp_path / "ack.json"
+    state_path.write_text('{"latest_pending_ack":{"message_id":"100","telegram_chat_id":"-1003589561528","telegram_thread_id":"19"}}')
+    with patch.object(card, "ACK_STATE_PATH", state_path):
+        assert card.claim_pending_ack("topic-17-card", "-1003589561528", "17") == ""
+    saved = card.load_json_file(state_path, {})["latest_pending_ack"]
+    assert "claimed_by" not in saved
+
+
+def test_unscoped_pending_ack_is_not_claimed(tmp_path):
+    state_path = tmp_path / "ack.json"
+    state_path.write_text('{"latest_pending_ack":{"message_id":"100"}}')
+    with patch.object(card, "ACK_STATE_PATH", state_path):
+        assert card.claim_pending_ack("safe-card", "-1003589561528", "17") == ""
+
+
 def test_objective_and_live_card_are_separate_messages():
     args = SimpleNamespace(
         key="three-bubble", title="Restore middle card", model="model", route="route",

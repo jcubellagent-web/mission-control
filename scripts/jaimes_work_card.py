@@ -105,11 +105,20 @@ def save_json_file(path: Path, data: dict) -> None:
     tmp.replace(path)
 
 
-def claim_pending_ack(card_key: str) -> str:
+def claim_pending_ack(card_key: str, chat_id: str | None, thread_id: str | None) -> str:
     state = load_json_file(ACK_STATE_PATH, {})
     pending = state.get("latest_pending_ack") or {}
     message_id = str(pending.get("message_id") or "")
     if not message_id or pending.get("claimed_by"):
+        return ""
+    pending_chat = str(pending.get("telegram_chat_id") or "")
+    pending_thread = str(pending.get("telegram_thread_id") or "")
+    requested_chat = str(chat_id or "")
+    requested_thread = str(thread_id or "")
+    #JAIMES: a pending acknowledgement is origin-scoped. Reusing the newest
+    # message ID across topics edits the wrong card and makes both cards appear
+    # to disappear or change objectives.
+    if not pending_chat or pending_chat != requested_chat or pending_thread != requested_thread:
         return ""
     pending["claimed_by"] = card_key
     pending["claimed_at"] = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -1003,7 +1012,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("TELEGRAM_TARGET_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID")
     thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("TELEGRAM_THREAD_ID")
     if not args.separate_message and not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        ack_message_id = claim_pending_ack(args.key)
+        ack_message_id = claim_pending_ack(args.key, chat_id, thread_id)
         objective_message_id = ack_message_id or objective_message_id
     text = build_card(
         title=title,

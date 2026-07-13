@@ -1665,6 +1665,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             "event": sent[-1]["event"],
             "created_at": utc_now(),
             "model": selected_model,
+            "telegram_chat_id": sent[-1]["result"].get("telegram_chat_id"),
+            "telegram_thread_id": sent[-1]["result"].get("telegram_thread_id"),
         }
     else:
         state["last_result"] = {"ok": True, "status": "watching", "session_ids": session_ids}
