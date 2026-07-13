@@ -98,7 +98,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(result["sent"], [])
         send.assert_not_called()
 
-    def test_ack_is_objective_only_and_work_card_is_separate(self) -> None:
+    def test_ack_is_adopted_as_the_single_work_card(self) -> None:
         event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}
         meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17", "origin": {"message_id": "77"}}
         state = {}
@@ -118,7 +118,8 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertIn("👀", initial.call_args.args[0])
         start_cmd = run.call_args.args[0]
         self.assertIn("start", start_cmd)
-        self.assertNotIn("--ack-message-id", start_cmd)
+        self.assertIn("--ack-message-id", start_cmd)
+        self.assertEqual(start_cmd[start_cmd.index("--ack-message-id") + 1], "100")
 
     def test_progress_burst_is_coalesced_to_one_edit(self) -> None:
         active = {

@@ -969,6 +969,11 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     if existing.get("message_id"):
         result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "edited"
+    elif ack_message_id:
+        #JAIMES: adopt the fresh acknowledgement as the one live card. Sending
+        # another message here created the duplicate objective/work-card bubble.
+        result = edit_card(ack_message_id, text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
+        action = "adopted"
     else:
         result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "sent"
@@ -980,6 +985,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     message_id = existing.get("message_id")
     if action == "sent":
         message_id = result.get("result", {}).get("message_id")
+    elif action == "adopted":
+        message_id = ack_message_id
     final_message_id = existing.get("final_message_id")
     final_action = None
     if final_text:
