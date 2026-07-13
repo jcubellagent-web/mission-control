@@ -184,3 +184,19 @@ def test_dash_rows_use_two_space_hanging_indent():
     assert len(rows) > 1
     assert all(row.startswith("  ") for row in rows[1:])
     assert max(map(len, rows)) <= card.CARD_WRAP_WIDTH
+
+
+def test_final_summary_is_html_preformatted_and_bounded():
+    rendered = card.build_completion_summary(
+        title="Render final response summaries in fixed-width Telegram code blocks",
+        status="done",
+        model="openai-codex/gpt-5.6-sol",
+        done=["Updated every agent renderer and verified the deployed mirrors"],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert "What was done:" in body
+    assert "Approval needed:" in body

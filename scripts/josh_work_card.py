@@ -671,12 +671,12 @@ def build_completion_summary(
 
     def final_lines(items: list[str], fallback: str) -> list[str]:
         clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [f"- {html.escape(item)}" for item in clean[:5]] or [f"- {fallback}"]
+        return [line for item in (clean[:5] or [fallback]) for line in hanging_bullet_lines(item)]
 
     lines = [
-        f"Model: {html.escape(friendly_model_line(model_line))} | Route: {html.escape(resolve_auth_path(model_line))} | Why: verified task execution",
+        *hanging_status_lines(f"Model: {friendly_model_line(model_line)} | Route: {resolve_auth_path(model_line)} | Why: verified task execution"),
         "",
-        f"Complete: {complete} - {html.escape(complete_detail)}",
+        *hanging_status_lines(f"Complete: {complete} - {complete_detail}"),
         "",
         "What was done:",
         *final_lines(steps, f"Closed out: {title}"),
@@ -690,7 +690,7 @@ def build_completion_summary(
         "Approval needed:",
         *final_lines(approval_needed, "n/a"),
     ]
-    return "\n".join(lines)
+    return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
 
 
 def build_card(

@@ -4,12 +4,12 @@ All Josh-facing live work cards use one fixed-width Telegram rendering contract.
 
 ## Required geometry
 
-- Container: Telegram HTML `<pre>`
+- Container: Telegram HTML `<pre>` for both live cards and final summaries
 - Server-side wrap width: 38 columns
 - Emoji/check continuation indent: 3 ASCII spaces
 - Plain `- ` continuation indent: 2 ASCII spaces
 - Numbered continuation indent: length of the numeric prefix
-- Final summaries remain normal Telegram bubbles
+- Final summaries use the same fixed-width `<pre>` geometry
 
 Do not use proportional-text spacing, `&nbsp;`, or Unicode nonbreaking spaces to simulate alignment. Telegram code blocks use fixed-width cells, so values that look correct in proportional text do not render one-to-one.
 

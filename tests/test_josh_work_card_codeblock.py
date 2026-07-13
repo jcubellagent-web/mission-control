@@ -57,3 +57,19 @@ def test_live_card_is_html_preformatted_and_bounded():
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
     assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "\n✅ action: patch — updated the\n   fixed-width renderer\n" in rendered
+
+
+def test_final_summary_is_html_preformatted_and_bounded():
+    rendered = card.build_completion_summary(
+        title="Render final response summaries in fixed-width Telegram code blocks",
+        status="done",
+        model="google/gemini-2.5-flash",
+        done=["Updated every agent renderer and verified the deployed mirrors"],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert "What was done:" in body
+    assert "Approval needed:" in body

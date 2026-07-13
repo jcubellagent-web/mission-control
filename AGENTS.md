@@ -218,7 +218,7 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - If no new tool/model event is visible for a longer-running task, update the card with a short "still working" heartbeat instead of letting the card look frozen.
 - Publish Brain Feed under the agent that received the Telegram task. If the task was in Josh 2.0 Telegram, publish as `--agent josh2`; if it was in JAIMES Telegram, publish as `--agent jaimes`.
 - Do not show routing/model buttons by default. Only show routing buttons when it is useful for Josh to steer the objective toward a specific model or agent.
-- Complete the live work card after local/tool work is finished or a blocker needs Josh, then send one separate final summary card. Do not send a second native completion message.
+- Complete the live work card after local/tool work is finished or a blocker needs Josh, then send one separate final summary in the same 38-column Telegram HTML `<pre>` format. Do not send a second native completion message.
 - Start every native reply and work-card model field from verified runtime state. Use the compact format `Model: <provider/model> — <lane>` in native replies.
 - Show buttons only for real approvals or mitigations. Never add routine model-routing, status, or `n/a` controls.
 

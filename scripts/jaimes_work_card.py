@@ -630,13 +630,13 @@ def build_completion_summary(
 
     def final_lines(items: list[str], fallback: str) -> list[str]:
         clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [html.escape(hanging_wrap(f"- {item}")) for item in clean[:5]] or [html.escape(hanging_wrap(f"- {fallback}"))]
+        return [hanging_wrap(f"- {item}") for item in clean[:5]] or [hanging_wrap(f"- {fallback}")]
 
     approval_needed = next_steps if issues else []
     lines = [
-        f"Model: {html.escape(friendly_model_line(model_line))} | Route: Hermes workhorse | Why: verified task execution",
+        hanging_wrap(f"Model: {friendly_model_line(model_line)} | Route: Hermes workhorse | Why: verified task execution"),
         "",
-        f"Complete: {'Yes' if complete else 'No'} - {html.escape(compact(title, limit=120))}",
+        hanging_wrap(f"Complete: {'Yes' if complete else 'No'} - {compact(title, limit=120)}"),
         "",
         "What was done:",
         *final_lines(unique_steps[-5:], f"Closed out: {title}"),
@@ -650,7 +650,7 @@ def build_completion_summary(
         "Approval needed:",
         *final_lines(approval_needed, "n/a"),
     ]
-    return "\n".join(lines)
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
 
 
 def live_phase(status: str, current: str) -> str:

@@ -20,7 +20,7 @@ Use this whenever a Telegram-facing task needs to feel clear, live, and low-nois
 
 ## Final Summary Template
 
-Use plain-text labels. Do not use HTML, Markdown bold, Markdown headings, or other emphasis in Telegram final summaries; Telegram renders those larger/heavier and makes the chat harder to scan.
+Render the entire final summary inside a Telegram HTML `<pre>` block using the same 38-column fixed-width geometry as live cards. Use plain-text labels inside the block: no Markdown bold, headings, or other emphasis. Pre-wrap every dynamic line server-side; plain `- ` bullets use two-space continuation indents and other wrapped rows use three spaces.
 
 - `Complete:` Yes or No plus whether the objective was completed.
 - `What was done:` 3-5 tight bullets.
