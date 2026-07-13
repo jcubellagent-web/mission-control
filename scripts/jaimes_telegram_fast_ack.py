@@ -397,6 +397,7 @@ def recent_prompt_events_from_state_db(session_id: str, after_message_id: int) -
         SELECT id, timestamp, content, platform_message_id
         FROM messages
         WHERE session_id = ? AND role = 'user' AND id > ?
+          AND TRIM(COALESCE(content, '')) != ''
         ORDER BY id ASC
     """
     con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
