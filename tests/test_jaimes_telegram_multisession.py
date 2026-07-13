@@ -121,6 +121,19 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertIn("--ack-message-id", start_cmd)
         self.assertEqual(start_cmd[start_cmd.index("--ack-message-id") + 1], "100")
 
+    def test_same_task_key_never_sends_a_second_ack_or_card(self) -> None:
+        event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17"}
+        state = {"processed_task_keys": ["jaimes-fast-ack--1003589561528-9"]}
+        with patch.object(watcher, "send_initial_ack") as initial, \
+             patch.object(watcher, "set_eyes_reaction") as reaction, \
+             patch.object(watcher, "run_cmd") as run:
+            result = watcher.send_ack(event, "openai-codex/gpt-5.6-sol", state, meta=meta)
+        self.assertTrue(result["duplicate_suppressed"])
+        initial.assert_not_called()
+        reaction.assert_not_called()
+        run.assert_not_called()
+
     def test_progress_burst_is_coalesced_to_one_edit(self) -> None:
         active = {
             "telegram-message-9": {

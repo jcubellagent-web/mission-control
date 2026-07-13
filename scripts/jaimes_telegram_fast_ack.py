@@ -1065,6 +1065,23 @@ def event_age_seconds(ts: str) -> float | None:
 def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: bool = False, meta: dict[str, Any] | None = None) -> dict[str, Any]:
     task_identity = event.get("platform_message_id") or event.get("db_message_id") or event["ts"].replace(":", "").replace(".", "-")
     key = f"jaimes-fast-ack-{(meta or {}).get('telegram_chat_id') or 'telegram'}-{task_identity}"
+    if key in set(state.get("processed_task_keys") or []):
+        #JAIMES: a replayed state-db row with the same stable task key must not
+        # create a second acknowledgement or work-card lifecycle.
+        return {
+            "ok": True,
+            "duplicate_suppressed": True,
+            "ack_message_id": "",
+            "key": key,
+            "model": model or DEFAULT_MODEL,
+            "route": "",
+            "skill": {},
+            "objective": objective_from_prompt(event.get("prompt", "")),
+            "reaction_ok": False,
+            "button_triggered": False,
+            "run_id": "",
+            "last_card_update_at": utc_now(),
+        }
     prompt = event.get("prompt", "")
     objective = objective_from_prompt(prompt)
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
@@ -1125,6 +1142,8 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
                 display_model,
                 "--route",
                 display_route,
+                "--ack-message-id",
+                ack_message_id,
                 "--now",
                 "Objective, model route, and runbook confirmed",
                 "--done",
@@ -1533,6 +1552,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             result["x_intelligence_queued"] = queued_x
         if result.get("ok"):
             acked.add(event_id)
+            state.setdefault("processed_task_keys", []).append(str(result.get("key") or ""))
+            state["processed_task_keys"] = sorted({k for k in state["processed_task_keys"] if k})[-300:]
             if result.get("run_id"):
                 state["active_cards"][result["run_id"]] = {
                     "key": result.get("key"),
