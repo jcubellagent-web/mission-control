@@ -121,6 +121,7 @@ def test_complete_card_keeps_cumulative_major_steps_and_final_marker():
         next_step="No action needed.",
         blocker="None",
     )
+    normalized = " ".join(text.split())
     for expected in (
         "🧭 skill: telegram-task-flow",
         "🧠 decision: preserve cumulative major-step history",
@@ -129,7 +130,7 @@ def test_complete_card_keeps_cumulative_major_steps_and_final_marker():
         "✅ verify: terminal",
         "🏁 final: summary sent",
     ):
-        assert expected in text
+        assert expected in normalized
 
 
 def test_long_history_keeps_early_skill_and_decision_plus_recent_steps():
@@ -142,3 +143,26 @@ def test_long_history_keeps_early_skill_and_decision_plus_recent_steps():
     assert any("🧠 decision:" in line for line in lines)
     assert any("phase 15" in line for line in lines)
     assert len(lines) == 12
+
+
+def test_emoji_rows_use_six_space_hanging_indent():
+    wrapped = card.hanging_wrap(
+        "✅ tool: web_search — researching "
+        "site:inspect.aisi.org.uk custom eval task datasets and scorers"
+    )
+    rows = wrapped.splitlines()
+    assert rows[0] == "✅ tool: web_search — researching"
+    assert rows[1] == "      site:inspect.aisi.org.uk custom eval"
+    assert all(row.startswith("      ") for row in rows[1:])
+    assert max(map(len, rows)) <= card.CARD_WRAP_WIDTH
+
+
+def test_dash_rows_use_two_space_hanging_indent():
+    wrapped = card.hanging_wrap(
+        "- Wait for the active shared source lease to finish before applying "
+        "the verified renderer patch."
+    )
+    rows = wrapped.splitlines()
+    assert len(rows) > 1
+    assert all(row.startswith("  ") for row in rows[1:])
+    assert max(map(len, rows)) <= card.CARD_WRAP_WIDTH

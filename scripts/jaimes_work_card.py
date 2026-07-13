@@ -18,6 +18,8 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
+CARD_WRAP_WIDTH = max(32, int(os.environ.get("JAIMES_CARD_WRAP_WIDTH", "42")))
+CARD_CONTINUATION_INDENT = "      "
 #JAIMES: one absolute state path prevents completion calls launched from a
 #different cwd from rebuilding the card with only the last "summary sent" row.
 STATE_PATH = Path(os.environ.get("JAIMES_WORK_CARD_STATE", str(ROOT.parent / "memory" / "jaimes_work_cards.json")))
@@ -190,6 +192,23 @@ def compact(value: str, fallback: str = "", limit: int = 220) -> str:
 
 def clean_live_text(value: str, fallback: str = "") -> str:
     return " ".join((value or fallback).replace("...", "").replace("…", "").split())
+
+
+def hanging_wrap(value: str, *, width: int = CARD_WRAP_WIDTH) -> str:
+    """Wrap a card row with a mobile-friendly hanging indent."""
+    text = clean_live_text(value)
+    if not text:
+        return ""
+    indent = "  " if text.startswith("- ") else CARD_CONTINUATION_INDENT
+    return "\n".join(
+        textwrap.wrap(
+            text,
+            width=width,
+            subsequent_indent=indent,
+            break_long_words=False,
+            break_on_hyphens=False,
+        )
+    )
 
 
 def estimate_initial_plan(title: str) -> tuple[int, str]:
@@ -499,7 +518,7 @@ def bullet_lines(items: list[str], *, fallback: str = "n/a", limit: int = 5) -> 
             clean.append(text)
     if not clean:
         clean = [fallback]
-    return [f"- {html.escape(item)}" for item in clean[:limit]]
+    return [html.escape(hanging_wrap(f"- {item}")) for item in clean[:limit]]
 
 
 def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int = 10) -> list[str]:
@@ -510,7 +529,7 @@ def plain_bullet_lines(items: list[str], *, fallback: str = "None", limit: int =
             clean.append(text)
     if not clean:
         clean = [fallback]
-    return [f"- {html.escape(item)}" for item in clean[:limit]]
+    return [html.escape(hanging_wrap(f"- {item}")) for item in clean[:limit]]
 
 
 def live_lines(items: list[str], *, fallback: str = "waiting: first update", limit: int = 6) -> list[str]:
@@ -604,7 +623,7 @@ def build_completion_summary(
 
     def final_lines(items: list[str], fallback: str) -> list[str]:
         clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [f"- {html.escape(item)}" for item in clean[:5]] or [f"- {fallback}"]
+        return [html.escape(hanging_wrap(f"- {item}")) for item in clean[:5]] or [html.escape(hanging_wrap(f"- {fallback}"))]
 
     approval_needed = next_steps if issues else []
     lines = [
@@ -651,7 +670,7 @@ def check_lines(items: list[str], *, fallback: str, limit: int = 4) -> list[str]
         text = compact(text, limit=120)
         if text and text not in clean:
             clean.append(text)
-    return [f"✓ {html.escape(item)}" for item in clean[-limit:]] if clean else [fallback]
+    return [html.escape(hanging_wrap(f"✓ {item}")) for item in clean[-limit:]] if clean else [fallback]
 
 
 def activity_lines(items: list[str], *, fallback: str, limit: int = 12) -> list[str]:
@@ -672,7 +691,7 @@ def activity_lines(items: list[str], *, fallback: str, limit: int = 12) -> list[
                 anchors.append(match)
         recent = clean[-max(1, limit - len(anchors)):]
         clean = anchors + [item for item in recent if item not in anchors]
-    return [html.escape(item) for item in clean] if clean else [fallback]
+    return [html.escape(hanging_wrap(item)) for item in clean] if clean else [fallback]
 
 
 def build_card(
@@ -724,7 +743,7 @@ def build_card(
         html.escape(progress),
         "",
         "<b>🔄 Now</b>",
-        html.escape(current),
+        html.escape(hanging_wrap(current)),
         "",
         "<b>✅ Completed</b>",
         *activity_lines(completed, fallback="Nothing completed yet", limit=12),
