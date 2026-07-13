@@ -26,7 +26,7 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     args = SimpleNamespace(
         key="single-card", title="Fix duplicate cards", model="model", route="route",
         now="Working", done="Received task", next="Verify", blocker="None", eta="",
-        ack_message_id="100", chat_id="-1003589561528", thread_id="17",
+        ack_message_id="100", separate_message=False, chat_id="-1003589561528", thread_id="17",
         buttons=None, buttons_file=None, routing_buttons=False,
         approval_buttons=False, no_buttons=True, final_summary=False,
         no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
@@ -44,6 +44,30 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     send.assert_not_called()
     assert saved["cards"]["single-card"]["message_id"] == "100"
     assert saved["cards"]["single-card"]["retention"] == "persistent-edit-only"
+
+
+def test_objective_and_live_card_are_separate_messages():
+    args = SimpleNamespace(
+        key="three-bubble", title="Restore middle card", model="model", route="route",
+        now="Working", done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="100", separate_message=True, chat_id="-1003589561528", thread_id="17",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    saved = {}
+    with patch.object(card, "load_state", return_value={"cards": {}}), \
+         patch.object(card, "save_state", side_effect=lambda state: saved.update(state)), \
+         patch.object(card, "edit_card") as edit, \
+         patch.object(card, "send_card", return_value={"ok": True, "result": {"message_id": 101}}) as send, \
+         patch.object(card, "edit_objective_message") as edit_objective, \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 0
+    send.assert_called_once()
+    edit.assert_not_called()
+    edit_objective.assert_not_called()
+    assert saved["cards"]["three-bubble"]["ack_message_id"] == "100"
+    assert saved["cards"]["three-bubble"]["message_id"] == 101
 
 
 def test_live_card_delete_is_blocked_without_explicit_override():

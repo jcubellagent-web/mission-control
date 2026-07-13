@@ -1159,6 +1159,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
                 display_route,
                 "--ack-message-id",
                 ack_message_id,
+                "--separate-message",
                 "--now",
                 "Objective, model route, and runbook confirmed",
                 "--done",

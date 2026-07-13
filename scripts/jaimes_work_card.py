@@ -972,11 +972,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         render_now = (new_done[-1] if new_done else previous_current) or "Finished and verified the result"
     route = args.route or existing.get("route") or ""
     model = args.model or existing.get("model") or ""
-    ack_message_id = args.ack_message_id or existing.get("ack_message_id")
+    objective_message_id = args.ack_message_id or existing.get("ack_message_id")
+    ack_message_id = "" if args.separate_message else objective_message_id
     chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("TELEGRAM_TARGET_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID")
     thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("TELEGRAM_THREAD_ID")
-    if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
+    if not args.separate_message and not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
         ack_message_id = claim_pending_ack(args.key)
+        objective_message_id = ack_message_id or objective_message_id
     text = build_card(
         title=title,
         status=status,
@@ -1060,7 +1062,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     cards[args.key] = {
         "title": title,
         "message_id": message_id,
-        "ack_message_id": ack_message_id,
+        "ack_message_id": objective_message_id,
         "final_message_id": final_message_id,
         "approval_message_id": approval_message_id,
         "status": status,
@@ -1106,6 +1108,7 @@ def main() -> int:
     parser.add_argument("--blocker", default="None")
     parser.add_argument("--eta")
     parser.add_argument("--ack-message-id")
+    parser.add_argument("--separate-message", action="store_true", help="Keep the objective bubble and send the work card as its own persistent message")
     parser.add_argument("--chat-id")
     parser.add_argument("--thread-id")
     parser.add_argument("--buttons")
