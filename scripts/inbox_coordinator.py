@@ -56,17 +56,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b", re.I),
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
-WORKER_OUTPUT_CONTRACT = """Return a concise operational answer using exactly these plain-text sections:
-Complete: Yes or No
-What was done:
-- 3 to 5 tight bullets
-Issues:
-- bullets or n/a
-Appropriate next steps:
-- useful next action or No action needed.
-Approval needed:
-- one concrete approval per issue or n/a
-Do not claim a provider, model, host, worker, route, or latency. The coordinator inserts verified runtime facts after execution. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+WORKER_OUTPUT_CONTRACT = """Answer the user directly in a concise, natural voice. Lead with the useful answer, then include only the context or next step that genuinely helps. Match the requested length and format; do not force the reply into status-report sections. If the task is blocked, say plainly what happened and what is needed. Do not claim a provider, model, host, worker, route, or latency. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 FINAL_SECTION_LABELS = {
     "complete": "Complete:",
     "done": "What was done:",
@@ -550,44 +540,28 @@ def parse_model_sections(output: str) -> dict[str, Any]:
 
 
 def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: str) -> str:
-    sections = parse_model_sections(output)
-    provider = clean_final_item(str(execution.get("actualProvider") or route.get("provider") or "unverified"), 80)
-    model = clean_final_item(str(execution.get("actualModel") or "unverified"), 100)
-    worker = clean_final_item(str(execution.get("actualWorker") or route.get("worker") or "unverified"), 100)
-    host = clean_final_item(str(execution.get("actualHost") or route.get("host") or "unverified"), 80)
-    route_id = clean_final_item(str(route.get("routeId") or "unverified"), 60)
-    why = clean_final_item(str(route.get("routingReason") or "verified coordinator route"), 160)
-    fallback = clean_final_item(str(route.get("fallback") or ""), 120)
-    if fallback:
-        why = f"{why}; {fallback}"
-    lines = [
-        f"Model: {provider}/{model} | Route: {route_id} via {worker} on {host} | Why: {why}",
-        "",
-        f"Complete: {'Yes' if sections['complete'] else 'No'}",
-        "",
-        "What was done:",
-        *[f"- {item}" for item in sections["done"]],
-        "",
-        "Issues:",
-        *([f"- {item}" for item in sections["issues"]] if sections["issues"] else ["- n/a"]),
-        "",
-        "Appropriate next steps:",
-        *[f"- {item}" for item in sections["next"]],
-        "",
-        "Approval needed:",
-        *([f"- {item}" for item in sections["approval"]] if sections["approval"] else ["- n/a"]),
-    ]
-    wrapped: list[str] = []
+    #JAIMES: runtime facts stay on the editable card/telemetry; keep the final
+    # user-facing message conversational instead of repeating internal routing.
+    body = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
+    body = re.sub(r"</?pre>", "", body, flags=re.I)
+    body = re.sub(r"(?m)^\s*```[^\n]*\n?", "", body)
+    body = re.sub(r"(?m)^\s{0,3}#{1,6}\s+", "", body)
+    body = re.sub(r"\*\*([^*]+)\*\*", r"\1", body)
+    body = re.sub(r"__([^_]+)__", r"\1", body)
+    body = re.sub(r"`([^`\n]+)`", r"\1", body)
+    body = redact_secret_values(body)
+    lines = [line.rstrip() for line in body.splitlines()]
+    natural_lines: list[str] = []
     for line in lines:
-        if not line:
-            wrapped.append("")
+        if not line and (not natural_lines or not natural_lines[-1]):
             continue
-        indent = "  " if line.startswith("- ") else "   "
-        wrapped.extend(textwrap.wrap(line, width=38, subsequent_indent=indent, break_long_words=False, break_on_hyphens=False) or [""])
-    body = "\n".join(wrapped)
+        natural_lines.append(line)
+    body = "\n".join(natural_lines).strip()
+    if not body:
+        body = "I couldn't produce a useful answer for that request. Please try again."
     if len(body) > 3950:
         body = body[:3900].rstrip() + "\n\n- Output shortened for Telegram."
-    return f"<pre>{html.escape(body)}</pre>"
+    return html.escape(body)
 
 
 def dedupe_key(prompt: str, origin: dict[str, str], sensitive: bool = False) -> str:
@@ -972,7 +946,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
                 snapshot,
                 route,
                 failure_execution,
-                "Complete: No\nWhat was done:\n- Acknowledged the Inbox request\n- Attempted the selected worker route\n- Stopped without claiming successful model execution\nIssues:\n- The worker did not complete successfully\nAppropriate next steps:\n- Retry after the selected route is healthy\nApproval needed:\n- n/a",
+                "I couldn't complete that request because the selected worker stopped before producing a verified result. Please retry once that route is healthy; no successful model execution was claimed.",
             )
 
     latency_ms = max(0, round((time.perf_counter() - started) * 1000))

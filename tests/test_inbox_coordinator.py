@@ -183,7 +183,7 @@ class InboxCoordinatorTests(unittest.TestCase):
             persisted = coordinator.STATE_PATH.read_text()
             self.assertNotIn("API key", persisted)
 
-    def test_postprocessor_uses_verified_route_and_redacts_secret_values(self):
+    def test_postprocessor_is_natural_and_redacts_secret_values(self):
         coordinator = load_module()
         route = {
             "routeId": "grok",
@@ -203,14 +203,24 @@ class InboxCoordinatorTests(unittest.TestCase):
         text = coordinator.render_final_html(
             route,
             execution,
-            "Complete: Yes\nWhat was done:\n- Checked the route\n- token: abcdefghijklmnop\n- Finished\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
+            "**The Inbox route is working naturally.**\n\n- Checked the route\n- token: abcdefghijklmnop\n\nNext, send it a normal request.",
         )
         decoded = html.unescape(text)
-        self.assertIn("Model: xai/grok-test", decoded)
-        self.assertIn("jaimes-grok-public", decoded)
+        self.assertIn("The Inbox route is working naturally.", decoded)
+        self.assertIn("Next, send it a normal request.", decoded)
+        self.assertNotIn("Model:", decoded)
+        self.assertNotIn("jaimes-grok-public", decoded)
+        self.assertNotIn("**", decoded)
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
-        self.assertLessEqual(max(len(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
+        self.assertFalse(text.startswith("<pre>"))
+        self.assertLessEqual(len(decoded), 3950)
+
+    def test_worker_contract_requests_a_direct_natural_answer(self):
+        coordinator = load_module()
+        self.assertIn("Answer the user directly", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("do not force the reply into status-report sections", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertNotIn("using exactly these plain-text sections", coordinator.WORKER_OUTPUT_CONTRACT)
 
     def test_recovery_requeues_only_dead_workers(self):
         coordinator = load_module()
