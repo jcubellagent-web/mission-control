@@ -166,6 +166,7 @@ MODEL_ALIASES = {
     "jain": "jaimes",
     "glm-5.2": "glm",
     "glm 5.2": "glm",
+    "glm": "glm",
     "ollama": "ollama",
     "grok": "grok",
     "xai": "grok",

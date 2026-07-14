@@ -48,6 +48,16 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "luna")
         self.assertIn("unhealthy", route["fallback"])
 
+    def test_explicit_glm_request_selects_glm_when_healthy(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Use GLM for this task.",
+            injected_health={"glm": True, "luna": True},
+        )
+        self.assertEqual(route["requestedRouteId"], "glm")
+        self.assertEqual(route["routeId"], "glm")
+        self.assertIs(route["explicitRequest"], True)
+
     def test_private_or_secret_terms_stay_on_josh_lane(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
