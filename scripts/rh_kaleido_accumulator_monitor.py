@@ -6,6 +6,8 @@ from pathlib import Path
 sys.path.insert(0,'/Users/jc_agent/.hermes/scripts')
 import rh_autonomous_executor as e
 K='0x6689ab375aaaa9aed78aaaba2e8edcc547478cf1';CFG=Path('/Users/jc_agent/.hermes/config/rh_kaleido_accumulator.json');STATE=Path('/Users/jc_agent/.hermes/cron/state/rh_kaleido_accumulator.json');CAND=Path('/Users/jc_agent/reports/rh_kaleido_accumulator_candidate.json');OUT=Path('/Users/jc_agent/reports/rh_kaleido_accumulator_latest.json');EXEC=Path('/Users/jc_agent/reports/rh_kaleido_accumulator_execution_latest.json')
+HEALTH=Path('/Users/jc_agent/.hermes/cron/state/rh_kaleido_accumulator_health.json')
+TRANSIENT_MARKERS=('429','too many requests','timeout','timed out','deadline exceeded','temporarily unavailable','connection reset','urlopen error','remote end closed')
 def load(p,d):
  try:return json.loads(p.read_text())
  except Exception:return d
@@ -41,4 +43,19 @@ def main():
  if buyhash and st.get('last_reported_tx')!=buyhash:
   print(f"```text\nKALEIDO ACCUMULATED | +{float(ex['acquired_kaleido']):.4f} | total {float(ex['balance_kaleido']):.4f}/1.0000 | spent {float(ex['spent_weth']):.5f} WETH | {buyhash}\n```");st['last_reported_tx']=buyhash
  save(STATE,st);return 0
-if __name__=='__main__':raise SystemExit(main())
+def guarded_main():
+ try:
+  rc=main()
+ except Exception as exc:
+  text=str(exc).lower()
+  if not any(marker in text for marker in TRANSIENT_MARKERS):raise
+  now=time.time();health=load(HEALTH,{});last=float(health.get('last_failure_at') or 0);count=int(health.get('consecutive_failures') or 0) if now-last<1800 else 0;count+=1;last_alert=float(health.get('last_alert_at') or 0);alert=count==3 or (count>3 and now-last_alert>=21600)
+  health.update({'consecutive_failures':count,'last_failure_at':now,'last_error_type':type(exc).__name__})
+  if alert:health['last_alert_at']=now
+  save(HEALTH,health)
+  if alert:
+   print(f'KALEIDO monitor provider unavailable for {count} consecutive runs: {type(exc).__name__}: {str(exc)[:240]}',file=sys.stderr)
+   return 1
+  return 0
+ save(HEALTH,{'consecutive_failures':0,'last_success_at':time.time()});return rc
+if __name__=='__main__':raise SystemExit(guarded_main())

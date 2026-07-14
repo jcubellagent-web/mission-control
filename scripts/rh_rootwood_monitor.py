@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Read-only Rootwood inventory, mint, launch, liquidity and secondary monitor."""
-import json,time,urllib.request
+import json,sys,time,urllib.request
 from datetime import datetime,timezone,timedelta
 from pathlib import Path
 from eth_utils import keccak
 RPC='https://rpc.mainnet.chain.robinhood.com';C='0x8D2301C19050bA61C1bA722EFa8a339bADD554Df';W='0xa8Fed22B1DF934370B7E9E0F611a3A894Fc257d8';EVENTS=Path('/Users/jc_agent/reports/rh_nft_activity_events.jsonl');STATE=Path('/Users/jc_agent/.hermes/cron/state/rh_rootwood_monitor.json');OUT=Path('/Users/jc_agent/reports/rh_rootwood_monitor_latest.json')
+HEALTH=Path('/Users/jc_agent/.hermes/cron/state/rh_rootwood_monitor_health.json')
+TRANSIENT_MARKERS=('429','too many requests','timeout','timed out','deadline exceeded','temporarily unavailable','connection reset','urlopen error','remote end closed')
 def rpc(m,p):
  req=urllib.request.Request(RPC,data=json.dumps({'jsonrpc':'2.0','id':1,'method':m,'params':p}).encode(),headers={'Content-Type':'application/json','User-Agent':'Mozilla/5.0','Origin':'https://docs.robinhood.com','Referer':'https://docs.robinhood.com/'});d=json.loads(urllib.request.urlopen(req,timeout=30).read());
  if d.get('error'):raise RuntimeError(d['error'])
@@ -50,4 +52,19 @@ def main():
  save(STATE,{**out,'milestone':milestone})
  if alerts:print('```text\nROOTWOOD MATERIAL UPDATE\n- '+'\n- '.join(alerts)+'\n```')
  return 0
-if __name__=='__main__':raise SystemExit(main())
+def guarded_main():
+ try:
+  rc=main()
+ except Exception as exc:
+  text=str(exc).lower()
+  if not any(marker in text for marker in TRANSIENT_MARKERS):raise
+  now=time.time();health=load(HEALTH,{});last=float(health.get('last_failure_at') or 0);count=int(health.get('consecutive_failures') or 0) if now-last<1800 else 0;count+=1;last_alert=float(health.get('last_alert_at') or 0);alert=count==3 or (count>3 and now-last_alert>=21600)
+  health.update({'consecutive_failures':count,'last_failure_at':now,'last_error_type':type(exc).__name__})
+  if alert:health['last_alert_at']=now
+  save(HEALTH,health)
+  if alert:
+   print(f'Rootwood monitor provider unavailable for {count} consecutive runs: {type(exc).__name__}: {str(exc)[:240]}',file=sys.stderr)
+   return 1
+  return 0
+ save(HEALTH,{'consecutive_failures':0,'last_success_at':time.time()});return rc
+if __name__=='__main__':raise SystemExit(guarded_main())
