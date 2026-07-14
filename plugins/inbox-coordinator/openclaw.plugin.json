@@ -1,0 +1,23 @@
+{
+  "id": "inbox-coordinator",
+  "name": "Inbox Coordinator",
+  "description": "Claims untagged Josh 2.0 Inbox messages and dispatches one private asynchronous worker.",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "chatId": { "type": "string" },
+      "threadId": { "type": "string" },
+      "pythonPath": { "type": "string" },
+      "helperPath": { "type": "string" },
+      "jaimesMentions": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "activation": {
+    "onStartup": true
+  }
+}

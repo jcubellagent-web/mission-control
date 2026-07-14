@@ -1,7 +1,10 @@
 import html
 import importlib.util
 import json
+import os
 from pathlib import Path
+import stat
+import tempfile
 import unittest
 
 
@@ -17,6 +20,13 @@ def load_module():
 
 
 class InboxCoordinatorTests(unittest.TestCase):
+    def configure_private_state(self, coordinator, root: Path):
+        coordinator.PRIVATE_DIR = root / "private"
+        coordinator.STATE_PATH = coordinator.PRIVATE_DIR / "jobs.json"
+        coordinator.LOCK_PATH = coordinator.PRIVATE_DIR / "jobs.lock"
+        coordinator.TELEMETRY_PATH = root / "telemetry.jsonl"
+        coordinator.publish_control_tower = lambda *args, **kwargs: None
+
     def test_explicit_model_request_wins_when_healthy(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
@@ -47,6 +57,18 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "luna")
         self.assertEqual(route["provider"], "codex")
 
+    def test_explicit_remote_model_cannot_override_privacy_policy(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Use Grok on this OAuth token incident.",
+            privacy="sensitive-account",
+            injected_health={"grok": True, "luna": True},
+        )
+        self.assertEqual(route["requestedRouteId"], "grok")
+        self.assertEqual(route["routeId"], "luna")
+        self.assertIs(route["policyAllowed"], False)
+        self.assertIn("privacy policy blocked", route["fallback"])
+
     def test_final_summary_is_deterministic_pre_block(self):
         coordinator = load_module()
 
@@ -64,9 +86,12 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertTrue(text.startswith("<pre>"))
         self.assertTrue(text.endswith("</pre>"))
         decoded = html.unescape(text)
-        self.assertIn("Model: codex/gpt-5.6-luna | Route: Josh 2.0 Inbox coordinator | Why: fast coordination", decoded)
+        self.assertIn("Model: codex/gpt-5.6-luna | Route:", decoded)
+        self.assertIn("Josh 2.0 Inbox coordinator | Why:", decoded)
+        self.assertIn("fast coordination", decoded)
         self.assertIn("Complete: Yes", decoded)
         self.assertIn("- n/a", decoded)
+        self.assertLessEqual(max(len(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
 
     def test_telemetry_excludes_prompt_and_output(self):
         coordinator = load_module()
@@ -90,7 +115,118 @@ class InboxCoordinatorTests(unittest.TestCase):
             row = json.loads(telemetry.read_text().splitlines()[0])
             self.assertNotIn("prompt", row)
             self.assertNotIn("output", row)
+            self.assertNotIn("promptSignature", row)
             self.assertEqual(row["model"], "gpt-5.6-luna")
+
+    def test_deduplication_and_private_state_permissions(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.configure_private_state(coordinator, root)
+            route = coordinator.route_prompt("Routine check", injected_health={"luna": True})
+            origin = {"runId": "run-1", "cardKey": "card-1", "chatId": "chat", "threadId": "1"}
+            first, first_deduped = coordinator.make_job("Routine check", route, origin, 30)
+            second, second_deduped = coordinator.make_job("Routine check", route, origin, 30)
+            self.assertIs(first_deduped, False)
+            self.assertIs(second_deduped, True)
+            self.assertEqual(first["jobId"], second["jobId"])
+            self.assertEqual(stat.S_IMODE(coordinator.STATE_PATH.stat().st_mode), 0o600)
+            self.assertEqual(stat.S_IMODE(Path(first["promptPath"]).stat().st_mode), 0o600)
+
+    def test_retry_preserves_prompt_then_result_is_consumed_once(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.configure_private_state(coordinator, root)
+            coordinator.spawn_worker = lambda job_id: None
+            coordinator.deliver_result = lambda *args, **kwargs: True
+            route = coordinator.route_prompt("Retry me", injected_health={"luna": True})
+            job, _ = coordinator.make_job("Retry me", route, {"runId": "run-2"}, 30)
+            prompt_path = Path(job["promptPath"])
+
+            coordinator.execute_route = lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("transient"))
+            first = coordinator.run_worker(job["jobId"])
+            self.assertEqual(first["outcome"], "retry")
+            self.assertTrue(prompt_path.exists())
+
+            coordinator.execute_route = lambda *args, **kwargs: {
+                "output": "finished",
+                "actualHost": "josh2",
+                "actualWorker": "test-worker",
+                "actualProvider": "codex",
+                "actualModel": "gpt-5.6-luna",
+                "modelVerified": True,
+                "executionVerified": True,
+            }
+            second = coordinator.run_worker(job["jobId"])
+            self.assertEqual(second["outcome"], "done")
+            self.assertFalse(prompt_path.exists())
+            taken = coordinator.take_result(job["jobId"])
+            self.assertEqual(taken["output"], "finished")
+            self.assertFalse(coordinator.take_result(job["jobId"])["ok"])
+
+    def test_sensitive_prompt_is_never_persisted_or_hashed(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.configure_private_state(coordinator, root)
+            route = coordinator.route_prompt("Handle this API key safely", injected_health={"luna": True})
+            job, _ = coordinator.make_job(
+                "Handle this API key safely",
+                route,
+                {"messageId": "100", "chatId": "chat", "threadId": "1"},
+                30,
+            )
+            self.assertIs(job["promptEphemeral"], True)
+            self.assertEqual(job["promptPath"], "")
+            self.assertEqual(job["promptSignature"], "")
+            persisted = coordinator.STATE_PATH.read_text()
+            self.assertNotIn("API key", persisted)
+
+    def test_postprocessor_uses_verified_route_and_redacts_secret_values(self):
+        coordinator = load_module()
+        route = {
+            "routeId": "grok",
+            "provider": "xai",
+            "worker": "jaimes-grok-public",
+            "host": "jaimes",
+            "routingReason": "explicit model request",
+            "fallback": "",
+        }
+        execution = {
+            "actualProvider": "xai",
+            "actualModel": "grok-test",
+            "actualWorker": "jaimes-grok-public",
+            "actualHost": "jaimes",
+            "executionVerified": True,
+        }
+        text = coordinator.render_final_html(
+            route,
+            execution,
+            "Complete: Yes\nWhat was done:\n- Checked the route\n- token: abcdefghijklmnop\n- Finished\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
+        )
+        decoded = html.unescape(text)
+        self.assertIn("Model: xai/grok-test", decoded)
+        self.assertIn("jaimes-grok-public", decoded)
+        self.assertNotIn("abcdefghijklmnop", decoded)
+        self.assertIn("[redacted]", decoded)
+        self.assertLessEqual(max(len(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
+
+    def test_recovery_requeues_only_dead_workers(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.configure_private_state(coordinator, root)
+            route = coordinator.route_prompt("Recover me", injected_health={"luna": True})
+            job, _ = coordinator.make_job("Recover me", route, {"runId": "run-3"}, 30)
+            state = coordinator.read_json(coordinator.STATE_PATH, {"jobs": {}})
+            state["jobs"][job["jobId"]].update({"status": "running", "workerPid": 99999999, "leaseToken": "old"})
+            coordinator.save_json(coordinator.STATE_PATH, state)
+            spawned = []
+            coordinator.spawn_worker = spawned.append
+            result = coordinator.recover()
+            self.assertEqual(result["recovered"], 1)
+            self.assertEqual(spawned, [job["jobId"]])
 
 
 if __name__ == "__main__":

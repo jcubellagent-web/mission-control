@@ -974,15 +974,20 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             eta=args.eta or "",
         )
         buttons = load_buttons(args, status)
-        final_text = build_completion_summary(
-            title=title,
-            status=status,
-            now=args.now or "",
-            done=done,
-            next_step=args.next or "",
-            blocker=args.blocker or "None",
-            model=model,
-        ) if terminal_status and not args.no_final_summary else ""
+        if terminal_status and args.final_text_file:
+            final_text = Path(args.final_text_file).read_text(encoding="utf-8").strip()
+            if not (final_text.startswith("<pre>") and final_text.endswith("</pre>")):
+                raise SystemExit("--final-text-file must contain one Telegram HTML <pre> block")
+        else:
+            final_text = build_completion_summary(
+                title=title,
+                status=status,
+                now=args.now or "",
+                done=done,
+                next_step=args.next or "",
+                blocker=args.blocker or "None",
+                model=model,
+            ) if terminal_status and not args.no_final_summary else ""
 
         if args.dry_run:
             print(json.dumps({"ok": True, "dry_run": True, "text": text, "final_text": final_text, "buttons": buttons, "existing": existing}, indent=2))
@@ -1084,6 +1089,7 @@ def main() -> int:
     parser.add_argument("--no-buttons", action="store_true")
     #JAIMES: default lifecycle preserves the live card and emits one final outcome card; opt out only for deliberately card-only runs.
     parser.add_argument("--no-final-summary", action="store_true", help="Complete the live card without a separate final summary card")
+    parser.add_argument("--final-text-file", help="Private file containing an already-normalized Telegram HTML <pre> final summary")
     parser.add_argument("--separate-final-summary", action="store_true", help="Compatibility no-op; separate final summary cards are the default")
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
