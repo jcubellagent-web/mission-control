@@ -98,7 +98,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(result["sent"], [])
         send.assert_not_called()
 
-    def test_objective_and_work_card_are_separate_bubbles(self) -> None:
+    def test_visible_ack_is_the_single_editable_work_card(self) -> None:
         event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}
         meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17", "origin": {"message_id": "77"}}
         state = {}
@@ -111,16 +111,15 @@ class MultiSessionWatcherTests(unittest.TestCase):
              patch.object(watcher, "send_chat_action"), \
              patch.object(watcher, "send_message_draft"), \
              patch.object(watcher, "should_start_visible_card", return_value=True), \
-             patch.object(watcher, "run_cmd", return_value={"ok": True}) as run, \
+             patch.object(watcher, "run_cmd", return_value={"ok": True, "message_id": "100"}) as run, \
              patch.object(watcher, "publish_jaimes"):
             result = watcher.send_ack(event, "openai-codex/gpt-5.6-sol", state, meta=meta)
         self.assertTrue(result["reaction_ok"])
-        self.assertIn("👀", initial.call_args.args[0])
+        self.assertEqual(result["ack_message_id"], "100")
+        initial.assert_not_called()
         start_cmd = run.call_args.args[0]
         self.assertIn("start", start_cmd)
-        self.assertIn("--ack-message-id", start_cmd)
-        self.assertEqual(start_cmd[start_cmd.index("--ack-message-id") + 1], "100")
-        self.assertIn("--separate-message", start_cmd)
+        self.assertNotIn("--separate-message", start_cmd)
 
     def test_same_task_key_never_sends_a_second_ack_or_card(self) -> None:
         event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}

@@ -1463,6 +1463,15 @@ def session_has_compaction_marker(session_id: str) -> bool:
         ).fetchone()
         if row:
             return True
+        session_columns = {
+            str(column[1])
+            for column in con.execute("PRAGMA table_info(sessions)").fetchall()
+        }
+        if not {"id", "parent_session_id", "end_reason"}.issubset(session_columns):
+            # Older Hermes state databases and small test fixtures predate the
+            # compaction-edge columns. The explicit marker above remains valid;
+            # absence of the newer schema is not itself evidence of compaction.
+            return False
         #JAIMES: a compression child may carry replayed user turns without a
         # marker. Treat the parent compression edge as equivalent so poll_once
         # keeps extending the existing card instead of creating a new pair.
