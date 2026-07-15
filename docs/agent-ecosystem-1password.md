@@ -3,19 +3,39 @@
 The shared secret source is a dedicated 1Password vault named `Agent Ecosystem`.
 Josh 2.0 and JAIMES/J.A.I.N use separate host-scoped read-only service accounts.
 
+## Production state
+
+As of 2026-07-14, the production launch paths are fully migrated:
+
+- Josh 2.0 OpenCLAW resolves the shared template from 1Password before the
+  gateway starts.
+- JAIMES OpenCLAW and Telegram fast-ack resolve the shared template from
+  1Password before their child processes start.
+- JAIMES Hermes resolves `config/agent-ecosystem-hermes.op.env`. Its OpenRouter
+  and Telegram credentials are dedicated items named `OpenRouter JAIMES Hermes`
+  and `Telegram JAIMES Hermes Bot`; the remaining integrations use shared vault
+  items.
+- Active host configuration contains no plaintext assignments for the migrated
+  shared credential set. Pre-migration copies are isolated under host-local
+  backup directories, not active service/config directories.
+- JOSHeX uses its signed-in 1Password desktop account for intentional vault
+  administration. It does not receive a background service-account token.
+
 ## Manual Provisioning
 
 1. Create the `Agent Ecosystem` vault.
 2. Move shared automation secrets into named items with fields matching
-   `config/agent-ecosystem.op.env`.
+   `config/agent-ecosystem.op.env` and
+   `config/agent-ecosystem-hermes.op.env`.
 3. Create read-only 1Password service accounts:
    - Josh 2.0 host: read-only access to the `Agent Ecosystem` vault.
    - JAIMES/J.A.I.N host: read-only access to the same vault.
 4. Store each service-account token only in that host's macOS Keychain service:
    - Josh 2.0: `com.josh.agent-ecosystem.op-service-account.josh2`
    - JAIMES/J.A.I.N: `com.josh.agent-ecosystem.op-service-account.JC-Agents-Mac-mini`
-5. Launch secreted commands through:
+5. Launch shared secreted commands through:
    `scripts/op_agent_env.sh config/agent-ecosystem.op.env -- <command>`.
+   Launch Hermes through the same wrapper with the Hermes-specific template.
 
 Service-account creation can be done with an already authenticated 1Password
 CLI. Create two distinct credentials; never create one and copy it between
@@ -61,9 +81,9 @@ retries because replay would require retaining the secret-bearing prompt.
 
 After the Josh 2.0 Keychain entry passes presence-only validation:
 
-- Keep the generated OpenCLAW service environment file for non-secret runtime
-  settings only. Remove plaintext `GEMINI_API_KEY` and
-  `JOSH_TELEGRAM_BOT_TOKEN` assignments after confirming their 1Password items.
+- Keep generated OpenCLAW service environment files for non-secret runtime
+  settings only. Remove migrated plaintext assignments only after confirming
+  their 1Password references and a healthy wrapped restart.
 - Chain the existing OpenCLAW environment wrapper into `scripts/op_agent_env.sh`
   before the gateway Node command.
 - Launch `com.josh20.telegram-fast-ack` directly through
@@ -90,8 +110,11 @@ model run.
 - Remove the six shared assignments from the generated OpenCLAW service file
   only after both services restart and pass presence/equality checks.
 - Hermes has distinct OpenRouter and Telegram credentials. Store them as
-  dedicated vault items and use a Hermes-specific `op://` template; never
+  dedicated vault items and use `config/agent-ecosystem-hermes.op.env`; never
   replace those two values with the Josh/OpenCLAW credentials.
+- Launch `ai.hermes.gateway` directly through `scripts/op_agent_env.sh` before
+  the Hermes Python command. Keep Hermes's `.env` for non-migrated settings
+  only.
 
 ## Presence-only validation
 
