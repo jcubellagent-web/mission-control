@@ -265,8 +265,41 @@ def test_live_canary_closes_card_at_100_percent_then_sends_exactly_one_final(mon
     assert len([call for call in module.calls if call[0] == "send_final"]) == 1
     assert result["cleanup"]["attempted"] == 4
     assert result["cleanup"]["deleted"] == 4
-    assert "synthetic cumulative transport timing" in result["scope"]
+    assert "synthetic cumulative response timing" in result["scope"]
+    assert "after the canary anchor receipt" in result["scope"]
     assert "never p95 or inbound-path evidence" in result["scope"]
+
+
+def test_live_canary_excludes_anchor_setup_from_response_slo(monkeypatch) -> None:
+    clock = [0.0]
+    monkeypatch.setattr(stress.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
+
+    class TimedLiveModule(FakeLiveModule):
+        def send_card(self, text, *args, **kwargs) -> dict:
+            clock[0] += 3.0 if "Objective" not in text else 0.2
+            return super().send_card(text, *args, **kwargs)
+
+        def send_rich_message(self, rich, legacy, *args, **kwargs) -> dict:
+            clock[0] += 0.2
+            return super().send_rich_message(rich, legacy, *args, **kwargs)
+
+        def send_final_summary(self, text, *args, **kwargs) -> dict:
+            clock[0] += 0.1
+            return super().send_final_summary(text, *args, **kwargs)
+
+        def api_call(self, method: str, payload: dict, timeout: int = 15) -> dict:
+            if method == "setMessageReaction":
+                clock[0] += 0.1
+            return super().api_call(method, payload, timeout)
+
+    result = stress.live_canary(TimedLiveModule(), "-1001", "1")
+
+    assert result["ok"] is True
+    assert result["timing"]["setupMs"] == 3_000.0
+    assert result["timing"]["cumulativeMs"]["eyes"] == 100.0
+    assert result["timing"]["cumulativeMs"]["header"] == 300.0
+    assert result["timing"]["cumulativeMs"]["liveCard"] == 500.0
 
 
 @pytest.mark.parametrize(

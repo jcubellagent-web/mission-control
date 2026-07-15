@@ -433,6 +433,8 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
     if not all(hasattr(module, name) for name in ("build_task_header", "build_card", "build_rich_card", "send_rich_message", "edit_rich_card")):
         return basic_live_canary(module, chat_id, thread_id)
     start = time.monotonic()
+    response_start: float | None = None
+    setup_ms: float | None = None
     sent_ids: list[str] = []
     stage_ms: dict[str, float] = {}
     failures: list[str] = []
@@ -480,7 +482,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         if final_successes == 1 and not all(
             synthetic_checks[key] for key in ("eyesUnder2s", "headerUnder5s", "liveCardUnder8s")
         ):
-            result_failures.append("synthetic cumulative transport timing exceeded one or more thresholds")
+            result_failures.append("synthetic cumulative response timing exceeded one or more thresholds")
         if final_attempts and not exactly_one_final:
             result_failures.append("exactly-one-final contract failed")
         if cleanup["failedIds"] or cleanup["indeterminateStages"]:
@@ -488,10 +490,11 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         result_failures = list(dict.fromkeys(result_failures))
         return {
             "ok": not result_failures,
-            "scope": "synthetic cumulative transport timing only; never p95 or inbound-path evidence",
+            "scope": "synthetic cumulative response timing begins after the canary anchor receipt; never p95 or inbound-path evidence",
             "renderer": renderer,
             "timing": {
-                "kind": "synthetic cumulative transport timing",
+                "kind": "synthetic cumulative response timing after anchor receipt",
+                "setupMs": setup_ms,
                 "cumulativeMs": stage_ms,
                 "checks": synthetic_checks,
             },
@@ -519,6 +522,12 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         if not anchor.get("ok") or not anchor_id:
             failures.append(f"anchor send failed: {str(anchor.get('error') or 'send failed')[:160]}")
             return finish()
+        # The anchor stands in for a Telegram message that already exists when
+        # Josh receives a real Inbox update. Its outbound setup latency is not
+        # part of Josh's response SLO, so start the synthetic response clock
+        # only after Telegram has returned the anchor receipt.
+        response_start = time.monotonic()
+        setup_ms = round((response_start - start) * 1000, 1)
 
         reaction = module.api_call(
             "setMessageReaction",
@@ -530,7 +539,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             },
             timeout=15,
         )
-        stage_ms["eyes"] = round((time.monotonic() - start) * 1000, 1)
+        stage_ms["eyes"] = round((time.monotonic() - response_start) * 1000, 1)
         if not reaction.get("ok"):
             failures.append("eyes reaction failed")
             return finish()
@@ -543,7 +552,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             thread_id=thread_id,
         )
         header_id = track_delivery(header, "task-header")
-        stage_ms["header"] = round((time.monotonic() - start) * 1000, 1)
+        stage_ms["header"] = round((time.monotonic() - response_start) * 1000, 1)
         if not header.get("ok") or not header_id:
             failures.append("task header send failed")
             return finish()
@@ -574,7 +583,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         )
         live_id = track_delivery(live, "live-card")
         renderer = "rich" if live.get("native_rich_message") else "fallback"
-        stage_ms["liveCard"] = round((time.monotonic() - start) * 1000, 1)
+        stage_ms["liveCard"] = round((time.monotonic() - response_start) * 1000, 1)
         if not live.get("ok") or not live_id:
             failures.append("live card send failed")
             return finish()
@@ -653,7 +662,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         final_id = track_delivery(final, "structured-final")
         if final_id:
             final_ids.append(final_id)
-        stage_ms["final"] = round((time.monotonic() - start) * 1000, 1)
+        stage_ms["final"] = round((time.monotonic() - response_start) * 1000, 1)
         if not final.get("ok") or not final_id:
             failures.append("structured final send failed")
         else:
