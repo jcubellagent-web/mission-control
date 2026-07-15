@@ -40,8 +40,15 @@ Keychain service name.
 - Keep only `op://` references in Git.
 - Do not put service-account tokens in files, launchd plists, Telegram, Control
   Tower, Brain Feed, queues, or logs.
-- The wrapper reads the token from Keychain into process environment only, then
-  executes `op run`. It does not print the token or resolved secret values.
+- The wrapper reads the token from Keychain into process environment only and
+  does not print the token or resolved secret values.
+- Josh 2.0 may use the standard `op run` path. JAIMES uses the canonical
+  `scripts/op_agent_env.sh` direct-read path because 1Password CLI 2.34.x can
+  deadlock launchd capture pipes. Each JAIMES read writes only to a private
+  kernel FIFO, and a separate shell reader imports the value into memory.
+- The JAIMES wrapper stops the CLI daemon and removes its FIFO and lock before
+  launching the service. It also removes the service-account token from the
+  child environment.
 - Shared telemetry records route facts and outcomes only; raw prompts, model
   outputs, OAuth payloads, cookies, passwords, tokens, raw emails, and private
   account contents are not allowed in shared JSONL, queues, or dashboard data.
@@ -72,6 +79,19 @@ It claims untagged messages, silently yields visible ownership to direct
 coordinator worker. `#jaimes` and plain-language delegation remain Josh 2.0
 front-door requests and route to the JAIMES workhorse without a duplicate Josh
 model run.
+
+## JAIMES launcher wiring
+
+- Chain `ai.openclaw.gateway` through the generated service environment and
+  then `scripts/op_agent_env.sh` before the Node gateway command.
+- Launch `ai.jaimes.telegram-fast-ack` directly through
+  `scripts/op_agent_env.sh`; use launchd stdout/stderr paths instead of shell
+  redirection.
+- Remove the six shared assignments from the generated OpenCLAW service file
+  only after both services restart and pass presence/equality checks.
+- Hermes has distinct OpenRouter and Telegram credentials. Store them as
+  dedicated vault items and use a Hermes-specific `op://` template; never
+  replace those two values with the Josh/OpenCLAW credentials.
 
 ## Presence-only validation
 
