@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import tempfile
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "josh_work_card.py"
@@ -73,3 +74,15 @@ def test_final_summary_is_html_preformatted_and_bounded():
     assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "What was done:" in body
     assert "Approval needed:" in body
+
+
+def test_telegram_not_modified_is_an_idempotent_success_signal():
+    assert card.telegram_message_not_modified({"ok": False, "error": "Bad Request: message is not modified"})
+    assert not card.telegram_message_not_modified({"ok": False, "error": "Bad Request: message to edit not found"})
+
+
+def test_final_text_file_accepts_conversational_escaped_text():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        path.write_text("Inbox routing is healthy &amp; ready.", encoding="utf-8")
+        assert card.load_final_text_file(str(path)) == "Inbox routing is healthy &amp; ready."

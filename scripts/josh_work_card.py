@@ -932,6 +932,17 @@ def load_buttons(args: argparse.Namespace, status: str) -> list | None:
     return None
 
 
+def telegram_message_not_modified(result: dict) -> bool:
+    return "message is not modified" in str(result.get("error", "")).lower()
+
+
+def load_final_text_file(path: str) -> str:
+    text = Path(path).read_text(encoding="utf-8").strip()
+    if not text:
+        raise SystemExit("--final-text-file must not be empty")
+    return text
+
+
 def upsert_card(args: argparse.Namespace, status: str) -> int:
     with state_lock():
         state = load_state()
@@ -975,9 +986,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         )
         buttons = load_buttons(args, status)
         if terminal_status and args.final_text_file:
-            final_text = Path(args.final_text_file).read_text(encoding="utf-8").strip()
-            if not (final_text.startswith("<pre>") and final_text.endswith("</pre>")):
-                raise SystemExit("--final-text-file must contain one Telegram HTML <pre> block")
+            final_text = load_final_text_file(args.final_text_file)
         else:
             final_text = build_completion_summary(
                 title=title,
@@ -1005,7 +1014,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         # A retry can encounter an already-updated live card after a later final-card send failed.
         # Treat Telegram's idempotent "not modified" response as success so the terminal flow can resume.
-        if not result.get("ok") and "message is not modified" in str(result.get("error", "")).lower():
+        if not result.get("ok") and telegram_message_not_modified(result):
             result = {"ok": True, "result": {"message_id": existing.get("message_id")}}
         if not result.get("ok"):
             print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
@@ -1025,6 +1034,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             else:
                 final_result = send_final_summary(final_text, args.timeout, buttons, chat_id=chat_id, thread_id=thread_id)
                 final_action = "sent"
+            if not final_result.get("ok") and telegram_message_not_modified(final_result):
+                final_result = {"ok": True, "result": {"message_id": final_message_id}}
             if not final_result.get("ok"):
                 print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
                 return 1
@@ -1089,7 +1100,7 @@ def main() -> int:
     parser.add_argument("--no-buttons", action="store_true")
     #JAIMES: default lifecycle preserves the live card and emits one final outcome card; opt out only for deliberately card-only runs.
     parser.add_argument("--no-final-summary", action="store_true", help="Complete the live card without a separate final summary card")
-    parser.add_argument("--final-text-file", help="Private file containing an already-normalized Telegram HTML <pre> final summary")
+    parser.add_argument("--final-text-file", help="Private file containing already-normalized Telegram HTML or escaped text")
     parser.add_argument("--separate-final-summary", action="store_true", help="Compatibility no-op; separate final summary cards are the default")
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
