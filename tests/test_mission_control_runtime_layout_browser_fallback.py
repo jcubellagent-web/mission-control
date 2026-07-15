@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "mission_control_runtime_layout_check.py"
+FIXTURE_PATH = Path(__file__).parent / "fixtures" / "control-tower-live.ci.json"
+WORKFLOW_PATH = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "mission-control-regression.yml"
 SPEC = importlib.util.spec_from_file_location("mission_control_runtime_layout_check", MODULE_PATH)
 assert SPEC and SPEC.loader
 runtime_layout = importlib.util.module_from_spec(SPEC)
@@ -36,6 +39,37 @@ def missing_browser_error() -> RuntimeError:
         "BrowserType.launch: Executable doesn't exist. "
         "Please run the following command to download new browsers: playwright install"
     )
+
+
+def test_ci_live_data_fixture_satisfies_canonical_contract() -> None:
+    result = runtime_layout.check_control_tower_json(FIXTURE_PATH)
+
+    assert result["name"] == "live-data-json"
+    assert result["state"] == "pass"
+    assert runtime_layout.internal_text_leaks(FIXTURE_PATH.read_text()) == []
+
+
+def test_release_workflow_stages_and_validates_same_live_data_fixture() -> None:
+    workflow = WORKFLOW_PATH.read_text()
+
+    assert "cp tests/fixtures/control-tower-live.ci.json data/control-tower-live.json" in workflow
+    assert "--data data/control-tower-live.json" in workflow
+
+
+@pytest.mark.parametrize("missing_field", ["runtimeLayout", "sourceUpdatedAt"])
+def test_ci_live_data_fixture_keeps_required_fields_strict(
+    missing_field: str,
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    payload.pop(missing_field)
+    candidate = tmp_path / "control-tower-live.json"
+    candidate.write_text(json.dumps(payload))
+
+    result = runtime_layout.check_control_tower_json(candidate)
+
+    assert result["state"] == "fail"
+    assert missing_field in result["detail"]
 
 
 def test_uses_bundled_playwright_browser_without_fallback() -> None:

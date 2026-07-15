@@ -47,6 +47,8 @@ jobs:
         run: |
           python3 scripts/ecosystem_qa_benchmark.py --route-only --no-write
           python3 scripts/ecosystem_qa_benchmark.py --fault-injection --no-write
+      - name: Stage deterministic Control Tower live-data fixture
+        run: cp tests/fixtures/control-tower-live.ci.json data/control-tower-live.json
       - name: Start built Control Tower preview
         run: |
           npm run preview:ci > /tmp/control-tower-preview.log 2>&1 &
@@ -62,6 +64,7 @@ jobs:
       - name: Verify rendered React semantics and visual evidence
         run: |
           python3 scripts/mission_control_runtime_layout_check.py \
+            --data data/control-tower-live.json \
             --strict-browser \
             --strict-visual \
             --screenshot-path screenshots/current/control-tower-runtime.png \
