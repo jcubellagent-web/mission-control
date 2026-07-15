@@ -6,6 +6,8 @@ const DEFAULT_CHAT_ID = "-1003589561528";
 const DEFAULT_THREAD_ID = "1";
 const DEFAULT_MENTIONS = ["@jaimes", "@jain", "@j.a.i.n"];
 const GROUP_TOPIC_RE = /telegram:group:(-?\d+):(?:topic:)?(\d+)/i;
+const DEFAULT_HELPER_TIMEOUT_MS = 4_000;
+const MAX_RECEIPT_BYTES = 4_096;
 
 function stringValue(value, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
@@ -67,11 +69,26 @@ export function helperArgs(event = {}, ctx = {}, config = {}) {
   return args;
 }
 
-export function handleInboxEvent(event = {}, ctx = {}, config = {}, logger = console, dispatch = dispatchClaim) {
+export async function handleInboxEvent(event = {}, ctx = {}, config = {}, logger = console, dispatch = dispatchClaim) {
   const decision = inboxDecision(event, ctx, config);
   if (decision === "ignore") return undefined;
   if (decision === "silence") return { handled: true };
-  return dispatch(event, ctx, config, logger) ? { handled: true } : undefined;
+  return await dispatch(event, ctx, config, logger) ? { handled: true } : undefined;
+}
+
+function validReceipt(stdout) {
+  try {
+    const receipt = JSON.parse(stdout);
+    return Boolean(
+      receipt
+      && receipt.ok === true
+      && receipt.status === "queued"
+      && typeof receipt.job_id === "string"
+      && receipt.job_id.trim(),
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = console) {
@@ -83,19 +100,52 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
   }
   const pythonPath = stringValue(config.pythonPath, "/opt/homebrew/bin/python3");
   const prompt = String(event.bodyForAgent || event.body || event.content || "");
-  try {
-    const child = spawn(pythonPath, args, {
-      detached: true,
-      stdio: ["pipe", "ignore", "ignore"],
-      env: process.env,
-    });
-    child.stdin.end(prompt, "utf8");
-    child.unref();
-    return true;
-  } catch {
-    logger.error?.("inbox-coordinator: dispatch failed; allowing normal OpenCLAW handling");
-    return false;
-  }
+  const spawnHelper = config.spawn || spawn;
+  const timeoutMs = Number.isFinite(config.helperTimeoutMs)
+    ? Math.max(1, config.helperTimeoutMs)
+    : DEFAULT_HELPER_TIMEOUT_MS;
+  return new Promise((resolve) => {
+    let child;
+    let settled = false;
+    let stdout = "";
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const terminate = () => {
+      try { child?.kill?.("SIGTERM"); } catch { /* best-effort cleanup */ }
+    };
+    const fail = () => {
+      terminate();
+      logger.error?.("inbox-coordinator: helper claim unavailable; allowing normal OpenCLAW handling");
+      finish(false);
+    };
+    const timer = setTimeout(fail, timeoutMs);
+    try {
+      child = spawnHelper(pythonPath, args, {
+        detached: false,
+        stdio: ["pipe", "pipe", "ignore"],
+        env: process.env,
+      });
+      child.once?.("error", fail);
+      child.stdout?.on("data", (chunk) => {
+        stdout += String(chunk);
+        if (Buffer.byteLength(stdout, "utf8") > MAX_RECEIPT_BYTES) fail();
+      });
+      child.once?.("close", (code) => {
+        if (code !== 0 || !validReceipt(stdout)) return fail();
+        finish(true);
+      });
+      child.stdin?.once?.("error", fail);
+      child.stdin?.end(prompt, "utf8");
+    } catch {
+      clearTimeout(timer);
+      logger.error?.("inbox-coordinator: dispatch failed; allowing normal OpenCLAW handling");
+      finish(false);
+    }
+  });
 }
 
 export default {
@@ -103,7 +153,7 @@ export default {
   name: "Inbox Coordinator",
   description: "Owns untagged Josh 2.0 Inbox messages and dispatches one asynchronous worker.",
   register(api) {
-    // #JAIMES: OpenClaw 2026.7.1 sends unbound Topic 1 traffic through global before_dispatch.
+    // #JAIMES: before_dispatch is handled only after a bounded helper receipt confirms a queued job.
     api.on("inbound_claim", async (event, ctx) => {
       const config = event.context?.pluginConfig || api.pluginConfig || {};
       return handleInboxEvent(event, ctx, config, api.logger);

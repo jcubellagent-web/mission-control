@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import coordinator, { handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget } from "../index.js";
+import { EventEmitter } from "node:events";
+import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -36,7 +37,7 @@ test("builds helper arguments without prompt content", () => {
   assert.equal(args[args.indexOf("--message-id") + 1], inboxCtx.messageId);
 });
 
-test("claims the runtime-shaped global before_dispatch Inbox event", () => {
+test("claims the runtime-shaped global before_dispatch Inbox event", async () => {
   const event = {
     content: "please review this privately",
     body: "please review this privately",
@@ -51,7 +52,7 @@ test("claims the runtime-shaped global before_dispatch Inbox event", () => {
     sessionKey: inboxCtx.sessionKey,
   };
   let dispatched = false;
-  const result = handleInboxEvent(event, ctx, {}, console, (receivedEvent, receivedCtx) => {
+  const result = await handleInboxEvent(event, ctx, {}, console, async (receivedEvent, receivedCtx) => {
     dispatched = true;
     assert.equal(receivedEvent.body, event.body);
     assert.equal(receivedCtx.sessionKey, inboxCtx.sessionKey);
@@ -65,15 +66,74 @@ test("claims the runtime-shaped global before_dispatch Inbox event", () => {
   assert.equal(args[args.indexOf("--run-id") + 1], `before-dispatch:${event.timestamp}`);
 });
 
-test("silences a JAIMES mention on the global before_dispatch path", () => {
+test("silences a JAIMES mention on the global before_dispatch path", async () => {
   const event = { content: "@JAIMES please take this", channel: "telegram", sessionKey: inboxCtx.sessionKey };
   let dispatched = false;
-  const result = handleInboxEvent(event, { channelId: "telegram", sessionKey: inboxCtx.sessionKey }, {}, console, () => {
+  const result = await handleInboxEvent(event, { channelId: "telegram", sessionKey: inboxCtx.sessionKey }, {}, console, () => {
     dispatched = true;
     return true;
   });
   assert.deepEqual(result, { handled: true });
   assert.equal(dispatched, false);
+});
+
+function fakeChild(onPrompt = () => {}) {
+  const child = new EventEmitter();
+  child.stdout = new EventEmitter();
+  child.stdin = new EventEmitter();
+  child.stdin.end = (prompt) => onPrompt(child, prompt);
+  child.killed = false;
+  child.kill = () => { child.killed = true; };
+  return child;
+}
+
+function dispatchConfig(spawn) {
+  return { helperPath: import.meta.filename, spawn, helperTimeoutMs: 25 };
+}
+
+test("returns handled only after a successful queued helper receipt", async () => {
+  let prompt = "";
+  const child = fakeChild((current, stdin) => {
+    prompt = stdin;
+    current.stdout.emit("data", '{"ok":true,"status":"queued","job_id":"job-123"}');
+    current.emit("close", 0);
+  });
+  const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, dispatchConfig(() => child));
+  assert.equal(claimed, true);
+  assert.equal(prompt, "private prompt");
+});
+
+for (const [name, arrange] of [
+  ["nonzero exit", () => fakeChild((child) => child.emit("close", 2))],
+  ["empty receipt", () => fakeChild((child) => child.emit("close", 0))],
+  ["malformed receipt", () => fakeChild((child) => { child.stdout.emit("data", "not-json"); child.emit("close", 0); })],
+  ["empty queued job id", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":true,"status":"queued","job_id":""}'); child.emit("close", 0); })],
+  ["queue failure receipt", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":false,"status":"queue-failed"}'); child.emit("close", 1); })],
+]) {
+  test(`allows Terra handling on ${name}`, async () => {
+    const child = arrange();
+    const config = dispatchConfig(() => child);
+    const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, config, { error() {} });
+    assert.equal(claimed, false);
+    if (child?.killed !== undefined) assert.equal(child.killed, true);
+  });
+}
+
+test("allows Terra handling on spawn error", async () => {
+  const claimed = await dispatchClaim(
+    { content: "private prompt" },
+    inboxCtx,
+    dispatchConfig(() => { throw new Error("spawn"); }),
+    { error() {} },
+  );
+  assert.equal(claimed, false);
+});
+
+test("terminates a timed-out helper and allows Terra handling", async () => {
+  const child = fakeChild();
+  const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, dispatchConfig(() => child), { error() {} });
+  assert.equal(claimed, false);
+  assert.equal(child.killed, true);
 });
 
 test("registers both bound and global claim hooks", () => {
