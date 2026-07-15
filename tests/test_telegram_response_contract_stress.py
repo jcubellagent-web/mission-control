@@ -185,7 +185,7 @@ def test_render_stress_covers_header_progress_rich_terminal_and_final_contracts(
 
     assert result["ok"] is True
     assert result["iterations"] == 5
-    assert result["renderedCards"] == 45
+    assert result["renderedCards"] == 55
     assert result["milestoneSequences"][0][-1] == 6
     assert result["problems"] == []
 

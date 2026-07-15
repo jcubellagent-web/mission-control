@@ -381,6 +381,39 @@ def render_stress(module, iterations: int) -> dict:
             if required not in rich:
                 problems.append(f"rich live card missing {required}")
 
+        # A terminal workflow can complete its delivery lifecycle even when
+        # the objective result is Complete: No. Keep NEEDS ATTENTION truthful,
+        # but require the same Delivered/100% terminal contract before final.
+        failed_items = [
+            *MILESTONE_UPDATES[:-1],
+            "Structured issue summary prepared",
+        ]
+        failed_legacy = module.build_card(
+            title=title,
+            status="failed",
+            model=model,
+            route=route,
+            now=failed_items[-1],
+            done=failed_items[:-1],
+            updated="2026-01-01T00:00:06Z",
+            started_at="2026-01-01T00:00:00Z",
+        )
+        failed_rich = module.build_rich_card(
+            title=title,
+            status="failed",
+            model=model,
+            route=route,
+            now=failed_items[-1],
+            done=failed_items[:-1],
+            updated="2026-01-01T00:00:06Z",
+            started_at="2026-01-01T00:00:00Z",
+        )
+        for rendered in (pre_text(failed_legacy), pre_text(failed_rich)):
+            if "100%" not in rendered or "stage 6/6" not in rendered:
+                problems.append("needs-attention terminal card did not close at 100% through stage 6/6")
+        if "NEEDS ATTENTION" not in failed_rich:
+            problems.append("failed terminal rich card lost its needs-attention outcome label")
+
         final = module.build_completion_summary(
             title=title,
             status="done",
@@ -396,7 +429,7 @@ def render_stress(module, iterations: int) -> dict:
     return {
         "ok": not problems,
         "iterations": iterations,
-        "renderedCards": iterations * (len(MILESTONE_UPDATES) + 3),
+        "renderedCards": iterations * (len(MILESTONE_UPDATES) + 5),
         "milestoneSequences": milestone_sequences[:3],
         "problems": sorted(set(problems)),
     }

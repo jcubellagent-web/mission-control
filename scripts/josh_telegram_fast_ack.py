@@ -1176,16 +1176,7 @@ def is_hold_request(prompt: str) -> bool:
 OBJECTIVE_RULES = [
     (("post-restart readiness", "route-readiness", "route readiness", "workhorse readiness", "readiness pressure test", "readiness test"), "Run readiness test"),
     (("telegram/route", "telegram route", "route repair", "route-readiness repair", "readiness repair"), "Repair Telegram routing"),
-    (("jaimes", "strict", "settings", "prevent him", "following my instructions"), "Tune JAIMES instruction-following settings"),
-    (("crypto", "wallet", "portfolio", "profit target", "trade card", "trading autonomy"), "Tune JAIMES crypto action mode"),
-    (("next week", "next matchup", "week 7", "future lineup"), "Check ESPN next-week lineup"),
-    (("fantasy baseball", "espn", "roster", "lineup", "trade", "add/drop", "waiver"), "Sync fantasy baseball roster"),
-    (("telegram", "button", "buttons", "work card", "live card"), "Tune Telegram UX"),
-    (("openclaw", "upgrade", "update", "latest version"), "Update OpenCLAW stack"),
     (("keychain", "cookie.codex", "codex cookie"), "Fix Codex keychain alert"),
-    (("automation", "automations", "cron", "crons", "schedule", "jobs"), "Review automation schedule"),
-    (("sorare", "lineup", "game week", "gw"), "Review Sorare lineup state"),
-    (("jaimes", "j.a.i.n", "jain", "josh 2.0", "joshex", "agent ecosystem"), "Sync agent ecosystem state"),
 ]
 
 LEADING_REQUEST_RE = re.compile(
@@ -1237,6 +1228,156 @@ def current_request_text(text: str) -> str:
     return candidates[-1] if candidates else " ".join(eligible)
 
 
+OBJECTIVE_MAX_WORDS = 12
+OBJECTIVE_MAX_CHARS = 80
+OBJECTIVE_DANGLING_WORDS = {
+    "a", "an", "and", "or", "the", "that", "with", "for", "to", "in", "on", "at", "across", "from"
+}
+
+
+#JAIMES: derive the visible objective from the current request's action and target before any topic label.
+def bounded_objective(action: str, target: str, outcome: str = "") -> str:
+    """Keep action, target, and outcome intact inside the mobile header budget."""
+    target_words = target.strip(" .?!").split()
+    action_words = action.split()
+    outcome_words = outcome.strip(" .?!").split()
+    maximum_outcome_words = max(0, OBJECTIVE_MAX_WORDS - len(action_words) - 1)
+    outcome_words = outcome_words[:maximum_outcome_words]
+    while len(outcome_words) > 1 and outcome_words[-1].lower() in OBJECTIVE_DANGLING_WORDS:
+        outcome_words.pop()
+    reserved = len(action_words) + len(outcome_words)
+    target_budget = max(1, OBJECTIVE_MAX_WORDS - reserved)
+    if len(target_words) > target_budget and target_words[0].lower() in {"the", "this", "that"}:
+        target_words = target_words[1:]
+    target_words = target_words[:target_budget]
+    while len(target_words) > 1 and target_words[-1].lower() in OBJECTIVE_DANGLING_WORDS:
+        target_words.pop()
+
+    def render() -> str:
+        return " ".join(
+            part for part in (" ".join(action_words), " ".join(target_words), " ".join(outcome_words)) if part
+        )
+
+    candidate = render()
+    while len(candidate) > OBJECTIVE_MAX_CHARS and len(target_words) > 1:
+        target_words.pop()
+        while len(target_words) > 1 and target_words[-1].lower() in OBJECTIVE_DANGLING_WORDS:
+            target_words.pop()
+        candidate = render()
+    while len(candidate) > OBJECTIVE_MAX_CHARS and len(outcome_words) > 1:
+        outcome_words.pop()
+        while len(outcome_words) > 1 and outcome_words[-1].lower() in OBJECTIVE_DANGLING_WORDS:
+            outcome_words.pop()
+        candidate = render()
+    return candidate[:OBJECTIVE_MAX_CHARS].rstrip(" ,;:-")
+
+
+def verification_outcome(target: str) -> str:
+    if re.search(r"\b(work|works|working|operate|operates|correct|correctly|intended|pass|passes)\b", target, re.I):
+        return ""
+    if re.search(r"\b(changes|updates|fixes|cards|messages|responses|workflows|behaviors|features|integrations)\b", target, re.I):
+        return "work as intended"
+    if re.search(r"\b(change|update|fix|card|message|response|workflow|behavior|feature|integration)\b", target, re.I):
+        return "works as intended"
+    if re.fullmatch(r"(?:the\s+)?(?:JOSHeX|JAIMES|J\.A\.I\.N|JAIN|Josh\s+2\.0|OpenCLAW|Telegram)", target, re.I):
+        return "operates correctly"
+    return ""
+
+
+def action_specific_objective(text: str) -> str:
+    """Paraphrase an explicit current-request action before broad topic rules.
+
+    Agent names and generic nouns such as ``update`` are context, not intent.
+    Keeping the concrete action and target together prevents a request like
+    "Testing the new JOSHeX changes" from collapsing into an ecosystem label.
+    """
+    request = " ".join((text or "").split()).strip(" .?!")
+    courtesy_patterns = (
+        r"^please\s+",
+        r"^(?:can|could|would|may)\s+you(?:\s+please)?\s+",
+        r"^i\s+want\s+you\s+to(?:\s+please)?\s+",
+    )
+    for _ in range(3):
+        before = request
+        for pattern in courtesy_patterns:
+            request = re.sub(pattern, "", request, count=1, flags=re.I)
+        if request == before:
+            break
+
+    why = re.match(r"^why\s+(?:did|does|is|was|has|have|are|were)\s+(.+)$", request, re.I)
+    if why:
+        target = re.sub(r"\bchange$", "changed", why.group(1).strip(), flags=re.I)
+        return bounded_objective("Investigate why", target)
+    what = re.match(r"^what\s+(?:did|does|is|was|has|have|are|were)\s+(.+)$", request, re.I)
+    if what:
+        target = re.sub(r"\bchange\b", "changed", what.group(1).strip(), count=1, flags=re.I)
+        return bounded_objective("Explain what", target)
+    yes_no = re.match(
+        r"^(?:is|are|was|were|does|do|did|has|have)\s+(.+?)\s+"
+        r"(?:working|work|worked|correct|correctly|ready|healthy|fixed|complete|completed|pass|passing)$",
+        request,
+        re.I,
+    )
+    if yes_no:
+        target = yes_no.group(1).strip()
+        return bounded_objective("Verify whether", target, verification_outcome(target) or "works as intended")
+
+    rewrites = (
+        (r"^(?:test(?:ing)?|validate|validating|verify|confirm|check|make sure)\s+", "Verify", True),
+        (r"^(?:deep[- ]?scan|scan|review|audit)\s+", "Audit", False),
+        (r"^(?:look at|inspect)\s+", "Inspect", False),
+        (r"^(?:examine|assess)\s+", "Assess", False),
+        (r"^(?:find out|find|investigate)\s+", "Investigate", False),
+        (r"^(?:fix|repair|resolve)\s+", "Repair", False),
+        (r"^(?:add|implement)\s+", "Implement", False),
+        (r"^(?:update|upgrade)\s+", "Update", False),
+        (r"^(?:sync|synchronize|reconcile|align)\s+", "Synchronize", False),
+        (r"^(?:triage)\s+", "Triage", False),
+        (r"^(?:run|execute)\s+", "Run", False),
+        (r"^(?:tell me|explain|remind me)\s+", "Explain", False),
+    )
+    for pattern, action, add_outcome in rewrites:
+        if not re.match(pattern, request, flags=re.I):
+            continue
+        target = re.sub(pattern, "", request, count=1, flags=re.I).strip(" .?!")
+        if not target:
+            return ""
+        explicit_outcome = re.search(
+            r"\s+(?:so that|so (?:i|we) can|to ensure|in order to|and make sure|and ensure)\s+",
+            target,
+            re.I,
+        )
+        if explicit_outcome:
+            outcome = target[explicit_outcome.start():].strip()
+            target = target[:explicit_outcome.start()].strip()
+        else:
+            outcome = verification_outcome(target) if add_outcome else ""
+        return bounded_objective(action, target, outcome)
+    return ""
+
+
+def topic_objective(lowered: str) -> str:
+    """Use category labels only when entity and intent context both agree."""
+    if "jaimes" in lowered and any(marker in lowered for marker in ("strict", "settings", "prevent him", "following my instructions")):
+        return "Tune JAIMES instruction-following settings"
+    if any(marker in lowered for marker in ("crypto", "wallet", "portfolio", "profit target", "trade card", "trading autonomy")):
+        return "Tune JAIMES crypto action mode"
+    fantasy_context = any(marker in lowered for marker in ("fantasy baseball", "espn", "roster", "add/drop", "waiver"))
+    if fantasy_context and any(marker in lowered for marker in ("next week", "next matchup", "week 7", "future lineup")):
+        return "Check ESPN next-week lineup"
+    if fantasy_context:
+        return "Sync fantasy baseball roster"
+    if "telegram" in lowered and any(marker in lowered for marker in ("button", "buttons", "work card", "live card", "formatting", "reaction")):
+        return "Tune Telegram UX"
+    if "openclaw" in lowered and any(marker in lowered for marker in ("upgrade", "update", "latest version")):
+        return "Update OpenCLAW stack"
+    if any(marker in lowered for marker in ("automation", "automations", "cron", "crons", "schedule", "jobs")):
+        return "Review automation schedule"
+    if "sorare" in lowered and any(marker in lowered for marker in ("lineup", "game week", "gw")):
+        return "Review Sorare lineup state"
+    return ""
+
+
 def summarize_objective(text: str) -> str:
     clean = " ".join(current_request_text(text).split())
     lowered = clean.lower()
@@ -1253,6 +1394,12 @@ def summarize_objective(text: str) -> str:
         or ("email" in lowered and any(marker in lowered for marker in ("inbox", "triage", "unread", "messages")))
     ):
         return "Triage Gmail inbox"
+    specific = action_specific_objective(clean)
+    if specific:
+        return specific
+    topic = topic_objective(lowered)
+    if topic:
+        return topic
     for markers, summary in OBJECTIVE_RULES:
         if any(marker in lowered for marker in markers):
             return summary

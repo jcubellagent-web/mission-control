@@ -938,15 +938,27 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
 
 
 COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
+#JAIMES: terminal delivery completion is distinct from whether the requested objective succeeded.
+TERMINAL_LIFECYCLE_STATUSES = {*COMPLETE_STATUSES, "failed", "failure", "error"}
 
 
 def is_complete_status(status: str) -> bool:
     return str(status or "").strip().lower() in COMPLETE_STATUSES
 
 
+def is_terminal_lifecycle_status(status: str) -> bool:
+    """Return whether work and result delivery have reached their terminal phase.
+
+    This is intentionally separate from objective success: a verified
+    ``Complete: No`` outcome still finishes the six-stage delivery lifecycle
+    and can remain visibly labelled as needing attention.
+    """
+    return str(status or "").strip().lower() in TERMINAL_LIFECYCLE_STATUSES
+
+
 def milestone_count(items: list[str], status: str, *, route: str = "") -> int:
     """Return the current milestone position from events, never update volume."""
-    if is_complete_status(status):
+    if is_terminal_lifecycle_status(status):
         return len(LIVE_STAGES)
     if not items:
         return 0
@@ -965,11 +977,12 @@ def milestone_count(items: list[str], status: str, *, route: str = "") -> int:
 
 def stage_rows(items: list[str], status: str, *, route: str = "") -> list[str]:
     position = milestone_count(items, status, route=route)
+    terminal = is_terminal_lifecycle_status(status)
     rows: list[str] = []
     for index, label in enumerate(LIVE_STAGES, start=1):
-        if is_complete_status(status) or index < position:
+        if terminal or index < position:
             marker = "✓"
-        elif index == position and not is_complete_status(status):
+        elif index == position and not terminal:
             marker = "!" if status == "failed" else "▶"
         else:
             marker = "·"
@@ -981,6 +994,8 @@ def progress_phase(items: list[str], status: str, *, route: str = "") -> tuple[i
     position = milestone_count(items, status, route=route)
     if is_complete_status(status):
         return 100, "complete"
+    if is_terminal_lifecycle_status(status):
+        return 100, "delivery complete · needs attention"
     if not position:
         return 0, "waiting for first update"
     percent = round((position / len(LIVE_STAGES)) * 100)
@@ -998,10 +1013,16 @@ def progress_lines(items: list[str], status: str, *, route: str = "") -> list[st
         text = live_line(item)
         if text and text not in clean:
             clean.append(text)
-    complete_status = is_complete_status(status)
+    terminal_status = is_terminal_lifecycle_status(status)
     if not clean:
-        if complete_status:
-            return ["██████████ 100% complete", ""]
+        if terminal_status:
+            detail = "complete" if is_complete_status(status) else "delivery complete - needs attention"
+            return [
+                *hanging_status_lines(
+                    f"██████████ 100% · stage {len(LIVE_STAGES)}/{len(LIVE_STAGES)} · {detail}"
+                ),
+                "",
+            ]
         return ["░░░░░░░░░░ 0% complete - waiting for first update", ""]
 
     percent, detail = progress_phase(items, status, route=route)
@@ -1017,7 +1038,7 @@ def current_step_text(status: str, now: str, live_items: list[str]) -> str:
     if status == "done":
         return "Finished and verified the result."
     if status == "failed":
-        return "Stopped on an issue that needs attention."
+        return "Result delivered; objective needs attention."
     if status == "paused":
         return "Paused until the next instruction."
     if live_items:
@@ -1157,7 +1178,7 @@ def build_card(
         *hanging_status_lines(f"{elapsed_text(started_at, updated)} · updated {now_label()}"),
         "",
         "🗂 Recent activity:",
-        *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=5),
+        *live_lines(live_items, fallback="complete" if is_terminal_lifecycle_status(status) else "waiting: first update", limit=5),
     ]
     return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
 
@@ -1191,8 +1212,8 @@ def build_rich_card(
 
     stage_items = []
     for index, label in enumerate(LIVE_STAGES, start=1):
-        checked = " checked" if is_complete_status(status) or index < position else ""
-        active = index == position and not is_complete_status(status)
+        checked = " checked" if is_terminal_lifecycle_status(status) or index < position else ""
+        active = index == position and not is_terminal_lifecycle_status(status)
         label_html = f"<mark>{html.escape(label)}</mark>" if active else html.escape(label)
         stage_items.append(f'<li><input type="checkbox"{checked}>{label_html}</li>')
 

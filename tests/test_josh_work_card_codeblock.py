@@ -183,6 +183,44 @@ def test_progress_is_based_on_verified_milestones_not_update_volume():
     assert early[0] == 50
 
 
+def test_terminal_needs_attention_closes_delivery_lifecycle_at_100_percent():
+    items = [
+        "Received Telegram task",
+        "Objective and runbook confirmed",
+        "Route selected: Josh 2.0 system",
+        "Worker started verified execution",
+        "Model execution verified; formatting final result",
+        "Structured issue summary prepared",
+    ]
+    route = "route=terra; reason=trusted execution; worker=josh2-codex-terra"
+
+    assert card.is_complete_status("failed") is False
+    assert card.is_terminal_lifecycle_status("failed") is True
+    assert card.milestone_count(items, "failed", route=route) == 6
+    assert card.progress_phase(items, "failed", route=route) == (100, "delivery complete · needs attention")
+
+    legacy = card.build_card(
+        title="Verify the new JOSHeX changes work as intended",
+        status="failed",
+        model="provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2",
+        route=route,
+        done=items,
+        blocker="The requested behavior still needs attention",
+    )
+    rich = card.build_rich_card(
+        title="Verify the new JOSHeX changes work as intended",
+        status="failed",
+        model="provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2",
+        route=route,
+        done=items,
+    )
+
+    assert "100% · stage 6/6" in card.html.unescape(legacy)
+    assert "JOSH 2.0 · NEEDS ATTENTION" in rich
+    assert "100% · stage 6/6" in rich
+    assert rich.count('type="checkbox" checked') == len(card.LIVE_STAGES)
+
+
 def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
     model = "planned provider=xai; model=grok-4; worker=jaimes-grok-public; host=jaimes"
     route = "route=grok; owner=josh2; reason=current events"
@@ -594,6 +632,85 @@ def test_live_receipt_is_checkpointed_before_final_retry(monkeypatch, tmp_path):
     assert final["message_id"] == 202
     assert final["final_message_id"] == 303
     assert calls == {"send_live": 1, "edit_live": 1, "send_final": 2}
+
+
+@pytest.mark.parametrize("renderer", ["rich", "legacy"])
+def test_needs_attention_card_reaches_100_before_structured_final(monkeypatch, tmp_path, renderer):
+    monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    calls: list[tuple] = []
+    card.save_state({
+        "cards": {
+            "failed-terminal-order": {
+                "title": "Verify the new JOSHeX changes work as intended",
+                "message_id": 202,
+                "header_message_id": 201,
+                "final_message_id": None,
+                "ack_message_id": "",
+                "status": "running",
+                "started_at": "2026-07-15T19:18:59Z",
+                "updated_at": "2026-07-15T19:19:20Z",
+                "done": ["Received Telegram task"],
+                "work_log": ["Received Telegram task"],
+                "route": "route=terra; worker=josh2-codex-terra",
+                "model": "provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2",
+                "renderer": renderer,
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+            }
+        }
+    })
+
+    def edit_live(message_id, rich, legacy, *_args, **_kwargs):
+        calls.append(("edit_live", str(message_id), rich, legacy))
+        return {"ok": True, "native_rich_message": True, "result": {"message_id": int(message_id)}}
+
+    def send_final(text, *_args, **_kwargs):
+        calls.append(("send_final", text))
+        return {"ok": True, "result": {"message_id": 303}}
+
+    def edit_legacy(message_id, legacy, *_args, **_kwargs):
+        calls.append(("edit_live", str(message_id), legacy))
+        return {"ok": True, "result": {"message_id": int(message_id)}}
+
+    monkeypatch.setattr(card, "edit_rich_card", edit_live)
+    monkeypatch.setattr(card, "edit_card", edit_legacy)
+    monkeypatch.setattr(card, "send_final_summary", send_final)
+    args = argparse.Namespace(
+        key="failed-terminal-order",
+        title="Verify the new JOSHeX changes work as intended",
+        model="provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2",
+        route="route=terra; worker=josh2-codex-terra",
+        now="Structured issue summary prepared",
+        done="Worker execution verified|Objective was not completed|Structured issue summary prepared",
+        next="Review the remaining issue.",
+        blocker="The requested behavior still needs attention",
+        eta="",
+        ack_message_id="",
+        buttons="",
+        buttons_file="",
+        routing_buttons=False,
+        approval_buttons=False,
+        no_buttons=True,
+        no_final_summary=False,
+        final_text_file="",
+        timeout=15,
+        chat_id="-1003589561528",
+        thread_id="1",
+        dry_run=False,
+        no_brain_feed=True,
+    )
+
+    assert card.upsert_card(args, "failed") == 0
+    assert [call[0] for call in calls] == ["edit_live", "send_final"]
+    assert "100% · stage 6/6" in calls[0][2]
+    if renderer == "rich":
+        assert "100% · stage 6/6" in card.html.unescape(calls[0][3])
+    persisted = card.load_state()["cards"]["failed-terminal-order"]
+    assert persisted["status"] == "failed"
+    assert persisted["message_id"] == 202
+    assert persisted["final_message_id"] == 303
 
 
 def test_ambiguous_rich_send_does_not_create_a_second_fallback(monkeypatch):

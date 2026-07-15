@@ -5,6 +5,8 @@ import importlib.util
 import io
 from pathlib import Path
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).parents[1] / "scripts" / "josh_telegram_fast_ack.py"
 SPEC = importlib.util.spec_from_file_location("josh_telegram_fast_ack_under_test", MODULE_PATH)
@@ -46,7 +48,113 @@ def test_unmatched_objective_is_operator_paraphrase() -> None:
     objective = watcher.objective_from_prompt(prompt)
     assert objective.startswith("Assess ")
     assert objective != prompt.rstrip("?")
-    assert len(objective.split()) <= 8
+    assert len(objective.split()) <= watcher.OBJECTIVE_MAX_WORDS
+
+
+@pytest.mark.parametrize(
+    ("prompt", "expected"),
+    [
+        ("Testing the new JOSHeX changes", "Verify the new JOSHeX changes work as intended"),
+        ("Please test the new JAIMES changes", "Verify the new JAIMES changes work as intended"),
+        ("Please inspect JOSHeX after the update", "Inspect JOSHeX after the update"),
+        ("Please review JAIMES response formatting", "Audit JAIMES response formatting"),
+        (
+            "Please sync Josh 2.0 and JAIMES shared state",
+            "Synchronize Josh 2.0 and JAIMES shared state",
+        ),
+        (
+            "Could you please test the new JOSHeX changes?",
+            "Verify the new JOSHeX changes work as intended",
+        ),
+        (
+            "I want you to test the new JOSHeX changes",
+            "Verify the new JOSHeX changes work as intended",
+        ),
+        (
+            "Please verify the new JOSHeX changes",
+            "Verify the new JOSHeX changes work as intended",
+        ),
+        ("Please test Josh 2.0", "Verify Josh 2.0 operates correctly"),
+        (
+            "Please test the new JOSHeX changes across Telegram and Control Tower",
+            "Verify new JOSHeX changes across Telegram and Control Tower work as intended",
+        ),
+        (
+            "Why did the JAIMES response change?",
+            "Investigate why the JAIMES response changed",
+        ),
+        (
+            "What did the update change in JOSHeX?",
+            "Explain what the update changed in JOSHeX",
+        ),
+        (
+            "Are the new JOSHeX changes working?",
+            "Verify whether the new JOSHeX changes work as intended",
+        ),
+        (
+            "Is the new JOSHeX behavior correct?",
+            "Verify whether the new JOSHeX behavior works as intended",
+        ),
+        (
+            "Does the new JOSHeX workflow work?",
+            "Verify whether the new JOSHeX workflow works as intended",
+        ),
+        (
+            "Please test the new JOSHeX changes so that the task header stays specific",
+            "Verify the new JOSHeX changes so that the task header stays specific",
+        ),
+        (
+            "Could you please test the new JOSHeX changes so I can trust the header?",
+            "Verify the new JOSHeX changes so I can trust the header",
+        ),
+        (
+            "Please validate the new JOSHeX changes and make sure the live card completes",
+            "Verify the new JOSHeX changes and make sure the live card completes",
+        ),
+        (
+            "Was the new JOSHeX behavior correct?",
+            "Verify whether the new JOSHeX behavior works as intended",
+        ),
+        (
+            "Have the new JOSHeX changes worked?",
+            "Verify whether the new JOSHeX changes work as intended",
+        ),
+    ],
+)
+def test_explicit_action_and_target_outrank_agent_topic_buckets(prompt: str, expected: str) -> None:
+    objective = watcher.objective_from_prompt(prompt)
+    assert objective == expected
+    assert objective != "Sync agent ecosystem state"
+    assert len(objective) <= 80
+
+
+def test_pasted_card_agent_names_do_not_override_current_request_objective() -> None:
+    prompt = """Objective:
+Sync agent ecosystem state
+Model: codex/gpt-5.6-terra
+
+Current user request: Please test the new JOSHeX changes
+"""
+    assert watcher.objective_from_prompt(prompt) == "Verify the new JOSHeX changes work as intended"
+
+
+def test_generic_settings_text_does_not_invent_a_jaimes_objective() -> None:
+    objective = watcher.objective_from_prompt("The settings changed unexpectedly")
+    assert objective == "Handle settings changed unexpectedly"
+    assert objective != "Tune JAIMES instruction-following settings"
+
+
+def test_media_and_pasted_status_identifiers_do_not_leak_into_objective() -> None:
+    prompt = """[media attached: media://inbound/private-card-id] (image/jpeg)
+Objective:
+Sync agent ecosystem state
+
+Current user request: Could you please test the new JOSHeX changes?
+"""
+    objective = watcher.objective_from_prompt(prompt)
+    assert objective == "Verify the new JOSHeX changes work as intended"
+    assert "media" not in objective.lower()
+    assert "private-card-id" not in objective
 
 
 def patch_post_reaction_path(monkeypatch, calls: list[str], *, live_cards: bool) -> None:
