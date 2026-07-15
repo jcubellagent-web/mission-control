@@ -27,7 +27,7 @@ def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
     card_receipt = '{"ok": true, "action": "start", "message_id": 444}'
     with patch.object(watcher, "fast_ack_enabled", return_value=True), patch.object(watcher, "send_chat_action"), patch.object(watcher, "send_message_draft"), patch.object(watcher, "send_prompt_reaction", return_value=True), patch.object(watcher, "publish_josh"), patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": card_receipt}) as run_cmd:
         result = watcher.send_ack(event, model=watcher.DEFAULT_MODEL, dry_run=False, meta={"telegram_chat_id": "-100", "telegram_thread_id": "1"})
-    command = run_cmd.call_args.args[0]
+    command = next(call.args[0] for call in run_cmd.call_args_list if str(watcher.WORK_CARD_SCRIPT) in call.args[0])
     assert command[1] == str(watcher.WORK_CARD_SCRIPT)
     assert (watcher.WORK_CARD_SCRIPT.parent / "send_josh_reply.py").exists()
     assert result["card_start_ok"] is True
