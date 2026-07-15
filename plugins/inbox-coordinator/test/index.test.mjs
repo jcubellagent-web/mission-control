@@ -108,7 +108,7 @@ for (const [name, arrange] of [
   ["empty receipt", () => fakeChild((child) => child.emit("close", 0))],
   ["malformed receipt", () => fakeChild((child) => { child.stdout.emit("data", "not-json"); child.emit("close", 0); })],
   ["empty queued job id", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":true,"status":"queued","job_id":""}'); child.emit("close", 0); })],
-  ["queue failure receipt", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":false,"status":"queue-failed"}'); child.emit("close", 1); })],
+  ["queue failure receipt", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":false,"status":"queue-failed"}'); child.emit("close", 0); })],
 ]) {
   test(`allows Terra handling on ${name}`, async () => {
     const child = arrange();
@@ -120,6 +120,18 @@ for (const [name, arrange] of [
 }
 
 test("allows Terra handling on spawn error", async () => {
+  const child = fakeChild((current) => current.emit("error", new Error("spawn")));
+  const claimed = await dispatchClaim(
+    { content: "private prompt" },
+    inboxCtx,
+    dispatchConfig(() => child),
+    { error() {} },
+  );
+  assert.equal(claimed, false);
+  assert.equal(child.killed, true);
+});
+
+test("allows Terra handling when spawning throws", async () => {
   const claimed = await dispatchClaim(
     { content: "private prompt" },
     inboxCtx,
