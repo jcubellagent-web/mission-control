@@ -15,7 +15,10 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+WORKSPACE = ROOT.parent
 OUTPUT = ROOT / "data" / "ecosystem-runtime-probe.json"
+JOSH_WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
+JOSH_SEND_REPLY_SCRIPT = JOSH_WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
 RECOVERY_COOLDOWN = dt.timedelta(minutes=15)
 SERVICE_LABELS = {
     "controlTower": "com.josh20.mission-control-react-v2",
@@ -99,6 +102,12 @@ def collect(base_url: str) -> dict[str, Any]:
     brain_ok, brain_ms, brain_detail = tcp_probe(8765)
     gateway_ok, gateway_ms, gateway_detail = tcp_probe(18790)
     fast_ack_ok = launchd_running(SERVICE_LABELS["telegramFastAck"])
+    telegram_helper_missing = [
+        path.name
+        for path in (JOSH_WORK_CARD_SCRIPT, JOSH_SEND_REPLY_SCRIPT)
+        if not path.is_file()
+    ]
+    telegram_helper_ok = not telegram_helper_missing
     source_stamp = parse_ts(live.get("sourceUpdatedAt"))
     source_age = round((utc_now() - source_stamp.astimezone(dt.timezone.utc)).total_seconds() / 60, 1) if source_stamp else None
     checks = {
@@ -106,6 +115,10 @@ def collect(base_url: str) -> dict[str, Any]:
         "brainFeed": {"ok": brain_ok, "latencyMs": brain_ms, "detail": brain_detail},
         "gateway": {"ok": gateway_ok, "latencyMs": gateway_ms, "detail": gateway_detail},
         "telegramFastAck": {"ok": fast_ack_ok, "detail": "launchd running" if fast_ack_ok else "launchd not running"},
+        "telegramWorkCardHelper": {
+            "ok": telegram_helper_ok,
+            "detail": "workspace helpers present" if telegram_helper_ok else f"missing: {', '.join(telegram_helper_missing)}",
+        },
         "sourceFreshness": {"ok": source_age is not None and source_age <= 5, "ageMinutes": source_age, "detail": "sourceUpdatedAt"},
     }
     return {"checks": checks, "ok": all(row["ok"] for row in checks.values())}

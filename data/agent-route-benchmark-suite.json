@@ -1,0 +1,341 @@
+{
+  "updatedAt": "2026-07-15T00:00:00Z",
+  "description": "Deterministic ownership and model-ladder contract for Inbox, Control Tower, private accounts, specialists, and execution lanes.",
+  "minimumFixtures": 24,
+  "minimumPassRatePct": 100,
+  "requiredRouteMetadataCoveragePct": 100,
+  "cases": [
+    {
+      "id": "inbox_untagged",
+      "taskType": "inbox",
+      "title": "General Inbox request",
+      "objective": "Understand and answer a bounded request from the group Inbox",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-luna"
+    },
+    {
+      "id": "inbox_frontdesk",
+      "taskType": "frontdesk",
+      "title": "Quick Inbox coordination",
+      "objective": "Coordinate a short dashboard-safe request",
+      "complexity": "bounded",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-luna"
+    },
+    {
+      "id": "inbox_shared_agents",
+      "taskType": "shared-agent-inbox",
+      "title": "Shared agent Inbox",
+      "objective": "Triage a group request before delegating work",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-luna"
+    },
+    {
+      "id": "inbox_requester_does_not_move_frontdoor",
+      "taskType": "telegram-inbox",
+      "title": "Inbox from JAIMES",
+      "objective": "Triage a new shared request",
+      "requester": "jaimes",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-luna"
+    },
+    {
+      "id": "inbox_multistep_escalates",
+      "taskType": "inbox",
+      "title": "Inbox system change",
+      "objective": "Coordinate and execute a multi-step system change",
+      "complexity": "multi-step",
+      "capabilities": ["tool-execution"],
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "control_tower_status",
+      "taskType": "control-tower",
+      "title": "Control Tower status",
+      "objective": "Inspect current Control Tower state",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "control_tower_code",
+      "taskType": "control-tower-code",
+      "title": "Fix Control Tower UI",
+      "objective": "Edit the React source and verify the build",
+      "capabilities": ["repo-edit"],
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "control_tower_repair",
+      "taskType": "control-tower-repair",
+      "title": "Repair Control Tower service",
+      "objective": "Diagnose and repair the kiosk service",
+      "capabilities": ["service-repair"],
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "dashboard_update",
+      "taskType": "dashboard-update",
+      "title": "Update dashboard generator",
+      "objective": "Patch and validate the canonical dashboard generator",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "generic_code",
+      "taskType": "code",
+      "title": "Implement a code fix",
+      "objective": "Edit source and run focused tests",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "generic_repair",
+      "taskType": "repair",
+      "title": "Repair a service",
+      "objective": "Apply and verify a bounded service repair",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "hard_high_blast_earns_sol",
+      "taskType": "repair",
+      "title": "Critical production recovery",
+      "objective": "Plan and verify a high-blast-radius recovery",
+      "priority": "critical",
+      "complexity": "hard",
+      "blastRadius": "high",
+      "capabilities": ["high-blast-radius", "incident-command"],
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-sol"
+    },
+    {
+      "id": "hard_medium_stays_terra",
+      "taskType": "repair",
+      "title": "Difficult isolated repair",
+      "objective": "Repair an isolated subsystem",
+      "priority": "high",
+      "complexity": "hard",
+      "blastRadius": "medium",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "high_blast_bounded_stays_terra",
+      "taskType": "repair",
+      "title": "Bounded high-impact check",
+      "objective": "Perform a bounded preflight without mutation",
+      "priority": "high",
+      "complexity": "bounded",
+      "blastRadius": "high",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "personal_gmail",
+      "taskType": "gmail",
+      "title": "Personal Gmail triage",
+      "objective": "Review the private personal inbox on the trusted Mac",
+      "privacy": "agent-private",
+      "expectedOwner": "joshex",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "personal_inbox",
+      "taskType": "personal-inbox",
+      "title": "Private account inbox",
+      "objective": "Coordinate private account work on the trusted Mac",
+      "privacy": "agent-private",
+      "expectedOwner": "joshex",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "connected_account_from_joshex",
+      "taskType": "connected-account-triage",
+      "title": "Private connected account",
+      "objective": "Triage private account state locally",
+      "privacy": "agent-private",
+      "requester": "joshex",
+      "expectedOwner": "joshex",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "connected_account_on_josh2",
+      "taskType": "connected-account-triage",
+      "title": "Josh 2.0 connected account",
+      "objective": "Triage host-local account state on its owning host",
+      "privacy": "agent-private",
+      "requester": "josh",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "connected_account_on_jaimes",
+      "taskType": "connected-account-triage",
+      "title": "JAIMES connected account",
+      "objective": "Triage host-local account state on its owning host",
+      "privacy": "agent-private",
+      "requester": "jaimes",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "sorare_lineup",
+      "taskType": "sorare",
+      "title": "Sorare lineup check",
+      "objective": "Check lineup risk and lock timing",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "sorare_research",
+      "taskType": "sorare-research",
+      "title": "Sorare research pass",
+      "objective": "Run a durable Sorare research workflow",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "sorare_monitor",
+      "taskType": "sorare-monitor",
+      "title": "Sorare background monitor",
+      "objective": "Run a scheduled lineup-state monitor",
+      "expectedOwner": "jain",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "current_events_grok_verified",
+      "taskType": "current-events",
+      "title": "Current events scan",
+      "objective": "Review current public signals",
+      "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
+      "expectedOwner": "jain",
+      "expectedProvider": "xai",
+      "expectedModel": "grok-4.20-reasoning"
+    },
+    {
+      "id": "x_search_grok_verified",
+      "taskType": "x-search",
+      "title": "X-native scan",
+      "objective": "Review current X-native public signals",
+      "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
+      "expectedOwner": "jain",
+      "expectedProvider": "xai",
+      "expectedModel": "grok-4.20-reasoning"
+    },
+    {
+      "id": "current_events_truthful_fallback",
+      "taskType": "current-events",
+      "title": "Current events without Grok",
+      "objective": "Review current public signals through a verified fallback",
+      "expectedOwner": "jain",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra",
+      "expectedRole": "xai-unavailable-fallback"
+    },
+    {
+      "id": "public_news_truthful_fallback",
+      "taskType": "public-news-monitor",
+      "title": "Public news without Grok",
+      "objective": "Monitor public news through a verified fallback",
+      "expectedOwner": "jain",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra",
+      "expectedRole": "xai-unavailable-fallback"
+    },
+    {
+      "id": "dashboard_safe_summary",
+      "taskType": "summary",
+      "title": "Routine safe summary",
+      "objective": "Summarize sanitized operational state",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "gemini"
+    },
+    {
+      "id": "dashboard_safe_review",
+      "taskType": "review",
+      "title": "Independent safe review",
+      "objective": "Review a sanitized operational artifact",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "gemini"
+    },
+    {
+      "id": "private_summary_stays_codex",
+      "taskType": "summary",
+      "title": "Private summary",
+      "objective": "Summarize agent-private state without specialist disclosure",
+      "privacy": "agent-private",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    },
+    {
+      "id": "destructive_requires_approval",
+      "taskType": "destructive-maintenance",
+      "title": "Destructive maintenance",
+      "objective": "Prepare a guarded destructive maintenance operation",
+      "privacy": "destructive",
+      "complexity": "hard",
+      "blastRadius": "high",
+      "expectedOwner": "joshex",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra",
+      "expectedNeedsApproval": true
+    },
+    {
+      "id": "openrouter_explicit_fallback_class",
+      "taskType": "model-fallback",
+      "title": "Outside model comparison",
+      "objective": "Run a sanitized fallback comparison",
+      "expectedOwner": "joshex",
+      "expectedProvider": "openrouter",
+      "expectedModel": "openrouter/auto"
+    },
+    {
+      "id": "sol_request_not_earned",
+      "taskType": "inbox",
+      "title": "Bounded Inbox with oversized request",
+      "objective": "Answer a bounded Inbox question",
+      "requestedProvider": "codex",
+      "requestedModel": "gpt-5.6-sol",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-luna"
+    },
+    {
+      "id": "luna_request_cannot_do_code",
+      "taskType": "code",
+      "title": "Code task with undersized request",
+      "objective": "Edit source and run tests",
+      "requestedProvider": "codex",
+      "requestedModel": "gpt-5.6-luna",
+      "expectedOwner": "josh",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra"
+    }
+  ]
+}

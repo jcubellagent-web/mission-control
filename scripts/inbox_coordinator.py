@@ -36,6 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
+SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
 PRIVATE_DIR = Path(os.environ.get("JOSH_INBOX_COORDINATOR_PRIVATE_DIR", str(Path.home() / ".openclaw" / "private" / "inbox-coordinator")))
 STATE_PATH = PRIVATE_DIR / "jobs.json"
 LOCK_PATH = PRIVATE_DIR / "jobs.lock"

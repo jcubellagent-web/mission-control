@@ -33,7 +33,7 @@ def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
     command = next(call.args[0] for call in run_cmd.call_args_list if str(watcher.WORK_CARD_SCRIPT) in call.args[0])
     assert command[1] == str(watcher.WORK_CARD_SCRIPT)
     assert command[command.index("--thread-id") + 1] == "1"
-    assert (watcher.WORK_CARD_SCRIPT.parent / "send_josh_reply.py").exists()
+    assert watcher.SEND_REPLY_SCRIPT == watcher.WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
     assert result["card_start_ok"] is True
     assert result["card_start_receipt"] == card_receipt
 

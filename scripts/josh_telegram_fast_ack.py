@@ -38,6 +38,7 @@ DEFAULT_ROUTE = "Josh 2.0 Telegram -> OpenCLAW task"
 COORDINATOR_SCRIPT = WORKSPACE / "mission-control" / "scripts" / "inbox_coordinator.py"
 #JAIMES: Fast-ack cards use the workspace copy, colocated with send_josh_reply.py and the real Telegram credentials path.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
+SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
 STALE_BOOTSTRAP_SECONDS = 120
 MAX_UNACKED_PROMPT_AGE_SECONDS = 30
 HEARTBEAT_SECONDS = 20

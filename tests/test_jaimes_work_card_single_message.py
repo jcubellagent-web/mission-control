@@ -25,7 +25,7 @@ card = load_module()
 
 def test_default_state_path_is_absolute_and_workspace_scoped():
     assert card.STATE_PATH.is_absolute()
-    assert str(card.STATE_PATH).endswith("/.openclaw/workspace/memory/jaimes_work_cards.json")
+    assert card.STATE_PATH == card.ROOT.parent / "memory" / "jaimes_work_cards.json"
 
 
 def test_ack_message_is_adopted_instead_of_sending_duplicate():
