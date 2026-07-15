@@ -11,8 +11,10 @@ fi
 
 KIOSK_ORIGIN="http://127.0.0.1:5174"
 URL="${1:-$KIOSK_ORIGIN/?ct_refresh=$(date -u +%Y%m%dT%H%M%SZ)}"
-PROFILE="/tmp/control-tower-kiosk-profile"
+PROFILE="${CONTROL_TOWER_CHROME_PROFILE:-$HOME/.openclaw/browser-profiles/control-tower-kiosk}"
 CHROME_APP="Google Chrome"
+
+mkdir -p "$PROFILE"
 
 if ! curl -fsS --max-time 2 "http://127.0.0.1:5174/" >/dev/null 2>&1; then
   echo "control-tower: current React kiosk server not ready at http://127.0.0.1:5174/"
@@ -38,20 +40,17 @@ if [[ "$FORCE_RELOAD" != "1" ]] && pgrep -f "Google Chrome.*--user-data-dir=$PRO
   exit 0
 fi
 
-# Dedicated kiosk screen: close stale tabbed/app Chrome windows first.
-osascript -e 'tell application "Google Chrome" to quit' >/dev/null 2>&1 || true
-sleep 3
-pkill -f 'Google Chrome' 2>/dev/null || true
+# Restart only the dedicated kiosk process. Credential/browser automation uses
+# a separate persistent profile and must remain available when the kiosk heals.
+pkill -f "Google Chrome.*--user-data-dir=$PROFILE" 2>/dev/null || true
 sleep 2
 rm -rf "$PROFILE/SingletonLock" "$PROFILE/SingletonSocket" "$PROFILE/SingletonCookie" 2>/dev/null || true
 
 open -na "$CHROME_APP" --args \
   --user-data-dir="$PROFILE" \
   --remote-debugging-port=9224 \
-  --remote-allow-origins='*' \
+  --remote-allow-origins=http://127.0.0.1:9224 \
   --no-first-run \
-  --use-mock-keychain \
-  --password-store=basic \
   --disable-session-crashed-bubble \
   --disable-infobars \
   --force-prefers-reduced-motion \
