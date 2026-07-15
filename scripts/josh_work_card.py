@@ -73,6 +73,10 @@ SECTION_SPACER = "⠀"
 CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "38")))
 CARD_CONTINUATION_INDENT = "   "
 CARD_BULLET_INDENT = "  "
+CONTROL_CENTER_CHAT_ID = "-1003589561528"
+INBOX_THREAD_ID = "1"
+RICH_CARD_ENV = "JOSH_TELEGRAM_RICH_CARDS"
+LIVE_STAGES = ("Accepted", "Planned", "Routed", "Working", "Verifying", "Delivered")
 
 
 def now_label() -> str:
@@ -198,6 +202,102 @@ def parse_list(value: str | None) -> list[str]:
     return [item.strip() for item in value.split("|") if item.strip()]
 
 
+def utc_now() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_timestamp(value: str | None) -> dt.datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        return parsed.astimezone(dt.timezone.utc)
+    except Exception:
+        return None
+
+
+def parse_route_facts(value: str) -> dict[str, str]:
+    """Extract dashboard-safe routing facts from the coordinator's compact line."""
+    facts: dict[str, str] = {}
+    for raw in str(value or "").split(";"):
+        if "=" not in raw:
+            continue
+        key, item = raw.split("=", 1)
+        key = re.sub(r"^(?:planned|actual|verified)\s+", "", key.strip().lower())
+        item = clean_live_text(item)
+        if key and item:
+            facts[key] = item
+    return facts
+
+
+def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
+    """Default native Rich Messages on only for the owned Inbox topic."""
+    raw = os.environ.get(RICH_CARD_ENV, "").strip().lower()
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+
+
+def human_worker_name(value: str) -> str:
+    normalized = clean_live_text(value).lower()
+    if not normalized:
+        return ""
+    known = {
+        "josh2-codex-luna": "Codex Luna",
+        "josh2-codex-terra": "Codex Terra",
+        "josh2-codex-sol": "Codex Sol",
+        "jaimes-hermes": "JAIMES / Hermes",
+        "jaimes-grok-public": "JAIMES / Grok",
+        "jaimes-gemini": "JAIMES / Gemini",
+        "jain": "J.AI.N",
+    }
+    if normalized in known:
+        return known[normalized]
+    if normalized.startswith("josh2-"):
+        return " ".join(part.title() for part in normalized.removeprefix("josh2-").split("-") if part)
+    if normalized.startswith("jaimes-"):
+        suffix = " ".join(part.title() for part in normalized.removeprefix("jaimes-").split("-") if part)
+        return f"JAIMES / {suffix}" if suffix else "JAIMES"
+    return compact(value.replace("_", " ").replace("-", " ").title(), limit=70)
+
+
+def worker_visibility_lines(model: str, route: str, status: str) -> list[str]:
+    model_facts = parse_route_facts(model)
+    route_facts = parse_route_facts(route)
+    owner_raw = route_facts.get("owner") or "josh2"
+    owner = "Josh 2.0" if owner_raw.lower() in {"josh", "josh2", "josh 2.0"} else human_worker_name(owner_raw)
+    state = "complete" if is_complete_status(status) else "needs attention" if status == "failed" else "active"
+    lines = [f"{owner or 'Josh 2.0'} · owner/coordinator"]
+    worker_raw = model_facts.get("worker") or route_facts.get("worker")
+    worker = human_worker_name(worker_raw or "")
+    if worker:
+        provider = model_facts.get("provider") or route_facts.get("provider")
+        model_name = model_facts.get("model") or route_facts.get("model")
+        detail = f"{provider}/{model_name}" if provider and model_name else ""
+        suffix = f" · {detail}" if detail and detail.lower() not in worker.lower() else ""
+        lines.append(f"↳ {worker}{suffix} · {state}")
+    return lines
+
+
+def elapsed_text(started_at: str | None, updated_at: str | None = None) -> str:
+    started = parse_timestamp(started_at)
+    updated = parse_timestamp(updated_at) or dt.datetime.now(dt.timezone.utc)
+    if not started:
+        return "elapsed <1m"
+    seconds = max(0, int((updated - started).total_seconds()))
+    if seconds < 60:
+        return f"elapsed {seconds}s"
+    minutes, seconds = divmod(seconds, 60)
+    if minutes < 60:
+        return f"elapsed {minutes}m {seconds:02d}s"
+    hours, minutes = divmod(minutes, 60)
+    return f"elapsed {hours}h {minutes:02d}m"
+
+
 def append_log(existing: list[str], *groups: list[str]) -> list[str]:
     log = [clean_live_text(item) for item in existing if clean_live_text(item)]
     for group in groups:
@@ -274,7 +374,9 @@ def operator_objective(title: str) -> str:
 
 def resolve_auth_path(raw: str) -> str:
     normalized = (raw or "").strip().lower()
-    if normalized.startswith("provider=codex;"):
+    facts = parse_route_facts(raw)
+    provider = facts.get("provider", "").lower()
+    if normalized.startswith("provider=codex;") or provider in {"codex", "openai", "openai-codex"}:
         return "subscription"
     if normalized.startswith("openai/") or normalized.startswith("openai-codex/"):
         return "subscription"
@@ -321,6 +423,19 @@ def friendly_route_line(route: str) -> str:
     lower = text.lower()
     if not text:
         return "Josh 2.0 Telegram task"
+    facts = parse_route_facts(text)
+    worker = human_worker_name(facts.get("worker", ""))
+    route_id = facts.get("route") or facts.get("lane")
+    reason = facts.get("reason") or facts.get("why")
+    fallback = facts.get("fallback")
+    if facts:
+        target = worker or (route_id.title() if route_id else "selected worker")
+        parts = [f"Josh 2.0 → {target}"]
+        if reason:
+            parts.append(reason)
+        if fallback and fallback.lower() != "none":
+            parts.append(f"fallback: {fallback}")
+        return compact("; ".join(parts), limit=150)
     if "jaimes" in lower:
         return "Josh 2.0 coordinating with JAIMES"
     if "gemini" in lower:
@@ -550,53 +665,55 @@ def is_complete_status(status: str) -> bool:
     return str(status or "").strip().lower() in COMPLETE_STATUSES
 
 
-def progress_phase(items: list[str], status: str) -> tuple[int, str]:
+def milestone_count(items: list[str], status: str, *, route: str = "") -> int:
+    """Return the current milestone position from events, never update volume."""
+    if is_complete_status(status):
+        return len(LIVE_STAGES)
+    if not items:
+        return 0
+    completed = 1  # accepted
+    lowered = [clean_live_text(item).lower() for item in items]
+    if any(any(token in item for token in ("objective", "runbook", "skill selected", "plan")) for item in lowered):
+        completed = max(completed, 2)
+    if parse_route_facts(route) or any(any(token in item for token in ("route", "delegat", "worker queued")) for item in lowered):
+        completed = max(completed, 3)
+    if any(any(token in item for token in ("worker started", "tool", "running", "checking", "execut")) for item in lowered):
+        completed = max(completed, 4)
+    if any(any(token in item for token in ("verified", "verification", "test passed", "canary", "formatting final")) for item in lowered):
+        completed = max(completed, 5)
+    return min(len(LIVE_STAGES) - 1, completed)
+
+
+def stage_rows(items: list[str], status: str, *, route: str = "") -> list[str]:
+    position = milestone_count(items, status, route=route)
+    rows: list[str] = []
+    for index, label in enumerate(LIVE_STAGES, start=1):
+        if is_complete_status(status) or index < position:
+            marker = "✓"
+        elif index == position and not is_complete_status(status):
+            marker = "!" if status == "failed" else "▶"
+        else:
+            marker = "·"
+        rows.append(f"{marker} {label}")
+    return rows
+
+
+def progress_phase(items: list[str], status: str, *, route: str = "") -> tuple[int, str]:
+    position = milestone_count(items, status, route=route)
     if is_complete_status(status):
         return 100, "complete"
-    if status == "failed":
-        return 90, "blocked near completion"
-    if status == "paused":
-        return 60, "paused"
-    if not items:
+    if not position:
         return 0, "waiting for first update"
-
-    percent = 10
-    detail = "task received"
-    for item in items:
-        text = live_line(item)
-        lower = text.lower()
-        if text.startswith(("📥", "👀")):
-            percent = max(percent, 10)
-            detail = "task received"
-        elif text.startswith(("📌", "🤖")):
-            percent = max(percent, 20)
-            detail = "objective confirmed"
-        elif text.startswith(("🧭", "🧠")):
-            percent = max(percent, 35)
-            detail = "triage and decisions"
-        elif text.startswith(("🔧", "🛠️")):
-            percent = max(percent, 55)
-            detail = "tool work in progress"
-        elif text.startswith("🤝"):
-            percent = max(percent, 65)
-            detail = "delegation in progress"
-        elif text.startswith("✅"):
-            if any(token in lower for token in ("verified", "canary", "passed", "success", "fixed")):
-                percent = max(percent, 85)
-                detail = "verification in progress"
-            else:
-                percent = max(percent, 75)
-                detail = "implementation complete"
-        elif text.startswith("🏁"):
-            percent = max(percent, 95)
-            detail = "wrapping up"
-
-    # Nudge progress forward within the current phase as more distinct updates arrive.
-    percent = min(95, percent + max(0, min(10, len(items) - 1)))
-    return percent, detail
+    percent = round((position / len(LIVE_STAGES)) * 100)
+    if status == "failed":
+        return percent, "needs attention"
+    if status == "paused":
+        return percent, "paused"
+    current_label = LIVE_STAGES[max(0, min(position - 1, len(LIVE_STAGES) - 1))].lower()
+    return percent, f"{current_label} in progress"
 
 
-def progress_lines(items: list[str], status: str) -> list[str]:
+def progress_lines(items: list[str], status: str, *, route: str = "") -> list[str]:
     clean = []
     for item in items:
         text = live_line(item)
@@ -608,10 +725,11 @@ def progress_lines(items: list[str], status: str) -> list[str]:
             return ["██████████ 100% complete", ""]
         return ["░░░░░░░░░░ 0% complete - waiting for first update", ""]
 
-    percent, detail = progress_phase(clean, status)
+    percent, detail = progress_phase(items, status, route=route)
     filled = max(0, min(10, round(percent / 10)))
     bar = "█" * filled + "░" * (10 - filled)
-    return [*hanging_status_lines(f"{bar} {percent}% complete - {detail}"), ""]
+    position = milestone_count(items, status, route=route)
+    return [*hanging_status_lines(f"{bar} {percent}% · stage {position}/{len(LIVE_STAGES)} · {detail}"), ""]
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:
@@ -710,6 +828,7 @@ def build_card(
     blocker: str = "none",
     eta: str = "",
     updated: str | None = None,
+    started_at: str | None = None,
 ) -> str:
     done = done or []
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
@@ -734,10 +853,76 @@ def build_card(
         *hanging_bullet_lines(current_step_text(status, now, live_items)),
         "",
         "📈 Progress:",
-        *progress_lines(live_items, status),
+        *progress_lines(live_items, status, route=route),
+        "🪜 Stages:",
+        *(line for row in stage_rows(live_items, status, route=route) for line in hanging_status_lines(row)),
+        "",
+        "👥 Active work:",
+        *(line for row in worker_visibility_lines(model_line, route, status) for line in hanging_bullet_lines(row)),
+        "",
+        "🕒 Timing:",
+        *hanging_status_lines(f"{elapsed_text(started_at, updated)} · updated {now_label()}"),
+        "",
+        "🗂 Recent activity:",
         *live_lines(live_items, fallback="complete" if is_complete_status(status) else "waiting: first update", limit=5),
     ]
     return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
+
+
+def build_rich_card(
+    *,
+    title: str,
+    status: str,
+    model: str = "",
+    route: str = "",
+    now: str = "",
+    done: list[str] | None = None,
+    updated: str | None = None,
+    started_at: str | None = None,
+) -> str:
+    """Render the Codex-style Inbox card with Telegram Rich Message blocks."""
+    done = done or []
+    model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
+    live_items = append_log(done, [now] if now else [])
+    position = milestone_count(live_items, status, route=route)
+    percent, detail = progress_phase(live_items, status, route=route)
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    heading = {
+        "running": "JOSH 2.0 · LIVE WORK",
+        "done": "JOSH 2.0 · COMPLETE",
+        "failed": "JOSH 2.0 · NEEDS ATTENTION",
+        "paused": "JOSH 2.0 · PAUSED",
+    }.get(status, f"JOSH 2.0 · {status.upper()}")
+    step = current_step_text(status, now, live_items)
+
+    stage_items = []
+    for index, label in enumerate(LIVE_STAGES, start=1):
+        checked = " checked" if is_complete_status(status) or index < position else ""
+        active = index == position and not is_complete_status(status)
+        label_html = f"<mark>{html.escape(label)}</mark>" if active else html.escape(label)
+        stage_items.append(f'<li><input type="checkbox"{checked}>{label_html}</li>')
+
+    workers = "".join(f"<li>{html.escape(line)}</li>" for line in worker_visibility_lines(model_line, route, status))
+    activity = []
+    for item in live_items[-8:]:
+        rendered = html.unescape(live_line(item))
+        activity.append(f"<li>{html.escape(rendered)}</li>")
+    activity_html = "".join(activity) or "<li>Waiting for the first verified update.</li>"
+    updated_label = parse_timestamp(updated)
+    updated_text = updated_label.astimezone().strftime("%H:%M %Z") if updated_label else now_label()
+
+    return "".join([
+        f"<h3>{html.escape(heading)}</h3>",
+        f"<p><b>Objective</b><br>{html.escape(operator_objective(title))}</p>",
+        f"<p><code>{html.escape(friendly_model_line(model_line))}</code> · Josh 2.0 owns delivery</p>",
+        f"<pre>{bar} {percent}% · stage {position}/{len(LIVE_STAGES)}\n{html.escape(detail)}</pre>",
+        f"<blockquote><b>Now</b><br>{html.escape(step)}</blockquote>",
+        f"<h4>Progress</h4><ul>{''.join(stage_items)}</ul>",
+        f"<h4>Active work</h4><ul>{workers}</ul>",
+        f"<details><summary>Recent activity ({len(live_items)})</summary><ul>{activity_html}</ul></details>",
+        f"<footer>{html.escape(elapsed_text(started_at, updated))} · updated {html.escape(updated_text)}</footer>",
+    ])
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
@@ -830,7 +1015,45 @@ def send_rich_message(
 
     fallback_payload = build_payload(fallback_text, buttons, silent=silent, chat_id=chat_id, thread_id=thread_id)
     fallback_payload["disable_web_page_preview"] = True
+    if fallback_text.lstrip().startswith("<pre>"):
+        fallback_payload["parse_mode"] = "HTML"
     fallback = api_call("sendMessage", fallback_payload, timeout=timeout)
+    fallback["native_rich_message"] = False
+    fallback["rich_error"] = result.get("error") or result
+    return fallback
+
+
+def edit_rich_card(
+    message_id: int | str,
+    rich_html: str,
+    fallback_text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload = build_payload("", buttons, silent=True, chat_id=chat_id, thread_id=thread_id)
+    payload.pop("text", None)
+    payload.pop("disable_notification", None)
+    payload["message_id"] = message_id
+    payload["rich_message"] = {"html": rich_html, "skip_entity_detection": True}
+    if buttons:
+        payload["reply_markup"] = {"inline_keyboard": buttons}
+    result = api_call("editMessageText", payload, timeout=timeout)
+    if result.get("ok"):
+        result["native_rich_message"] = True
+        return result
+    if telegram_message_not_modified(result):
+        return {"ok": True, "result": {"message_id": message_id}, "native_rich_message": True}
+
+    fallback = edit_card(
+        message_id,
+        fallback_text,
+        buttons,
+        timeout,
+        chat_id=chat_id,
+        thread_id=thread_id,
+    )
     fallback["native_rich_message"] = False
     fallback["rich_error"] = result.get("error") or result
     return fallback
@@ -974,6 +1197,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("JOSH_TELEGRAM_CHAT_ID")
         thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("JOSH_TELEGRAM_THREAD_ID")
         model = model or current_session_model(str(chat_id or ""), str(thread_id or "")) or "unverified"
+        started_at = str(existing.get("started_at") or utc_now())
+        updated_at = utc_now()
         if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
             ack_message_id = claim_pending_ack(args.key)
         terminal_status = status in {"done", "failed"}
@@ -988,6 +1213,18 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             next_step=args.next or "",
             blocker=args.blocker or "None",
             eta=args.eta or "",
+            updated=updated_at,
+            started_at=started_at,
+        )
+        rich_text = build_rich_card(
+            title=title,
+            status=status,
+            model=model,
+            route=route,
+            now=args.now or "",
+            done=done,
+            updated=updated_at,
+            started_at=started_at,
         )
         buttons = load_buttons(args, status)
         if terminal_status and args.final_text_file:
@@ -1004,15 +1241,47 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             ) if terminal_status and not args.no_final_summary else ""
 
         if args.dry_run:
-            print(json.dumps({"ok": True, "dry_run": True, "text": text, "final_text": final_text, "buttons": buttons, "existing": existing}, indent=2))
+            print(json.dumps({
+                "ok": True,
+                "dry_run": True,
+                "renderer": "rich" if rich_cards_enabled(chat_id, thread_id) else "legacy",
+                "text": text,
+                "rich_text": rich_text,
+                "final_text": final_text,
+                "buttons": buttons,
+                "existing": existing,
+            }, indent=2))
             return 0
 
         # Approval controls govern the outcome, so they belong only on the separate final summary card.
         card_buttons = buttons if not terminal_status else None
 
-        if existing.get("message_id"):
+        renderer = str(existing.get("renderer") or "")
+        use_rich = renderer == "rich" or (not existing.get("message_id") and rich_cards_enabled(chat_id, thread_id))
+        if existing.get("message_id") and use_rich:
+            result = edit_rich_card(
+                existing["message_id"],
+                rich_text,
+                text,
+                card_buttons,
+                args.timeout,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            action = "edited"
+        elif existing.get("message_id"):
             result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
             action = "edited"
+        elif use_rich:
+            result = send_rich_message(
+                rich_text,
+                text,
+                args.timeout,
+                buttons=card_buttons,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            action = "sent"
         else:
             result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
             action = "sent"
@@ -1028,6 +1297,10 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         message_id = existing.get("message_id")
         if action == "sent":
             message_id = result.get("result", {}).get("message_id")
+        if use_rich:
+            renderer = "rich" if result.get("native_rich_message") else "legacy"
+        elif not renderer:
+            renderer = "legacy"
 
         final_message_id = existing.get("final_message_id")
         final_action = None
@@ -1059,18 +1332,20 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             "final_message_id": final_message_id,
             "approval_message_id": approval_message_id,
             "status": status,
-            "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "started_at": started_at,
+            "updated_at": updated_at,
             "done": done,
             "work_log": done,
             "route": route,
             "model": model,
+            "renderer": renderer,
             "chat_id": chat_id,
             "thread_id": thread_id,
             "next_step": args.next or existing.get("next_step") or "",
         }
         save_state(state)
         publish_brain_feed(args, status)
-        print(json.dumps({"ok": True, "action": action, "final_action": final_action, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
+        print(json.dumps({"ok": True, "action": action, "final_action": final_action, "renderer": renderer, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
         return 0
 
 

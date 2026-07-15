@@ -1,4 +1,5 @@
 import argparse
+import datetime as dt
 import importlib.util
 import sys
 from pathlib import Path
@@ -41,3 +42,28 @@ def test_claim_inbox_queues_when_ack_explicitly_reports_failure():
         result = watcher.claim_inbox(args)
     assert result["status"] == "queued"
     assert any("submit" in call.args[0] for call in run_cmd.call_args_list)
+
+
+def test_coordinator_worker_gets_heartbeat_while_running():
+    old = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=watcher.HEARTBEAT_SECONDS + 5)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    state = {
+        "active_cards": {
+            "run-1": {
+                "key": "card-1",
+                "objective": "Long Inbox worker",
+                "model": "codex/gpt-5.6-luna",
+                "route": "route=luna; owner=josh2",
+                "session_id": "session",
+                "job_id": "job-1",
+                "coordinator_owned": True,
+                "started_at": old,
+                "last_card_update_at": old,
+                "status": "active",
+            }
+        }
+    }
+    with patch.object(watcher, "live_cards_enabled", return_value=True), patch.object(watcher, "recent_progress_events", return_value=[]), patch.object(watcher, "coordinator_job_status", return_value="running"):
+        updates = watcher.update_active_cards(state, "session", dry_run=True, meta={"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"})
+    assert len(updates) == 1
+    assert updates[0]["event"].startswith("heartbeat:run-1:")
+    assert state["active_cards"]["run-1"]["last_card_update_at"] != old

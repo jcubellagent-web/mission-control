@@ -84,7 +84,83 @@ def test_live_progress_has_a_ten_cell_visual_bar():
     )
     rendered = "\n".join(lines)
     assert re.search(r"[█░]{10}", rendered)
-    assert "% complete" in rendered
+    assert "%" in rendered
+    assert "stage" in rendered
+
+
+def test_progress_is_based_on_verified_milestones_not_update_volume():
+    route = "planned provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2"
+    early = card.progress_phase(
+        ["Received Telegram task", "Objective determined: Inbox health check"],
+        "running",
+        route=route,
+    )
+    noisy = card.progress_phase(
+        ["Received Telegram task", "Objective determined: Inbox health check"] + [f"Update {i}" for i in range(20)],
+        "running",
+        route=route,
+    )
+    assert early == noisy
+    assert early[0] == 50
+
+
+def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
+    model = "planned provider=xai; model=grok-4; worker=jaimes-grok-public; host=jaimes"
+    route = "route=grok; owner=josh2; reason=current events"
+    rows = card.worker_visibility_lines(model, route, "running")
+    assert rows[0] == "Josh 2.0 · owner/coordinator"
+    assert rows[1] == "↳ JAIMES / Grok · xai/grok-4 · active"
+    assert "jaimes-grok-public" not in " ".join(rows)
+
+
+def test_rich_card_uses_native_blocks_and_collapsible_activity():
+    rendered = card.build_rich_card(
+        title="Verify Inbox routing",
+        status="running",
+        model="planned provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2",
+        route="route=luna; owner=josh2; reason=fast Inbox coordination",
+        now="Asynchronous worker started",
+        done=["Received Telegram task", "Objective determined: Verify Inbox routing"],
+        started_at="2026-07-15T05:00:00Z",
+        updated="2026-07-15T05:01:15Z",
+    )
+    assert rendered.startswith("<h3>JOSH 2.0 · LIVE WORK</h3>")
+    assert '<input type="checkbox" checked>' in rendered
+    assert "<details><summary>Recent activity" in rendered
+    assert "<footer>elapsed 1m 15s" in rendered
+    assert re.search(r"[█░]{10}", rendered)
+
+
+def test_rich_cards_default_only_to_control_center_inbox(monkeypatch):
+    monkeypatch.delenv(card.RICH_CARD_ENV, raising=False)
+    assert card.rich_cards_enabled("-1003589561528", "1")
+    assert not card.rich_cards_enabled("-1003589561528", "17")
+    assert not card.rich_cards_enabled("6218150306", "")
+
+
+def test_rich_edit_falls_back_to_legacy_html(monkeypatch):
+    calls = []
+
+    def fake_api(method, payload, timeout=15):
+        calls.append((method, payload))
+        if len(calls) == 1:
+            return {"ok": False, "error": "rich unsupported"}
+        return {"ok": True, "result": {"message_id": 42}}
+
+    monkeypatch.setattr(card, "api_call", fake_api)
+    result = card.edit_rich_card(
+        42,
+        "<h3>Live</h3>",
+        "<pre>Live</pre>",
+        None,
+        15,
+        chat_id="-1003589561528",
+        thread_id="1",
+    )
+    assert result["ok"]
+    assert result["native_rich_message"] is False
+    assert calls[0][1]["rich_message"]["html"] == "<h3>Live</h3>"
+    assert calls[1][1]["parse_mode"] == "HTML"
 
 
 def test_verified_coordinator_model_is_disclosed_on_the_live_card():
