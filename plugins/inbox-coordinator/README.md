@@ -12,6 +12,18 @@ cache. The helper can therefore place the eyes reaction before it creates one
 live card and submits one asynchronous coordinator worker. Prompt text is never
 placed in a process argument, cache, or plugin log.
 
+The default helper is the canonical checked-in
+`mission-control/scripts/josh_telegram_fast_ack.py`, not the legacy workspace
+copy. A Josh claim is accepted only after its exact receipt proves the eyes
+reaction, successful card start, immutable header ID, editable live-card ID,
+and durable worker job ID. A timeout after the helper may have produced visible
+Telegram effects is retained as indeterminate and suppresses an unsafe native
+fallback; a clean failure before any possible effects remains fail-open.
+
+Inbound `message_received` correlations are consumed one-to-one. This keeps a
+burst of global `before_dispatch` hooks from binding multiple requests to the
+same Telegram message ID.
+
 Direct `@JAIMES` mentions are handed off only when the JAIMES health
 snapshot is fresh and JAIMES returns a per-message acceptance receipt for the
 exact chat, topic, and inbound message. That receipt proves the eyes reaction,

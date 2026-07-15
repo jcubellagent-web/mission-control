@@ -710,10 +710,30 @@ def shared_layer_attention_item(shared_layer: Dict[str, Any]) -> Dict[str, Any]:
         }
     if blocked_tasks:
         task = blocked_tasks[0]
+        dashboard_safe = str(task.get("privacy") or "") == "dashboard-safe"
+        if dashboard_safe:
+            notes = task.get("notes") if isinstance(task.get("notes"), list) else []
+            latest_note = next(
+                (
+                    str(note.get("note") or "")
+                    for note in notes
+                    if isinstance(note, dict) and str(note.get("note") or "").strip()
+                ),
+                "",
+            )
+            detail = (
+                latest_note
+                or task.get("summary")
+                or task.get("detail")
+                or task.get("status")
+                or "A shared task reported blocked."
+            )
+        else:
+            detail = "A private shared task is blocked; review it in the secure task queue."
         return {
             "priority": "medium",
             "title": plain_dashboard_text(task.get("title") or task.get("id") or "Shared task blocked", 96),
-            "detail": plain_dashboard_text(task.get("detail") or task.get("status") or "A shared task reported blocked.", 180),
+            "detail": plain_dashboard_text(detail, 180),
             "url": "#jobs",
         }
     if approval_tasks:

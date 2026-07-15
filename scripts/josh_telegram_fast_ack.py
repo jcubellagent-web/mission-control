@@ -10,7 +10,9 @@ starts after the objective is known.
 from __future__ import annotations
 
 import argparse
+import copy
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import os
@@ -20,6 +22,7 @@ import sys
 import time
 import tempfile
 import urllib.request
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -340,6 +343,340 @@ def save_json(path: Path, data: Any) -> None:
                 tmp.unlink()
             except Exception:
                 pass
+
+
+def protocol_lock_path(effect_path: Path) -> Path:
+    text = str(effect_path)
+    suffix = ".effects.json"
+    return Path(text[:-len(suffix)] + ".protocol.lock") if text.endswith(suffix) else Path(text + ".protocol.lock")
+
+
+@contextmanager
+def telegram_effect_lock(effect_path: Path, timeout: float = 0.25):
+    lock_path = protocol_lock_path(effect_path)
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            os.mkdir(lock_path, 0o700)
+            break
+        except FileExistsError:
+            try:
+                if time.time() - lock_path.stat().st_mtime > 2.0:
+                    os.rmdir(lock_path)
+                    continue
+            except (FileNotFoundError, OSError):
+                pass
+            if time.monotonic() >= deadline:
+                raise TimeoutError("telegram effect protocol lock unavailable")
+            time.sleep(0.005)
+    try:
+        yield
+    finally:
+        try:
+            os.rmdir(lock_path)
+        except FileNotFoundError:
+            pass
+
+
+def atomic_protocol_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False) as handle:
+        temp = Path(handle.name)
+        handle.write(json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    try:
+        temp.replace(path)
+        try:
+            directory_fd = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        except OSError:
+            pass
+    finally:
+        if temp.exists():
+            temp.unlink()
+
+
+def telegram_effect_protocol(args: argparse.Namespace) -> dict[str, Path] | None:
+    effect_path = Path(str(getattr(args, "effect_path", "") or ""))
+    cancel_path = Path(str(getattr(args, "cancel_path", "") or ""))
+    if not str(getattr(args, "effect_path", "") or "") or not str(getattr(args, "cancel_path", "") or ""):
+        return None
+    return {
+        "effect": effect_path,
+        "cancel": cancel_path,
+        "surface_deadline_ms": int(getattr(args, "surface_deadline_ms", 0) or 0),
+    }
+
+
+def begin_telegram_surface(protocol: dict[str, Path] | None, stage: str) -> bool:
+    """Fence cancellation and durably checkpoint immediately before a send."""
+    if not protocol:
+        return True
+    effect_path = protocol["effect"]
+    cancel_path = protocol["cancel"]
+    try:
+        with telegram_effect_lock(effect_path):
+            if cancel_path.exists():
+                return False
+            current = load_json(effect_path, {})
+            if not isinstance(current, dict):
+                current = {}
+            atomic_protocol_json(effect_path, {
+                **current,
+                "version": 1,
+                "state": "attempting",
+                "stage": stage,
+                "surface_started_at": current.get("surface_started_at") or utc_now(),
+                "updated_at": utc_now(),
+            })
+    except TimeoutError:
+        return False
+    return True
+
+
+def telegram_claim_not_cancelled(protocol: dict[str, Path] | None) -> bool:
+    """Check cancellation for idempotent acknowledgement work without fencing fallback."""
+    if not protocol:
+        return True
+    try:
+        with telegram_effect_lock(protocol["effect"]):
+            return not protocol["cancel"].exists()
+    except TimeoutError:
+        return False
+
+
+def update_telegram_effect(protocol: dict[str, Path] | None, **values: Any) -> None:
+    if not protocol:
+        return
+    effect_path = protocol["effect"]
+    try:
+        with telegram_effect_lock(effect_path):
+            current = load_json(effect_path, {})
+            if not isinstance(current, dict):
+                current = {}
+            atomic_protocol_json(effect_path, {**current, **values, "version": 1, "updated_at": utc_now()})
+    except TimeoutError:
+        pass
+
+
+@contextmanager
+def fast_ack_state_lock():
+    """Serialize cross-process fast-ack state merges without holding network work."""
+    #JAIMES: Keep every fast-ack read/merge/write inside this separate flock;
+    # a stale poller must never replace a coordinator claim written mid-poll.
+    lock_path = STATE_PATH.with_suffix(STATE_PATH.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def load_fast_ack_state_snapshot() -> tuple[dict[str, Any], dict[str, Any]]:
+    """Return a locked state snapshot and an immutable merge base."""
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+    if not isinstance(state, dict):
+        state = {}
+    return state, copy.deepcopy(state)
+
+
+POLL_STATE_FIELDS = {
+    "last_checked_at",
+    "direct_session_id",
+    "model",
+    "status",
+    "last_error",
+    "last_error_at",
+    "last_sent_at",
+    "last_result",
+    "latest_pending_ack",
+}
+
+
+def _three_way_poll_value(base: dict[str, Any], candidate: dict[str, Any], latest: dict[str, Any], key: str) -> tuple[bool, Any]:
+    """Resolve one poll-owned value without reverting a concurrent writer."""
+    missing = object()
+    base_value = base.get(key, missing)
+    candidate_value = candidate.get(key, missing)
+    latest_value = latest.get(key, missing)
+    if candidate_value == base_value:
+        return latest_value is not missing, latest_value
+    if latest_value == base_value:
+        return candidate_value is not missing, candidate_value
+    # Both writers changed the value. Preserve the newer on-disk writer; poll
+    # fields are advisory and must not erase a concurrent claim or ack handoff.
+    return latest_value is not missing, latest_value
+
+
+def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[str, Any]:
+    """Merge a stale poll snapshot into current state while preserving claims."""
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        if not isinstance(latest, dict):
+            latest = {}
+        merged = copy.deepcopy(latest)
+
+        for key in POLL_STATE_FIELDS:
+            keep, value = _three_way_poll_value(base, candidate, latest, key)
+            if keep:
+                merged[key] = value
+            else:
+                merged.pop(key, None)
+
+        for key, limit in (("acked_prompt_events", 200), ("processed_progress_events", 300)):
+            combined = {
+                str(item)
+                for source in (latest.get(key), candidate.get(key))
+                for item in (source or [])
+                if str(item)
+            }
+            merged[key] = sorted(combined)[-limit:]
+
+        base_cards = base.get("active_cards") if isinstance(base.get("active_cards"), dict) else {}
+        candidate_cards = candidate.get("active_cards") if isinstance(candidate.get("active_cards"), dict) else {}
+        latest_cards = latest.get("active_cards") if isinstance(latest.get("active_cards"), dict) else {}
+        merged_cards = copy.deepcopy(latest_cards)
+        missing = object()
+        for card_key in set(base_cards) | set(candidate_cards):
+            base_card = base_cards.get(card_key, missing)
+            candidate_card = candidate_cards.get(card_key, missing)
+            latest_card = latest_cards.get(card_key, missing)
+            if candidate_card == base_card:
+                continue
+            if latest_card == base_card:
+                if candidate_card is missing:
+                    merged_cards.pop(card_key, None)
+                else:
+                    merged_cards[card_key] = copy.deepcopy(candidate_card)
+                continue
+            if candidate_card is missing:
+                # A concurrent writer changed this card after the poll snapshot;
+                # never prune that newer record.
+                continue
+            if isinstance(latest_card, dict) and isinstance(candidate_card, dict):
+                merged_cards[card_key] = {**latest_card, **copy.deepcopy(candidate_card)}
+            elif latest_card is missing:
+                merged_cards[card_key] = copy.deepcopy(candidate_card)
+        merged["active_cards"] = merged_cards
+        save_json(STATE_PATH, merged)
+        return merged
+
+
+def persist_claim_state(stable: str, card: dict[str, Any], last_claim: dict[str, Any]) -> dict[str, Any]:
+    """Add one coordinator claim without replacing poller-owned state."""
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        if not isinstance(state, dict):
+            state = {}
+        active = state.setdefault("active_cards", {})
+        if not isinstance(active, dict):
+            active = {}
+            state["active_cards"] = active
+        active[stable] = copy.deepcopy(card)
+        state["last_claim_at"] = utc_now()
+        state["last_claim"] = copy.deepcopy(last_claim)
+        save_json(STATE_PATH, state)
+        return state
+
+
+def record_fast_ack_error(error_name: str) -> None:
+    """Record a watcher exception without racing a per-message claim."""
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        if not isinstance(state, dict):
+            state = {}
+        state["last_error_at"] = utc_now()
+        state["last_error"] = error_name
+        save_json(STATE_PATH, state)
+
+
+def positive_telegram_message_id(value: Any) -> str:
+    text = str(value or "").strip()
+    return text if text.isdigit() and int(text) > 0 else ""
+
+
+def exact_control_center_inbox(meta: dict[str, Any] | None = None) -> bool:
+    return bool(
+        meta
+        and str(meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+        and str(meta.get("telegram_thread_id") or "") == "1"
+    )
+
+
+def _json_receipt(raw: Any) -> dict[str, Any]:
+    try:
+        parsed = json.loads(str(raw or ""))
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def work_card_state_receipt(card_key: str) -> dict[str, Any]:
+    state = load_json(WORK_CARD_STATE_PATH, {})
+    cards = state.get("cards") if isinstance(state, dict) else {}
+    card = cards.get(card_key) if isinstance(cards, dict) else {}
+    if not isinstance(card, dict):
+        card = {}
+    return {
+        "header_message_id": positive_telegram_message_id(card.get("header_message_id")),
+        "live_message_id": positive_telegram_message_id(card.get("message_id")),
+        "status": str(card.get("status") or ""),
+        "header_delivery_status": str(card.get("header_delivery_status") or ""),
+        "live_delivery_status": str(card.get("live_delivery_status") or ""),
+    }
+
+
+def parse_work_card_start_receipt(card_key: str, result: dict[str, Any]) -> dict[str, Any]:
+    """Read the helper receipt, falling back only to the same persisted card."""
+    payload = _json_receipt(result.get("stdout"))
+    persisted = work_card_state_receipt(card_key)
+    header_message_id = positive_telegram_message_id(payload.get("header_message_id")) or persisted["header_message_id"]
+    live_message_id = positive_telegram_message_id(payload.get("message_id") or payload.get("live_message_id")) or persisted["live_message_id"]
+    return {
+        "command_ok": bool(result.get("ok")),
+        "header_message_id": header_message_id,
+        "live_message_id": live_message_id,
+        "surface_ok": bool(header_message_id and live_message_id),
+        "persisted_status": persisted["status"],
+        "header_delivery_status": persisted["header_delivery_status"],
+        "live_delivery_status": persisted["live_delivery_status"],
+        "surface_indeterminate": "indeterminate" in {
+            persisted["header_delivery_status"].lower(),
+            persisted["live_delivery_status"].lower(),
+        },
+    }
+
+
+def safe_same_key_card_retry(card_key: str, receipt: dict[str, Any]) -> bool:
+    """Retry only when the header is durable and no live send is ambiguous."""
+    persisted = work_card_state_receipt(card_key)
+    return bool(
+        persisted["header_message_id"]
+        and not persisted["live_message_id"]
+        and persisted["header_delivery_status"].lower() != "indeterminate"
+        and persisted["live_delivery_status"].lower() != "indeterminate"
+        and persisted["status"].lower() not in TERMINAL_CARD_STATUSES
+        and not receipt.get("surface_ok")
+    )
+
+
+def run_work_card_start(cmd: list[str]) -> dict[str, Any]:
+    try:
+        # The child has two bounded Telegram sends (header + live). Keep the
+        # parent alive long enough for its timeout handler to persist an
+        # indeterminate receipt instead of killing it after request write.
+        return dict(run_cmd(cmd, timeout=25))
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "returncode": -1, "stdout": "", "stderr": "work-card start timed out"}
+    except Exception as exc:  # noqa: BLE001 - keep the native fallback available
+        return {"ok": False, "returncode": -1, "stdout": "", "stderr": type(exc).__name__}
 
 
 def local_time_label() -> str:
@@ -1217,7 +1554,13 @@ def should_skip_stale_prompt_event(ts: str, first_bootstrap: bool) -> bool:
     return age > MAX_UNACKED_PROMPT_AGE_SECONDS
 
 
-def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dict[str, Any] | None = None) -> dict[str, Any]:
+def send_ack(
+    event: dict[str, str],
+    model: str,
+    dry_run: bool = False,
+    meta: dict[str, Any] | None = None,
+    effect_protocol: dict[str, Path] | None = None,
+) -> dict[str, Any]:
     message_id = str(event.get("message_id") or "")
     if message_id and meta:
         key = f"fast-ack-telegram-{meta.get('telegram_chat_id')}-{meta.get('telegram_thread_id')}-message-{message_id}"
@@ -1240,6 +1583,18 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
         if fast_ack_enabled():
             # The exact Inbox path is reaction-first by contract. A global
             # watcher event may lack a message ID, so it remains best-effort.
+            if effect_protocol and not telegram_claim_not_cancelled(effect_protocol):
+                return {
+                    "ok": False,
+                    "status": "cancelled-before-surface",
+                    "error": "claim_cancelled_before_telegram_surface",
+                    "reaction_ok": False,
+                    "ack_message_id": "",
+                    "key": key,
+                    "objective": objective_from_prompt(prompt),
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                }
             ack_sent = (
                 place_inbox_reaction(message_id, meta=meta)
                 if reaction_required
@@ -1287,8 +1642,23 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
             "last_card_update_at": utc_now(),
         }
     start_visible_card = live_cards_enabled(meta)
+    card_start_attempts = 0
+    header_message_id = ""
+    live_message_id = ""
+    card_start_ok = True
     if not dry_run and start_visible_card:
-        card_start = run_cmd(with_work_card_target([
+        if not telegram_claim_not_cancelled(effect_protocol):
+            return {
+                "ok": False,
+                "status": "cancelled-before-surface",
+                "error": "claim_cancelled_before_card_surface",
+                "reaction_ok": bool(ack_sent),
+                "key": key,
+                "card_start_ok": False,
+                "header_message_id": "",
+                "live_message_id": "",
+            }
+        card_start_cmd = with_work_card_target([
             "python3",
             str(WORK_CARD_SCRIPT),
             "start",
@@ -1308,9 +1678,68 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
             "Work automatically; show buttons only for final approval steps if needed",
             "--ack-message-id",
             ack_message_id,
-        ], meta))
+            "--timeout",
+            "6",
+        ], meta)
+        if effect_protocol:
+            card_start_cmd.extend([
+                "--effect-path", str(effect_protocol["effect"]),
+                "--cancel-path", str(effect_protocol["cancel"]),
+            ])
+            if int(effect_protocol.get("surface_deadline_ms") or 0) > 0:
+                card_start_cmd.extend([
+                    "--surface-deadline-ms",
+                    str(effect_protocol["surface_deadline_ms"]),
+                ])
+        card_start_attempts = 1
+        card_start = run_work_card_start(card_start_cmd)
+        card_receipt = parse_work_card_start_receipt(key, card_start)
+        if exact_control_center_inbox(meta) and safe_same_key_card_retry(key, card_receipt):
+            card_start_attempts += 1
+            card_start = run_work_card_start(card_start_cmd)
+            card_receipt = parse_work_card_start_receipt(key, card_start)
+        header_message_id = str(card_receipt.get("header_message_id") or "")
+        live_message_id = str(card_receipt.get("live_message_id") or "")
+        card_start_ok = bool(card_receipt.get("surface_ok")) if exact_control_center_inbox(meta) else bool(card_start.get("ok"))
+        effect_state = (
+            "surface-started"
+            if card_start_ok or header_message_id or live_message_id
+            else "indeterminate"
+            if card_receipt.get("surface_indeterminate")
+            else "failed-before-surface"
+        )
+        update_telegram_effect(
+            effect_protocol,
+            state=effect_state,
+            stage="header-live-card",
+            reaction_ok=bool(ack_sent),
+            header_message_id=header_message_id,
+            live_message_id=live_message_id,
+        )
     else:
         card_start = {"ok": True, "skipped": True}
+    if not dry_run and start_visible_card and exact_control_center_inbox(meta) and not card_start_ok:
+        return {
+            "ok": False,
+            "status": "surface-failed",
+            "error": "inbox_header_or_live_receipt_missing",
+            "reaction_ok": bool(ack_sent),
+            "ack_message_id": ack_message_id,
+            "key": key,
+            "model": display_model,
+            "route": display_route,
+            "route_plan": route.get("route_plan"),
+            "skill": skill,
+            "objective": objective,
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+            "card_start_ok": False,
+            "card_start_attempts": card_start_attempts,
+            "header_message_id": header_message_id,
+            "live_message_id": live_message_id,
+            "surface_indeterminate": bool(card_receipt.get("surface_indeterminate")),
+            "card_start_receipt": str(card_start.get("stdout") or ""),
+        }
     if not dry_run:
         publish_josh(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
     return {
@@ -1325,7 +1754,10 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
         "objective": objective,
         "run_id": event.get("run_id") or "",
         "last_card_update_at": utc_now(),
-        "card_start_ok": bool(card_start.get("ok")),
+        "card_start_ok": card_start_ok,
+        "card_start_attempts": card_start_attempts,
+        "header_message_id": header_message_id,
+        "live_message_id": live_message_id,
         "card_start_receipt": str(card_start.get("stdout") or ""),
     }
 
@@ -1685,20 +2117,58 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "message_id": str(args.message_id or ""),
         "prompt": prompt,
     }
-    ack = send_ack(event, model=DEFAULT_MODEL, dry_run=args.dry_run, meta=meta)
+    effect_protocol = telegram_effect_protocol(args)
+    ack = send_ack(
+        event,
+        model=DEFAULT_MODEL,
+        dry_run=args.dry_run,
+        meta=meta,
+        effect_protocol=effect_protocol,
+    )
     if not ack.get("ok"):
         if not args.dry_run:
-            publish_josh(
-                "Inbox acknowledgement needs retry",
-                "error",
-                "Required eyes reaction failed; no header or card was created and native fallback remains available.",
-            )
+            if str(ack.get("status") or "") == "surface-failed":
+                publish_josh(
+                    "Inbox task surface needs retry",
+                    "error",
+                    "The reaction completed, but the header/live-card receipt was incomplete; no worker was queued and native fallback remains available.",
+                )
+            else:
+                publish_josh(
+                    "Inbox acknowledgement needs retry",
+                    "error",
+                    "Required eyes reaction failed; no header or card was created and native fallback remains available.",
+                )
         return {
             "ok": False,
             "status": str(ack.get("status") or "reaction-failed"),
-            "reaction_ok": False,
+            "reaction_ok": bool(ack.get("reaction_ok")),
             "key": ack.get("key"),
+            "card_start_ok": bool(ack.get("card_start_ok")),
+            "header_message_id": str(ack.get("header_message_id") or ""),
+            "live_message_id": str(ack.get("live_message_id") or ""),
+            "surface_indeterminate": bool(ack.get("surface_indeterminate")),
         }
+
+    if exact_control_center_inbox(meta) and not args.dry_run:
+        header_message_id = positive_telegram_message_id(ack.get("header_message_id"))
+        live_message_id = positive_telegram_message_id(ack.get("live_message_id"))
+        if not ack.get("card_start_ok") or not header_message_id or not live_message_id:
+            publish_josh(
+                "Inbox task surface needs retry",
+                "error",
+                "The helper did not prove both Topic 1 message receipts; no worker was queued and native fallback remains available.",
+            )
+            return {
+                "ok": False,
+                "status": "surface-failed",
+                "reaction_ok": bool(ack.get("reaction_ok")),
+                "key": ack.get("key"),
+                "card_start_ok": False,
+                "header_message_id": header_message_id,
+                "live_message_id": live_message_id,
+                "surface_indeterminate": bool(ack.get("surface_indeterminate")),
+            }
 
     cmd = [
         sys.executable,
@@ -1716,8 +2186,15 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         cmd.extend(["--route-plan-json", json.dumps(route_plan, separators=(",", ":"), sort_keys=True)])
     if args.dry_run:
         cmd.append("--dry-run")
-    submitted = run_cmd(cmd, timeout=30, input_text=prompt)
-    if not submitted.get("ok") or not submitted.get("stdout"):
+
+    def queue_failure_receipt(error_name: str) -> dict[str, Any]:
+        update_telegram_effect(
+            effect_protocol,
+            state="indeterminate",
+            stage="coordinator-submit",
+            header_message_id=str(ack.get("header_message_id") or ""),
+            live_message_id=str(ack.get("live_message_id") or ""),
+        )
         if not args.dry_run:
             run_cmd(with_work_card_target([
                 sys.executable,
@@ -1731,19 +2208,40 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
                 "--next", "Retry after the coordinator service is healthy",
             ], meta))
             publish_josh("Inbox worker queue failed", "error", "The request was acknowledged but no worker was queued.")
-        return {"ok": False, "status": "queue-failed", "key": ack.get("key")}
+        # Preserve every proven Telegram effect. The plugin uses these durable
+        # receipts to avoid opening a second handler after a visible card exists.
+        return {
+            "ok": False,
+            "status": "queue-failed",
+            "error": error_name,
+            "reaction_ok": bool(ack.get("reaction_ok")),
+            "card_start_ok": bool(ack.get("card_start_ok")),
+            "header_message_id": str(ack.get("header_message_id") or ""),
+            "live_message_id": str(ack.get("live_message_id") or ""),
+            "job_id": "",
+            "key": ack.get("key"),
+        }
+
+    try:
+        submitted = run_cmd(cmd, timeout=30, input_text=prompt)
+    except subprocess.TimeoutExpired:
+        return queue_failure_receipt("coordinator_submit_timeout")
+    if not submitted.get("ok") or not submitted.get("stdout"):
+        return queue_failure_receipt("coordinator_submit_failed")
 
     try:
         envelope = json.loads(str(submitted["stdout"]))
     except Exception:
-        envelope = {}
-    job = envelope.get("job") if isinstance(envelope, dict) else {}
-    route = envelope.get("route") if isinstance(envelope, dict) else {}
-    state = load_json(STATE_PATH, {})
-    if not isinstance(state, dict):
-        state = {}
-    active = state.setdefault("active_cards", {})
-    active[stable] = {
+        return queue_failure_receipt("coordinator_receipt_invalid_json")
+    if not isinstance(envelope, dict):
+        return queue_failure_receipt("coordinator_receipt_not_object")
+    job = envelope.get("job")
+    if not isinstance(job, dict) or not str(job.get("jobId") or "").strip():
+        return queue_failure_receipt("coordinator_receipt_missing_job")
+    route = envelope.get("route")
+    if not isinstance(route, dict):
+        route = {}
+    active_card = {
         "key": ack.get("key"),
         "objective": ack.get("objective"),
         "model": ack.get("model"),
@@ -1755,25 +2253,41 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "telegram_chat_id": str(meta["telegram_chat_id"]),
         "telegram_thread_id": str(meta["telegram_thread_id"]),
         "reaction_ok": bool(ack.get("reaction_ok")),
+        "card_start_ok": bool(ack.get("card_start_ok")),
+        "header_message_id": str(ack.get("header_message_id") or ""),
+        "live_message_id": str(ack.get("live_message_id") or ""),
         "started_at": ack.get("last_card_update_at"),
         "last_progress_at": ack.get("last_card_update_at"),
         "last_card_update_at": ack.get("last_card_update_at"),
         "status": "active",
     }
-    state["last_claim_at"] = utc_now()
-    state["last_claim"] = {
+    last_claim = {
         "run_id": stable,
         "message_id": str(args.message_id or ""),
         "job_id": str((job or {}).get("jobId") or ""),
         "route_id": str((route or {}).get("routeId") or ""),
         "reaction_ok": bool(ack.get("reaction_ok")),
+        "card_start_ok": bool(ack.get("card_start_ok")),
+        "header_message_id": str(ack.get("header_message_id") or ""),
+        "live_message_id": str(ack.get("live_message_id") or ""),
     }
     if not args.dry_run:
-        save_json(STATE_PATH, state)
+        persist_claim_state(stable, active_card, last_claim)
+    update_telegram_effect(
+        effect_protocol,
+        state="queued",
+        stage="coordinator-queued",
+        reaction_ok=bool(ack.get("reaction_ok")),
+        header_message_id=str(ack.get("header_message_id") or ""),
+        live_message_id=str(ack.get("live_message_id") or ""),
+    )
     return {
         "ok": True,
         "status": "queued",
         "reaction_ok": bool(ack.get("reaction_ok")),
+        "card_start_ok": bool(ack.get("card_start_ok")),
+        "header_message_id": str(ack.get("header_message_id") or ""),
+        "live_message_id": str(ack.get("live_message_id") or ""),
         "job_id": str((job or {}).get("jobId") or ""),
         "route_id": str((route or {}).get("routeId") or ""),
         "deduplicated": bool(envelope.get("deduplicated")) if isinstance(envelope, dict) else False,
@@ -1799,9 +2313,7 @@ def coordinator_maintenance() -> None:
 
 
 def poll_once(dry_run: bool = False) -> dict[str, Any]:
-    state = load_json(STATE_PATH, {})
-    if not isinstance(state, dict):
-        state = {}
+    state, base_state = load_fast_ack_state_snapshot()
     acked = set(state.get("acked_prompt_events") or [])
     meta = session_metadata()
     session_id = str(meta.get("sessionId") or "")
@@ -1813,7 +2325,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         state["last_result"] = {"ok": False, "status": "no-direct-session"}
         state["status"] = "no-direct-session"
         if not dry_run:
-            save_json(STATE_PATH, state)
+            merge_poll_state(state, base_state)
         return {"ok": False, "status": "no-direct-session"}
 
     sent: list[dict[str, Any]] = []
@@ -1842,6 +2354,9 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "model": result.get("model"),
                     "route": result.get("route"),
                     "ack_message_id": result.get("ack_message_id"),
+                    "card_start_ok": bool(result.get("card_start_ok")),
+                    "header_message_id": str(result.get("header_message_id") or ""),
+                    "live_message_id": str(result.get("live_message_id") or ""),
                     "session_id": session_id,
                     "started_at": result.get("last_card_update_at"),
                     "last_progress_at": result.get("last_card_update_at"),
@@ -1879,7 +2394,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         updates.extend(orphan_updates)
     pruned_terminal_cards = prune_terminal_cards(state)
     if not dry_run:
-        save_json(STATE_PATH, state)
+        merge_poll_state(state, base_state)
     return {
         "ok": True,
         "session_id": session_id,
@@ -1901,6 +2416,9 @@ def main() -> int:
     parser.add_argument("--chat-id", default="")
     parser.add_argument("--thread-id", default="")
     parser.add_argument("--session-key", default="")
+    parser.add_argument("--effect-path", default="")
+    parser.add_argument("--cancel-path", default="")
+    parser.add_argument("--surface-deadline-ms", type=int, default=0)
     args = parser.parse_args()
 
     if args.claim_inbox:
@@ -1916,12 +2434,7 @@ def main() -> int:
         try:
             poll_once()
         except Exception as exc:  # noqa: BLE001 - keep watcher alive
-            state = load_json(STATE_PATH, {})
-            if not isinstance(state, dict):
-                state = {}
-            state["last_error_at"] = utc_now()
-            state["last_error"] = type(exc).__name__
-            save_json(STATE_PATH, state)
+            record_fast_ack_error(type(exc).__name__)
         time.sleep(max(0.5, args.interval))
 
 

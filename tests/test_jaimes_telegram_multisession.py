@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import contextlib
 import json
 import sqlite3
 import stat
@@ -49,6 +50,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
             patch.object(watcher, "update_active_cards", return_value=[]),
             patch.object(watcher, "HANDOFF_DIR", self.handoff_dir),
             patch.object(watcher, "verify_bot_identity", return_value=True),
+            patch.object(watcher, "set_eyes_reaction", return_value=True),
         ]
         for item in self.patches:
             item.start()
@@ -139,7 +141,9 @@ class MultiSessionWatcherTests(unittest.TestCase):
         initial.assert_not_called()
         start_cmd = run.call_args.args[0]
         self.assertIn("start", start_cmd)
-        self.assertNotIn("--separate-message", start_cmd)
+        self.assertIn("--separate-message", start_cmd)
+        self.assertEqual(start_cmd[start_cmd.index("--timeout") + 1], "4")
+        self.assertEqual(run.call_args.kwargs["timeout"], 12)
 
     def test_inbox_reaction_failure_emits_no_header_or_live_card(self) -> None:
         event = {
@@ -158,6 +162,107 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(result["error"], "eyes_reaction_failed")
         run.assert_not_called()
         initial.assert_not_called()
+
+    def test_inbox_card_receipt_requires_positive_header_and_live_ids(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify receipt validation",
+            "platform_message_id": "78",
+            "db_message_id": "10",
+            "run_id": "telegram-message-10",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        with patch.object(watcher, "set_eyes_reaction", return_value=True), \
+             patch.object(watcher, "auto_route_for_prompt", return_value={}), \
+             patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+             patch.object(watcher, "run_cmd", return_value={
+                 "ok": True,
+                 "stdout": json.dumps({"ok": True, "header_message_id": "invalid", "message_id": 0}),
+                 "stderr": "",
+             }), \
+             patch.object(watcher, "record_api_result"), \
+             patch.object(watcher, "send_chat_action"), \
+             patch.object(watcher, "publish_jaimes"):
+            result = watcher.send_ack(event, "model", {}, meta=meta)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["header_message_id"], "")
+        self.assertEqual(result["ack_message_id"], "")
+
+    def test_inbox_ambiguous_card_delivery_propagates_durable_quarantine(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify ambiguous delivery fencing",
+            "platform_message_id": "79",
+            "db_message_id": "11",
+            "run_id": "telegram-message-11",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        durable_state = {
+            "cards": {
+                "jaimes-fast-ack--1003589561528-79": {
+                    "header_message_id": "301",
+                    "message_id": None,
+                    "live_delivery_status": "indeterminate",
+                }
+            }
+        }
+        with patch.object(watcher, "set_eyes_reaction", return_value=True), \
+             patch.object(watcher, "auto_route_for_prompt", return_value={}), \
+             patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+             patch.object(watcher, "run_cmd", return_value={
+                 "ok": False,
+                 "stdout": "",
+                 "stderr": "Telegram delivery timed out",
+             }), \
+             patch.object(watcher.work_card, "load_state", return_value=durable_state), \
+             patch.object(watcher, "record_api_result"), \
+             patch.object(watcher, "send_chat_action"), \
+             patch.object(watcher, "publish_jaimes"):
+            result = watcher.send_ack(event, "model", {}, meta=meta)
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["surface_indeterminate"])
+        self.assertEqual(result["header_message_id"], "301")
+        self.assertEqual(result["ack_message_id"], "")
+
+    def test_ambiguous_handoff_surface_stays_owned_and_never_fails_open(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES preserve ambiguous ownership",
+            "platform_message_id": "101",
+            "db_message_id": "12",
+            "run_id": "telegram-message-12",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "101") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "waiting",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "101",
+                "created_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+        with patch.object(watcher, "send_ack", return_value={
+            "ok": False,
+            "surface_indeterminate": True,
+            "reaction_ok": True,
+            "header_message_id": "401",
+            "ack_message_id": "",
+        }):
+            result = watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["handoff_indeterminate"])
+        self.assertNotIn("claim_token", result["handoff_receipt"])
+        with watcher.handoff_lock("-1003589561528", "1", "101") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "indeterminate")
+        self.assertEqual(stored["ownership_state"], "claimed_in_flight")
+        code, receipt = watcher.await_handoff("-1003589561528", "1", "101", 0.5)
+        self.assertEqual(code, 0)
+        self.assertEqual(receipt["status"], "indeterminate")
 
     def test_bot_identity_success_clears_stale_active_api_error(self) -> None:
         state = {"last_telegram_api_error": {"at": "old", "method": "sendMessage", "ok": False}}
@@ -237,6 +342,99 @@ class MultiSessionWatcherTests(unittest.TestCase):
             stored = watcher.load_json(path, {})
         self.assertEqual(stored["status"], "cancelled")
 
+    def test_claimed_without_surface_times_out_to_fallback(self) -> None:
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "89") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "claimed",
+                "ownership_state": "claimed_no_effect",
+                "reaction_ok": True,
+                "claim_token": "crashed-owner",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "89",
+                "created_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+        code, receipt = watcher.await_handoff("-1003589561528", "1", "89", 0.05)
+        self.assertEqual(code, 2)
+        self.assertEqual(receipt["status"], "timeout")
+        with watcher.handoff_lock("-1003589561528", "1", "89") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "cancelled")
+        self.assertEqual(stored["reason"], "handoff_timeout_before_surface")
+
+    def test_surface_intent_without_child_checkpoint_falls_back(self) -> None:
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "90") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "claimed",
+                "ownership_state": "surface_inflight",
+                "reaction_ok": True,
+                "claim_token": "crashed-after-intent",
+                "card_key": "jaimes-fast-ack--1003589561528-90",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "90",
+                "created_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+        with patch.object(watcher, "work_card_surface_receipt", return_value={}):
+            code, receipt = watcher.await_handoff("-1003589561528", "1", "90", 0.05)
+        self.assertEqual(code, 2)
+        self.assertEqual(receipt["status"], "timeout")
+        with watcher.handoff_lock("-1003589561528", "1", "90") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "cancelled")
+        self.assertEqual(stored["reason"], "handoff_timeout_without_durable_surface_evidence")
+
+    def test_expired_surface_owner_is_terminally_consumed_instead_of_wedging(self) -> None:
+        event = {
+            "platform_message_id": "91",
+            "prompt": "@JAIMES expired owner",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        past = watcher.dt.datetime.now(watcher.dt.timezone.utc) - watcher.dt.timedelta(seconds=1)
+        with watcher.handoff_lock("-1003589561528", "1", "91") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "claimed",
+                "ownership_state": "surface_inflight",
+                "claim_token": "dead-owner",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "91",
+                "created_at": watcher.utc_now(),
+                "expires_at": past.isoformat().replace("+00:00", "Z"),
+            })
+        decision, record = watcher.handoff_event_state(meta, event)
+        self.assertEqual(decision, "consume")
+        self.assertEqual(record["status"], "failed")
+        self.assertEqual(record["reason"], "handoff_surface_owner_expired")
+        with watcher.handoff_lock("-1003589561528", "1", "91") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "failed")
+
+    def test_missing_lease_waits_briefly_then_consumes_as_josh_owned(self) -> None:
+        old = watcher.dt.datetime.now(watcher.dt.timezone.utc) - watcher.dt.timedelta(
+            seconds=watcher.HANDOFF_LEASE_ARRIVAL_GRACE_SECONDS + 1
+        )
+        event = {
+            "platform_message_id": "92",
+            "prompt": "@JAIMES no lease was created",
+            "ts": old.isoformat().replace("+00:00", "Z"),
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        decision, record = watcher.handoff_event_state(meta, event)
+        self.assertEqual(decision, "consume")
+        self.assertEqual(record["status"], "cancelled")
+        self.assertEqual(record["reason"], "handoff_lease_never_arrived_josh_fallback_owned")
+
     def test_process_ack_event_requires_lease_and_persists_acceptance(self) -> None:
         event = {
             "ts": watcher.utc_now(),
@@ -276,6 +474,270 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(stored["status"], "accepted")
         self.assertEqual(stored["header_message_id"], "201")
         self.assertEqual(stored["live_message_id"], "202")
+
+    def test_handoff_send_runs_without_holding_the_file_lock(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify lock scope",
+            "platform_message_id": "109",
+            "db_message_id": "19",
+            "run_id": "telegram-message-19",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "109") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "waiting",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "109",
+                "created_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+
+        original_lock = watcher.handoff_lock
+        lock_state = {"held": False}
+
+        @contextlib.contextmanager
+        def tracked_lock(*args, **kwargs):
+            with original_lock(*args, **kwargs) as record_path:
+                self.assertFalse(lock_state["held"])
+                lock_state["held"] = True
+                try:
+                    yield record_path
+                finally:
+                    lock_state["held"] = False
+
+        def assert_unlocked_send(*args, **kwargs):
+            self.assertFalse(lock_state["held"])
+            self.assertTrue(kwargs["surface_attempt_callback"]())
+            self.assertFalse(lock_state["held"])
+            return {
+                "ok": True,
+                "reaction_ok": True,
+                "header_message_id": "301",
+                "ack_message_id": "302",
+            }
+
+        with patch.object(watcher, "handoff_lock", tracked_lock), \
+             patch.object(watcher, "send_ack", side_effect=assert_unlocked_send):
+            result = watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+
+        self.assertTrue(result["ok"])
+        self.assertFalse(lock_state["held"])
+
+    def test_claimed_sender_outlives_short_waiting_lease_without_self_cancelling(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify claimed lease extension",
+            "platform_message_id": "114",
+            "db_message_id": "24",
+            "run_id": "telegram-message-24",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        short_future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(milliseconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "114") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "waiting",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "114",
+                "created_at": watcher.utc_now(),
+                "expires_at": short_future.isoformat().replace("+00:00", "Z"),
+            })
+
+        def send_after_waiting_expiry(*args, **kwargs):
+            self.assertTrue(kwargs["surface_attempt_callback"]())
+            time.sleep(0.06)
+            return {
+                "ok": True,
+                "reaction_ok": True,
+                "header_message_id": "451",
+                "ack_message_id": "452",
+            }
+
+        with patch.object(watcher, "send_ack", side_effect=send_after_waiting_expiry):
+            result = watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+        self.assertTrue(result["ok"])
+        with watcher.handoff_lock("-1003589561528", "1", "114") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "accepted")
+        self.assertEqual(stored["live_message_id"], "452")
+
+    def test_slow_handoff_send_returns_indeterminate_then_reconciles_accepted(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify timeout fencing",
+            "platform_message_id": "119",
+            "db_message_id": "29",
+            "run_id": "telegram-message-29",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        waiter_output: list[tuple[int, dict]] = []
+        processor_output: list[dict] = []
+        send_started = threading.Event()
+        release_send = threading.Event()
+
+        def wait_for_acceptance() -> None:
+            waiter_output.append(watcher.await_handoff("-1003589561528", "1", "119", 0.8))
+
+        waiter = threading.Thread(target=wait_for_acceptance)
+        waiter.start()
+        deadline = time.time() + 1
+        while time.time() < deadline:
+            with watcher.handoff_lock("-1003589561528", "1", "119") as path:
+                if watcher.load_json(path, {}).get("status") == "waiting":
+                    break
+            time.sleep(0.01)
+        else:
+            self.fail("handoff waiter never published its lease")
+
+        def slow_send(*args, **kwargs):
+            self.assertTrue(kwargs["surface_attempt_callback"]())
+            send_started.set()
+            self.assertTrue(release_send.wait(3))
+            return {
+                "ok": True,
+                "reaction_ok": True,
+                "header_message_id": "401",
+                "ack_message_id": "402",
+            }
+
+        def process() -> None:
+            processor_output.append(
+                watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+            )
+
+        with patch.object(watcher, "send_ack", side_effect=slow_send) as send, \
+             patch.object(watcher, "work_card_surface_receipt", return_value={"surface_indeterminate": True}):
+            processor = threading.Thread(target=process)
+            processor.start()
+            self.assertTrue(send_started.wait(1))
+            waiter.join(timeout=2)
+            self.assertFalse(waiter.is_alive(), "indeterminate ownership receipt was blocked by slow Telegram work")
+            self.assertTrue(processor.is_alive(), "slow Telegram work should still be outside the lock")
+            self.assertEqual(waiter_output[0][0], 0)
+            self.assertEqual(waiter_output[0][1]["status"], "indeterminate")
+            self.assertEqual(waiter_output[0][1]["ownership_state"], "claimed_in_flight")
+            self.assertNotIn("claim_token", waiter_output[0][1])
+            release_send.set()
+            processor.join(timeout=2)
+            self.assertFalse(processor.is_alive())
+            self.assertEqual(send.call_count, 1)
+
+        self.assertTrue(processor_output[0]["ok"])
+        with watcher.handoff_lock("-1003589561528", "1", "119") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "accepted")
+        self.assertEqual(stored["header_message_id"], "401")
+        self.assertEqual(stored["live_message_id"], "402")
+        self.assertIn("accepted_at", stored)
+
+    def test_concurrent_handoff_processors_have_one_claim_owner(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES verify one owner",
+            "platform_message_id": "129",
+            "db_message_id": "39",
+            "run_id": "telegram-message-39",
+        }
+        meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "129") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "waiting",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "129",
+                "created_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+
+        first_send_started = threading.Event()
+        release_first_send = threading.Event()
+        first_output: list[dict] = []
+
+        def one_slow_send(*args, **kwargs):
+            self.assertTrue(kwargs["surface_attempt_callback"]())
+            first_send_started.set()
+            self.assertTrue(release_first_send.wait(3))
+            return {
+                "ok": True,
+                "reaction_ok": True,
+                "header_message_id": "501",
+                "ack_message_id": "502",
+            }
+
+        with patch.object(watcher, "send_ack", side_effect=one_slow_send) as send:
+            first = threading.Thread(target=lambda: first_output.append(
+                watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+            ))
+            first.start()
+            self.assertTrue(first_send_started.wait(1))
+            second = watcher.process_ack_event(event, model="model", state={}, dry_run=False, meta=meta)
+            self.assertFalse(second["ok"])
+            self.assertEqual(second["error"], "handoff_lease_unavailable")
+            release_first_send.set()
+            first.join(timeout=2)
+            self.assertFalse(first.is_alive())
+            self.assertEqual(send.call_count, 1)
+
+        self.assertTrue(first_output[0]["ok"])
+        with watcher.handoff_lock("-1003589561528", "1", "129") as path:
+            stored = watcher.load_json(path, {})
+        self.assertEqual(stored["status"], "accepted")
+        self.assertEqual(stored["header_message_id"], "501")
+        self.assertEqual(stored["live_message_id"], "502")
+
+    def test_preexisting_accepted_receipt_advances_stale_cursor_without_resend(self) -> None:
+        event = {
+            "session_id": "inbox",
+            "ts": watcher.utc_now(),
+            "prompt": "@JAIMES recover accepted work",
+            "platform_message_id": "177",
+            "db_message_id": "44",
+            "run_id": "telegram-message-44",
+        }
+        meta = {
+            "sessionId": "inbox",
+            "model": "gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "1",
+        }
+        future = watcher.dt.datetime.now(watcher.dt.timezone.utc) + watcher.dt.timedelta(seconds=30)
+        with watcher.handoff_lock("-1003589561528", "1", "177") as path:
+            watcher.write_handoff_record(path, {
+                "schema_version": 1,
+                "status": "accepted",
+                "agent": "jaimes",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+                "inbound_message_id": "177",
+                "reaction_ok": True,
+                "header_message_id": "701",
+                "live_message_id": "702",
+                "accepted_at": watcher.utc_now(),
+                "expires_at": future.isoformat().replace("+00:00", "Z"),
+            })
+        self.state.write_text(json.dumps({"direct_db_cursor:inbox": 0}), encoding="utf-8")
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", return_value=[event]), \
+             patch.object(watcher, "send_ack") as send:
+            result = watcher.poll_once()
+        send.assert_not_called()
+        saved = json.loads(self.state.read_text())
+        self.assertEqual(saved["direct_db_cursor:inbox"], 44)
+        recovered = saved["active_cards"]["telegram-message-44"]
+        self.assertTrue(recovered["recovered_from_handoff_receipt"])
+        self.assertEqual(recovered["header_message_id"], "701")
+        self.assertEqual(recovered["ack_message_id"], "702")
+        self.assertEqual(result["sent"], [])
 
     def test_same_task_key_never_sends_a_second_ack_or_card(self) -> None:
         event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}

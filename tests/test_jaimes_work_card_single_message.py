@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 import datetime as dt
+import fcntl
 import importlib.util
 import json
 from pathlib import Path
 import stat
+import subprocess
 import sys
+import time
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 
 
+MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "jaimes_work_card.py"
+
+
 def load_module():
-    path = Path(__file__).resolve().parents[1] / "scripts" / "jaimes_work_card.py"
-    spec = importlib.util.spec_from_file_location("jaimes_work_card_single_message", path)
+    spec = importlib.util.spec_from_file_location("jaimes_work_card_single_message", MODULE_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -62,6 +67,70 @@ def test_pending_ack_is_claimed_only_for_matching_origin(tmp_path):
     assert saved["claimed_by"] == "matching-card"
 
 
+def test_pending_ack_claim_preserves_concurrent_fast_ack_state(tmp_path):
+    ack_path = tmp_path / "jaimes_fast_ack_state.json"
+    ready_path = tmp_path / "claim-ready"
+    card.save_json_file(ack_path, {
+        "latest_pending_ack": {
+            "message_id": "100",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "1",
+        },
+        "active_cards": {"before": {"status": "active"}},
+        "acked_prompt_events": ["before-event"],
+    })
+    lock_path = ack_path.with_suffix(ack_path.suffix + ".lock")
+    worker_code = """
+import importlib.util
+import sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("jaimes_card_claimant", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+module.ACK_STATE_PATH = Path(sys.argv[2])
+Path(sys.argv[3]).write_text("ready", encoding="utf-8")
+print(module.claim_pending_ack("current-card", "-1003589561528", "1"))
+"""
+
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        process = subprocess.Popen(
+            [sys.executable, "-c", worker_code, str(MODULE_PATH), str(ack_path), str(ready_path)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        deadline = time.monotonic() + 5
+        while not ready_path.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert ready_path.exists()
+        card.save_json_file(ack_path, {
+            "latest_pending_ack": {
+                "message_id": "100",
+                "telegram_chat_id": "-1003589561528",
+                "telegram_thread_id": "1",
+            },
+            "last_claim": {"run_id": "new-run"},
+            "active_cards": {
+                "before": {"status": "active"},
+                "new-run": {"status": "active"},
+            },
+            "acked_prompt_events": ["before-event", "new-event"],
+            "processed_progress_events": ["progress-event"],
+        })
+
+    stdout, stderr = process.communicate(timeout=10)
+    assert process.returncode == 0, (stdout, stderr)
+    assert stdout.strip() == "100"
+    final = card.load_json_file(ack_path, {})
+    assert final["latest_pending_ack"]["claimed_by"] == "current-card"
+    assert final["last_claim"] == {"run_id": "new-run"}
+    assert set(final["active_cards"]) == {"before", "new-run"}
+    assert final["acked_prompt_events"] == ["before-event", "new-event"]
+    assert final["processed_progress_events"] == ["progress-event"]
+
+
 def test_pending_ack_from_another_topic_is_not_claimed(tmp_path):
     state_path = tmp_path / "ack.json"
     state_path.write_text('{"latest_pending_ack":{"message_id":"100","telegram_chat_id":"-1003589561528","telegram_thread_id":"19"}}')
@@ -76,6 +145,47 @@ def test_unscoped_pending_ack_is_not_claimed(tmp_path):
     state_path.write_text('{"latest_pending_ack":{"message_id":"100"}}')
     with patch.object(card, "ACK_STATE_PATH", state_path):
         assert card.claim_pending_ack("safe-card", "-1003589561528", "17") == ""
+
+
+def test_inbox_separate_message_never_adopts_prior_pending_ack(tmp_path):
+    state_path = tmp_path / "cards.json"
+    ack_path = tmp_path / "jaimes_fast_ack_state.json"
+    card.save_json_file(ack_path, {
+        "latest_pending_ack": {
+            "message_id": "900",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "1",
+            "key": "prior-task",
+        },
+        "active_cards": {"prior-run": {"key": "prior-task", "status": "active"}},
+    })
+    args = SimpleNamespace(
+        key="current-task", title="Create current Topic 1 surfaces", model="model", route="route",
+        now="Working", done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="", separate_message=True, chat_id="-1003589561528", thread_id="1",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    responses = iter([
+        {"ok": True, "result": {"message_id": 901}},
+        {"ok": True, "result": {"message_id": 902}},
+    ])
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "ACK_STATE_PATH", ack_path), \
+         patch.object(card, "claim_pending_ack", side_effect=AssertionError("prior ack must not be claimed")), \
+         patch.object(card, "send_card", side_effect=lambda *args, **kwargs: next(responses)) as send, \
+         patch.object(card, "edit_card", side_effect=AssertionError("prior ack must not be edited")), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 0
+
+    saved = card.load_json_file(state_path, {})["cards"]["current-task"]
+    assert send.call_count == 2
+    assert saved["header_message_id"] == 901
+    assert saved["message_id"] == 902
+    assert card.load_json_file(ack_path, {})["latest_pending_ack"]["message_id"] == "900"
 
 
 def test_objective_and_live_card_are_separate_messages():
@@ -117,7 +227,7 @@ def test_inbox_header_precedes_live_card_and_is_retry_safe(tmp_path):
     calls = []
     responses = iter([
         {"ok": True, "result": {"message_id": 101}},
-        {"ok": False, "error": "temporary live-card failure"},
+        {"ok": False, "error": "HTTP error 400: rejected before delivery"},
         {"ok": True, "result": {"message_id": 202}},
     ])
 
@@ -140,6 +250,154 @@ def test_inbox_header_precedes_live_card_and_is_retry_safe(tmp_path):
     assert calls == ["header", "live", "live"]
     assert final["header_message_id"] == 101
     assert final["message_id"] == 202
+
+
+def test_inbox_indeterminate_header_send_is_quarantined(tmp_path):
+    state_path = tmp_path / "cards.json"
+    args = SimpleNamespace(
+        key="ambiguous-header", title="Fence an ambiguous Topic 1 header", model="model", route="route",
+        now="Working", done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="", separate_message=True, chat_id="-1003589561528", thread_id="1",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    sends = []
+
+    def ambiguous_header(*args, **kwargs):
+        sends.append("header")
+        return {"ok": False, "error": "timed out after request write"}
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "send_card", side_effect=ambiguous_header), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 1
+        partial = card.load_state()["cards"]["ambiguous-header"]
+        assert partial["header_delivery_status"] == "indeterminate"
+        assert partial["header_message_id"] is None
+        assert card.upsert_card(args, "running") == 1
+
+    assert sends == ["header"]
+
+
+def test_inbox_indeterminate_live_send_is_quarantined_after_header_checkpoint(tmp_path):
+    state_path = tmp_path / "cards.json"
+    args = SimpleNamespace(
+        key="ambiguous-live", title="Fence an ambiguous Topic 1 live card", model="model", route="route",
+        now="Working", done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="", separate_message=True, chat_id="-1003589561528", thread_id="1",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    sends = []
+
+    def send_surface(text, *args, **kwargs):
+        if not sends:
+            sends.append("header")
+            return {"ok": True, "result": {"message_id": 101}}
+        sends.append("live")
+        return {"ok": False, "error": "connection reset after request write"}
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "send_card", side_effect=send_surface), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 1
+        partial = card.load_state()["cards"]["ambiguous-live"]
+        assert partial["header_message_id"] == 101
+        assert partial["message_id"] is None
+        assert partial["live_delivery_status"] == "indeterminate"
+        assert card.upsert_card(args, "running") == 1
+
+    assert sends == ["header", "live"]
+
+
+def test_inbox_live_receipt_survives_indeterminate_final_send_and_retry(tmp_path):
+    state_path = tmp_path / "cards.json"
+    start_args = SimpleNamespace(
+        key="ambiguous-final", title="Checkpoint live before the final", model="model", route="route",
+        now="Working", done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="", separate_message=True, chat_id="-1003589561528", thread_id="1",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    done_args = SimpleNamespace(**{
+        **start_args.__dict__,
+        "now": "Finished and verified",
+        "done": "Completed task|Verified result|Prepared final",
+        "final_summary": True,
+        "no_final_summary": False,
+    })
+    sends = iter([
+        {"ok": True, "result": {"message_id": 101}},
+        {"ok": True, "result": {"message_id": 102}},
+    ])
+    final_sends = []
+
+    def ambiguous_final(*args, **kwargs):
+        final_sends.append("final")
+        return {"ok": False, "error": "timed out after request write"}
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "send_card", side_effect=lambda *args, **kwargs: next(sends)), \
+         patch.object(card, "edit_card", return_value={"ok": True}), \
+         patch.object(card, "send_final_summary", side_effect=ambiguous_final), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(start_args, "running") == 0
+        assert card.upsert_card(done_args, "done") == 1
+        partial = card.load_state()["cards"]["ambiguous-final"]
+        assert partial["header_message_id"] == 101
+        assert partial["message_id"] == 102
+        assert partial["final_message_id"] is None
+        assert partial["final_delivery_status"] == "indeterminate"
+        assert card.upsert_card(done_args, "done") == 1
+
+    assert final_sends == ["final"]
+
+
+def test_inbox_indeterminate_final_edit_never_falls_back_to_new_send(tmp_path):
+    state_path = tmp_path / "cards.json"
+    card.save_json_file(state_path, {"cards": {
+        "edit-final": {
+            "title": "Retry one known final",
+            "header_message_id": 101,
+            "message_id": 102,
+            "final_message_id": 103,
+            "status": "done",
+            "done": ["Completed task", "Verified result", "Prepared final"],
+            "work_log": ["Completed task", "Verified result", "Prepared final"],
+            "route": "route",
+            "model": "model",
+            "chat_id": "-1003589561528",
+            "thread_id": "1",
+        }
+    }})
+    args = SimpleNamespace(
+        key="edit-final", title="Retry one known final", model="model", route="route",
+        now="Finished and verified", done="", next="No action needed", blocker="None", eta="",
+        ack_message_id="", separate_message=True, chat_id="-1003589561528", thread_id="1",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=True,
+        no_final_summary=False, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "edit_card", return_value={"ok": True}), \
+         patch.object(card, "edit_final_summary", return_value={"ok": False, "error": "timed out after request write"}) as edit_final, \
+         patch.object(card, "send_final_summary") as send_final, \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "done") == 1
+
+    edit_final.assert_called_once()
+    send_final.assert_not_called()
+    saved = card.load_json_file(state_path, {})["cards"]["edit-final"]
+    assert saved["message_id"] == 102
+    assert saved["final_message_id"] == 103
 
 
 def test_inbox_task_header_is_bounded_and_names_agent_and_models():

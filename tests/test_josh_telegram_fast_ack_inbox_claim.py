@@ -1,15 +1,16 @@
 import argparse
 import datetime as dt
 import importlib.util
+import json
+import subprocess
 import sys
+import threading
 from pathlib import Path
 from unittest.mock import patch
 
 
-SPEC = importlib.util.spec_from_file_location(
-    "josh_telegram_fast_ack",
-    Path(__file__).resolve().parents[1] / "scripts" / "josh_telegram_fast_ack.py",
-)
+MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "josh_telegram_fast_ack.py"
+SPEC = importlib.util.spec_from_file_location("josh_telegram_fast_ack", MODULE_PATH)
 watcher = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 sys.modules[SPEC.name] = watcher
@@ -27,14 +28,20 @@ def test_send_ack_uses_prompt_reaction_without_message_id_and_does_not_fail_clai
 
 def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
     event = {"session_id": "session", "ts": "2026-07-15T04:23:21Z", "run_id": "before-dispatch:1", "message_id": "", "prompt": "Fix a multi-step Inbox task"}
-    card_receipt = '{"ok": true, "action": "start", "message_id": 444}'
-    with patch.object(watcher, "fast_ack_enabled", return_value=True), patch.object(watcher, "live_cards_enabled", return_value=True), patch.object(watcher, "send_chat_action"), patch.object(watcher, "send_message_draft"), patch.object(watcher, "send_prompt_reaction", return_value=True), patch.object(watcher, "publish_josh"), patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": card_receipt}) as run_cmd:
-        result = watcher.send_ack(event, model=watcher.DEFAULT_MODEL, dry_run=False, meta={"telegram_chat_id": "-100", "telegram_thread_id": "1"})
-    command = next(call.args[0] for call in run_cmd.call_args_list if str(watcher.WORK_CARD_SCRIPT) in call.args[0])
+    card_receipt = '{"ok": true, "header_message_id": 443, "message_id": 444}'
+    with patch.object(watcher, "fast_ack_enabled", return_value=True), patch.object(watcher, "live_cards_enabled", return_value=True), patch.object(watcher, "send_chat_action"), patch.object(watcher, "send_message_draft"), patch.object(watcher, "send_prompt_reaction", return_value=True), patch.object(watcher, "auto_route_for_prompt", return_value={"model": "planned model", "route": "planned route", "route_plan": {"routeId": "luna"}}), patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), patch.object(watcher, "publish_josh"), patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": card_receipt}) as run_cmd:
+        result = watcher.send_ack(event, model=watcher.DEFAULT_MODEL, dry_run=False, meta={"telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID, "telegram_thread_id": "1"})
+    work_card_call = next(call for call in run_cmd.call_args_list if str(watcher.WORK_CARD_SCRIPT) in call.args[0])
+    command = work_card_call.args[0]
     assert command[1] == str(watcher.WORK_CARD_SCRIPT)
     assert command[command.index("--thread-id") + 1] == "1"
+    assert command[command.index("--timeout") + 1] == "6"
+    assert work_card_call.kwargs["timeout"] == 25
     assert watcher.SEND_REPLY_SCRIPT == watcher.WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
     assert result["card_start_ok"] is True
+    assert result["header_message_id"] == "443"
+    assert result["live_message_id"] == "444"
+    assert result["card_start_attempts"] == 1
     assert result["card_start_receipt"] == card_receipt
 
 
@@ -76,7 +83,381 @@ def test_claim_inbox_leaves_native_fallback_when_ack_reports_failure():
         result = watcher.claim_inbox(args)
     assert result["status"] == "reaction-failed"
     assert result["reaction_ok"] is False
+    assert result["card_start_ok"] is False
     run_cmd.assert_not_called()
+
+
+def test_claim_inbox_refuses_queue_without_topic_surface_receipts():
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:902",
+        message_id="902",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": False,
+        "header_message_id": "101",
+        "live_message_id": "",
+        "key": "card-902",
+    }
+    with patch("sys.stdin.read", return_value="private request"), patch.object(watcher, "send_ack", return_value=ack), patch.object(watcher, "run_cmd") as run_cmd, patch.object(watcher, "publish_josh"):
+        result = watcher.claim_inbox(args)
+    assert result == {
+        "ok": False,
+        "status": "surface-failed",
+        "reaction_ok": True,
+        "key": "card-902",
+        "card_start_ok": False,
+        "header_message_id": "101",
+        "live_message_id": "",
+        "surface_indeterminate": False,
+    }
+    run_cmd.assert_not_called()
+
+
+def test_queue_failure_preserves_all_durable_surface_receipts():
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:904",
+        message_id="904",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "401",
+        "live_message_id": "402",
+        "key": "card-904",
+        "objective": "Queue a worker",
+        "model": "model",
+        "route": "route",
+        "last_card_update_at": watcher.utc_now(),
+    }
+
+    def fail_submit(cmd, *args, **kwargs):
+        if str(watcher.COORDINATOR_SCRIPT) in cmd:
+            return {"ok": False, "stdout": "", "stderr": "queue unavailable"}
+        return {"ok": True, "stdout": "{}", "stderr": ""}
+
+    with patch("sys.stdin.read", return_value="private request"), \
+         patch.object(watcher, "send_ack", return_value=ack), \
+         patch.object(watcher, "run_cmd", side_effect=fail_submit), \
+         patch.object(watcher, "publish_josh"), \
+         patch.object(watcher, "persist_claim_state") as persist:
+        result = watcher.claim_inbox(args)
+
+    assert result == {
+        "ok": False,
+        "status": "queue-failed",
+        "error": "coordinator_submit_failed",
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "401",
+        "live_message_id": "402",
+        "job_id": "",
+        "key": "card-904",
+    }
+    persist.assert_not_called()
+
+
+def test_invalid_coordinator_envelope_never_claims_queued():
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:905",
+        message_id="905",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "501",
+        "live_message_id": "502",
+        "key": "card-905",
+        "objective": "Validate coordinator receipt",
+        "model": "model",
+        "route": "route",
+        "last_card_update_at": watcher.utc_now(),
+    }
+
+    for stdout, expected_error in (
+        ("not-json", "coordinator_receipt_invalid_json"),
+        ('{"ok":true,"job":{}}', "coordinator_receipt_missing_job"),
+    ):
+        def invalid_receipt(cmd, *args, **kwargs):
+            if str(watcher.COORDINATOR_SCRIPT) in cmd:
+                return {"ok": True, "stdout": stdout, "stderr": ""}
+            return {"ok": True, "stdout": "{}", "stderr": ""}
+
+        with patch("sys.stdin.read", return_value="private request"), \
+             patch.object(watcher, "send_ack", return_value=ack), \
+             patch.object(watcher, "run_cmd", side_effect=invalid_receipt), \
+             patch.object(watcher, "publish_josh"), \
+             patch.object(watcher, "persist_claim_state") as persist:
+            result = watcher.claim_inbox(args)
+
+        assert result["ok"] is False
+        assert result["status"] == "queue-failed"
+        assert result["error"] == expected_error
+        assert result["header_message_id"] == "501"
+        assert result["live_message_id"] == "502"
+        assert result["job_id"] == ""
+        persist.assert_not_called()
+
+
+def test_valid_coordinator_envelope_returns_verified_queue_receipt():
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:906",
+        message_id="906",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "601",
+        "live_message_id": "602",
+        "key": "card-906",
+        "objective": "Queue verified work",
+        "model": "model",
+        "route": "route",
+        "route_plan": {"routeId": "luna"},
+        "last_card_update_at": watcher.utc_now(),
+    }
+    envelope = {
+        "job": {"jobId": "job-906"},
+        "route": {"routeId": "luna"},
+        "deduplicated": False,
+    }
+    with patch("sys.stdin.read", return_value="private request"), \
+         patch.object(watcher, "send_ack", return_value=ack), \
+         patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": json.dumps(envelope), "stderr": ""}), \
+         patch.object(watcher, "persist_claim_state") as persist:
+        result = watcher.claim_inbox(args)
+
+    assert result == {
+        "ok": True,
+        "status": "queued",
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "601",
+        "live_message_id": "602",
+        "job_id": "job-906",
+        "route_id": "luna",
+        "deduplicated": False,
+    }
+    persist.assert_called_once()
+
+
+def test_card_start_retries_once_only_after_durable_header(monkeypatch, tmp_path):
+    state_path = tmp_path / "work-cards.json"
+    monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", state_path)
+    event = {
+        "session_id": "session",
+        "ts": "2026-07-15T04:23:21Z",
+        "run_id": "telegram-message:-1003589561528:1:902",
+        "message_id": "902",
+        "prompt": "Verify a retry-safe Inbox card",
+    }
+    expected_key = "fast-ack-telegram--1003589561528-1-message-902"
+    calls = []
+
+    def run_card(cmd, *args, **kwargs):
+        calls.append(list(cmd))
+        if len(calls) == 1:
+            state_path.write_text(json.dumps({
+                "cards": {
+                    expected_key: {
+                        "status": "running",
+                        "header_message_id": 101,
+                        "message_id": None,
+                    }
+                }
+            }), encoding="utf-8")
+            return {"ok": False, "stdout": "", "stderr": '{"ok":false,"action":"sent"}'}
+        return {"ok": True, "stdout": '{"ok":true,"header_message_id":101,"message_id":102}', "stderr": ""}
+
+    monkeypatch.setattr(watcher, "send_message_reaction", lambda *args, **kwargs: True)
+    monkeypatch.setattr(watcher, "send_chat_action", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "send_message_draft", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: {"model": "planned model", "route": "planned route", "route_plan": {"routeId": "luna"}})
+    monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: {"id": "", "label": "", "reason": ""})
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "run_cmd", run_card)
+
+    result = watcher.send_ack(event, watcher.DEFAULT_MODEL, meta={
+        "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+        "telegram_thread_id": "1",
+    })
+
+    assert result["ok"] is True
+    assert result["card_start_attempts"] == 2
+    assert result["header_message_id"] == "101"
+    assert result["live_message_id"] == "102"
+    assert len(calls) == 2
+    assert all(cmd[cmd.index("--key") + 1] == expected_key for cmd in calls)
+
+
+def test_card_start_does_not_retry_an_indeterminate_live_send(monkeypatch, tmp_path):
+    state_path = tmp_path / "work-cards.json"
+    monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", state_path)
+    expected_key = "fast-ack-telegram--1003589561528-1-message-903"
+    calls = []
+
+    def ambiguous_card(cmd, *args, **kwargs):
+        calls.append(list(cmd))
+        state_path.write_text(json.dumps({
+            "cards": {
+                expected_key: {
+                    "status": "running",
+                    "header_message_id": 201,
+                    "message_id": None,
+                    "live_delivery_status": "indeterminate",
+                }
+            }
+        }), encoding="utf-8")
+        return {"ok": False, "stdout": "", "stderr": "timed out after request write"}
+
+    monkeypatch.setattr(watcher, "send_message_reaction", lambda *args, **kwargs: True)
+    monkeypatch.setattr(watcher, "send_chat_action", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "send_message_draft", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: {"model": "planned model", "route": "planned route", "route_plan": {"routeId": "luna"}})
+    monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: {"id": "", "label": "", "reason": ""})
+    monkeypatch.setattr(watcher, "run_cmd", ambiguous_card)
+
+    result = watcher.send_ack({
+        "session_id": "session",
+        "ts": "2026-07-15T04:23:21Z",
+        "run_id": "telegram-message:-1003589561528:1:903",
+        "message_id": "903",
+        "prompt": "Verify ambiguous delivery handling",
+    }, watcher.DEFAULT_MODEL, meta={
+        "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+        "telegram_thread_id": "1",
+    })
+
+    assert result["ok"] is False
+    assert result["status"] == "surface-failed"
+    assert result["card_start_attempts"] == 1
+    assert result["header_message_id"] == "201"
+    assert result["live_message_id"] == ""
+    assert len(calls) == 1
+
+
+def test_stale_poller_merge_preserves_concurrent_claim(monkeypatch, tmp_path):
+    state_path = tmp_path / "fast-ack.json"
+    monkeypatch.setattr(watcher, "STATE_PATH", state_path)
+    watcher.save_json(state_path, {
+        "status": "ok",
+        "active_cards": {"old": {"status": "active", "last_card_update_at": "old"}},
+        "acked_prompt_events": ["old-event"],
+    })
+    candidate, base = watcher.load_fast_ack_state_snapshot()
+    candidate["last_checked_at"] = "2026-07-15T12:00:00Z"
+    candidate["active_cards"]["old"]["last_card_update_at"] = "poll-update"
+
+    claim = {"key": "card-new", "status": "active", "coordinator_owned": True}
+    worker = threading.Thread(target=watcher.persist_claim_state, args=(
+        "new-run",
+        claim,
+        {"run_id": "new-run", "job_id": "job-new", "header_message_id": "301", "live_message_id": "302"},
+    ))
+    worker.start()
+    worker.join(timeout=2)
+    assert not worker.is_alive()
+
+    merged = watcher.merge_poll_state(candidate, base)
+    assert merged["active_cards"]["new-run"] == claim
+    assert merged["active_cards"]["old"]["last_card_update_at"] == "poll-update"
+    assert merged["last_claim"]["job_id"] == "job-new"
+    assert merged["acked_prompt_events"] == ["old-event"]
+
+
+def test_concurrent_claim_writers_preserve_both_cards(monkeypatch, tmp_path):
+    state_path = tmp_path / "fast-ack.json"
+    monkeypatch.setattr(watcher, "STATE_PATH", state_path)
+    watcher.save_json(state_path, {"active_cards": {}})
+    barrier = threading.Barrier(3)
+
+    def write_claim(run_id):
+        barrier.wait(timeout=2)
+        watcher.persist_claim_state(run_id, {"key": f"card-{run_id}", "status": "active"}, {"run_id": run_id})
+
+    workers = [threading.Thread(target=write_claim, args=(run_id,)) for run_id in ("one", "two")]
+    for worker in workers:
+        worker.start()
+    barrier.wait(timeout=2)
+    for worker in workers:
+        worker.join(timeout=2)
+        assert not worker.is_alive()
+    state = watcher.load_json(state_path, {})
+    assert set(state["active_cards"]) == {"one", "two"}
+
+
+def test_cross_process_claim_stress_preserves_every_card(tmp_path):
+    state_path = tmp_path / "fast-ack.json"
+    watcher.save_json(state_path, {"active_cards": {}})
+    writer_code = """
+import importlib.util
+import sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("fast_ack_writer", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+module.STATE_PATH = Path(sys.argv[2])
+prefix = sys.argv[3]
+for index in range(int(sys.argv[4])):
+    run_id = f"{prefix}-{index}"
+    module.persist_claim_state(
+        run_id,
+        {"key": f"card-{run_id}", "status": "active"},
+        {"run_id": run_id},
+    )
+"""
+    writer_count = 8
+    cards_per_writer = 12
+    processes = [
+        subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                writer_code,
+                str(MODULE_PATH),
+                str(state_path),
+                f"writer-{writer}",
+                str(cards_per_writer),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        for writer in range(writer_count)
+    ]
+    for process in processes:
+        stdout, stderr = process.communicate(timeout=15)
+        assert process.returncode == 0, (stdout, stderr)
+
+    state = watcher.load_json(state_path, {})
+    cards = state.get("active_cards") or {}
+    assert len(cards) == writer_count * cards_per_writer
+    assert set(cards) == {
+        f"writer-{writer}-{index}"
+        for writer in range(writer_count)
+        for index in range(cards_per_writer)
+    }
 
 
 def test_coordinator_worker_gets_heartbeat_while_running():
@@ -119,3 +500,72 @@ def test_terminal_card_history_is_bounded():
     removed = watcher.prune_terminal_cards(state, keep=10)
     assert removed == 110
     assert len(state["active_cards"]) == 10
+
+
+def test_effect_protocol_checkpoints_only_before_irreversible_surface(tmp_path):
+    effect_path = tmp_path / "claim.effects.json"
+    cancel_path = tmp_path / "claim.cancel.json"
+    protocol = {"effect": effect_path, "cancel": cancel_path}
+
+    assert watcher.telegram_claim_not_cancelled(protocol) is True
+    assert not effect_path.exists(), "eyes-only acknowledgement must not fence native fallback"
+    assert watcher.begin_telegram_surface(protocol, "header-live-card") is True
+    effect = json.loads(effect_path.read_text(encoding="utf-8"))
+    assert effect["state"] == "attempting"
+    assert effect["stage"] == "header-live-card"
+    assert "prompt" not in effect
+
+
+def test_effect_protocol_honors_timeout_cancellation_before_surface(tmp_path):
+    effect_path = tmp_path / "claim.effects.json"
+    cancel_path = tmp_path / "claim.cancel.json"
+    cancel_path.write_text('{"version":1,"state":"cancelled-before-surface"}\n', encoding="utf-8")
+    protocol = {"effect": effect_path, "cancel": cancel_path}
+
+    assert watcher.telegram_claim_not_cancelled(protocol) is False
+    assert watcher.begin_telegram_surface(protocol, "header-live-card") is False
+    assert not effect_path.exists()
+
+
+def test_coordinator_submit_timeout_returns_durable_receipt(monkeypatch, tmp_path):
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:990",
+        message_id="990",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+        effect_path=str(tmp_path / "claim.effects.json"),
+        cancel_path=str(tmp_path / "claim.cancel.json"),
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "901",
+        "live_message_id": "902",
+        "key": "card-990",
+        "objective": "Exercise timeout receipt",
+        "model": "model",
+        "route": "route",
+        "last_card_update_at": watcher.utc_now(),
+    }
+
+    def timeout_submit(cmd, *unused_args, **unused_kwargs):
+        if str(watcher.COORDINATOR_SCRIPT) in cmd:
+            raise subprocess.TimeoutExpired(cmd, 30)
+        return {"ok": True, "stdout": "{}", "stderr": ""}
+
+    monkeypatch.setattr("sys.stdin.read", lambda: "private request")
+    monkeypatch.setattr(watcher, "send_ack", lambda *args, **kwargs: ack)
+    monkeypatch.setattr(watcher, "run_cmd", timeout_submit)
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: None)
+    result = watcher.claim_inbox(args)
+
+    assert result["ok"] is False
+    assert result["status"] == "queue-failed"
+    assert result["error"] == "coordinator_submit_timeout"
+    assert result["header_message_id"] == "901"
+    assert result["live_message_id"] == "902"
+    effect = json.loads(Path(args.effect_path).read_text(encoding="utf-8"))
+    assert effect["state"] == "indeterminate"

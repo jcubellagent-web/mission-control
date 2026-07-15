@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 from contextlib import contextmanager
 import fcntl
+import hashlib
 import html
 import json
 import os
@@ -19,7 +20,9 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 import textwrap
+import time
 import urllib.error
 import urllib.request
 import unicodedata
@@ -138,6 +141,48 @@ def save_json(path: Path, data: dict) -> None:
     os.chmod(path, 0o600)
 
 
+@contextmanager
+def ack_state_lock():
+    """Use the same cross-process lock as josh_telegram_fast_ack.py."""
+    lock_path = ACK_STATE_PATH.with_suffix(ACK_STATE_PATH.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        try:
+            os.chmod(lock_path, 0o600)
+        except OSError:
+            pass
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def save_ack_state(data: dict) -> None:
+    """Atomically replace ACK state without sharing a temporary filename."""
+    ACK_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=ACK_STATE_PATH.parent,
+            prefix=f".{ACK_STATE_PATH.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            handle.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, ACK_STATE_PATH)
+        os.chmod(ACK_STATE_PATH, 0o600)
+    finally:
+        if temporary and temporary.exists():
+            temporary.unlink(missing_ok=True)
+
+
 def telegram_cooldown_active() -> dict | None:
     state = load_json(TELEGRAM_COOLDOWN_PATH, {})
     until = state.get("until")
@@ -172,16 +217,26 @@ def note_telegram_cooldown(method: str, body: str) -> None:
 
 
 def claim_pending_ack(card_key: str) -> str:
-    state = load_json(ACK_STATE_PATH, {})
-    pending = state.get("latest_pending_ack") or {}
-    message_id = str(pending.get("message_id") or "")
-    if not message_id or pending.get("claimed_by"):
-        return ""
-    pending["claimed_by"] = card_key
-    pending["claimed_at"] = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    state["latest_pending_ack"] = pending
-    save_json(ACK_STATE_PATH, state)
-    return message_id
+    #JAIMES: This file is shared with the fast-ack poller and claim hook. Merge
+    # only the pending-ack receipt while holding their exact lock so a work-card
+    # start cannot erase active cards, durable claims, or processed-event sets.
+    with ack_state_lock():
+        state = load_json(ACK_STATE_PATH, {})
+        if not isinstance(state, dict):
+            state = {}
+        pending = state.get("latest_pending_ack")
+        if not isinstance(pending, dict):
+            return ""
+        message_id = str(pending.get("message_id") or "")
+        if not message_id or pending.get("claimed_by"):
+            return ""
+        state["latest_pending_ack"] = {
+            **pending,
+            "claimed_by": card_key,
+            "claimed_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        }
+        save_ack_state(state)
+        return message_id
 
 
 def save_state(state: dict) -> None:
@@ -191,6 +246,35 @@ def save_state(state: dict) -> None:
     os.chmod(tmp, 0o600)
     tmp.replace(STATE_PATH)
     os.chmod(STATE_PATH, 0o600)
+
+
+def save_card_state(card_key: str, state: dict) -> None:
+    """Merge one card under the short global state lock.
+
+    Telegram I/O is serialized per card, not across every Inbox task. Only the
+    atomic read/merge/replace touches the global lock, so a slow API call for
+    one task cannot stall an unrelated burst while card records remain lossless.
+    """
+    record = (state.get("cards") or {}).get(card_key)
+    if not isinstance(record, dict):
+        return
+    with state_lock():
+        latest = load_state()
+        latest.setdefault("cards", {})[card_key] = record
+        save_state(latest)
+
+
+@contextmanager
+def card_lock(card_key: str):
+    digest = hashlib.sha256(str(card_key).encode("utf-8")).hexdigest()[:24]
+    lock_path = LOCK_PATH.with_name(f"{LOCK_PATH.name}.{digest}.card")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 @contextmanager
@@ -212,6 +296,77 @@ def parse_list(value: str | None) -> list[str]:
 
 def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def effect_protocol_lock_path(effect_path: Path) -> Path:
+    text = str(effect_path)
+    suffix = ".effects.json"
+    return Path(text[:-len(suffix)] + ".protocol.lock") if text.endswith(suffix) else Path(text + ".protocol.lock")
+
+
+@contextmanager
+def effect_protocol_lock(effect_path: Path, timeout: float = 0.25):
+    lock_path = effect_protocol_lock_path(effect_path)
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            os.mkdir(lock_path, 0o700)
+            break
+        except FileExistsError:
+            try:
+                if time.time() - lock_path.stat().st_mtime > 2.0:
+                    os.rmdir(lock_path)
+                    continue
+            except (FileNotFoundError, OSError):
+                pass
+            if time.monotonic() >= deadline:
+                raise TimeoutError("Telegram effect lock unavailable")
+            time.sleep(0.005)
+    try:
+        yield
+    finally:
+        try:
+            os.rmdir(lock_path)
+        except FileNotFoundError:
+            pass
+
+
+def update_effect_protocol(args: argparse.Namespace, state: str, stage: str, **values) -> bool:
+    effect_value = str(getattr(args, "effect_path", "") or "")
+    cancel_value = str(getattr(args, "cancel_path", "") or "")
+    if not effect_value or not cancel_value:
+        return True
+    effect_path = Path(effect_value)
+    cancel_path = Path(cancel_value)
+    if state == "attempting":
+        surface_deadline_ms = int(getattr(args, "surface_deadline_ms", 0) or 0)
+        if surface_deadline_ms and int(time.time() * 1000) >= surface_deadline_ms:
+            return False
+    try:
+        with effect_protocol_lock(effect_path):
+            if state in {"attempting", "surface-started"} and cancel_path.exists():
+                return False
+            current = load_json(effect_path, {})
+            if not isinstance(current, dict):
+                current = {}
+            payload = {
+                **current,
+                **values,
+                "version": 1,
+                "state": state,
+                "stage": stage,
+                "updated_at": utc_now(),
+            }
+            effect_path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=effect_path.parent, prefix=f".{effect_path.name}.", suffix=".tmp", delete=False) as handle:
+                temporary = Path(handle.name)
+                handle.write(json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, effect_path)
+        return True
+    except TimeoutError:
+        return False
 
 
 def parse_timestamp(value: str | None) -> dt.datetime | None:
@@ -1345,7 +1500,7 @@ def load_final_text_file(path: str) -> str:
 
 
 def upsert_card(args: argparse.Namespace, status: str) -> int:
-    with state_lock():
+    with card_lock(args.key):
         state = load_state()
         cards = state.setdefault("cards", {})
         existing = cards.get(args.key, {})
@@ -1440,7 +1595,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             final_id: int | str | None,
             active_renderer: str,
         ) -> dict:
-            cards[args.key] = {
+            record = {
                 "title": title,
                 "header_message_id": header_message_id,
                 "message_id": live_message_id,
@@ -1459,12 +1614,33 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "thread_id": thread_id,
                 "next_step": args.next or existing.get("next_step") or "",
             }
-            save_state(state)
+            for surface in ("header", "live", "final"):
+                for suffix in ("delivery_status", "delivery_error_at"):
+                    field = f"{surface}_{suffix}"
+                    if field in existing:
+                        record[field] = existing[field]
+            cards[args.key] = record
+            save_card_state(args.key, state)
             return cards[args.key]
 
         header_message_id = existing.get("header_message_id")
         header_action = None
         if not header_message_id and not existing.get("message_id") and task_headers_enabled(chat_id, thread_id):
+            if existing.get("header_delivery_status") == "indeterminate":
+                print(json.dumps({
+                    "ok": False,
+                    "action": "header_send_quarantined",
+                    "error": "Prior task-header send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+                }, indent=2), file=sys.stderr)
+                return 1
+            if not update_effect_protocol(
+                args,
+                "attempting",
+                "task-header-send",
+                resolve_by_ms=int(time.time() * 1000) + (args.timeout * 1000) + 250,
+            ):
+                print(json.dumps({"ok": False, "action": "cancelled_before_header_send"}), file=sys.stderr)
+                return 1
             header_result = send_card(
                 header_text,
                 None,
@@ -1473,6 +1649,19 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 thread_id=thread_id,
             )
             if not header_result.get("ok"):
+                if delivery_indeterminate(header_result):
+                    update_effect_protocol(args, "indeterminate", "task-header-send")
+                    existing = persist_checkpoint(
+                        live_message_id=None,
+                        final_id=existing.get("final_message_id"),
+                        active_renderer=str(existing.get("renderer") or ""),
+                    )
+                    existing["header_delivery_status"] = "indeterminate"
+                    existing["header_delivery_error_at"] = utc_now()
+                    cards[args.key] = existing
+                    save_card_state(args.key, state)
+                else:
+                    update_effect_protocol(args, "failed-before-surface", "task-header-send")
                 print(json.dumps({
                     "ok": False,
                     "action": "send_header",
@@ -1481,6 +1670,16 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 return 1
             header_message_id = (header_result.get("result") or {}).get("message_id")
             if not header_message_id:
+                update_effect_protocol(args, "indeterminate", "task-header-send")
+                existing = persist_checkpoint(
+                    live_message_id=None,
+                    final_id=existing.get("final_message_id"),
+                    active_renderer=str(existing.get("renderer") or ""),
+                )
+                existing["header_delivery_status"] = "indeterminate"
+                existing["header_delivery_error_at"] = utc_now()
+                cards[args.key] = existing
+                save_card_state(args.key, state)
                 print(json.dumps({
                     "ok": False,
                     "action": "send_header",
@@ -1488,6 +1687,12 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 }, indent=2), file=sys.stderr)
                 return 1
             header_action = "sent"
+            update_effect_protocol(
+                args,
+                "surface-started",
+                "task-header-sent",
+                header_message_id=str(header_message_id),
+            )
             # Persist the receipt before sending the live card. A retry can then
             # continue without creating another immutable header.
             cards[args.key] = {
@@ -1509,7 +1714,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "thread_id": thread_id,
                 "next_step": args.next or existing.get("next_step") or "",
             }
-            save_state(state)
+            save_card_state(args.key, state)
             existing = cards[args.key]
 
         renderer = str(existing.get("renderer") or "")
@@ -1536,6 +1741,15 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
             action = "edited"
         elif use_rich:
+            if not update_effect_protocol(
+                args,
+                "attempting",
+                "live-card-send",
+                header_message_id=str(header_message_id or ""),
+                resolve_by_ms=int(time.time() * 1000) + (args.timeout * 1000) + 250,
+            ):
+                print(json.dumps({"ok": False, "action": "cancelled_before_live_send"}), file=sys.stderr)
+                return 1
             result = send_rich_message(
                 rich_text,
                 text,
@@ -1546,6 +1760,15 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             )
             action = "sent"
         else:
+            if not update_effect_protocol(
+                args,
+                "attempting",
+                "live-card-send",
+                header_message_id=str(header_message_id or ""),
+                resolve_by_ms=int(time.time() * 1000) + (args.timeout * 1000) + 250,
+            ):
+                print(json.dumps({"ok": False, "action": "cancelled_before_live_send"}), file=sys.stderr)
+                return 1
             result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
             action = "sent"
 
@@ -1555,6 +1778,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             result = {"ok": True, "result": {"message_id": existing.get("message_id")}}
         if not result.get("ok"):
             if action == "sent" and delivery_indeterminate(result):
+                update_effect_protocol(args, "indeterminate", "live-card-send", header_message_id=str(header_message_id or ""))
                 existing = persist_checkpoint(
                     live_message_id=None,
                     final_id=existing.get("final_message_id"),
@@ -1563,7 +1787,9 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 existing["live_delivery_status"] = "indeterminate"
                 existing["live_delivery_error_at"] = utc_now()
                 cards[args.key] = existing
-                save_state(state)
+                save_card_state(args.key, state)
+            elif action == "sent" and not header_message_id:
+                update_effect_protocol(args, "failed-before-surface", "live-card-send")
             print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
             return 1
 
@@ -1571,12 +1797,29 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         if action == "sent":
             message_id = result.get("result", {}).get("message_id")
             if not message_id:
+                update_effect_protocol(args, "indeterminate", "live-card-send", header_message_id=str(header_message_id or ""))
+                existing = persist_checkpoint(
+                    live_message_id=None,
+                    final_id=existing.get("final_message_id"),
+                    active_renderer=renderer,
+                )
+                existing["live_delivery_status"] = "indeterminate"
+                existing["live_delivery_error_at"] = utc_now()
+                cards[args.key] = existing
+                save_card_state(args.key, state)
                 print(json.dumps({
                     "ok": False,
                     "action": action,
                     "error": "Telegram accepted the live card without returning a message id",
                 }, indent=2), file=sys.stderr)
                 return 1
+            update_effect_protocol(
+                args,
+                "surface-started",
+                "live-card-sent",
+                header_message_id=str(header_message_id or ""),
+                live_message_id=str(message_id),
+            )
         if use_rich:
             renderer = "rich" if result.get("native_rich_message") else "legacy"
         elif not renderer:
@@ -1613,12 +1856,16 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                     existing["final_delivery_status"] = "indeterminate"
                     existing["final_delivery_error_at"] = utc_now()
                     cards[args.key] = existing
-                    save_state(state)
+                    save_card_state(args.key, state)
                 print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
                 return 1
             if final_action == "sent":
                 final_message_id = final_result.get("result", {}).get("message_id")
                 if not final_message_id:
+                    existing["final_delivery_status"] = "indeterminate"
+                    existing["final_delivery_error_at"] = utc_now()
+                    cards[args.key] = existing
+                    save_card_state(args.key, state)
                     print(json.dumps({
                         "ok": False,
                         "action": final_action,
@@ -1657,7 +1904,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             "thread_id": thread_id,
             "next_step": args.next or existing.get("next_step") or "",
         }
-        save_state(state)
+        save_card_state(args.key, state)
         publish_brain_feed(args, status)
         print(json.dumps({
             "ok": True,
@@ -1709,6 +1956,9 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
     parser.add_argument("--thread-id", help="Telegram forum topic id override for group-topic routing")
+    parser.add_argument("--effect-path", default="", help=argparse.SUPPRESS)
+    parser.add_argument("--cancel-path", default="", help=argparse.SUPPRESS)
+    parser.add_argument("--surface-deadline-ms", type=int, default=0, help=argparse.SUPPRESS)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-brain-feed", action="store_true", help="Skip Brain Feed only for dry-runs or ALLOW_NO_BRAIN_FEED=1 maintenance")
     parser.add_argument("--status-button", action="store_true", help="Deprecated; buttons are attached by default")

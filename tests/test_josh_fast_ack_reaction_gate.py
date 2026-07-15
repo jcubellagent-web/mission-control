@@ -60,7 +60,14 @@ def patch_post_reaction_path(monkeypatch, calls: list[str], *, live_cards: bool)
     monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: {"id": "", "label": ""})
     monkeypatch.setattr(watcher, "is_hold_request", lambda *args, **kwargs: False)
     monkeypatch.setattr(watcher, "live_cards_enabled", lambda *args, **kwargs: live_cards)
-    monkeypatch.setattr(watcher, "run_cmd", lambda *args, **kwargs: calls.append("header-card") or {"ok": True})
+    monkeypatch.setattr(
+        watcher,
+        "run_cmd",
+        lambda *args, **kwargs: calls.append("header-card") or {
+            "ok": True,
+            "stdout": '{"ok":true,"header_message_id":101,"message_id":102}',
+        },
+    )
     monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: calls.append("publish"))
 
 
@@ -154,5 +161,9 @@ def test_claim_stops_before_coordinator_when_required_reaction_fails(monkeypatch
         "status": "reaction-failed",
         "reaction_ok": False,
         "key": "message-key",
+        "card_start_ok": False,
+        "header_message_id": "",
+        "live_message_id": "",
+        "surface_indeterminate": False,
     }
     assert published

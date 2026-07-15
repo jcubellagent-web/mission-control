@@ -132,26 +132,51 @@ def save_json_file(path: Path, data: dict) -> None:
             pass
 
 
+@contextlib.contextmanager
+def ack_state_lock():
+    """Use the fast-ack daemon's exact cross-process state lock."""
+    lock_path = ACK_STATE_PATH.with_suffix(ACK_STATE_PATH.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        os.fchmod(handle.fileno(), 0o600)
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
 def claim_pending_ack(card_key: str, chat_id: str | None, thread_id: str | None) -> str:
-    state = load_json_file(ACK_STATE_PATH, {})
-    pending = state.get("latest_pending_ack") or {}
-    message_id = str(pending.get("message_id") or "")
-    if not message_id or pending.get("claimed_by"):
-        return ""
-    pending_chat = str(pending.get("telegram_chat_id") or "")
-    pending_thread = str(pending.get("telegram_thread_id") or "")
-    requested_chat = str(chat_id or "")
-    requested_thread = str(thread_id or "")
-    #JAIMES: a pending acknowledgement is origin-scoped. Reusing the newest
-    # message ID across topics edits the wrong card and makes both cards appear
-    # to disappear or change objectives.
-    if not pending_chat or pending_chat != requested_chat or pending_thread != requested_thread:
-        return ""
-    pending["claimed_by"] = card_key
-    pending["claimed_at"] = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    state["latest_pending_ack"] = pending
-    save_json_file(ACK_STATE_PATH, state)
-    return message_id
+    #JAIMES: merge only this receipt while holding the daemon's exact lock;
+    # whole-state unlocked writes can erase active cards and poll cursors.
+    with ack_state_lock():
+        state = load_json_file(ACK_STATE_PATH, {})
+        if not isinstance(state, dict):
+            state = {}
+        pending = state.get("latest_pending_ack")
+        if not isinstance(pending, dict):
+            return ""
+        message_id = str(pending.get("message_id") or "")
+        if not message_id or pending.get("claimed_by"):
+            return ""
+        pending_chat = str(pending.get("telegram_chat_id") or "")
+        pending_thread = str(pending.get("telegram_thread_id") or "")
+        requested_chat = str(chat_id or "")
+        requested_thread = str(thread_id or "")
+        # A pending acknowledgement is origin-scoped. Reusing the newest
+        # message ID across topics edits the wrong card and makes both cards
+        # appear to disappear or change objectives.
+        if not pending_chat or pending_chat != requested_chat or pending_thread != requested_thread:
+            return ""
+        state["latest_pending_ack"] = {
+            **pending,
+            "claimed_by": card_key,
+            "claimed_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        }
+        # save_json_file already uses a unique private temporary inode and an
+        # atomic replace, so concurrent card processes cannot share `.tmp`.
+        save_json_file(ACK_STATE_PATH, state)
+        return message_id
 
 
 def save_state(state: dict) -> None:
@@ -1098,6 +1123,22 @@ def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
         return {"ok": False, "error": str(exc)}
 
 
+def delivery_indeterminate(result: dict) -> bool:
+    """Return true when Telegram may have accepted a send without a receipt."""
+    if result.get("delivery_indeterminate"):
+        return True
+    error = str(result.get("error") or result.get("description") or "").lower()
+    definitive = any(marker in error for marker in (
+        "http error 400", "http error 403", "http error 404", "bad request",
+        "forbidden", "method not found", "unsupported", "too many requests", "429",
+    ))
+    return bool(error) and not definitive
+
+
+def telegram_message_not_modified(result: dict) -> bool:
+    return "message is not modified" in str(result.get("error") or result.get("description") or "").lower()
+
+
 def send_card(
     text: str,
     buttons: list | None,
@@ -1347,10 +1388,63 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
 
     card_buttons = buttons if status == "running" else None
     final_buttons = buttons if status in {"done", "failed"} else None
+    strict_inbox_delivery = (
+        str(chat_id or "") == CONTROL_CENTER_CHAT_ID
+        and str(thread_id or "") == INBOX_THREAD_ID
+    )
+
+    def persist_checkpoint(
+        *,
+        header_id: int | str | None,
+        live_id: int | str | None,
+        final_id: int | str | None,
+        extra: dict | None = None,
+        clear_delivery: tuple[str, ...] = (),
+    ) -> dict:
+        record = {
+            "title": title,
+            "header_message_id": header_id,
+            "message_id": live_id,
+            "ack_message_id": objective_message_id,
+            "final_message_id": final_id,
+            "approval_message_id": existing.get("approval_message_id"),
+            "status": status,
+            "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "done": done,
+            "work_log": done,
+            "current_step": render_now,
+            "planned_steps": planned_steps,
+            "route": route,
+            "model": model,
+            "next_step": args.next or existing.get("next_step") or "",
+            "retention": "persistent-edit-only",
+            "chat_id": chat_id,
+            "thread_id": thread_id,
+        }
+        for surface in ("header", "live", "final"):
+            for suffix in ("delivery_status", "delivery_error_at"):
+                field = f"{surface}_{suffix}"
+                if field in existing:
+                    record[field] = existing[field]
+        for surface in clear_delivery:
+            record.pop(f"{surface}_delivery_status", None)
+            record.pop(f"{surface}_delivery_error_at", None)
+        if extra:
+            record.update(extra)
+        cards[args.key] = record
+        save_state(state)
+        return record
 
     header_message_id = existing.get("header_message_id")
     header_action = None
     if status == "running" and not header_message_id and not existing.get("message_id") and header_enabled:
+        if strict_inbox_delivery and existing.get("header_delivery_status") == "indeterminate":
+            print(json.dumps({
+                "ok": False,
+                "action": "header_send_quarantined",
+                "error": "Prior task-header send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+            }, indent=2), file=sys.stderr)
+            return 1
         if objective_message_id:
             header_result = edit_card(
                 objective_message_id,
@@ -1372,7 +1466,26 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             )
             header_action = "sent"
             header_message_id = (header_result.get("result") or {}).get("message_id")
+        if (
+            strict_inbox_delivery
+            and header_action == "adopted"
+            and not header_result.get("ok")
+            and telegram_message_not_modified(header_result)
+        ):
+            header_result = {"ok": True, "result": {"message_id": header_message_id}}
         if not header_result.get("ok") or not header_message_id:
+            if strict_inbox_delivery and header_action == "sent" and (
+                delivery_indeterminate(header_result) or (header_result.get("ok") and not header_message_id)
+            ):
+                existing = persist_checkpoint(
+                    header_id=None,
+                    live_id=None,
+                    final_id=existing.get("final_message_id"),
+                    extra={
+                        "header_delivery_status": "indeterminate",
+                        "header_delivery_error_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    },
+                )
             print(json.dumps({
                 "ok": False,
                 "action": f"header_{header_action}",
@@ -1381,32 +1494,24 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             return 1
         # Checkpoint the immutable header before the editable live-card send.
         # A retry can then resume without duplicating the header.
-        cards[args.key] = {
-            "title": title,
-            "header_message_id": header_message_id,
-            "message_id": None,
-            "ack_message_id": objective_message_id,
-            "final_message_id": existing.get("final_message_id"),
-            "approval_message_id": existing.get("approval_message_id"),
-            "status": status,
-            "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-            "done": done,
-            "work_log": done,
-            "current_step": render_now,
-            "planned_steps": planned_steps,
-            "route": route,
-            "model": model,
-            "next_step": args.next or existing.get("next_step") or "",
-            "retention": "persistent-edit-only",
-            "chat_id": chat_id,
-            "thread_id": thread_id,
-        }
-        save_state(state)
-        existing = cards[args.key]
+        existing = persist_checkpoint(
+            header_id=header_message_id,
+            live_id=None,
+            final_id=existing.get("final_message_id"),
+            clear_delivery=("header",),
+        )
     if header_enabled and header_message_id:
         # The header is its own durable receipt; never adopt or overwrite it as
         # the editable live work card.
         ack_message_id = ""
+
+    if strict_inbox_delivery and existing.get("live_delivery_status") == "indeterminate" and not existing.get("message_id"):
+        print(json.dumps({
+            "ok": False,
+            "action": "live_send_quarantined",
+            "error": "Prior live-card send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+        }, indent=2), file=sys.stderr)
+        return 1
 
     if existing.get("message_id"):
         result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
@@ -1420,7 +1525,24 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "sent"
 
+    if (
+        strict_inbox_delivery
+        and action in {"edited", "adopted"}
+        and not result.get("ok")
+        and telegram_message_not_modified(result)
+    ):
+        result = {"ok": True, "result": {"message_id": existing.get("message_id") or ack_message_id}}
     if not result.get("ok"):
+        if strict_inbox_delivery and action == "sent" and delivery_indeterminate(result):
+            existing = persist_checkpoint(
+                header_id=header_message_id,
+                live_id=None,
+                final_id=existing.get("final_message_id"),
+                extra={
+                    "live_delivery_status": "indeterminate",
+                    "live_delivery_error_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                },
+            )
         print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
         return 1
 
@@ -1430,6 +1552,16 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
     elif action == "adopted":
         message_id = ack_message_id
     if not message_id:
+        if strict_inbox_delivery and action == "sent":
+            existing = persist_checkpoint(
+                header_id=header_message_id,
+                live_id=None,
+                final_id=existing.get("final_message_id"),
+                extra={
+                    "live_delivery_status": "indeterminate",
+                    "live_delivery_error_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                },
+            )
         print(json.dumps({
             "ok": False,
             "action": action,
@@ -1437,22 +1569,74 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         }, indent=2), file=sys.stderr)
         return 1
     final_message_id = existing.get("final_message_id")
+    existing = persist_checkpoint(
+        header_id=header_message_id,
+        live_id=message_id,
+        final_id=final_message_id,
+        clear_delivery=("live",),
+    )
     final_action = None
     if final_text:
+        if strict_inbox_delivery and not final_message_id and existing.get("final_delivery_status") == "indeterminate":
+            print(json.dumps({
+                "ok": False,
+                "action": "final_send_quarantined",
+                "error": "Prior final-summary send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+            }, indent=2), file=sys.stderr)
+            return 1
         if final_message_id:
             final_result = edit_final_summary(final_message_id, final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "edited"
-            if not final_result.get("ok"):
+            if (
+                strict_inbox_delivery
+                and not final_result.get("ok")
+                and telegram_message_not_modified(final_result)
+            ):
+                final_result = {"ok": True, "result": {"message_id": final_message_id}}
+            if not final_result.get("ok") and not strict_inbox_delivery:
                 final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
                 final_action = "sent"
         else:
             final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "sent"
         if not final_result.get("ok"):
+            if strict_inbox_delivery and final_action == "sent" and delivery_indeterminate(final_result):
+                existing = persist_checkpoint(
+                    header_id=header_message_id,
+                    live_id=message_id,
+                    final_id=None,
+                    extra={
+                        "final_delivery_status": "indeterminate",
+                        "final_delivery_error_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    },
+                )
             print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
             return 1
         if final_action == "sent":
             final_message_id = final_result.get("result", {}).get("message_id")
+            if not final_message_id:
+                if strict_inbox_delivery:
+                    existing = persist_checkpoint(
+                        header_id=header_message_id,
+                        live_id=message_id,
+                        final_id=None,
+                        extra={
+                            "final_delivery_status": "indeterminate",
+                            "final_delivery_error_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                        },
+                    )
+                print(json.dumps({
+                    "ok": False,
+                    "action": final_action,
+                    "error": "Telegram accepted the final summary without returning a message id",
+                }, indent=2), file=sys.stderr)
+                return 1
+        existing = persist_checkpoint(
+            header_id=header_message_id,
+            live_id=message_id,
+            final_id=final_message_id,
+            clear_delivery=("final",),
+        )
 
     approval_message_id = existing.get("approval_message_id")
     if final_buttons and not approval_message_id:

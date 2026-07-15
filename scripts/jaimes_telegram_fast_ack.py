@@ -12,13 +12,14 @@ import html
 import json
 import os
 import re
+import secrets
 import sqlite3
 import subprocess
 import sys
 import textwrap
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 HOME = Path.home()
@@ -43,6 +44,7 @@ DEFAULT_MODEL = "openai-codex/gpt-5.6-sol"
 DEFAULT_ROUTE = "JAIMES Telegram -> Hermes task"
 STALE_BOOTSTRAP_SECONDS = 120
 HANDOFF_RECEIPT_TTL_SECONDS = 90
+HANDOFF_LEASE_ARRIVAL_GRACE_SECONDS = 15
 BOT_IDENTITY_CHECK_SECONDS = 5 * 60
 EXPECTED_BOT_USERNAME = os.environ.get("JAIMES_TELEGRAM_BOT_USERNAME", "Jaimes_claw_bot")
 HEARTBEAT_SECONDS = 20
@@ -124,6 +126,34 @@ def work_card_target_args(meta: dict[str, Any] | None) -> list[str]:
     if thread_id not in {None, ""}:
         args += ["--thread-id", str(thread_id)]
     return args
+
+
+def work_card_surface_receipt(key: str) -> dict[str, Any]:
+    """Recover the durable card checkpoint after a child delivery failure.
+
+    Topic 1 work-card sends checkpoint ambiguous Telegram responses before the
+    child exits nonzero.  The handoff owner must carry that state upward;
+    treating it as a clean failure would let Josh create a second surface even
+    though Telegram may already have accepted JAIMES's first request.
+    """
+    if work_card is None:
+        return {}
+    try:
+        state = work_card.load_state()
+    except Exception:  # noqa: BLE001
+        return {}
+    cards = state.get("cards") if isinstance(state, dict) else None
+    record = cards.get(key) if isinstance(cards, dict) else None
+    if not isinstance(record, dict):
+        return {}
+    return {
+        "header_message_id": _handoff_id(record.get("header_message_id")),
+        "message_id": _handoff_id(record.get("message_id")),
+        "surface_indeterminate": any(
+            record.get(field) == "indeterminate"
+            for field in ("header_delivery_status", "live_delivery_status")
+        ),
+    }
 
 
 def send_initial_ack(text: str, timeout: int = 15, meta: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -376,21 +406,127 @@ def handoff_record_fresh(record: dict[str, Any]) -> bool:
     return bool(expires and expires > dt.datetime.now(dt.timezone.utc))
 
 
-def active_handoff_lease(meta: dict[str, Any], event: dict[str, Any]) -> bool:
+def handoff_claim_matches(
+    record: dict[str, Any],
+    chat_id: Any,
+    thread_id: Any,
+    message_id: Any,
+    claim_token: str,
+) -> bool:
+    """Return true only while this exact worker still owns the handoff claim."""
+    return bool(
+        claim_token
+        and isinstance(record, dict)
+        and record.get("status") in {"claimed", "indeterminate"}
+        and secrets.compare_digest(str(record.get("claim_token") or ""), claim_token)
+        and handoff_record_matches(record, chat_id, thread_id, message_id)
+    )
+
+
+def public_indeterminate_handoff_receipt(record: dict[str, Any]) -> dict[str, Any]:
+    """Return a privacy-safe ownership receipt without exposing the claim token."""
+    return {
+        "ok": True,
+        "handled": True,
+        "schema_version": int(record.get("schema_version") or 1),
+        "status": "indeterminate",
+        "ownership_state": "claimed_in_flight",
+        "agent": "jaimes",
+        "chat_id": str(record.get("chat_id") or ""),
+        "thread_id": str(record.get("thread_id") or ""),
+        "inbound_message_id": str(record.get("inbound_message_id") or ""),
+        "indeterminate_at": str(record.get("indeterminate_at") or ""),
+        "expires_at": str(record.get("expires_at") or ""),
+    }
+
+
+def handoff_event_state(meta: dict[str, Any], event: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    """Return `process`, `wait`, or `consume` for an exact Inbox handoff row."""
     chat_id = meta.get("telegram_chat_id")
     thread_id = meta.get("telegram_thread_id")
     message_id = event.get("platform_message_id") or ((meta.get("origin") or {}).get("message_id"))
     try:
         with handoff_lock(chat_id, thread_id, message_id) as record_path:
             record = load_json(record_path, {})
-            return bool(
-                isinstance(record, dict)
-                and record.get("status") == "waiting"
-                and handoff_record_matches(record, chat_id, thread_id, message_id)
-                and handoff_record_fresh(record)
-            )
+            if not isinstance(record, dict) or not handoff_record_matches(record, chat_id, thread_id, message_id):
+                age = event_age_seconds(str(event.get("ts") or ""))
+                if age is not None and age > HANDOFF_LEASE_ARRIVAL_GRACE_SECONDS:
+                    expired = {
+                        "schema_version": 1,
+                        "status": "cancelled",
+                        "agent": "jaimes",
+                        "chat_id": str(chat_id or ""),
+                        "thread_id": str(thread_id or ""),
+                        "inbound_message_id": str(message_id or ""),
+                        "cancelled_at": utc_now(),
+                        "expires_at": utc_now(),
+                        "reason": "handoff_lease_never_arrived_josh_fallback_owned",
+                    }
+                    write_handoff_record(record_path, expired)
+                    return "consume", expired
+                return "wait", {}
+            status = str(record.get("status") or "")
+            if status in {"accepted", "failed", "cancelled"}:
+                # A crash after the durable terminal receipt but before the
+                # watcher cursor save must consume this row without resending.
+                return "consume", record
+            if status == "waiting" and handoff_record_fresh(record):
+                return "process", record
+            if status in {"waiting", "claimed", "indeterminate"} and not handoff_record_fresh(record):
+                expired = dict(record)
+                if status == "waiting" or record.get("ownership_state") == "claimed_no_effect":
+                    expired.update({
+                        "status": "cancelled",
+                        "cancelled_at": utc_now(),
+                        "reason": "handoff_expired_before_surface",
+                    })
+                else:
+                    expired.update({
+                        "status": "failed",
+                        "failed_at": utc_now(),
+                        "reason": "handoff_surface_owner_expired",
+                    })
+                write_handoff_record(record_path, expired)
+                return "consume", expired
+            return "wait", record
     except ValueError:
-        return False
+        return "wait", {}
+
+
+def recover_accepted_handoff_card(
+    state: dict[str, Any],
+    event: dict[str, Any],
+    meta: dict[str, Any],
+    record: dict[str, Any],
+) -> None:
+    """Restore minimal private tracking after accepted-receipt/cursor split-brain."""
+    if record.get("status") != "accepted":
+        return
+    run_id = str(event.get("run_id") or "")
+    message_id = str(event.get("platform_message_id") or record.get("inbound_message_id") or "")
+    if not run_id or not message_id:
+        return
+    cards = state.setdefault("active_cards", {})
+    if run_id in cards:
+        return
+    key = f"jaimes-fast-ack-{meta.get('telegram_chat_id') or 'telegram'}-{message_id}"
+    cards[run_id] = {
+        "key": key,
+        "objective": objective_from_prompt(str(event.get("prompt") or "")),
+        "model": str(meta.get("model") or DEFAULT_MODEL),
+        "route": "Recovered from durable JAIMES Inbox acceptance",
+        "header_message_id": str(record.get("header_message_id") or ""),
+        "ack_message_id": str(record.get("live_message_id") or ""),
+        "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
+        "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
+        "session_id": str(event.get("session_id") or meta.get("sessionId") or ""),
+        "started_at": str(record.get("accepted_at") or utc_now()),
+        "last_progress_at": str(record.get("accepted_at") or utc_now()),
+        "last_card_update_at": str(record.get("accepted_at") or utc_now()),
+        "status": "active",
+        "retention": "persistent-edit-only",
+        "recovered_from_handoff_receipt": True,
+    }
 
 
 def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float) -> tuple[int, dict[str, Any]]:
@@ -406,7 +542,7 @@ def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float)
         existing = load_json(record_path, {})
         if not (
             isinstance(existing, dict)
-            and existing.get("status") in {"waiting", "accepted"}
+            and existing.get("status") in {"waiting", "claimed", "indeterminate", "accepted"}
             and handoff_record_matches(existing, chat, thread, message)
             and handoff_record_fresh(existing)
         ):
@@ -418,7 +554,7 @@ def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float)
                 "thread_id": thread,
                 "inbound_message_id": message,
                 "created_at": utc_now(),
-                "expires_at": lease_expiry.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                "expires_at": lease_expiry.isoformat().replace("+00:00", "Z"),
             })
 
     while True:
@@ -435,9 +571,70 @@ def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float)
             )
             if accepted:
                 return 0, {"ok": True, **record}
+            indeterminate = bool(
+                isinstance(record, dict)
+                and record.get("status") == "indeterminate"
+                and record.get("ownership_state") == "claimed_in_flight"
+                and handoff_record_matches(record, chat, thread, message)
+                and handoff_record_fresh(record)
+                and str(record.get("claim_token") or "")
+            )
+            if indeterminate:
+                return 0, public_indeterminate_handoff_receipt(record)
             if isinstance(record, dict) and record.get("status") in {"failed", "cancelled"}:
                 return 2, {"ok": False, **record}
             if time.monotonic() >= deadline:
+                if (
+                    isinstance(record, dict)
+                    and record.get("status") == "claimed"
+                    and handoff_record_matches(record, chat, thread, message)
+                ):
+                    if record.get("ownership_state") == "claimed_no_effect":
+                        record.update({
+                            "status": "cancelled",
+                            "cancelled_at": utc_now(),
+                            "reason": "handoff_timeout_before_surface",
+                        })
+                        write_handoff_record(record_path, record)
+                        return 2, {
+                            "ok": False,
+                            "status": "timeout",
+                            "agent": "jaimes",
+                            "chat_id": chat,
+                            "thread_id": thread,
+                            "inbound_message_id": message,
+                        }
+                    if record.get("ownership_state") == "surface_inflight":
+                        durable = work_card_surface_receipt(str(record.get("card_key") or ""))
+                        has_surface_evidence = bool(
+                            durable.get("surface_indeterminate")
+                            or durable.get("header_message_id")
+                            or durable.get("message_id")
+                        )
+                        if not has_surface_evidence:
+                            record.update({
+                                "status": "cancelled",
+                                "cancelled_at": utc_now(),
+                                "reason": "handoff_timeout_without_durable_surface_evidence",
+                            })
+                            write_handoff_record(record_path, record)
+                            return 2, {
+                                "ok": False,
+                                "status": "timeout",
+                                "agent": "jaimes",
+                                "chat_id": chat,
+                                "thread_id": thread,
+                                "inbound_message_id": message,
+                            }
+                    now = dt.datetime.now(dt.timezone.utc)
+                    record.update({
+                        "status": "indeterminate",
+                        "ownership_state": "claimed_in_flight",
+                        "indeterminate_at": now.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                        "expires_at": (now + dt.timedelta(seconds=HANDOFF_RECEIPT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    })
+                    write_handoff_record(record_path, record)
+                    return 0, public_indeterminate_handoff_receipt(record)
                 if isinstance(record, dict) and record.get("status") == "waiting":
                     record.update({"status": "cancelled", "cancelled_at": utc_now(), "reason": "handoff_timeout"})
                     write_handoff_record(record_path, record)
@@ -1470,7 +1667,15 @@ def event_age_seconds(ts: str) -> float | None:
         return None
 
 
-def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: bool = False, meta: dict[str, Any] | None = None) -> dict[str, Any]:
+def send_ack(
+    event: dict[str, str],
+    model: str,
+    state: dict[str, Any],
+    dry_run: bool = False,
+    meta: dict[str, Any] | None = None,
+    reaction_already_done: bool = False,
+    surface_attempt_callback: Callable[[], bool] | None = None,
+) -> dict[str, Any]:
     task_identity = event.get("platform_message_id") or event.get("db_message_id") or event["ts"].replace(":", "").replace(".", "-")
     key = f"jaimes-fast-ack-{(meta or {}).get('telegram_chat_id') or 'telegram'}-{task_identity}"
     if key in set(state.get("processed_task_keys") or []):
@@ -1498,8 +1703,8 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
         and str((meta or {}).get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
     )
-    reaction_ok = False
-    if not dry_run:
+    reaction_ok = bool(reaction_already_done)
+    if not dry_run and not reaction_already_done:
         reaction_ok = set_eyes_reaction(inbound_message_id, state, meta=meta)
     if handoff_topic and not dry_run and not reaction_ok:
         return {
@@ -1530,13 +1735,31 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     cards_flag = os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower()
     start_visible_card = should_start_visible_card(prompt, meta, cards_flag)
 
+    if handoff_topic and not dry_run and start_visible_card and surface_attempt_callback:
+        # The durable owner records card-attempt intent immediately before the
+        # child is spawned. A crash during routing still remains no-effect and
+        # can safely fall back to Josh.
+        if not surface_attempt_callback():
+            return {
+                "ok": False,
+                "handoff_terminal_failure": True,
+                "error": "handoff_claim_cancelled_before_surface",
+                "reaction_ok": reaction_ok,
+                "header_message_id": "",
+                "ack_message_id": "",
+                "key": key,
+                "objective": objective,
+                "run_id": event.get("run_id") or "",
+                "last_card_update_at": utc_now(),
+            }
+
     #JAIMES: send the first stable surface once. The previous placeholder ->
     # objective -> live-card edit chain forced Telegram to remove/redraw the same
     # bubble several times in two seconds, which looked like cards disappearing.
     header_message_id = "dry-run-header" if dry_run else ""
     ack_message_id = "dry-run-message" if dry_run else ""
     if not dry_run and start_visible_card:
-        card_result = run_cmd([
+        card_command = [
             "python3",
             "mission-control/scripts/jaimes_work_card.py",
             "start",
@@ -1554,25 +1777,42 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
             f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
             "--next",
             "Work automatically; show buttons only for final approval steps if needed",
-        ] + work_card_target_args(meta), timeout=6)
+        ]
+        if handoff_topic:
+            # Topic 1's immutable header and live card are new surfaces for the
+            # current inbound message. Never adopt the prior poll receipt.
+            # Bound each child API call below the parent lifetime so the child
+            # can checkpoint an indeterminate send instead of being killed
+            # after Telegram may already have accepted it.
+            card_command.extend(["--separate-message", "--timeout", "4"])
+        card_result = run_cmd(
+            card_command + work_card_target_args(meta),
+            timeout=12 if handoff_topic else 6,
+        )
         card_receipt: dict[str, Any] = {}
-        if card_result.get("ok") and card_result.get("stdout"):
+        if card_result.get("stdout"):
             try:
                 parsed_receipt = json.loads(str(card_result["stdout"]))
                 if isinstance(parsed_receipt, dict):
                     card_receipt = parsed_receipt
             except (TypeError, ValueError):
                 card_receipt = {}
+        durable_receipt = work_card_surface_receipt(key) if handoff_topic else {}
         ack_message_id = str(
             card_receipt.get("message_id")
             or (card_receipt.get("result") or {}).get("message_id")
+            or durable_receipt.get("message_id")
             or ""
         )
         header_message_id = str(
             card_receipt.get("header_message_id")
             or (card_receipt.get("result") or {}).get("header_message_id")
+            or durable_receipt.get("header_message_id")
             or ""
         )
+        if handoff_topic:
+            ack_message_id = _handoff_id(ack_message_id)
+            header_message_id = _handoff_id(header_message_id)
         record_api_result(state, "sendMessage", {
             "ok": bool(card_result.get("ok") and card_receipt.get("ok") and ack_message_id),
             "error": card_result.get("stderr") or card_result.get("error") or "",
@@ -1610,6 +1850,11 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         "telegram_chat_id": (meta or {}).get("telegram_chat_id"),
         "telegram_thread_id": (meta or {}).get("telegram_thread_id"),
         "retention": "persistent-edit-only",
+        "surface_indeterminate": bool(
+            handoff_topic and not dry_run and durable_receipt.get("surface_indeterminate")
+        ) if start_visible_card else False,
+        "error": str(card_result.get("stderr") or card_result.get("error") or "")[:240]
+        if start_visible_card and not dry_run and not card_result.get("ok") else "",
     }
 
 
@@ -2001,13 +2246,21 @@ def process_ack_event(
     dry_run: bool,
     meta: dict[str, Any],
 ) -> dict[str, Any]:
-    """Fence Topic 1 ownership behind an exact, privacy-safe acceptance lease."""
+    """Fence Topic 1 ownership behind an exact, privacy-safe acceptance lease.
+
+    The file lock protects only state transitions. Telegram and subprocess
+    work can take longer than Josh's handoff wait, so it must never run while
+    the lock is held. A random claim token makes the post-send commit
+    conditional: if the waiter cancels first, a late sender cannot overwrite
+    that cancellation with an accepted receipt.
+    """
     if dry_run or not inbox_handoff_topic(meta):
         return send_ack(event, model=model, state=state, dry_run=dry_run, meta=meta)
 
     chat_id = meta.get("telegram_chat_id")
     thread_id = meta.get("telegram_thread_id")
     message_id = event.get("platform_message_id") or ((meta.get("origin") or {}).get("message_id"))
+    claim_token = secrets.token_urlsafe(24)
     try:
         with handoff_lock(chat_id, thread_id, message_id) as record_path:
             record = load_json(record_path, {})
@@ -2025,8 +2278,92 @@ def process_ack_event(
                     "header_message_id": "",
                     "ack_message_id": "",
                 }
+            claimed = {
+                **record,
+                "status": "claimed",
+                "ownership_state": "claimed_no_effect",
+                "claim_token": claim_token,
+                "claimed_at": utc_now(),
+                # The waiting lease is sized for Josh's handoff wait, not for
+                # the claimed sender's bounded Telegram work. Extend it while
+                # atomically taking ownership so the valid token holder cannot
+                # self-cancel before the waiter records `indeterminate`.
+                "expires_at": (
+                    dt.datetime.now(dt.timezone.utc)
+                    + dt.timedelta(seconds=HANDOFF_RECEIPT_TTL_SECONDS)
+                ).isoformat().replace("+00:00", "Z"),
+            }
+            write_handoff_record(record_path, claimed)
 
-            result = send_ack(event, model=model, state=state, dry_run=False, meta=meta)
+        # The eyes reaction is idempotent and is the first permitted Telegram
+        # effect. Keep the claim in `claimed_no_effect` until that call proves
+        # an effect, so a pre-request crash remains safe for Josh fallback.
+        reaction_ok = set_eyes_reaction(str(message_id or ""), state, meta=meta)
+        if not reaction_ok:
+            with handoff_lock(chat_id, thread_id, message_id) as record_path:
+                current = load_json(record_path, {})
+                if handoff_claim_matches(current, chat_id, thread_id, message_id, claim_token):
+                    current.update({
+                        "status": "failed",
+                        "failed_at": utc_now(),
+                        "reason": "eyes_reaction_failed",
+                    })
+                    write_handoff_record(record_path, current)
+            return {
+                "ok": False,
+                "handoff_terminal_failure": True,
+                "error": "eyes_reaction_failed",
+                "reaction_ok": False,
+                "header_message_id": "",
+                "ack_message_id": "",
+            }
+
+        def mark_surface_attempt() -> bool:
+            # This callback runs after routing and immediately before the
+            # work-card child. It is the durable intent checkpoint that closes
+            # the eyes-only crash window without holding the lock over I/O.
+            with handoff_lock(chat_id, thread_id, message_id) as record_path:
+                claimed = load_json(record_path, {})
+                claim_active = handoff_claim_matches(
+                    claimed, chat_id, thread_id, message_id, claim_token
+                ) and handoff_record_fresh(claimed)
+                if not claim_active:
+                    return False
+                claimed["ownership_state"] = "surface_inflight"
+                claimed["reaction_ok"] = True
+                claimed["card_key"] = (
+                    f"jaimes-fast-ack-{chat_id or 'telegram'}-{message_id}"
+                )
+                claimed["surface_attempt_started_at"] = utc_now()
+                write_handoff_record(record_path, claimed)
+                return True
+
+        # Telegram/network/subprocess work is intentionally outside the file
+        # lock so the waiter can atomically cancel at its deadline.
+        result = send_ack(
+            event,
+            model=model,
+            state=state,
+            dry_run=False,
+            meta=meta,
+            reaction_already_done=True,
+            surface_attempt_callback=mark_surface_attempt,
+        )
+
+        with handoff_lock(chat_id, thread_id, message_id) as record_path:
+            current = load_json(record_path, {})
+            claim_active = handoff_claim_matches(
+                current, chat_id, thread_id, message_id, claim_token
+            ) and handoff_record_fresh(current)
+            if not claim_active:
+                result = dict(result)
+                result.update({
+                    "ok": False,
+                    "handoff_terminal_failure": True,
+                    "error": "handoff_claim_cancelled",
+                })
+                return result
+
             if result.get("ok"):
                 accepted_at = dt.datetime.now(dt.timezone.utc)
                 receipt = {
@@ -2046,8 +2383,26 @@ def process_ack_event(
                 result["handoff_receipt"] = receipt
                 return result
 
+            if result.get("surface_indeterminate"):
+                indeterminate_at = dt.datetime.now(dt.timezone.utc)
+                receipt = {
+                    **current,
+                    "status": "indeterminate",
+                    "ownership_state": "claimed_in_flight",
+                    "indeterminate_at": indeterminate_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "expires_at": (indeterminate_at + dt.timedelta(seconds=HANDOFF_RECEIPT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "reaction_ok": bool(result.get("reaction_ok")),
+                    "header_message_id": str(result.get("header_message_id") or ""),
+                    "live_message_id": str(result.get("ack_message_id") or ""),
+                    "reason": "telegram_surface_delivery_indeterminate",
+                }
+                write_handoff_record(record_path, receipt)
+                result["handoff_indeterminate"] = True
+                result["handoff_receipt"] = public_indeterminate_handoff_receipt(receipt)
+                return result
+
             failure = {
-                **record,
+                **current,
                 "status": "failed",
                 "failed_at": utc_now(),
                 "reason": str(result.get("error") or "jaimes_surface_acceptance_failed")[:120],
@@ -2127,12 +2482,18 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 inbox_handoff_topic(session_meta)
                 and direct_jaimes_mention(event.get("prompt") or "")
                 and not dry_run
-                and not active_handoff_lease(session_meta, event)
             ):
-                # Do not advance the Hermes cursor until Josh's exact-message
-                # waiter has created a lease. This closes the arrival-order race
-                # between the two Telegram gateways without sending late cards.
-                break
+                handoff_decision, handoff_record = handoff_event_state(session_meta, event)
+                if handoff_decision == "wait":
+                    # Do not advance until Josh creates a waiting lease, or
+                    # while another token owner is still resolving it.
+                    break
+                if handoff_decision == "consume":
+                    event_id = f"{event['session_id']}:{event['ts']}"
+                    acked.add(event_id)
+                    state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
+                    recover_accepted_handoff_card(state, event, session_meta, handoff_record)
+                    continue
             age = event_age_seconds(event["ts"])
             event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
             replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
@@ -2203,7 +2564,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 }
             sent.append({"event": event_id, "result": result})
         else:
-            if result.get("handoff_terminal_failure"):
+            if result.get("handoff_terminal_failure") or result.get("handoff_indeterminate"):
                 acked.add(event_id)
             sent.append({"event": event_id, "result": result})
             break

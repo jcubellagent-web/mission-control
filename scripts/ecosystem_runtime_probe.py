@@ -19,6 +19,10 @@ WORKSPACE = ROOT.parent
 OUTPUT = ROOT / "data" / "ecosystem-runtime-probe.json"
 JOSH_WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 JOSH_SEND_REPLY_SCRIPT = JOSH_WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
+CANONICAL_WORK_CARD_SCRIPT = ROOT / "scripts" / "josh_work_card.py"
+CANONICAL_FAST_ACK_SCRIPT = ROOT / "scripts" / "josh_telegram_fast_ack.py"
+INBOX_PLUGIN_SOURCE = ROOT / "plugins" / "inbox-coordinator" / "index.js"
+OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 RECOVERY_COOLDOWN = dt.timedelta(minutes=15)
 SERVICE_LABELS = {
     "controlTower": "com.josh20.mission-control-react-v2",
@@ -96,18 +100,70 @@ def launchd_running(label: str) -> bool:
     return proc.returncode == 0 and ("state = running" in text or "pid =" in text)
 
 
+def launchd_snapshot(label: str) -> tuple[bool, str]:
+    proc = subprocess.run(
+        ["launchctl", "print", f"gui/{os.getuid()}/{label}"],
+        text=True,
+        capture_output=True,
+        timeout=8,
+        check=False,
+    )
+    text = proc.stdout
+    running = proc.returncode == 0 and ("state = running" in text.lower() or "pid =" in text.lower())
+    return running, text
+
+
+def configured_inbox_helper(config: dict[str, Any]) -> str:
+    plugins = config.get("plugins") if isinstance(config.get("plugins"), dict) else {}
+    entries = plugins.get("entries") if isinstance(plugins.get("entries"), dict) else {}
+    entry = entries.get("inbox-coordinator") if isinstance(entries.get("inbox-coordinator"), dict) else {}
+    plugin_config = entry.get("config") if isinstance(entry.get("config"), dict) else {}
+    return str(plugin_config.get("helperPath") or entry.get("helperPath") or "").strip()
+
+
+def inbox_plugin_enabled(config: dict[str, Any]) -> bool:
+    """Match OpenCLAW's canonical explicit boolean plugin enablement."""
+    plugins = config.get("plugins") if isinstance(config.get("plugins"), dict) else {}
+    entries = plugins.get("entries") if isinstance(plugins.get("entries"), dict) else {}
+    entry = entries.get("inbox-coordinator") if isinstance(entries.get("inbox-coordinator"), dict) else {}
+    return entry.get("enabled") is True
+
+
+def plugin_uses_canonical_helper_default(source: str) -> bool:
+    return '"mission-control", "scripts", "josh_telegram_fast_ack.py"' in source
+
+
 def collect(base_url: str) -> dict[str, Any]:
     root_ok, root_ms, _, root_detail = http_json(base_url.rstrip("/") + "/data/control-tower-live.json")
     live = _ if isinstance(_, dict) else {}
     brain_ok, brain_ms, brain_detail = tcp_probe(8765)
     gateway_ok, gateway_ms, gateway_detail = tcp_probe(18790)
-    fast_ack_ok = launchd_running(SERVICE_LABELS["telegramFastAck"])
+    fast_ack_ok, fast_ack_launch = launchd_snapshot(SERVICE_LABELS["telegramFastAck"])
     telegram_helper_missing = [
         path.name
-        for path in (JOSH_WORK_CARD_SCRIPT, JOSH_SEND_REPLY_SCRIPT)
+        for path in (JOSH_WORK_CARD_SCRIPT, JOSH_SEND_REPLY_SCRIPT, CANONICAL_WORK_CARD_SCRIPT)
         if not path.is_file()
     ]
-    telegram_helper_ok = not telegram_helper_missing
+    work_card_synced = bool(
+        not telegram_helper_missing
+        and JOSH_WORK_CARD_SCRIPT.read_bytes() == CANONICAL_WORK_CARD_SCRIPT.read_bytes()
+    )
+    telegram_helper_ok = not telegram_helper_missing and work_card_synced
+    openclaw_config = read_json(OPENCLAW_CONFIG, {})
+    parsed_config = openclaw_config if isinstance(openclaw_config, dict) else {}
+    configured_helper = configured_inbox_helper(parsed_config)
+    plugin_enabled = inbox_plugin_enabled(parsed_config)
+    plugin_source = INBOX_PLUGIN_SOURCE.read_text(encoding="utf-8") if INBOX_PLUGIN_SOURCE.is_file() else ""
+    expected_helper = CANONICAL_FAST_ACK_SCRIPT.resolve()
+    effective_helper = Path(configured_helper).expanduser().resolve() if configured_helper else expected_helper
+    default_contract_ok = bool(configured_helper) or plugin_uses_canonical_helper_default(plugin_source)
+    claim_helper_ok = (
+        plugin_enabled
+        and CANONICAL_FAST_ACK_SCRIPT.is_file()
+        and effective_helper == expected_helper
+        and default_contract_ok
+        and str(CANONICAL_FAST_ACK_SCRIPT) in fast_ack_launch
+    )
     source_stamp = parse_ts(live.get("sourceUpdatedAt"))
     source_age = round((utc_now() - source_stamp.astimezone(dt.timezone.utc)).total_seconds() / 60, 1) if source_stamp else None
     checks = {
@@ -117,7 +173,17 @@ def collect(base_url: str) -> dict[str, Any]:
         "telegramFastAck": {"ok": fast_ack_ok, "detail": "launchd running" if fast_ack_ok else "launchd not running"},
         "telegramWorkCardHelper": {
             "ok": telegram_helper_ok,
-            "detail": "workspace helpers present" if telegram_helper_ok else f"missing: {', '.join(telegram_helper_missing)}",
+            "detail": (
+                "runtime work-card helper matches canonical source"
+                if telegram_helper_ok
+                else f"missing: {', '.join(telegram_helper_missing)}"
+                if telegram_helper_missing
+                else "runtime work-card helper differs from canonical source"
+            ),
+        },
+        "telegramInboxClaimHelper": {
+            "ok": claim_helper_ok,
+            "detail": "canonical helper selected by plugin and launchd" if claim_helper_ok else "plugin or launchd is not using the canonical Inbox helper",
         },
         "sourceFreshness": {"ok": source_age is not None and source_age <= 5, "ageMinutes": source_age, "detail": "sourceUpdatedAt"},
     }
