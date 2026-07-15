@@ -20,6 +20,11 @@ def load_module():
 
 
 class InboxCoordinatorTests(unittest.TestCase):
+    def test_work_card_uses_telegram_capable_workspace_helper(self):
+        coordinator = load_module()
+        self.assertEqual(coordinator.WORK_CARD_SCRIPT, coordinator.WORKSPACE / "scripts" / "josh_work_card.py")
+        self.assertTrue((coordinator.WORK_CARD_SCRIPT.parent / "send_josh_reply.py").exists())
+
     def configure_private_state(self, coordinator, root: Path):
         coordinator.PRIVATE_DIR = root / "private"
         coordinator.STATE_PATH = coordinator.PRIVATE_DIR / "jobs.json"

@@ -22,6 +22,18 @@ def test_send_ack_uses_prompt_reaction_without_message_id_and_does_not_fail_clai
     assert result["reaction_ok"] is False
 
 
+def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
+    event = {"session_id": "session", "ts": "2026-07-15T04:23:21Z", "run_id": "before-dispatch:1", "message_id": "", "prompt": "Fix a multi-step Inbox task"}
+    card_receipt = '{"ok": true, "action": "start", "message_id": 444}'
+    with patch.object(watcher, "fast_ack_enabled", return_value=True), patch.object(watcher, "send_chat_action"), patch.object(watcher, "send_message_draft"), patch.object(watcher, "send_prompt_reaction", return_value=True), patch.object(watcher, "publish_josh"), patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": card_receipt}) as run_cmd:
+        result = watcher.send_ack(event, model=watcher.DEFAULT_MODEL, dry_run=False, meta={"telegram_chat_id": "-100", "telegram_thread_id": "1"})
+    command = run_cmd.call_args.args[0]
+    assert command[1] == str(watcher.WORK_CARD_SCRIPT)
+    assert (watcher.WORK_CARD_SCRIPT.parent / "send_josh_reply.py").exists()
+    assert result["card_start_ok"] is True
+    assert result["card_start_receipt"] == card_receipt
+
+
 def test_claim_inbox_queues_when_ack_explicitly_reports_failure():
     args = argparse.Namespace(run_id="before-dispatch:1", message_id="", chat_id="-100", thread_id="1", session_key="session", dry_run=False)
     submitted = {"ok": True, "stdout": '{"job":{"jobId":"job-1"},"route":{"routeId":"route-1"},"deduplicated":false}'}
