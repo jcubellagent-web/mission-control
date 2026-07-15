@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget } from "../index.js";
+import coordinator, { handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -33,4 +33,50 @@ test("builds helper arguments without prompt content", () => {
   assert.equal(args.includes(prompt), false);
   assert.deepEqual(args.slice(0, 3), ["/tmp/helper.py", "--claim-inbox", "--run-id"]);
   assert.equal(args.at(-1), inboxCtx.sessionKey);
+});
+
+test("claims the runtime-shaped global before_dispatch Inbox event", () => {
+  const event = {
+    content: "please review this privately",
+    body: "please review this privately",
+    channel: "telegram",
+    sessionKey: inboxCtx.sessionKey,
+    timestamp: 1784086200000,
+    isGroup: true,
+  };
+  const ctx = {
+    channelId: "telegram",
+    conversationId: inboxCtx.sessionKey,
+    sessionKey: inboxCtx.sessionKey,
+  };
+  let dispatched = false;
+  const result = handleInboxEvent(event, ctx, {}, console, (receivedEvent, receivedCtx) => {
+    dispatched = true;
+    assert.equal(receivedEvent.body, event.body);
+    assert.equal(receivedCtx.sessionKey, inboxCtx.sessionKey);
+    return true;
+  });
+  assert.deepEqual(result, { handled: true });
+  assert.equal(dispatched, true);
+  const args = helperArgs(event, ctx, { helperPath: "/tmp/helper.py" });
+  assert.equal(args.includes(event.body), false);
+  assert.equal(args[args.indexOf("--message-id") + 1], String(event.timestamp));
+});
+
+test("silences a JAIMES mention on the global before_dispatch path", () => {
+  const event = { content: "@JAIMES please take this", channel: "telegram", sessionKey: inboxCtx.sessionKey };
+  let dispatched = false;
+  const result = handleInboxEvent(event, { channelId: "telegram", sessionKey: inboxCtx.sessionKey }, {}, console, () => {
+    dispatched = true;
+    return true;
+  });
+  assert.deepEqual(result, { handled: true });
+  assert.equal(dispatched, false);
+});
+
+test("registers both bound and global claim hooks", () => {
+  const hooks = [];
+  coordinator.register({ on: (name, handler, options) => hooks.push({ name, handler, options }), pluginConfig: {} });
+  assert.deepEqual(hooks.map(({ name }) => name), ["inbound_claim", "before_dispatch"]);
+  assert.deepEqual(hooks.map(({ options }) => options.priority), [100, 100]);
 });

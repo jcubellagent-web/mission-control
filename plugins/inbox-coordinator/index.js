@@ -51,16 +51,24 @@ export function inboxDecision(event = {}, ctx = {}, config = {}) {
 
 export function helperArgs(event = {}, ctx = {}, config = {}) {
   const target = parseTelegramTarget(event, ctx);
+  const messageId = stringValue(ctx.messageId || event.messageId) || (event.timestamp ? String(event.timestamp) : "");
   const args = [
     stringValue(config.helperPath, path.join(process.env.HOME || "/Users/josh2.0", ".openclaw", "workspace", "josh_telegram_fast_ack.py")),
     "--claim-inbox",
     "--run-id", stringValue(ctx.runId),
-    "--message-id", stringValue(ctx.messageId || event.messageId),
+    "--message-id", messageId,
     "--chat-id", target.chatId,
     "--thread-id", target.threadId,
     "--session-key", stringValue(ctx.sessionKey),
   ];
   return args;
+}
+
+export function handleInboxEvent(event = {}, ctx = {}, config = {}, logger = console, dispatch = dispatchClaim) {
+  const decision = inboxDecision(event, ctx, config);
+  if (decision === "ignore") return undefined;
+  if (decision === "silence") return { handled: true };
+  return dispatch(event, ctx, config, logger) ? { handled: true } : undefined;
 }
 
 export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = console) {
@@ -92,13 +100,14 @@ export default {
   name: "Inbox Coordinator",
   description: "Owns untagged Josh 2.0 Inbox messages and dispatches one asynchronous worker.",
   register(api) {
+    // #JAIMES: OpenClaw 2026.7.1 sends unbound Topic 1 traffic through global before_dispatch.
     api.on("inbound_claim", async (event, ctx) => {
       const config = event.context?.pluginConfig || api.pluginConfig || {};
-      const decision = inboxDecision(event, ctx, config);
-      if (decision === "ignore") return;
-      if (decision === "silence") return { handled: true };
-      if (!dispatchClaim(event, ctx, config, api.logger)) return;
-      return { handled: true };
+      return handleInboxEvent(event, ctx, config, api.logger);
+    }, { priority: 100, timeoutMs: 5_000 });
+    api.on("before_dispatch", async (event, ctx) => {
+      const config = api.pluginConfig || {};
+      return handleInboxEvent(event, ctx, config, api.logger);
     }, { priority: 100, timeoutMs: 5_000 });
   },
 };

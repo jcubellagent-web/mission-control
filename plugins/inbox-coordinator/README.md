@@ -3,10 +3,11 @@
 Trusted Josh 2.0 OpenCLAW hook for the J.A.I.N Control Center Inbox.
 
 It claims only untagged Telegram messages in group `-1003589561528`, topic
-`1`, then passes the prompt over a pipe to the host-local fast-ack helper. The
-helper sends the acknowledgement, creates one live card, and submits one
-asynchronous coordinator worker. Prompt text is never placed in a process
-argument or plugin log.
+`1`, then passes the prompt over a pipe to the host-local fast-ack helper. It
+uses both `inbound_claim` for plugin-owned bindings and global
+`before_dispatch` for unbound Topic 1 traffic. The helper sends the
+acknowledgement, creates one live card, and submits one asynchronous coordinator
+worker. Prompt text is never placed in a process argument or plugin log.
 
 Direct `@JAIMES`/`@JAIN` mentions are claimed silently by Josh 2.0 so its main
 model does not also answer; the JAIMES bot remains the visible owner. `#jaimes`
