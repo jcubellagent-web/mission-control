@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import importlib.util
 from pathlib import Path
 import re
@@ -136,6 +137,86 @@ def test_rich_cards_default_only_to_control_center_inbox(monkeypatch):
     assert card.rich_cards_enabled("-1003589561528", "1")
     assert not card.rich_cards_enabled("-1003589561528", "17")
     assert not card.rich_cards_enabled("6218150306", "")
+
+
+def test_task_header_is_a_bounded_fixed_width_table():
+    rendered = card.build_task_header(
+        title="Add a concise routing receipt before live work",
+        model="planned provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2",
+        route="route=luna; owner=josh2; reason=fast Inbox coordination; fallback=none",
+    )
+    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert "TASK HEADER" in body
+    assert "│Objective│" in body
+    assert "│Agent    │ Josh 2.0 system" in body
+    assert "│Models   │ codex/gpt-5.6-luna" in body
+
+
+def test_task_header_defaults_only_to_control_center_inbox(monkeypatch):
+    monkeypatch.delenv(card.TASK_HEADER_ENV, raising=False)
+    assert card.task_headers_enabled("-1003589561528", "1")
+    assert not card.task_headers_enabled("-1003589561528", "17")
+
+
+def test_header_is_persisted_before_live_send_and_not_duplicated_on_retry(monkeypatch, tmp_path):
+    state_path = tmp_path / "cards.json"
+    monkeypatch.setattr(card, "STATE_PATH", state_path)
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    monkeypatch.setattr(card, "claim_pending_ack", lambda key: "")
+    calls = []
+    live_attempts = iter([
+        {"ok": False, "error": "temporary live send failure"},
+        {"ok": True, "native_rich_message": True, "result": {"message_id": 202}},
+    ])
+
+    def fake_send_card(text, buttons, timeout, chat_id=None, thread_id=None):
+        calls.append("header")
+        assert text.startswith("<pre>TASK HEADER")
+        return {"ok": True, "result": {"message_id": 101}}
+
+    def fake_send_rich(*args, **kwargs):
+        calls.append("live")
+        return next(live_attempts)
+
+    monkeypatch.setattr(card, "send_card", fake_send_card)
+    monkeypatch.setattr(card, "send_rich_message", fake_send_rich)
+    args = argparse.Namespace(
+        key="header-retry",
+        title="Verify retry-safe task header",
+        model="planned provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2",
+        route="route=luna; owner=josh2; reason=fast Inbox coordination; fallback=none",
+        now="Objective and runbook confirmed",
+        done="Received Telegram task|Objective determined: Verify retry-safe task header",
+        next="Continue automatically",
+        blocker="None",
+        eta="",
+        ack_message_id="",
+        buttons="",
+        buttons_file="",
+        routing_buttons=False,
+        approval_buttons=False,
+        no_buttons=True,
+        no_final_summary=False,
+        final_text_file="",
+        timeout=15,
+        chat_id="-1003589561528",
+        thread_id="1",
+        dry_run=False,
+        no_brain_feed=True,
+    )
+    assert card.upsert_card(args, "running") == 1
+    partial = card.load_state()["cards"]["header-retry"]
+    assert partial["header_message_id"] == 101
+    assert partial["message_id"] is None
+
+    assert card.upsert_card(args, "running") == 0
+    final = card.load_state()["cards"]["header-retry"]
+    assert calls == ["header", "live", "live"]
+    assert final["header_message_id"] == 101
+    assert final["message_id"] == 202
 
 
 def test_rich_edit_falls_back_to_legacy_html(monkeypatch):

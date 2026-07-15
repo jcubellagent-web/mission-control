@@ -76,7 +76,10 @@ CARD_BULLET_INDENT = "  "
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
 INBOX_THREAD_ID = "1"
 RICH_CARD_ENV = "JOSH_TELEGRAM_RICH_CARDS"
+TASK_HEADER_ENV = "JOSH_TELEGRAM_TASK_HEADERS"
 LIVE_STAGES = ("Accepted", "Planned", "Routed", "Working", "Verifying", "Delivered")
+HEADER_LABEL_WIDTH = 9
+HEADER_VALUE_WIDTH = CARD_WRAP_WIDTH - HEADER_LABEL_WIDTH - 4
 
 
 def now_label() -> str:
@@ -242,6 +245,16 @@ def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -
     return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
 
 
+def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
+    """Default the persistent task header on only for the owned Inbox topic."""
+    raw = os.environ.get(TASK_HEADER_ENV, "").strip().lower()
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+
+
 def human_worker_name(value: str) -> str:
     normalized = clean_live_text(value).lower()
     if not normalized:
@@ -263,6 +276,78 @@ def human_worker_name(value: str) -> str:
         suffix = " ".join(part.title() for part in normalized.removeprefix("jaimes-").split("-") if part)
         return f"JAIMES / {suffix}" if suffix else "JAIMES"
     return compact(value.replace("_", " ").replace("-", " ").title(), limit=70)
+
+
+def planned_agent_name(model: str, route: str) -> str:
+    model_facts = parse_route_facts(model)
+    route_facts = parse_route_facts(route)
+    worker = clean_live_text(model_facts.get("worker") or route_facts.get("worker") or "").lower()
+    if not worker or worker in {"unknown", "unknown-worker", "system"}:
+        return "Josh 2.0 system"
+    if worker.startswith("josh2-"):
+        return "Josh 2.0 system"
+    if worker.startswith("jaimes-") or worker == "jaimes":
+        return "JAIMES"
+    if worker.startswith("jain") or worker.startswith("j.a.i.n"):
+        return "J.A.I.N"
+    if worker.startswith("joshex"):
+        return "JOSHeX"
+    return human_worker_name(worker) or "Task system"
+
+
+def planned_models(model: str, route: str) -> list[str]:
+    """Return the selected model chain without pretending an unverified switch occurred."""
+    results: list[str] = []
+    for facts in (parse_route_facts(model), parse_route_facts(route)):
+        raw_models = facts.get("models") or facts.get("model") or ""
+        provider = clean_live_text(facts.get("provider") or "")
+        for raw in re.split(r"\s*(?:,|\||→|->)\s*", raw_models):
+            item = clean_live_text(raw)
+            if not item:
+                continue
+            label = item if "/" in item or not provider else f"{provider}/{item}"
+            if label not in results:
+                results.append(label)
+    if not results:
+        fallback = friendly_model_line(model)
+        if fallback and fallback.lower() not in {"unknown", "unverified"}:
+            results.append(fallback)
+    return results or ["Route-selected model"]
+
+
+def task_header_row(label: str, value: str) -> list[str]:
+    parts = textwrap.wrap(
+        clean_live_text(value),
+        width=HEADER_VALUE_WIDTH,
+        break_long_words=True,
+        break_on_hyphens=True,
+    ) or [""]
+    rows = []
+    for index, part in enumerate(parts):
+        row_label = compact(label, limit=HEADER_LABEL_WIDTH) if index == 0 else ""
+        rows.append(f"│{row_label:<{HEADER_LABEL_WIDTH}}│ {part:<{HEADER_VALUE_WIDTH}}│")
+    return rows
+
+
+def build_task_header(*, title: str, model: str, route: str) -> str:
+    """Build the persistent fixed-width receipt shown before the live card."""
+    divider_top = f"┌{'─' * HEADER_LABEL_WIDTH}┬{'─' * (HEADER_VALUE_WIDTH + 1)}┐"
+    divider_mid = f"├{'─' * HEADER_LABEL_WIDTH}┼{'─' * (HEADER_VALUE_WIDTH + 1)}┤"
+    divider_bottom = f"└{'─' * HEADER_LABEL_WIDTH}┴{'─' * (HEADER_VALUE_WIDTH + 1)}┘"
+    models = " → ".join(planned_models(model, route))
+    lines = [
+        "TASK HEADER",
+        divider_top,
+        *task_header_row("Objective", operator_objective(title)),
+        divider_mid,
+        *task_header_row("Owner", "Josh 2.0"),
+        divider_mid,
+        *task_header_row("Agent", planned_agent_name(model, route)),
+        divider_mid,
+        *task_header_row("Models", models),
+        divider_bottom,
+    ]
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
 
 
 def worker_visibility_lines(model: str, route: str, status: str) -> list[str]:
@@ -1183,6 +1268,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "action": "skipped",
                 "reason": f"stale_running_after_{existing_status}",
                 "key": args.key,
+                "header_message_id": existing.get("header_message_id"),
                 "message_id": existing.get("message_id"),
                 "final_message_id": existing.get("final_message_id"),
             }, indent=2))
@@ -1226,6 +1312,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             updated=updated_at,
             started_at=started_at,
         )
+        header_text = build_task_header(title=title, model=model, route=route)
         buttons = load_buttons(args, status)
         if terminal_status and args.final_text_file:
             final_text = load_final_text_file(args.final_text_file)
@@ -1245,6 +1332,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "ok": True,
                 "dry_run": True,
                 "renderer": "rich" if rich_cards_enabled(chat_id, thread_id) else "legacy",
+                "task_header": task_headers_enabled(chat_id, thread_id),
+                "header_text": header_text,
                 "text": text,
                 "rich_text": rich_text,
                 "final_text": final_text,
@@ -1255,6 +1344,56 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         # Approval controls govern the outcome, so they belong only on the separate final summary card.
         card_buttons = buttons if not terminal_status else None
+
+        header_message_id = existing.get("header_message_id")
+        header_action = None
+        if not header_message_id and not existing.get("message_id") and task_headers_enabled(chat_id, thread_id):
+            header_result = send_card(
+                header_text,
+                None,
+                args.timeout,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            if not header_result.get("ok"):
+                print(json.dumps({
+                    "ok": False,
+                    "action": "send_header",
+                    "error": header_result.get("error") or header_result,
+                }, indent=2), file=sys.stderr)
+                return 1
+            header_message_id = (header_result.get("result") or {}).get("message_id")
+            if not header_message_id:
+                print(json.dumps({
+                    "ok": False,
+                    "action": "send_header",
+                    "error": "Telegram accepted the header without returning a message id",
+                }, indent=2), file=sys.stderr)
+                return 1
+            header_action = "sent"
+            # Persist the receipt before sending the live card. A retry can then
+            # continue without creating another immutable header.
+            cards[args.key] = {
+                "title": title,
+                "header_message_id": header_message_id,
+                "message_id": None,
+                "ack_message_id": ack_message_id,
+                "final_message_id": existing.get("final_message_id"),
+                "approval_message_id": None,
+                "status": status,
+                "started_at": started_at,
+                "updated_at": updated_at,
+                "done": done,
+                "work_log": done,
+                "route": route,
+                "model": model,
+                "renderer": existing.get("renderer") or "",
+                "chat_id": chat_id,
+                "thread_id": thread_id,
+                "next_step": args.next or existing.get("next_step") or "",
+            }
+            save_state(state)
+            existing = cards[args.key]
 
         renderer = str(existing.get("renderer") or "")
         use_rich = renderer == "rich" or (not existing.get("message_id") and rich_cards_enabled(chat_id, thread_id))
@@ -1327,6 +1466,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         cards[args.key] = {
             "title": title,
+            "header_message_id": header_message_id,
             "message_id": message_id,
             "ack_message_id": ack_message_id,
             "final_message_id": final_message_id,
@@ -1345,7 +1485,17 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         }
         save_state(state)
         publish_brain_feed(args, status)
-        print(json.dumps({"ok": True, "action": action, "final_action": final_action, "renderer": renderer, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
+        print(json.dumps({
+            "ok": True,
+            "header_action": header_action,
+            "action": action,
+            "final_action": final_action,
+            "renderer": renderer,
+            "key": args.key,
+            "header_message_id": header_message_id,
+            "message_id": message_id,
+            "final_message_id": final_message_id,
+        }, indent=2))
         return 0
 
 
