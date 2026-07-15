@@ -57,7 +57,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b", re.I),
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
-WORKER_OUTPUT_CONTRACT = """Answer the user directly in a concise, natural voice. Lead with the useful answer, then include only the context or next step that genuinely helps. Match the requested length and format; do not force the reply into status-report sections. If the task is blocked, say plainly what happened and what is needed. Do not claim a provider, model, host, worker, route, or latency. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 tight bullets; Issues: bullets or n/a; Appropriate next steps: one useful next action or No action needed.; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 FINAL_SECTION_LABELS = {
     "complete": "Complete:",
     "done": "What was done:",
@@ -469,9 +469,10 @@ def redact_secret_values(text: str) -> str:
 def clean_final_item(value: str, limit: int = 700) -> str:
     text = html.unescape(str(value or ""))
     text = re.sub(r"</?pre>", "", text, flags=re.I)
-    text = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", text)
     text = re.sub(r"`([^`]+)`", r"\1", text)
     text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
+    text = re.sub(r"__([^_]+)__", r"\1", text)
+    text = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", text)
     text = " ".join(redact_secret_values(text).split())
     if len(text) > limit:
         text = text[: limit - 1].rstrip() + "…"
@@ -519,7 +520,7 @@ def parse_model_sections(output: str) -> dict[str, Any]:
             loose.append(item)
 
     if not sections["done"]:
-        sections["done"] = loose[:3] or ["Completed the requested Inbox worker task."]
+        sections["done"] = loose[:5] or ["Completed the requested Inbox worker task."]
     while len(sections["done"]) < 3:
         additions = [
             "Verified the worker execution completed.",
@@ -536,34 +537,27 @@ def parse_model_sections(output: str) -> dict[str, Any]:
     sections["approval"] = [item for item in sections["approval"] if item.lower() not in {"n/a", "na", "none"}][:5]
     if not sections["next"]:
         sections["next"] = ["No action needed."] if complete and not sections["issues"] else ["Review the listed issue before retrying."]
-    if not sections["approval"] and sections["issues"]:
-        sections["approval"] = ["Approve the next safe remediation step for the listed issue."]
     return {"complete": complete, **sections}
 
 
 def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: str) -> str:
-    #JAIMES: runtime facts stay on the editable card/telemetry; keep the final
-    # user-facing message conversational instead of repeating internal routing.
-    body = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
-    body = re.sub(r"</?pre>", "", body, flags=re.I)
-    body = re.sub(r"(?m)^\s*```[^\n]*\n?", "", body)
-    body = re.sub(r"(?m)^\s{0,3}#{1,6}\s+", "", body)
-    body = re.sub(r"\*\*([^*]+)\*\*", r"\1", body)
-    body = re.sub(r"__([^_]+)__", r"\1", body)
-    body = re.sub(r"`([^`\n]+)`", r"\1", body)
-    body = redact_secret_values(body)
-    lines = [line.rstrip() for line in body.splitlines()]
-    natural_lines: list[str] = []
-    for line in lines:
-        if not line and (not natural_lines or not natural_lines[-1]):
-            continue
-        natural_lines.append(line)
-    body = "\n".join(natural_lines).strip()
-    if not body:
-        body = "I couldn't produce a useful answer for that request. Please try again."
-    if len(body) > 3950:
-        body = body[:3900].rstrip() + "\n\n- Output shortened for Telegram."
-    return html.escape(body)
+    #JAIMES: the delivery layer, not the model, owns the fixed final format and
+    # inserts only verified runtime routing facts.
+    sections = parse_model_sections(output)
+    provider = clean_final_item(str(execution.get("actualProvider") or "unverified"), limit=40)
+    model = clean_final_item(str(execution.get("actualModel") or "unverified"), limit=80)
+    verified_model = f"{provider}/{model}" if provider and model else "unverified"
+    args = argparse.Namespace(
+        model=verified_model,
+        route=clean_final_item(str(route.get("routeId") or "unverified"), limit=80),
+        why=clean_final_item(str(route.get("routingReason") or "verified Inbox routing"), limit=120),
+        complete=bool(sections["complete"]),
+        done=sections["done"],
+        issue=sections["issues"],
+        next=sections["next"],
+        approval=sections["approval"],
+    )
+    return format_final(args)
 
 
 def dedupe_key(prompt: str, origin: dict[str, str], sensitive: bool = False) -> str:

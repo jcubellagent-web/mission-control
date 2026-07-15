@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import re
 import tempfile
 
 
@@ -74,6 +75,22 @@ def test_final_summary_is_html_preformatted_and_bounded():
     assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "What was done:" in body
     assert "Approval needed:" in body
+
+
+def test_live_progress_has_a_ten_cell_visual_bar():
+    lines = card.progress_lines(
+        ["Received Telegram task", "Objective determined: Inbox health check", "Asynchronous worker started"],
+        "running",
+    )
+    rendered = "\n".join(lines)
+    assert re.search(r"[█░]{10}", rendered)
+    assert "% complete" in rendered
+
+
+def test_verified_coordinator_model_is_disclosed_on_the_live_card():
+    raw = "provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2"
+    assert card.friendly_model_line(raw) == "codex/gpt-5.6-luna"
+    assert card.resolve_auth_path(raw) == "subscription"
 
 
 def test_telegram_not_modified_is_an_idempotent_success_signal():

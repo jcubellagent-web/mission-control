@@ -198,7 +198,7 @@ class InboxCoordinatorTests(unittest.TestCase):
             persisted = coordinator.STATE_PATH.read_text()
             self.assertNotIn("API key", persisted)
 
-    def test_postprocessor_is_natural_and_redacts_secret_values(self):
+    def test_postprocessor_enforces_structured_final_and_redacts_secret_values(self):
         coordinator = load_module()
         route = {
             "routeId": "grok",
@@ -221,21 +221,30 @@ class InboxCoordinatorTests(unittest.TestCase):
             "**The Inbox route is working naturally.**\n\n- Checked the route\n- token: abcdefghijklmnop\n\nNext, send it a normal request.",
         )
         decoded = html.unescape(text)
-        self.assertIn("The Inbox route is working naturally.", decoded)
-        self.assertIn("Next, send it a normal request.", decoded)
-        self.assertNotIn("Model:", decoded)
+        body = decoded.removeprefix("<pre>").removesuffix("</pre>")
+        flat = " ".join(body.split())
+        self.assertTrue(text.startswith("<pre>"))
+        self.assertTrue(text.endswith("</pre>"))
+        self.assertTrue(body.startswith("Model: xai/grok-test | Route:"))
+        self.assertIn("Complete: Yes", body)
+        self.assertIn("What was done:", body)
+        self.assertIn("Issues:", body)
+        self.assertIn("Appropriate next steps:", body)
+        self.assertIn("Approval needed:", body)
+        self.assertIn("The Inbox route is working naturally.", flat)
+        self.assertIn("Next, send it a normal request.", flat)
         self.assertNotIn("jaimes-grok-public", decoded)
         self.assertNotIn("**", decoded)
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
-        self.assertFalse(text.startswith("<pre>"))
-        self.assertLessEqual(len(decoded), 3950)
+        self.assertLessEqual(max(len(line) for line in body.splitlines()), 38)
 
-    def test_worker_contract_requests_a_direct_natural_answer(self):
+    def test_worker_contract_requests_the_structured_sections(self):
         coordinator = load_module()
-        self.assertIn("Answer the user directly", coordinator.WORKER_OUTPUT_CONTRACT)
-        self.assertIn("do not force the reply into status-report sections", coordinator.WORKER_OUTPUT_CONTRACT)
-        self.assertNotIn("using exactly these plain-text sections", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("exactly these plain-text sections", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("What was done:", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("Approval needed:", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("Do not include a Model line", coordinator.WORKER_OUTPUT_CONTRACT)
 
     def test_recovery_requeues_only_dead_workers(self):
         coordinator = load_module()

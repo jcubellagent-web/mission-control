@@ -274,6 +274,8 @@ def operator_objective(title: str) -> str:
 
 def resolve_auth_path(raw: str) -> str:
     normalized = (raw or "").strip().lower()
+    if normalized.startswith("provider=codex;"):
+        return "subscription"
     if normalized.startswith("openai/") or normalized.startswith("openai-codex/"):
         return "subscription"
     if normalized.startswith("google-gemini-cli/"):
@@ -288,6 +290,15 @@ def friendly_model_line(model: str) -> str:
     lower = text.lower()
     if not text:
         return "Josh 2.0"
+
+    route_match = re.search(r"provider=([^;]+);\s*model=([^;]+)", text, re.I)
+    if route_match:
+        provider = clean_live_text(route_match.group(1))
+        model_name = clean_live_text(route_match.group(2))
+        if provider and model_name:
+            if "/" in model_name:
+                return compact(model_name, limit=90)
+            return compact(f"{provider}/{model_name}", limit=90)
     if "gemini" in lower and ("safe summary" in lower or "review" in lower):
         return "Josh 2.0, with a summary helper if needed"
     if "codex" in lower or "openclaw" in lower:
@@ -297,14 +308,6 @@ def friendly_model_line(model: str) -> str:
     if "jain" in lower:
         return "J.AI.N worker support"
     
-    route_match = re.search(r"provider=([^;]+);\s*model=([^;]+)", text, re.I)
-    if route_match:
-        provider = clean_live_text(route_match.group(1))
-        model_name = clean_live_text(route_match.group(2))
-        if provider and model_name:
-            if "/" in model_name:
-                return compact(model_name, limit=90)
-            return compact(f"{provider}/{model_name}", limit=90)
     if "/" in text:
         return compact(text, limit=90)
     session_model = current_direct_session_model()
@@ -602,11 +605,13 @@ def progress_lines(items: list[str], status: str) -> list[str]:
     complete_status = is_complete_status(status)
     if not clean:
         if complete_status:
-            return ["100% complete", ""]
-        return ["0% complete - waiting for first update", ""]
+            return ["██████████ 100% complete", ""]
+        return ["░░░░░░░░░░ 0% complete - waiting for first update", ""]
 
     percent, detail = progress_phase(clean, status)
-    return [*hanging_status_lines(f"{percent}% complete - {detail}"), ""]
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    return [*hanging_status_lines(f"{bar} {percent}% complete - {detail}"), ""]
 
 
 def current_step_text(status: str, now: str, live_items: list[str]) -> str:

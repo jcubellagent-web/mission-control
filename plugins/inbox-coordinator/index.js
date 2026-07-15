@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 
 const DEFAULT_CHAT_ID = "-1003589561528";
@@ -8,9 +9,58 @@ const DEFAULT_MENTIONS = ["@jaimes", "@jain", "@j.a.i.n"];
 const GROUP_TOPIC_RE = /telegram:group:(-?\d+):(?:topic:)?(\d+)/i;
 const DEFAULT_HELPER_TIMEOUT_MS = 4_000;
 const MAX_RECEIPT_BYTES = 4_096;
+const INBOUND_MESSAGE_TTL_MS = 30_000;
+const recentInboundMessages = new Map();
 
 function stringValue(value, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function sessionIdentity(event = {}, ctx = {}) {
+  return stringValue(ctx.sessionKey || event.sessionKey || ctx.conversationId || event.conversationId);
+}
+
+function contentFingerprint(event = {}) {
+  const content = String(event.content || event.bodyForAgent || event.body || "");
+  return content ? createHash("sha256").update(content, "utf8").digest("hex") : "";
+}
+
+export function rememberInboundMessage(event = {}, ctx = {}, config = {}) {
+  if (inboxDecision(event, ctx, config) === "ignore") return false;
+  const sessionKey = sessionIdentity(event, ctx);
+  const messageId = stringValue(ctx.messageId || event.messageId);
+  const fingerprint = contentFingerprint(event);
+  if (!sessionKey || !messageId || !fingerprint) return false;
+  const now = Date.now();
+  const current = recentInboundMessages.get(sessionKey) || [];
+  const fresh = current.filter((item) => now - item.recordedAt <= INBOUND_MESSAGE_TTL_MS);
+  fresh.push({
+    messageId,
+    fingerprint,
+    timestamp: Number(event.timestamp) || 0,
+    recordedAt: now,
+  });
+  recentInboundMessages.set(sessionKey, fresh.slice(-8));
+  return true;
+}
+
+export function resolveInboundMessageId(event = {}, ctx = {}) {
+  const direct = stringValue(ctx.messageId || event.messageId);
+  if (direct) return direct;
+  const sessionKey = sessionIdentity(event, ctx);
+  const fingerprint = contentFingerprint(event);
+  if (!sessionKey || !fingerprint) return "";
+  const now = Date.now();
+  const fresh = (recentInboundMessages.get(sessionKey) || [])
+    .filter((item) => now - item.recordedAt <= INBOUND_MESSAGE_TTL_MS && item.fingerprint === fingerprint);
+  recentInboundMessages.set(sessionKey, fresh);
+  if (!fresh.length) return "";
+  const timestamp = Number(event.timestamp) || 0;
+  if (timestamp) {
+    fresh.sort((left, right) => Math.abs(left.timestamp - timestamp) - Math.abs(right.timestamp - timestamp));
+    return fresh[0].messageId;
+  }
+  return fresh[fresh.length - 1].messageId;
 }
 
 export function parseTelegramTarget(event = {}, ctx = {}) {
@@ -53,9 +103,9 @@ export function inboxDecision(event = {}, ctx = {}, config = {}) {
 
 export function helperArgs(event = {}, ctx = {}, config = {}) {
   const target = parseTelegramTarget(event, ctx);
-  // #JAIMES: before_dispatch does not include Telegram messageId; timestamps
-  // remain a deterministic run/dedupe identity and must never be sent as one.
-  const messageId = stringValue(ctx.messageId || event.messageId);
+  // #JAIMES: before_dispatch lacks Telegram messageId, so correlate it with
+  // message_received using only a short-lived content hash and session key.
+  const messageId = resolveInboundMessageId(event, ctx);
   const runId = stringValue(ctx.runId || event.runId) || (event.timestamp ? `before-dispatch:${event.timestamp}` : "");
   const args = [
     stringValue(config.helperPath, path.join(process.env.HOME || "/Users/josh2.0", ".openclaw", "workspace", "josh_telegram_fast_ack.py")),
@@ -154,6 +204,10 @@ export default {
   description: "Owns untagged Josh 2.0 Inbox messages and dispatches one asynchronous worker.",
   register(api) {
     // #JAIMES: before_dispatch is handled only after a bounded helper receipt confirms a queued job.
+    api.on("message_received", (event, ctx) => {
+      const config = api.pluginConfig || {};
+      rememberInboundMessage(event, ctx, config);
+    }, { priority: 200 });
     api.on("inbound_claim", async (event, ctx) => {
       const config = event.context?.pluginConfig || api.pluginConfig || {};
       return handleInboxEvent(event, ctx, config, api.logger);

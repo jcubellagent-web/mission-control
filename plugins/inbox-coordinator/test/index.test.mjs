@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget } from "../index.js";
+import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget, rememberInboundMessage } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -51,6 +51,11 @@ test("claims the runtime-shaped global before_dispatch Inbox event", async () =>
     conversationId: inboxCtx.sessionKey,
     sessionKey: inboxCtx.sessionKey,
   };
+  rememberInboundMessage({
+    content: event.content,
+    messageId: "77",
+    timestamp: event.timestamp,
+  }, ctx);
   let dispatched = false;
   const result = await handleInboxEvent(event, ctx, {}, console, async (receivedEvent, receivedCtx) => {
     dispatched = true;
@@ -62,8 +67,15 @@ test("claims the runtime-shaped global before_dispatch Inbox event", async () =>
   assert.equal(dispatched, true);
   const args = helperArgs(event, ctx, { helperPath: "/tmp/helper.py" });
   assert.equal(args.includes(event.body), false);
-  assert.equal(args.includes("--message-id"), false);
+  assert.equal(args[args.indexOf("--message-id") + 1], "77");
   assert.equal(args[args.indexOf("--run-id") + 1], `before-dispatch:${event.timestamp}`);
+});
+
+test("does not correlate a different prompt to the cached Telegram message", () => {
+  const ctx = { ...inboxCtx, messageId: undefined };
+  rememberInboundMessage({ content: "first prompt", messageId: "88", timestamp: 1000 }, ctx);
+  const args = helperArgs({ content: "second prompt", timestamp: 1001 }, ctx, { helperPath: "/tmp/helper.py" });
+  assert.equal(args.includes("--message-id"), false);
 });
 
 test("silences a JAIMES mention on the global before_dispatch path", async () => {
@@ -148,9 +160,9 @@ test("terminates a timed-out helper and allows Terra handling", async () => {
   assert.equal(child.killed, true);
 });
 
-test("registers both bound and global claim hooks", () => {
+test("registers message correlation plus bound and global claim hooks", () => {
   const hooks = [];
   coordinator.register({ on: (name, handler, options) => hooks.push({ name, handler, options }), pluginConfig: {} });
-  assert.deepEqual(hooks.map(({ name }) => name), ["inbound_claim", "before_dispatch"]);
-  assert.deepEqual(hooks.map(({ options }) => options.priority), [100, 100]);
+  assert.deepEqual(hooks.map(({ name }) => name), ["message_received", "inbound_claim", "before_dispatch"]);
+  assert.deepEqual(hooks.map(({ options }) => options.priority), [200, 100, 100]);
 });
