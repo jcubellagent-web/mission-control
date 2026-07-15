@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "timezone": "America/New_York",
+  "jobs": [
+    {
+      "id": "control-tower-refresh",
+      "owner": "josh2",
+      "team": "Control Tower writer",
+      "schedule": {"intervalMinutes": 2, "offset": 0},
+      "command": ["python3", "scripts/update_mission_control.py"],
+      "timeoutSeconds": 180,
+      "severity": "p0"
+    },
+    {
+      "id": "runtime-service-probe",
+      "owner": "josh2",
+      "team": "Runtime SRE",
+      "schedule": {"intervalMinutes": 5, "offset": 1},
+      "command": ["python3", "scripts/ecosystem_runtime_probe.py", "--recover"],
+      "timeoutSeconds": 75,
+      "severity": "p0"
+    },
+    {
+      "id": "lifecycle-reconcile",
+      "owner": "jain",
+      "team": "Data integrity",
+      "schedule": {"intervalMinutes": 10, "offset": 3},
+      "command": ["python3", "scripts/ecosystem_state_reconciler.py"],
+      "timeoutSeconds": 60,
+      "severity": "p1"
+    },
+    {
+      "id": "runtime-layout-check",
+      "owner": "josh2",
+      "team": "Runtime UI QA",
+      "schedule": {"minutes": [7, 22, 37, 52]},
+      "command": ["/opt/homebrew/bin/python3", "scripts/mission_control_runtime_layout_check.py"],
+      "timeoutSeconds": 120,
+      "severity": "p1"
+    },
+    {
+      "id": "remote-sidecar-ingest",
+      "owner": "josh2",
+      "team": "Cross-host ingest",
+      "schedule": {"minutes": [11, 26, 41, 56]},
+      "command": ["python3", "scripts/remote_qa_sidecar_ingest.py"],
+      "timeoutSeconds": 60,
+      "severity": "p1"
+    },
+    {
+      "id": "route-benchmark",
+      "owner": "josh2",
+      "team": "Route QA",
+      "schedule": {"minutes": [23], "hours": [0, 6, 12, 18]},
+      "command": ["python3", "scripts/ecosystem_qa_benchmark.py", "--route-only"],
+      "timeoutSeconds": 240,
+      "severity": "p1"
+    },
+    {
+      "id": "nightly-control-tower-suite",
+      "owner": "josh2",
+      "team": "Deep release QA",
+      "schedule": {"minutes": [47], "hours": [2]},
+      "command": ["python3", "scripts/ecosystem_qa_benchmark.py", "--full"],
+      "timeoutSeconds": 900,
+      "severity": "p1",
+      "skipDuringChangeLease": true
+    },
+    {
+      "id": "full-kiosk-visual",
+      "owner": "josh2",
+      "team": "Physical visual QA",
+      "schedule": {"minutes": [17], "hours": [3, 15]},
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "scripts/mission_control_runtime_layout_check.py",
+        "--strict-browser",
+        "--strict-visual",
+        "--screenshot-path",
+        "/tmp/control-tower-scheduled-visual.png"
+      ],
+      "timeoutSeconds": 300,
+      "severity": "p1",
+      "skipDuringChangeLease": true
+    },
+    {
+      "id": "host-retention",
+      "owner": "jain",
+      "team": "Capacity support",
+      "schedule": {"minutes": [27], "hours": [3]},
+      "command": ["python3", "scripts/ecosystem_retention.py"],
+      "timeoutSeconds": 300,
+      "severity": "p2"
+    },
+    {
+      "id": "inbox-coordinator-retention",
+      "owner": "josh2",
+      "team": "Inbox privacy",
+      "schedule": {"minutes": [33], "hours": [3]},
+      "command": ["python3", "scripts/inbox_coordinator.py", "cleanup", "--max-age-seconds", "86400"],
+      "timeoutSeconds": 60,
+      "severity": "p2"
+    },
+    {
+      "id": "daily-qa-rollup",
+      "owner": "josh2",
+      "team": "QA status",
+      "schedule": {"minutes": [43], "hours": [6]},
+      "command": ["python3", "scripts/ecosystem_health_sweep.py"],
+      "timeoutSeconds": 120,
+      "severity": "p2"
+    },
+    {
+      "id": "weekly-recovery-drill",
+      "owner": "josh2",
+      "team": "Recovery QA",
+      "schedule": {"minutes": [13], "hours": [4], "weekdays": [0]},
+      "command": ["python3", "scripts/ecosystem_qa_benchmark.py", "--fault-injection"],
+      "timeoutSeconds": 900,
+      "severity": "p1"
+    }
+  ]
+}

@@ -45,6 +45,9 @@ MAX_ACTIVE_CARD_SECONDS = 10 * 60
 ORPHAN_WORK_CARD_GRACE_SECONDS = 10
 TERMINAL_CARD_STATUSES = {"done", "failed", "paused"}
 MAX_TERMINAL_CARD_RECORDS = 100
+INBOX_REACTION_ATTEMPTS = 2
+INBOX_REACTION_TIMEOUT_SECONDS = 3
+INBOX_REACTION_RETRY_DELAY_SECONDS = 0.15
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
 WORK_CARD_STATE_PATH = WORKSPACE / "memory" / "josh_work_cards.json"
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
@@ -233,6 +236,31 @@ def send_message_reaction(message_id: str, chat_id: str = "", emoji: str = "👀
         payload = apply_telegram_target(payload, meta)
     result = api_post("setMessageReaction", payload, timeout=timeout)
     return bool(result.get("ok"))
+
+
+def requires_inbox_reaction(message_id: str, meta: dict[str, Any] | None = None) -> bool:
+    """Return true only for an exact, owned Inbox message with a Telegram ID."""
+    return bool(
+        str(message_id or "").isdigit()
+        and meta
+        and str(meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+        and str(meta.get("telegram_thread_id") or "") == "1"
+    )
+
+
+def place_inbox_reaction(message_id: str, meta: dict[str, Any] | None = None) -> bool:
+    """Place the required Inbox eyes reaction with a short bounded retry."""
+    for attempt in range(INBOX_REACTION_ATTEMPTS):
+        if send_message_reaction(
+            message_id,
+            emoji="👀",
+            timeout=INBOX_REACTION_TIMEOUT_SECONDS,
+            meta=meta,
+        ):
+            return True
+        if attempt + 1 < INBOX_REACTION_ATTEMPTS:
+            time.sleep(INBOX_REACTION_RETRY_DELAY_SECONDS)
+    return False
 
 
 def edit_message(message_id: str, text: str, timeout: int = 15, meta: dict[str, Any] | None = None) -> bool:
@@ -818,7 +846,6 @@ OBJECTIVE_RULES = [
     (("openclaw", "upgrade", "update", "latest version"), "Update OpenCLAW stack"),
     (("keychain", "cookie.codex", "codex cookie"), "Fix Codex keychain alert"),
     (("automation", "automations", "cron", "crons", "schedule", "jobs"), "Review automation schedule"),
-    (("gmail", "inbox", "email"), "Triage Gmail inbox"),
     (("sorare", "lineup", "game week", "gw"), "Review Sorare lineup state"),
     (("jaimes", "j.a.i.n", "jain", "josh 2.0", "joshex", "agent ecosystem"), "Sync agent ecosystem state"),
 ]
@@ -877,6 +904,17 @@ def summarize_objective(text: str) -> str:
     lowered = clean.lower()
     if "correct objective" in lowered and "current task" in lowered:
         return "Fix current-task objective mapping"
+    if "inbox" in lowered and any(
+        marker in lowered
+        for marker in ("routing", "model route", "model routing", "brain feed", "gateway", "health check", "workflow")
+    ):
+        return "Verify Inbox routing and health"
+    if (
+        "gmail" in lowered
+        or "mailbox" in lowered
+        or ("email" in lowered and any(marker in lowered for marker in ("inbox", "triage", "unread", "messages")))
+    ):
+        return "Triage Gmail inbox"
     for markers, summary in OBJECTIVE_RULES:
         if any(marker in lowered for marker in markers):
             return summary
@@ -891,6 +929,28 @@ def summarize_objective(text: str) -> str:
         if any(marker in lowered for marker in markers):
             return summary
     clean = LEADING_REQUEST_RE.sub("", clean).strip(" .")
+    # Turn an unmatched request into a short operator objective rather than a
+    # clipped copy of the user's sentence. This stays deterministic so the
+    # required task header does not wait on another model call.
+    clean = re.split(r"\s+(?:so that|so I can|and then|and make|and ensure)\b", clean, maxsplit=1, flags=re.I)[0]
+    verb_rewrites = (
+        (r"^(?:deep[- ]?scan|scan)\s+", "Audit "),
+        (r"^(?:check|confirm|make sure)\s+", "Verify "),
+        (r"^(?:review|audit)\s+", "Audit "),
+        (r"^(?:look at|inspect)\s+", "Inspect "),
+        (r"^(?:examine|assess)\s+", "Assess "),
+        (r"^(?:find|find out|investigate)\s+", "Investigate "),
+        (r"^(?:fix|repair|resolve)\s+", "Repair "),
+        (r"^(?:add|implement)\s+", "Implement "),
+        (r"^(?:tell me|explain|remind me)\s+", "Explain "),
+    )
+    rewritten = ""
+    for pattern, replacement in verb_rewrites:
+        if re.match(pattern, clean, flags=re.I):
+            rewritten = re.sub(pattern, replacement, clean, count=1, flags=re.I)
+            break
+    generic_object = re.sub(r"^(?:this|the)\s+", "", clean, flags=re.I)
+    clean = rewritten or f"Handle {generic_object}"
     words = clean.split()
     if len(words) > 8:
         clean = " ".join(words[:8])
@@ -994,7 +1054,7 @@ def display_model_route(route_result: dict[str, Any], fallback_model: str) -> tu
     return detail, f"provider={provider}; model={model}; lane={lane}; owner={agent}; fallback={fallback}"
 
 
-def auto_route_for_prompt(prompt: str, fallback_model: str) -> dict[str, str]:
+def auto_route_for_prompt(prompt: str, fallback_model: str) -> dict[str, Any]:
     task_type = classify_task_type(prompt)
     privacy = classify_privacy(prompt)
     if COORDINATOR_SCRIPT.exists():
@@ -1018,7 +1078,13 @@ def auto_route_for_prompt(prompt: str, fallback_model: str) -> dict[str, str]:
                 role = str(route_result.get("role") or route_result.get("routeId") or "coordinator")
                 display = f"planned provider={provider}; model={model}; worker={worker}; host={host}; why={reason}; fallback={fallback}"
                 route_line = f"planned provider={provider}; model={model}; lane={role}; worker={worker}; host={host}; reason={reason}; fallback={fallback}"
-                return {"model": display, "route": route_line, "task_type": task_type, "privacy": privacy}
+                return {
+                    "model": display,
+                    "route": route_line,
+                    "task_type": task_type,
+                    "privacy": privacy,
+                    "route_plan": route_result,
+                }
         except Exception:
             pass
     cmd = [
@@ -1044,7 +1110,7 @@ def auto_route_for_prompt(prompt: str, fallback_model: str) -> dict[str, str]:
         if result.get("ok") and result.get("stdout"):
             route_result = json.loads(str(result["stdout"]))
             model_line, route_line = display_model_route(route_result, fallback_model)
-            return {"model": model_line, "route": route_line, "task_type": task_type, "privacy": privacy}
+            return {"model": model_line, "route": route_line, "task_type": task_type, "privacy": privacy, "route_plan": None}
     except Exception:
         pass
     return {
@@ -1052,6 +1118,7 @@ def auto_route_for_prompt(prompt: str, fallback_model: str) -> dict[str, str]:
         "route": f"{DEFAULT_ROUTE}; auto route unavailable, using local Codex fallback",
         "task_type": task_type,
         "privacy": privacy,
+        "route_plan": None,
     }
 
 
@@ -1164,17 +1231,35 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
     ack_message_id = ""
     ack_sent = False
+    reaction_required = requires_inbox_reaction(message_id, meta)
     if dry_run:
         ack_message_id = "dry-run-message"
         ack_sent = True
     else:
+        if fast_ack_enabled():
+            # The exact Inbox path is reaction-first by contract. A global
+            # watcher event may lack a message ID, so it remains best-effort.
+            ack_sent = (
+                place_inbox_reaction(message_id, meta=meta)
+                if reaction_required
+                else (send_message_reaction(message_id, meta=meta) if message_id else send_prompt_reaction(prompt, meta=meta))
+            )
+        else:
+            ack_sent = not reaction_required
+        if reaction_required and not ack_sent:
+            return {
+                "ok": False,
+                "status": "reaction-failed",
+                "error": "eyes_reaction_failed",
+                "reaction_ok": False,
+                "ack_message_id": "",
+                "key": key,
+                "objective": objective_from_prompt(prompt),
+                "run_id": event.get("run_id") or "",
+                "last_card_update_at": utc_now(),
+            }
         send_chat_action(meta=meta)
         send_message_draft(draft_id, "", meta=meta)
-        if fast_ack_enabled():
-            #JAIMES: use a real Telegram reaction for fast ack; never fall back to a visible eyes message bubble.
-            ack_sent = send_message_reaction(message_id, meta=meta) if message_id else send_prompt_reaction(prompt, meta=meta)
-        else:
-            ack_sent = True
     # The visible acknowledgement must be first. Route and skill probes may
     # involve remote health checks and must never delay the eyes reaction.
     objective = objective_from_prompt(prompt)
@@ -1189,8 +1274,6 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
         if not dry_run:
             publish_josh(objective, "done", "Hold requested; no live work card started.")
         return {
-            # #JAIMES: a reaction is best-effort UI only; never make it a gate
-            # for a claimed task because global before_dispatch lacks messageId.
             "ok": True,
             "reaction_ok": bool(dry_run or ack_sent),
             "ack_message_id": ack_message_id,
@@ -1230,13 +1313,13 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
     if not dry_run:
         publish_josh(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
     return {
-        # #JAIMES: queue delivery must survive a missing/failed optional reaction.
         "ok": True,
         "reaction_ok": bool(dry_run or ack_sent),
         "ack_message_id": ack_message_id,
         "key": key,
         "model": display_model,
         "route": display_route,
+        "route_plan": route.get("route_plan"),
         "skill": skill,
         "objective": objective,
         "run_id": event.get("run_id") or "",
@@ -1246,17 +1329,22 @@ def send_ack(event: dict[str, str], model: str, dry_run: bool = False, meta: dic
     }
 
 
-def coordinator_job_status(job_id: str) -> str:
+def coordinator_job_snapshot(job_id: str) -> dict[str, Any]:
     if not job_id or not COORDINATOR_SCRIPT.exists():
-        return ""
+        return {}
     try:
         result = run_cmd([sys.executable, str(COORDINATOR_SCRIPT), "status", "--job-id", job_id], timeout=8)
         if not result.get("ok") or not result.get("stdout"):
-            return ""
+            return {}
         payload = json.loads(str(result["stdout"]))
-        return str((payload.get("job") or {}).get("status") or "")
+        job = payload.get("job") or {}
+        return job if isinstance(job, dict) else {}
     except Exception:
-        return ""
+        return {}
+
+
+def coordinator_job_status(job_id: str) -> str:
+    return str(coordinator_job_snapshot(job_id).get("status") or "")
 
 
 def prune_terminal_cards(state: dict[str, Any], keep: int = MAX_TERMINAL_CARD_RECORDS) -> int:
@@ -1400,11 +1488,44 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         if not key:
             continue
         coordinator_owned = bool(card.get("coordinator_owned"))
-        worker_status = coordinator_job_status(str(card.get("job_id") or "")) if coordinator_owned else ""
-        if worker_status in {"done", "failed"}:
+        worker_job = coordinator_job_snapshot(str(card.get("job_id") or "")) if coordinator_owned else {}
+        worker_status = str(worker_job.get("status") or "")
+        if worker_status in {"done", "failed"} and worker_job.get("delivered"):
             card["status"] = worker_status
             card["ended_at"] = utc_now()
             card["last_card_update_at"] = card["ended_at"]
+            continue
+        if worker_status in {"done", "failed"}:
+            # A terminal coordinator row without a delivered final is not a
+            # terminal Telegram task. Emit the canonical failure final through
+            # the same origin-scoped work-card state and retry until accepted.
+            cmd = [
+                "python3",
+                str(WORK_CARD_SCRIPT),
+                "fail",
+                "--key",
+                key,
+                "--title",
+                objective,
+                "--model",
+                str(card.get("model") or DEFAULT_MODEL),
+                "--route",
+                str(card.get("route") or DEFAULT_ROUTE),
+                "--done",
+                "Worker routing was checked|The worker did not deliver a verified result|A structured failure summary was prepared",
+                "--blocker",
+                "The selected worker exhausted its safe delivery path",
+                "--next",
+                "Retry after the worker route is healthy",
+            ]
+            result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, card or meta))
+            if result.get("ok"):
+                card["status"] = "failed"
+                card["ended_at"] = utc_now()
+                card["last_card_update_at"] = card["ended_at"]
+            else:
+                card["final_delivery_status"] = "retry"
+                card["last_card_update_at"] = utc_now()
             continue
         # #JAIMES: coordinator-owned workers still need visible heartbeat edits.
         # Let them bypass session-expiry handling below, then reach the shared
@@ -1564,10 +1685,19 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "prompt": prompt,
     }
     ack = send_ack(event, model=DEFAULT_MODEL, dry_run=args.dry_run, meta=meta)
-    # #JAIMES: acknowledgement/reaction is best effort; the coordinator owns
-    # delivery after claiming, even if Telegram cannot place the eyes reaction.
     if not ack.get("ok"):
-        publish_josh("Inbox acknowledgement degraded", "active", "Reaction failed; continuing to queue the owned Inbox request.")
+        if not args.dry_run:
+            publish_josh(
+                "Inbox acknowledgement needs retry",
+                "error",
+                "Required eyes reaction failed; no header or card was created and native fallback remains available.",
+            )
+        return {
+            "ok": False,
+            "status": str(ack.get("status") or "reaction-failed"),
+            "reaction_ok": False,
+            "key": ack.get("key"),
+        }
 
     cmd = [
         sys.executable,
@@ -1580,6 +1710,9 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "--chat-id", str(meta["telegram_chat_id"]),
         "--thread-id", str(meta["telegram_thread_id"]),
     ]
+    route_plan = ack.get("route_plan")
+    if isinstance(route_plan, dict) and route_plan.get("routeId"):
+        cmd.extend(["--route-plan-json", json.dumps(route_plan, separators=(",", ":"), sort_keys=True)])
     if args.dry_run:
         cmd.append("--dry-run")
     submitted = run_cmd(cmd, timeout=30, input_text=prompt)
@@ -1618,6 +1751,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "message_id": str(args.message_id or ""),
         "job_id": str((job or {}).get("jobId") or ""),
         "coordinator_owned": True,
+        "telegram_chat_id": str(meta["telegram_chat_id"]),
+        "telegram_thread_id": str(meta["telegram_thread_id"]),
         "reaction_ok": bool(ack.get("reaction_ok")),
         "started_at": ack.get("last_card_update_at"),
         "last_progress_at": ack.get("last_card_update_at"),
@@ -1637,6 +1772,7 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "ok": True,
         "status": "queued",
+        "reaction_ok": bool(ack.get("reaction_ok")),
         "job_id": str((job or {}).get("jobId") or ""),
         "route_id": str((route or {}).get("routeId") or ""),
         "deduplicated": bool(envelope.get("deduplicated")) if isinstance(envelope, dict) else False,
@@ -1721,6 +1857,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state["direct_session_id"] = session_id
     state["model"] = model
     state["status"] = "ok"
+    state.pop("last_error", None)
+    state.pop("last_error_at", None)
     if sent:
         state["last_sent_at"] = utc_now()
         state["last_result"] = sent[-1]["result"]

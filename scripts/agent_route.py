@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import os
@@ -21,7 +22,9 @@ CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 BUDGETS_PATH = DATA_DIR / "model-provider-budgets.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 JAIMES_GEMINI_POLICY_PATH = DATA_DIR / "jaimes-gemini-policy.json"
-ROUTE_TELEMETRY_PATH = DATA_DIR / "agent-route-decisions.jsonl"
+ROUTE_TELEMETRY_PATH = Path(
+    os.environ.get("AGENT_ROUTE_TELEMETRY_PATH", DATA_DIR / "agent-route-decisions.jsonl")
+)
 
 GEMINI_FIRST_TASK_TYPES = {
     "review",
@@ -62,6 +65,11 @@ GEMINI_FIRST_CAPABILITIES = {
 }
 
 CODEX_ONLY_TASK_TYPES = {
+    "code",
+    "repair",
+    "multi-step",
+    "control-tower-code",
+    "control-tower-repair",
     "repo-patch",
     "dashboard-update",
     "validation",
@@ -138,6 +146,9 @@ JOSH2_PREFERRED_TYPES = {
 }
 
 JOSHEX_LOCAL_ONLY_TYPES = {
+    "gmail",
+    "personal-gmail",
+    "personal-inbox",
     "connected-account-triage",
     "sensitive-coordination",
     "account-mutation",
@@ -149,9 +160,66 @@ JOSHEX_LOCAL_ONLY_TYPES = {
     "unapproved-account-mutation",
 }
 
+INBOX_FRONTDOOR_TYPES = {
+    "frontdesk",
+    "inbox",
+    "inbox-triage",
+    "telegram-inbox",
+    "group-chat-inbox",
+    "shared-agent-inbox",
+}
+
+CONTROL_TOWER_TYPES = {
+    "control-tower",
+    "control-tower-code",
+    "control-tower-repair",
+    "dashboard-refresh",
+    "dashboard-update",
+    "health-check",
+    "service-status",
+}
+
+SORARE_TYPES = {
+    "sorare",
+    "sorare-lineup",
+    "sorare-research",
+    "sorare-monitor",
+}
+
+CODE_OR_REPAIR_TYPES = {
+    "code",
+    "repair",
+    "multi-step",
+    "repo-patch",
+    "validation",
+    "host-maintenance",
+    "control-tower-code",
+    "control-tower-repair",
+}
+
+EXECUTION_CAPABILITIES = {
+    "repo-edit",
+    "terminal",
+    "service-repair",
+    "browser-auth",
+    "multi-step",
+    "tool-execution",
+}
+
+HIGH_BLAST_CAPABILITIES = {
+    "high-blast-radius",
+    "incident-command",
+    "security-critical",
+    "production-migration",
+}
+
 
 REQUESTED_PROVIDER_ALIASES = {
     "gpt": "codex",
+    "gpt-5.6": "codex",
+    "gpt-5.6-luna": "codex",
+    "gpt-5.6-terra": "codex",
+    "gpt-5.6-sol": "codex",
     "gpt-5.5": "codex",
     "gpt-5.4": "codex",
     "codex": "codex",
@@ -169,8 +237,8 @@ REQUESTED_PROVIDER_ALIASES = {
 }
 
 PROVIDER_DEFAULT_MODELS = {
-    "codex": "gpt-5.5",
-    "gemini": "gemini-3.1-pro-preview",
+    "codex": "gpt-5.6-terra",
+    "gemini": "gemini-3.5-flash",
     "xai": "grok-4.20-reasoning",
     "openrouter": "openrouter/auto",
 }
@@ -215,7 +283,11 @@ def append_route_telemetry(
         [args.task_type, args.title, args.objective, args.privacy, result.get("agent", "")]
     )
     record = {
+        "schemaVersion": 2,
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
+        "routeDecisionId": hashlib.sha256(
+            f"{signature_source}\x1f{time.time_ns()}".encode("utf-8")
+        ).hexdigest()[:20],
         "requestSignature": hashlib.sha256(signature_source.encode("utf-8")).hexdigest()[:16],
         "sourceAgent": args.requester,
         "owner": result.get("agent"),
@@ -230,6 +302,7 @@ def append_route_telemetry(
         "needsApproval": bool(result.get("needsApproval")),
         "outcome": "routed",
         "routeLabel": model_route.get("role") or model_route.get("firstStop") or provider,
+        "reason": compact(model_route.get("reason") or result.get("reason") or "deterministic policy route"),
         "queueDurationMs": optional_ms(args.queue_duration_ms),
         "routingDurationMs": routing_duration_ms,
         "routeDurationMs": routing_duration_ms,
@@ -249,7 +322,10 @@ def append_route_telemetry(
     }
     ROUTE_TELEMETRY_PATH.parent.mkdir(parents=True, exist_ok=True)
     with ROUTE_TELEMETRY_PATH.open("a", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         handle.write(json.dumps(record, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
 
 
 def score_route(route: dict[str, Any], task_type: str, capabilities: set[str], privacy: str, requester: str = "") -> int:
@@ -305,8 +381,21 @@ def gemini_model(alias: str = "fast") -> str:
         value = aliases.get(alias) or aliases.get("fast")
         if value:
             return str(value)
-    budget_value = provider_budget("gemini").get("lastModelUsed")
-    return str(budget_value or "gemini-3-flash-preview")
+    budget = provider_budget("gemini")
+    preferred = budget.get("preferredModels") if isinstance(budget.get("preferredModels"), dict) else {}
+    budget_aliases = {
+        "fast": "routine",
+        "review": "review",
+        "deep": "deep",
+        "longContext": "longContext",
+    }
+    preferred_value = preferred.get(budget_aliases.get(alias, alias)) if isinstance(preferred, dict) else None
+    if preferred_value:
+        return str(preferred_value)
+    budget_value = str(budget.get("lastModelUsed") or "")
+    if "gemini" in budget_value.lower() and "subscription" not in budget_value.lower():
+        return budget_value
+    return PROVIDER_DEFAULT_MODELS["gemini"]
 
 
 def provider_budget_guard(provider_id: str) -> tuple[bool, str]:
@@ -352,6 +441,12 @@ def choose_agent(args: argparse.Namespace) -> tuple[str, dict[str, Any], bool]:
     routes = [r for r in policy.get("routes", []) if isinstance(r, dict)]
     if needs_approval and args.approval != "approved":
         routes = [r for r in routes if r.get("agent") == "joshex"]
+    else:
+        hard_owner = hard_owner_for(args)
+        if hard_owner:
+            exact = [r for r in routes if r.get("agent") == hard_owner]
+            if exact:
+                return hard_owner, exact[0], needs_approval
     if args.prefer:
         routes = [r for r in routes if r.get("agent") == args.prefer] + [r for r in routes if r.get("agent") != args.prefer]
     ranked = sorted(
@@ -362,6 +457,29 @@ def choose_agent(args: argparse.Namespace) -> tuple[str, dict[str, Any], bool]:
     if not ranked:
         raise SystemExit("No route available.")
     return str(ranked[0]["agent"]), ranked[0], needs_approval
+
+
+def hard_owner_for(args: argparse.Namespace) -> str:
+    """Apply ecosystem ownership boundaries before heuristic scoring."""
+    task_type = str(args.task_type or "").strip().lower()
+    requester = str(args.requester or "").strip().lower()
+    privacy = str(args.privacy or "").strip().lower()
+
+    if task_type == "connected-account-triage" and privacy == "agent-private":
+        if requester in {"josh", "josh2", "josh2.0"}:
+            return "josh"
+        if requester == "jaimes":
+            return "jaimes"
+        return "joshex"
+    if task_type in JOSHEX_LOCAL_ONLY_TYPES or task_type in {"gmail", "personal-gmail", "personal-inbox"}:
+        return "joshex"
+    if task_type in INBOX_FRONTDOOR_TYPES or task_type in CONTROL_TOWER_TYPES:
+        return "josh"
+    if task_type in SORARE_TYPES:
+        return "jain" if task_type == "sorare-monitor" else "jaimes"
+    if task_type in {"code", "repair", "multi-step"}:
+        return "josh"
+    return ""
 
 
 
@@ -444,28 +562,89 @@ def explicit_route_payload(provider: str, model: str, owner: str, args: argparse
         ],
     }
 
+
+def codex_model_for(args: argparse.Namespace) -> str:
+    """Choose Luna/Terra/Sol from explicit, auditable task signals."""
+    task_type = str(args.task_type or "").strip().lower()
+    caps = {str(value).strip().lower() for value in (args.capability or [])}
+    complexity = str(getattr(args, "complexity", "auto") or "auto").strip().lower()
+    blast_radius = str(getattr(args, "blast_radius", "auto") or "auto").strip().lower()
+    priority = str(args.priority or "normal").strip().lower()
+
+    sol_earned = (
+        complexity == "hard"
+        and blast_radius == "high"
+        and (priority in {"high", "critical"} or bool(caps & HIGH_BLAST_CAPABILITIES))
+    )
+    if sol_earned:
+        return "gpt-5.6-sol"
+
+    terra_required = (
+        complexity in {"multi-step", "hard"}
+        or task_type in CODE_OR_REPAIR_TYPES
+        or task_type in CODEX_ONLY_TASK_TYPES
+        or bool(caps & EXECUTION_CAPABILITIES)
+        or blast_radius == "high"
+    )
+    if terra_required:
+        return "gpt-5.6-terra"
+
+    bounded_inbox = task_type in INBOX_FRONTDOOR_TYPES and complexity in {"auto", "bounded"}
+    if bounded_inbox:
+        return "gpt-5.6-luna"
+    return "gpt-5.6-terra"
+
+
+def xai_verified_available() -> tuple[bool, str]:
+    """Require an explicit enabled signal and a current verified auth signal."""
+    enabled = os.environ.get("XAI_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return False, "xAI/Grok route is disabled"
+    env_verified = os.environ.get("XAI_VERIFIED", "").strip().lower() in {"1", "true", "yes", "on"}
+    row = provider_budget("xai")
+    auth = str(row.get("authStatus") or "").strip().lower()
+    verified_auth = auth.startswith("available") or auth in {"verified", "healthy"}
+    if not (env_verified or verified_auth):
+        return False, f"xAI/Grok availability is not verified ({auth or 'no auth status'})"
+    budget_ok, budget_reason = provider_budget_guard("xai")
+    if not budget_ok:
+        return False, budget_reason
+    return True, "xAI/Grok route is enabled and verified"
+
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
     caps = set(args.capability or [])
     task_type = args.task_type
     allowance_mode = codex_allowance_mode(args)
     codex_constrained = allowance_mode in {"conserve", "exhausted"}
     unsafe_privacy = args.privacy != "dashboard-safe"
-    codex_only = task_type in CODEX_ONLY_TASK_TYPES
+    codex_only = (
+        task_type in CODEX_ONLY_TASK_TYPES
+        or task_type in INBOX_FRONTDOOR_TYPES
+        or task_type in CONTROL_TOWER_TYPES
+        or task_type in SORARE_TYPES
+    )
     gemini_hint = task_type in GEMINI_FIRST_TASK_TYPES or bool(caps & GEMINI_FIRST_CAPABILITIES)
     xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
-    xai_enabled = os.environ.get("XAI_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
-    xai_first = bool(xai_hint and xai_enabled and not codex_only and not unsafe_privacy and not needs_approval)
-    if xai_hint and not xai_enabled and not codex_only and not unsafe_privacy and not needs_approval:
-        gemini_first = True
+    xai_available, xai_availability_reason = xai_verified_available()
+    xai_first = bool(xai_hint and xai_available and not codex_only and not unsafe_privacy and not needs_approval)
     openrouter_fallback = bool(openrouter_hint and not codex_only and not unsafe_privacy and not needs_approval)
 
     requested_provider, requested_model, requested_reason = explicit_model_request(args)
-    if requested_provider == "xai" and not xai_enabled:
-        requested_provider = "gemini"
-        requested_model = PROVIDER_DEFAULT_MODELS["gemini"]
-        requested_reason = "xAI/Grok disabled while credits are exhausted; using subscription Gemini for no-cost public-web analysis"
+    if requested_provider == "codex" and requested_model:
+        policy_model = codex_model_for(args)
+        requested_codex_model = requested_model.lower().removeprefix("openai/")
+        if requested_codex_model in {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol"} and requested_codex_model != policy_model:
+            requested_reason = (
+                f"Requested {requested_codex_model} does not match the safety/complexity ladder for this task; "
+                f"using {policy_model}. Sol is allowed only for earned hard/high-blast work and Luna is bounded Inbox-only."
+            )
+            requested_model = policy_model
+    if requested_provider == "xai" and not xai_available:
+        requested_provider = "codex"
+        requested_model = codex_model_for(args)
+        requested_reason = f"{xai_availability_reason}; using the verified Codex fallback"
     if requested_provider:
         unavailable = explicit_route_unavailable(requested_provider)
         unsafe_specialist = requested_provider in {"gemini", "xai", "openrouter"} and (unsafe_privacy or needs_approval or codex_only)
@@ -514,6 +693,28 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             }
         gemini_first = True
 
+    if xai_hint and not xai_first and not codex_only and not unsafe_privacy and not needs_approval:
+        return {
+            "firstStop": "codex",
+            "provider": "codex",
+            "model": codex_model_for(args),
+            "role": "xai-unavailable-fallback",
+            "owner": owner,
+            "enforced": True,
+            "freshLaneRequired": False,
+            "verifyBeforeWork": True,
+            "codexAllowanceMode": allowance_mode,
+            "spendClass": "verified-fallback",
+            "privacy": args.privacy,
+            "fallbackFrom": "xai",
+            "reason": compact(f"{xai_availability_reason}; use the verified Codex/public-web lane and disclose that Grok was not used."),
+            "guardrails": [
+                "Do not claim Grok or X-native verification when the route is unavailable.",
+                "Use only verified public sources and make source limitations visible.",
+                "Do not send or store private connector data in route telemetry.",
+            ],
+        }
+
     if openrouter_fallback:
         budget_ok, budget_reason = provider_budget_guard("openrouter")
         if budget_ok:
@@ -553,6 +754,8 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         return {
             "firstStop": "codex",
             "provider": "codex",
+            "model": codex_model_for(args),
+            "role": "codex-execution",
             "owner": "joshex" if owner == "joshex" else owner,
             "enforced": True,
             "codexAllowanceMode": allowance_mode,
@@ -642,6 +845,18 @@ def main() -> int:
     parser.add_argument("--capability", action="append", default=[])
     parser.add_argument("--privacy", default="dashboard-safe")
     parser.add_argument("--priority", default="normal")
+    parser.add_argument(
+        "--complexity",
+        default="auto",
+        choices=["auto", "bounded", "multi-step", "hard"],
+        help="Bounded work may use Luna; multi-step/hard execution requires Terra unless Sol is explicitly earned.",
+    )
+    parser.add_argument(
+        "--blast-radius",
+        default="auto",
+        choices=["auto", "low", "medium", "high"],
+        help="Sol requires hard complexity plus high blast radius and a high/critical or explicit high-blast signal.",
+    )
     parser.add_argument("--requester", default="joshex")
     parser.add_argument("--prefer", default="")
     parser.add_argument("--approval", default="none", choices=["none", "required", "approved", "rejected"])

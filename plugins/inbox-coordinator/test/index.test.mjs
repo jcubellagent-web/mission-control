@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget, rememberInboundMessage, reserveClaim } from "../index.js";
+import coordinator, { dispatchClaim, dispatchJaimesHandoff, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, jaimesHandoffArgs, jaimesHandoffReady, parseTelegramTarget, rememberInboundMessage, reserveClaim, validJaimesHandoffReceipt } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -25,10 +25,11 @@ test("claims untagged Inbox messages and ignores other topics", () => {
   ), "ignore");
 });
 
-test("silences Josh for a direct JAIMES mention but not a routing hashtag", () => {
+test("classifies a direct JAIMES mention as a health-gated handoff", () => {
   assert.equal(isJaimesMention("@JAIMES please take this"), true);
-  assert.equal(inboxDecision({ channel: "telegram", content: "@JAIMES please take this" }, inboxCtx), "silence");
+  assert.equal(inboxDecision({ channel: "telegram", content: "@JAIMES please take this" }, inboxCtx), "handoff");
   assert.equal(inboxDecision({ channel: "telegram", content: "#jaimes please take this" }, inboxCtx), "claim");
+  assert.equal(inboxDecision({ channel: "telegram", content: "@JAIN please take this" }, inboxCtx), "claim");
   assert.equal(isJaimesMention("hey,@JAIMES please take this"), true);
 });
 
@@ -89,15 +90,135 @@ test("accepts numeric Telegram message ids", () => {
   assert.equal(args[args.indexOf("--message-id") + 1], "89");
 });
 
-test("silences a JAIMES mention on the global before_dispatch path", async () => {
+test("silences Josh only when the JAIMES Telegram handoff is fresh and healthy", async () => {
   const event = { content: "@JAIMES please take this", channel: "telegram", sessionKey: inboxCtx.sessionKey };
+  const directory = mkdtempSync(join(tmpdir(), "jaimes-health-"));
+  const healthPath = join(directory, "health.json");
+  writeFileSync(healthPath, JSON.stringify({
+    status: "ok",
+    checkedAt: new Date().toISOString(),
+    probe: { gatewayState: "running", telegramState: "connected", fastAckState: "running", telegramSessionPresent: true },
+  }));
   let dispatched = false;
-  const result = await handleInboxEvent(event, { channelId: "telegram", sessionKey: inboxCtx.sessionKey }, {}, console, () => {
+  const acceptedAt = new Date().toISOString();
+  const config = {
+    jaimesHealthPath: healthPath,
+    handoffClaimDir: mkdtempSync(join(tmpdir(), "jaimes-handoff-claims-")),
+    handoffSpawn: () => fakeHandoffChild(JSON.stringify({
+      ok: true,
+      status: "accepted",
+      agent: "jaimes",
+      chat_id: "-1003589561528",
+      thread_id: "1",
+      inbound_message_id: "42",
+      reaction_ok: true,
+      header_message_id: "101",
+      live_message_id: "102",
+      accepted_at: acceptedAt,
+    })),
+  };
+  assert.equal(jaimesHandoffReady(config), true);
+  const result = await handleInboxEvent(event, inboxCtx, config, console, () => {
     dispatched = true;
     return true;
   });
   assert.deepEqual(result, { handled: true });
   assert.equal(dispatched, false);
+});
+
+test("falls back to Josh when the JAIMES Telegram handoff is stale or unhealthy", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "jaimes-health-"));
+  const healthPath = join(directory, "health.json");
+  writeFileSync(healthPath, JSON.stringify({
+    status: "unhealthy",
+    checkedAt: new Date().toISOString(),
+    probe: { gatewayState: "running", telegramState: "disconnected", fastAckState: "running", telegramSessionPresent: true },
+  }));
+  assert.equal(jaimesHandoffReady({ jaimesHealthPath: healthPath }), false);
+  const result = await handleInboxEvent(
+    { content: "@JAIMES please take this", channel: "telegram", sessionKey: inboxCtx.sessionKey },
+    { channelId: "telegram", sessionKey: inboxCtx.sessionKey },
+    { jaimesHealthPath: healthPath },
+    { error() {} },
+  );
+  assert.equal(result, undefined);
+});
+
+test("health alone never silences Josh without an exact JAIMES receipt", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "jaimes-health-"));
+  const healthPath = join(directory, "health.json");
+  writeFileSync(healthPath, JSON.stringify({
+    status: "ok",
+    checkedAt: new Date().toISOString(),
+    probe: { gatewayState: "running", telegramState: "connected", fastAckState: "running", telegramSessionPresent: true },
+  }));
+  const result = await handleInboxEvent(
+    { content: "@JAIMES verify this", channel: "telegram", sessionKey: inboxCtx.sessionKey },
+    inboxCtx,
+    {
+      jaimesHealthPath: healthPath,
+      handoffClaimDir: mkdtempSync(join(tmpdir(), "jaimes-handoff-claims-")),
+      handoffSpawn: () => fakeHandoffChild('{"ok":true,"status":"accepted"}'),
+    },
+    { error() {} },
+  );
+  assert.equal(result, undefined);
+});
+
+test("JAIMES handoff command carries only exact origin ids and no prompt", () => {
+  const prompt = "@JAIMES private request body";
+  const args = jaimesHandoffArgs({ content: prompt }, inboxCtx, {});
+  assert.equal(args.includes(prompt), false);
+  assert.equal(args[args.indexOf("--chat-id") + 1], "-1003589561528");
+  assert.equal(args[args.indexOf("--thread-id") + 1], "1");
+  assert.equal(args[args.indexOf("--message-id") + 1], "42");
+});
+
+test("exact accepted JAIMES receipt is required", () => {
+  const event = { content: "@JAIMES verify this", channel: "telegram" };
+  const accepted = {
+    ok: true,
+    status: "accepted",
+    agent: "jaimes",
+    chat_id: "-1003589561528",
+    thread_id: "1",
+    inbound_message_id: "42",
+    reaction_ok: true,
+    header_message_id: "101",
+    live_message_id: "102",
+    accepted_at: new Date().toISOString(),
+  };
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify(accepted), event, inboxCtx), true);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...accepted, inbound_message_id: "43" }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...accepted, reaction_ok: false }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...accepted, header_message_id: "" }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...accepted, live_message_id: "" }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt("not-json", event, inboxCtx), false);
+});
+
+test("missing Telegram message id falls back without spawning JAIMES", async () => {
+  let spawned = false;
+  const accepted = await dispatchJaimesHandoff(
+    { content: "@JAIMES verify this", channel: "telegram" },
+    { channelId: "telegram", sessionKey: `${inboxCtx.sessionKey}:missing-id` },
+    { handoffSpawn: () => { spawned = true; return fakeHandoffChild(); } },
+    { error() {} },
+  );
+  assert.equal(accepted, false);
+  assert.equal(spawned, false);
+});
+
+test("handoff timeout is sticky across the duplicate OpenCLAW hook", async () => {
+  let spawns = 0;
+  const config = {
+    handoffClaimDir: mkdtempSync(join(tmpdir(), "jaimes-handoff-claims-")),
+    jaimesHandoffTimeoutMs: 25,
+    handoffSpawn: () => { spawns += 1; return fakeHandoffChild("", 0, { close: false }); },
+  };
+  const event = { content: "@JAIMES verify this", channel: "telegram" };
+  assert.equal(await dispatchJaimesHandoff(event, inboxCtx, config, { error() {} }), false);
+  assert.equal(await dispatchJaimesHandoff(event, inboxCtx, config, { error() {} }), false);
+  assert.equal(spawns, 1);
 });
 
 test("silences framework replay markers without creating a task", async () => {
@@ -126,6 +247,19 @@ function fakeChild(onPrompt = () => {}, { emitSpawn = true } = {}) {
   return child;
 }
 
+function fakeHandoffChild(stdout = "", code = 0, { close = true } = {}) {
+  const child = new EventEmitter();
+  child.stdout = new EventEmitter();
+  child.killed = false;
+  child.kill = () => { child.killed = true; };
+  queueMicrotask(() => {
+    child.emit("spawn");
+    if (stdout) child.stdout.emit("data", stdout);
+    if (close) child.emit("close", code);
+  });
+  return child;
+}
+
 function dispatchConfig(spawn) {
   return {
     helperPath: import.meta.filename,
@@ -135,11 +269,11 @@ function dispatchConfig(spawn) {
   };
 }
 
-test("returns handled as soon as the durable claimed helper starts", async () => {
+test("returns handled only after a valid durable queue receipt", async () => {
   let prompt = "";
   const child = fakeChild((current, stdin) => {
     prompt = stdin;
-    current.stdout.emit("data", '{"ok":true,"status":"queued","job_id":"job-123"}');
+    current.stdout.emit("data", '{"ok":true,"status":"queued","reaction_ok":true,"job_id":"job-123"}');
     current.emit("close", 0);
   });
   const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, dispatchConfig(() => child));
@@ -151,14 +285,15 @@ for (const [name, arrange] of [
   ["nonzero exit", () => fakeChild((child) => child.emit("close", 2))],
   ["empty receipt", () => fakeChild((child) => child.emit("close", 0))],
   ["malformed receipt", () => fakeChild((child) => { child.stdout.emit("data", "not-json"); child.emit("close", 0); })],
+  ["missing eyes reaction", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":true,"status":"queued","reaction_ok":false,"job_id":"job-123"}'); child.emit("close", 0); })],
   ["empty queued job id", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":true,"status":"queued","job_id":""}'); child.emit("close", 0); })],
   ["queue failure receipt", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":false,"status":"queue-failed"}'); child.emit("close", 0); })],
 ]) {
-  test(`keeps Josh ownership after helper start on ${name}`, async () => {
+  test(`allows normal fallback after ${name}`, async () => {
     const child = arrange();
     const config = dispatchConfig(() => child);
     const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, config, { error() {} });
-    assert.equal(claimed, true);
+    assert.equal(claimed, false);
     if (child?.killed !== undefined) assert.equal(child.killed, false);
   });
 }
@@ -195,7 +330,7 @@ test("terminates a timed-out helper and allows Terra handling", async () => {
 test("atomically suppresses a second hook for the same Telegram message", async () => {
   let spawns = 0;
   const child = fakeChild((current) => {
-    current.stdout.emit("data", '{"ok":true,"status":"queued","job_id":"job-123"}');
+    current.stdout.emit("data", '{"ok":true,"status":"queued","reaction_ok":true,"job_id":"job-123"}');
     current.emit("close", 0);
   });
   const config = dispatchConfig(() => { spawns += 1; return child; });

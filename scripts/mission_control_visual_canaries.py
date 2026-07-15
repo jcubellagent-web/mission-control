@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Generate lightweight Control Tower visual/data canaries.
+"""Generate lightweight advisory Control Tower source/data canaries.
 
-These are dashboard-facing guardrails: they summarize whether the pieces Josh
-actually looks at are intact before a human has to notice a visual regression.
+These source-shape checks preserve design history and highlight drift.  They
+are advisory unless explicitly marked critical; actual release health is
+enforced by mission_control_runtime_layout_check.py with a real browser,
+desktop/mobile viewports, console/network inspection, and screenshots.
 """
 from __future__ import annotations
 
@@ -74,6 +76,31 @@ def status(ok: bool, name: str, detail: str, severity: str = "high") -> dict[str
         "ok": bool(ok),
         "detail": detail,
         "severity": "ok" if ok else severity,
+    }
+
+
+def summarize_canary_checks(checks: list[dict[str, Any]]) -> dict[str, Any]:
+    failed = [check for check in checks if not check.get("ok")]
+    blocking = [check for check in failed if str(check.get("severity") or "").lower() == "critical"]
+    advisory = [check for check in failed if check not in blocking]
+    if blocking:
+        summary = f"{len(blocking)} critical canary issue(s); {len(advisory)} advisory drift item(s)"
+        state = "attention"
+    elif advisory:
+        summary = (
+            f"{len(advisory)} advisory source/data drift item(s); "
+            "live rendered-browser QA is the release gate"
+        )
+        state = "advisory"
+    else:
+        summary = "All advisory source/data canaries passed"
+        state = "ok"
+    return {
+        "ok": not blocking,
+        "status": state,
+        "summary": summary,
+        "blocking": blocking,
+        "advisory": advisory,
     }
 
 
@@ -1012,15 +1039,18 @@ def main() -> int:
         ),
         status(
             RUNTIME_LAYOUT_CHECK_PATH.exists()
-            and "KIOSK_URL = \"http://127.0.0.1:5174/\"" in runtime_layout_check
+            and "DEFAULT_KIOSK_URL = \"http://127.0.0.1:5174/\"" in runtime_layout_check
             and "check_http" in runtime_layout_check
-            and "check_dashboard_json" in runtime_layout_check
-            and "check_screenshot" in runtime_layout_check
+            and "check_control_tower_json" in runtime_layout_check
+            and "check_physical_screenshot" in runtime_layout_check
+            and "launch_playwright_browser" in runtime_layout_check
+            and '"channel": "chrome"' in runtime_layout_check
+            and '"browserFallback"' in runtime_layout_check
             and "visibleInternalTextLeaks" in runtime_layout_check
             and "mission_control_runtime_layout_check.py" in run_watchdog
             and "mission_control_runtime_layout_check.py" in kiosk_watchdog,
             "Runtime kiosk layout guard",
-            "watchdog checks the live kiosk endpoint, dashboard data, screenshot helper, and visible debug-text leak status",
+            "watchdog checks the live kiosk, data, full Playwright rendering, installed-Chrome fallback, screenshots, and visible debug-text leaks",
             severity="medium",
         ),
         status(
@@ -1426,12 +1456,14 @@ def main() -> int:
             check["severity"] = "ok"
             check["detail"] = "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks"
 
-    failed = [c for c in checks if not c["ok"]]
+    result = summarize_canary_checks(checks)
     out = {
-        "ok": not failed,
-        "status": "ok" if not failed else "attention",
-        "summary": "All canaries passed" if not failed else f"{len(failed)} canary issue(s)",
+        "ok": result["ok"],
+        "status": result["status"],
+        "summary": result["summary"],
         "checkedAt": utc_now(),
+        "blockingCount": len(result["blocking"]),
+        "advisoryCount": len(result["advisory"]),
         "checks": checks,
     }
     OUT_PATH.write_text(json.dumps(out, indent=2) + "\n")

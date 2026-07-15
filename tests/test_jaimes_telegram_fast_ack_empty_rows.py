@@ -93,7 +93,7 @@ def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
     _stable_surface_stubs(watcher, monkeypatch)
     calls = []
     monkeypatch.setattr(watcher, "should_start_visible_card", lambda *args, **kwargs: True)
-    monkeypatch.setattr(watcher, "run_cmd", lambda command: calls.append(command) or {"ok": True, "returncode": 0, "stdout": '{"ok": true, "message_id": 444}', "stderr": ""})
+    monkeypatch.setattr(watcher, "run_cmd", lambda command, **kwargs: calls.append(command) or {"ok": True, "returncode": 0, "stdout": '{"ok": true, "message_id": 444}', "stderr": ""})
     monkeypatch.setattr(watcher, "send_initial_ack", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("placeholder/objective bubble must not be sent")))
     monkeypatch.setattr(watcher, "edit_message", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("initial Telegram surface must not be edited")))
     result = watcher.send_ack(

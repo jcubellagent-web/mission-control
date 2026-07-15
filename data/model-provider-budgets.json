@@ -1,18 +1,18 @@
 {
-  "updatedAt": "2026-06-21T15:27:16Z",
+  "updatedAt": "2026-07-15T00:00:00Z",
   "currency": "USD",
   "policy": {
-    "defaultProvider": "gemini-flash-frontdesk-plus-codex-execution",
+    "defaultProvider": "codex-luna-inbox-plus-codex-terra-execution",
     "reviewProvider": "gemini-pro-when-judgment-needed",
     "currentEventsProvider": "xai",
     "fallbackProvider": "openrouter",
-    "codexAllowanceMode": "conserve",
+    "codexAllowanceMode": "normal",
     "codexExhaustedMode": {
       "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
-      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events, X-native research, outside critique, and batch audits to xAI. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
+      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events and X-native research to xAI only when enabled and verified; otherwise disclose the verified Codex fallback. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
       "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
     },
-    "rule": "Deterministic ladder first: Gemini Flash is the dashboard-safe front-desk/router-assist lane, Flash Lite is bounded worker-only and never a router, Gemini Pro is judgment/escalation, JAIMES/Codex owns verified execution, J.A.I.N/OpenClaw is fallback/staging, and Josh approves irreversible external actions.",
+    "rule": "Deterministic ladder first: Josh 2.0/Codex Luna owns bounded shared Inbox coordination; Terra owns code, repairs, tools, and multi-step execution; Sol is allowed only for earned hard/high-blast work. Gemini handles privacy-safe review/summaries, verified Grok handles current-events/X work, and Josh approves irreversible external actions.",
     "tripleConstraint": "Balance speed, routing effectiveness, and token efficiency by task context: mobile/frontdesk favors speed, complex/high-risk work favors route quality, ambient background work favors local/Gemini efficiency.",
     "failoverTriggers": [
       "HTTP 429",
@@ -23,8 +23,8 @@
     ],
     "failoverRule": "Before external fallback, keep ownership on the right internal lane. If Gemini/xAI/OpenRouter fails for dashboard-safe work, preserve a bounded state package and continue through Codex/OpenAI on the selected owner lane.",
     "statePreservation": "Failover packages may include objective summary, current step, recent safe activity, route decision, task/handoff ids, AGENTS.md/shared-skill pointers, and sanitized memory refs. They must exclude secrets, OAuth payloads, cookies, passwords, tokens, raw emails, raw connector data, and private account contents.",
-    "lastModeChangeAt": "2026-06-19T00:00:00Z",
-    "lastModeChangeReason": "enable Gemini-first orchestration and conserve Codex weekly allowance"
+    "lastModeChangeAt": "2026-07-15T00:00:00Z",
+    "lastModeChangeReason": "restore normal Codex allowance and enforce deterministic Inbox ownership, Luna/Terra/Sol escalation, and verified Grok routing"
   },
   "providers": [
     {
@@ -35,7 +35,7 @@
       "monthlyCapUsd": 200,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "Codex subscription",
+      "lastModelUsed": "gpt-5.6-terra",
       "lastRouteReason": "Subscription-backed execution lane; token estimates are telemetry, not incremental billable spend.",
       "fixedMonthlyUsd": 200,
       "fixedWeeklyUsd": 50.0,
@@ -45,7 +45,7 @@
     {
       "id": "gemini",
       "label": "Gemini",
-      "role": "Front-desk/review/judgment ladder: Flash for fast safe triage, Pro for escalation, Lite worker-only.",
+      "role": "Privacy-safe review and summarization specialist; not the shared Inbox owner.",
       "budgetType": "subscription",
       "monthlyCapUsd": 20,
       "dailyCapUsd": 0,
@@ -55,13 +55,13 @@
       "lastAuthCheck": "2026-06-20T16:40:35Z",
       "lastAuthIssue": null,
       "preferredModels": {
-        "frontdesk": "google/gemini-2.5-flash",
-        "routine": "google/gemini-2.5-flash",
-        "review": "google/gemini-2.5-pro",
-        "deep": "google/gemini-2.5-pro",
-        "longContext": "google/gemini-2.5-pro",
-        "tinyWorker": "google/gemini-2.5-flash-lite",
-        "cheapFallback": "google/gemini-2.5-flash"
+        "frontdesk": "google/gemini-3.5-flash",
+        "routine": "google/gemini-3.5-flash",
+        "review": "google/gemini-3.5-pro",
+        "deep": "google/gemini-3.5-pro",
+        "longContext": "google/gemini-3.5-pro",
+        "tinyWorker": "google/gemini-3.5-flash-lite",
+        "cheapFallback": "google/gemini-3.5-flash"
       },
       "lastRouteReason": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
       "fixedMonthlyUsd": 20,
@@ -78,8 +78,10 @@
       "dailyCapUsd": 0,
       "reserveUsd": 48.97,
       "remainingCreditUsd": null,
-      "lastModelUsed": "Grok via X Premium",
-      "authStatus": "pending-local-key-install",
+      "lastModelUsed": "grok-4.20-reasoning",
+      "apiModelUsed": "grok-4.20-reasoning",
+      "authStatus": "available-verified",
+      "lastAuthCheck": "2026-07-15T00:00:00Z",
       "keyMode": "host-local-env-or-secret-file",
       "lastRouteReason": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
       "fixedMonthlyUsd": 8,
@@ -123,6 +125,9 @@
     }
   ],
   "guardrails": [
+    "Shared Inbox ownership never floats to a specialist model: Josh 2.0 owns intake, Luna handles bounded coordination, and Terra takes execution or multi-step work.",
+    "Sol requires hard complexity plus high blast radius plus a high/critical priority or explicit high-blast capability signal; otherwise use Terra.",
+    "Grok/xAI may be selected only when XAI_ENABLED and a current verified availability signal are both present; unavailable routes must disclose a truthful Codex fallback.",
     "Do not route secrets, OAuth payloads, raw connector data, raw emails, or private account contents to Gemini, xAI, or OpenRouter automatically.",
     "Any provider with a daily cap is blocked once dailySpendUsd is greater than or equal to dailyCapUsd unless Josh explicitly approves an override.",
     "When Codex allowance mode is exhausted, non-execution dashboard-safe work must leave Codex first; Codex/API/OpenRouter spend is reserved for execution and private actions.",

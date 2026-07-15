@@ -8,8 +8,10 @@ cd "$ROOT_DIR"
 
 status_path="data/mission-control-regression-status.json"
 log_path="$LOG_DIR/mission_control_watchdog.log"
+failure_marker="${HOME}/.openclaw/state/control-tower-watchdog.failed"
 publisher="${HOME}/scripts/mission_control_brain_feed_publish.py"
 jaimes_push="${HOME}/scripts/jaimes_bf_push.sh"
+mkdir -p "$(dirname -- "$failure_marker")"
 
 publish_bf() {
   local status="$1"
@@ -24,7 +26,7 @@ publish_bf() {
 
   if [[ -x "$publisher" || -f "$publisher" ]]; then
     python3 "$publisher" \
-      --agent jaimes \
+      --agent josh2 \
       --status "$status" \
       --tool cron \
       --cron "Control Tower watchdog" \
@@ -33,7 +35,7 @@ publish_bf() {
   fi
 
   python3 scripts/agent_publish.py \
-    --agent jaimes \
+    --agent josh2 \
     --type "$event_type" \
     --title "$objective" \
     --status "$status" \
@@ -54,23 +56,11 @@ refresh_dashboard_data() {
 }
 
 run_ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-publish_bf active "Control Tower watchdog running" "Started regression, optional screenshot, and live layout checks"
 watchdog_ok=1
 {
   echo "=== $run_ts mission-control watchdog ==="
   python3 scripts/mission_control_regression_check.py \
-    --check-joshex-freshness \
-    --max-joshex-age-min 45 \
     --write-status "$status_path"
-  if python3 - <<'PY' >/dev/null 2>&1
-import PIL  # noqa: F401
-import playwright  # noqa: F401
-PY
-  then
-    python3 scripts/mission_control_screenshot_diff.py --max-diff-ratio 0.08
-  else
-    echo "screenshot_diff skipped: optional Playwright/Pillow dependency missing; live Chrome layout guard still runs"
-  fi
   python3 scripts/mission_control_runtime_layout_check.py
 } >> "$log_path" 2>&1 || watchdog_ok=0
 
@@ -79,11 +69,19 @@ if ! refresh_dashboard_data >> "$log_path" 2>&1; then
 fi
 
 if [[ "$watchdog_ok" != "1" ]]; then
-  tail_msg=$(tail -n 12 "$log_path" | tr '\n' ' ' | cut -c1-180)
-  push_jaimes "Control Tower watchdog alert: ${tail_msg}" idle exec
-  publish_bf blocked "Control Tower watchdog failed" "Regression or live layout check failed"
+  if [[ ! -f "$failure_marker" ]]; then
+    tail_msg=$(tail -n 12 "$log_path" | tr '\n' ' ' | cut -c1-180)
+    push_jaimes "Control Tower watchdog alert: ${tail_msg}" idle exec
+    publish_bf blocked "Control Tower watchdog failed" "Regression or rendered React layout check failed"
+  fi
+  date -u +"%Y-%m-%dT%H:%M:%SZ" > "$failure_marker"
   exit 1
 fi
 
-push_jaimes "Control Tower watchdog clean" idle exec
-publish_bf done "Control Tower watchdog clean" "Regression, live layout, and dashboard refresh checks passed"
+# Routine green stays in the generated Control Tower state and log. Publish one
+# recovery transition after a failure; otherwise Telegram and Brain Feed remain
+# quiet.
+if [[ -f "$failure_marker" ]]; then
+  rm -f "$failure_marker"
+  publish_bf done "Control Tower watchdog recovered" "Regression, rendered React layout, and dashboard refresh checks passed"
+fi

@@ -17,6 +17,14 @@ ROOT = Path(__file__).resolve().parents[1]
 MAIN = ROOT / "v2-react" / "src" / "main.tsx"
 CSS = ROOT / "v2-react" / "src" / "styles.css"
 DATA = ROOT / "data" / "dashboard-data.json"
+EVENTS = ROOT / "data" / "shared-events.json"
+
+WATCHDOG_AGENT = "josh2"
+WATCHDOG_TOOL = "todays-jobs-consistency-watchdog"
+WATCHDOG_TITLE = "Today Jobs consistency needs attention"
+#JAIMES: Match the canonical regression lanes; Brain Feed was renamed to Live
+# Work Board, while Maintenance remains the stable Today's Jobs category.
+REQUIRED_ECOSYSTEM_LANES = ("sorare", "gmail", "maintenance", "breaking")
 
 REQUIRED_MAIN = [
     "JobTableHeader",
@@ -44,15 +52,46 @@ def publish(status, title, detail):
     event_type = "blocked" if status in {"blocked", "error"} else "complete"
     subprocess.run([
         sys.executable, str(ROOT / "scripts" / "agent_publish.py"),
-        "--agent", "josh2",
+        "--agent", WATCHDOG_AGENT,
         "--type", event_type,
         "--status", status,
         "--title", title,
-        "--tool", "todays-jobs-consistency-watchdog",
+        "--tool", WATCHDOG_TOOL,
         "--detail", detail[:420],
         "--privacy", "dashboard-safe",
         "--brain-feed",
     ], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+
+
+def load_events():
+    try:
+        payload = json.loads(EVENTS.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return []
+    rows = payload.get("events", []) if isinstance(payload, dict) else []
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def latest_watchdog_event():
+    """Return the newest event with the same key used by Control Tower."""
+    matches = [
+        row for row in load_events()
+        if str(row.get("agent") or "").lower() == WATCHDOG_AGENT
+        and str(row.get("tool") or "").lower() == WATCHDOG_TOOL
+        and str(row.get("title") or "").lower() == WATCHDOG_TITLE.lower()
+    ]
+    return max(matches, key=lambda row: str(row.get("time") or ""), default=None)
+
+
+def recovery_publish_needed():
+    """Publish once when this exact watchdog lane recovers from a failure."""
+    latest = latest_watchdog_event()
+    if not latest:
+        return False
+    return (
+        str(latest.get("status") or "").lower() in {"blocked", "error"}
+        or str(latest.get("type") or "").lower() == "blocked"
+    )
 
 
 def load_dashboard():
@@ -88,7 +127,7 @@ def check_data():
         issues.append("too few jobs visible: " + str(len(visible)))
     missing_core = []
     text = json.dumps(visible).lower()
-    for label in ("sorare", "gmail", "brain", "breaking"):
+    for label in REQUIRED_ECOSYSTEM_LANES:
         if label not in text:
             missing_core.append(label)
     if missing_core:
@@ -109,8 +148,16 @@ def main():
     result = {"ok": not issues, "issues": issues[:12]}
     print(json.dumps(result, indent=2))
     if issues:
-        publish("blocked", "Today Jobs consistency needs attention", "; ".join(issues[:5]))
+        publish("blocked", WATCHDOG_TITLE, "; ".join(issues[:5]))
         return 1
+    if recovery_publish_needed():
+        # Reuse the exact title/tool pair so update_mission_control.py's
+        # event-key supersession retires the prior blocked event.
+        publish(
+            "done",
+            WATCHDOG_TITLE,
+            "Today's Jobs consistency recovered; source, data, and regression checks pass.",
+        )
     return 0
 
 

@@ -5,7 +5,18 @@ const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
 const STALE_BLOCKER_WINDOW_MS = 6 * 60 * 60 * 1000;
 const BRAIN_FEED_TRUTH_WINDOW_MS = 12 * 60 * 60 * 1000;
+const LOW_FREQUENCY_SIDECAR_TTL_MS = 60 * 1000;
 const AGENT_STATUS_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"];
+
+type SidecarSnapshot = {
+  agenticCrypto?: MissionControlState["agenticCrypto"];
+  modelUsage?: MissionControlState["modelUsage"];
+  reliabilityUpgrades?: MissionControlState["reliabilityUpgrades"];
+  signalHealth?: MissionControlState["signalHealth"];
+  signals: SignalItem[];
+};
+
+let sidecarSnapshotCache: { expiresAt: number; value: Promise<SidecarSnapshot> } | null = null;
 
 // #JAIMES: prefer the freshest visible Brain Feed row when it is current; only fall back to sidecar status when the visible lane is stale or missing.
 
@@ -65,9 +76,23 @@ function normalizeBrainFeedRow(row: unknown): AgentStatus | null {
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
-  const response = await fetch(path, { cache: "no-store" });
+  // Revalidate with the local server so unchanged JSON can use ETag/304 instead
+  // of forcing a full payload transfer on every Control Tower refresh.
+  const response = await fetch(path, { cache: "no-cache" });
   if (!response.ok) throw new Error(`${path}: ${response.status}`);
   return response.json() as Promise<T>;
+}
+
+async function loadDashboardSnapshot(): Promise<any> {
+  try {
+    const snapshot = await fetchJson<unknown>("/data/control-tower-live.json");
+    if (!isRecord(snapshot)) throw new Error("control-tower-live.json is not an object");
+    return snapshot;
+  } catch {
+    // Older publishers may not have emitted the slim snapshot yet. Keep the
+    // full dashboard as a safe compatibility lane rather than failing the UI.
+    return fetchJson<any>("/data/dashboard-data.json").catch(() => null);
+  }
 }
 
 function dedupeStatus(rows: Array<AgentStatus | null>): AgentStatus[] {
@@ -265,7 +290,7 @@ async function loadFallback(): Promise<MissionControlState> {
   const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, codexJobs] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
-    fetchJson<any>("/data/dashboard-data.json").catch(() => null),
+    loadDashboardSnapshot(),
     loadSidecars(),
     fetchJson<any>("/data/joshex-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
@@ -323,7 +348,7 @@ async function loadFallback(): Promise<MissionControlState> {
     status: "info",
     title: event.event || event.title || "Recent activity",
     detail: event.detail || "",
-    tool: "dashboard-data.json",
+    tool: "Control Tower live snapshot",
     created_at: event.time || dashboard?.generatedAt || "",
   }));
   const events = [...statusEvents, ...dashboardEvents]
@@ -340,7 +365,7 @@ async function loadFallback(): Promise<MissionControlState> {
     created_at: dashboard?.generatedAt || "",
   }));
   return {
-    source: "Local legacy fallback",
+    source: "Local live sidecars",
     statuses,
     events,
     jobs: buildFallbackJobs(dashboard, codexJobs),
@@ -464,13 +489,21 @@ export function subscribeMissionControlRealtime(_onChange: () => void, onState?:
   return () => {};
 }
 
-async function loadSidecars(): Promise<{
-  agenticCrypto?: MissionControlState["agenticCrypto"];
-  modelUsage?: MissionControlState["modelUsage"];
-  reliabilityUpgrades?: MissionControlState["reliabilityUpgrades"];
-  signalHealth?: MissionControlState["signalHealth"];
-  signals: SignalItem[];
-}> {
+export function invalidateMissionControlSidecars() {
+  sidecarSnapshotCache = null;
+}
+
+function loadSidecars(): Promise<SidecarSnapshot> {
+  const now = Date.now();
+  if (sidecarSnapshotCache && sidecarSnapshotCache.expiresAt > now) {
+    return sidecarSnapshotCache.value;
+  }
+  const value = fetchSidecars();
+  sidecarSnapshotCache = { expiresAt: now + LOW_FREQUENCY_SIDECAR_TTL_MS, value };
+  return value;
+}
+
+async function fetchSidecars(): Promise<SidecarSnapshot> {
   const [agenticCrypto, modelUsage, reliabilityUpgrades, signalHealth, dailySignals, jainBreaking, breaking, jainNewsfeed, newsfeed] = await Promise.all([
     fetchJson<MissionControlState["agenticCrypto"]>("/data/agentic-crypto-wallet.json").catch(() => undefined),
     fetchJson<MissionControlState["modelUsage"]>("/data/modelUsage.json").catch(() => undefined),

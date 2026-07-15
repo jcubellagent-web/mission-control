@@ -1,4 +1,4 @@
-name: Mission Control Regression
+name: Control Tower Release QA
 
 on:
   push:
@@ -17,25 +17,71 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - name: Install screenshot dependencies
+          cache: npm
+      - name: Install application dependencies
+        run: npm ci
+      - name: Install rendered-layout browser
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install pillow playwright
+          python3 -m pip install -r requirements-qa.txt playwright
           python3 -m playwright install --with-deps chromium
+      - name: Compile QA and health checks
+        run: |
+          python3 -m py_compile \
+            scripts/ecosystem_health_sweep.py \
+            scripts/ecosystem_qa_benchmark.py \
+            scripts/mission_control_runtime_layout_check.py
+          python3 scripts/mission_control_runtime_layout_check.py --self-test
+          if python3 scripts/ecosystem_health_sweep.py --help | grep -q -- '--ci'; then
+            python3 scripts/ecosystem_health_sweep.py --ci
+          else
+            echo "ecosystem_health_sweep.py has no fixture-safe --ci mode; syntax contract verified"
+          fi
+      - name: Run QA unit and contract tests
+        run: python3 -m pytest -q tests scripts/test_telegram_approval_extraction.py
+      - name: Build current React Control Tower
+        run: npm run build
       - name: Run static UI/data regression checks
         run: python3 scripts/mission_control_regression_check.py
-      - name: Run Brain Feed screenshot capture/diff
-        # CI runners render fonts differently than the Mac kiosk lane.
-        # Keep artifacts for visual review; local watchdog enforces diff.
-        continue-on-error: true
-        run: python3 scripts/mission_control_screenshot_diff.py --max-diff-ratio 0.08
-      - name: Upload Brain Feed screenshots
+      - name: Run deterministic route and fault-injection benchmarks
+        run: |
+          python3 scripts/ecosystem_qa_benchmark.py --route-only --no-write
+          python3 scripts/ecosystem_qa_benchmark.py --fault-injection --no-write
+      - name: Start built Control Tower preview
+        run: |
+          npm run preview:ci > /tmp/control-tower-preview.log 2>&1 &
+          echo $! > /tmp/control-tower-preview.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5174/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/control-tower-preview.log
+          exit 1
+      - name: Verify rendered React semantics and visual evidence
+        run: |
+          python3 scripts/mission_control_runtime_layout_check.py \
+            --strict-browser \
+            --strict-visual \
+            --screenshot-path screenshots/current/control-tower-runtime.png \
+            --output data/mission-control-runtime-layout.json
+      - name: Stop Control Tower preview
+        if: always()
+        run: |
+          if [[ -f /tmp/control-tower-preview.pid ]]; then
+            kill "$(cat /tmp/control-tower-preview.pid)" 2>/dev/null || true
+          fi
+          mkdir -p screenshots/runtime
+          cp /tmp/control-tower-preview.log screenshots/runtime/control-tower-preview.log 2>/dev/null || true
+      - name: Upload Control Tower runtime evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: mission-control-brain-feed-screenshots
+          name: control-tower-runtime-evidence
           path: |
             screenshots/current/*.png
-            screenshots/diffs/*.png
+            screenshots/runtime/*.log
+            data/mission-control-runtime-layout.json
           if-no-files-found: warn
           retention-days: 14

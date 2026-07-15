@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T07:05:00Z",
+  "updatedAt": "2026-07-15T00:00:00Z",
   "defaultRequester": "joshex",
   "deviceResourcePolicy": {
     "summary": "JOSHeX is the trusted coordinator and private-Mac specialist, not the default execution host. Prefer Josh 2.0 or JAIMES for real ecosystem work unless the task requires MacBook-only local state.",
@@ -30,7 +30,12 @@
   },
   "modelRouting": {
     "enforcedBy": "scripts/agent_route.py",
-    "default": "codex",
+    "default": "codex/gpt-5.6-terra",
+    "inboxModelLadder": {
+      "luna": "gpt-5.6-luna for bounded Inbox understanding, triage, and coordination",
+      "terra": "gpt-5.6-terra for code, repairs, tool use, and multi-step execution",
+      "sol": "gpt-5.6-sol only when complexity is hard, blast radius is high, and priority or capability evidence earns it"
+    },
     "codexAllowanceMode": "normal",
     "codexExhaustedMode": {
       "activation": "Set model-provider-budgets.json policy.codexAllowanceMode to exhausted, or call scripts/agent_route.py with --codex-allowance exhausted.",
@@ -46,8 +51,8 @@
       "openrouter"
     ],
     "providerRoles": {
-      "codex": "OpenAI Codex OAuth/subscription: default for execution, code edits, repo work, shell/tools, Control Tower/OpenCLAW, auth-sensitive workflows, and final verification.",
-      "gemini": "Antigravity-authenticated Gemini subscription: default for dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion.",
+      "codex": "OpenAI Codex OAuth/subscription: Luna for bounded Inbox coordination, Terra for execution, and Sol only for earned hard/high-blast work. Codex owns code edits, repo work, shell/tools, Control Tower/OpenCLAW, auth-sensitive workflows, and final verification.",
+      "gemini": "Antigravity-authenticated Gemini subscription: dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion when privacy permits.",
       "xai": "Grok/xAI specialist: X-native, current-events/social signal, creator posts, crypto/news pulse, public reaction, and zeitgeist checks.",
       "openrouter": "Fallback/specialist route only; not primary spend."
     },
@@ -99,6 +104,25 @@
       "outside-model-check"
     ],
     "codexOnly": [
+      "frontdesk",
+      "inbox",
+      "inbox-triage",
+      "telegram-inbox",
+      "group-chat-inbox",
+      "shared-agent-inbox",
+      "control-tower",
+      "control-tower-code",
+      "control-tower-repair",
+      "code",
+      "repair",
+      "multi-step",
+      "gmail",
+      "personal-gmail",
+      "personal-inbox",
+      "sorare",
+      "sorare-lineup",
+      "sorare-research",
+      "sorare-monitor",
       "repo-patch",
       "dashboard-update",
       "validation",
@@ -121,8 +145,8 @@
     "dailyUtilizationPolicy": "Run at least two dashboard-safe Gemini specialist passes per day when quota is available: one daily digest/stale-task compression pass and one review/evaluator pass. Use scripts/gemini_specialist_pass.py --agent jaimes for JAIMES-owned passes so raw prompts and raw output are not stored. Keep Codex/Hermes as execution owner.",
     "jaimesGeminiRoute": "JAIMES should use Gemini first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations. Use Gemini Flash for routine throughput and Gemini Pro for explicit deeper compact evaluation. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
     "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth and route reason; explicit model switches must verify a fresh lane before work.",
-    "lastModeChangeAt": "2026-06-18T07:05:00Z",
-    "lastModeChangeReason": "add verified fresh-lane model switching contract from JOSHeX proposal",
+    "lastModeChangeAt": "2026-07-15T00:00:00Z",
+    "lastModeChangeReason": "make Inbox ownership and Luna/Terra/Sol escalation deterministic; require verified Grok availability and truthful fallback",
     "skillPack": {
       "source": "mission-control/agent-skills",
       "inventory": "mission-control/data/agent-skill-inventory.json",
@@ -136,7 +160,7 @@
         "handoff-to-joshex"
       ]
     },
-    "updatedAt": "2026-06-18T07:05:00Z",
+    "updatedAt": "2026-07-15T00:00:00Z",
     "freshLaneSwitching": {
       "rule": "Model switching means checkpoint + fresh execution lane/session + verification before substantive work; never pretend the current session mutated models.",
       "explicitRequestOverride": "Josh explicit model requests override the router unless unsafe or unavailable.",
@@ -172,6 +196,9 @@
       "agent": "joshex",
       "priority": 100,
       "taskTypes": [
+        "gmail",
+        "personal-gmail",
+        "personal-inbox",
         "planning",
         "repo-patch",
         "dashboard-update",
@@ -225,6 +252,18 @@
       "agent": "josh",
       "priority": 80,
       "taskTypes": [
+        "frontdesk",
+        "inbox",
+        "inbox-triage",
+        "telegram-inbox",
+        "group-chat-inbox",
+        "shared-agent-inbox",
+        "control-tower",
+        "control-tower-code",
+        "control-tower-repair",
+        "code",
+        "repair",
+        "multi-step",
         "dashboard-refresh",
         "health-check",
         "service-status",
@@ -261,6 +300,9 @@
       "agent": "jaimes",
       "priority": 85,
       "taskTypes": [
+        "sorare",
+        "sorare-lineup",
+        "sorare-research",
         "summary",
         "summarization",
         "digest",
@@ -307,6 +349,7 @@
       "agent": "jain",
       "priority": 60,
       "taskTypes": [
+        "sorare-monitor",
         "monitor",
         "scan",
         "status-check",

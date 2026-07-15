@@ -7,12 +7,25 @@ from pathlib import Path
 import re
 import tempfile
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "josh_work_card.py"
 spec = importlib.util.spec_from_file_location("josh_work_card", MODULE_PATH)
 card = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(card)
+
+
+def test_card_state_writes_are_private(tmp_path, monkeypatch):
+    state_path = tmp_path / "josh_work_cards.json"
+    state_path.write_text("{}\n", encoding="utf-8")
+    state_path.chmod(0o644)
+    monkeypatch.setattr(card, "STATE_PATH", state_path)
+
+    card.save_state({"cards": {"one": {"status": "running"}}})
+
+    assert state_path.stat().st_mode & 0o777 == 0o600
 
 
 def test_ecosystem_code_block_geometry():
@@ -168,7 +181,9 @@ def test_header_is_persisted_before_live_send_and_not_duplicated_on_retry(monkey
     monkeypatch.setattr(card, "claim_pending_ack", lambda key: "")
     calls = []
     live_attempts = iter([
-        {"ok": False, "error": "temporary live send failure"},
+        # A definitive rejection is safe to retry. Ambiguous timeouts are
+        # covered separately and must remain quarantined to avoid duplicates.
+        {"ok": False, "error": "HTTP error 400: rejected before delivery"},
         {"ok": True, "native_rich_message": True, "result": {"message_id": 202}},
     ])
 
@@ -217,6 +232,52 @@ def test_header_is_persisted_before_live_send_and_not_duplicated_on_retry(monkey
     assert calls == ["header", "live", "live"]
     assert final["header_message_id"] == 101
     assert final["message_id"] == 202
+
+
+def test_indeterminate_rich_send_is_quarantined_instead_of_duplicated(monkeypatch, tmp_path):
+    monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    monkeypatch.setattr(card, "claim_pending_ack", lambda key: "")
+    monkeypatch.setattr(card, "task_headers_enabled", lambda *args: False)
+    monkeypatch.setattr(card, "rich_cards_enabled", lambda *args: True)
+    sends = []
+
+    def ambiguous_send(*args, **kwargs):
+        sends.append("send")
+        return {"ok": False, "error": "timed out after request write", "delivery_indeterminate": True}
+
+    monkeypatch.setattr(card, "send_rich_message", ambiguous_send)
+    args = argparse.Namespace(
+        key="indeterminate-live",
+        title="Prevent duplicate live cards",
+        model="planned provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2",
+        route="route=luna; owner=josh2; reason=bounded Inbox coordination; fallback=none",
+        now="Objective and route confirmed",
+        done="Received Telegram task|Objective determined: Prevent duplicate live cards",
+        next="Continue automatically",
+        blocker="None",
+        eta="",
+        ack_message_id="",
+        buttons="",
+        buttons_file="",
+        routing_buttons=False,
+        approval_buttons=False,
+        no_buttons=True,
+        no_final_summary=False,
+        final_text_file="",
+        timeout=15,
+        chat_id="-1003589561528",
+        thread_id="1",
+        dry_run=False,
+        no_brain_feed=True,
+    )
+    assert card.upsert_card(args, "running") == 1
+    partial = card.load_state()["cards"]["indeterminate-live"]
+    assert partial["live_delivery_status"] == "indeterminate"
+
+    assert card.upsert_card(args, "running") == 1
+    assert sends == ["send"]
 
 
 def test_rich_edit_falls_back_to_legacy_html(monkeypatch):
@@ -335,8 +396,33 @@ def test_telegram_not_modified_is_an_idempotent_success_signal():
     assert not card.telegram_message_not_modified({"ok": False, "error": "Bad Request: message to edit not found"})
 
 
-def test_final_text_file_accepts_conversational_escaped_text():
+def test_final_text_file_rejects_noncanonical_conversational_text():
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "final.html"
         path.write_text("Inbox routing is healthy &amp; ready.", encoding="utf-8")
-        assert card.load_final_text_file(str(path)) == "Inbox routing is healthy &amp; ready."
+        with pytest.raises(SystemExit, match="canonical ordered final contract"):
+            card.load_final_text_file(str(path))
+
+
+def test_final_text_file_accepts_canonical_structured_text():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        value = """<pre>Model: codex/gpt-5.6-luna
+
+Complete: Yes
+
+What was done:
+- Routed the Inbox request.
+- Verified worker execution.
+- Prepared the final result.
+
+Issues:
+- n/a
+
+Appropriate next steps:
+- No action needed.
+
+Approval needed:
+- n/a</pre>"""
+        path.write_text(value, encoding="utf-8")
+        assert card.load_final_text_file(str(path)) == value

@@ -5,12 +5,18 @@ import { spawn } from "node:child_process";
 
 const DEFAULT_CHAT_ID = "-1003589561528";
 const DEFAULT_THREAD_ID = "1";
-const DEFAULT_MENTIONS = ["@jaimes", "@jain", "@j.a.i.n"];
+const DEFAULT_MENTIONS = ["@jaimes"];
 const GROUP_TOPIC_RE = /telegram:group:(-?\d+):(?:topic:)?(\d+)/i;
-const DEFAULT_HELPER_TIMEOUT_MS = 1_000;
+const DEFAULT_HELPER_TIMEOUT_MS = 3_000;
+const DEFAULT_HANDOFF_TIMEOUT_MS = 12_000;
+const DEFAULT_HANDOFF_WAIT_SECONDS = 9;
+const DEFAULT_JAIMES_SSH_TARGET = "jc_agent@100.121.89.84";
+const DEFAULT_JAIMES_PYTHON = "/Users/jc_agent/.local/bin/python3.11";
+const DEFAULT_JAIMES_HELPER = "/Users/jc_agent/.openclaw/workspace/mission-control/scripts/jaimes_telegram_fast_ack.py";
 const MAX_RECEIPT_BYTES = 4_096;
 const INBOUND_MESSAGE_TTL_MS = 30_000;
 const CLAIM_STALE_MS = 2 * 60_000;
+const DEFAULT_JAIMES_HEALTH_MAX_AGE_MS = 10 * 60_000;
 const recentInboundMessages = new Map();
 
 function stringValue(value, fallback = "") {
@@ -120,7 +126,7 @@ export function inboxDecision(event = {}, ctx = {}, config = {}) {
     : DEFAULT_MENTIONS;
   const content = event.bodyForAgent || event.body || event.content || "";
   if (internalReplayPrompt(content)) return "silence";
-  return isJaimesMention(content, mentions) ? "silence" : "claim";
+  return isJaimesMention(content, mentions) ? "handoff" : "claim";
 }
 
 export function helperArgs(event = {}, ctx = {}, config = {}) {
@@ -147,7 +153,200 @@ export async function handleInboxEvent(event = {}, ctx = {}, config = {}, logger
   const decision = inboxDecision(event, ctx, config);
   if (decision === "ignore") return undefined;
   if (decision === "silence") return { handled: true };
+  if (decision === "handoff") {
+    if (jaimesHandoffReady(config) && await dispatchJaimesHandoff(event, ctx, config, logger)) {
+      return { handled: true };
+    }
+    logger.error?.("inbox-coordinator: JAIMES did not confirm exact-message acceptance; allowing Josh 2.0 fallback handling");
+    return undefined;
+  }
   return await dispatch(event, ctx, config, logger) ? { handled: true } : undefined;
+}
+
+export function jaimesHandoffReady(config = {}) {
+  const healthPath = stringValue(
+    config.jaimesHealthPath,
+    path.join(process.env.HOME || "/Users/josh2.0", "agent-loops", "state", "jaimes-telegram-health.json"),
+  );
+  try {
+    const health = JSON.parse(fs.readFileSync(healthPath, "utf8"));
+    const checkedAt = Date.parse(health.checkedAt || health.updatedAt || "");
+    const maxAgeMs = Number.isFinite(config.jaimesHealthMaxAgeMs)
+      ? Math.max(1, config.jaimesHealthMaxAgeMs)
+      : DEFAULT_JAIMES_HEALTH_MAX_AGE_MS;
+    const probe = health.probe || {};
+    return health.status === "ok"
+      && Number.isFinite(checkedAt)
+      && Date.now() - checkedAt <= maxAgeMs
+      && probe.gatewayState === "running"
+      && probe.telegramState === "connected"
+      && probe.fastAckState === "running"
+      && probe.telegramSessionPresent === true;
+  } catch {
+    return false;
+  }
+}
+
+function positiveTelegramId(value) {
+  const text = stringValue(value);
+  return /^\d+$/.test(text) && Number(text) > 0 ? text : "";
+}
+
+export function jaimesHandoffArgs(event = {}, ctx = {}, config = {}) {
+  const target = parseTelegramTarget(event, ctx);
+  const messageId = positiveTelegramId(resolveInboundMessageId(event, ctx));
+  if (!/^-?\d+$/.test(target.chatId) || !positiveTelegramId(target.threadId) || !messageId) return [];
+  const waitSeconds = Number.isFinite(config.jaimesHandoffWaitSeconds)
+    ? Math.min(10, Math.max(1, config.jaimesHandoffWaitSeconds))
+    : DEFAULT_HANDOFF_WAIT_SECONDS;
+  return [
+    "-o", "BatchMode=yes",
+    "-o", "ConnectTimeout=3",
+    "-o", "ServerAliveInterval=3",
+    "-o", "ServerAliveCountMax=1",
+    stringValue(config.jaimesSshTarget, DEFAULT_JAIMES_SSH_TARGET),
+    stringValue(config.jaimesPythonPath, DEFAULT_JAIMES_PYTHON),
+    stringValue(config.jaimesHelperPath, DEFAULT_JAIMES_HELPER),
+    "--await-handoff",
+    "--chat-id", target.chatId,
+    "--thread-id", target.threadId,
+    "--message-id", messageId,
+    "--timeout", String(waitSeconds),
+  ];
+}
+
+export function validJaimesHandoffReceipt(stdout, event = {}, ctx = {}, maxAgeMs = 120_000) {
+  try {
+    const receipt = JSON.parse(stdout);
+    const target = parseTelegramTarget(event, ctx);
+    const messageId = positiveTelegramId(resolveInboundMessageId(event, ctx));
+    const acceptedAt = Date.parse(receipt.accepted_at || "");
+    return Boolean(
+      receipt
+      && receipt.ok === true
+      && receipt.status === "accepted"
+      && receipt.agent === "jaimes"
+      && receipt.chat_id === target.chatId
+      && receipt.thread_id === target.threadId
+      && receipt.inbound_message_id === messageId
+      && receipt.reaction_ok === true
+      && positiveTelegramId(receipt.header_message_id)
+      && positiveTelegramId(receipt.live_message_id)
+      && Number.isFinite(acceptedAt)
+      && Math.abs(Date.now() - acceptedAt) <= maxAgeMs,
+    );
+  } catch {
+    return false;
+  }
+}
+
+function handoffClaimDirectory(config = {}) {
+  return stringValue(
+    config.handoffClaimDir,
+    path.join(process.env.HOME || "/Users/josh2.0", ".openclaw", "telegram", "inbox-handoff-claims"),
+  );
+}
+
+function reserveHandoffClaim(event = {}, ctx = {}, config = {}) {
+  const directory = handoffClaimDirectory(config);
+  try {
+    fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  } catch {
+    return { ok: false, existing: false, path: "" };
+  }
+  const key = claimIdentity(event, ctx);
+  const claimPath = path.join(directory, `${key}.json`);
+  const now = Date.now();
+  if (fs.existsSync(claimPath)) {
+    const existing = readClaim(claimPath);
+    const age = now - Date.parse(existing.updatedAt || existing.createdAt || 0);
+    if (!Number.isFinite(age) || age <= CLAIM_STALE_MS) {
+      return { ok: true, existing: true, path: claimPath };
+    }
+    try { fs.unlinkSync(claimPath); } catch { /* another hook may own it */ }
+  }
+  try {
+    const target = parseTelegramTarget(event, ctx);
+    fs.writeFileSync(claimPath, `${JSON.stringify({
+      key,
+      status: "reserved",
+      chatId: target.chatId,
+      threadId: target.threadId,
+      messageId: positiveTelegramId(resolveInboundMessageId(event, ctx)),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })}\n`, { flag: "wx", mode: 0o600 });
+    return { ok: true, existing: false, path: claimPath };
+  } catch (error) {
+    if (error?.code === "EEXIST") return { ok: true, existing: true, path: claimPath };
+    return { ok: false, existing: false, path: claimPath };
+  }
+}
+
+export function dispatchJaimesHandoff(event = {}, ctx = {}, config = {}, logger = console) {
+  const args = jaimesHandoffArgs(event, ctx, config);
+  if (!args.length) {
+    logger.error?.("inbox-coordinator: exact JAIMES message origin unavailable; allowing Josh 2.0 fallback handling");
+    return false;
+  }
+  const reservation = reserveHandoffClaim(event, ctx, config);
+  if (!reservation.ok) return false;
+  const timeoutMs = Number.isFinite(config.jaimesHandoffTimeoutMs)
+    ? Math.max(100, config.jaimesHandoffTimeoutMs)
+    : DEFAULT_HANDOFF_TIMEOUT_MS;
+  if (reservation.existing) {
+    const existing = readClaim(reservation.path);
+    if (existing.status === "accepted") return true;
+    if (existing.status === "failed") return false;
+    return new Promise((resolve) => {
+      const deadline = Date.now() + timeoutMs;
+      const poll = () => {
+        const current = readClaim(reservation.path);
+        if (current.status === "accepted") return resolve(true);
+        if (current.status === "failed" || Date.now() >= deadline) return resolve(false);
+        setTimeout(poll, 20);
+      };
+      poll();
+    });
+  }
+
+  const sshPath = stringValue(config.sshPath, "/usr/bin/ssh");
+  const spawnHelper = config.handoffSpawn || spawn;
+  return new Promise((resolve) => {
+    let child;
+    let settled = false;
+    let stdout = "";
+    const finish = (accepted, error = "") => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      updateClaim(reservation.path, { status: accepted ? "accepted" : "failed", error });
+      resolve(accepted);
+    };
+    const timer = setTimeout(() => {
+      try { child?.kill?.("SIGTERM"); } catch { /* best effort */ }
+      finish(false, "jaimes_handoff_timeout");
+    }, timeoutMs);
+    try {
+      child = spawnHelper(sshPath, args, {
+        detached: false,
+        stdio: ["ignore", "pipe", "ignore"],
+        env: process.env,
+      });
+      child.once?.("spawn", () => updateClaim(reservation.path, { status: "started" }));
+      child.once?.("error", () => finish(false, "jaimes_handoff_spawn_error"));
+      child.stdout?.on("data", (chunk) => {
+        stdout += String(chunk);
+        if (Buffer.byteLength(stdout, "utf8") > MAX_RECEIPT_BYTES) stdout = stdout.slice(-MAX_RECEIPT_BYTES);
+      });
+      child.once?.("close", (code) => {
+        const accepted = code === 0 && validJaimesHandoffReceipt(stdout, event, ctx);
+        finish(accepted, accepted ? "" : `jaimes_handoff_exit_${code ?? "unknown"}`);
+      });
+    } catch {
+      finish(false, "jaimes_handoff_dispatch_error");
+    }
+  });
 }
 
 function validReceipt(stdout) {
@@ -157,6 +356,7 @@ function validReceipt(stdout) {
       receipt
       && receipt.ok === true
       && receipt.status === "queued"
+      && receipt.reaction_ok === true
       && typeof receipt.job_id === "string"
       && receipt.job_id.trim(),
     );
@@ -249,7 +449,24 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
     logger.error?.("inbox-coordinator: could not reserve the Inbox claim; allowing normal OpenCLAW handling");
     return false;
   }
-  if (reservation.existing) return true;
+  if (reservation.existing) {
+    const existing = readClaim(reservation.path);
+    if (existing.status === "queued") return true;
+    if (existing.status === "failed") return false;
+    const timeoutMs = Number.isFinite(config.helperTimeoutMs)
+      ? Math.max(1, config.helperTimeoutMs)
+      : DEFAULT_HELPER_TIMEOUT_MS;
+    return new Promise((resolve) => {
+      const deadline = Date.now() + timeoutMs;
+      const poll = () => {
+        const claim = readClaim(reservation.path);
+        if (claim.status === "queued") return resolve(true);
+        if (claim.status === "failed" || Date.now() >= deadline) return resolve(false);
+        setTimeout(poll, 20);
+      };
+      poll();
+    });
+  }
   const args = helperArgs(event, ctx, config);
   const helper = args[0];
   if (!fs.existsSync(helper)) {
@@ -274,14 +491,14 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
       clearTimeout(timer);
       resolve(ok);
     };
-    const failBeforeSpawn = () => {
-      if (spawned || settled) return;
+    const failDispatch = (reason = "helper_receipt_timeout") => {
+      if (settled) return;
       try { child?.kill?.("SIGTERM"); } catch { /* best-effort cleanup */ }
-      try { fs.unlinkSync(reservation.path); } catch { /* best effort */ }
-      logger.error?.("inbox-coordinator: helper process did not start; allowing normal OpenCLAW handling");
+      updateClaim(reservation.path, { status: "failed", error: reason });
+      logger.error?.("inbox-coordinator: helper did not return a valid queue receipt; allowing normal OpenCLAW handling");
       finish(false);
     };
-    const timer = setTimeout(failBeforeSpawn, timeoutMs);
+    const timer = setTimeout(() => failDispatch("helper_receipt_timeout"), timeoutMs);
     try {
       child = spawnHelper(pythonPath, args, {
         detached: false,
@@ -291,12 +508,9 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
       child.once?.("spawn", () => {
         spawned = true;
         updateClaim(reservation.path, { status: "started" });
-        finish(true);
       });
       child.once?.("error", () => {
-        if (!spawned) return failBeforeSpawn();
-        updateClaim(reservation.path, { status: "failed", error: "helper_process_error" });
-        logger.error?.("inbox-coordinator: claimed helper process failed after start");
+        failDispatch(spawned ? "helper_process_error" : "helper_spawn_error");
       });
       child.stdout?.on("data", (chunk) => {
         stdout += String(chunk);
@@ -305,16 +519,17 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
         }
       });
       child.once?.("close", (code) => {
+        if (settled) return;
         const queued = code === 0 && validReceipt(stdout);
         updateClaim(reservation.path, {
           status: queued ? "queued" : "failed",
           error: queued ? "" : `helper_exit_${code ?? "unknown"}`,
         });
-        if (!spawned && !queued) failBeforeSpawn();
+        if (!queued) logger.error?.("inbox-coordinator: helper exited without a valid queue receipt; allowing normal OpenCLAW handling");
+        finish(queued);
       });
       child.stdin?.once?.("error", () => {
-        if (!spawned) return failBeforeSpawn();
-        updateClaim(reservation.path, { status: "failed", error: "helper_stdin_error" });
+        failDispatch("helper_stdin_error");
       });
       child.stdin?.end(prompt, "utf8");
     } catch {
@@ -331,9 +546,9 @@ export default {
   name: "Inbox Coordinator",
   description: "Owns untagged Josh 2.0 Inbox messages and dispatches one asynchronous worker.",
   register(api) {
-    // Reserve one durable owner before either hook can dispatch. The hook then
-    // returns as soon as the claimed helper process starts; its queued/failure
-    // receipt is recorded asynchronously and never releases a second model.
+    // Reserve one durable owner before either hook can dispatch. The hook is
+    // suppressed only after the helper returns a valid durable queue receipt;
+    // invalid or missing receipts fall back to normal Josh 2.0 handling.
     api.on("message_received", (event, ctx) => {
       const config = api.pluginConfig || {};
       rememberInboundMessage(event, ctx, config);
@@ -341,10 +556,10 @@ export default {
     api.on("inbound_claim", async (event, ctx) => {
       const config = event.context?.pluginConfig || api.pluginConfig || {};
       return handleInboxEvent(event, ctx, config, api.logger);
-    }, { priority: 100, timeoutMs: 5_000 });
+    }, { priority: 100, timeoutMs: 15_000 });
     api.on("before_dispatch", async (event, ctx) => {
       const config = api.pluginConfig || {};
       return handleInboxEvent(event, ctx, config, api.logger);
-    }, { priority: 100, timeoutMs: 5_000 });
+    }, { priority: 100, timeoutMs: 15_000 });
   },
 };

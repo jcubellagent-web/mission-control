@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, ExternalLink, EyeOff, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sun, Timer, UserRoundCheck, WalletCards } from "lucide-react";
-import { loadMissionControl, subscribeMissionControlRealtime } from "./data";
+import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import type { AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem } from "./types";
 import "./styles.css";
@@ -83,7 +83,7 @@ type KioskPulse = {
 };
 
 const CHANGE_CUE_MS = 3200;
-const LIVE_REFRESH_MS = 5_000;
+const LIVE_REFRESH_MS = 10_000;
 const MIN_EXPECTED_OPERATOR_JOBS = 12;
 
 const JOSH_HEADSHOT_URL = new URL("../../assets/josh-headshot.jpg", import.meta.url).href;
@@ -166,6 +166,10 @@ function agentIsReady(status?: AgentStatus) {
   return Boolean(status.active) || ["active", "queued", "ready", "ok", "done", "approved", "stale"].includes(value);
 }
 
+function agentIsReporting(status?: AgentStatus) {
+  return Boolean(status?.updated_at) && freshnessClass(status.updated_at) !== "is-stale";
+}
+
 function freshnessTone(minutes: number) {
   if (!Number.isFinite(minutes) || minutes > 30) return "risk" as const;
   if (minutes > 10) return "watch" as const;
@@ -176,7 +180,9 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
   const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
   const focusCount = missionFocusCount(state);
   const activeAgents = state.statuses.filter((row) => row.active || String(row.status).toLowerCase() === "active").length;
-  const readyAgents = state.statuses.filter((row) => agentIsReady(row)).length;
+  const reportingAgents = new Set(
+    state.statuses.filter((row) => agentIsReporting(row)).map((row) => row.agent_id),
+  ).size;
   const workingJobs = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
   const blockedJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
@@ -208,7 +214,7 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
         : focusCount
           ? "Open the highlighted rail first."
           : "Glance mode is safe: nothing urgent is waiting.",
-    agentLine: `${readyAgents}/${Math.max(HERO_AGENT_ORDER.length, state.statuses.length)} agents reporting`,
+    agentLine: `${reportingAgents}/${Math.max(HERO_AGENT_ORDER.length, state.statuses.length)} agents reporting`,
     jobsLine: nextJob ? `Next: ${compactJobTitle(nextJob)} · ${jobRunCells(nextJob).next}` : `${trackedJobs.length} jobs tracked`,
     finopsLine: `${fmtCurrencyExact(wallet?.summary?.liquidEstimatedUsd)} liquid · wallet ${finopsFresh.label}`,
     freshnessLine: lastUpdate ? `${ageLabel(lastUpdate)} · ${state.source}` : "No live timestamp yet",
@@ -986,6 +992,7 @@ function App() {
     if (showLoading) setLoading(true);
     try {
       await fetch("/actions/agentic-crypto-refresh?mode=lightweight", { method: "POST", cache: "no-store" });
+      invalidateMissionControlSidecars();
     } catch (error) {
       console.warn(error);
     } finally {
@@ -1108,8 +1115,8 @@ function App() {
           </span>
           <span className="source-chip"><ShieldCheck size={15} />{state.source}</span>
           <span className="source-chip">Updated {fmtTime(lastUpdate)}</span>
-          <span className="source-chip live-chip" title="Control Tower polls local sidecars every 5 seconds">
-            {liveMode === "connected" ? "Realtime" : "Live • 5s"}
+          <span className="source-chip live-chip" title="Control Tower polls local live data every 10 seconds">
+            {liveMode === "connected" ? "Realtime" : "Live • 10s"}
           </span>
           <button
             type="button"
@@ -4372,7 +4379,7 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
       <div className="action-jobs-section">
         <header>
           <strong>Action</strong>
-          <span>{actionJobs.length ? `${actionJobs.length} need Josh` : "no approval or repair needed"}</span>
+          <span>{actionJobs.length ? `${actionJobs.length} need attention` : "no system attention needed"}</span>
         </header>
         <div className="operator-queue-list">
           {actionJobs.length ? actionJobs.map((job) => (
@@ -4382,7 +4389,7 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
               <span className="status-dot is-done" aria-hidden="true" />
               <div>
                 <strong>No action needed</strong>
-                <p>Agents are reporting, jobs are scheduled, and no current blocker needs Josh.</p>
+                <p>Agents are reporting, jobs are scheduled, and no current system blocker needs attention.</p>
               </div>
             </article>
           )}

@@ -19,6 +19,7 @@ import re
 import shlex
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import tempfile
@@ -44,6 +45,40 @@ DEFAULT_TIMEOUT_SECONDS = 900
 MAX_RETRIES = 1
 STALE_CARD_SECONDS = 10 * 60
 DEDUPE_WINDOW_SECONDS = 10 * 60
+DELIVERY_RECOVERY_WINDOW_SECONDS = DEDUPE_WINDOW_SECONDS
+DELIVERY_PENDING_RETENTION_SECONDS = 24 * 60 * 60
+DELIVERY_RECOVERY_BACKOFF_SECONDS = 5
+MAX_AUTOMATIC_DELIVERY_RECOVERY_ATTEMPTS = 3
+TERMINAL_JOB_STATUSES = frozenset({"done", "failed", "cancelled"})
+JOB_ARTIFACT_FIELDS = ("promptPath", "resultPath")
+JOB_AUDIT_FIELDS = (
+    "jobId",
+    "createdAt",
+    "updatedAt",
+    "startedAt",
+    "completedAt",
+    "finishedAt",
+    "resultTakenAt",
+    "resultInspectedAt",
+    "status",
+    "attempt",
+    "maxRetries",
+    "timeoutSeconds",
+    "origin",
+    "route",
+    "actual",
+    "latencyMs",
+    "delivered",
+    "lastError",
+    "deliveryRecoveryAttempts",
+    "deliveryRecoveryReferenceAt",
+    "deliveryFailedAt",
+    "deliveryRecoveredAt",
+    "deliveryRecoveryAutomaticAttempts",
+    "deliveryRecoveryLastAttemptAt",
+    "previousStatus",
+    "cancelledAt",
+)
 JAIMES_SSH_HOST = os.environ.get("JOSH_INBOX_JAIMES_SSH_HOST", "jaimes")
 JAIMES_WORKSPACE = "/Users/jc_agent/.openclaw/workspace"
 
@@ -198,6 +233,25 @@ def state_lock():
     finally:
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
+
+
+@contextmanager
+def existing_state_read_lock():
+    """Take a shared lock for dry-run only when the lock already exists."""
+    fd = -1
+    try:
+        fd = os.open(LOCK_PATH, os.O_RDONLY)
+        fcntl.flock(fd, fcntl.LOCK_SH)
+    except OSError:
+        if fd >= 0:
+            os.close(fd)
+        fd = -1
+    try:
+        yield
+    finally:
+        if fd >= 0:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
 
 
 def read_json(path: Path, fallback: Any) -> Any:
@@ -510,8 +564,9 @@ def parse_model_sections(output: str) -> dict[str, Any]:
         if lower.startswith("model:"):
             continue
         if lower.startswith("complete:"):
-            complete = not bool(re.search(r"\b(no|false|incomplete|blocked)\b", lower))
-            complete_declared = True
+            match = re.match(r"^complete:\s*(yes|no)\b", lower)
+            complete = bool(match and match.group(1) == "yes")
+            complete_declared = match is not None
             current = ""
             continue
         matched = False
@@ -779,7 +834,38 @@ def execute_route(prompt: str, route: dict[str, Any], timeout: int) -> dict[str,
 
 def submit_job(args: argparse.Namespace) -> dict[str, Any]:
     prompt = load_prompt(args)
-    route = route_prompt(prompt, args.privacy)
+    route: dict[str, Any] | None = None
+    if getattr(args, "route_plan_json", ""):
+        try:
+            planned = json.loads(args.route_plan_json)
+            route_id = str(planned.get("routeId") or "")
+            cfg = ROUTES[route_id]
+            if route_allowed_for_privacy(route_id, args.privacy):
+                route = {
+                    "ok": True,
+                    "routeId": route_id,
+                    "requestedRouteId": str(planned.get("requestedRouteId") or ""),
+                    "explicitRequest": bool(planned.get("explicitRequest")),
+                    "requestedRouteHealthy": bool(planned.get("requestedRouteHealthy")),
+                    "policyAllowed": True,
+                    "provider": cfg["provider"],
+                    "model": cfg["model"],
+                    "tier": cfg["tier"],
+                    "worker": cfg["worker"],
+                    "host": cfg["host"],
+                    "role": cfg["role"],
+                    "executor": cfg["executor"],
+                    "routingReason": clean_final_item(str(planned.get("routingReason") or "verified Inbox routing"), limit=160),
+                    "fallback": clean_final_item(str(planned.get("fallback") or ""), limit=160),
+                    "privacy": args.privacy,
+                    "latencyMs": planned.get("latencyMs"),
+                    "executionVerified": False,
+                    "outcome": "planned",
+                }
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+            route = None
+    if route is None:
+        route = route_prompt(prompt, args.privacy)
     origin = {
         "runId": args.origin_run_id or "",
         "messageId": args.message_id or "",
@@ -952,6 +1038,8 @@ def run_worker(job_id: str) -> dict[str, Any]:
             raise RuntimeError("delivery failed")
         task_complete = bool(execution.get("executionVerified") and parse_model_sections(output).get("complete"))
         outcome = "done" if task_complete else "failed"
+        if not task_complete:
+            error_code = "model_reported_incomplete"
     except Exception as exc:  # noqa: BLE001
         error_code = type(exc).__name__
         can_retry = (
@@ -964,7 +1052,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
         if execution.get("executionVerified") and output:
             delivered = deliver_result(job_id, snapshot, route, execution, output)
             if delivered:
-                outcome = "done"
+                outcome = "done" if parse_model_sections(output).get("complete") else "failed"
         else:
             failure_execution = {
                 "actualHost": route.get("host") or "unverified",
@@ -974,13 +1062,15 @@ def run_worker(job_id: str) -> dict[str, Any]:
                 "modelVerified": False,
                 "executionVerified": False,
             }
-            deliver_result(
+            delivered = deliver_result(
                 job_id,
                 snapshot,
                 route,
                 failure_execution,
                 "I couldn't complete that request because the selected worker stopped before producing a verified result. Please retry once that route is healthy; no successful model execution was claimed.",
             )
+            if not delivered:
+                error_code = "failure_final_delivery_failed"
 
     latency_ms = max(0, round((time.perf_counter() - started) * 1000))
     with state_lock():
@@ -992,6 +1082,13 @@ def run_worker(job_id: str) -> dict[str, Any]:
         job["updatedAt"] = utc_now()
         job["latencyMs"] = latency_ms
         job["delivered"] = delivered
+        if execution.get("executionVerified") and result_path.exists() and not delivered:
+            # Freeze the first delivery-failure timestamp. Automatic recovery is
+            # bounded from this point and retries never refresh the window.
+            job["deliveryFailedAt"] = job.get("deliveryFailedAt") or utc_now()
+            job["deliveryRecoveryReferenceAt"] = job.get("deliveryRecoveryReferenceAt") or job["deliveryFailedAt"]
+        elif delivered:
+            job.pop("deliveryFailedAt", None)
         job.pop("workerPid", None)
         job.pop("leaseToken", None)
         if execution:
@@ -1025,33 +1122,518 @@ def run_worker(job_id: str) -> dict[str, Any]:
     return {"ok": outcome in {"done", "retry"}, "jobId": job_id, "outcome": outcome, "latencyMs": latency_ms}
 
 
-def cleanup(max_age_seconds: int, include_queued: bool = False) -> dict[str, Any]:
-    with state_lock():
-        state = read_json(STATE_PATH, {"jobs": {}})
-        jobs = state.get("jobs") if isinstance(state, dict) else {}
-        if not isinstance(jobs, dict):
-            return {"ok": True, "removed": 0}
+def _job_artifact_paths(job_id: str, job: dict[str, Any]) -> tuple[list[Path], int]:
+    """Return only job-owned files directly inside the coordinator private dir."""
+    safe_job_id = str(job_id or "")
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", safe_job_id):
+        return [], sum(bool(job.get(field)) for field in JOB_ARTIFACT_FIELDS)
+
+    expected_names = {
+        f"{safe_job_id}.prompt",
+        f"{safe_job_id}.result",
+        f"{safe_job_id}.final.html",
+    }
+    raw_paths = [str(job.get(field) or "").strip() for field in JOB_ARTIFACT_FIELDS]
+    raw_paths.extend(str(PRIVATE_DIR / name) for name in sorted(expected_names))
+    private_root = PRIVATE_DIR.resolve()
+    paths: list[Path] = []
+    seen: set[str] = set()
+    unsafe = 0
+    for raw in raw_paths:
+        if not raw:
+            continue
+        candidate = Path(raw).expanduser()
+        if not candidate.is_absolute():
+            candidate = PRIVATE_DIR / candidate
+        try:
+            parent = candidate.parent.resolve()
+        except OSError:
+            unsafe += 1
+            continue
+        if parent != private_root or candidate.name not in expected_names:
+            unsafe += 1
+            continue
+        key = str(candidate.absolute())
+        if key not in seen:
+            paths.append(candidate)
+            seen.add(key)
+    return paths, unsafe
+
+
+def _audit_tombstone(job_id: str, job: dict[str, Any], scrubbed_at: str) -> dict[str, Any]:
+    tombstone = {key: job[key] for key in JOB_AUDIT_FIELDS if key in job}
+    tombstone["jobId"] = str(job.get("jobId") or job_id)
+    if str(job.get("status") or "") == "queued":
+        # The legacy explicit include-queued override is a cancellation, not a
+        # queued tombstone that recovery could accidentally try to execute.
+        tombstone["previousStatus"] = "queued"
+        tombstone["status"] = "cancelled"
+        tombstone["cancelledAt"] = str(job.get("cancelledAt") or scrubbed_at)
+        tombstone["lastError"] = "stale queued job cancelled by explicit cleanup"
+    tombstone["auditTombstone"] = True
+    tombstone["artifactsScrubbedAt"] = str(job.get("artifactsScrubbedAt") or scrubbed_at)
+    return tombstone
+
+
+def _has_recoverable_delivery_result(job_id: str, job: dict[str, Any], now: dt.datetime) -> bool:
+    """Keep a verified, undelivered result for a finite explicit-retry grace."""
+    if job.get("delivered") is True:
+        return False
+    actual = job.get("actual") or {}
+    origin = job.get("origin") or {}
+    if not isinstance(actual, dict) or not actual.get("executionVerified"):
+        return False
+    if not isinstance(origin, dict) or not str(origin.get("cardKey") or ""):
+        return False
+    reference = (
+        parse_utc(job.get("deliveryRecoveryReferenceAt"))
+        or parse_utc(job.get("deliveryFailedAt"))
+        or parse_utc(job.get("finishedAt"))
+        or parse_utc(job.get("updatedAt"))
+        or parse_utc(job.get("createdAt"))
+    )
+    if reference is None:
+        return False
+    age_seconds = (now - reference).total_seconds()
+    if not (-60 <= age_seconds <= DELIVERY_PENDING_RETENTION_SECONDS):
+        return False
+    safe_job_id = str(job_id or "")
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", safe_job_id):
+        return False
+    configured = str(job.get("resultPath") or "").strip()
+    if not configured:
+        return False
+    candidate = Path(configured).expanduser()
+    if not candidate.is_absolute():
+        candidate = PRIVATE_DIR / candidate
+    try:
+        if candidate.parent.resolve() != PRIVATE_DIR.resolve():
+            return False
+        if candidate.name != f"{safe_job_id}.result" or candidate.is_symlink():
+            return False
+        return candidate.is_file() and candidate.stat().st_size > 0
+    except OSError:
+        return False
+
+
+def _private_file_mode_changes(*, apply: bool) -> tuple[int, int, int]:
+    """Return files needing hardening, verified changes, and failures."""
+    needed = 0
+    changed = 0
+    failures = 0
+    try:
+        children = list(PRIVATE_DIR.iterdir())
+    except OSError:
+        return 0, 0, 0
+    for path in children:
+        try:
+            if path.is_symlink() or not path.is_file():
+                continue
+            if stat.S_IMODE(path.stat().st_mode) == 0o600:
+                continue
+            needed += 1
+            if apply:
+                path.chmod(0o600)
+                if stat.S_IMODE(path.stat().st_mode) == 0o600:
+                    changed += 1
+                else:
+                    failures += 1
+        except OSError:
+            if apply:
+                failures += 1
+    return needed, changed, failures
+
+
+def _read_cleanup_state() -> tuple[dict[str, Any] | None, str]:
+    """Read retention state without converting corruption into an empty queue."""
+    try:
+        raw = STATE_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {"jobs": {}}, ""
+    except OSError:
+        return None, "state-unreadable"
+    try:
+        state = json.loads(raw)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None, "state-invalid-json"
+    if not isinstance(state, dict) or not isinstance(state.get("jobs"), dict):
+        return None, "state-invalid-jobs"
+    if any(not isinstance(job, dict) for job in state["jobs"].values()):
+        return None, "state-invalid-job"
+    if any(not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", str(job_id)) for job_id in state["jobs"]):
+        return None, "state-invalid-job-id"
+    return state, ""
+
+
+def _private_dir_mode_changes(*, apply: bool) -> tuple[int, int, int]:
+    """Return whether the private directory needs/is hardened to mode 0700."""
+    try:
+        current = stat.S_IMODE(PRIVATE_DIR.stat().st_mode)
+    except FileNotFoundError:
+        return 0, 0, 0
+    except OSError:
+        return 0, 0, 1 if apply else 0
+    if current == 0o700:
+        return 0, 0, 0
+    if not apply:
+        return 1, 0, 0
+    try:
+        PRIVATE_DIR.chmod(0o700)
+        if stat.S_IMODE(PRIVATE_DIR.stat().st_mode) == 0o700:
+            return 1, 1, 0
+    except OSError:
+        pass
+    return 1, 0, 1
+
+
+def _aged_orphan_artifacts(
+    jobs: dict[str, Any],
+    now: dt.datetime,
+    max_age_seconds: int,
+) -> tuple[list[Path], int, int]:
+    """Find old job-shaped files that are not owned by any persisted row."""
+    expected_names = {
+        name
+        for job_id in jobs
+        for name in (
+            f"{job_id}.prompt",
+            f"{job_id}.result",
+            f"{job_id}.final.html",
+        )
+    }
+    artifact_name = re.compile(r"^[A-Za-z0-9_-]{1,128}\.(?:prompt|result|final\.html)$")
+    try:
+        children = list(PRIVATE_DIR.iterdir())
+    except FileNotFoundError:
+        return [], 0, 0
+    except OSError:
+        return [], 0, 1
+    orphans: list[Path] = []
+    unsafe = 0
+    inspection_failures = 0
+    for path in children:
+        if path.name in expected_names or not artifact_name.fullmatch(path.name):
+            continue
+        try:
+            metadata = path.lstat()
+        except OSError:
+            inspection_failures += 1
+            continue
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.geteuid():
+            unsafe += 1
+            continue
+        modified = dt.datetime.fromtimestamp(metadata.st_mtime, tz=dt.timezone.utc)
+        if (now - modified).total_seconds() > max_age_seconds:
+            orphans.append(path)
+    return orphans, unsafe, inspection_failures
+
+
+def cleanup(max_age_seconds: int, include_queued: bool = False, dry_run: bool = False) -> dict[str, Any]:
+    """Scrub aged payload files while retaining privacy-safe audit tombstones.
+
+    Queued work is cancelled and scrubbed only under the legacy explicit
+    ``include_queued`` override; running work is never eligible. The
+    scheduled/default path is intentionally terminal-only.
+    """
+    result = {
+        "ok": True,
+        "dryRun": bool(dry_run),
+        "scannedJobs": 0,
+        "eligibleJobs": 0,
+        "scrubbedJobs": 0,
+        "wouldScrubJobs": 0,
+        "removedArtifacts": 0,
+        "wouldRemoveArtifacts": 0,
+        "hardenedFiles": 0,
+        "wouldHardenFiles": 0,
+        "hardenedDirectories": 0,
+        "wouldHardenDirectories": 0,
+        "unsafeArtifactPaths": 0,
+        "retainedTombstones": 0,
+        "preservedActiveJobs": 0,
+        "preservedDeliveryPendingJobs": 0,
+        "cancelledQueuedJobs": 0,
+        "artifactInspectionFailures": 0,
+        "artifactRemovalFailures": 0,
+        "invalidTimestampJobs": 0,
+        "unsafeOrphanArtifacts": 0,
+        "removedOrphanArtifacts": 0,
+        "wouldRemoveOrphanArtifacts": 0,
+        "permissionFailures": 0,
+        "stateWriteFailures": 0,
+        "errors": [],
+    }
+    try:
+        max_age_seconds = int(max_age_seconds)
+    except (TypeError, ValueError):
+        result["ok"] = False
+        result["errors"].append("invalid-max-age")
+        return result
+    if max_age_seconds < 0:
+        result["ok"] = False
+        result["errors"].append("negative-max-age")
+        return result
+
+    lock_context = existing_state_read_lock() if dry_run else state_lock()
+    with lock_context:
+        state, state_error = _read_cleanup_state()
+        if state is None:
+            result["ok"] = False
+            result["errors"].append(state_error or "state-invalid")
+            needed, _changed, _failures = _private_file_mode_changes(apply=False)
+            result["wouldHardenFiles"] = needed
+            dir_needed, _dir_changed, _dir_failures = _private_dir_mode_changes(apply=False)
+            result["wouldHardenDirectories"] = dir_needed
+            if not dry_run:
+                _needed, changed, failures = _private_file_mode_changes(apply=True)
+                _dir_needed, dir_changed, dir_failures = _private_dir_mode_changes(apply=True)
+                result["hardenedFiles"] = changed
+                result["hardenedDirectories"] = dir_changed
+                result["permissionFailures"] = failures + dir_failures
+                if failures or dir_failures:
+                    result["errors"].append("permission-hardening-failed")
+            return result
+        jobs = state["jobs"]
         now = dt.datetime.now(dt.timezone.utc)
-        removed = 0
+        scrubbed_at = utc_now()
+        eligible_statuses = set(TERMINAL_JOB_STATUSES)
+        if include_queued:
+            eligible_statuses.add("queued")
         for job_id, job in list(jobs.items()):
-            updated_dt = parse_utc((job or {}).get("updatedAt")) or now
+            if not isinstance(job, dict):
+                continue
+            result["scannedJobs"] += 1
+            updated_dt = (
+                parse_utc(job.get("updatedAt"))
+                or parse_utc(job.get("completedAt"))
+                or parse_utc(job.get("createdAt"))
+            )
+            if updated_dt is None:
+                result["invalidTimestampJobs"] += 1
+                if "invalid-job-timestamp" not in result["errors"]:
+                    result["errors"].append("invalid-job-timestamp")
+                continue
             stale = (now - updated_dt).total_seconds() > max_age_seconds
-            removable_statuses = {"done", "failed", "queued"} if include_queued else {"done", "failed"}
-            if stale and str((job or {}).get("status") or "") in removable_statuses:
-                for field in ("promptPath", "resultPath"):
-                    try:
-                        Path(str(job.get(field) or "")).unlink(missing_ok=True)
-                    except Exception:
-                        pass
-                jobs.pop(job_id, None)
-                removed += 1
-        save_json(STATE_PATH, state)
-    return {"ok": True, "removed": removed}
+            if not stale or str(job.get("status") or "") not in eligible_statuses:
+                continue
+
+            if _has_recoverable_delivery_result(str(job_id), job, now):
+                # A completed model result awaiting the existing-card edit is
+                # still live work, even when its worker status is terminal.
+                result["preservedDeliveryPendingJobs"] += 1
+                continue
+
+            delivery_claim_started = parse_utc(job.get("deliveryRecoveryStartedAt"))
+            delivery_claim_age = (
+                (now - delivery_claim_started).total_seconds()
+                if delivery_claim_started is not None
+                else None
+            )
+            if (
+                job.get("deliveryRecoveryToken")
+                and delivery_claim_age is not None
+                and -5 <= delivery_claim_age <= DELIVERY_RECOVERY_WINDOW_SECONDS
+            ):
+                # Delivery recovery performs the Telegram edit outside the
+                # state lock. Keep its verified result and claim intact until
+                # the bounded claim window closes.
+                result["preservedActiveJobs"] += 1
+                continue
+
+            result["eligibleJobs"] += 1
+            artifact_paths, unsafe = _job_artifact_paths(str(job_id), job)
+            result["unsafeArtifactPaths"] += unsafe
+            if unsafe:
+                if "unsafe-artifact-path" not in result["errors"]:
+                    result["errors"].append("unsafe-artifact-path")
+                continue
+            existing_artifacts = []
+            inspection_failures = 0
+            for path in artifact_paths:
+                try:
+                    if path.exists() or path.is_symlink():
+                        existing_artifacts.append(path)
+                except OSError:
+                    inspection_failures += 1
+            result["artifactInspectionFailures"] += inspection_failures
+            if inspection_failures:
+                if "artifact-inspection-failed" not in result["errors"]:
+                    result["errors"].append("artifact-inspection-failed")
+                continue
+            tombstone = _audit_tombstone(str(job_id), job, scrubbed_at)
+            needs_scrub = tombstone != job or bool(existing_artifacts)
+            if not needs_scrub:
+                result["retainedTombstones"] += 1
+                continue
+            result["wouldScrubJobs"] += 1
+            result["wouldRemoveArtifacts"] += len(existing_artifacts)
+            if dry_run:
+                continue
+            removed = 0
+            removal_failures = 0
+            for path in existing_artifacts:
+                try:
+                    path.unlink(missing_ok=True)
+                    removed += 1
+                except OSError:
+                    removal_failures += 1
+            result["removedArtifacts"] += removed
+            result["artifactRemovalFailures"] += removal_failures
+            if removal_failures:
+                if "artifact-removal-failed" not in result["errors"]:
+                    result["errors"].append("artifact-removal-failed")
+                # Keep the complete row so cleanup can retry the remaining
+                # owned artifact instead of claiming a fully scrubbed record.
+                continue
+            jobs[job_id] = tombstone
+            result["scrubbedJobs"] += 1
+            if tombstone.get("previousStatus") == "queued":
+                result["cancelledQueuedJobs"] += 1
+            result["retainedTombstones"] += 1
+
+        orphan_artifacts, unsafe_orphans, orphan_inspection_failures = _aged_orphan_artifacts(
+            jobs,
+            now,
+            max_age_seconds,
+        )
+        result["unsafeOrphanArtifacts"] = unsafe_orphans
+        result["artifactInspectionFailures"] += orphan_inspection_failures
+        result["wouldRemoveOrphanArtifacts"] = len(orphan_artifacts)
+        result["wouldRemoveArtifacts"] += len(orphan_artifacts)
+        if unsafe_orphans and "unsafe-orphan-artifact" not in result["errors"]:
+            result["errors"].append("unsafe-orphan-artifact")
+        if orphan_inspection_failures and "artifact-inspection-failed" not in result["errors"]:
+            result["errors"].append("artifact-inspection-failed")
+        if not dry_run:
+            for path in orphan_artifacts:
+                try:
+                    path.unlink(missing_ok=True)
+                    result["removedArtifacts"] += 1
+                    result["removedOrphanArtifacts"] += 1
+                except OSError:
+                    result["artifactRemovalFailures"] += 1
+            if result["artifactRemovalFailures"] and "artifact-removal-failed" not in result["errors"]:
+                result["errors"].append("artifact-removal-failed")
+
+        needed, _changed, _failures = _private_file_mode_changes(apply=False)
+        result["wouldHardenFiles"] = needed
+        dir_needed, _dir_changed, _dir_failures = _private_dir_mode_changes(apply=False)
+        result["wouldHardenDirectories"] = dir_needed
+        if not dry_run:
+            try:
+                save_json(STATE_PATH, state)
+            except Exception:
+                result["stateWriteFailures"] += 1
+                if "state-write-failed" not in result["errors"]:
+                    result["errors"].append("state-write-failed")
+            _needed, changed, failures = _private_file_mode_changes(apply=True)
+            _dir_needed, dir_changed, dir_failures = _private_dir_mode_changes(apply=True)
+            result["hardenedFiles"] = changed
+            result["hardenedDirectories"] = dir_changed
+            result["permissionFailures"] = failures + dir_failures
+            if (failures or dir_failures) and "permission-hardening-failed" not in result["errors"]:
+                result["errors"].append("permission-hardening-failed")
+    result["ok"] = not result["errors"]
+    return result
 
 
-def recover() -> dict[str, Any]:
+def expected_result_path(job_id: str, job: dict[str, Any]) -> Path | None:
+    """Return only the coordinator-owned result path for this job.
+
+    State is private, but recovery still must not turn a corrupted state row into
+    an arbitrary local-file read.  New and legacy coordinator jobs both use this
+    exact filename in ``PRIVATE_DIR``.
+    """
+    configured = str(job.get("resultPath") or "")
+    if not configured:
+        return None
+    expected = PRIVATE_DIR / f"{job_id}.result"
+    configured_absolute = Path(os.path.abspath(os.path.normpath(configured)))
+    expected_absolute = Path(os.path.abspath(os.path.normpath(str(expected))))
+    if configured_absolute != expected_absolute:
+        return None
+    return expected_absolute
+
+
+def verified_saved_result(job_id: str, job: dict[str, Any]) -> tuple[str | None, str]:
+    """Read a saved result only when execution and path ownership are verified."""
+    actual = job.get("actual") or {}
+    if not isinstance(actual, dict) or not actual.get("executionVerified"):
+        return None, "execution-unverified"
+    result_path = expected_result_path(job_id, job)
+    if result_path is None:
+        return None, "result-path-invalid"
+    fd = -1
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(result_path, flags)
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.geteuid():
+            return None, "result-file-unsafe"
+        with os.fdopen(fd, "r", encoding="utf-8") as handle:
+            fd = -1
+            output = handle.read()
+    except Exception:
+        return None, "result-file-unavailable"
+    finally:
+        if fd >= 0:
+            os.close(fd)
+    if not output.strip():
+        return None, "result-file-empty"
+    return output, ""
+
+
+def delivery_recovery_reference(job: dict[str, Any]) -> dt.datetime | None:
+    """Return the immutable timestamp that bounds automatic redelivery."""
+    return (
+        parse_utc(job.get("deliveryRecoveryReferenceAt"))
+        or parse_utc(job.get("deliveryFailedAt"))
+        or parse_utc(job.get("finishedAt"))
+        or parse_utc(job.get("updatedAt"))
+        or parse_utc(job.get("createdAt"))
+    )
+
+
+def delivery_recovery_is_fresh(job: dict[str, Any], now: dt.datetime) -> bool:
+    reference = delivery_recovery_reference(job)
+    if reference is None:
+        return False
+    age_seconds = (now - reference).total_seconds()
+    # A small negative age tolerates host clock skew without allowing an
+    # unbounded future timestamp to keep automatic recovery eligible forever.
+    return -60 <= age_seconds <= DELIVERY_RECOVERY_WINDOW_SECONDS
+
+
+def process_is_alive(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def recover(job_id: str = "") -> dict[str, Any]:
+    """Recover interrupted workers and retry delivery of verified saved results.
+
+    Delivery recovery is intentionally separate from worker recovery.  Once a
+    verified result exists, this function claims only a delivery attempt and
+    calls ``deliver_result`` with the original card key; it never queues a model
+    worker for that job.  The claim prevents concurrent recovery processes from
+    posting the same final result twice.
+    """
     to_spawn: list[str] = []
+    delivery_claims: list[tuple[str, str, dict[str, Any], str]] = []
     left_running = 0
+    delivery_in_progress = 0
+    delivery_not_recoverable = 0
+    now = dt.datetime.now(dt.timezone.utc)
+    requested_job_id = str(job_id or "").strip()
+    delivery_deferred_historical = 0
+    delivery_deferred_backoff = 0
+    delivery_attempts_exhausted = 0
+    requested_job_found = False
     with state_lock():
         state = read_json(STATE_PATH, {"jobs": {}})
         jobs = state.get("jobs") if isinstance(state, dict) else {}
@@ -1059,41 +1641,182 @@ def recover() -> dict[str, Any]:
             for job_id, job in jobs.items():
                 if not isinstance(job, dict):
                     continue
+                if requested_job_id and job_id != requested_job_id:
+                    continue
+                if requested_job_id:
+                    requested_job_found = True
                 status = job.get("status")
+                saved_output, _saved_error = verified_saved_result(job_id, job)
+                delivery_pending = bool(saved_output and not job.get("delivered"))
+                if delivery_pending and not job.get("deliveryRecoveryReferenceAt"):
+                    # Freeze the pre-recovery state timestamp before any status
+                    # normalization below can update ``updatedAt``. This keeps
+                    # historical rows historical on every future scan.
+                    reference = delivery_recovery_reference(job)
+                    if reference is not None:
+                        job["deliveryRecoveryReferenceAt"] = reference.isoformat().replace("+00:00", "Z")
+                automatic_delivery_allowed = delivery_recovery_is_fresh(job, now)
                 if status == "running":
                     pid = int(job.get("workerPid") or 0)
-                    alive = False
-                    if pid > 0:
-                        try:
-                            os.kill(pid, 0)
-                            alive = True
-                        except OSError:
-                            alive = False
-                    if alive:
+                    if process_is_alive(pid):
                         left_running += 1
                         continue
-                    if int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
+                    # A dead worker with a verified result needs delivery only.
+                    # Never send it back through the model worker queue.
+                    if delivery_pending:
+                        job["status"] = "failed"
+                        job["updatedAt"] = utc_now()
+                        job["lastError"] = "worker stopped after saving a verified result"
+                        job.pop("workerPid", None)
+                        job.pop("leaseToken", None)
+                    elif int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
                         job["status"] = "failed"
                         job["updatedAt"] = utc_now()
                         job["lastError"] = "dead worker exhausted its retry budget"
                         job.pop("workerPid", None)
                         job.pop("leaseToken", None)
-                        continue
-                    job["status"] = "queued"
-                    job.pop("workerPid", None)
-                    job.pop("leaseToken", None)
+                    else:
+                        job["status"] = "queued"
+                        job.pop("workerPid", None)
+                        job.pop("leaseToken", None)
                 if job.get("status") == "queued":
-                    if int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
+                    # The prior worker may have saved output immediately before
+                    # dying.  Deliver that output rather than re-running it.
+                    if delivery_pending:
+                        job["status"] = "failed"
+                        job["updatedAt"] = utc_now()
+                        job["lastError"] = "verified result awaiting delivery recovery"
+                    elif int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
                         job["status"] = "failed"
                         job["updatedAt"] = utc_now()
                         job["lastError"] = "queued recovery exhausted its retry budget"
+                    else:
+                        job["updatedAt"] = utc_now()
+                        to_spawn.append(job_id)
+
+                if job.get("status") != "failed" or job.get("delivered"):
+                    continue
+                saved_output, _saved_error = verified_saved_result(job_id, job)
+                if not saved_output:
+                    continue
+                origin = job.get("origin") or {}
+                if not isinstance(origin, dict) or not str(origin.get("cardKey") or ""):
+                    # Delivery recovery may update only the existing live card.
+                    # A missing key is never replaced with a new Telegram send.
+                    delivery_not_recoverable += 1
+                    continue
+
+                claim_token = str(job.get("deliveryRecoveryToken") or "")
+                claim_pid = int(job.get("deliveryRecoveryPid") or 0)
+                claim_started = parse_utc(job.get("deliveryRecoveryStartedAt"))
+                claim_fresh = bool(
+                    claim_started
+                    and (now - claim_started).total_seconds() <= 2 * 60
+                )
+                if claim_token and claim_fresh and process_is_alive(claim_pid):
+                    delivery_in_progress += 1
+                    continue
+                job.pop("deliveryRecoveryToken", None)
+                job.pop("deliveryRecoveryPid", None)
+                job.pop("deliveryRecoveryStartedAt", None)
+
+                if not requested_job_id:
+                    if not automatic_delivery_allowed:
+                        # Old terminal rows remain auditable but inert. An
+                        # operator must select the exact job id to retry their
+                        # Telegram delivery; a routine scan never resurrects it.
+                        delivery_deferred_historical += 1
                         continue
-                    job["updatedAt"] = utc_now()
-                    to_spawn.append(job_id)
+                    automatic_attempts = int(job.get("deliveryRecoveryAutomaticAttempts") or 0)
+                    if automatic_attempts >= MAX_AUTOMATIC_DELIVERY_RECOVERY_ATTEMPTS:
+                        delivery_attempts_exhausted += 1
+                        continue
+                    last_attempt = parse_utc(job.get("deliveryRecoveryLastAttemptAt"))
+                    if last_attempt is not None and (now - last_attempt).total_seconds() < DELIVERY_RECOVERY_BACKOFF_SECONDS:
+                        delivery_deferred_backoff += 1
+                        continue
+
+                claim_token = uuid.uuid4().hex
+                attempt_started = utc_now()
+                job["deliveryRecoveryToken"] = claim_token
+                job["deliveryRecoveryPid"] = os.getpid()
+                job["deliveryRecoveryStartedAt"] = attempt_started
+                job["deliveryRecoveryLastAttemptAt"] = attempt_started
+                job["deliveryRecoveryAttempts"] = int(job.get("deliveryRecoveryAttempts") or 0) + 1
+                if not requested_job_id:
+                    job["deliveryRecoveryAutomaticAttempts"] = int(job.get("deliveryRecoveryAutomaticAttempts") or 0) + 1
+                job["updatedAt"] = attempt_started
+                delivery_claims.append((job_id, claim_token, dict(job), saved_output))
             save_json(STATE_PATH, state)
+
     for job_id in to_spawn:
         spawn_worker(job_id)
-    return {"ok": True, "recovered": len(to_spawn), "leftRunning": left_running}
+
+    delivery_recovered = 0
+    delivery_retry_failed = 0
+    for job_id, claim_token, snapshot, output in delivery_claims:
+        route = snapshot.get("route") or {}
+        execution = snapshot.get("actual") or {}
+        delivered = False
+        try:
+            delivered = deliver_result(job_id, snapshot, route, execution, output)
+        except Exception:
+            delivered = False
+        complete = bool(parse_model_sections(output).get("complete"))
+        with state_lock():
+            state = read_json(STATE_PATH, {"jobs": {}})
+            job = (state.get("jobs") or {}).get(job_id)
+            if not isinstance(job, dict) or job.get("deliveryRecoveryToken") != claim_token:
+                delivery_retry_failed += 1
+                continue
+            job.pop("deliveryRecoveryToken", None)
+            job.pop("deliveryRecoveryPid", None)
+            job.pop("deliveryRecoveryStartedAt", None)
+            job["updatedAt"] = utc_now()
+            if delivered:
+                job["delivered"] = True
+                job["deliveryRecoveredAt"] = utc_now()
+                job["status"] = "done" if complete else "failed"
+                if complete:
+                    job.pop("lastError", None)
+                else:
+                    job["lastError"] = "model_reported_incomplete"
+                delivery_recovered += 1
+            else:
+                job["status"] = "failed"
+                job["delivered"] = False
+                job["lastError"] = "delivery_recovery_failed"
+                delivery_retry_failed += 1
+            save_json(STATE_PATH, state)
+        append_telemetry({
+            **route,
+            **execution,
+            "jobId": job_id,
+            "attempt": snapshot.get("attempt"),
+            "telemetryStage": "delivery-recovery",
+            "executionVerified": True,
+            "outcome": "delivered" if delivered else "delivery-failed",
+        })
+        publish_control_tower(
+            "Josh 2.0 Inbox result delivery recovered" if delivered else "Josh 2.0 Inbox result delivery retry failed",
+            "done" if delivered else "error",
+            f"{route.get('worker')} reused the verified saved result and existing Inbox card",
+        )
+
+    return {
+        "ok": delivery_retry_failed == 0,
+        "recovered": len(to_spawn),
+        "leftRunning": left_running,
+        "deliveryRecovered": delivery_recovered,
+        "deliveryRetryFailed": delivery_retry_failed,
+        "deliveryInProgress": delivery_in_progress,
+        "deliveryNotRecoverable": delivery_not_recoverable,
+        "deliveryDeferredHistorical": delivery_deferred_historical,
+        "deliveryDeferredBackoff": delivery_deferred_backoff,
+        "deliveryAttemptsExhausted": delivery_attempts_exhausted,
+        "requestedJobId": requested_job_id,
+        "requestedJobFound": requested_job_found if requested_job_id else None,
+    }
 
 
 def public_job(job: dict[str, Any]) -> dict[str, Any]:
@@ -1102,7 +1825,8 @@ def public_job(job: dict[str, Any]) -> dict[str, Any]:
         for key, value in job.items()
         if key not in {
             "promptPath", "resultPath", "promptSignature", "dedupeKey",
-            "lastError", "leaseToken", "workerPid",
+            "lastError", "leaseToken", "workerPid", "deliveryRecoveryToken",
+            "deliveryRecoveryPid",
         }
     }
 
@@ -1113,7 +1837,12 @@ def job_status(job_id: str) -> dict[str, Any]:
         job = (state.get("jobs") or {}).get(job_id)
         if not isinstance(job, dict):
             return {"ok": False, "error": "unknown job"}
-        return {"ok": True, "job": public_job(job), "resultReady": Path(str(job.get("resultPath") or "")).exists()}
+        result_path = str(job.get("resultPath") or "").strip()
+        return {
+            "ok": True,
+            "job": public_job(job),
+            "resultReady": bool(result_path and Path(result_path).is_file()),
+        }
 
 
 def take_result(job_id: str) -> dict[str, Any]:
@@ -1122,18 +1851,42 @@ def take_result(job_id: str) -> dict[str, Any]:
         job = (state.get("jobs") or {}).get(job_id)
         if not isinstance(job, dict):
             return {"ok": False, "error": "unknown job"}
-        if job.get("status") != "done":
+        if job.get("status") not in {"done", "failed"}:
             return {"ok": False, "error": "result not ready", "status": job.get("status")}
-        result_path = Path(str(job.get("resultPath") or ""))
-        try:
-            output = result_path.read_text(encoding="utf-8")
-        except Exception:
-            return {"ok": False, "error": "result file unavailable"}
-        result_path.unlink(missing_ok=True)
-        job["resultTakenAt"] = utc_now()
+        output, saved_error = verified_saved_result(job_id, job)
+        if output is None:
+            return {"ok": False, "error": saved_error or "result file unavailable"}
+        delivery_pending = not bool(job.get("delivered"))
+        origin = job.get("origin") or {}
+        recovery_eligible = bool(
+            delivery_pending
+            and isinstance(origin, dict)
+            and str(origin.get("cardKey") or "")
+        )
+        result_path = expected_result_path(job_id, job)
+        if delivery_pending:
+            # Inspection must not consume the only artifact a safe delivery
+            # retry can use. Repeated take-result calls therefore return the
+            # same verified output while delivery remains pending.
+            if not job.get("deliveryRecoveryReferenceAt"):
+                reference = delivery_recovery_reference(job)
+                if reference is not None:
+                    job["deliveryRecoveryReferenceAt"] = reference.isoformat().replace("+00:00", "Z")
+            job["resultInspectedAt"] = job.get("resultInspectedAt") or utc_now()
+        else:
+            if result_path is not None:
+                result_path.unlink(missing_ok=True)
+            job["resultTakenAt"] = job.get("resultTakenAt") or utc_now()
         job["updatedAt"] = utc_now()
         save_json(STATE_PATH, state)
-        return {"ok": True, "job": public_job(job), "output": output}
+        return {
+            "ok": True,
+            "job": public_job(job),
+            "output": output,
+            "deliveryPending": delivery_pending,
+            "deliveryRecoveryEligible": recovery_eligible,
+            "resultRetained": delivery_pending,
+        }
 
 
 def display_width(value: str) -> int:
@@ -1231,6 +1984,7 @@ def main() -> int:
     submit_p.add_argument("--card-key", default="")
     submit_p.add_argument("--chat-id", default="")
     submit_p.add_argument("--thread-id", default="")
+    submit_p.add_argument("--route-plan-json", default="")
     submit_p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     submit_p.add_argument("--dry-run", action="store_true")
 
@@ -1245,9 +1999,15 @@ def main() -> int:
 
     cleanup_p = sub.add_parser("cleanup")
     cleanup_p.add_argument("--max-age-seconds", type=int, default=24 * 60 * 60)
-    cleanup_p.add_argument("--include-queued", action="store_true")
+    cleanup_p.add_argument(
+        "--include-queued",
+        action="store_true",
+        help="also cancel and scrub queued jobs older than the retention window",
+    )
+    cleanup_p.add_argument("--dry-run", action="store_true")
 
-    sub.add_parser("recover")
+    recover_p = sub.add_parser("recover")
+    recover_p.add_argument("--job-id", default="")
 
     final_p = sub.add_parser("format-final")
     final_p.add_argument("--model", required=True)
@@ -1280,10 +2040,11 @@ def main() -> int:
         print(json.dumps(take_result(args.job_id), indent=2, sort_keys=True))
         return 0
     if args.command == "cleanup":
-        print(json.dumps(cleanup(args.max_age_seconds, args.include_queued), indent=2, sort_keys=True))
-        return 0
+        cleanup_result = cleanup(args.max_age_seconds, args.include_queued, args.dry_run)
+        print(json.dumps(cleanup_result, indent=2, sort_keys=True))
+        return 0 if cleanup_result.get("ok") else 1
     if args.command == "recover":
-        print(json.dumps(recover(), indent=2, sort_keys=True))
+        print(json.dumps(recover(args.job_id), indent=2, sort_keys=True))
         return 0
     if args.command == "format-final":
         print(format_final(args))

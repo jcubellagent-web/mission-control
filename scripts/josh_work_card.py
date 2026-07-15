@@ -133,7 +133,9 @@ def save_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.chmod(tmp, 0o600)
     tmp.replace(path)
+    os.chmod(path, 0o600)
 
 
 def telegram_cooldown_active() -> dict | None:
@@ -186,7 +188,9 @@ def save_state(state: dict) -> None:
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     tmp = STATE_PATH.with_suffix(STATE_PATH.suffix + ".tmp")
     tmp.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.chmod(tmp, 0o600)
     tmp.replace(STATE_PATH)
+    os.chmod(STATE_PATH, 0o600)
 
 
 @contextmanager
@@ -903,8 +907,15 @@ def build_completion_summary(
     steps = list(done or [])
     if now and now not in steps:
         steps.append(now)
-    if len(steps) < 3:
-        steps.append(f"Closed out: {title}")
+    for fallback in (
+        f"Closed out: {title}",
+        "Verified the worker execution state.",
+        "Prepared the result for Telegram delivery.",
+    ):
+        if len(steps) >= 3:
+            break
+        if fallback not in steps:
+            steps.append(fallback)
 
     issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
     next_steps = parse_list(next_step)
@@ -1150,6 +1161,7 @@ def send_rich_message(
         # message. Sending a second fallback in that ambiguous state would be a
         # duplicate; let the stable-key retry path decide instead.
         result["native_rich_message"] = False
+        result["delivery_indeterminate"] = True
         return result
 
     fallback_payload = build_payload(fallback_text, buttons, silent=silent, chat_id=chat_id, thread_id=thread_id)
@@ -1160,6 +1172,17 @@ def send_rich_message(
     fallback["native_rich_message"] = False
     fallback["rich_error"] = result.get("error") or result
     return fallback
+
+
+def delivery_indeterminate(result: dict) -> bool:
+    if result.get("delivery_indeterminate"):
+        return True
+    error = str(result.get("error") or result.get("description") or "").lower()
+    definitive = any(marker in error for marker in (
+        "http error 400", "http error 403", "http error 404", "bad request",
+        "forbidden", "method not found", "unsupported", "too many requests", "429",
+    ))
+    return bool(error) and not definitive
 
 
 def edit_rich_card(
@@ -1307,6 +1330,17 @@ def load_final_text_file(path: str) -> str:
     text = Path(path).read_text(encoding="utf-8").strip()
     if not text:
         raise SystemExit("--final-text-file must not be empty")
+    plain = html.unescape(re.sub(r"^\s*<pre>|</pre>\s*$", "", text, flags=re.I))
+    labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
+    positions = [plain.find(label) for label in labels]
+    complete_valid = bool(re.search(r"(?m)^Complete:\s+(?:Yes|No)\b", plain))
+    ordered = all(position >= 0 for position in positions) and positions == sorted(positions)
+    done_block = plain[positions[1] + len(labels[1]):positions[2]] if ordered else ""
+    done_bullets = [line for line in done_block.splitlines() if line.strip().startswith("- ")]
+    if not ordered or not complete_valid or not 3 <= len(done_bullets) <= 5:
+        raise SystemExit(
+            "--final-text-file must use the canonical ordered final contract with Complete: Yes/No and 3-5 What was done bullets"
+        )
     return text
 
 
@@ -1479,6 +1513,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             existing = cards[args.key]
 
         renderer = str(existing.get("renderer") or "")
+        if existing.get("live_delivery_status") == "indeterminate" and not existing.get("message_id"):
+            print(json.dumps({
+                "ok": False,
+                "action": "send_quarantined",
+                "error": "Prior live-card send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+            }, indent=2), file=sys.stderr)
+            return 1
         use_rich = renderer == "rich" or (not existing.get("message_id") and rich_cards_enabled(chat_id, thread_id))
         if existing.get("message_id") and use_rich:
             result = edit_rich_card(
@@ -1513,6 +1554,16 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         if not result.get("ok") and telegram_message_not_modified(result):
             result = {"ok": True, "result": {"message_id": existing.get("message_id")}}
         if not result.get("ok"):
+            if action == "sent" and delivery_indeterminate(result):
+                existing = persist_checkpoint(
+                    live_message_id=None,
+                    final_id=existing.get("final_message_id"),
+                    active_renderer=renderer,
+                )
+                existing["live_delivery_status"] = "indeterminate"
+                existing["live_delivery_error_at"] = utc_now()
+                cards[args.key] = existing
+                save_state(state)
             print(json.dumps({"ok": False, "action": action, "error": result.get("error") or result}, indent=2), file=sys.stderr)
             return 1
 
@@ -1542,6 +1593,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         )
 
         if final_text:
+            if not final_message_id and existing.get("final_delivery_status") == "indeterminate":
+                print(json.dumps({
+                    "ok": False,
+                    "action": "final_send_quarantined",
+                    "error": "Prior final send has an indeterminate Telegram receipt; automatic resend is blocked to prevent a duplicate.",
+                }, indent=2), file=sys.stderr)
+                return 1
             if final_message_id:
                 final_result = edit_final_summary(final_message_id, final_text, args.timeout, buttons, chat_id=chat_id, thread_id=thread_id)
                 final_action = "edited"
@@ -1551,6 +1609,11 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             if not final_result.get("ok") and telegram_message_not_modified(final_result):
                 final_result = {"ok": True, "result": {"message_id": final_message_id}}
             if not final_result.get("ok"):
+                if final_action == "sent" and delivery_indeterminate(final_result):
+                    existing["final_delivery_status"] = "indeterminate"
+                    existing["final_delivery_error_at"] = utc_now()
+                    cards[args.key] = existing
+                    save_state(state)
                 print(json.dumps({"ok": False, "action": final_action, "error": final_result.get("error") or final_result}, indent=2), file=sys.stderr)
                 return 1
             if final_action == "sent":

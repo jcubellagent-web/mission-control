@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "timezone": "America/New_York",
+  "controlTower": {
+    "localHttpP95Ms": 500,
+    "sourceFreshnessP95Minutes": 3,
+    "sourceFreshnessHardMaxMinutes": 5,
+    "buildHardMaxSeconds": 60,
+    "concurrentWritersMax": 1,
+    "invalidJsonReadsAllowed": 0,
+    "overflowOrCroppingAllowed": 0,
+    "internalTextLeaksAllowed": 0
+  },
+  "routing": {
+    "fixturePassRatePct": 100,
+    "requiredMetadataCoveragePct": 100,
+    "instrumentationCoveragePct": 95,
+    "decisionP95Ms": 250,
+    "truthfulFallbackRatePct": 100,
+    "rawPrivateContentRowsAllowed": 0
+  },
+  "telegramInbox": {
+    "eyesReactionP95Seconds": 2,
+    "objectiveHeaderP95Seconds": 5,
+    "liveWorkCardP95Seconds": 8,
+    "finalMessagesPerClaim": 1,
+    "orphanTypingIndicatorsAllowed": 0,
+    "requiredFinalSections": ["Complete", "What was done", "Issues", "Appropriate next steps", "Approval needed"]
+  },
+  "scheduler": {
+    "fireLagP95Seconds": 60,
+    "duplicateOwnersAllowed": 0,
+    "missingProgramsAllowed": 0,
+    "unexplainedNonzeroRunsAllowed": 0
+  },
+  "recovery": {
+    "serviceRecoveryHardMaxSeconds": 60,
+    "restartAttemptsPerIncident": 1,
+    "restartCooldownMinutes": 15,
+    "cleanProbesToClear": 2
+  },
+  "lifecycle": {
+    "queuedAttentionAfterHours": 24,
+    "handoffAttentionAfterHours": 6,
+    "activeWithoutExecutionEvidenceAllowed": 0,
+    "terminalRowsDisplayedAsActiveAllowed": 0
+  }
+}

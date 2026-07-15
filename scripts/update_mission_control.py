@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import fcntl
 import json
 import os
 import socket
@@ -28,6 +29,8 @@ def utc_iso(delta: dt.timedelta | None = None) -> str:
 
 DATA_DIR = ROOT.parent / "data"
 DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
+LIVE_DASHBOARD_PATH = DATA_DIR / "control-tower-live.json"
+WRITER_LOCK_PATH = DATA_DIR / ".control-tower-writer.lock"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
@@ -62,6 +65,90 @@ RUNTIME_LAYOUT_PATH = ROOT.parent / "data" / "mission-control-runtime-layout.jso
 CODEX_AUTOMATIONS_DIR = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "automations"
 CODEX_AUTOMATION_STATUS_PATH = DATA_DIR / "codex-automation-status.json"
 JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
+ECOSYSTEM_QA_SCHEDULE_PATH = ROOT.parent / "config" / "ecosystem-qa-schedule.json"
+ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
+
+
+def atomic_write_json(path: Path, payload: Any) -> None:
+    """Promote a complete JSON document without exposing partial output."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=True, default=str)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _timestamp_candidates(value: Any) -> List[dt.datetime]:
+    candidates: List[dt.datetime] = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if key in {"updatedAt", "checkedAt", "generatedAt", "createdAt", "time"} and isinstance(item, str):
+                try:
+                    parsed = dt.datetime.fromisoformat(item.replace("Z", "+00:00"))
+                    candidates.append(parsed.astimezone(dt.timezone.utc))
+                except (TypeError, ValueError):
+                    pass
+            elif isinstance(item, (dict, list)):
+                candidates.extend(_timestamp_candidates(item))
+    elif isinstance(value, list):
+        for item in value:
+            candidates.extend(_timestamp_candidates(item))
+    return candidates
+
+
+def source_freshness() -> Dict[str, Any]:
+    """Report source-sidecar freshness independently of regeneration time."""
+    sources = {
+        "brainFeed": DATA_DIR / "brain-feed.json",
+        "agentHeartbeats": AGENT_HEARTBEATS_PATH,
+        "agentTasks": AGENT_TASK_QUEUE_PATH,
+        "sharedEvents": SHARED_EVENTS_PATH,
+        "handoffs": HANDOFF_QUEUE_PATH,
+        "personalCodex": PERSONAL_CODEX_PATH,
+        "jaimes": DATA_DIR / "jaimes-brain-feed.json",
+        "jain": DATA_DIR / "jain-brain-feed.json",
+    }
+    rows: Dict[str, str] = {}
+    stamps: List[dt.datetime] = []
+    for name, path in sources.items():
+        candidates: List[dt.datetime] = []
+        try:
+            candidates = _timestamp_candidates(json.loads(path.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+        if not candidates:
+            try:
+                candidates = [dt.datetime.fromtimestamp(path.stat().st_mtime, tz=dt.timezone.utc)]
+            except OSError:
+                continue
+        latest = max(candidates)
+        stamps.append(latest)
+        rows[name] = latest.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    latest_iso = max(stamps).replace(microsecond=0).isoformat().replace("+00:00", "Z") if stamps else None
+    return {"latest": latest_iso, "sources": rows}
+
+
+LIVE_DASHBOARD_KEYS = {
+    "actionRequired", "agentBrainFeeds", "agentBus", "agentContextRegistry", "agentControl",
+    "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
+    "codexJobs", "crons", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
+    "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
+    "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
+    "sourceUpdatedAt", "trackedTasks",
+}
+
+
+def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep the kiosk hot path compact while preserving every rendered field."""
+    return {key: value for key, value in dashboard.items() if key in LIVE_DASHBOARD_KEYS}
+
+
 def _default_control_tower_base() -> str:
     host = socket.gethostname().lower()
     if host.startswith("josh2"):
@@ -163,9 +250,11 @@ CRON_TARGETS = [
     {"name": "Gmail Morning Inbox Triage", "pattern": "gmail-morning-inbox-triage", "schedule": "Daily 8:30 AM ET", "description": "Reviews the last 24 hours of Personal Gmail, quiets low-signal mail, and surfaces anything that needs attention", "category": "Personal Inbox", "agent": "JOSHeX", "source": "codex_automation", "automationId": "gmail-morning-inbox-triage", "assumePresent": True},
 
     # ── JOSH 2.0 (local) ────────────────────────────────────────────────────
-    {"name": "Control Tower Refresh", "pattern": "mission-control/scripts/update_and_push.sh", "schedule": "Every 5 min", "description": "Refreshes Control Tower data and pushes local dashboard updates", "category": "Maintenance", "agent": "JOSH 2.0"},
+    {"name": "Ecosystem QA Scheduler", "pattern": "com.josh20.ecosystem-qa-scheduler", "schedule": "Every 1 min", "description": "Dispatches the single-writer Control Tower refresh, runtime SRE, lifecycle QC, route QA, visual checks, and retention jobs", "category": "QA & Product Support", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/mission-control/logs/ecosystem-qa-scheduler.out.log"},
     {"name": "J.A.I.N Context Sync", "pattern": "com.josh20.mission-control-signal-refresh", "schedule": "Every 5 min", "description": "Keeps J.A.I.N alert state available for Telegram and agent context", "category": "Agent Context", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log"},
-    {"name": "Live Work Board Server", "pattern": "brain_feed_server.py", "schedule": "Every 2 min (keepalive)", "description": "Keeps the Live Work Board endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0"},
+    #JAIMES: This server is launchd-owned; match the service label so Today's
+    # Jobs reflects the live process instead of a nonexistent cron entry.
+    {"name": "Live Work Board Server", "pattern": "com.josh20.brain-feed-server", "schedule": "Every 2 min (keepalive)", "description": "Keeps the Live Work Board endpoint available for Control Tower", "category": "Maintenance", "agent": "JOSH 2.0", "source": "launchd", "logPath": "/Users/josh2.0/.openclaw/workspace/logs/brain-feed-server.launchd.log"},
     {"name": "Chiro Invite Sync", "pattern": "scripts/chiro_invite_sync.sh", "schedule": "Hourly", "description": "Syncs chiropractic client invites into calendar", "category": "Appointments", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Silence Detector", "pattern": "jain_silence_detector.py", "schedule": "Hourly", "description": "Alerts if J.A.I.N stops reporting or goes quiet unexpectedly", "category": "Maintenance", "agent": "JOSH 2.0"},
     {"name": "J.A.I.N Medic", "pattern": "jain_medic.sh", "schedule": "Hourly", "description": "Runs local watchdog and recovery checks for J.A.I.N", "category": "Maintenance", "agent": "JOSH 2.0"},
@@ -551,6 +640,12 @@ def event_key(event: Dict[str, Any]) -> tuple[str, str, str]:
     title = str(event.get("title") or "").lower()
     if "screen check" in tool or "screen check" in title:
         title = "screen check"
+    # The QA scheduler publishes a human-readable incident title on failure
+    # and a matching "... recovered" title when the same lane clears.  Keep
+    # that wording in the activity feed, but correlate both transitions to a
+    # stable incident key so a recovered probe cannot remain Action Required.
+    if tool == "ecosystem qa scheduler":
+        title = re.sub(r"\s+(?:needs attention|recovered)$", "", title).strip()
     return (
         str(event.get("agent") or "").lower(),
         tool,
@@ -567,7 +662,9 @@ def superseded_blocked_event_ids(events: List[Dict[str, Any]]) -> set[str]:
         key = event_key(event)
         event_time = str(event.get("time") or "")
         if status in {"ok", "done", "ready"} and etype != "blocked":
-            latest_clear_by_key.setdefault(key, event_time)
+            previous = latest_clear_by_key.get(key)
+            if not previous or event_time > previous:
+                latest_clear_by_key[key] = event_time
 
     superseded: set[str] = set()
     for event in events:
@@ -1816,7 +1913,7 @@ def load_accum() -> Dict[str, Any]:
         return empty
 
 def save_accum(a: Dict[str, Any]) -> None:
-    ACCUM_PATH.write_text(json.dumps(a, indent=2))
+    atomic_write_json(ACCUM_PATH, a)
 
 def fetch_openrouter_usage() -> Dict[str, Any]:
     """OpenRouter usage disabled.
@@ -2206,9 +2303,9 @@ def merge_jain_newsfeed() -> None:
 
     if isinstance(local_feed, dict):
         local_feed["items"] = merged
-        NEWSFEED_PATH.write_text(json.dumps(local_feed, indent=2))
+        atomic_write_json(NEWSFEED_PATH, local_feed)
     else:
-        NEWSFEED_PATH.write_text(json.dumps(merged, indent=2))
+        atomic_write_json(NEWSFEED_PATH, merged)
 
 
 def fetch_current_session_cost() -> float:
@@ -2276,7 +2373,7 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             ],
             "_note": "costEstimated=true means Gemini cost was calculated from token counts × pricing table, not billed directly."
         }
-        tracker_path.write_text(json.dumps(tracker_payload, indent=2))
+        atomic_write_json(tracker_path, tracker_payload)
         # Run all external/SSH fetches in parallel to cut pipeline time
         import concurrent.futures as _cf
         with _cf.ThreadPoolExecutor(max_workers=5) as _pool:
@@ -2682,7 +2779,6 @@ et = ZoneInfo('America/New_York')
     jobs = {
     'Control Tower Refresh': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log',
     'J.A.I.N Context Sync': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log',
-    'Live Work Board Server': '/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
     'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
@@ -2716,7 +2812,6 @@ PY"""
             local_jobs = {
                 'Control Tower Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-cron.log'),
                 'J.A.I.N Context Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log'),
-                'Live Work Board Server': Path('/Users/josh2.0/.openclaw/workspace/logs/brain_feed_server.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
                 'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
@@ -3285,6 +3380,53 @@ PY"""
                         run['done'] = False
             row['multiRun'] = {'runs': runs}
         rows.append(row)
+
+    qa_config = load_json_file(ECOSYSTEM_QA_SCHEDULE_PATH, {})
+    qa_state = load_json_file(ECOSYSTEM_QA_STATE_PATH, {})
+    qa_runs = qa_state.get("jobs") if isinstance(qa_state.get("jobs"), dict) else {}
+    owner_labels = {"josh2": "JOSH 2.0", "jaimes": "JAIMES", "jain": "J.A.I.N", "joshex": "JOSHeX"}
+
+    def qa_schedule_label(schedule: Dict[str, Any]) -> str:
+        interval = int(schedule.get("intervalMinutes") or 0)
+        if interval:
+            return f"Every {interval} min"
+        minutes = ",".join(f"{int(value):02d}" for value in schedule.get("minutes", [])) or "00"
+        hours = schedule.get("hours", [])
+        weekdays = schedule.get("weekdays", [])
+        hour_text = ",".join(f"{int(value):02d}:{minutes} ET" for value in hours) if hours else f":{minutes} each hour ET"
+        if weekdays:
+            day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            hour_text = ",".join(day_names[int(value)] for value in weekdays) + " " + hour_text
+        return hour_text
+
+    for job in qa_config.get("jobs", []):
+        if not isinstance(job, dict) or not job.get("id"):
+            continue
+        job_id = str(job["id"])
+        run = qa_runs.get(job_id) if isinstance(qa_runs.get(job_id), dict) else {}
+        run_state = str(run.get("status") or "scheduled")
+        failed = run_state in {"failed", "timeout"}
+        schedule = job.get("schedule") if isinstance(job.get("schedule"), dict) else {}
+        weekdays = schedule.get("weekdays", [])
+        today_relevant = not weekdays or now_et.weekday() in weekdays
+        rows.append({
+            "name": str(job.get("team") or job_id),
+            "id": f"ecosystem-qa-{job_id}",
+            "schedule": qa_schedule_label(schedule),
+            "description": job_id.replace("-", " ").capitalize(),
+            "category": "QA & Product Support",
+            "agent": owner_labels.get(str(job.get("owner") or "josh2"), "JOSH 2.0"),
+            "status": "error" if failed else "ok",
+            "source": "ecosystem_qa_scheduler",
+            "sourceLabel": "Canonical QA Scheduler",
+            "todayRelevant": today_relevant,
+            "runStatus": "missed" if failed else ("done" if run_state == "ok" else "upcoming"),
+            "errors": 1 if failed else 0,
+            "lastError": plain_dashboard_text(run.get("stderr") or run.get("stdout"), 180) if failed else None,
+            "lastRun": run.get("completedAt") or run.get("startedAt"),
+            "durationMs": run.get("durationMs"),
+            "failureStreak": int(run.get("failureStreak") or 0),
+        })
     return rows
 
 def build_devices() -> List[Dict[str, str]]:
@@ -4297,7 +4439,7 @@ def fetch_moltworld_data() -> Dict[str, Any]:
         payload["stale"] = False
         payload["lastError"] = None
     try:
-        MOLTWORLD_CACHE_PATH.write_text(json.dumps(payload, indent=2))
+        atomic_write_json(MOLTWORLD_CACHE_PATH, payload)
     except OSError:
         pass
     return payload
@@ -4406,6 +4548,13 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
 
 def main() -> None:
     DASHBOARD_PATH.parent.mkdir(parents=True, exist_ok=True)
+    writer_lock = WRITER_LOCK_PATH.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(writer_lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print("Control Tower refresh skipped: canonical writer is already running.")
+        writer_lock.close()
+        return
     merge_jain_newsfeed()
     now_iso = utc_iso()
     dashboard: Dict[str, Any] = {
@@ -4667,17 +4816,22 @@ def main() -> None:
             item for item in dashboard["recentActivity"]
             if not (item.get("event", "") in seen_activity or seen_activity.add(item.get("event", "")))
         ][:6]
+    dashboard["generatedAt"] = now_iso
     dashboard["lastUpdated"] = now_iso
+    dashboard["sourceFreshness"] = source_freshness()
+    dashboard["sourceUpdatedAt"] = dashboard["sourceFreshness"].get("latest")
 
     # Final validation — fills any missing required fields with safe defaults
     validate_dashboard(dashboard, now_iso)
 
-    DASHBOARD_PATH.write_text(json.dumps(dashboard, indent=2))
-    MODEL_USAGE_PATH.write_text(json.dumps(model_usage, indent=2))
-    AGENT_COMMS_PATH.write_text(json.dumps(agent_comms, indent=2))
+    atomic_write_json(DASHBOARD_PATH, dashboard)
+    atomic_write_json(LIVE_DASHBOARD_PATH, build_live_dashboard(dashboard))
+    atomic_write_json(MODEL_USAGE_PATH, model_usage)
+    atomic_write_json(AGENT_COMMS_PATH, agent_comms)
     MOLTWORLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True) # Ensure data dir exists
-    (ROOT.parent / "data" / "moltworld-data.json").write_text(json.dumps(moltworld_data, indent=2))
+    atomic_write_json(ROOT.parent / "data" / "moltworld-data.json", moltworld_data)
     print(f"Updated {DASHBOARD_PATH}")
+    print(f"Updated {LIVE_DASHBOARD_PATH}")
     print(f"Updated {MODEL_USAGE_PATH}")
     print(f"Updated {AGENT_COMMS_PATH}")
     print(f"Updated {ROOT.parent / 'data' / 'moltworld-data.json'}")
@@ -4771,7 +4925,7 @@ def main() -> None:
                     ms['achieved'] = total_browser_replies >= ms.get('target', 9999)
 
             xp['updatedAt'] = now_iso
-            xp_path.write_text(json.dumps(xp, indent=2, default=str))
+            atomic_write_json(xp_path, xp)
             print(f"Updated x-progress.json (replies={total_browser_replies})")
     except Exception as _xe:
         print(f"x-progress sync warning: {_xe}")

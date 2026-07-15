@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -46,7 +47,16 @@ def read_json(path: Path, default: Any) -> Any:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2) + "\n")
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, ensure_ascii=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def run(cmd: list[str], timeout: int = 60) -> subprocess.CompletedProcess[str]:
@@ -102,7 +112,15 @@ def model_status_ok() -> bool:
             return False
         data = json.loads(proc.stdout)
         auth = data.get("auth") if isinstance(data, dict) else {}
-        return not bool(auth.get("missingProvidersInUse")) and bool(data.get("resolvedDefault"))
+        missing = {str(item).lower() for item in auth.get("missingProvidersInUse", [])}
+        # Ollama is a local runtime and does not require a provider credential.
+        # Verify the daemon/model inventory instead of treating it as missing auth.
+        if "ollama" in missing:
+            local = run(["ollama", "list"], timeout=20)
+            if local.returncode != 0 or len(local.stdout.splitlines()) < 2:
+                return False
+            missing.remove("ollama")
+        return not missing and bool(data.get("resolvedDefault"))
     except Exception:
         return False
 
@@ -152,7 +170,21 @@ def main() -> int:
     parser.add_argument("--brain-feed", action="store_true")
     parser.add_argument("--job", action="store_true")
     parser.add_argument("--telegram-summary", action="store_true")
+    parser.add_argument("--ci", action="store_true", help="Validate the offline health contract without probing host services.")
     args = parser.parse_args()
+
+    if args.ci:
+        required_paths = [HEARTBEATS_PATH, DASHBOARD_PATH, *SIDECAR_PATHS.values()]
+        payload = {
+            "ok": len(REQUIRED_AGENTS) == len(set(REQUIRED_AGENTS)),
+            "status": "ok",
+            "mode": "ci-contract",
+            "requiredAgents": list(REQUIRED_AGENTS),
+            "fixturePaths": [str(path.relative_to(ROOT)) for path in required_paths],
+            "liveServicesProbed": False,
+        }
+        print(json.dumps(payload, indent=2))
+        return 0 if payload["ok"] else 1
 
     now_iso = utc_now()
     now_dt = dt.datetime.now(dt.timezone.utc)
@@ -163,7 +195,7 @@ def main() -> int:
     cron_issues = cron_attention(dashboard)
     model_ok = model_status_ok()
     dashboard_age = None
-    dashboard_updated = parse_ts(dashboard.get("lastUpdated"))
+    dashboard_updated = parse_ts(dashboard.get("sourceUpdatedAt") or dashboard.get("lastUpdated"))
     if dashboard_updated:
         dashboard_age = round((now_dt - dashboard_updated.astimezone(dt.timezone.utc)).total_seconds() / 60, 1)
 

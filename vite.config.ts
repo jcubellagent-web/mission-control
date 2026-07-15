@@ -167,5 +167,9 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     port: 5174,
+    // The independent JAIMES black-box probe reaches this read-only feed
+    // through a tailnet-only Tailscale Serve path. Keep the listener local and
+    // allow only the canonical tailnet hostname at Vite's host boundary.
+    allowedHosts: ["josh2.tail2a17bd.ts.net"],
   },
 });

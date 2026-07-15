@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.openclaw.gateway</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/jc_agent/.local/bin/python3.11</string>
+    <string>/Users/jc_agent/.openclaw/workspace/mission-control/scripts/jaimes_openclaw_gateway_launcher.py</string>
+    <string>--</string>
+    <string>/opt/homebrew/opt/node@24/bin/node</string>
+    <string>/opt/homebrew/lib/node_modules/openclaw/dist/index.js</string>
+    <string>gateway</string>
+    <string>--port</string>
+    <string>18789</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/jc_agent/.openclaw</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/jc_agent</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/opt/node@24/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>TMPDIR</key>
+    <string>/Users/jc_agent/.openclaw/tmp</string>
+    <key>NODE_EXTRA_CA_CERTS</key>
+    <string>/etc/ssl/cert.pem</string>
+    <key>NODE_USE_SYSTEM_CA</key>
+    <string>1</string>
+    <key>OPENCLAW_GATEWAY_PORT</key>
+    <string>18789</string>
+    <key>OPENCLAW_LAUNCHD_LABEL</key>
+    <string>ai.openclaw.gateway</string>
+    <key>OPENCLAW_SERVICE_KIND</key>
+    <string>gateway</string>
+    <key>OPENCLAW_SERVICE_MARKER</key>
+    <string>openclaw</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>StandardOutPath</key>
+  <string>/Users/jc_agent/Library/Logs/openclaw/gateway.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jc_agent/Library/Logs/openclaw/gateway.err.log</string>
+</dict>
+</plist>

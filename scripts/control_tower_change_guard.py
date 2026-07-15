@@ -19,12 +19,44 @@ LOCK_PATH = STATE_DIR / "control-tower-change-lock.json"
 BACKUP_ROOT = Path.home() / ".openclaw" / "backups" / "control-tower-changes"
 SOURCE_PATHS = (
     "AGENTS.md",
+    ".github/workflows/mission-control-regression.yml",
     ".gitignore",
     "agent-skills/shared-memory-retrieval",
+    "agent-skills/proposal-first-maintenance",
+    "config",
+    "data/agent-route-benchmark-suite.json",
+    "data/agent-routing-policy.json",
+    "data/model-provider-budgets.json",
     "v2-react/src",
     "v2-react/index.html",
     "vite.config.ts",
     "package.json",
+    "package-lock.json",
+    "requirements-qa.txt",
+    "plugins/inbox-coordinator",
+    "launchd",
+    "tests",
+    "scripts/agent_route.py",
+    "scripts/agent_publish.py",
+    "scripts/ecosystem_health_sweep.py",
+    "scripts/ecosystem_qa_benchmark.py",
+    "scripts/ecosystem_qa_scheduler.py",
+    "scripts/ecosystem_qa_supervisor.py",
+    "scripts/ecosystem_proposal_ledger.py",
+    "scripts/ecosystem_retention.py",
+    "scripts/ecosystem_runtime_probe.py",
+    "scripts/ecosystem_state_reconciler.py",
+    "scripts/inbox_coordinator.py",
+    "scripts/install_ecosystem_qa_schedules.py",
+    "scripts/jaimes_cross_host_qc.py",
+    "scripts/jaimes_control_tower_blackbox_qc.py",
+    "scripts/jaimes_openclaw_gateway_launcher.py",
+    "scripts/jaimes_telegram_health.py",
+    "scripts/jaimes_telegram_fast_ack.py",
+    "scripts/jaimes_telegram_fast_ack_launcher.py",
+    "scripts/jaimes_work_card.py",
+    "scripts/josh_telegram_fast_ack.py",
+    "scripts/josh_work_card.py",
     "scripts/update_mission_control.py",
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
@@ -35,6 +67,17 @@ SOURCE_PATHS = (
     "scripts/run_sleep_memory_review.sh",
     "scripts/mission_control_regression_check.py",
     "scripts/mission_control_runtime_layout_check.py",
+    "scripts/mission_control_visual_canaries.py",
+    "scripts/run_mission_control_watchdog.sh",
+    "scripts/route_quality_audit.py",
+    "scripts/remote_qa_sidecar_ingest.py",
+    "scripts/remediate_jaimes_shell_profile.py",
+    "scripts/route_contract_benchmark.py",
+    "scripts/state_visibility_guard.py",
+    "scripts/test_ecosystem_qa_scheduler.py",
+    "scripts/test_ecosystem_state_reconciler.py",
+    "scripts/test_telegram_approval_extraction.py",
+    "scripts/todays_jobs_consistency_watchdog.py",
 )
 LEASE_MINUTES = 45
 
@@ -74,6 +117,13 @@ def read_lock() -> dict:
     return payload
 
 
+def public_lease(payload: dict | None) -> dict | None:
+    """Return operator-visible lease metadata without the bearer token."""
+    if not payload:
+        return None
+    return {key: value for key, value in payload.items() if key != "token"}
+
+
 def source_changes() -> list[str]:
     proc = run(["git", "status", "--porcelain", "--", *SOURCE_PATHS], check=False)
     return [line[3:].strip() for line in proc.stdout.splitlines() if len(line) > 3]
@@ -93,7 +143,7 @@ def begin(agent: str, objective: str) -> None:
     BACKUP_ROOT.mkdir(parents=True, exist_ok=True)
     existing = read_lock()
     if existing:
-        raise SystemExit(json.dumps({"ok": False, "reason": "leased", "lease": existing}, indent=2))
+        raise SystemExit(json.dumps({"ok": False, "reason": "leased", "lease": public_lease(existing)}, indent=2))
     dirty = source_changes()
     if dirty:
         raise SystemExit(json.dumps({"ok": False, "reason": "canonical source already dirty", "paths": dirty}, indent=2))
@@ -127,27 +177,54 @@ def begin(agent: str, objective: str) -> None:
 
 
 def status() -> None:
-    print(json.dumps({"ok": True, "lease": read_lock() or None, "sourceChanges": source_changes()}, indent=2))
+    print(json.dumps({"ok": True, "lease": public_lease(read_lock()), "sourceChanges": source_changes()}, indent=2))
 
 
 def renew(token: str) -> None:
     payload = require_token(token)
     payload["expiresAt"] = iso(now() + dt.timedelta(minutes=LEASE_MINUTES))
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
-    print(json.dumps({"ok": True, "lease": payload}, indent=2))
+    print(json.dumps({"ok": True, "lease": public_lease(payload)}, indent=2))
 
 
 def verify(token: str) -> None:
     payload = require_token(token)
     env = dict(os.environ)
     env["CONTROL_TOWER_ALLOW_GENERATED"] = "1"
+    qa_python = str(ROOT / ".venv-qa" / "bin" / "python") if (ROOT / ".venv-qa" / "bin" / "python").exists() else sys.executable
     checks = [
         ([sys.executable, "scripts/control_tower_path_guard.py"], env),
         ([sys.executable, "scripts/memory_registry_smoke_test.py"], None),
+        ([sys.executable, "-m", "py_compile",
+          "scripts/control_tower_change_guard.py",
+          "scripts/ecosystem_health_sweep.py",
+          "scripts/ecosystem_qa_benchmark.py",
+          "scripts/mission_control_runtime_layout_check.py",
+          "scripts/mission_control_visual_canaries.py",
+          "scripts/todays_jobs_consistency_watchdog.py",
+          "scripts/jaimes_openclaw_gateway_launcher.py",
+          "scripts/josh_telegram_fast_ack.py",
+          "scripts/jaimes_telegram_fast_ack.py",
+          "scripts/josh_work_card.py",
+          "scripts/jaimes_work_card.py"], None),
+        ([qa_python, "-m", "pytest", "-q", "tests", "scripts/test_telegram_approval_extraction.py"], None),
+        (["npm", "test", "--prefix", "plugins/inbox-coordinator"], None),
         (["npm", "run", "build"], None),
         ([sys.executable, "scripts/update_mission_control.py"], None),
         ([sys.executable, "scripts/mission_control_regression_check.py"], None),
-        ([sys.executable, "scripts/mission_control_runtime_layout_check.py"], None),
+        ([sys.executable, "scripts/ecosystem_qa_benchmark.py", "--route-only"], None),
+        ([sys.executable, "scripts/ecosystem_qa_benchmark.py", "--fault-injection", "--no-write"], None),
+        ([sys.executable, "scripts/mission_control_runtime_layout_check.py", "--self-test"], None),
+        ([sys.executable, "scripts/mission_control_runtime_layout_check.py",
+          "--strict-browser", "--strict-visual",
+          "--screenshot-path", "/tmp/control-tower-change-guard.png"], None),
+        ([sys.executable, "scripts/mission_control_visual_canaries.py"], None),
+        # Regenerate once more so the just-written runtime-layout result is the
+        # status consumed by the live ecosystem sweep below.
+        ([sys.executable, "scripts/update_mission_control.py"], None),
+        # This is intentionally the live sweep on the canonical Josh 2.0 host.
+        # CI uses fixture-safe structural checks and never attempts host recovery.
+        ([sys.executable, "scripts/ecosystem_qa_benchmark.py", "--health-only", "--no-write"], None),
     ]
     results = []
     for command, command_env in checks:

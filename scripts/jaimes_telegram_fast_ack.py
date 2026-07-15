@@ -4,14 +4,18 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
+import fcntl
 import hashlib
+import html
 import json
 import os
 import re
 import sqlite3
 import subprocess
 import sys
+import textwrap
 import time
 from pathlib import Path
 from typing import Any
@@ -25,6 +29,7 @@ SESSION_DIR = SESSIONS_PATH.parent
 HERMES_SESSION_DIR = HERMES_SESSIONS_PATH.parent
 HERMES_STATE_DB = HOME / ".hermes" / "state.db"
 STATE_PATH = HOME / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json"
+HANDOFF_DIR = HOME / ".openclaw" / "telegram" / "jaimes_handoff_receipts"
 DIRECT_SESSION_KEYS = (
     "agent:main:telegram:dm:6218150306",
     "agent:main:telegram:direct:6218150306",
@@ -37,6 +42,9 @@ TELEGRAM_GROUP_TOPIC_RE = re.compile(r"telegram:group:(-?\d+):(?:topic:)?(\d+)")
 DEFAULT_MODEL = "openai-codex/gpt-5.6-sol"
 DEFAULT_ROUTE = "JAIMES Telegram -> Hermes task"
 STALE_BOOTSTRAP_SECONDS = 120
+HANDOFF_RECEIPT_TTL_SECONDS = 90
+BOT_IDENTITY_CHECK_SECONDS = 5 * 60
+EXPECTED_BOT_USERNAME = os.environ.get("JAIMES_TELEGRAM_BOT_USERNAME", "Jaimes_claw_bot")
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 45 * 60
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
@@ -147,8 +155,34 @@ def record_api_result(state: dict[str, Any], method: str, result: dict[str, Any]
     history = list(state.get("telegram_api_results") or [])
     history.append(row)
     state["telegram_api_results"] = history[-40:]
-    if not row["ok"]:
+    if row["ok"]:
+        state["last_telegram_api_success"] = row
+        state.pop("last_telegram_api_error", None)
+    else:
         state["last_telegram_api_error"] = row
+
+
+def verify_bot_identity(state: dict[str, Any]) -> bool:
+    identity = state.get("telegram_identity") if isinstance(state.get("telegram_identity"), dict) else {}
+    checked_at = parse_utc(identity.get("checked_at"))
+    if checked_at and (dt.datetime.now(dt.timezone.utc) - checked_at).total_seconds() < BOT_IDENTITY_CHECK_SECONDS:
+        return identity.get("ok") is True
+    if work_card is None:
+        state["telegram_identity"] = {"checked_at": utc_now(), "ok": False, "username": ""}
+        return False
+    result = work_card.api_call("getMe", {}, timeout=6)
+    username = str((result.get("result") or {}).get("username") or "")
+    ok = bool(result.get("ok") and username.casefold() == EXPECTED_BOT_USERNAME.casefold())
+    record_api_result(state, "getMe", {
+        "ok": ok,
+        "error": "Telegram bot identity mismatch" if result.get("ok") and not ok else result.get("error") or "",
+    })
+    state["telegram_identity"] = {
+        "checked_at": utc_now(),
+        "ok": ok,
+        "username": username if ok else "",
+    }
+    return ok
 
 
 def set_eyes_reaction(platform_message_id: str, state: dict[str, Any], meta: dict[str, Any] | None = None) -> bool:
@@ -160,7 +194,7 @@ def set_eyes_reaction(platform_message_id: str, state: dict[str, Any], meta: dic
         "reaction": [{"type": "emoji", "emoji": "👀"}],
         "is_big": False,
     }, meta)
-    result = work_card.api_call("setMessageReaction", payload, timeout=6)
+    result = work_card.api_call("setMessageReaction", payload, timeout=4)
     record_api_result(state, "setMessageReaction", result)
     return bool(result.get("ok"))
 
@@ -181,15 +215,23 @@ def send_message_draft(draft_id: int, text: str = "", meta: dict[str, Any] | Non
     work_card.api_call("sendMessageDraft", payload, timeout=6)
 
 
-def edit_message(message_id: str, text: str, timeout: int = 15, meta: dict[str, Any] | None = None) -> dict[str, Any]:
+def edit_message(
+    message_id: str,
+    text: str,
+    timeout: int = 15,
+    meta: dict[str, Any] | None = None,
+    parse_mode: str | None = None,
+) -> dict[str, Any]:
     if work_card is None or not message_id:
         return {"ok": False, "error": "missing editable acknowledgement or work-card helper"}
     payload = {
         "chat_id": telegram_target(meta),
-        "message_id": message_id,
+        "message_id": int(message_id) if str(message_id).isdigit() else message_id,
         "text": text,
         "disable_notification": True,
     }
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
     apply_telegram_target(payload, meta)
     return work_card.api_call("editMessageText", payload, timeout=timeout)
 
@@ -226,13 +268,188 @@ def save_json(path: Path, data: Any) -> None:
     # crashing the approval-button sender before it reached Telegram.
     tmp = path.parent / f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp"
     try:
-        tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
         os.replace(tmp, path)
+        # Replacing with the private temporary inode normally supplies this
+        # mode already. The explicit chmod also repairs a legacy state file on
+        # the next successful daemon write.
+        os.chmod(path, 0o600)
     finally:
         try:
             tmp.unlink(missing_ok=True)
         except Exception:
             pass
+
+
+def _handoff_id(value: Any, *, allow_negative: bool = False) -> str:
+    text = str(value or "").strip()
+    pattern = r"-?\d+" if allow_negative else r"\d+"
+    if not re.fullmatch(pattern, text):
+        return ""
+    if not allow_negative and int(text) <= 0:
+        return ""
+    return text
+
+
+def handoff_identity(chat_id: Any, thread_id: Any, message_id: Any) -> tuple[str, str, str]:
+    chat = _handoff_id(chat_id, allow_negative=True)
+    thread = _handoff_id(thread_id)
+    message = _handoff_id(message_id)
+    if not chat or not thread or not message:
+        raise ValueError("handoff origin ids must be numeric")
+    return chat, thread, message
+
+
+def handoff_paths(chat_id: Any, thread_id: Any, message_id: Any) -> tuple[Path, Path]:
+    chat, thread, message = handoff_identity(chat_id, thread_id, message_id)
+    digest = hashlib.sha256(f"{chat}:{thread}:{message}".encode("utf-8")).hexdigest()
+    return HANDOFF_DIR / f"{digest}.json", HANDOFF_DIR / f"{digest}.lock"
+
+
+@contextlib.contextmanager
+def handoff_lock(chat_id: Any, thread_id: Any, message_id: Any):
+    record_path, lock_path = handoff_paths(chat_id, thread_id, message_id)
+    HANDOFF_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        os.chmod(HANDOFF_DIR, 0o700)
+    except OSError:
+        pass
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        try:
+            os.chmod(lock_path, 0o600)
+        except OSError:
+            pass
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        yield record_path
+
+
+def write_handoff_record(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    try:
+        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        try:
+            directory_fd = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        except OSError:
+            pass
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def parse_utc(value: Any) -> dt.datetime | None:
+    try:
+        parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def handoff_record_matches(record: dict[str, Any], chat_id: Any, thread_id: Any, message_id: Any) -> bool:
+    try:
+        chat, thread, message = handoff_identity(chat_id, thread_id, message_id)
+    except ValueError:
+        return False
+    return (
+        str(record.get("chat_id") or "") == chat
+        and str(record.get("thread_id") or "") == thread
+        and str(record.get("inbound_message_id") or "") == message
+    )
+
+
+def handoff_record_fresh(record: dict[str, Any]) -> bool:
+    expires = parse_utc(record.get("expires_at"))
+    return bool(expires and expires > dt.datetime.now(dt.timezone.utc))
+
+
+def active_handoff_lease(meta: dict[str, Any], event: dict[str, Any]) -> bool:
+    chat_id = meta.get("telegram_chat_id")
+    thread_id = meta.get("telegram_thread_id")
+    message_id = event.get("platform_message_id") or ((meta.get("origin") or {}).get("message_id"))
+    try:
+        with handoff_lock(chat_id, thread_id, message_id) as record_path:
+            record = load_json(record_path, {})
+            return bool(
+                isinstance(record, dict)
+                and record.get("status") == "waiting"
+                and handoff_record_matches(record, chat_id, thread_id, message_id)
+                and handoff_record_fresh(record)
+            )
+    except ValueError:
+        return False
+
+
+def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float) -> tuple[int, dict[str, Any]]:
+    """Wait for exact JAIMES surface acceptance without carrying prompt data."""
+    try:
+        chat, thread, message = handoff_identity(chat_id, thread_id, message_id)
+    except ValueError as exc:
+        return 2, {"ok": False, "status": "invalid-origin", "error": str(exc)}
+    wait_seconds = min(12.0, max(0.5, float(timeout)))
+    deadline = time.monotonic() + wait_seconds
+    lease_expiry = dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=wait_seconds)
+    with handoff_lock(chat, thread, message) as record_path:
+        existing = load_json(record_path, {})
+        if not (
+            isinstance(existing, dict)
+            and existing.get("status") in {"waiting", "accepted"}
+            and handoff_record_matches(existing, chat, thread, message)
+            and handoff_record_fresh(existing)
+        ):
+            write_handoff_record(record_path, {
+                "schema_version": 1,
+                "status": "waiting",
+                "agent": "jaimes",
+                "chat_id": chat,
+                "thread_id": thread,
+                "inbound_message_id": message,
+                "created_at": utc_now(),
+                "expires_at": lease_expiry.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            })
+
+    while True:
+        with handoff_lock(chat, thread, message) as record_path:
+            record = load_json(record_path, {})
+            accepted = bool(
+                isinstance(record, dict)
+                and record.get("status") == "accepted"
+                and handoff_record_matches(record, chat, thread, message)
+                and handoff_record_fresh(record)
+                and record.get("reaction_ok") is True
+                and _handoff_id(record.get("header_message_id"))
+                and _handoff_id(record.get("live_message_id"))
+            )
+            if accepted:
+                return 0, {"ok": True, **record}
+            if isinstance(record, dict) and record.get("status") in {"failed", "cancelled"}:
+                return 2, {"ok": False, **record}
+            if time.monotonic() >= deadline:
+                if isinstance(record, dict) and record.get("status") == "waiting":
+                    record.update({"status": "cancelled", "cancelled_at": utc_now(), "reason": "handoff_timeout"})
+                    write_handoff_record(record_path, record)
+                return 2, {
+                    "ok": False,
+                    "status": "timeout",
+                    "agent": "jaimes",
+                    "chat_id": chat,
+                    "thread_id": thread,
+                    "inbound_message_id": message,
+                }
+        time.sleep(0.1)
 
 
 def queue_forwarded_x_intelligence(event: dict[str, Any], meta: dict[str, Any]) -> int:
@@ -459,10 +676,10 @@ def recent_prompt_events_from_state_db(session_id: str, after_message_id: int) -
     return events
 
 
-def final_assistant_message_after(session_id: str, user_message_id: int) -> str:
-    """Return the final non-empty assistant text for one user turn, if stored."""
+def final_assistant_record_after(session_id: str, user_message_id: int) -> dict[str, Any]:
+    """Return the delivered final record for exactly one user turn."""
     if not HERMES_STATE_DB.exists():
-        return ""
+        return {}
     con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
     try:
         next_user = con.execute(
@@ -472,16 +689,149 @@ def final_assistant_message_after(session_id: str, user_message_id: int) -> str:
         upper_id = int(next_user[0]) if next_user and next_user[0] else 2**63 - 1
         row = con.execute(
             """
-            SELECT content FROM messages
+            SELECT id, content, platform_message_id FROM messages
              WHERE session_id = ? AND role = 'assistant'
                AND id > ? AND id < ? AND TRIM(COALESCE(content, '')) != ''
              ORDER BY id DESC LIMIT 1
             """,
             (session_id, user_message_id, upper_id),
         ).fetchone()
-        return str(row[0] or "") if row else ""
+        if not row:
+            return {}
+        return {
+            "id": int(row[0]),
+            "content": str(row[1] or ""),
+            "platform_message_id": str(row[2] or ""),
+        }
     finally:
         con.close()
+
+
+def final_assistant_message_after(session_id: str, user_message_id: int) -> str:
+    """Compatibility wrapper for callers that only need final content."""
+    return str(final_assistant_record_after(session_id, user_message_id).get("content") or "")
+
+
+FINAL_SECTION_ALIASES = {
+    "what was done": "done",
+    "tldr": "done",
+    "tl;dr": "done",
+    "objective complete": "done",
+    "issues": "issues",
+    "challenges": "issues",
+    "blockers": "issues",
+    "appropriate next steps": "next",
+    "next steps": "next",
+    "next": "next",
+    "approval needed": "approval",
+    "mitigation steps for approval": "approval",
+}
+
+
+def clean_final_item(value: str) -> str:
+    text = html.unescape(re.sub(r"<[^>]+>", " ", str(value or "")))
+    text = re.sub(r"[`*_#]", "", text)
+    text = re.sub(r"^[\s>\-•]+", "", text)
+    text = re.sub(r"^\d+[.)]\s*", "", text)
+    text = " ".join(text.split()).strip(" :-")
+    return text[:260]
+
+
+def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
+    sections: dict[str, list[str]] = {"done": [], "issues": [], "next": [], "approval": []}
+    current = "done"
+    explicit_complete: bool | None = None
+    for raw in str(text or "").splitlines():
+        line = clean_final_item(raw)
+        if not line:
+            continue
+        complete_match = re.match(r"(?i)^complete\s*:\s*(yes|no)\b(?:\s*[-—:]\s*(.*))?$", line)
+        if complete_match:
+            explicit_complete = complete_match.group(1).lower() == "yes"
+            if complete_match.group(2):
+                sections["done" if explicit_complete else "issues"].append(clean_final_item(complete_match.group(2)))
+            continue
+        normalized = re.sub(r"[^a-z; ]", "", line.lower()).strip()
+        if normalized in FINAL_SECTION_ALIASES:
+            current = FINAL_SECTION_ALIASES[normalized]
+            continue
+        if re.match(r"(?i)^(?:model|route|objective|status)\s*:", line):
+            continue
+        if line.lower() not in {"n/a", "na", "none", "not applicable"}:
+            sections[current].append(line)
+
+    if explicit_complete is None:
+        failure_text = " ".join(sections["issues"] + sections["done"]).lower()
+        explicit_complete = not any(marker in failure_text for marker in (
+            "couldn't", "could not", "failed", "blocked", "unavailable", "not complete", "needs attention",
+        ))
+    if not sections["done"]:
+        sections["done"] = ["Completed the requested work and prepared this verified result."] if explicit_complete else ["Checked the request and identified the unresolved issue."]
+    for fallback in (
+        "Verified the runtime outcome.",
+        "Prepared the result for Telegram delivery.",
+        "Closed the live-work lifecycle.",
+    ):
+        if len(sections["done"]) >= 3:
+            break
+        if fallback not in sections["done"]:
+            sections["done"].append(fallback)
+    return explicit_complete, sections
+
+
+def structured_final_text(text: str, *, objective: str, model: str, route: str) -> str:
+    """Normalize a native Hermes final to the canonical fixed-width contract."""
+    complete, sections = parse_final_sections(text)
+
+    def wrap(value: str, *, indent: str = "") -> list[str]:
+        return textwrap.wrap(
+            value,
+            width=38,
+            subsequent_indent=indent,
+            break_long_words=True,
+            break_on_hyphens=False,
+        ) or [""]
+
+    def bullets(items: list[str], fallback: str) -> list[str]:
+        chosen = [clean_final_item(item) for item in items if clean_final_item(item)][:5] or [fallback]
+        rows: list[str] = []
+        for item in chosen:
+            rows.extend(wrap(f"- {item}", indent="  "))
+        return rows
+
+    model_label = clean_final_item(model) or "Verified JAIMES runtime"
+    route_label = clean_final_item(route) or "JAIMES verified execution"
+    objective_label = clean_final_item(objective) or "Complete the current Telegram task"
+    next_items = sections["next"] or ([] if not complete else ["No action needed."])
+    approval_items = sections["approval"]
+    lines = [
+        *wrap(
+            f"Model: {model_label} | Route: {route_label} | Why: verified JAIMES execution",
+            indent="   ",
+        ),
+        "",
+        *wrap(f"Complete: {'Yes' if complete else 'No'} - {objective_label}", indent="   "),
+        "",
+        "What was done:",
+        *bullets(sections["done"], "Completed the request."),
+        "",
+        "Issues:",
+        *bullets(sections["issues"], "n/a"),
+        "",
+        "Appropriate next steps:",
+        *bullets(next_items, "Review the issue and choose the next safe step." if not complete else "No action needed."),
+        "",
+        "Approval needed:",
+        *bullets(approval_items, "n/a"),
+    ]
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+
+
+def final_contract_is_canonical(value: str) -> bool:
+    plain = html.unescape(re.sub(r"^<pre>|</pre>$", "", str(value or "").strip(), flags=re.I))
+    labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
+    positions = [plain.find(label) for label in labels]
+    return all(position >= 0 for position in positions) and positions == sorted(positions) and bool(re.search(r"(?m)^Complete: (?:Yes|No)\b", plain))
 
 
 def latest_direct_message_id(session_id: str) -> int:
@@ -1061,7 +1411,10 @@ def skill_for_prompt(prompt: str) -> dict[str, str]:
 
 
 def run_cmd(cmd: list[str], timeout: int = 20) -> dict[str, str | int | bool]:
-    proc = subprocess.run(cmd, cwd=WORKSPACE, text=True, capture_output=True, timeout=timeout)
+    try:
+        proc = subprocess.run(cmd, cwd=WORKSPACE, text=True, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "returncode": 124, "stdout": "", "stderr": f"command timed out after {timeout}s"}
     return {"ok": proc.returncode == 0, "returncode": proc.returncode, "stdout": proc.stdout.strip(), "stderr": proc.stderr.strip()}
 
 
@@ -1126,6 +1479,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         return {
             "ok": True,
             "duplicate_suppressed": True,
+            "header_message_id": "",
             "ack_message_id": "",
             "key": key,
             "model": model or DEFAULT_MODEL,
@@ -1140,11 +1494,31 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     prompt = event.get("prompt", "")
     objective = objective_from_prompt(prompt)
     inbound_message_id = event.get("platform_message_id") or str(((meta or {}).get("origin") or {}).get("message_id") or "")
+    handoff_topic = bool(
+        str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+        and str((meta or {}).get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
+    )
     reaction_ok = False
     if not dry_run:
         reaction_ok = set_eyes_reaction(inbound_message_id, state, meta=meta)
+    if handoff_topic and not dry_run and not reaction_ok:
+        return {
+            "ok": False,
+            "handoff_terminal_failure": True,
+            "error": "eyes_reaction_failed",
+            "header_message_id": "",
+            "ack_message_id": "",
+            "key": key,
+            "model": model or DEFAULT_MODEL,
+            "route": "",
+            "skill": {},
+            "objective": objective,
+            "reaction_ok": False,
+            "button_triggered": is_button_prompt(prompt),
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+        }
 
-    route = auto_route_for_prompt(prompt, model or DEFAULT_MODEL)
     skill = skill_for_prompt(prompt)
     # A router recommendation is not a model switch. Keep the visible model
     # sourced from the active Hermes session until a new lane actually starts.
@@ -1159,6 +1533,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
     #JAIMES: send the first stable surface once. The previous placeholder ->
     # objective -> live-card edit chain forced Telegram to remove/redraw the same
     # bubble several times in two seconds, which looked like cards disappearing.
+    header_message_id = "dry-run-header" if dry_run else ""
     ack_message_id = "dry-run-message" if dry_run else ""
     if not dry_run and start_visible_card:
         card_result = run_cmd([
@@ -1179,7 +1554,7 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
             f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
             "--next",
             "Work automatically; show buttons only for final approval steps if needed",
-        ] + work_card_target_args(meta))
+        ] + work_card_target_args(meta), timeout=6)
         card_receipt: dict[str, Any] = {}
         if card_result.get("ok") and card_result.get("stdout"):
             try:
@@ -1191,6 +1566,11 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         ack_message_id = str(
             card_receipt.get("message_id")
             or (card_receipt.get("result") or {}).get("message_id")
+            or ""
+        )
+        header_message_id = str(
+            card_receipt.get("header_message_id")
+            or (card_receipt.get("result") or {}).get("header_message_id")
             or ""
         )
         record_api_result(state, "sendMessage", {
@@ -1213,8 +1593,10 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
         send_chat_action(meta=meta)
         publish_jaimes(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
 
+    surface_ok = bool(ack_message_id and (not handoff_topic or header_message_id))
     return {
-        "ok": bool(dry_run or ack_message_id),
+        "ok": bool(dry_run or (surface_ok and (reaction_ok or not handoff_topic))),
+        "header_message_id": header_message_id,
         "ack_message_id": ack_message_id,
         "key": key,
         "model": display_model,
@@ -1232,16 +1614,50 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
 
 
 def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, dry_run: bool = False) -> int:
-    """Align the current live card to 100% once its final answer is stored."""
+    """Normalize the delivered native final, then align the live card to 100%."""
     completed = 0
     for run_id, card in (state.get("active_cards") or {}).items():
         if not isinstance(card, dict) or card.get("status") == "done":
             continue
         match = re.fullmatch(r"telegram-message-(\d+)", str(run_id))
-        if not match or not final_assistant_message_after(session_id, int(match.group(1))):
+        if not match:
+            continue
+        final_record = final_assistant_record_after(session_id, int(match.group(1)))
+        if not final_record:
+            continue
+        native_final_id = str(final_record.get("platform_message_id") or "")
+        if not native_final_id:
+            card["final_contract_status"] = "waiting_for_telegram_delivery_id"
             continue
         key = str(card.get("key") or "")
         if not key:
+            continue
+        formatted_final = structured_final_text(
+            str(final_record.get("content") or ""),
+            objective=str(card.get("objective") or "JAIMES Telegram task"),
+            model=str(card.get("model") or DEFAULT_MODEL),
+            route=str(card.get("route") or DEFAULT_ROUTE),
+        )
+        if not final_contract_is_canonical(formatted_final):
+            card["final_contract_status"] = "formatter_error"
+            continue
+        if dry_run:
+            edit_result = {"ok": True, "dry_run": True}
+        else:
+            edit_result = edit_message(
+                native_final_id,
+                formatted_final,
+                meta=card,
+                parse_mode="HTML",
+            )
+            record_api_result(state, "editMessageText", edit_result)
+        not_modified = "message is not modified" in str(
+            edit_result.get("description") or edit_result.get("error") or ""
+        ).lower()
+        if not edit_result.get("ok") and not not_modified:
+            card["final_contract_status"] = "retry_same_message"
+            card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
+            card["native_final_message_id"] = native_final_id
             continue
         cmd = [
             "python3", "mission-control/scripts/jaimes_work_card.py", "done",
@@ -1258,6 +1674,10 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             card["status"] = "done"
             card["ended_at"] = utc_now()
             card["last_card_update_at"] = card["ended_at"]
+            card["native_final_message_id"] = native_final_id
+            card["final_db_message_id"] = final_record.get("id")
+            card["final_contract_status"] = "canonical"
+            card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
             completed += 1
     return completed
 
@@ -1566,10 +1986,97 @@ def recent_active_card_for_meta(state: dict[str, Any], meta: dict[str, Any], max
     return max(candidates, key=lambda card: str(card.get("started_at") or "")) if candidates else None
 
 
+def inbox_handoff_topic(meta: dict[str, Any] | None) -> bool:
+    return bool(
+        str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+        and str((meta or {}).get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
+    )
+
+
+def process_ack_event(
+    event: dict[str, Any],
+    *,
+    model: str,
+    state: dict[str, Any],
+    dry_run: bool,
+    meta: dict[str, Any],
+) -> dict[str, Any]:
+    """Fence Topic 1 ownership behind an exact, privacy-safe acceptance lease."""
+    if dry_run or not inbox_handoff_topic(meta):
+        return send_ack(event, model=model, state=state, dry_run=dry_run, meta=meta)
+
+    chat_id = meta.get("telegram_chat_id")
+    thread_id = meta.get("telegram_thread_id")
+    message_id = event.get("platform_message_id") or ((meta.get("origin") or {}).get("message_id"))
+    try:
+        with handoff_lock(chat_id, thread_id, message_id) as record_path:
+            record = load_json(record_path, {})
+            if not (
+                isinstance(record, dict)
+                and record.get("status") == "waiting"
+                and handoff_record_matches(record, chat_id, thread_id, message_id)
+                and handoff_record_fresh(record)
+            ):
+                return {
+                    "ok": False,
+                    "handoff_terminal_failure": True,
+                    "error": "handoff_lease_unavailable",
+                    "reaction_ok": False,
+                    "header_message_id": "",
+                    "ack_message_id": "",
+                }
+
+            result = send_ack(event, model=model, state=state, dry_run=False, meta=meta)
+            if result.get("ok"):
+                accepted_at = dt.datetime.now(dt.timezone.utc)
+                receipt = {
+                    "schema_version": 1,
+                    "status": "accepted",
+                    "agent": "jaimes",
+                    "chat_id": str(chat_id),
+                    "thread_id": str(thread_id),
+                    "inbound_message_id": str(message_id),
+                    "reaction_ok": True,
+                    "header_message_id": str(result.get("header_message_id") or ""),
+                    "live_message_id": str(result.get("ack_message_id") or ""),
+                    "accepted_at": accepted_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "expires_at": (accepted_at + dt.timedelta(seconds=HANDOFF_RECEIPT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                }
+                write_handoff_record(record_path, receipt)
+                result["handoff_receipt"] = receipt
+                return result
+
+            failure = {
+                **record,
+                "status": "failed",
+                "failed_at": utc_now(),
+                "reason": str(result.get("error") or "jaimes_surface_acceptance_failed")[:120],
+            }
+            write_handoff_record(record_path, failure)
+            result["handoff_terminal_failure"] = True
+            return result
+    except ValueError:
+        return {
+            "ok": False,
+            "handoff_terminal_failure": True,
+            "error": "invalid_handoff_origin",
+            "reaction_ok": False,
+            "header_message_id": "",
+            "ack_message_id": "",
+        }
+
+
 def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state = load_json(STATE_PATH, {})
     if not isinstance(state, dict):
         state = {}
+    if not dry_run and not verify_bot_identity(state):
+        state["last_checked_at"] = utc_now()
+        state["status"] = "telegram-identity-error"
+        state["last_error_at"] = utc_now()
+        state["last_error"] = "JAIMES Telegram bot identity verification failed"
+        save_json(STATE_PATH, state)
+        return {"ok": False, "status": state["status"]}
     acked = set(state.get("acked_prompt_events") or [])
     metas = active_hermes_sessions_metadata()
     if not metas:
@@ -1606,7 +2113,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         compaction_session = session_has_compaction_marker(sid)
         for event in batch:
             event_id = f"{event['session_id']}:{event['ts']}"
-            state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
+            event_db_id = int(event.get("db_message_id") or 0)
             if (
                 str(session_meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
                 and str(session_meta.get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
@@ -1614,16 +2121,29 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             ):
                 # Topic 1 remains Josh-owned unless JAIMES is directly tagged.
                 acked.add(event_id)
+                state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
                 continue
+            if (
+                inbox_handoff_topic(session_meta)
+                and direct_jaimes_mention(event.get("prompt") or "")
+                and not dry_run
+                and not active_handoff_lease(session_meta, event)
+            ):
+                # Do not advance the Hermes cursor until Josh's exact-message
+                # waiter has created a lease. This closes the arrival-order race
+                # between the two Telegram gateways without sending late cards.
+                break
             age = event_age_seconds(event["ts"])
             event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
             replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
             replay_duplicate = compaction_session and replayed_prompt_from_other_session(event)
             if internal_replay_prompt(event.get("prompt") or "") or replay_adjacent or replay_duplicate or (age is not None and age > STALE_BOOTSTRAP_SECONDS):
                 acked.add(event_id)
+                state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
                 continue
             if event_id not in acked:
                 candidates.append((event_ts, event, session_meta))
+            state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
 
     # Preserve the existing anti-replay rule: if multiple genuine turns arrive
     # during one catch-up pass, only the newest creates visible Telegram UX.
@@ -1651,7 +2171,13 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     for event in events:
         event_id = f"{event['session_id']}:{event['ts']}"
         queued_x = 0 if dry_run else queue_forwarded_x_intelligence(event, selected_meta)
-        result = send_ack(event, model=selected_model, state=state, dry_run=dry_run, meta=selected_meta)
+        result = process_ack_event(
+            event,
+            model=selected_model,
+            state=state,
+            dry_run=dry_run,
+            meta=selected_meta,
+        )
         if queued_x:
             result["x_intelligence_queued"] = queued_x
         if result.get("ok"):
@@ -1664,6 +2190,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "objective": result.get("objective"),
                     "model": result.get("model"),
                     "route": result.get("route"),
+                    "header_message_id": result.get("header_message_id"),
                     "ack_message_id": result.get("ack_message_id"),
                     "telegram_chat_id": selected_meta.get("telegram_chat_id"),
                     "telegram_thread_id": selected_meta.get("telegram_thread_id"),
@@ -1676,6 +2203,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 }
             sent.append({"event": event_id, "result": result})
         else:
+            if result.get("handoff_terminal_failure"):
+                acked.add(event_id)
             sent.append({"event": event_id, "result": result})
             break
 
@@ -1718,7 +2247,17 @@ def main() -> int:
     parser.add_argument("--once", action="store_true", help="Run one poll and exit.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interval", type=float, default=1.5)
+    parser.add_argument("--await-handoff", action="store_true", help="Wait for an exact Topic 1 JAIMES acceptance receipt.")
+    parser.add_argument("--chat-id", default="")
+    parser.add_argument("--thread-id", default="")
+    parser.add_argument("--message-id", default="")
+    parser.add_argument("--timeout", type=float, default=10.0)
     args = parser.parse_args()
+
+    if args.await_handoff:
+        code, receipt = await_handoff(args.chat_id, args.thread_id, args.message_id, args.timeout)
+        print(json.dumps(receipt, sort_keys=True))
+        return code
 
     if args.once:
         print(json.dumps(poll_once(dry_run=args.dry_run), indent=2))

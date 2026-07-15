@@ -70,13 +70,13 @@ def test_missing_message_retry_reuses_run_scoped_card_key():
     assert first["key"] == second["key"]
 
 
-def test_claim_inbox_queues_when_ack_explicitly_reports_failure():
+def test_claim_inbox_leaves_native_fallback_when_ack_reports_failure():
     args = argparse.Namespace(run_id="before-dispatch:1", message_id="", chat_id="-100", thread_id="1", session_key="session", dry_run=False)
-    submitted = {"ok": True, "stdout": '{"job":{"jobId":"job-1"},"route":{"routeId":"route-1"},"deduplicated":false}'}
-    with patch("sys.stdin.read", return_value="private request"), patch.object(watcher, "send_ack", return_value={"ok": False, "key": "card-1", "objective": "Request", "model": "model", "route": "route", "last_card_update_at": "now"}), patch.object(watcher, "run_cmd", return_value=submitted) as run_cmd, patch.object(watcher, "load_json", return_value={}), patch.object(watcher, "save_json"), patch.object(watcher, "publish_josh"):
+    with patch("sys.stdin.read", return_value="private request"), patch.object(watcher, "send_ack", return_value={"ok": False, "status": "reaction-failed", "reaction_ok": False, "key": "card-1"}), patch.object(watcher, "run_cmd") as run_cmd, patch.object(watcher, "publish_josh"):
         result = watcher.claim_inbox(args)
-    assert result["status"] == "queued"
-    assert any("submit" in call.args[0] for call in run_cmd.call_args_list)
+    assert result["status"] == "reaction-failed"
+    assert result["reaction_ok"] is False
+    run_cmd.assert_not_called()
 
 
 def test_coordinator_worker_gets_heartbeat_while_running():

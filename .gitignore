@@ -26,6 +26,19 @@ data/shared-layer-adoption.json
 data/memory-operations.json
 data/memory-registry.sqlite*
 scripts/__pycache__/
+tests/__pycache__/
+**/__pycache__/
+.venv-qa/
+data/.ecosystem-qa-locks/
+data/control-tower-live.json
+data/agent-route-benchmark-results.json
+data/ecosystem-qa-benchmark.json
+data/ecosystem-qa-scheduler.json
+data/ecosystem-runtime-probe.json
+data/ecosystem-retention.json
+data/jaimes-control-tower-blackbox.json
+data/remote-qa-ingest-status.json
+data/inbox-coordinator-telemetry.jsonl
 # JAIMES repo-hygiene cleanup 2026-07-01: local backup/temp noise from live fixes should stay out of git.
 *.bak-*
 *.disabled-*

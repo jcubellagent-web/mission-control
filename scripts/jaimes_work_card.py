@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
+import fcntl
 import html
 import json
 import os
@@ -11,6 +13,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 import textwrap
 import urllib.error
 import urllib.request
@@ -26,7 +29,16 @@ CARD_CONTINUATION_INDENT = "   "
 #JAIMES: one absolute state path prevents completion calls launched from a
 #different cwd from rebuilding the card with only the last "summary sent" row.
 STATE_PATH = Path(os.environ.get("JAIMES_WORK_CARD_STATE", str(ROOT.parent / "memory" / "jaimes_work_cards.json")))
+LOCK_PATH = Path(os.environ.get("JAIMES_WORK_CARD_LOCK", str(STATE_PATH.with_suffix(".lock"))))
 ACK_STATE_PATH = Path(os.environ.get("JAIMES_FAST_ACK_STATE", str(Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json")))
+CONTROL_CENTER_CHAT_ID = "-1003589561528"
+INBOX_THREAD_ID = "1"
+TASK_HEADER_ENV = "JAIMES_TELEGRAM_TASK_HEADERS"
+HEADER_LABEL_WIDTH = 9
+HEADER_VALUE_WIDTH = 25
+DEFAULT_RECONCILE_MAX_AGE_SECONDS = 12 * 60 * 60
+ACTIVE_WORK_CARD_STATUSES = {"active", "running"}
+TERMINAL_FAST_ACK_STATUSES = {"done", "failed", "paused", "retired", "complete", "completed"}
 ENV_PATHS = [
     HOME / ".hermes" / ".env",
     HOME / ".openclaw" / "service-env" / "ai.openclaw.gateway.env",
@@ -100,9 +112,24 @@ def load_json_file(path: Path, fallback: dict) -> dict:
 
 def save_json_file(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    tmp.replace(path)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        # State contains Telegram message identifiers and origin metadata. Keep
+        # both newly-created stores and replacements private even when a caller
+        # has an unusually permissive umask.
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+        os.chmod(path, 0o600)
+    finally:
+        try:
+            os.unlink(tmp_name)
+        except FileNotFoundError:
+            pass
 
 
 def claim_pending_ack(card_key: str, chat_id: str | None, thread_id: str | None) -> str:
@@ -128,10 +155,182 @@ def claim_pending_ack(card_key: str, chat_id: str | None, thread_id: str | None)
 
 
 def save_state(state: dict) -> None:
-    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    tmp = STATE_PATH.with_suffix(STATE_PATH.suffix + ".tmp")
-    tmp.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    tmp.replace(STATE_PATH)
+    save_json_file(STATE_PATH, state)
+
+
+def parse_utc_timestamp(value: object) -> dt.datetime | None:
+    """Parse a persisted ISO timestamp without guessing when it is invalid."""
+    try:
+        parsed = dt.datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _strict_json_object(path: Path, *, missing: dict) -> dict:
+    """Read state for maintenance without load_state's lossy fallback."""
+    if not path.exists():
+        return missing
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Cannot safely read {path.name}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise RuntimeError(f"Cannot safely reconcile {path.name}: root must be an object")
+    return value
+
+
+def active_fast_ack_card_keys(state: dict) -> set[str]:
+    """Return work-card keys still owned by a non-terminal fast-ack run."""
+    active = state.get("active_cards", {})
+    if not isinstance(active, dict):
+        raise RuntimeError("Cannot safely reconcile fast-ack state: active_cards must be an object")
+    keys: set[str] = set()
+    for run_id, record in active.items():
+        if not isinstance(record, dict):
+            continue
+        status = str(record.get("status") or "").strip().lower()
+        if status in TERMINAL_FAST_ACK_STATUSES:
+            continue
+        key = str(record.get("key") or run_id or "").strip()
+        if key:
+            keys.add(key)
+    return keys
+
+
+def _timestamped_state_backup(now: dt.datetime) -> Path:
+    """Copy the exact pre-mutation state into a private, timestamped backup."""
+    if not STATE_PATH.exists():
+        raise RuntimeError("Cannot create a reconciliation backup: work-card state is missing")
+    timestamp = now.astimezone(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    base = STATE_PATH.with_name(f"{STATE_PATH.name}.{timestamp}.bak")
+    candidate = base
+    suffix = 1
+    while candidate.exists():
+        candidate = base.with_name(f"{base.name}.{suffix}")
+        suffix += 1
+    payload = STATE_PATH.read_bytes()
+    fd = os.open(candidate, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except Exception:
+        try:
+            candidate.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    os.chmod(candidate, 0o600)
+    return candidate
+
+
+def _reconcile_work_cards(
+    *,
+    max_age_seconds: int = DEFAULT_RECONCILE_MAX_AGE_SECONDS,
+    dry_run: bool = False,
+    now: dt.datetime | None = None,
+) -> dict:
+    """Retire stale, unowned records without touching their Telegram messages."""
+    if max_age_seconds < 0:
+        raise ValueError("max_age_seconds must be zero or greater")
+    current = now or dt.datetime.now(dt.timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=dt.timezone.utc)
+    current = current.astimezone(dt.timezone.utc)
+
+    state = _strict_json_object(STATE_PATH, missing={"cards": {}})
+    cards = state.get("cards")
+    if not isinstance(cards, dict):
+        raise RuntimeError("Cannot safely reconcile work-card state: cards must be an object")
+    fast_ack_state = _strict_json_object(ACK_STATE_PATH, missing={})
+    owned_keys = active_fast_ack_card_keys(fast_ack_state)
+
+    candidates: list[str] = []
+    skipped = {
+        "fast_ack_active": 0,
+        "fresh": 0,
+        "invalid_updated_at": 0,
+        "terminal": 0,
+        "invalid_record": 0,
+    }
+    for key, record in cards.items():
+        if not isinstance(record, dict):
+            skipped["invalid_record"] += 1
+            continue
+        status = str(record.get("status") or "").strip().lower()
+        if status not in ACTIVE_WORK_CARD_STATUSES:
+            skipped["terminal"] += 1
+            continue
+        if str(key) in owned_keys:
+            skipped["fast_ack_active"] += 1
+            continue
+        updated = parse_utc_timestamp(record.get("updated_at"))
+        if updated is None:
+            # Missing or malformed timestamps are ambiguous, so preserve them
+            # for operator review instead of guessing that they are stale.
+            skipped["invalid_updated_at"] += 1
+            continue
+        age_seconds = (current - updated).total_seconds()
+        if age_seconds < max_age_seconds:
+            skipped["fresh"] += 1
+            continue
+        candidates.append(str(key))
+
+    backup_path: Path | None = None
+    retired_at = current.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    reason = f"stale-for-{max_age_seconds}s-without-active-fast-ack-owner"
+    if candidates and not dry_run:
+        # Back up the exact on-disk bytes before modifying the in-memory state.
+        backup_path = _timestamped_state_backup(current)
+        for key in candidates:
+            record = cards[key]
+            record.setdefault("previous_status", record.get("status"))
+            record["status"] = "retired"
+            record["retired_at"] = retired_at
+            record["retired_reason"] = reason
+        save_state(state)
+
+    return {
+        "ok": True,
+        "dry_run": dry_run,
+        "max_age_seconds": max_age_seconds,
+        "scanned": len(cards),
+        "retired": len(candidates),
+        "retired_keys": sorted(candidates),
+        "active_fast_ack_keys": sorted(owned_keys),
+        "skipped": skipped,
+        "backup": str(backup_path) if backup_path else "",
+        "telegram_messages_changed": False,
+        "brain_feed_published": False,
+    }
+
+
+def reconcile_work_cards(
+    *,
+    max_age_seconds: int = DEFAULT_RECONCILE_MAX_AGE_SECONDS,
+    dry_run: bool = False,
+    now: dt.datetime | None = None,
+) -> dict:
+    with state_lock():
+        return _reconcile_work_cards(max_age_seconds=max_age_seconds, dry_run=dry_run, now=now)
+
+
+@contextlib.contextmanager
+def state_lock():
+    """Serialize send/edit/checkpoint operations across overlapping workers."""
+    LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with LOCK_PATH.open("a+", encoding="utf-8") as handle:
+        os.fchmod(handle.fileno(), 0o600)
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def parse_list(value: str | None) -> list[str]:
@@ -275,6 +474,91 @@ def operator_objective(title: str) -> str:
     return compact(intent or "Handle the current Telegram task.", limit=90)
 
 
+def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
+    """Default the immutable routing receipt on for the Control Center Inbox."""
+    raw = os.environ.get(TASK_HEADER_ENV, "").strip().lower()
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+
+
+def route_fact(value: str, key: str) -> str:
+    for item in str(value or "").split(";"):
+        if "=" not in item:
+            continue
+        raw_key, raw_value = item.split("=", 1)
+        normalized = re.sub(r"^(?:planned|actual|verified)\s+", "", raw_key.strip().lower())
+        if normalized == key:
+            return clean_live_text(raw_value)
+    return ""
+
+
+def planned_agent_name(model: str, route: str) -> str:
+    worker = (route_fact(model, "worker") or route_fact(route, "worker")).lower()
+    haystack = f"{worker} {route}".lower()
+    if "joshex" in haystack:
+        return "JOSHeX"
+    if "jain" in haystack or "j.a.i.n" in haystack:
+        return "J.AI.N"
+    if "gemini" in haystack:
+        return "JAIMES / Gemini"
+    if "grok" in haystack or "xai" in haystack:
+        return "JAIMES / Grok"
+    return "JAIMES system"
+
+
+def planned_models(model: str, route: str) -> list[str]:
+    results: list[str] = []
+    for source in (model, route):
+        provider = route_fact(source, "provider")
+        raw_models = route_fact(source, "models") or route_fact(source, "model")
+        for raw in re.split(r"\s*(?:,|\||→|->)\s*", raw_models):
+            item = clean_live_text(raw)
+            if not item:
+                continue
+            label = item if "/" in item or not provider else f"{provider}/{item}"
+            if label not in results:
+                results.append(label)
+    fallback = friendly_model_line(model)
+    if not results and fallback:
+        results.append(fallback)
+    return results or ["Route-selected model"]
+
+
+def task_header_row(label: str, value: str) -> list[str]:
+    parts = textwrap.wrap(
+        clean_live_text(value),
+        width=HEADER_VALUE_WIDTH,
+        break_long_words=True,
+        break_on_hyphens=False,
+    ) or [""]
+    rows = []
+    for index, part in enumerate(parts):
+        row_label = compact(label, limit=HEADER_LABEL_WIDTH) if index == 0 else ""
+        rows.append(f"│{row_label:<{HEADER_LABEL_WIDTH}}│ {part:<{HEADER_VALUE_WIDTH}}│")
+    return rows
+
+
+def build_task_header(*, title: str, model: str, route: str) -> str:
+    """Build the fixed-width routing receipt shown before the editable card."""
+    divider_top = f"┌{'─' * HEADER_LABEL_WIDTH}┬{'─' * (HEADER_VALUE_WIDTH + 1)}┐"
+    divider_mid = f"├{'─' * HEADER_LABEL_WIDTH}┼{'─' * (HEADER_VALUE_WIDTH + 1)}┤"
+    divider_bottom = f"└{'─' * HEADER_LABEL_WIDTH}┴{'─' * (HEADER_VALUE_WIDTH + 1)}┘"
+    lines = [
+        "TASK HEADER",
+        divider_top,
+        *task_header_row("Objective", operator_objective(title)),
+        divider_mid,
+        *task_header_row("Agent", planned_agent_name(model, route)),
+        divider_mid,
+        *task_header_row("Models", " → ".join(planned_models(model, route))),
+        divider_bottom,
+    ]
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+
+
 def friendly_model_line(model: str) -> str:
     text = clean_live_text(model)
     lower = text.lower()
@@ -284,7 +568,7 @@ def friendly_model_line(model: str) -> str:
     # labels such as "JAIMES / OpenCLAW" hide tier changes and made Terra or
     # Sol sessions appear to still be GPT-5.5.
     runtime_match = re.search(
-        r"(?:provider=)?(openai-codex|openai|google-gemini-cli|gemini|xai|grok|openrouter)"
+        r"(?:provider=)?(openai-codex|codex|openai|google-gemini-cli|gemini|xai|grok|openrouter)"
         r"[/; ,]+(?:model=)?([a-z0-9][a-z0-9._:\-]+)",
         text,
         re.I,
@@ -590,9 +874,16 @@ def progress_lines(items: list[str], status: str, planned_steps: int = 0) -> lis
             return ["Progress: ██████████ 100% - complete", ""]
         return ["Progress: ░░░░░░░░░░ 0% - starting", ""]
 
-    done_count = sum(1 for line in clean if line.startswith(("✅", "🏁")))
-    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳")))
-    total = max(int(planned_steps or 0), done_count + (1 if active_count else 0), 1)
+    combined = " ".join(clean).lower()
+    phase_hits = [
+        any(marker in combined for marker in ("📥 received", "📌 objective")),
+        any(marker in combined for marker in ("📌 objective", "🤖 model", "🧭 skill", "route", "runbook")),
+        any(marker in combined for marker in ("🔧", "⚙️ action", "🧰 tool", "✅ action", "✅ tool", "implement", "deploy", "build")),
+        any(marker in combined for marker in ("🧪 verify", "✅ verify", "verified", "test", "passed", "healthy")),
+    ]
+    done_count = sum(phase_hits)
+    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳", "⚙️", "🧰", "🧪")))
+    total = max(4, int(planned_steps or 0))
     if complete_status:
         percent = 100
     elif status == "failed":
@@ -604,11 +895,11 @@ def progress_lines(items: list[str], status: str, planned_steps: int = 0) -> lis
     filled = max(0, min(10, round(percent / 10)))
     bar = "█" * filled + "░" * (10 - filled)
     if complete_status:
-        detail = f"{done_count}/{max(done_count, total)} checkpoints complete" if total > 1 else "complete"
+        detail = "complete"
     elif active_count:
-        detail = f"{done_count}/{total} checkpoints complete"
+        detail = f"{done_count}/{total} phases complete"
     else:
-        detail = f"{done_count}/{total} checkpoints complete"
+        detail = f"{done_count}/{total} phases complete"
     return [f"Progress: {bar} {percent}% - {detail}", ""]
 
 
@@ -753,7 +1044,7 @@ def build_card(
         f"🤖 {html.escape(friendly_model_line(model_line))}",
         "",
         "<b>🎯 Objective</b>",
-        html.escape(operator_objective(title)),
+        html.escape(hanging_wrap(operator_objective(title))),
         "",
         "<b>📊 Progress</b>",
         html.escape(progress),
@@ -981,7 +1272,7 @@ def load_buttons(args: argparse.Namespace, status: str) -> list | None:
     return None
 
 
-def upsert_card(args: argparse.Namespace, status: str) -> int:
+def _upsert_card(args: argparse.Namespace, status: str) -> int:
     state = load_state()
     cards = state.setdefault("cards", {})
     existing = cards.get(args.key, {})
@@ -1014,6 +1305,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     if not args.separate_message and not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
         ack_message_id = claim_pending_ack(args.key, chat_id, thread_id)
         objective_message_id = ack_message_id or objective_message_id
+    header_enabled = task_headers_enabled(chat_id, thread_id)
+    header_text = build_task_header(title=title, model=model, route=route)
     text = build_card(
         title=title,
         status=status,
@@ -1040,11 +1333,80 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         )
 
     if args.dry_run:
-        print(json.dumps({"ok": True, "dry_run": True, "text": text, "final_text": final_text, "buttons": buttons, "existing": existing}, indent=2))
+        print(json.dumps({
+            "ok": True,
+            "dry_run": True,
+            "task_header": header_enabled,
+            "header_text": header_text,
+            "text": text,
+            "final_text": final_text,
+            "buttons": buttons,
+            "existing": existing,
+        }, indent=2))
         return 0
 
     card_buttons = buttons if status == "running" else None
     final_buttons = buttons if status in {"done", "failed"} else None
+
+    header_message_id = existing.get("header_message_id")
+    header_action = None
+    if status == "running" and not header_message_id and not existing.get("message_id") and header_enabled:
+        if objective_message_id:
+            header_result = edit_card(
+                objective_message_id,
+                header_text,
+                None,
+                args.timeout,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            header_action = "adopted"
+            header_message_id = objective_message_id
+        else:
+            header_result = send_card(
+                header_text,
+                None,
+                args.timeout,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            header_action = "sent"
+            header_message_id = (header_result.get("result") or {}).get("message_id")
+        if not header_result.get("ok") or not header_message_id:
+            print(json.dumps({
+                "ok": False,
+                "action": f"header_{header_action}",
+                "error": header_result.get("error") or "Telegram did not return a task-header message id",
+            }, indent=2), file=sys.stderr)
+            return 1
+        # Checkpoint the immutable header before the editable live-card send.
+        # A retry can then resume without duplicating the header.
+        cards[args.key] = {
+            "title": title,
+            "header_message_id": header_message_id,
+            "message_id": None,
+            "ack_message_id": objective_message_id,
+            "final_message_id": existing.get("final_message_id"),
+            "approval_message_id": existing.get("approval_message_id"),
+            "status": status,
+            "updated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "done": done,
+            "work_log": done,
+            "current_step": render_now,
+            "planned_steps": planned_steps,
+            "route": route,
+            "model": model,
+            "next_step": args.next or existing.get("next_step") or "",
+            "retention": "persistent-edit-only",
+            "chat_id": chat_id,
+            "thread_id": thread_id,
+        }
+        save_state(state)
+        existing = cards[args.key]
+    if header_enabled and header_message_id:
+        # The header is its own durable receipt; never adopt or overwrite it as
+        # the editable live work card.
+        ack_message_id = ""
 
     if existing.get("message_id"):
         result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
@@ -1067,6 +1429,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         message_id = result.get("result", {}).get("message_id")
     elif action == "adopted":
         message_id = ack_message_id
+    if not message_id:
+        print(json.dumps({
+            "ok": False,
+            "action": action,
+            "error": "Telegram accepted the live card without returning a message id",
+        }, indent=2), file=sys.stderr)
+        return 1
     final_message_id = existing.get("final_message_id")
     final_action = None
     if final_text:
@@ -1086,16 +1455,17 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             final_message_id = final_result.get("result", {}).get("message_id")
 
     approval_message_id = existing.get("approval_message_id")
-    if final_buttons:
+    if final_buttons and not approval_message_id:
         approval_result = send_card("Approval options:", final_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         if approval_result.get("ok"):
             approval_message_id = approval_result.get("result", {}).get("message_id")
 
-    if ack_message_id and title and title.lower() not in {"latest telegram task received", "determining objective"}:
-        edit_objective_message(ack_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
+    if args.separate_message and objective_message_id and not header_enabled and title and title.lower() not in {"latest telegram task received", "determining objective"}:
+        edit_objective_message(objective_message_id, title, model, args.timeout, chat_id=chat_id, thread_id=thread_id)
 
     cards[args.key] = {
         "title": title,
+        "header_message_id": header_message_id,
         "message_id": message_id,
         "ack_message_id": objective_message_id,
         "final_message_id": final_message_id,
@@ -1115,8 +1485,22 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
     }
     save_state(state)
     publish_brain_feed(args, status)
-    print(json.dumps({"ok": True, "action": action, "final_action": final_action, "key": args.key, "message_id": message_id, "final_message_id": final_message_id}, indent=2))
+    print(json.dumps({
+        "ok": True,
+        "header_action": header_action,
+        "action": action,
+        "final_action": final_action,
+        "key": args.key,
+        "header_message_id": header_message_id,
+        "message_id": message_id,
+        "final_message_id": final_message_id,
+    }, indent=2))
     return 0
+
+
+def upsert_card(args: argparse.Namespace, status: str) -> int:
+    with state_lock():
+        return _upsert_card(args, status)
 
 
 def main() -> int:
@@ -1129,11 +1513,12 @@ def main() -> int:
               scripts/jaimes_work_card.py start --key mc-fix --title "Control Tower fix" --now "reading files"
               scripts/jaimes_work_card.py update --key mc-fix --now "running tests" --done "patched CSS|py_compile passed"
               scripts/jaimes_work_card.py done --key mc-fix --done "tests passed|pushed main"
+              scripts/jaimes_work_card.py reconcile --dry-run
             """
         ),
     )
-    parser.add_argument("action", choices=["start", "update", "done", "fail", "pause"])
-    parser.add_argument("--key", required=True, help="Stable task key, e.g. sorare-lineup-check")
+    parser.add_argument("action", choices=["start", "update", "done", "fail", "pause", "reconcile"])
+    parser.add_argument("--key", help="Stable task key, e.g. sorare-lineup-check")
     parser.add_argument("--title", help="Human-readable task title")
     parser.add_argument("--model", help="Visible model/auth line")
     parser.add_argument("--route", help="Visible route line")
@@ -1155,9 +1540,34 @@ def main() -> int:
     parser.add_argument("--no-final-summary", action="store_true", help="Deprecated default; card status updates no longer send separate final summaries")
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--max-age-seconds",
+        type=int,
+        default=DEFAULT_RECONCILE_MAX_AGE_SECONDS,
+        help="For reconcile only: retire unowned active records at least this old (default: 43200)",
+    )
     parser.add_argument("--no-brain-feed", action="store_true", help="Skip Brain Feed only for dry-runs or ALLOW_NO_BRAIN_FEED=1 maintenance")
     args = parser.parse_args()
 
+    if args.action == "reconcile":
+        if args.max_age_seconds < 0:
+            parser.error("--max-age-seconds must be zero or greater")
+        try:
+            result = reconcile_work_cards(max_age_seconds=args.max_age_seconds, dry_run=args.dry_run)
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(json.dumps({
+                "ok": False,
+                "action": "reconcile",
+                "error": str(exc),
+                "telegram_messages_changed": False,
+                "brain_feed_published": False,
+            }, indent=2), file=sys.stderr)
+            return 1
+        print(json.dumps(result, indent=2))
+        return 0
+
+    if not args.key:
+        parser.error("--key is required for start, update, done, fail, and pause")
     if args.buttons and args.buttons_file:
         parser.error("Use either --buttons or --buttons-file, not both")
 

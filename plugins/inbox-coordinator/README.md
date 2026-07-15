@@ -12,10 +12,16 @@ cache. The helper can therefore place the eyes reaction before it creates one
 live card and submits one asynchronous coordinator worker. Prompt text is never
 placed in a process argument, cache, or plugin log.
 
-Direct `@JAIMES`/`@JAIN` mentions are claimed silently by Josh 2.0 so its main
-model does not also answer; the JAIMES bot remains the visible owner. `#jaimes`
-and plain-language delegation requests are routing hints and remain owned by
-Josh 2.0 for explicit worker delegation.
+Direct `@JAIMES` mentions are handed off only when the JAIMES health
+snapshot is fresh and JAIMES returns a per-message acceptance receipt for the
+exact chat, topic, and inbound message. That receipt proves the eyes reaction,
+immutable task header, and editable live card all exist before Josh 2.0 stands
+down. A timeout, stale or mismatched receipt, missing surface, or unhealthy
+watcher falls back to Josh 2.0 instead of silently dropping the message. The
+cross-host handoff carries numeric origin IDs only; prompt text never leaves the
+normal Telegram delivery lanes. `#jaimes` and plain-language delegation
+requests, including `@JAIN`, remain Josh-owned routing hints for explicit
+worker delegation.
 
 ## Verify
 
