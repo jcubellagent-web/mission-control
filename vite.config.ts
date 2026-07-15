@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync, statSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 
 const dataRoot = resolve(__dirname, "data");
@@ -21,6 +21,62 @@ const liveWatchFiles = [
   "codex-jobs.json",
   "agent-heartbeats.json",
 ];
+const walletRefreshTimeoutMs = 60_000;
+const walletRefreshOutputLimit = 64 * 1024;
+type WalletRefreshResult = { status: number; stdout: string; stderr: string; timedOut: boolean };
+let walletRefreshInFlight: Promise<WalletRefreshResult> | null = null;
+
+function boundedAppend(current: string, chunk: unknown) {
+  if (current.length >= walletRefreshOutputLimit) return current;
+  return (current + String(chunk ?? "")).slice(0, walletRefreshOutputLimit);
+}
+
+function runWalletRefresh(): Promise<WalletRefreshResult> {
+  if (walletRefreshInFlight) return walletRefreshInFlight;
+  //JAIMES: Keep wallet refresh single-flight and asynchronous so scheduled refreshes never freeze Control Tower HTTP/SSE.
+  const operation = new Promise<WalletRefreshResult>((resolveResult) => {
+    const child = spawn("python3", ["scripts/refresh_agentic_robinhood_wallet_live.py"], {
+      cwd: __dirname,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let timedOut = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let forceKill: ReturnType<typeof setTimeout> | undefined;
+    const finish = (result: WalletRefreshResult) => {
+      if (settled) return;
+      settled = true;
+      if (timeout) clearTimeout(timeout);
+      if (forceKill) clearTimeout(forceKill);
+      resolveResult(result);
+    };
+    child.stdout?.on("data", (chunk) => { stdout = boundedAppend(stdout, chunk); });
+    child.stderr?.on("data", (chunk) => { stderr = boundedAppend(stderr, chunk); });
+    child.on("error", (error) => finish({ status: 125, stdout, stderr: boundedAppend(stderr, error.message), timedOut: false }));
+    child.on("close", (code) => finish({
+      status: timedOut ? 124 : (code ?? 125),
+      stdout,
+      stderr,
+      timedOut,
+    }));
+    timeout = setTimeout(() => {
+      timedOut = true;
+      stderr = boundedAppend(stderr, "wallet refresh timed out");
+      child.kill("SIGTERM");
+      forceKill = setTimeout(() => {
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      }, 5_000);
+      forceKill.unref?.();
+    }, walletRefreshTimeoutMs);
+    timeout.unref?.();
+  });
+  walletRefreshInFlight = operation.finally(() => {
+    walletRefreshInFlight = null;
+  });
+  return walletRefreshInFlight;
+}
 
 function liveSourcePayload() {
   const files: Record<string, { mtime: number | null; size: number | null }> = {};
@@ -61,19 +117,27 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
   }
 
   if (pathname === "/actions/agentic-crypto-refresh") {
-    const result = spawnSync("python3", ["scripts/refresh_agentic_robinhood_wallet_live.py"], {
-      cwd: __dirname,
-      encoding: "utf8",
-      timeout: 60_000,
-    });
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Cache-Control", "no-store");
-    if (result.status === 0) {
-      res.end(result.stdout || JSON.stringify({ ok: true }));
-    } else {
+    void runWalletRefresh().then((result) => {
+      if (res.writableEnded) return;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      if (result.status === 0) {
+        res.end(result.stdout || JSON.stringify({ ok: true }));
+      } else {
+        res.statusCode = 500;
+        res.end(JSON.stringify({
+          ok: false,
+          error: (result.stderr || result.stdout || "wallet refresh failed").slice(0, 500),
+          timedOut: result.timedOut,
+        }));
+      }
+    }).catch((error) => {
+      if (res.writableEnded) return;
       res.statusCode = 500;
-      res.end(JSON.stringify({ ok: false, error: (result.stderr || result.stdout || "wallet refresh failed").slice(0, 500) }));
-    }
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      res.end(JSON.stringify({ ok: false, error: String(error?.message || "wallet refresh failed").slice(0, 500) }));
+    });
     return;
   }
 

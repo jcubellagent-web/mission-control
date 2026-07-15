@@ -23,6 +23,13 @@
     "eyesReactionP95Seconds": 2,
     "objectiveHeaderP95Seconds": 5,
     "liveWorkCardP95Seconds": 8,
+    "structuredFinalCanaryP95Seconds": 60,
+    "contractStressP95Ms": 2000,
+    "contractStressMinimumSamples": 20,
+    "syntheticCanaryMinimumSamples": 20,
+    "syntheticCanaryRollingWindowSamples": 30,
+    "transportMonitoring": "passive real-task evidence plus five-minute runtime health",
+    "recurringProductionWrites": false,
     "finalMessagesPerClaim": 1,
     "orphanTypingIndicatorsAllowed": 0,
     "requiredFinalSections": ["Complete", "What was done", "Issues", "Appropriate next steps", "Approval needed"]

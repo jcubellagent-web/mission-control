@@ -105,7 +105,15 @@ def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
             )
             stdout, stderr = process.communicate(timeout=int(job.get("timeoutSeconds") or 120))
             returncode = process.returncode
-            status = "ok" if returncode == 0 else "failed"
+            skip_return_codes = {
+                int(value)
+                for value in job.get("skipReturnCodes", [])
+                if str(value).lstrip("-").isdigit()
+            }
+            if returncode in skip_return_codes:
+                status = "skipped_precondition"
+            else:
+                status = "ok" if returncode == 0 else "failed"
         except subprocess.TimeoutExpired:
             os.killpg(process.pid, signal.SIGTERM)
             try:
@@ -136,7 +144,7 @@ def publish_transition(job: dict[str, Any], current: dict[str, Any], previous: d
     previous_status = str(previous.get("status") or "unknown")
     current_status = str(current.get("status") or "unknown")
     failed = current_status in {"failed", "timeout"}
-    recovered = current_status == "ok" and previous_status in {"failed", "timeout"}
+    recovered = current_status == "ok" and int(previous.get("failureStreak") or 0) > 0
     streak = int(current.get("failureStreak") or 0)
     immediate = job.get("severity") == "p0"
     if not recovered and not (failed and (immediate or streak >= 2)):

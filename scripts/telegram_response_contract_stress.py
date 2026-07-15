@@ -36,6 +36,65 @@ MILESTONE_UPDATES = (
     "Verification test passed",
     "Final response delivered",
 )
+CANARY_JOURNAL_ENV = "TELEGRAM_CANARY_CLEANUP_JOURNAL"
+
+
+def canary_journal_path() -> Path | None:
+    value = os.environ.get(CANARY_JOURNAL_ENV, "").strip()
+    return Path(value).expanduser() if value else None
+
+
+def write_canary_journal(
+    *,
+    stage: str,
+    chat_id: str,
+    thread_id: str,
+    message_ids: list[str],
+    indeterminate_stages: list[str],
+) -> None:
+    path = canary_journal_path()
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    payload = {
+        "version": 1,
+        "updatedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "chatId": str(chat_id),
+        "threadId": str(thread_id),
+        "stage": str(stage)[:80],
+        "messageIds": list(dict.fromkeys(str(value) for value in message_ids if str(value).isdigit())),
+        "indeterminateStages": list(dict.fromkeys(str(value)[:80] for value in indeterminate_stages)),
+    }
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def finalize_canary_journal(cleanup: dict, chat_id: str, thread_id: str) -> None:
+    path = canary_journal_path()
+    if path is None:
+        return
+    failed_ids = [str(value) for value in cleanup.get("failedIds") or [] if str(value).isdigit()]
+    unknown = [str(value) for value in cleanup.get("indeterminateStages") or []]
+    if failed_ids or unknown:
+        write_canary_journal(
+            stage="cleanup-pending",
+            chat_id=chat_id,
+            thread_id=thread_id,
+            message_ids=failed_ids,
+            indeterminate_stages=unknown,
+        )
+    else:
+        path.unlink(missing_ok=True)
 
 
 def load_module(path: Path):
@@ -88,6 +147,8 @@ def message_id(result: dict) -> str:
 
 
 def delivery_is_indeterminate(module, result: dict) -> bool:
+    if not isinstance(result, dict):
+        return True
     if result.get("delivery_indeterminate"):
         return True
     checker = getattr(module, "delivery_indeterminate", None)
@@ -97,7 +158,7 @@ def delivery_is_indeterminate(module, result: dict) -> bool:
         except Exception:
             pass
     if result.get("ok"):
-        return False
+        return not bool(message_id(result))
     error = str(result.get("error") or result.get("description") or "").strip().lower()
     definitive = any(marker in error for marker in (
         "http error 400",
@@ -116,7 +177,7 @@ def delivery_is_indeterminate(module, result: dict) -> bool:
         "token or target chat is unavailable",
         "helper is unavailable",
     ))
-    return bool(error) and not definitive
+    return not definitive
 
 
 def live_target_problems(chat_id: str, thread_id: str | None, confirm_production: bool) -> list[str]:
@@ -195,10 +256,16 @@ def delete_with_retry(module, chat_id: str, target_message_id: str, attempts: in
             )
         except Exception as exc:  # cleanup must continue to the next tracked ID
             result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
-        if result.get("ok"):
+        error_text = str(result.get("error") or result.get("description") or "").lower()
+        already_absent = any(marker in error_text for marker in (
+            "message to delete not found",
+            "message not found",
+        ))
+        if result.get("ok") or already_absent:
             return {
                 "messageId": str(target_message_id),
                 "deleted": True,
+                "alreadyAbsent": already_absent,
                 "attempts": attempt + 1,
                 "waitsSeconds": waits,
                 "error": "",
@@ -362,6 +429,13 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
     sent_ids: list[str] = []
     indeterminate_ids: list[str] = []
     indeterminate_stages: list[str] = []
+    write_canary_journal(
+        stage="basic-send-intent",
+        chat_id=chat_id,
+        thread_id=thread_id,
+        message_ids=sent_ids,
+        indeterminate_stages=["basic-send"],
+    )
     try:
         sent = module.send_card(
             "<pre>TEMPORARY QA CANARY\n- send\n- edit\n- delete</pre>",
@@ -377,6 +451,13 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
         sent_ids.append(target)
     if delivery_is_indeterminate(module, sent):
         (indeterminate_ids if target else indeterminate_stages).append(target or "basic-send")
+    write_canary_journal(
+        stage="basic-send-receipt",
+        chat_id=chat_id,
+        thread_id=thread_id,
+        message_ids=sent_ids,
+        indeterminate_stages=indeterminate_stages,
+    )
     if not sent.get("ok") or not target:
         cleanup = cleanup_messages(
             module,
@@ -385,6 +466,7 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
             indeterminate_ids=indeterminate_ids,
             indeterminate_stages=indeterminate_stages,
         )
+        finalize_canary_journal(cleanup, chat_id, thread_id)
         return {
             "ok": False,
             "stage": "send",
@@ -410,6 +492,7 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
         indeterminate_ids=indeterminate_ids,
         indeterminate_stages=indeterminate_stages,
     )
+    finalize_canary_journal(cleanup, chat_id, thread_id)
     failures = []
     if not edited.get("ok"):
         failures.append(f"basic edit failed: {str(edited.get('error') or 'edit failed')[:160]}")
@@ -450,8 +533,21 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
     model = "system/transport-canary"
     title = "Temporary Telegram Inbox response canary"
     renderer = "unknown"
+    pending_send_stage: str | None = None
+
+    def before_send(stage: str) -> None:
+        nonlocal pending_send_stage
+        pending_send_stage = stage
+        write_canary_journal(
+            stage=f"{stage}-intent",
+            chat_id=chat_id,
+            thread_id=thread_id,
+            message_ids=sent_ids,
+            indeterminate_stages=[*indeterminate_stages, stage],
+        )
 
     def track_delivery(result: dict, stage: str) -> str:
+        nonlocal pending_send_stage
         target = message_id(result)
         if target and target not in sent_ids:
             sent_ids.append(target)
@@ -460,16 +556,29 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
                 indeterminate_ids.append(target)
             else:
                 indeterminate_stages.append(stage)
+        if pending_send_stage == stage:
+            pending_send_stage = None
+        write_canary_journal(
+            stage=f"{stage}-receipt",
+            chat_id=chat_id,
+            thread_id=thread_id,
+            message_ids=sent_ids,
+            indeterminate_stages=indeterminate_stages,
+        )
         return target
 
     def finish() -> dict:
+        unresolved_stages = list(indeterminate_stages)
+        if pending_send_stage:
+            unresolved_stages.append(pending_send_stage)
         cleanup = cleanup_messages(
             module,
             chat_id,
             sent_ids,
             indeterminate_ids=indeterminate_ids,
-            indeterminate_stages=indeterminate_stages,
+            indeterminate_stages=unresolved_stages,
         )
+        finalize_canary_journal(cleanup, chat_id, thread_id)
         result_failures = list(failures)
         exactly_one_final = final_attempts == 1 and final_successes == 1 and len(final_ids) == 1
         synthetic_checks = {
@@ -511,6 +620,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         }
 
     try:
+        before_send("anchor")
         anchor = module.send_card(
             "<pre>TEMPORARY QA CANARY\nCleanup will be attempted.</pre>",
             None,
@@ -544,6 +654,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             failures.append("eyes reaction failed")
             return finish()
 
+        before_send("task-header")
         header = module.send_card(
             module.build_task_header(title=title, model=model, route=route),
             None,
@@ -574,6 +685,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             now=first_items[-1],
             done=first_items[:-1],
         )
+        before_send("live-card")
         live = module.send_rich_message(
             rich,
             legacy,
@@ -653,6 +765,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             failures.append(f"structured final validation failed: {', '.join(final_problems)}")
             return finish()
         final_attempts += 1
+        before_send("structured-final")
         final = module.send_final_summary(
             final_text,
             15,

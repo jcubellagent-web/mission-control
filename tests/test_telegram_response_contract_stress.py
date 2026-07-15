@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -431,3 +432,69 @@ def test_basic_canary_without_module_classifier_reports_raw_timeout_indeterminat
     assert result["ok"] is False
     assert result["cleanup"]["indeterminateIds"] == []
     assert result["cleanup"]["indeterminateStages"] == ["basic-send"]
+
+
+def test_live_canary_journals_intent_before_each_message_send_and_clears_after_cleanup(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
+    journal = tmp_path / "private" / "pending.json"
+    monkeypatch.setenv(stress.CANARY_JOURNAL_ENV, str(journal))
+
+    class JournalCheckingModule(FakeLiveModule):
+        def _assert_intent(self, stage: str) -> None:
+            payload = json.loads(journal.read_text(encoding="utf-8"))
+            assert payload["stage"] == f"{stage}-intent"
+            assert stage in payload["indeterminateStages"]
+
+        def send_card(self, text, *args, **kwargs) -> dict:
+            self._assert_intent("task-header" if "Objective" in text else "anchor")
+            return super().send_card(text, *args, **kwargs)
+
+        def send_rich_message(self, rich, legacy, *args, **kwargs) -> dict:
+            self._assert_intent("live-card")
+            return super().send_rich_message(rich, legacy, *args, **kwargs)
+
+        def send_final_summary(self, text, *args, **kwargs) -> dict:
+            self._assert_intent("structured-final")
+            return super().send_final_summary(text, *args, **kwargs)
+
+    result = stress.live_canary(JournalCheckingModule(), "-1001", "1")
+
+    assert result["ok"] is True
+    assert not journal.exists()
+    assert journal.parent.stat().st_mode & 0o777 == 0o700
+
+
+def test_live_canary_retains_private_journal_when_cleanup_fails(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
+    journal = tmp_path / "private" / "pending.json"
+    monkeypatch.setenv(stress.CANARY_JOURNAL_ENV, str(journal))
+    module = FakeLiveModule()
+    module.delete_behaviors["103"] = [{"ok": False, "error": "retention policy"}] * 3
+
+    result = stress.live_canary(module, "-1001", "1")
+    payload = json.loads(journal.read_text(encoding="utf-8"))
+
+    assert result["ok"] is False
+    assert payload["stage"] == "cleanup-pending"
+    assert payload["messageIds"] == ["103"]
+    assert payload["indeterminateStages"] == []
+    assert journal.stat().st_mode & 0o777 == 0o600
+
+
+def test_cleanup_treats_a_previously_deleted_journal_message_as_absent() -> None:
+    module = FakeLiveModule()
+    module.delete_behaviors["901"] = [{"ok": False, "error": "Bad Request: message to delete not found"}]
+
+    result = stress.delete_with_retry(module, "-1001", "901")
+
+    assert result["deleted"] is True
+    assert result["alreadyAbsent"] is True
+    assert result["attempts"] == 1
+
+
+def test_negative_delivery_without_receipt_or_definitive_error_is_indeterminate() -> None:
+    assert stress.delivery_is_indeterminate(object(), {"ok": False}) is True
+    assert stress.delivery_is_indeterminate(object(), {}) is True
+    assert stress.delivery_is_indeterminate(
+        object(), {"ok": False, "error": "Bad Request: chat not found"}
+    ) is False

@@ -78,3 +78,10 @@ def test_newer_blocker_is_not_cleared_by_an_older_recovery() -> None:
     }
 
     assert MODULE.superseded_blocked_event_ids([recovered, blocked]) == set()
+
+
+def test_all_safe_skip_states_preserve_an_open_scheduler_incident() -> None:
+    for run_state in ("skipped_precondition", "skipped_change_lease", "skipped_locked"):
+        assert MODULE.qa_run_needs_attention(run_state, 1) is True
+        assert MODULE.qa_run_needs_attention(run_state, 0) is False
+    assert MODULE.qa_run_needs_attention("ok", 3) is False

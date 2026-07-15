@@ -24,6 +24,7 @@ CANONICAL_FAST_ACK_SCRIPT = ROOT / "scripts" / "josh_telegram_fast_ack.py"
 INBOX_PLUGIN_SOURCE = ROOT / "plugins" / "inbox-coordinator" / "index.js"
 OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 RECOVERY_COOLDOWN = dt.timedelta(minutes=15)
+CLEAN_PROBES_TO_CLEAR = 2
 SERVICE_LABELS = {
     "controlTower": "com.josh20.mission-control-react-v2",
     "brainFeed": "com.josh20.brain-feed-server",
@@ -210,6 +211,54 @@ def restart_service(service: str) -> dict[str, Any]:
     return {"service": service, "label": label, "returncode": proc.returncode, "ok": proc.returncode == 0, "detail": (proc.stderr or proc.stdout).strip()[:400]}
 
 
+def next_service_failure_streaks(previous: dict[str, Any], checks: dict[str, Any]) -> dict[str, int]:
+    prior = previous.get("serviceFailureStreaks") if isinstance(previous.get("serviceFailureStreaks"), dict) else {}
+    return {
+        service: 0 if bool((checks.get(service) or {}).get("ok")) else int(prior.get(service) or 0) + 1
+        for service in SERVICE_LABELS
+    }
+
+
+def next_service_healthy_streaks(previous: dict[str, Any], checks: dict[str, Any]) -> dict[str, int]:
+    prior = previous.get("serviceHealthyStreaks") if isinstance(previous.get("serviceHealthyStreaks"), dict) else {}
+    return {
+        service: min(CLEAN_PROBES_TO_CLEAR, int(prior.get(service) or 0) + 1)
+        if bool((checks.get(service) or {}).get("ok"))
+        else 0
+        for service in SERVICE_LABELS
+    }
+
+
+def recoverable_services(
+    previous: dict[str, Any],
+    checks: dict[str, Any],
+    streaks: dict[str, int],
+    now: dt.datetime,
+) -> list[str]:
+    return [
+        service
+        for service in SERVICE_LABELS
+        if not bool((checks.get(service) or {}).get("ok"))
+        and int(streaks.get(service) or 0) >= 2
+        and recovery_due(previous, service, now)
+    ]
+
+
+def clear_stably_healthy_recoveries(
+    recoveries: dict[str, Any],
+    checks: dict[str, Any],
+    healthy_streaks: dict[str, int],
+) -> dict[str, Any]:
+    remaining = dict(recoveries)
+    for service in SERVICE_LABELS:
+        if (
+            bool((checks.get(service) or {}).get("ok"))
+            and int(healthy_streaks.get(service) or 0) >= CLEAN_PROBES_TO_CLEAR
+        ):
+            remaining.pop(service, None)
+    return remaining
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default=os.environ.get("CONTROL_TOWER_BASE", "http://127.0.0.1:5174"))
@@ -220,33 +269,44 @@ def main() -> int:
     previous = read_json(OUTPUT, {})
     result = collect(args.base_url)
     streak = 0 if result["ok"] else int(previous.get("failureStreak") or 0) + 1
+    service_streaks = next_service_failure_streaks(previous, result["checks"])
+    service_healthy_streaks = next_service_healthy_streaks(previous, result["checks"])
     recoveries = previous.get("recoveries") if isinstance(previous.get("recoveries"), dict) else {}
     attempted = []
-    if args.recover and streak >= 2:
-        for service in ("controlTower", "brainFeed", "gateway", "telegramFastAck"):
-            if not result["checks"][service]["ok"] and recovery_due(previous, service, now):
-                row = restart_service(service)
-                attempted.append(row)
-                previous_row = recoveries.get(service) if isinstance(recoveries.get(service), dict) else {}
-                recoveries[service] = {
-                    "lastAttemptAt": iso(now),
-                    "attemptsSinceHealthy": int(previous_row.get("attemptsSinceHealthy") or 0) + 1,
-                    "lastResult": row,
-                }
+    initial_checks = result["checks"]
+    if args.recover:
+        for service in recoverable_services(previous, result["checks"], service_streaks, now):
+            row = restart_service(service)
+            attempted.append(row)
+            previous_row = recoveries.get(service) if isinstance(recoveries.get(service), dict) else {}
+            recoveries[service] = {
+                "lastAttemptAt": iso(now),
+                "attemptsSinceHealthy": int(previous_row.get("attemptsSinceHealthy") or 0) + 1,
+                "lastResult": row,
+            }
         if attempted:
             time.sleep(4)
             result = collect(args.base_url)
             if result["ok"]:
-                streak, recoveries = 0, {}
+                streak = 0
+            for row in attempted:
+                service_healthy_streaks[str(row["service"])] = 0
+    for service in SERVICE_LABELS:
+        if bool((result["checks"].get(service) or {}).get("ok")):
+            service_streaks[service] = 0
+    recoveries = clear_stably_healthy_recoveries(recoveries, result["checks"], service_healthy_streaks)
     payload = {
         "checkedAt": iso(),
         "ok": result["ok"],
         "status": "ok" if result["ok"] else "attention",
         "failureStreak": streak,
+        "serviceFailureStreaks": service_streaks,
+        "serviceHealthyStreaks": service_healthy_streaks,
         "checks": result["checks"],
+        "preRecoveryChecks": initial_checks if attempted else None,
         "recoveryAttempts": attempted,
         "recoveries": recoveries,
-        "policy": "One restart per service per 15 minutes; circuit opens after three attempts; source staleness never triggers a service restart.",
+        "policy": "A service must fail two consecutive service-specific probes before one bounded restart; 15-minute cooldown; circuit opens after three attempts; two later scheduled clean probes clear recovery state; source staleness never triggers a restart.",
     }
     if not args.no_write:
         atomic_write(OUTPUT, payload)

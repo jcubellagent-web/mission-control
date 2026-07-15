@@ -57,6 +57,27 @@
       "severity": "p1"
     },
     {
+      "id": "telegram-inbox-contract-stress",
+      "owner": "josh2",
+      "team": "Telegram Inbox Contract QA",
+      "schedule": {"minutes": [19, 49]},
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "scripts/telegram_inbox_qa_monitor.py",
+        "--mode",
+        "stress",
+        "--iterations",
+        "100",
+        "--timeout-seconds",
+        "120",
+        "--alert-after-failures",
+        "1"
+      ],
+      "timeoutSeconds": 180,
+      "severity": "p1",
+      "skipDuringChangeLease": true
+    },
+    {
       "id": "nightly-control-tower-suite",
       "owner": "josh2",
       "team": "Deep release QA",

@@ -4,18 +4,29 @@
 from __future__ import annotations
 
 import unittest
+import importlib.util
 from pathlib import Path
 import sys
 
-WORKSPACE = Path(__file__).resolve().parents[2]
-if str(WORKSPACE) not in sys.path:
-    sys.path.insert(0, str(WORKSPACE))
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+if str(SCRIPT_DIR) in sys.path:
+    sys.path.remove(str(SCRIPT_DIR))
+sys.path.insert(0, str(SCRIPT_DIR))
 
-import jaimes_telegram_fast_ack as fast_ack
-import josh_telegram_fast_ack
+
+def load_canonical(name: str, filename: str):
+    path = SCRIPT_DIR / filename
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot import canonical watcher {filename}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+fast_ack = load_canonical("canonical_jaimes_telegram_fast_ack_for_approvals", "jaimes_telegram_fast_ack.py")
+josh_telegram_fast_ack = load_canonical("canonical_josh_telegram_fast_ack_for_approvals", "josh_telegram_fast_ack.py")
 
 
 WATCHERS = (fast_ack, josh_telegram_fast_ack)

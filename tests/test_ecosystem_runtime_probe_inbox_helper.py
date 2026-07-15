@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import datetime as dt
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "ecosystem_runtime_probe.py"
@@ -160,3 +161,66 @@ def test_collect_rejects_drifted_runtime_work_card(monkeypatch, tmp_path) -> Non
         "ok": False,
         "detail": "runtime work-card helper differs from canonical source",
     }
+
+
+def test_service_failure_streaks_do_not_inherit_unrelated_global_failure() -> None:
+    previous = {
+        "failureStreak": 9,
+        "serviceFailureStreaks": {"brainFeed": 1},
+    }
+    checks = {
+        "controlTower": {"ok": False},
+        "brainFeed": {"ok": True},
+        "gateway": {"ok": True},
+        "telegramFastAck": {"ok": True},
+    }
+
+    streaks = probe.next_service_failure_streaks(previous, checks)
+
+    assert streaks["controlTower"] == 1
+    assert streaks["brainFeed"] == 0
+
+
+def test_control_tower_requires_two_consecutive_own_failures_before_restart() -> None:
+    now = dt.datetime(2026, 7, 15, 12, 0, tzinfo=dt.timezone.utc)
+    checks = {
+        "controlTower": {"ok": False},
+        "brainFeed": {"ok": True},
+        "gateway": {"ok": True},
+        "telegramFastAck": {"ok": True},
+        "sourceFreshness": {"ok": False},
+    }
+
+    assert probe.recoverable_services({}, checks, {"controlTower": 1}, now) == []
+    assert probe.recoverable_services({}, checks, {"controlTower": 2}, now) == ["controlTower"]
+
+
+def test_source_freshness_never_becomes_a_restart_target() -> None:
+    now = dt.datetime(2026, 7, 15, 12, 0, tzinfo=dt.timezone.utc)
+    checks = {
+        "controlTower": {"ok": True},
+        "brainFeed": {"ok": True},
+        "gateway": {"ok": True},
+        "telegramFastAck": {"ok": True},
+        "sourceFreshness": {"ok": False},
+    }
+
+    assert probe.recoverable_services({}, checks, {"sourceFreshness": 99}, now) == []
+
+
+def test_recovery_cooldown_state_requires_two_later_clean_probes_to_clear() -> None:
+    recovery = {
+        "controlTower": {
+            "lastAttemptAt": "2026-07-15T12:00:00Z",
+            "attemptsSinceHealthy": 1,
+        }
+    }
+    checks = {service: {"ok": True} for service in probe.SERVICE_LABELS}
+
+    first = probe.next_service_healthy_streaks({}, checks)
+    assert first["controlTower"] == 1
+    assert probe.clear_stably_healthy_recoveries(recovery, checks, first) == recovery
+
+    second = probe.next_service_healthy_streaks({"serviceHealthyStreaks": first}, checks)
+    assert second["controlTower"] == 2
+    assert probe.clear_stably_healthy_recoveries(recovery, checks, second) == {}

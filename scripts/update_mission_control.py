@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import fcntl
 import json
+import math
 import os
 import socket
 import re
@@ -67,6 +68,7 @@ CODEX_AUTOMATION_STATUS_PATH = DATA_DIR / "codex-automation-status.json"
 JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
 ECOSYSTEM_QA_SCHEDULE_PATH = ROOT.parent / "config" / "ecosystem-qa-schedule.json"
 ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
+TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
 
 
 def atomic_write_json(path: Path, payload: Any) -> None:
@@ -140,7 +142,7 @@ LIVE_DASHBOARD_KEYS = {
     "codexJobs", "crons", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
-    "sourceUpdatedAt", "trackedTasks",
+    "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
 }
 
 
@@ -353,7 +355,7 @@ def fetch_next(endpoint: str, *, warn_non_json: bool = True) -> Dict[str, Any] |
                 if warn_non_json:
                     print(f"[warn] non-json response from {url}: {exc}", file=sys.stderr)
                 return None
-    except (urllib.error.URLError, TimeoutError) as exc:  # pragma: no cover - diagnostics only
+    except (urllib.error.URLError, TimeoutError, socket.timeout) as exc:  # pragma: no cover - diagnostics only
         if endpoint.startswith("/api/") and "Connection refused" in str(exc):
             return None
         print(f"[warn] failed to fetch {url}: {exc}", file=sys.stderr)
@@ -361,15 +363,15 @@ def fetch_next(endpoint: str, *, warn_non_json: bool = True) -> Dict[str, Any] |
 
 
 def fetch_brain_feed() -> Dict[str, Any] | None:
-    data = fetch_next("/data/brain-feed.json", warn_non_json=False)
+    #JAIMES: Brain Feed is a canonical local sidecar; never loop it back through Vite and make dashboard generation depend on port 5174.
+    data = load_json_file(DATA_DIR / "brain-feed.json", {})
     if not data:
         return None
-    now_iso = utc_iso()
     return {
         "status": data.get("status") or "",
         "context": data.get("focus") or "",
         "runway": data.get("energy") or 0,
-        "updatedAt": now_iso,
+        "updatedAt": data.get("updatedAt") or utc_iso(),
     }
 
 
@@ -394,6 +396,107 @@ def load_json_file(path: Path, default: Any) -> Any:
         return json.loads(path.read_text())
     except Exception:
         return default
+
+
+def _telegram_qa_metric(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return round(number, 1) if math.isfinite(number) and number >= 0 else None
+
+
+def sanitize_telegram_qa_sample(row: Any) -> Dict[str, Any] | None:
+    if not isinstance(row, dict) or row.get("mode") not in {"stress", "live"}:
+        return None
+    stress = row.get("stress") if isinstance(row.get("stress"), dict) else {}
+    result: Dict[str, Any] = {
+        "checkedAt": plain_dashboard_text(row.get("checkedAt"), 40),
+        "mode": str(row.get("mode")),
+        "role": "josh2",
+        "ok": bool(row.get("ok")),
+        "status": plain_dashboard_text(row.get("status"), 40),
+        "stress": {
+            "ok": bool(stress.get("ok")),
+            "iterations": max(0, int(stress.get("iterations") or 0)),
+            "renderedCards": max(0, int(stress.get("renderedCards") or 0)),
+            "problemCount": max(0, int(stress.get("problemCount") or 0)),
+            "durationMs": _telegram_qa_metric(stress.get("durationMs")),
+        },
+        "problemCount": max(0, int(row.get("problemCount") or 0)),
+    }
+    transport = row.get("transport") if isinstance(row.get("transport"), dict) else None
+    if transport is not None:
+        latency = transport.get("latencyMs") if isinstance(transport.get("latencyMs"), dict) else {}
+        cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+        result["transport"] = {
+            "ok": bool(transport.get("ok")),
+            "scope": "synthetic response timing after canary anchor receipt",
+            "renderer": plain_dashboard_text(transport.get("renderer"), 24),
+            "latencyMs": {
+                stage: metric
+                for stage in ("eyes", "header", "liveCard", "final")
+                if (metric := _telegram_qa_metric(latency.get(stage))) is not None
+            },
+            "terminalLiveCard100Percent": bool(transport.get("terminalLiveCard100Percent")),
+            "exactlyOneFinal": bool(transport.get("exactlyOneFinal")),
+            "cleanup": {
+                key: max(0, int(cleanup.get(key) or 0))
+                for key in ("attempted", "deleted", "failedCount", "indeterminateCount")
+            },
+        }
+    return result
+
+
+def sanitize_telegram_inbox_qa(payload: Any) -> Dict[str, Any]:
+    source = payload if isinstance(payload, dict) else {}
+    lanes_source = source.get("lanes") if isinstance(source.get("lanes"), dict) else {}
+    lanes: Dict[str, Any] = {}
+    for mode in ("stress", "live"):
+        lane = lanes_source.get(mode) if isinstance(lanes_source.get(mode), dict) else None
+        if lane is None:
+            continue
+        lanes[mode] = {
+            "consecutiveFailures": max(0, int(lane.get("consecutiveFailures") or 0)),
+            "alertAfterFailures": max(1, int(lane.get("alertAfterFailures") or 1)),
+            "alertActive": bool(lane.get("alertActive")),
+            "lastSuccessAt": plain_dashboard_text(lane.get("lastSuccessAt"), 40) or None,
+            "lastFailureAt": plain_dashboard_text(lane.get("lastFailureAt"), 40) or None,
+            "lastSample": sanitize_telegram_qa_sample(lane.get("lastSample")),
+        }
+    history = source.get("history") if isinstance(source.get("history"), list) else []
+    recent = [sample for row in history[-32:] if (sample := sanitize_telegram_qa_sample(row)) is not None][-8:]
+    rolling_source = source.get("rolling") if isinstance(source.get("rolling"), dict) else {}
+    contract = rolling_source.get("contractStress") if isinstance(rolling_source.get("contractStress"), dict) else {}
+    return {
+        "version": 1,
+        "updatedAt": plain_dashboard_text(source.get("updatedAt"), 40) or None,
+        "status": plain_dashboard_text(source.get("status"), 24) or "pending",
+        "summary": plain_dashboard_text(
+            source.get("summary") or "Telegram Inbox recurring contract QA has not run yet.",
+            220,
+        ),
+        "privacy": {"dashboardSafe": True, "messageIdsIncluded": False, "rawPromptsIncluded": False},
+        "coverage": {
+            "contractStress": "every 30 minutes",
+            "runtimeHealth": "every 5 minutes",
+            "liveTransport": "passive evidence from real Inbox work",
+            "recurringProductionWrites": False,
+        },
+        "lanes": lanes,
+        "rolling": {
+            "contractStress": {
+                "scope": "local deterministic render and response-contract stress; no Telegram messages",
+                "samples": max(0, int(contract.get("samples") or 0)),
+                "minimumSamples": max(1, int(contract.get("minimumSamples") or 20)),
+                "p50Ms": _telegram_qa_metric(contract.get("p50Ms")),
+                "p95Ms": _telegram_qa_metric(contract.get("p95Ms")),
+                "maxMs": _telegram_qa_metric(contract.get("maxMs")),
+                "sloMs": max(1, int(contract.get("sloMs") or 2000)),
+                "status": plain_dashboard_text(contract.get("status"), 24) or "warming_up",
+            }
+        },
+        "recentSamples": recent,
+    }
 
 
 def infer_task_owner(title: str, notes: str = "", background: str = "") -> str:
@@ -3425,7 +3528,8 @@ PY"""
         job_id = str(job["id"])
         run = qa_runs.get(job_id) if isinstance(qa_runs.get(job_id), dict) else {}
         run_state = str(run.get("status") or "scheduled")
-        failed = run_state in {"failed", "timeout"}
+        failure_streak = int(run.get("failureStreak") or 0)
+        failed = qa_run_needs_attention(run_state, failure_streak)
         schedule = job.get("schedule") if isinstance(job.get("schedule"), dict) else {}
         weekdays = schedule.get("weekdays", [])
         today_relevant = not weekdays or now_et.weekday() in weekdays
@@ -3442,15 +3546,27 @@ PY"""
             "todayRelevant": today_relevant,
             "runStatus": "missed" if failed else ("done" if run_state == "ok" else "upcoming"),
             "errors": 1 if failed else 0,
-            "lastError": plain_dashboard_text(run.get("stderr") or run.get("stdout"), 180) if failed else None,
+            "lastError": (
+                "Prior QA failure remains open; the latest canary skipped because a safe precondition was not met."
+                if run_state.startswith("skipped_") and failed
+                else plain_dashboard_text(run.get("stderr") or run.get("stdout"), 180) if failed else None
+            ),
             "lastRun": run.get("completedAt") or run.get("startedAt"),
             "durationMs": run.get("durationMs"),
-            "failureStreak": int(run.get("failureStreak") or 0),
+            "failureStreak": failure_streak,
+            "rawRunStatus": run_state,
         })
     return rows
 
 def build_devices() -> List[Dict[str, str]]:
     return [airpoint_status()]
+
+
+def qa_run_needs_attention(run_state: str, failure_streak: int) -> bool:
+    """Keep an open QA incident visible when a later probe safely skips."""
+    return run_state in {"failed", "timeout"} or (
+        run_state.startswith("skipped_") and failure_streak > 0
+    )
 
 
 def visual_canary_requires_action(canaries: Dict[str, Any]) -> bool:
@@ -4646,6 +4762,17 @@ def main() -> None:
     dashboard["sharedOperatingLayer"] = fetch_shared_operating_layer(now_iso)
     dashboard["visualCanaries"] = fetch_visual_canaries()
     dashboard["runtimeLayout"] = fetch_runtime_layout_status()
+    telegram_inbox_qa = load_json_file(TELEGRAM_INBOX_QA_PATH, {
+        "version": 1,
+        "updatedAt": None,
+        "status": "pending",
+        "summary": "Telegram Inbox recurring QA has not run yet.",
+        "privacy": {"dashboardSafe": True, "messageIdsIncluded": False, "rawPromptsIncluded": False},
+        "lanes": {},
+        "rolling": {},
+        "history": [],
+    })
+    dashboard["telegramInboxQa"] = sanitize_telegram_inbox_qa(telegram_inbox_qa)
     dashboard["sorareMlCockpit"] = fetch_sorare_ml_cockpit()
     dashboard["voiceRouter"] = fetch_voice_router_status()
     dashboard["opsInbox"] = fetch_ops_inbox_status(dashboard["calendarHealth"], dashboard["crons"])

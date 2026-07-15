@@ -8,6 +8,7 @@ activity, and per-trade realized/unrealized P&L without exposing signer data.
 from __future__ import annotations
 
 import datetime as dt
+import fcntl
 import json
 import os
 import tempfile
@@ -28,6 +29,7 @@ ROOT = Path.home() / ".openclaw/workspace/mission-control"
 RAW = Path.home() / ".openclaw/private/mission-control/agentic-crypto-wallet-raw.json"
 OUT = ROOT / "data/agentic-crypto-wallet.json"
 DASH = ROOT / "data/dashboard-data.json"
+REFRESH_LOCK_PATH = Path.home() / ".openclaw/private/mission-control/agentic-crypto-wallet-refresh.lock"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 JAIMES-Control-Tower/1.0",
     "Accept": "application/json",
@@ -316,7 +318,7 @@ def activity_rows(transactions: list[dict[str, Any]], trades: list[dict[str, Any
     return recent[:40], ledger[:80], all_activity[:200]
 
 
-def main() -> int:
+def refresh_wallet() -> int:
     errors: list[str] = []
     address = get_json(f"{BLOCKSCOUT}/addresses/{WALLET}")
     balances = get_json(f"{BLOCKSCOUT}/addresses/{WALLET}/token-balances")
@@ -423,6 +425,23 @@ def main() -> int:
         "tradeRows": sum(1 for row in ledger if row.get("side") in {"open", "close"}),
     }, sort_keys=True))
     return 0
+
+
+def main() -> int:
+    REFRESH_LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    lock = REFRESH_LOCK_PATH.open("a+", encoding="utf-8")
+    os.chmod(REFRESH_LOCK_PATH, 0o600)
+    try:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        lock.close()
+        print(json.dumps({"ok": True, "status": "already-running"}, sort_keys=True))
+        return 0
+    try:
+        return refresh_wallet()
+    finally:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+        lock.close()
 
 
 if __name__ == "__main__":

@@ -3,7 +3,11 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import sys
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 import ecosystem_qa_scheduler as subject
 
@@ -37,6 +41,61 @@ class SchedulerTests(unittest.TestCase):
         jobs = {row["id"]: row for row in config["jobs"]}
         for job_id in ("runtime-layout-check", "full-kiosk-visual"):
             self.assertEqual(jobs[job_id]["command"][0], "/opt/homebrew/bin/python3")
+
+    def test_recurring_telegram_contract_stress_is_quiet_guarded_and_lease_aware(self) -> None:
+        config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
+        jobs = {row["id"]: row for row in config["jobs"]}
+        stress = jobs["telegram-inbox-contract-stress"]
+
+        self.assertEqual(stress["schedule"], {"minutes": [19, 49]})
+        self.assertEqual(stress["command"][0], "/opt/homebrew/bin/python3")
+        self.assertEqual(stress["command"][stress["command"].index("--iterations") + 1], "100")
+        self.assertTrue(stress["skipDuringChangeLease"])
+        self.assertNotIn("telegram-inbox-live-canary", jobs)
+
+    def test_configured_precondition_exit_maps_to_skip(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(subject, "LOCK_DIR", Path(directory)):
+                result = subject.run_job({
+                    "id": "precondition-skip",
+                    "command": [sys.executable, "-c", "raise SystemExit(75)"],
+                    "skipReturnCodes": [75],
+                    "timeoutSeconds": 10,
+                })
+
+        self.assertEqual(result["status"], "skipped_precondition")
+        self.assertEqual(result["returncode"], 75)
+
+    def test_skip_preserves_failure_streak_in_scheduler_state(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "schedule.json"
+            config.write_text(json.dumps({
+                "timezone": "UTC",
+                "jobs": [{"id": "live", "schedule": {"intervalMinutes": 1}, "command": ["noop"]}],
+            }))
+            state = root / "state.json"
+            state.write_text(json.dumps({
+                "jobs": {"live": {"status": "failed", "failureStreak": 2, "lastSlot": "older"}},
+            }))
+            skipped = {"id": "live", "status": "skipped_precondition", "returncode": 75, "durationMs": 0}
+            with mock.patch.object(subject, "STATE_PATH", state), \
+                    mock.patch.object(subject, "run_job", return_value=skipped), \
+                    mock.patch.object(subject, "publish_transition"):
+                result = subject.tick(config, dt.datetime(2026, 7, 15, 12, 0, tzinfo=dt.timezone.utc))
+
+        self.assertEqual(result["jobs"]["live"]["status"], "skipped_precondition")
+        self.assertEqual(result["jobs"]["live"]["failureStreak"], 2)
+
+    def test_clean_run_after_any_safe_skip_publishes_recovery_for_open_streak(self) -> None:
+        job = {"id": "live", "owner": "josh2", "team": "Telegram QA", "severity": "p0"}
+        current = {"status": "ok", "failureStreak": 0}
+        previous = {"status": "skipped_change_lease", "failureStreak": 2}
+        with mock.patch.object(subject.subprocess, "run") as publish:
+            subject.publish_transition(job, current, previous)
+
+        publish.assert_called_once()
+        self.assertIn("complete", publish.call_args.args[0])
 
 
 if __name__ == "__main__":
