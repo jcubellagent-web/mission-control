@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget, rememberInboundMessage } from "../index.js";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import coordinator, { dispatchClaim, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, parseTelegramTarget, rememberInboundMessage, reserveClaim } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -26,6 +29,7 @@ test("silences Josh for a direct JAIMES mention but not a routing hashtag", () =
   assert.equal(isJaimesMention("@JAIMES please take this"), true);
   assert.equal(inboxDecision({ channel: "telegram", content: "@JAIMES please take this" }, inboxCtx), "silence");
   assert.equal(inboxDecision({ channel: "telegram", content: "#jaimes please take this" }, inboxCtx), "claim");
+  assert.equal(isJaimesMention("hey,@JAIMES please take this"), true);
 });
 
 test("builds helper arguments without prompt content", () => {
@@ -68,14 +72,21 @@ test("claims the runtime-shaped global before_dispatch Inbox event", async () =>
   const args = helperArgs(event, ctx, { helperPath: "/tmp/helper.py" });
   assert.equal(args.includes(event.body), false);
   assert.equal(args[args.indexOf("--message-id") + 1], "77");
-  assert.equal(args[args.indexOf("--run-id") + 1], `before-dispatch:${event.timestamp}`);
+  assert.equal(args[args.indexOf("--run-id") + 1], "telegram-message:-1003589561528:1:77");
 });
 
-test("does not correlate a different prompt to the cached Telegram message", () => {
+test("correlates the freshest same-session message when hook envelopes differ", () => {
   const ctx = { ...inboxCtx, messageId: undefined };
   rememberInboundMessage({ content: "first prompt", messageId: "88", timestamp: 1000 }, ctx);
   const args = helperArgs({ content: "second prompt", timestamp: 1001 }, ctx, { helperPath: "/tmp/helper.py" });
-  assert.equal(args.includes("--message-id"), false);
+  assert.equal(args[args.indexOf("--message-id") + 1], "88");
+});
+
+test("accepts numeric Telegram message ids", () => {
+  const ctx = { ...inboxCtx, messageId: undefined };
+  rememberInboundMessage({ content: "numeric prompt", messageId: 89, timestamp: 1002 }, ctx);
+  const args = helperArgs({ content: "numeric prompt", timestamp: 1002 }, ctx, { helperPath: "/tmp/helper.py" });
+  assert.equal(args[args.indexOf("--message-id") + 1], "89");
 });
 
 test("silences a JAIMES mention on the global before_dispatch path", async () => {
@@ -89,21 +100,42 @@ test("silences a JAIMES mention on the global before_dispatch path", async () =>
   assert.equal(dispatched, false);
 });
 
-function fakeChild(onPrompt = () => {}) {
+test("silences framework replay markers without creating a task", async () => {
+  let dispatched = false;
+  const result = await handleInboxEvent(
+    { content: "[context compaction] replay", channel: "telegram", sessionKey: inboxCtx.sessionKey },
+    { channelId: "telegram", sessionKey: inboxCtx.sessionKey },
+    {},
+    console,
+    () => { dispatched = true; return true; },
+  );
+  assert.deepEqual(result, { handled: true });
+  assert.equal(dispatched, false);
+});
+
+function fakeChild(onPrompt = () => {}, { emitSpawn = true } = {}) {
   const child = new EventEmitter();
   child.stdout = new EventEmitter();
   child.stdin = new EventEmitter();
-  child.stdin.end = (prompt) => onPrompt(child, prompt);
+  child.stdin.end = (prompt) => {
+    if (emitSpawn) child.emit("spawn");
+    onPrompt(child, prompt);
+  };
   child.killed = false;
   child.kill = () => { child.killed = true; };
   return child;
 }
 
 function dispatchConfig(spawn) {
-  return { helperPath: import.meta.filename, spawn, helperTimeoutMs: 25 };
+  return {
+    helperPath: import.meta.filename,
+    spawn,
+    helperTimeoutMs: 25,
+    claimDir: mkdtempSync(join(tmpdir(), "inbox-claims-")),
+  };
 }
 
-test("returns handled only after a successful queued helper receipt", async () => {
+test("returns handled as soon as the durable claimed helper starts", async () => {
   let prompt = "";
   const child = fakeChild((current, stdin) => {
     prompt = stdin;
@@ -122,17 +154,17 @@ for (const [name, arrange] of [
   ["empty queued job id", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":true,"status":"queued","job_id":""}'); child.emit("close", 0); })],
   ["queue failure receipt", () => fakeChild((child) => { child.stdout.emit("data", '{"ok":false,"status":"queue-failed"}'); child.emit("close", 0); })],
 ]) {
-  test(`allows Terra handling on ${name}`, async () => {
+  test(`keeps Josh ownership after helper start on ${name}`, async () => {
     const child = arrange();
     const config = dispatchConfig(() => child);
     const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, config, { error() {} });
-    assert.equal(claimed, false);
-    if (child?.killed !== undefined) assert.equal(child.killed, true);
+    assert.equal(claimed, true);
+    if (child?.killed !== undefined) assert.equal(child.killed, false);
   });
 }
 
 test("allows Terra handling on spawn error", async () => {
-  const child = fakeChild((current) => current.emit("error", new Error("spawn")));
+  const child = fakeChild((current) => current.emit("error", new Error("spawn")), { emitSpawn: false });
   const claimed = await dispatchClaim(
     { content: "private prompt" },
     inboxCtx,
@@ -154,10 +186,29 @@ test("allows Terra handling when spawning throws", async () => {
 });
 
 test("terminates a timed-out helper and allows Terra handling", async () => {
-  const child = fakeChild();
+  const child = fakeChild(() => {}, { emitSpawn: false });
   const claimed = await dispatchClaim({ content: "private prompt" }, inboxCtx, dispatchConfig(() => child), { error() {} });
   assert.equal(claimed, false);
   assert.equal(child.killed, true);
+});
+
+test("atomically suppresses a second hook for the same Telegram message", async () => {
+  let spawns = 0;
+  const child = fakeChild((current) => {
+    current.stdout.emit("data", '{"ok":true,"status":"queued","job_id":"job-123"}');
+    current.emit("close", 0);
+  });
+  const config = dispatchConfig(() => { spawns += 1; return child; });
+  assert.equal(await dispatchClaim({ content: "one prompt" }, inboxCtx, config), true);
+  assert.equal(await dispatchClaim({ content: "one prompt" }, inboxCtx, config), true);
+  assert.equal(spawns, 1);
+});
+
+test("durable claim records never contain prompt content", () => {
+  const config = { claimDir: mkdtempSync(join(tmpdir(), "inbox-claims-")) };
+  const reservation = reserveClaim({ content: "private prompt body" }, inboxCtx, config);
+  assert.equal(reservation.ok, true);
+  assert.equal(readFileSync(reservation.path, "utf8").includes("private prompt body"), false);
 });
 
 test("registers message correlation plus bound and global claim hooks", () => {

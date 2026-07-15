@@ -31,6 +31,8 @@ DIRECT_SESSION_KEYS = (
 )
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
 JAIMES_CONTROL_CENTER_TOPICS = {"17", "19", "20", "56"}
+JAIMES_DIRECT_MENTION_TOPICS = {"1"}
+JAIMES_MENTION_RE = re.compile(r"(?:^|[\s,.:;!?()\[\]{}])@jaimes(?=$|[\s,.:;!?()\[\]{}])", re.I)
 TELEGRAM_GROUP_TOPIC_RE = re.compile(r"telegram:group:(-?\d+):(?:topic:)?(\d+)")
 DEFAULT_MODEL = "openai-codex/gpt-5.6-sol"
 DEFAULT_ROUTE = "JAIMES Telegram -> Hermes task"
@@ -278,7 +280,7 @@ def session_metadata() -> dict[str, Any]:
             chat_id = str(target.get("telegram_chat_id") or "")
             thread_id = str(target.get("telegram_thread_id") or "")
             is_direct = str(key) in DIRECT_SESSION_KEYS
-            is_owned_group_topic = chat_id == CONTROL_CENTER_CHAT_ID and thread_id in JAIMES_CONTROL_CENTER_TOPICS
+            is_owned_group_topic = chat_id == CONTROL_CENTER_CHAT_ID and thread_id in (JAIMES_CONTROL_CENTER_TOPICS | JAIMES_DIRECT_MENTION_TOPICS)
             if not is_direct and not is_owned_group_topic:
                 continue
             normalized = normalize_session_metadata(value, assume_telegram=True)
@@ -314,7 +316,7 @@ def active_hermes_sessions_metadata() -> list[dict[str, Any]]:
                    AND ended_at IS NULL
                    AND (
                         chat_id = '6218150306'
-                        OR (chat_id = ? AND thread_id IN ('17','19','20','56'))
+                        OR (chat_id = ? AND thread_id IN ('1','17','19','20','56'))
                    )
               ORDER BY started_at DESC
                 """,
@@ -1178,14 +1180,22 @@ def send_ack(event: dict[str, str], model: str, state: dict[str, Any], dry_run: 
             "--next",
             "Work automatically; show buttons only for final approval steps if needed",
         ] + work_card_target_args(meta))
+        card_receipt: dict[str, Any] = {}
+        if card_result.get("ok") and card_result.get("stdout"):
+            try:
+                parsed_receipt = json.loads(str(card_result["stdout"]))
+                if isinstance(parsed_receipt, dict):
+                    card_receipt = parsed_receipt
+            except (TypeError, ValueError):
+                card_receipt = {}
         ack_message_id = str(
-            card_result.get("message_id")
-            or (card_result.get("result") or {}).get("message_id")
+            card_receipt.get("message_id")
+            or (card_receipt.get("result") or {}).get("message_id")
             or ""
         )
         record_api_result(state, "sendMessage", {
-            "ok": bool(card_result.get("ok") and ack_message_id),
-            "error": card_result.get("error") or "",
+            "ok": bool(card_result.get("ok") and card_receipt.get("ok") and ack_message_id),
+            "error": card_result.get("stderr") or card_result.get("error") or "",
         })
     elif not dry_run:
         ack_result = send_initial_ack(
@@ -1440,6 +1450,10 @@ def internal_replay_prompt(prompt: str) -> bool:
     ))
 
 
+def direct_jaimes_mention(prompt: str) -> bool:
+    return bool(JAIMES_MENTION_RE.search(clean_prompt(prompt)))
+
+
 def session_has_compaction_marker(session_id: str) -> bool:
     """Detect a compression continuation even when no marker row was copied.
 
@@ -1593,6 +1607,14 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         for event in batch:
             event_id = f"{event['session_id']}:{event['ts']}"
             state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
+            if (
+                str(session_meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+                and str(session_meta.get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
+                and not direct_jaimes_mention(event.get("prompt") or "")
+            ):
+                # Topic 1 remains Josh-owned unless JAIMES is directly tagged.
+                acked.add(event_id)
+                continue
             age = event_age_seconds(event["ts"])
             event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
             replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)

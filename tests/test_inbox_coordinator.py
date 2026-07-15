@@ -53,6 +53,23 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "luna")
         self.assertIn("unhealthy", route["fallback"])
 
+    def test_negated_model_name_is_not_an_explicit_route(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Do not use Gemini; fix the broken production script.",
+            injected_health={"gemini": True, "terra": True, "luna": True},
+        )
+        self.assertEqual(route["routeId"], "terra")
+        self.assertIs(route["explicitRequest"], False)
+
+    def test_execution_intent_wins_over_review_word(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Review and fix the broken integration.",
+            injected_health={"gemini": True, "terra": True, "luna": True},
+        )
+        self.assertEqual(route["routeId"], "terra")
+
     def test_explicit_glm_request_selects_glm_when_healthy(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
@@ -106,7 +123,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIn("fast coordination", decoded)
         self.assertIn("Complete: Yes", decoded)
         self.assertIn("- n/a", decoded)
-        self.assertLessEqual(max(len(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
+        self.assertLessEqual(max(coordinator.display_width(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
 
     def test_telemetry_excludes_prompt_and_output(self):
         coordinator = load_module()
@@ -148,6 +165,16 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertEqual(stat.S_IMODE(coordinator.STATE_PATH.stat().st_mode), 0o600)
             self.assertEqual(stat.S_IMODE(Path(first["promptPath"]).stat().st_mode), 0o600)
 
+    def test_message_id_is_the_canonical_dedupe_identity(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+            route = coordinator.route_prompt("Routine check", injected_health={"luna": True})
+            first, _ = coordinator.make_job("Routine check", route, {"messageId": "42", "runId": "run-a", "cardKey": "card-a", "chatId": "chat", "threadId": "1"}, 30)
+            second, deduped = coordinator.make_job("Routine check", route, {"messageId": "42", "runId": "run-b", "cardKey": "card-b", "chatId": "chat", "threadId": "1"}, 30)
+            self.assertIs(deduped, True)
+            self.assertEqual(first["jobId"], second["jobId"])
+
     def test_retry_preserves_prompt_then_result_is_consumed_once(self):
         coordinator = load_module()
         with tempfile.TemporaryDirectory() as tmp:
@@ -165,7 +192,7 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertTrue(prompt_path.exists())
 
             coordinator.execute_route = lambda *args, **kwargs: {
-                "output": "finished",
+                "output": "Complete: Yes\nWhat was done:\n- Finished the retry test\n- Verified delivery\n- Saved the result\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
                 "actualHost": "josh2",
                 "actualWorker": "test-worker",
                 "actualProvider": "codex",
@@ -177,7 +204,7 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertEqual(second["outcome"], "done")
             self.assertFalse(prompt_path.exists())
             taken = coordinator.take_result(job["jobId"])
-            self.assertEqual(taken["output"], "finished")
+            self.assertIn("Complete: Yes", taken["output"])
             self.assertFalse(coordinator.take_result(job["jobId"])["ok"])
 
     def test_sensitive_prompt_is_never_persisted_or_hashed(self):
@@ -213,12 +240,13 @@ class InboxCoordinatorTests(unittest.TestCase):
             "actualModel": "grok-test",
             "actualWorker": "jaimes-grok-public",
             "actualHost": "jaimes",
+            "modelVerified": True,
             "executionVerified": True,
         }
         text = coordinator.render_final_html(
             route,
             execution,
-            "**The Inbox route is working naturally.**\n\n- Checked the route\n- token: abcdefghijklmnop\n\nNext, send it a normal request.",
+            "Complete: Yes\nWhat was done:\n- The Inbox route is working naturally.\n- Checked the route\n- token: abcdefghijklmnop\nIssues:\n- n/a\nAppropriate next steps:\n- Send it a normal request.\nApproval needed:\n- n/a",
         )
         decoded = html.unescape(text)
         body = decoded.removeprefix("<pre>").removesuffix("</pre>")
@@ -232,12 +260,26 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIn("Appropriate next steps:", body)
         self.assertIn("Approval needed:", body)
         self.assertIn("The Inbox route is working naturally.", flat)
-        self.assertIn("Next, send it a normal request.", flat)
+        self.assertIn("Send it a normal request.", flat)
         self.assertNotIn("jaimes-grok-public", decoded)
         self.assertNotIn("**", decoded)
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
-        self.assertLessEqual(max(len(line) for line in body.splitlines()), 38)
+        self.assertLessEqual(max(coordinator.display_width(line) for line in body.splitlines()), 38)
+
+    def test_unstructured_or_unverified_output_never_claims_completion(self):
+        coordinator = load_module()
+        route = {"routeId": "luna", "routingReason": "test route"}
+        execution = {
+            "actualProvider": "codex",
+            "actualModel": "gpt-5.6-luna",
+            "modelVerified": False,
+            "executionVerified": False,
+        }
+        body = html.unescape(coordinator.render_final_html(route, execution, "Worker stopped before producing a result."))
+        self.assertIn("Model: unverified", body)
+        self.assertIn("Complete: No", body)
+        self.assertIn("Worker execution was not verified.", body)
 
     def test_worker_contract_requests_the_structured_sections(self):
         coordinator = load_module()
@@ -261,6 +303,28 @@ class InboxCoordinatorTests(unittest.TestCase):
             result = coordinator.recover()
             self.assertEqual(result["recovered"], 1)
             self.assertEqual(spawned, [job["jobId"]])
+
+    def test_recovery_never_exceeds_retry_budget(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+            route = coordinator.route_prompt("Recover me", injected_health={"luna": True})
+            job, _ = coordinator.make_job("Recover me", route, {"runId": "run-exhausted"}, 30)
+            state = coordinator.read_json(coordinator.STATE_PATH, {"jobs": {}})
+            state["jobs"][job["jobId"]].update({
+                "status": "running",
+                "attempt": int(job["maxRetries"]) + 1,
+                "workerPid": 99999999,
+                "leaseToken": "old",
+            })
+            coordinator.save_json(coordinator.STATE_PATH, state)
+            spawned = []
+            coordinator.spawn_worker = spawned.append
+            result = coordinator.recover()
+            self.assertEqual(result["recovered"], 0)
+            self.assertEqual(spawned, [])
+            status = coordinator.job_status(job["jobId"])["job"]["status"]
+            self.assertEqual(status, "failed")
 
 
 if __name__ == "__main__":

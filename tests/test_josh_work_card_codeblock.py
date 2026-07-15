@@ -26,8 +26,8 @@ def test_emoji_rows_use_three_space_continuation():
         "✅ action: terminal — running a bounded system operation"
     )
     assert rows == [
-        "✅ action: terminal — running a bounded",
-        "   system operation",
+        "✅ action: terminal — running a",
+        "   bounded system operation",
     ]
 
 
@@ -58,7 +58,7 @@ def test_live_card_is_html_preformatted_and_bounded():
     )
     assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "\n✅ action: patch — updated the\n   fixed-width renderer\n" in rendered
 
 
@@ -73,7 +73,7 @@ def test_final_summary_is_html_preformatted_and_bounded():
     )
     assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "What was done:" in body
     assert "Approval needed:" in body
 
@@ -110,7 +110,7 @@ def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
     route = "route=grok; owner=josh2; reason=current events"
     rows = card.worker_visibility_lines(model, route, "running")
     assert rows[0] == "Josh 2.0 · owner/coordinator"
-    assert rows[1] == "↳ JAIMES / Grok · xai/grok-4 · active"
+    assert rows[1] == "↳ JAIMES / Grok · xai/grok-4 · planned"
     assert "jaimes-grok-public" not in " ".join(rows)
 
 
@@ -147,7 +147,7 @@ def test_task_header_is_a_bounded_fixed_width_table():
     )
     assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert "TASK HEADER" in body
     assert "│Objective│" in body
     assert "│Agent    │ Josh 2.0 system" in body
@@ -242,6 +242,86 @@ def test_rich_edit_falls_back_to_legacy_html(monkeypatch):
     assert result["native_rich_message"] is False
     assert calls[0][1]["rich_message"]["html"] == "<h3>Live</h3>"
     assert calls[1][1]["parse_mode"] == "HTML"
+
+
+def test_live_receipt_is_checkpointed_before_final_retry(monkeypatch, tmp_path):
+    monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    monkeypatch.setattr(card, "claim_pending_ack", lambda key: "")
+    monkeypatch.setattr(card, "task_headers_enabled", lambda *args: False)
+    monkeypatch.setattr(card, "rich_cards_enabled", lambda *args: True)
+    calls = {"send_live": 0, "edit_live": 0, "send_final": 0}
+
+    def send_live(*args, **kwargs):
+        calls["send_live"] += 1
+        return {"ok": True, "native_rich_message": True, "result": {"message_id": 202}}
+
+    def edit_live(*args, **kwargs):
+        calls["edit_live"] += 1
+        return {"ok": True, "native_rich_message": True, "result": {"message_id": 202}}
+
+    def send_final(*args, **kwargs):
+        calls["send_final"] += 1
+        if calls["send_final"] == 1:
+            return {"ok": False, "error": "temporary final delivery failure"}
+        return {"ok": True, "result": {"message_id": 303}}
+
+    monkeypatch.setattr(card, "send_rich_message", send_live)
+    monkeypatch.setattr(card, "edit_rich_card", edit_live)
+    monkeypatch.setattr(card, "send_final_summary", send_final)
+    args = argparse.Namespace(
+        key="final-retry",
+        title="Verify final retry",
+        model="provider=codex; model=gpt-5.6-luna; worker=josh2-codex-luna; host=josh2",
+        route="route=luna; reason=fast Inbox coordination; fallback=none",
+        now="Finished and verified",
+        done="Completed the request|Verified the result|Prepared the final",
+        next="No action needed.",
+        blocker="None",
+        eta="",
+        ack_message_id="",
+        buttons="",
+        buttons_file="",
+        routing_buttons=False,
+        approval_buttons=False,
+        no_buttons=True,
+        no_final_summary=False,
+        final_text_file="",
+        timeout=15,
+        chat_id="-1003589561528",
+        thread_id="1",
+        dry_run=False,
+        no_brain_feed=True,
+    )
+    assert card.upsert_card(args, "done") == 1
+    partial = card.load_state()["cards"]["final-retry"]
+    assert partial["message_id"] == 202
+    assert partial["final_message_id"] is None
+    assert card.upsert_card(args, "done") == 0
+    final = card.load_state()["cards"]["final-retry"]
+    assert final["message_id"] == 202
+    assert final["final_message_id"] == 303
+    assert calls == {"send_live": 1, "edit_live": 1, "send_final": 2}
+
+
+def test_ambiguous_rich_send_does_not_create_a_second_fallback(monkeypatch):
+    calls = []
+
+    def fake_api(method, payload, timeout=15):
+        calls.append(method)
+        return {"ok": False, "error": "timed out waiting for response"}
+
+    monkeypatch.setattr(card, "api_call", fake_api)
+    result = card.send_rich_message(
+        "<h3>Live</h3>",
+        "<pre>Live</pre>",
+        15,
+        chat_id="-1003589561528",
+        thread_id="1",
+    )
+    assert result["ok"] is False
+    assert calls == ["sendRichMessage"]
 
 
 def test_verified_coordinator_model_is_disclosed_on_the_live_card():

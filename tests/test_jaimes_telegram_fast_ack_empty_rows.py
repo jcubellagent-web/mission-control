@@ -93,7 +93,7 @@ def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
     _stable_surface_stubs(watcher, monkeypatch)
     calls = []
     monkeypatch.setattr(watcher, "should_start_visible_card", lambda *args, **kwargs: True)
-    monkeypatch.setattr(watcher, "run_cmd", lambda command: calls.append(command) or {"ok": True, "message_id": 444})
+    monkeypatch.setattr(watcher, "run_cmd", lambda command: calls.append(command) or {"ok": True, "returncode": 0, "stdout": '{"ok": true, "message_id": 444}', "stderr": ""})
     monkeypatch.setattr(watcher, "send_initial_ack", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("placeholder/objective bubble must not be sent")))
     monkeypatch.setattr(watcher, "edit_message", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("initial Telegram surface must not be edited")))
     result = watcher.send_ack(
@@ -106,6 +106,13 @@ def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
     assert len(calls) == 1
     assert "--ack-message-id" not in calls[0]
     assert "--separate-message" not in calls[0]
+
+
+def test_topic_one_requires_a_direct_jaimes_mention():
+    watcher = load_module()
+    assert watcher.direct_jaimes_mention("@JAIMES please take this")
+    assert watcher.direct_jaimes_mention("hey,@JAIMES please take this")
+    assert not watcher.direct_jaimes_mention("please let Josh handle this")
 
 
 def test_non_card_ack_is_sent_once_at_final_objective_text(monkeypatch):

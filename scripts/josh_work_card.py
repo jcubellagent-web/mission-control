@@ -22,6 +22,7 @@ import sys
 import textwrap
 import urllib.error
 import urllib.request
+import unicodedata
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
@@ -315,17 +316,56 @@ def planned_models(model: str, route: str) -> list[str]:
     return results or ["Route-selected model"]
 
 
+def display_width(value: str) -> int:
+    total = 0
+    text = str(value or "")
+    for index, char in enumerate(text):
+        if char == "\u200d" or unicodedata.combining(char) or unicodedata.category(char) in {"Cf", "Mn", "Me"}:
+            continue
+        if index + 1 < len(text) and text[index + 1] == "\ufe0f":
+            total += 2
+        else:
+            total += 2 if unicodedata.east_asian_width(char) in {"W", "F"} else 1
+    return total
+
+
+def fixed_width_lines(value: str, *, width: int, subsequent_indent: str = "   ") -> list[str]:
+    pending = str(value or "")
+    lines: list[str] = []
+    first = True
+    while pending:
+        candidate = pending if first else f"{subsequent_indent}{pending.lstrip()}"
+        if display_width(candidate) <= width:
+            lines.append(candidate.rstrip())
+            break
+        used = 0
+        cut = 0
+        for index, char in enumerate(candidate):
+            next_char = candidate[index + 1] if index + 1 < len(candidate) else ""
+            char_width = 0 if char == "\u200d" or unicodedata.combining(char) or unicodedata.category(char) in {"Cf", "Mn", "Me"} else (2 if next_char == "\ufe0f" or unicodedata.east_asian_width(char) in {"W", "F"} else 1)
+            if used + char_width > width:
+                break
+            used += char_width
+            cut = index + 1
+        whitespace = candidate.rfind(" ", len(subsequent_indent) if not first else 0, cut)
+        if whitespace > (len(subsequent_indent) if not first else 0):
+            cut = whitespace
+        lines.append(candidate[:cut].rstrip())
+        pending = candidate[cut:].lstrip()
+        first = False
+    return lines or [""]
+
+
+def display_pad(value: str, width: int) -> str:
+    return f"{value}{' ' * max(0, width - display_width(value))}"
+
+
 def task_header_row(label: str, value: str) -> list[str]:
-    parts = textwrap.wrap(
-        clean_live_text(value),
-        width=HEADER_VALUE_WIDTH,
-        break_long_words=True,
-        break_on_hyphens=True,
-    ) or [""]
+    parts = fixed_width_lines(clean_live_text(value), width=HEADER_VALUE_WIDTH, subsequent_indent="")
     rows = []
     for index, part in enumerate(parts):
         row_label = compact(label, limit=HEADER_LABEL_WIDTH) if index == 0 else ""
-        rows.append(f"│{row_label:<{HEADER_LABEL_WIDTH}}│ {part:<{HEADER_VALUE_WIDTH}}│")
+        rows.append(f"│{display_pad(row_label, HEADER_LABEL_WIDTH)}│ {display_pad(part, HEADER_VALUE_WIDTH)}│")
     return rows
 
 
@@ -355,7 +395,8 @@ def worker_visibility_lines(model: str, route: str, status: str) -> list[str]:
     route_facts = parse_route_facts(route)
     owner_raw = route_facts.get("owner") or "josh2"
     owner = "Josh 2.0" if owner_raw.lower() in {"josh", "josh2", "josh 2.0"} else human_worker_name(owner_raw)
-    state = "complete" if is_complete_status(status) else "needs attention" if status == "failed" else "active"
+    planned = str(model or "").lstrip().lower().startswith("planned ") or str(route or "").lstrip().lower().startswith("planned ")
+    state = "complete" if is_complete_status(status) else "needs attention" if status == "failed" else "planned" if planned else "active"
     lines = [f"{owner or 'Josh 2.0'} · owner/coordinator"]
     worker_raw = model_facts.get("worker") or route_facts.get("worker")
     worker = human_worker_name(worker_raw or "")
@@ -658,13 +699,7 @@ def hanging_lines(item: str, *, prefix: str = "", width: int = CARD_WRAP_WIDTH) 
     text = clean_live_text(item)
     first = f"{prefix}{text}"
     indent = CARD_BULLET_INDENT if prefix == "- " else (" " * len(prefix) if prefix else CARD_CONTINUATION_INDENT)
-    return textwrap.wrap(
-        first,
-        width=width,
-        subsequent_indent=indent,
-        break_long_words=False,
-        break_on_hyphens=False,
-    ) or [first]
+    return fixed_width_lines(first, width=width, subsequent_indent=indent)
 
 
 def hanging_bullet_lines(item: str, *, width: int = CARD_WRAP_WIDTH) -> list[str]:
@@ -859,6 +894,7 @@ def build_completion_summary(
     next_step: str = "",
     blocker: str = "None",
     model: str = "",
+    route: str = "",
 ) -> str:
     complete = "Yes" if status == "done" else "No"
     complete_title = compact(title, fallback="objective", limit=120)
@@ -876,13 +912,19 @@ def build_completion_summary(
         next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
     approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["n/a"]
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or "unverified"
+    route_facts = parse_route_facts(route)
+    route_label = route_facts.get("route") or route_facts.get("lane") or compact(route, fallback="unverified", limit=90)
+    why = route_facts.get("reason") or route_facts.get("why") or (
+        "verified task execution" if status == "done" and "unverified" not in model_line.lower() and not model_line.lower().startswith("planned ")
+        else "reported work-card outcome"
+    )
 
     def final_lines(items: list[str], fallback: str) -> list[str]:
         clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
         return [line for item in (clean[:5] or [fallback]) for line in hanging_bullet_lines(item)]
 
     lines = [
-        *hanging_status_lines(f"Model: {friendly_model_line(model_line)} | Route: {resolve_auth_path(model_line)} | Why: verified task execution"),
+        *hanging_status_lines(f"Model: {friendly_model_line(model_line)} | Route: {route_label} | Why: {why}"),
         "",
         *hanging_status_lines(f"Complete: {complete} - {complete_detail}"),
         "",
@@ -1096,6 +1138,18 @@ def send_rich_message(
     result = api_call("sendRichMessage", payload, timeout=timeout)
     if result.get("ok"):
         result["native_rich_message"] = True
+        return result
+
+    error_text = str(result.get("error") or result).lower()
+    definitive_rejection = any(
+        marker in error_text
+        for marker in ("http error 400", "http error 404", "bad request", "method not found", "unsupported")
+    )
+    if not definitive_rejection:
+        # A timeout/connection loss can happen after Telegram accepted the rich
+        # message. Sending a second fallback in that ambiguous state would be a
+        # duplicate; let the stable-key retry path decide instead.
+        result["native_rich_message"] = False
         return result
 
     fallback_payload = build_payload(fallback_text, buttons, silent=silent, chat_id=chat_id, thread_id=thread_id)
@@ -1325,6 +1379,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 next_step=args.next or "",
                 blocker=args.blocker or "None",
                 model=model,
+                route=route,
             ) if terminal_status and not args.no_final_summary else ""
 
         if args.dry_run:
@@ -1344,6 +1399,34 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         # Approval controls govern the outcome, so they belong only on the separate final summary card.
         card_buttons = buttons if not terminal_status else None
+
+        def persist_checkpoint(
+            *,
+            live_message_id: int | str | None,
+            final_id: int | str | None,
+            active_renderer: str,
+        ) -> dict:
+            cards[args.key] = {
+                "title": title,
+                "header_message_id": header_message_id,
+                "message_id": live_message_id,
+                "ack_message_id": ack_message_id,
+                "final_message_id": final_id,
+                "approval_message_id": None,
+                "status": status,
+                "started_at": started_at,
+                "updated_at": updated_at,
+                "done": done,
+                "work_log": done,
+                "route": route,
+                "model": model,
+                "renderer": active_renderer,
+                "chat_id": chat_id,
+                "thread_id": thread_id,
+                "next_step": args.next or existing.get("next_step") or "",
+            }
+            save_state(state)
+            return cards[args.key]
 
         header_message_id = existing.get("header_message_id")
         header_action = None
@@ -1436,6 +1519,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         message_id = existing.get("message_id")
         if action == "sent":
             message_id = result.get("result", {}).get("message_id")
+            if not message_id:
+                print(json.dumps({
+                    "ok": False,
+                    "action": action,
+                    "error": "Telegram accepted the live card without returning a message id",
+                }, indent=2), file=sys.stderr)
+                return 1
         if use_rich:
             renderer = "rich" if result.get("native_rich_message") else "legacy"
         elif not renderer:
@@ -1443,6 +1533,13 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         final_message_id = existing.get("final_message_id")
         final_action = None
+        # Persist the accepted live-card receipt before any final-card call.
+        # A failed final delivery can then retry by editing this same live card.
+        existing = persist_checkpoint(
+            live_message_id=message_id,
+            final_id=final_message_id,
+            active_renderer=renderer,
+        )
 
         if final_text:
             if final_message_id:
@@ -1458,6 +1555,20 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 return 1
             if final_action == "sent":
                 final_message_id = final_result.get("result", {}).get("message_id")
+                if not final_message_id:
+                    print(json.dumps({
+                        "ok": False,
+                        "action": final_action,
+                        "error": "Telegram accepted the final summary without returning a message id",
+                    }, indent=2), file=sys.stderr)
+                    return 1
+                # Save the final receipt immediately, before optional ack edits,
+                # Brain Feed publishing, or response formatting can fail.
+                existing = persist_checkpoint(
+                    live_message_id=message_id,
+                    final_id=final_message_id,
+                    active_renderer=renderer,
+                )
 
         approval_message_id = None
 

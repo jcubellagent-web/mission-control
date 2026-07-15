@@ -22,9 +22,9 @@ import socket
 import subprocess
 import sys
 import tempfile
-import textwrap
 import time
 import urllib.request
+import unicodedata
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
@@ -277,7 +277,13 @@ def remote_check(command: str, timeout: int = 5) -> bool:
 def detect_explicit_route(prompt: str) -> str:
     lower = " ".join((prompt or "").lower().split())
     for alias, route in sorted(MODEL_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
-        if re.search(rf"\b(use|run|route|ask|with|via|on|delegate to|send to)?\s*{re.escape(alias)}\b", lower):
+        pattern = re.compile(
+            rf"\b(?:use|run(?: this)? (?:with|on)|route(?: this)? (?:to|through)|ask|with|via|on|delegate to|send to)\s+{re.escape(alias)}\b"
+        )
+        for match in pattern.finditer(lower):
+            prefix = lower[max(0, match.start() - 20):match.start()]
+            if re.search(r"(?:do not|don't|dont|never|avoid|not to)\s*$", prefix):
+                continue
             return route
     return ""
 
@@ -288,10 +294,12 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
         return "luna", "private/sensitive content stays on Josh 2.0 coordinator lane"
     if any(token in lower for token in ("current event", "latest news", "x/twitter", "social signal", "market narrative")):
         return "grok", "public current-events/social signal request"
-    if any(token in lower for token in ("review", "summarize", "summary", "digest", "large context", "read this")):
-        return "gemini", "dashboard-safe review/summarization"
     if any(token in lower for token in ("hard", "stabilize", "architecture", "migration", "integration", "debug", "root cause")):
         return "terra", "trusted execution/integration"
+    if any(token in lower for token in ("fix", "patch", "change", "edit", "implement", "deploy", "repair", "build", "code")):
+        return "terra", "trusted execution/integration"
+    if any(token in lower for token in ("review", "summarize", "summary", "digest", "large context", "read this")):
+        return "gemini", "dashboard-safe review/summarization"
     return "luna", "fast Inbox coordination"
 
 
@@ -443,7 +451,14 @@ def publish_control_tower(title: str, status: str, detail: str) -> None:
         "--brain-feed",
     ]
     try:
-        subprocess.run(cmd, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
+        subprocess.Popen(
+            cmd,
+            cwd=ROOT,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
     except Exception:
         pass
 
@@ -483,7 +498,8 @@ def parse_model_sections(output: str) -> dict[str, Any]:
     cleaned = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
     cleaned = re.sub(r"</?pre>", "", cleaned, flags=re.I)
     sections: dict[str, list[str]] = {key: [] for key in ("done", "issues", "next", "approval")}
-    complete = True
+    complete = False
+    complete_declared = False
     current = ""
     loose: list[str] = []
     for raw_line in cleaned.splitlines():
@@ -495,6 +511,7 @@ def parse_model_sections(output: str) -> dict[str, Any]:
             continue
         if lower.startswith("complete:"):
             complete = not bool(re.search(r"\b(no|false|incomplete|blocked)\b", lower))
+            complete_declared = True
             current = ""
             continue
         matched = False
@@ -535,18 +552,26 @@ def parse_model_sections(output: str) -> dict[str, Any]:
     sections["issues"] = [item for item in sections["issues"] if item.lower() not in {"n/a", "na", "none"}][:5]
     sections["next"] = [item for item in sections["next"] if item.lower() not in {"n/a", "na", "none"}][:5]
     sections["approval"] = [item for item in sections["approval"] if item.lower() not in {"n/a", "na", "none"}][:5]
+    if not complete_declared:
+        sections["issues"].append("Worker did not return a verifiable completion status.")
     if not sections["next"]:
         sections["next"] = ["No action needed."] if complete and not sections["issues"] else ["Review the listed issue before retrying."]
-    return {"complete": complete, **sections}
+    return {"complete": complete, "completeDeclared": complete_declared, **sections}
 
 
 def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: str) -> str:
     #JAIMES: the delivery layer, not the model, owns the fixed final format and
     # inserts only verified runtime routing facts.
     sections = parse_model_sections(output)
-    provider = clean_final_item(str(execution.get("actualProvider") or "unverified"), limit=40)
-    model = clean_final_item(str(execution.get("actualModel") or "unverified"), limit=80)
-    verified_model = f"{provider}/{model}" if provider and model else "unverified"
+    execution_verified = bool(execution.get("executionVerified"))
+    model_verified = bool(execution.get("modelVerified"))
+    if not execution_verified:
+        sections["complete"] = False
+        if "Worker execution was not verified." not in sections["issues"]:
+            sections["issues"].append("Worker execution was not verified.")
+    provider = clean_final_item(str(execution.get("actualProvider") or ""), limit=40)
+    model = clean_final_item(str(execution.get("actualModel") or ""), limit=80)
+    verified_model = f"{provider}/{model}" if model_verified and provider and model else "unverified"
     args = argparse.Namespace(
         model=verified_model,
         route=clean_final_item(str(route.get("routeId") or "unverified"), limit=80),
@@ -561,10 +586,17 @@ def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: 
 
 
 def dedupe_key(prompt: str, origin: dict[str, str], sensitive: bool = False) -> str:
-    stable_origin = {
-        key: str(origin.get(key) or "")
-        for key in ("messageId", "runId", "cardKey", "chatId", "threadId")
-    }
+    chat_id = str(origin.get("chatId") or "")
+    thread_id = str(origin.get("threadId") or "")
+    message_id = str(origin.get("messageId") or "")
+    run_id = str(origin.get("runId") or "")
+    card_key = str(origin.get("cardKey") or "")
+    if message_id:
+        stable_origin = {"chatId": chat_id, "threadId": thread_id, "messageId": message_id}
+    elif run_id:
+        stable_origin = {"chatId": chat_id, "threadId": thread_id, "runId": run_id}
+    else:
+        stable_origin = {"chatId": chat_id, "threadId": thread_id, "cardKey": card_key}
     material = json.dumps(stable_origin, sort_keys=True, separators=(",", ":"))
     if sensitive:
         return hashlib.sha256(material.encode("utf-8")).hexdigest()
@@ -584,7 +616,8 @@ def make_job(prompt: str, route: dict[str, Any], origin: dict[str, str], timeout
                 continue
             created = parse_utc(existing.get("createdAt"))
             recent = created is not None and (now - created).total_seconds() <= DEDUPE_WINDOW_SECONDS
-            if recent and existing.get("status") in {"queued", "running", "done"}:
+            status = existing.get("status")
+            if status in {"queued", "running"} or (recent and status == "done"):
                 return existing, True
 
         job_id = uuid.uuid4().hex[:20]
@@ -839,15 +872,18 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
     write_private_text(final_path, render_final_html(route, execution, output))
     model_label = f"provider={execution.get('actualProvider') or route.get('provider')}; model={execution.get('actualModel') or 'unverified'}; worker={execution.get('actualWorker') or route.get('worker')}; host={execution.get('actualHost') or route.get('host')}"
     route_label = f"route={route.get('routeId')}; reason={route.get('routingReason')}; fallback={route.get('fallback') or 'none'}"
+    sections = parse_model_sections(output)
+    task_complete = bool(execution.get("executionVerified") and sections.get("complete"))
+    command = "done" if task_complete else "fail"
     cmd = [
         sys.executable,
         str(WORK_CARD_SCRIPT),
-        "done",
+        command,
         "--key", card_key,
         "--model", model_label,
         "--route", route_label,
-        "--done", "Worker execution verified|Final result delivered",
-        "--blocker", "None",
+        "--done", "Worker execution verified|Final result delivered" if task_complete else "Worker stopped without a verified completion|Structured issue summary delivered",
+        "--blocker", "None" if task_complete else "The objective was not verified complete",
         "--final-text-file", str(final_path),
     ]
     if origin.get("chatId"):
@@ -914,7 +950,8 @@ def run_worker(job_id: str) -> dict[str, Any]:
         delivered = deliver_result(job_id, snapshot, route, execution, output)
         if not delivered:
             raise RuntimeError("delivery failed")
-        outcome = "done"
+        task_complete = bool(execution.get("executionVerified") and parse_model_sections(output).get("complete"))
+        outcome = "done" if task_complete else "failed"
     except Exception as exc:  # noqa: BLE001
         error_code = type(exc).__name__
         can_retry = (
@@ -1035,10 +1072,22 @@ def recover() -> dict[str, Any]:
                     if alive:
                         left_running += 1
                         continue
+                    if int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
+                        job["status"] = "failed"
+                        job["updatedAt"] = utc_now()
+                        job["lastError"] = "dead worker exhausted its retry budget"
+                        job.pop("workerPid", None)
+                        job.pop("leaseToken", None)
+                        continue
                     job["status"] = "queued"
                     job.pop("workerPid", None)
                     job.pop("leaseToken", None)
                 if job.get("status") == "queued":
+                    if int(job.get("attempt") or 0) >= int(job.get("maxRetries") or 0) + 1:
+                        job["status"] = "failed"
+                        job["updatedAt"] = utc_now()
+                        job["lastError"] = "queued recovery exhausted its retry budget"
+                        continue
                     job["updatedAt"] = utc_now()
                     to_spawn.append(job_id)
             save_json(STATE_PATH, state)
@@ -1087,6 +1136,46 @@ def take_result(job_id: str) -> dict[str, Any]:
         return {"ok": True, "job": public_job(job), "output": output}
 
 
+def display_width(value: str) -> int:
+    total = 0
+    text = str(value or "")
+    for index, char in enumerate(text):
+        if char == "\u200d" or unicodedata.combining(char) or unicodedata.category(char) in {"Cf", "Mn", "Me"}:
+            continue
+        if index + 1 < len(text) and text[index + 1] == "\ufe0f":
+            total += 2
+        else:
+            total += 2 if unicodedata.east_asian_width(char) in {"W", "F"} else 1
+    return total
+
+
+def fixed_width_lines(value: str, *, width: int = 38, subsequent_indent: str = "   ") -> list[str]:
+    pending = str(value or "")
+    lines: list[str] = []
+    first = True
+    while pending:
+        candidate = pending if first else f"{subsequent_indent}{pending.lstrip()}"
+        if display_width(candidate) <= width:
+            lines.append(candidate.rstrip())
+            break
+        used = 0
+        cut = 0
+        for index, char in enumerate(candidate):
+            next_char = candidate[index + 1] if index + 1 < len(candidate) else ""
+            char_width = 0 if char == "\u200d" or unicodedata.combining(char) or unicodedata.category(char) in {"Cf", "Mn", "Me"} else (2 if next_char == "\ufe0f" or unicodedata.east_asian_width(char) in {"W", "F"} else 1)
+            if used + char_width > width:
+                break
+            used += char_width
+            cut = index + 1
+        whitespace = candidate.rfind(" ", len(subsequent_indent) if not first else 0, cut)
+        if whitespace > (len(subsequent_indent) if not first else 0):
+            cut = whitespace
+        lines.append(candidate[:cut].rstrip())
+        pending = candidate[cut:].lstrip()
+        first = False
+    return lines or [""]
+
+
 def format_final(args: argparse.Namespace) -> str:
     complete = "Yes" if args.complete else "No"
     lines = [
@@ -1112,15 +1201,7 @@ def format_final(args: argparse.Namespace) -> str:
             wrapped.append("")
             continue
         subsequent = "  " if line.startswith("- ") else "   "
-        wrapped.extend(
-            textwrap.wrap(
-                line,
-                width=38,
-                subsequent_indent=subsequent,
-                break_long_words=False,
-                break_on_hyphens=False,
-            ) or [""]
-        )
+        wrapped.extend(fixed_width_lines(line, width=38, subsequent_indent=subsequent))
     return f"<pre>{html.escape(chr(10).join(wrapped))}</pre>"
 
 
