@@ -32,7 +32,8 @@ test("builds helper arguments without prompt content", () => {
   const args = helperArgs({ channel: "telegram", content: prompt }, inboxCtx, { helperPath: "/tmp/helper.py" });
   assert.equal(args.includes(prompt), false);
   assert.deepEqual(args.slice(0, 3), ["/tmp/helper.py", "--claim-inbox", "--run-id"]);
-  assert.equal(args.at(-1), inboxCtx.sessionKey);
+  assert.equal(args[args.indexOf("--session-key") + 1], inboxCtx.sessionKey);
+  assert.equal(args[args.indexOf("--message-id") + 1], inboxCtx.messageId);
 });
 
 test("claims the runtime-shaped global before_dispatch Inbox event", () => {
@@ -60,7 +61,8 @@ test("claims the runtime-shaped global before_dispatch Inbox event", () => {
   assert.equal(dispatched, true);
   const args = helperArgs(event, ctx, { helperPath: "/tmp/helper.py" });
   assert.equal(args.includes(event.body), false);
-  assert.equal(args[args.indexOf("--message-id") + 1], String(event.timestamp));
+  assert.equal(args.includes("--message-id"), false);
+  assert.equal(args[args.indexOf("--run-id") + 1], `before-dispatch:${event.timestamp}`);
 });
 
 test("silences a JAIMES mention on the global before_dispatch path", () => {

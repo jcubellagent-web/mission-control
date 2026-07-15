@@ -51,16 +51,19 @@ export function inboxDecision(event = {}, ctx = {}, config = {}) {
 
 export function helperArgs(event = {}, ctx = {}, config = {}) {
   const target = parseTelegramTarget(event, ctx);
-  const messageId = stringValue(ctx.messageId || event.messageId) || (event.timestamp ? String(event.timestamp) : "");
+  // #JAIMES: before_dispatch does not include Telegram messageId; timestamps
+  // remain a deterministic run/dedupe identity and must never be sent as one.
+  const messageId = stringValue(ctx.messageId || event.messageId);
+  const runId = stringValue(ctx.runId || event.runId) || (event.timestamp ? `before-dispatch:${event.timestamp}` : "");
   const args = [
     stringValue(config.helperPath, path.join(process.env.HOME || "/Users/josh2.0", ".openclaw", "workspace", "josh_telegram_fast_ack.py")),
     "--claim-inbox",
-    "--run-id", stringValue(ctx.runId),
-    "--message-id", messageId,
+    "--run-id", runId,
     "--chat-id", target.chatId,
     "--thread-id", target.threadId,
     "--session-key", stringValue(ctx.sessionKey),
   ];
+  if (messageId) args.push("--message-id", messageId);
   return args;
 }
 
