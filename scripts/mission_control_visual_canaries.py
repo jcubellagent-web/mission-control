@@ -28,7 +28,10 @@ V2_FAVICON_PATH = ROOT / "v2-react" / "public" / "favicon.svg"
 VITE_CONFIG_PATH = ROOT / "vite.config.ts"
 UPDATE_SCRIPT_PATH = ROOT / "scripts" / "update_mission_control.py"
 KIOSK_WATCHDOG_PATH = ROOT / "scripts" / "mission_control_kiosk_watchdog.py"
-KIOSK_WATCHDOG_PLIST_PATH = ROOT / "launchagents" / "com.josh20.mission-control-kiosk-watchdog.plist"
+KIOSK_WATCHDOG_PLIST_PATH = ROOT / "launchd" / "com.josh20.mission-control-kiosk-watchdog.plist"
+FOREGROUND_GUARD_PATH = ROOT / "scripts" / "control_tower_foreground.py"
+FOREGROUND_GUARD_PLIST_PATH = ROOT / "launchd" / "com.josh20.control-tower-foreground-guard.plist"
+FOREGROUND_INSTALLER_PATH = ROOT / "scripts" / "install_control_tower_kiosk_guards.sh"
 STATE_VISIBILITY_GUARD_PATH = ROOT / "scripts" / "state_visibility_guard.py"
 RUNTIME_LAYOUT_CHECK_PATH = ROOT / "scripts" / "mission_control_runtime_layout_check.py"
 SCREENSHOT_DIFF_PATH = ROOT / "scripts" / "mission_control_screenshot_diff.py"
@@ -117,6 +120,8 @@ def main() -> int:
     update_script = UPDATE_SCRIPT_PATH.read_text(errors="replace") if UPDATE_SCRIPT_PATH.exists() else ""
     kiosk_watchdog = KIOSK_WATCHDOG_PATH.read_text(errors="replace") if KIOSK_WATCHDOG_PATH.exists() else ""
     kiosk_watchdog_plist = KIOSK_WATCHDOG_PLIST_PATH.read_text(errors="replace") if KIOSK_WATCHDOG_PLIST_PATH.exists() else ""
+    foreground_guard = FOREGROUND_GUARD_PATH.read_text(errors="replace") if FOREGROUND_GUARD_PATH.exists() else ""
+    foreground_guard_plist = FOREGROUND_GUARD_PLIST_PATH.read_text(errors="replace") if FOREGROUND_GUARD_PLIST_PATH.exists() else ""
     state_guard = STATE_VISIBILITY_GUARD_PATH.read_text(errors="replace") if STATE_VISIBILITY_GUARD_PATH.exists() else ""
     runtime_layout_check = RUNTIME_LAYOUT_CHECK_PATH.read_text(errors="replace") if RUNTIME_LAYOUT_CHECK_PATH.exists() else ""
     screenshot_diff = SCREENSHOT_DIFF_PATH.read_text(errors="replace") if SCREENSHOT_DIFF_PATH.exists() else ""
@@ -371,12 +376,19 @@ def main() -> int:
         status(
             KIOSK_WATCHDOG_PATH.exists()
             and KIOSK_WATCHDOG_PLIST_PATH.exists()
-            and "mission_control_kiosk_watchdog.py --repair" in kiosk_watchdog_plist
+            and FOREGROUND_GUARD_PATH.exists()
+            and FOREGROUND_GUARD_PLIST_PATH.exists()
+            and FOREGROUND_INSTALLER_PATH.exists()
+            and "mission_control_kiosk_watchdog.py" in kiosk_watchdog_plist
+            and "control_tower_foreground.py" in foreground_guard_plist
+            and "<integer>30</integer>" in foreground_guard_plist
+            and "active-visible-work" in foreground_guard
+            and "activate_kiosk_process" in foreground_guard
             and "open_mission_control_kiosk.sh" in kiosk_watchdog
             and "reopened Chrome kiosk" in kiosk_watchdog
             and "mission_control_runtime_layout_check.py" in kiosk_watchdog,
             "Kiosk self-healing watchdog",
-            "Josh 2.0 watchdog can repair Chrome kiosk drift and keep live layout checks fresh",
+            "Josh 2.0 has a fast exact-window foreground guard plus a slower rendered-layout watchdog",
             severity="high",
         ),
         status(

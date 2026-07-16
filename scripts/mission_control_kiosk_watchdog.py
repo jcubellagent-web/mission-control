@@ -10,6 +10,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from control_tower_foreground import ensure_foreground
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -70,10 +72,17 @@ def main() -> int:
     if not ok and args.repair:
         opener = ROOT / "scripts" / "open_mission_control_kiosk.sh"
         if opener.exists():
-            run([str(opener)], timeout=45)
+            run([str(opener)], timeout=75)
             repaired = True
             time.sleep(3)
             ok, payload, detail = runtime_check()
+
+    foreground = ensure_foreground(repair=args.repair)
+    foreground_ok = bool(foreground.get("ok"))
+    foreground_action = foreground.get("status") == "focused"
+    if not foreground_ok:
+        ok = False
+        detail = f"{detail}; physical foreground check: {foreground.get('reason', 'unknown failure')}"
 
     update = run([sys.executable, str(ROOT / "scripts" / "update_mission_control.py")], timeout=120)
     if update.returncode != 0:
@@ -81,17 +90,23 @@ def main() -> int:
         detail = f"{detail}; Control Tower refresh failed"
 
     if not args.no_publish:
-        if ok:
-            suffix = " after kiosk reopen" if repaired else ""
-            publish("done", "Josh 2.0 screen check clean", f"{detail}{suffix}; reopened Chrome kiosk when repair is needed")
+        if ok and (repaired or foreground_action):
+            actions = []
+            if repaired:
+                actions.append("reopened Chrome kiosk")
+            if foreground_action:
+                actions.append("restored the exact kiosk window to the foreground")
+            publish("done", "Josh 2.0 screen restored", f"{detail}; {' and '.join(actions)}")
         else:
-            publish("blocked", "Josh 2.0 screen check needs attention", detail)
+            if not ok:
+                publish("blocked", "Josh 2.0 screen check needs attention", detail)
 
     result = {
         "ok": ok,
         "status": "ok" if ok else "attention",
         "detail": detail,
         "runtime": payload,
+        "foreground": foreground,
         "repaired": repaired,
         "dashboardRefreshOk": update.returncode == 0,
     }

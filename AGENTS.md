@@ -10,6 +10,40 @@ An unqualified user-facing reference to the dashboard should say "Control Tower"
 - Current build: `npm run build`
 - Current dev server: `npm run dev`
 
+## Josh 2.0 Display Ownership
+
+The physical Josh 2.0 display belongs to Control Tower whenever no visible
+browser, Computer Use, or local-UI work is actively using the Mac mini. The
+lightweight `control_tower_foreground.py ensure --repair` LaunchAgent enforces
+this with the exact `control-tower-kiosk` Chrome PID; never replace it with a
+generic `tell application "Google Chrome" to activate`, because the persistent
+agent-auth profile is a different Chrome process.
+
+Before intentionally taking over the Josh 2.0 display, create a short lease:
+
+```bash
+python3 scripts/control_tower_foreground.py begin --owner <agent> --purpose browser
+# Renew longer visible work before the returned expiry:
+python3 scripts/control_tower_foreground.py renew --lease-id <returned-lease-id>
+# Always release when visible work ends; release restores Control Tower now:
+python3 scripts/control_tower_foreground.py end --lease-id <returned-lease-id>
+```
+
+- Valid purposes are `browser`, `computer-use`, and `local-ui`.
+- The default lease is three minutes and the hard maximum is ten minutes. Renew
+  only while the display is truly in use; never use a task, Brain Feed row,
+  persistent browser process, gateway, or background job as a display lease.
+- Recent physical input and a locked/protected system session also defer focus
+  safely. SSH, daemons, polling, and headless work do not.
+- Do not publish the opaque lease id, account pages, or visible private content
+  to Control Tower, Brain Feed, handoffs, or shared logs.
+- Never kill or mutate the agent-auth Chrome while restoring the kiosk. If
+  macOS refuses to switch between the two Chrome processes, the guard may hide
+  only the stale foreground process, activates the exact kiosk CDP target, and
+  verifies its process PID. Activating agent-auth for later work unhides it.
+- Canonical service definitions live in `launchd/`; install or repair them with
+  `scripts/install_control_tower_kiosk_guards.sh`.
+
 ## Control Tower Change Control
 
 Control Tower source edits require an exclusive change lease. This rule applies to JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.
