@@ -22,6 +22,7 @@ STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
 LOCK_DIR = DATA_DIR / ".ecosystem-qa-locks"
 TICK_LOCK = LOCK_DIR / "scheduler.lock"
 CHANGE_LOCK = Path.home() / ".openclaw" / "state" / "control-tower-change-lock.json"
+HOST_TOOL_PATHS = ("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin")
 
 
 def iso(value: dt.datetime | None = None) -> str:
@@ -82,6 +83,14 @@ def change_lease_active(now: dt.datetime) -> bool:
         return False
 
 
+def scheduler_environment() -> dict[str, str]:
+    """Keep launchd jobs able to resolve host tools such as npm and node."""
+    env = os.environ.copy()
+    inherited = [part for part in env.get("PATH", "").split(os.pathsep) if part]
+    env["PATH"] = os.pathsep.join(dict.fromkeys((*HOST_TOOL_PATHS, *inherited)))
+    return env
+
+
 def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
     job_id = str(job["id"])
     command = [str(item) for item in job.get("command", [])]
@@ -98,6 +107,7 @@ def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
             process = subprocess.Popen(
                 command,
                 cwd=ROOT,
+                env=scheduler_environment(),
                 text=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
