@@ -84,6 +84,7 @@ open -na "$CHROME_APP" --args \
   --force-prefers-reduced-motion \
   --hide-scrollbars \
   --app="$URL" \
+  --kiosk \
   --start-fullscreen \
   --start-maximized
 
