@@ -72,3 +72,24 @@ def test_high_priority_action_still_fails_operational_health(tmp_path) -> None:
         result = benchmark.ecosystem_health_check()
     assert result["ok"] is False
     assert result["blockingActionRequired"] == 1
+
+
+def test_running_deep_release_supersedes_its_previous_generated_alert(tmp_path) -> None:
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    (data_dir / "control-tower-live.json").write_text(json.dumps({
+        "actionRequired": [{"priority": "high", "title": "1 scheduled job(s) missed: Deep release QA"}],
+    }))
+    (data_dir / "ecosystem-qa-scheduler.json").write_text(json.dumps({
+        "jobs": {"nightly-control-tower-suite": {"status": "running"}},
+    }))
+    payload = health_payload()
+    payload["cronAttentionCount"] = 1
+    payload["cronAttention"] = [{"name": "Deep release QA", "status": "error"}]
+    with patch.object(benchmark, "ROOT", tmp_path), \
+         patch.object(benchmark, "execute", return_value={"ok": False, "stdout": json.dumps(payload)}):
+        result = benchmark.ecosystem_health_check()
+
+    assert result["ok"] is True
+    assert result["blockingActionRequired"] == 0
+    assert result["inFlightDeepReleaseQa"] is True

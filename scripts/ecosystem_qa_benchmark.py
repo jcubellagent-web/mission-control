@@ -124,6 +124,21 @@ def ecosystem_health_check(env: dict[str, str] | None = None) -> dict[str, Any]:
         live = {}
     actions = live.get("actionRequired") if isinstance(live, dict) else []
     actions = actions if isinstance(actions, list) else []
+    try:
+        scheduler = json.loads((ROOT / "data" / "ecosystem-qa-scheduler.json").read_text(encoding="utf-8"))
+    except Exception:
+        scheduler = {}
+    scheduler_jobs = scheduler.get("jobs") if isinstance(scheduler, dict) else {}
+    scheduler_jobs = scheduler_jobs if isinstance(scheduler_jobs, dict) else {}
+    deep_release = scheduler_jobs.get("nightly-control-tower-suite")
+    deep_release_running = isinstance(deep_release, dict) and deep_release.get("status") == "running"
+    if deep_release_running:
+        # #JAIMES: live scheduler state supersedes the prior generated alert
+        # while Deep release QA is actively replacing that terminal result.
+        actions = [
+            item for item in actions
+            if not (isinstance(item, dict) and "deep release qa" in str(item.get("title") or "").lower())
+        ]
     blocking_actions = [
         item for item in actions
         if isinstance(item, dict)
@@ -131,11 +146,18 @@ def ecosystem_health_check(env: dict[str, str] | None = None) -> dict[str, Any]:
     ]
     agents = payload.get("agents") if isinstance(payload, dict) else []
     agents = agents if isinstance(agents, list) else []
+    raw_cron_attention = payload.get("cronAttention") if isinstance(payload, dict) else None
+    cron_attention = raw_cron_attention if isinstance(raw_cron_attention, list) else []
+    if deep_release_running:
+        cron_attention = [
+            item for item in cron_attention
+            if not (isinstance(item, dict) and "deep release qa" in str(item.get("name") or "").lower())
+        ]
     operational_ok = bool(
         agents
         and all(isinstance(agent, dict) and agent.get("ok") and not agent.get("stale") for agent in agents)
         and payload.get("modelRoutesOk") is True
-        and int(payload.get("cronAttentionCount") or 0) == 0
+        and (not cron_attention if isinstance(raw_cron_attention, list) else int(payload.get("cronAttentionCount") or 0) == 0)
         and float(payload.get("controlTowerAgeMinutes") or 9999) <= 5
         and not blocking_actions
     )
@@ -143,6 +165,7 @@ def ecosystem_health_check(env: dict[str, str] | None = None) -> dict[str, Any]:
     row["reportedStatus"] = payload.get("status")
     row["nonBlockingActionRequired"] = max(0, len(actions) - len(blocking_actions))
     row["blockingActionRequired"] = len(blocking_actions)
+    row["inFlightDeepReleaseQa"] = deep_release_running
     return row
 
 
