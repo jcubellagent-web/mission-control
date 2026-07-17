@@ -70,6 +70,7 @@ SOURCE_PATHS = (
     "scripts/memory_registry_smoke_test.py",
     "scripts/ecosystem_memory_client.py",
     "scripts/run_sleep_memory_review.sh",
+    "scripts/mission_control_kiosk_watchdog.py",
     "scripts/mission_control_regression_check.py",
     "scripts/mission_control_runtime_layout_check.py",
     "scripts/mission_control_visual_canaries.py",

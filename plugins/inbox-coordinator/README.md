@@ -35,6 +35,29 @@ normal Telegram delivery lanes. `#jaimes` and plain-language delegation
 requests, including `@JAIN`, remain Josh-owned routing hints for explicit
 worker delegation.
 
+Natural Inbox finals use a pre-delivery gate. The fast-ack watcher waits for
+the agent to create an interpreted, own-words objective card, adopts that exact
+run's card, and leaves model completion to the gate. The gate validates the
+single structured final, atomically fences the watcher, makes the existing live
+card terminal, and only then permits the native Telegram final. Interim
+messages never close the card, stale same-topic cards cannot authorize a new
+run, and an existing final receipt suppresses duplicate native delivery.
+
+Because `before_agent_finalize` reads the candidate final in memory, this
+trusted non-bundled plugin must explicitly opt into conversation-hook access:
+
+```bash
+openclaw config set plugins.entries.inbox-coordinator.hooks.allowConversationAccess true --strict-json
+```
+
+Final text crosses the terminal helper only through private standard input and
+a mode-0600 ephemeral file that is removed immediately. Before Telegram I/O,
+the helper also records a mode-0600, origin-scoped private outbox item. The
+fast-ack watcher retries that item with the same card lock and final-message
+receipt until delivery succeeds; an expired close claim is reclaimed without
+operator action. It is never put in helper arguments, plugin logs, or Control
+Tower data, and the outbox item is deleted as soon as delivery is proven.
+
 ## Verify
 
 ```bash

@@ -11,6 +11,7 @@ const GROUP_TOPIC_RE = /telegram:group:(-?\d+):(?:topic:)?(\d+)/i;
 // inside OpenCLAW's 15-second hook budget without timing out a healthy card
 // setup at the old 3-second boundary.
 const DEFAULT_HELPER_TIMEOUT_MS = 12_000;
+const DEFAULT_TERMINAL_HELPER_TIMEOUT_MS = 10_000;
 const SURFACE_RESOLUTION_BUDGET_MS = 7_500;
 const DEFAULT_HANDOFF_TIMEOUT_MS = 14_000;
 const DEFAULT_HANDOFF_WAIT_SECONDS = 9;
@@ -25,8 +26,12 @@ const PROTOCOL_LOCK_WAIT_MS = 250;
 const PROTOCOL_LOCK_RETRY_MS = 5;
 const PROTOCOL_LOCK_STALE_MS = 2_000;
 const DEFAULT_JAIMES_HEALTH_MAX_AGE_MS = 10 * 60_000;
+const FINAL_DELIVERY_GATE_TTL_MS = 60_000;
+const MAX_CANONICAL_FINAL_BYTES = 3_500;
+const FINAL_SECTION_NAMES = ["Complete", "What was done", "Issues", "Appropriate next steps", "Approval needed"];
 const recentInboundMessages = new Map();
 const consumedInboundMessages = new Map();
+const terminalDeliveryGates = new Map();
 
 function stringValue(value, fallback = "") {
   if (typeof value === "string" && value.trim()) return value.trim();
@@ -177,7 +182,7 @@ function bindInboundMessage(event = {}, ctx = {}, hookPhase = "") {
 }
 
 export function parseTelegramTarget(event = {}, ctx = {}) {
-  const candidates = [ctx.sessionKey, event.conversationId, ctx.conversationId]
+  const candidates = [ctx.sessionKey, event.sessionKey, event.conversationId, ctx.conversationId]
     .filter(Boolean)
     .map(String);
   for (const candidate of candidates) {
@@ -243,6 +248,446 @@ export function helperArgs(event = {}, ctx = {}, config = {}) {
     args.push("--surface-deadline-ms", String(Math.floor(surfaceDeadlineMs)));
   }
   return args;
+}
+
+function exactInboxTarget(event = {}, ctx = {}, config = {}) {
+  const target = parseTelegramTarget(event, ctx);
+  return target.chatId === stringValue(config.chatId, DEFAULT_CHAT_ID)
+    && target.threadId === stringValue(config.threadId, DEFAULT_THREAD_ID);
+}
+
+function decodeFinalHtml(value) {
+  const entities = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" };
+  return String(value || "").replace(/&(amp|lt|gt|quot|#39);/gi, (match, name) => (
+    entities[String(name).toLowerCase()] ?? match
+  ));
+}
+
+function finalFailure(reason, sections = {}) {
+  return { ok: false, reason, terminalStatus: "paused", sections };
+}
+
+function finalSectionBlock(lines, positions, name) {
+  const index = FINAL_SECTION_NAMES.indexOf(name);
+  const start = positions[index];
+  const end = index + 1 < positions.length ? positions[index + 1] : lines.length;
+  const label = `${name}:`;
+  const block = lines.slice(start, end);
+  return {
+    inline: block[0].slice(label.length).trim(),
+    tail: block.slice(1).filter((line) => line.trim()),
+  };
+}
+
+function joinedSection(block) {
+  return [block.inline, ...block.tail.map((line) => line.trim())].filter(Boolean).join(" ").trim();
+}
+
+function bulletCount(block) {
+  let count = 0;
+  let hasBullet = false;
+  for (const line of block.tail) {
+    if (line.startsWith("- ")) {
+      count += 1;
+      hasBullet = true;
+    } else if (!hasBullet || !line.startsWith("  ")) {
+      return -1;
+    }
+  }
+  return count;
+}
+
+function verifiedRuntimeModel(event = {}) {
+  const provider = stringValue(event.provider);
+  const model = stringValue(event.model);
+  return provider && model ? `${provider}/${model}` : model;
+}
+
+export function parseCanonicalFinalSummary(content, options = {}) {
+  const text = String(content || "").trim();
+  if (!text) return finalFailure("empty-final");
+  if (Buffer.byteLength(text, "utf8") > MAX_CANONICAL_FINAL_BYTES) {
+    return finalFailure("final-too-long");
+  }
+  const pre = /^<pre>([\s\S]*)<\/pre>$/i.exec(text);
+  if (!pre) return finalFailure("missing-pre-wrapper");
+  const body = decodeFinalHtml(pre[1]).replace(/\r\n?/g, "\n").replace(/^\n|\n$/g, "");
+  if (!body || /<\/?[a-z][^>]*>/i.test(body)) return finalFailure("non-plain-pre-content");
+  const lines = body.split("\n");
+  if (lines.some((line) => Array.from(line).length > 38)) return finalFailure("line-over-38-columns");
+
+  const positions = FINAL_SECTION_NAMES.map((name) => lines.findIndex((line) => line.startsWith(`${name}:`)));
+  if (positions.some((position) => position < 0)) {
+    const missingIndex = positions.findIndex((position) => position < 0);
+    return finalFailure(`missing-${FINAL_SECTION_NAMES[missingIndex].toLowerCase().replaceAll(" ", "-")}`);
+  }
+  if (positions[0] < 1 || positions.some((position, index) => index > 0 && position <= positions[index - 1])) {
+    return finalFailure("section-order");
+  }
+
+  const headerLines = lines.slice(0, positions[0]).filter((line) => line.trim());
+  if (!headerLines.length || !headerLines[0].startsWith("Model:")) return finalFailure("missing-model-route-line");
+  if (headerLines.slice(1).some((line) => !line.startsWith("   "))) return finalFailure("invalid-header-wrap");
+  const header = headerLines.map((line) => line.trim()).join(" ").replace(/\s+/g, " ");
+  const headerMatch = /^Model:\s*(.+?)\s*\|\s*Route:\s*(.+?)\s*\|\s*Why:\s*(.+)$/i.exec(header);
+  if (!headerMatch || headerMatch.slice(1).some((value) => !value.trim())) return finalFailure("invalid-model-route-line");
+  const expectedModel = stringValue(options.expectedModel).toLowerCase();
+  if (expectedModel && headerMatch[1].trim().toLowerCase() !== expectedModel) {
+    return finalFailure("unverified-model-line");
+  }
+
+  const blocks = Object.fromEntries(FINAL_SECTION_NAMES.map((name) => [name, finalSectionBlock(lines, positions, name)]));
+  const sections = Object.fromEntries(FINAL_SECTION_NAMES.map((name) => [name, joinedSection(blocks[name])]));
+  const complete = sections.Complete.toLowerCase();
+  if (!/^(?:yes|no)\b/i.test(complete)) return finalFailure("invalid-complete", sections);
+  const doneCount = blocks["What was done"].inline ? -1 : bulletCount(blocks["What was done"]);
+  if (doneCount < 3 || doneCount > 5) return finalFailure("what-was-done-bullet-count", sections);
+  const issues = sections.Issues.toLowerCase();
+  const approval = sections["Approval needed"].toLowerCase();
+  const noIssue = /^(?:n\/a|none)\.?$/i.test(issues);
+  if (!noIssue && (blocks.Issues.inline || bulletCount(blocks.Issues) < 1)) return finalFailure("invalid-issues", sections);
+  const nextSteps = sections["Appropriate next steps"];
+  if (!nextSteps) return finalFailure("empty-appropriate-next-steps", sections);
+  const noApproval = /^(?:n\/a|none|no action needed)\.?$/i.test(approval);
+  if (!noApproval && (blocks["Approval needed"].inline || bulletCount(blocks["Approval needed"]) < 1)) {
+    return finalFailure("invalid-approval-needed", sections);
+  }
+  const approvalNeeded = !noApproval;
+  const completeYes = /^yes\b/i.test(complete) && !/\b(?:not|partial|blocked|failed)\b/i.test(complete);
+  const explicitFailure = /\b(?:failed|failure|fatal|unrecoverable error)\b/i.test(`${complete} ${issues}`);
+  const terminalStatus = completeYes && !approvalNeeded
+    ? "done"
+    : explicitFailure && !approvalNeeded
+      ? "failed"
+      : "paused";
+  return {
+    ok: true,
+    reason: "canonical",
+    terminalStatus,
+    model: headerMatch[1].trim(),
+    route: headerMatch[2].trim(),
+    why: headerMatch[3].trim(),
+    sections,
+  };
+}
+
+function fixedWidthLines(value, firstPrefix = "", continuation = "   ") {
+  const words = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [firstPrefix.trimEnd()];
+  const lines = [];
+  let prefix = firstPrefix;
+  let line = prefix;
+  while (words.length) {
+    let word = words.shift();
+    const separator = line === prefix ? "" : " ";
+    if (Array.from(`${line}${separator}${word}`).length <= 38) {
+      line = `${line}${separator}${word}`;
+      continue;
+    }
+    if (line !== prefix) {
+      lines.push(line);
+      prefix = continuation;
+      line = prefix;
+      words.unshift(word);
+      continue;
+    }
+    const capacity = Math.max(1, 38 - Array.from(prefix).length);
+    const characters = Array.from(word);
+    lines.push(`${prefix}${characters.slice(0, capacity).join("")}`);
+    word = characters.slice(capacity).join("");
+    prefix = continuation;
+    line = prefix;
+    if (word) words.unshift(word);
+  }
+  if (line !== prefix || !lines.length) lines.push(line);
+  return lines;
+}
+
+function escapeTelegramHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+export function buildRecoveryFinalSummary(content, expectedModel = "") {
+  const plain = String(content || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[*_`#>]+/g, " ")
+    .replace(/\b(?:Complete|What was done|Issues|Appropriate next steps|Approval needed)\s*:/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const fragments = plain
+    .split(/(?<=[.!?])\s+|\s*[|•]\s*/)
+    .map((item) => item.replace(/^[-\s]+/, "").trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  for (const fallback of [
+    "Agent work reached final review.",
+    "Live card ordering was preserved.",
+    "Response formatting was recovered.",
+  ]) {
+    if (fragments.length >= 3) break;
+    if (!fragments.includes(fallback)) fragments.push(fallback);
+  }
+  const failed = /\b(?:failed|failure|fatal|blocked|could not|unable)\b/i.test(plain);
+  const incomplete = /\b(?:not complete|not completed|not done|incomplete|partial|pending|waiting|still needs?|remains?)\b/i.test(plain);
+  const approvalNeeded = /\b(?:waiting for approval|approval (?:needed|required|pending)|needs? approval|approve|sign[- ]?off|permission required|cannot\b[^.]{0,80}\bwithout approval|can['’]t\b[^.]{0,80}\bwithout approval)\b/i.test(plain)
+    && !/\b(?:no approval|approval (?:is )?not (?:needed|required)|can (?:proceed|continue|release|deploy) without approval)\b/i.test(plain);
+  const complete = !failed
+    && !incomplete
+    && !approvalNeeded
+    && /\b(?:completed|successfully completed|is complete|work is done|tests? passed|released|deployed)\b/i.test(plain);
+  const model = stringValue(expectedModel, "unverified");
+  const lines = [
+    ...fixedWidthLines(`Model: ${model} | Route: Josh 2.0 Inbox | Why: format recovery`),
+    "",
+    ...fixedWidthLines(complete
+      ? "Complete: Yes - agent reported completion."
+      : failed
+        ? "Complete: No - agent reported a problem."
+        : "Complete: No - completion was not explicit."),
+    "",
+    "What was done:",
+    ...fragments.flatMap((item) => fixedWidthLines(item, "- ", "  ")),
+    "",
+    "Issues:",
+    ...fixedWidthLines(failed
+      ? "Agent reported an issue in its result."
+      : approvalNeeded
+        ? "The result still requires approval."
+        : incomplete
+          ? "The result was not yet complete."
+          : "Final format was repaired automatically.", "- ", "  "),
+    "",
+    "Appropriate next steps:",
+    ...fixedWidthLines(complete ? "No action needed." : "Review the recovered result and next step."),
+    "",
+    "Approval needed:",
+    ...(approvalNeeded
+      ? fixedWidthLines("Review and approve the requested next step.", "- ", "  ")
+      : ["n/a"]),
+  ];
+  return `<pre>${escapeTelegramHtml(lines.join("\n"))}</pre>`;
+}
+
+export function terminalHelperArgs(event = {}, ctx = {}, config = {}) {
+  const sessionKey = stringValue(event.sessionKey || ctx.sessionKey);
+  const target = parseTelegramTarget({ ...event, sessionKey }, ctx);
+  const args = [
+    stringValue(config.helperPath, path.join(
+      process.env.HOME || "/Users/josh2.0",
+      ".openclaw", "workspace", "mission-control", "scripts", "josh_telegram_fast_ack.py",
+    )),
+    "--close-before-final",
+    "--chat-id", target.chatId,
+    "--thread-id", target.threadId,
+    "--session-key", sessionKey,
+  ];
+  const runId = stringValue(event.runId || ctx.runId);
+  const sessionId = stringValue(event.sessionId || ctx.sessionId);
+  if (runId) args.push("--run-id", runId);
+  if (sessionId) args.push("--session-id", sessionId);
+  if (["done", "paused", "failed"].includes(config.terminalStatus)) {
+    args.push("--terminal-status", config.terminalStatus);
+  }
+  if (stringValue(config.finalSummary)) args.push("--final-from-stdin");
+  return args;
+}
+
+function validTerminalReceipt(receipt) {
+  return Boolean(
+    receipt
+    && receipt.ok === true
+    && ["closed", "closed-and-final-delivered", "final-queued-for-retry", "already-terminal", "no-card-required", "final-already-delivered", "not-applicable"].includes(receipt.status),
+  );
+}
+
+export function closeLiveCardBeforeFinal(event = {}, ctx = {}, config = {}, logger = console) {
+  if (!exactInboxTarget(event, ctx, config)) {
+    return Promise.resolve({ ok: true, status: "not-applicable", card_closed: false });
+  }
+  if (!stringValue(event.runId || ctx.runId)) {
+    return Promise.resolve({ ok: false, status: "missing-terminal-run-id", card_closed: false });
+  }
+  const args = terminalHelperArgs(event, ctx, config);
+  const helper = args[0];
+  if (!fs.existsSync(helper)) {
+    return Promise.resolve({ ok: false, status: "terminal-helper-unavailable" });
+  }
+  const pythonPath = stringValue(config.pythonPath, "/opt/homebrew/bin/python3");
+  const timeoutMs = Number.isFinite(config.terminalHelperTimeoutMs)
+    ? Math.max(100, config.terminalHelperTimeoutMs)
+    : DEFAULT_TERMINAL_HELPER_TIMEOUT_MS;
+  const spawnHelper = config.terminalSpawn || spawn;
+  const finalSummary = stringValue(config.finalSummary);
+  return new Promise((resolve) => {
+    let child;
+    let settled = false;
+    let stdout = "";
+    const finish = (receipt) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(receipt);
+    };
+    const timer = setTimeout(() => {
+      try { child?.kill?.("SIGTERM"); } catch { /* best effort */ }
+      finish({ ok: false, status: "terminal-helper-timeout" });
+    }, timeoutMs);
+    try {
+      child = spawnHelper(pythonPath, args, {
+        detached: false,
+        stdio: [finalSummary ? "pipe" : "ignore", "pipe", "ignore"],
+        env: process.env,
+      });
+      child.once?.("error", () => finish({ ok: false, status: "terminal-helper-spawn-error" }));
+      if (finalSummary) {
+        child.stdin?.once?.("error", () => finish({ ok: false, status: "terminal-helper-stdin-error" }));
+        child.stdin?.end?.(finalSummary, "utf8");
+      }
+      child.stdout?.on("data", (chunk) => {
+        stdout = appendReceiptChunk(stdout, chunk);
+      });
+      child.once?.("close", (code) => {
+        const receipt = parseReceipt(stdout);
+        if (code === 0 && validTerminalReceipt(receipt)) return finish(receipt);
+        logger.error?.("inbox-coordinator: final delivery paused because the live card did not close");
+        return finish(receipt && typeof receipt === "object"
+          ? { ...receipt, ok: false }
+          : { ok: false, status: `terminal-helper-exit-${code ?? "unknown"}` });
+      });
+    } catch {
+      finish({ ok: false, status: "terminal-helper-dispatch-error" });
+    }
+  });
+}
+
+function terminalGateKey(event = {}, ctx = {}) {
+  return stringValue(event.sessionKey || ctx.sessionKey || event.sessionId || ctx.sessionId);
+}
+
+function rememberTerminalGate(event = {}, ctx = {}, receipt = {}, extra = {}) {
+  const key = terminalGateKey(event, ctx);
+  if (!key) return;
+  terminalDeliveryGates.set(key, {
+    ready: validTerminalReceipt(receipt),
+    receipt,
+    runId: stringValue(event.runId || ctx.runId),
+    recordedAt: Date.now(),
+    suppressNativeFinal: receipt.suppress_native_final === true,
+    ...extra,
+  });
+}
+
+function recentTerminalGate(event = {}, ctx = {}) {
+  const key = terminalGateKey(event, ctx);
+  if (!key) return undefined;
+  const gate = terminalDeliveryGates.get(key);
+  if (!gate || Date.now() - gate.recordedAt > FINAL_DELIVERY_GATE_TTL_MS) {
+    terminalDeliveryGates.delete(key);
+    return undefined;
+  }
+  return gate;
+}
+
+export async function gateTelegramFinalization(event = {}, ctx = {}, config = {}, logger = console) {
+  if (!exactInboxTarget(event, ctx, config)) return undefined;
+  const expectedModel = verifiedRuntimeModel(event);
+  const finalText = String(event.lastAssistantMessage || "");
+  const finalSummary = parseCanonicalFinalSummary(finalText, { expectedModel });
+  const identity = stringValue(event.runId || ctx.runId || event.sessionId || ctx.sessionId, "unknown-run");
+  if (!finalSummary.ok) {
+    rememberTerminalGate(event, ctx, { ok: false, status: "final-format-invalid" }, {
+      formatValid: false,
+      formatReason: finalSummary.reason,
+      expectedModel,
+    });
+    return {
+      action: "revise",
+      reason: "The Telegram final response must be one concise structured summary before it can be delivered.",
+      retry: {
+        instruction: `Rewrite the same result as one Telegram HTML <pre> block. Start with Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason>. Then use Complete: Yes/No, What was done: with 3-5 bullets, Issues:, Appropriate next steps:, and Approval needed: in that exact order. Use plain text only inside the block, pre-wrap every physical line to at most 38 columns, keep the whole response under 3,500 bytes, and do not add another live card.`,
+        idempotencyKey: `telegram-final-format:${identity}`,
+        maxAttempts: 2,
+      },
+    };
+  }
+  const receipt = await closeLiveCardBeforeFinal(event, ctx, {
+    ...config,
+    terminalStatus: finalSummary.terminalStatus,
+    finalSummary: finalText,
+  }, logger);
+  rememberTerminalGate(event, ctx, receipt, { formatValid: true, expectedModel });
+  if (validTerminalReceipt(receipt)) {
+    return { action: "continue", reason: "The existing Telegram live work card is terminal." };
+  }
+  return {
+    action: "revise",
+    reason: "The interpreted Telegram live work card must reach its terminal state before the final response is delivered.",
+    retry: {
+      instruction: "Keep the same final answer, ensure the existing interpreted live work card is present, and retry finalization. Do not create a generic or duplicate card.",
+      idempotencyKey: `telegram-live-card-before-final:${identity}`,
+      maxAttempts: 2,
+    },
+  };
+}
+
+export async function enforceTelegramFinalDelivery(event = {}, ctx = {}, config = {}, logger = console) {
+  if (!exactInboxTarget(event, ctx, config)) return undefined;
+  const prior = recentTerminalGate(event, ctx);
+  // message_sending is a generic outbound hook. Without a preceding natural
+  // finalization marker, this is an interim/system message and must not touch
+  // the task card.
+  if (!prior) return undefined;
+  if (prior.suppressNativeFinal) {
+    terminalDeliveryGates.delete(terminalGateKey(event, ctx));
+    return {
+      cancel: true,
+      cancelReason: "A structured final summary was already delivered by the terminal card path.",
+    };
+  }
+  let finalText = String(event.content || "");
+  let finalSummary = parseCanonicalFinalSummary(finalText, { expectedModel: prior.expectedModel });
+  let formatRecovered = false;
+  if (!finalSummary.ok) {
+    finalText = buildRecoveryFinalSummary(finalText, prior.expectedModel);
+    finalSummary = parseCanonicalFinalSummary(finalText, { expectedModel: prior.expectedModel });
+    formatRecovered = finalSummary.ok;
+    if (!finalSummary.ok) {
+      return {
+        cancel: true,
+        cancelReason: "The outbound final response could not be normalized safely.",
+      };
+    }
+  }
+  if (prior?.ready) {
+    terminalDeliveryGates.delete(terminalGateKey(event, ctx));
+    return formatRecovered ? { content: finalText } : undefined;
+  }
+  const retryEvent = prior.runId ? { ...event, runId: prior.runId } : event;
+  const receipt = await closeLiveCardBeforeFinal(retryEvent, ctx, {
+    ...config,
+    terminalStatus: finalSummary.terminalStatus,
+    finalSummary: finalText,
+  }, logger);
+  rememberTerminalGate(retryEvent, ctx, receipt, { formatValid: true, expectedModel: prior.expectedModel });
+  if (validTerminalReceipt(receipt)) {
+    terminalDeliveryGates.delete(terminalGateKey(event, ctx));
+    if (receipt.suppress_native_final === true) {
+      return {
+        cancel: true,
+        cancelReason: "A structured final summary was already delivered by the terminal card path.",
+      };
+    }
+    return undefined;
+  }
+  return {
+    cancel: true,
+    cancelReason: "The live work card could not be closed before this final response.",
+  };
 }
 
 export async function handleInboxEvent(event = {}, ctx = {}, config = {}, logger = console, dispatch = dispatchClaim, hookPhase = "") {
@@ -886,5 +1331,13 @@ export default {
       const config = api.pluginConfig || {};
       return handleInboxEvent(event, ctx, config, api.logger, dispatchClaim, "before_dispatch");
     }, { priority: 100, timeoutMs: 15_000 });
+    api.on("before_agent_finalize", async (event, ctx) => {
+      const config = api.pluginConfig || {};
+      return gateTelegramFinalization(event, ctx, config, api.logger);
+    }, { priority: 300, timeoutMs: 12_000 });
+    api.on("message_sending", async (event, ctx) => {
+      const config = api.pluginConfig || {};
+      return enforceTelegramFinalDelivery(event, ctx, config, api.logger);
+    }, { priority: 300, timeoutMs: 12_000 });
   },
 };

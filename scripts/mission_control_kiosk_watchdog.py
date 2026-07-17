@@ -14,6 +14,8 @@ from control_tower_foreground import ensure_foreground
 
 
 ROOT = Path(__file__).resolve().parents[1]
+QA_PYTHON = ROOT / ".venv-qa" / "bin" / "python"
+PLAYWRIGHT_PYTHON = Path("/opt/homebrew/bin/python3")
 
 
 def run(cmd: list[str], timeout: int = 90) -> subprocess.CompletedProcess[str]:
@@ -50,7 +52,17 @@ def publish(status: str, title: str, detail: str) -> None:
 
 
 def runtime_check() -> tuple[bool, dict[str, Any], str]:
-    proc = run([sys.executable, str(ROOT / "scripts" / "mission_control_runtime_layout_check.py")])
+    # launchd intentionally starts this lightweight watchdog with /usr/bin
+    # Python. The rendered-browser check must use the Homebrew runtime where
+    # Playwright is installed; raw Chromium fallback can exit 0 without a DOM
+    # and create a false alert from harmless allocator/keychain/GCM stderr.
+    if PLAYWRIGHT_PYTHON.is_file():
+        layout_python = str(PLAYWRIGHT_PYTHON)
+    elif QA_PYTHON.is_file():
+        layout_python = str(QA_PYTHON)
+    else:
+        layout_python = sys.executable
+    proc = run([layout_python, str(ROOT / "scripts" / "mission_control_runtime_layout_check.py")])
     payload: dict[str, Any] = {}
     try:
         payload = json.loads(proc.stdout)

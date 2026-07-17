@@ -14,6 +14,7 @@ import copy
 import datetime as dt
 import fcntl
 import hashlib
+import html
 import json
 import os
 import re
@@ -21,6 +22,7 @@ import subprocess
 import sys
 import time
 import tempfile
+import textwrap
 import urllib.request
 from contextlib import contextmanager
 from pathlib import Path
@@ -46,7 +48,10 @@ STALE_BOOTSTRAP_SECONDS = 120
 MAX_UNACKED_PROMPT_AGE_SECONDS = 30
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 10 * 60
-ORPHAN_WORK_CARD_GRACE_SECONDS = 10
+INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS = 3 * 60
+TERMINAL_CLOSE_LEASE_SECONDS = 30
+STALE_FINAL_GATE_SECONDS = 90
+TERMINAL_OUTBOX_MAX_ATTEMPTS = 12
 TERMINAL_CARD_STATUSES = {"done", "failed", "paused"}
 MAX_TERMINAL_CARD_RECORDS = 100
 INBOX_REACTION_ATTEMPTS = 2
@@ -54,6 +59,7 @@ INBOX_REACTION_TIMEOUT_SECONDS = 3
 INBOX_REACTION_RETRY_DELAY_SECONDS = 0.15
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
 WORK_CARD_STATE_PATH = WORKSPACE / "memory" / "josh_work_cards.json"
+TERMINAL_OUTBOX_DIR = STATE_PATH.parent / "terminal-final-outbox"
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
 CONVERSATION_INFO_BLOCK_RE = re.compile(r"Conversation info \(untrusted metadata\):\s*```json\s*(\{.*?\})\s*```", re.S)
 CARD_KEY_TS_PATTERN = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{6})")
@@ -344,7 +350,9 @@ def save_json(path: Path, data: Any) -> None:
             handle.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
             handle.flush()
             os.fsync(handle.fileno())
+        os.chmod(tmp, 0o600)
         tmp.replace(path)
+        os.chmod(path, 0o600)
     finally:
         if tmp and tmp.exists():
             try:
@@ -569,7 +577,22 @@ def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[st
                 # never prune that newer record.
                 continue
             if isinstance(latest_card, dict) and isinstance(candidate_card, dict):
-                merged_cards[card_key] = {**latest_card, **copy.deepcopy(candidate_card)}
+                merged_card = {**latest_card, **copy.deepcopy(candidate_card)}
+                latest_status = str(latest_card.get("status") or "").lower()
+                if latest_status in {*TERMINAL_CARD_STATUSES, "closing-before-final", "awaiting-final-gate"}:
+                    # A poll snapshot loaded before the final-delivery gate
+                    # must not reopen a terminal/closing card during merge.
+                    for field in (
+                        "status",
+                        "ended_at",
+                        "last_progress_at",
+                        "last_card_update_at",
+                        "terminal_close_started_at",
+                        "terminal_closed_before_final_at",
+                    ):
+                        if field in latest_card:
+                            merged_card[field] = latest_card[field]
+                merged_cards[card_key] = merged_card
             elif latest_card is missing:
                 merged_cards[card_key] = copy.deepcopy(candidate_card)
         merged["active_cards"] = merged_cards
@@ -635,6 +658,7 @@ def work_card_state_receipt(card_key: str) -> dict[str, Any]:
     return {
         "header_message_id": positive_telegram_message_id(card.get("header_message_id")),
         "live_message_id": positive_telegram_message_id(card.get("message_id")),
+        "final_message_id": positive_telegram_message_id(card.get("final_message_id")),
         "status": str(card.get("status") or ""),
         "header_delivery_status": str(card.get("header_delivery_status") or ""),
         "live_delivery_status": str(card.get("live_delivery_status") or ""),
@@ -727,6 +751,118 @@ def card_session_id(card: dict[str, Any]) -> str:
     key = str(card.get("key") or "")
     match = CARD_KEY_SESSION_PATTERN.search(key)
     return match.group(1) if match else ""
+
+
+def work_card_origin(card: dict[str, Any]) -> tuple[str, str]:
+    chat_id = normalize_telegram_chat_id(card.get("chat_id") or card.get("telegram_chat_id"))
+    thread_id = str(card.get("thread_id") or card.get("telegram_thread_id") or "").strip()
+    return str(chat_id or ""), thread_id
+
+
+def interpreted_work_card_candidates(
+    meta: dict[str, Any] | None,
+    started_at: dt.datetime | None = None,
+    excluded_keys: set[str] | None = None,
+    max_age_seconds: int = INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS,
+) -> list[tuple[str, dict[str, Any]]]:
+    """Return recent visible cards that contain an agent-written objective."""
+    work_state = load_json(WORK_CARD_STATE_PATH, {})
+    cards = work_state.get("cards") if isinstance(work_state, dict) else {}
+    if not isinstance(cards, dict):
+        return []
+    meta = meta or {}
+    expected_chat = str(normalize_telegram_chat_id(meta.get("telegram_chat_id")) or "")
+    expected_thread = str(meta.get("telegram_thread_id") or "").strip()
+    excluded = excluded_keys or set()
+    now = dt.datetime.now(dt.timezone.utc)
+    candidates: list[tuple[float, str, dict[str, Any]]] = []
+    for key, raw_card in cards.items():
+        if key in excluded or not isinstance(raw_card, dict):
+            continue
+        if str(raw_card.get("status") or "").lower() not in {"running", "active"}:
+            continue
+        title = str(raw_card.get("title") or "").strip()
+        if not title or title.lower() in {"josh 2.0 telegram task", "telegram task"}:
+            continue
+        card_chat, card_thread = work_card_origin(raw_card)
+        if expected_chat and card_chat != expected_chat:
+            continue
+        if expected_thread and card_thread != expected_thread:
+            continue
+        candidate_started = parse_utc(raw_card.get("started_at") or raw_card.get("updated_at"))
+        if not candidate_started:
+            continue
+        if started_at:
+            delta = (candidate_started - started_at).total_seconds()
+            if delta < -5 or delta > INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS:
+                continue
+            distance = abs(delta)
+        else:
+            age = (now - candidate_started).total_seconds()
+            if age < -5 or age > max_age_seconds:
+                continue
+            distance = age
+        candidates.append((distance, str(key), copy.deepcopy(raw_card)))
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    return [(key, card) for _, key, card in candidates]
+
+
+def adopt_interpreted_work_cards(
+    state: dict[str, Any],
+    meta: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    """Bind an agent-created objective card to a watcher run awaiting interpretation."""
+    active = state.get("active_cards")
+    if not isinstance(active, dict):
+        return []
+    owned_keys = {
+        str(card.get("key") or "")
+        for card in active.values()
+        if isinstance(card, dict)
+        and not card.get("requires_objective_interpretation")
+        and str(card.get("status") or "").lower() not in TERMINAL_CARD_STATUSES
+    }
+    adopted: list[dict[str, str]] = []
+    pending = sorted(
+        (
+            (run_id, card)
+            for run_id, card in active.items()
+            if isinstance(card, dict)
+            and card.get("requires_objective_interpretation")
+            and str(card.get("status") or "").lower() not in TERMINAL_CARD_STATUSES
+        ),
+        key=lambda item: str(item[1].get("started_at") or ""),
+    )
+    for run_id, card in pending:
+        card_meta = {
+            "telegram_chat_id": card.get("telegram_chat_id") or (meta or {}).get("telegram_chat_id"),
+            "telegram_thread_id": card.get("telegram_thread_id") or (meta or {}).get("telegram_thread_id"),
+        }
+        candidates = interpreted_work_card_candidates(
+            card_meta,
+            started_at=card_started_at(card),
+            excluded_keys=owned_keys,
+        )
+        if not candidates:
+            continue
+        key, visible = candidates[0]
+        objective = str(visible.get("title") or "").strip()
+        card.update({
+            "key": key,
+            "objective": objective,
+            "model": str(visible.get("model") or card.get("model") or DEFAULT_MODEL),
+            "route": str(visible.get("route") or card.get("route") or DEFAULT_ROUTE),
+            "header_message_id": positive_telegram_message_id(visible.get("header_message_id")),
+            "live_message_id": positive_telegram_message_id(visible.get("message_id")),
+            "card_start_ok": bool(visible.get("message_id")),
+            "requires_objective_interpretation": False,
+            "objective_interpreted": True,
+            "adopted_at": utc_now(),
+            "status": "active",
+        })
+        owned_keys.add(key)
+        adopted.append({"run_id": str(run_id), "key": key, "objective": objective})
+    return adopted
 
 
 def session_metadata() -> dict[str, Any]:
@@ -1820,7 +1956,8 @@ def send_ack(
             "route": display_route,
             "skill": skill,
             "objective": objective,
-            "run_id": "",
+            "run_id": event.get("run_id") or "",
+            "no_card_required": True,
             "last_card_update_at": utc_now(),
         }
     start_visible_card = live_cards_enabled(meta)
@@ -1989,74 +2126,35 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     active = state.get("active_cards") or {}
     processed = set(state.get("processed_progress_events") or [])
     updates: list[dict[str, Any]] = []
+    adopt_interpreted_work_cards(state, meta=meta)
     for event in recent_progress_events(session_id, meta=meta):
         event_id = event["event_id"]
         if event_id in processed:
             continue
-        processed.add(event_id)
         card = active.get(event["run_id"])
         if not card:
+            processed.add(event_id)
             continue
         if str(card.get("status") or "").lower() in {"done", "failed", "paused"}:
+            processed.add(event_id)
+            continue
+        if str(card.get("status") or "").lower() in {"closing-before-final", "awaiting-final-gate"}:
+            continue
+        if card.get("requires_objective_interpretation"):
+            # Keep the event pending. Once the agent creates its interpreted
+            # card, adoption replays progress into that same visible surface.
             continue
         objective = str(card.get("objective") or "Josh 2.0 Telegram task")
         key = str(card.get("key") or "")
         if not key:
             continue
+        processed.add(event_id)
         if event["type"] == "model.completed":
-            final_text = str(event.get("final_text") or "")
-            if is_ack_only_final(final_text):
-                cmd = [
-                    "python3",
-                    str(WORK_CARD_SCRIPT),
-                    "fail",
-                    "--key",
-                    key,
-                    "--title",
-                    objective,
-                    "--model",
-                    str(card.get("model") or DEFAULT_MODEL),
-                    "--route",
-                    str(card.get("route") or DEFAULT_ROUTE),
-                    "--done",
-                    "Model returned only the acknowledgement|No useful tool, API, browser, or account check ran|Marked this as a failed run instead of complete",
-                    "--blocker",
-                    "OpenCLAW stopped after the acknowledgement instead of executing the task",
-                    "--next",
-                    "Re-run the task with full execution on the appropriate Josh 2.0 or JAIMES host",
-                ]
-                target_status = "error"
-                publish_detail = "OpenCLAW returned only the acknowledgement; no useful work ran."
-                card_status = "failed"
-            else:
-                cmd = [
-                    "python3",
-                    str(WORK_CARD_SCRIPT),
-                    "done",
-                    "--key",
-                    key,
-                    "--title",
-                    objective,
-                    "--model",
-                    str(card.get("model") or DEFAULT_MODEL),
-                    "--route",
-                    str(card.get("route") or DEFAULT_ROUTE),
-                    "--done",
-                    "Final response delivered",
-                    "--blocker",
-                    "None",
-                    "--no-final-summary",
-                ]
-                target_status = "done"
-                publish_detail = "Final response sent in Josh 2.0 Telegram."
-                card_status = "done"
-            if not dry_run:
-                result = run_cmd(with_work_card_target(cmd, meta)) if cmd else {"ok": True, "skipped_visible_completion": True}
-                publish_josh(objective, target_status, publish_detail)
-                #JAIMES: the model’s final reply is canonical; do not append a detached approval-button message after it.
-            else:
-                result = {"ok": True, "dry_run": True}
-            card["status"] = card_status
+            # Final text and outcome are validated by before_agent_finalize.
+            # The watcher records model completion but never races that gate
+            # with a second terminal Telegram edit.
+            result = {"ok": True, "deferred_to_pre_final_gate": True}
+            card["status"] = "awaiting-final-gate"
             card["last_card_update_at"] = utc_now()
             card["last_progress_at"] = card["last_card_update_at"]
             updates.append({"event": event_id, "result": result})
@@ -2092,6 +2190,10 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     now = dt.datetime.now(dt.timezone.utc)
     for run_id, card in active.items():
         if not isinstance(card, dict) or str(card.get("status") or "").lower() in TERMINAL_CARD_STATUSES:
+            continue
+        if str(card.get("status") or "").lower() in {"closing-before-final", "awaiting-final-gate"}:
+            continue
+        if card.get("requires_objective_interpretation"):
             continue
         last_raw = str(card.get("last_card_update_at") or "")
         try:
@@ -2237,6 +2339,7 @@ def reconcile_orphan_work_cards(
     dry_run: bool = False,
     meta: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
+    adopt_interpreted_work_cards(state, meta=meta)
     work_state = load_json(WORK_CARD_STATE_PATH, {})
     cards = work_state.get("cards") if isinstance(work_state, dict) else {}
     if not isinstance(cards, dict):
@@ -2255,8 +2358,14 @@ def reconcile_orphan_work_cards(
             continue
         if key in owned_keys:
             continue
+        # Manual interpreted cards are owned by the model run even when the
+        # watcher restarts or briefly loses its correlation state. Never infer
+        # that Josh is idle from absence alone; only watcher-created fast-ack
+        # surfaces are eligible for stale cleanup.
+        if not str(key).startswith("fast-ack-"):
+            continue
         updated = parse_utc(card.get("updated_at"))
-        if updated and (now - updated).total_seconds() < ORPHAN_WORK_CARD_GRACE_SECONDS:
+        if updated and (now - updated).total_seconds() < MAX_ACTIVE_CARD_SECONDS:
             continue
         title = str(card.get("title") or "Josh 2.0 Telegram task")
         summary = "No active model or tool run owns this card; Josh 2.0 is idle."
@@ -2281,6 +2390,624 @@ def reconcile_orphan_work_cards(
         result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, meta))
         reconciled.append({"event": f"orphan-card:{key}", "result": result})
     return reconciled
+
+
+def terminal_request_meta(args: argparse.Namespace) -> dict[str, Any]:
+    meta = parse_telegram_target_from_key(str(getattr(args, "session_key", "") or ""))
+    if getattr(args, "chat_id", ""):
+        meta["telegram_chat_id"] = str(args.chat_id)
+    if getattr(args, "thread_id", ""):
+        meta["telegram_thread_id"] = str(args.thread_id)
+    return meta
+
+
+def select_terminal_card(
+    state: dict[str, Any],
+    args: argparse.Namespace,
+    meta: dict[str, Any],
+) -> tuple[str, dict[str, Any]] | None:
+    active = state.setdefault("active_cards", {})
+    if not isinstance(active, dict):
+        active = {}
+        state["active_cards"] = active
+    run_id = str(getattr(args, "run_id", "") or "")
+    if run_id and isinstance(active.get(run_id), dict):
+        return run_id, active[run_id]
+    if run_id:
+        # A concrete OpenCLAW turn must never borrow an older same-topic card.
+        # Let the bounded finalize retry wait for the watcher to correlate the
+        # exact run instead of authorizing against stale terminal history.
+        return None
+
+    session_id = str(getattr(args, "session_id", "") or "")
+    session_key = str(getattr(args, "session_key", "") or "")
+    expected_chat = str(normalize_telegram_chat_id(meta.get("telegram_chat_id")) or "")
+    expected_thread = str(meta.get("telegram_thread_id") or "")
+    candidates: list[tuple[dt.datetime, str, dict[str, Any]]] = []
+    for key, card in active.items():
+        if not isinstance(card, dict):
+            continue
+        if str(card.get("status") or "").lower() in TERMINAL_CARD_STATUSES:
+            continue
+        card_chat = str(normalize_telegram_chat_id(card.get("telegram_chat_id")) or "")
+        card_thread = str(card.get("telegram_thread_id") or "")
+        exact_session = bool(session_id and card_session_id(card) == session_id)
+        exact_key = bool(session_key and str(card.get("telegram_session_key") or "") == session_key)
+        same_origin = bool(
+            expected_chat
+            and card_chat == expected_chat
+            and (not expected_thread or card_thread == expected_thread)
+        )
+        if not (exact_session or exact_key or same_origin):
+            continue
+        candidates.append((card_started_at(card) or dt.datetime.min.replace(tzinfo=dt.timezone.utc), str(key), card))
+    if candidates:
+        candidates.sort(key=lambda item: item[0], reverse=True)
+        _, key, card = candidates[0]
+        return key, card
+
+    # The watcher can lag the model by one poll. Adopt the newest visible,
+    # interpreted card in this exact origin so final delivery never overtakes it.
+    visible = interpreted_work_card_candidates(
+        meta,
+        max_age_seconds=INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS,
+    )
+    if not visible:
+        return None
+    visible_key, work_card = visible[0]
+    stable = run_id or session_id or f"terminal-card:{visible_key}"
+    active[stable] = {
+        "key": visible_key,
+        "objective": str(work_card.get("title") or "").strip(),
+        "model": str(work_card.get("model") or DEFAULT_MODEL),
+        "route": str(work_card.get("route") or DEFAULT_ROUTE),
+        "session_id": session_id,
+        "telegram_session_key": session_key,
+        "telegram_chat_id": expected_chat,
+        "telegram_thread_id": expected_thread,
+        "header_message_id": positive_telegram_message_id(work_card.get("header_message_id")),
+        "live_message_id": positive_telegram_message_id(work_card.get("message_id")),
+        "card_start_ok": bool(work_card.get("message_id")),
+        "objective_interpreted": True,
+        "requires_objective_interpretation": False,
+        "started_at": str(work_card.get("started_at") or work_card.get("updated_at") or utc_now()),
+        "last_card_update_at": str(work_card.get("updated_at") or utc_now()),
+        "status": "active",
+    }
+    return stable, active[stable]
+
+
+def terminal_action_fields(status: str) -> tuple[str, str, str]:
+    return {
+        "done": ("done", "Work complete; final summary follows", "None"),
+        "paused": ("pause", "Work paused; final summary explains what remains", "See final summary"),
+        "failed": ("fail", "Work stopped; final summary explains the issue", "See final summary"),
+    }.get(status, ("pause", "Work paused; final summary explains what remains", "See final summary"))
+
+
+def terminal_outbox_path(run_key: str, card_key: str) -> Path:
+    digest = hashlib.sha256(f"{run_key}\0{card_key}".encode("utf-8")).hexdigest()
+    return TERMINAL_OUTBOX_DIR / f"{digest}.json"
+
+
+def queue_terminal_final(
+    run_key: str,
+    card_key: str,
+    card: dict[str, Any],
+    meta: dict[str, Any],
+    terminal_status: str,
+    final_summary: str,
+) -> Path:
+    """Persist one private, origin-scoped final before any Telegram I/O."""
+    path = terminal_outbox_path(run_key, card_key)
+    existing = load_json(path, {})
+    if not isinstance(existing, dict):
+        existing = {}
+    save_json(path, {
+        "version": 1,
+        "run_key": run_key,
+        "card_key": card_key,
+        "objective": str(card.get("objective") or "").strip(),
+        "model": str(card.get("model") or DEFAULT_MODEL),
+        "route": str(card.get("route") or DEFAULT_ROUTE),
+        "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
+        "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
+        "terminal_status": terminal_status,
+        "final_summary": final_summary,
+        "attempts": int(existing.get("attempts") or 0),
+        "created_at": str(existing.get("created_at") or utc_now()),
+        "updated_at": utc_now(),
+        "next_attempt_at": str(existing.get("next_attempt_at") or ""),
+        "escalated_at": str(existing.get("escalated_at") or ""),
+    })
+    return path
+
+
+@contextmanager
+def private_terminal_final_file(final_summary: str):
+    TERMINAL_OUTBOX_DIR.mkdir(parents=True, exist_ok=True)
+    final_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=TERMINAL_OUTBOX_DIR,
+            prefix=".terminal-final-",
+            suffix=".html",
+            delete=False,
+        ) as handle:
+            handle.write(final_summary)
+            handle.flush()
+            os.fsync(handle.fileno())
+            final_path = Path(handle.name)
+        os.chmod(final_path, 0o600)
+        yield final_path
+    finally:
+        if final_path:
+            final_path.unlink(missing_ok=True)
+
+
+def terminal_work_card_command(
+    card_key: str,
+    card: dict[str, Any],
+    meta: dict[str, Any],
+    terminal_status: str,
+    final_path: Path | None = None,
+) -> list[str]:
+    terminal_action, terminal_done, terminal_blocker = terminal_action_fields(terminal_status)
+    cmd = [
+        "python3",
+        str(WORK_CARD_SCRIPT),
+        terminal_action,
+        "--key",
+        card_key,
+        "--title",
+        str(card.get("objective") or "").strip(),
+        "--model",
+        str(card.get("model") or DEFAULT_MODEL),
+        "--route",
+        str(card.get("route") or DEFAULT_ROUTE),
+        "--done",
+        terminal_done,
+        "--blocker",
+        terminal_blocker,
+        "--timeout",
+        "6",
+    ]
+    if final_path:
+        cmd.extend(["--final-text-file", str(final_path)])
+    else:
+        cmd.append("--no-final-summary")
+    return with_work_card_target(cmd, meta)
+
+
+def build_stale_gate_recovery_final(card: dict[str, Any]) -> str:
+    def wrapped(line: str, indent: str = "   ") -> list[str]:
+        return textwrap.wrap(
+            line,
+            width=38,
+            subsequent_indent=indent,
+            break_long_words=True,
+            break_on_hyphens=False,
+        ) or [""]
+
+    def bullet(line: str) -> list[str]:
+        return textwrap.wrap(
+            f"- {line}",
+            width=38,
+            subsequent_indent="  ",
+            break_long_words=True,
+            break_on_hyphens=False,
+        )
+
+    model = str(card.get("model") or DEFAULT_MODEL)
+    route = str(card.get("route") or "Josh 2.0 Inbox")
+    lines = [
+        *wrapped(f"Model: {model} | Route: {route} | Why: delivery recovery"),
+        "",
+        *wrapped("Complete: No - detailed result unavailable."),
+        "",
+        "What was done:",
+        *bullet("The agent run reached final review."),
+        *bullet("The existing live card was preserved."),
+        *bullet("Automatic recovery closed the stale gate."),
+        "",
+        "Issues:",
+        *bullet("The original final was not retained."),
+        "",
+        "Appropriate next steps:",
+        *wrapped("Review the task only if detail is needed."),
+        "",
+        "Approval needed:",
+        "n/a",
+    ]
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+
+
+def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False) -> list[dict[str, Any]]:
+    active = state.get("active_cards") if isinstance(state.get("active_cards"), dict) else {}
+    now = dt.datetime.now(dt.timezone.utc)
+    queued: list[dict[str, Any]] = []
+    for run_key, card in active.items():
+        if not isinstance(card, dict) or str(card.get("status") or "").lower() != "awaiting-final-gate":
+            continue
+        last = parse_utc(card.get("last_card_update_at") or card.get("last_progress_at"))
+        if not last or (now - last).total_seconds() <= STALE_FINAL_GATE_SECONDS:
+            continue
+        card_key = str(card.get("key") or "")
+        if not card_key:
+            continue
+        receipt = work_card_state_receipt(card_key)
+        if receipt["final_message_id"]:
+            status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else "done"
+            card.update({"status": status, "ended_at": utc_now(), "last_card_update_at": utc_now()})
+            queued.append({"event": f"stale-final-gate:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
+            continue
+        outbox = terminal_outbox_path(str(run_key), card_key)
+        if outbox.exists():
+            continue
+        meta = {
+            "telegram_chat_id": str(card.get("telegram_chat_id") or ""),
+            "telegram_thread_id": str(card.get("telegram_thread_id") or ""),
+        }
+        if not dry_run:
+            queue_terminal_final(
+                str(run_key),
+                card_key,
+                card,
+                meta,
+                "paused",
+                build_stale_gate_recovery_final(card),
+            )
+            card["terminal_recovery_queued_at"] = utc_now()
+        queued.append({"event": f"stale-final-gate:{run_key}", "result": {"ok": True, "status": "recovery-queued", "dry_run": dry_run}})
+    return queued
+
+
+def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) -> list[dict[str, Any]]:
+    if not TERMINAL_OUTBOX_DIR.exists():
+        return []
+    active = state.get("active_cards") if isinstance(state.get("active_cards"), dict) else {}
+    recovered: list[dict[str, Any]] = []
+    for path in sorted(TERMINAL_OUTBOX_DIR.glob("*.json")):
+        record = load_json(path, {})
+        if not isinstance(record, dict):
+            path.unlink(missing_ok=True)
+            continue
+        run_key = str(record.get("run_key") or "")
+        card_key = str(record.get("card_key") or "")
+        final_summary = str(record.get("final_summary") or "").strip()
+        if not run_key or not card_key or not final_summary:
+            path.unlink(missing_ok=True)
+            continue
+        next_attempt = parse_utc(record.get("next_attempt_at"))
+        if next_attempt and dt.datetime.now(dt.timezone.utc) < next_attempt:
+            continue
+        card = active.get(run_key) if isinstance(active.get(run_key), dict) else {
+            "key": card_key,
+            "objective": record.get("objective"),
+            "model": record.get("model"),
+            "route": record.get("route"),
+        }
+        if str(card.get("key") or "") != card_key:
+            continue
+        receipt = work_card_state_receipt(card_key)
+        if receipt["final_message_id"]:
+            status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else str(record.get("terminal_status") or "paused")
+            if run_key in active:
+                ended_at = utc_now()
+                active[run_key].update({"status": status, "ended_at": ended_at, "last_card_update_at": ended_at})
+            path.unlink(missing_ok=True)
+            recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
+            continue
+        if dry_run:
+            recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "retry-planned", "dry_run": True}})
+            continue
+        meta = {
+            "telegram_chat_id": str(record.get("telegram_chat_id") or ""),
+            "telegram_thread_id": str(record.get("telegram_thread_id") or ""),
+        }
+        terminal_status = str(record.get("terminal_status") or "paused").lower()
+        try:
+            with private_terminal_final_file(final_summary) as final_path:
+                result = run_cmd(
+                    terminal_work_card_command(card_key, card, meta, terminal_status, final_path),
+                    timeout=10,
+                )
+        except subprocess.TimeoutExpired:
+            result = {"ok": False, "returncode": -1, "stderr": "terminal outbox retry timed out"}
+        persisted = work_card_state_receipt(card_key)
+        if persisted["final_message_id"] and persisted["status"].lower() in TERMINAL_CARD_STATUSES:
+            ended_at = utc_now()
+            if run_key in active:
+                active[run_key].update({
+                    "status": persisted["status"].lower(),
+                    "ended_at": ended_at,
+                    "last_progress_at": ended_at,
+                    "last_card_update_at": ended_at,
+                    "terminal_closed_before_final_at": ended_at,
+                })
+            path.unlink(missing_ok=True)
+            recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "delivered"}})
+            continue
+        attempts = int(record.get("attempts") or 0) + 1
+        delay = min(300, 2 ** min(attempts, 8))
+        record.update({
+            "attempts": attempts,
+            "last_attempt_at": utc_now(),
+            "next_attempt_at": (dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=delay)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "last_error": str(result.get("stderr") or "terminal delivery retry failed")[:240],
+            "updated_at": utc_now(),
+        })
+        if attempts >= TERMINAL_OUTBOX_MAX_ATTEMPTS and not record.get("escalated_at"):
+            record["escalated_at"] = utc_now()
+            publish_josh(
+                str(card.get("objective") or "Telegram final delivery"),
+                "blocked",
+                "Automatic final delivery retries are still failing; the private final remains queued.",
+            )
+        save_json(path, record)
+        recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": False, "status": "retry-queued", "attempts": attempts}})
+    return recovered
+
+
+def persist_terminal_card_state(run_key: str, card_key: str, status: str = "done") -> None:
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        if not isinstance(latest, dict):
+            latest = {}
+        active = latest.setdefault("active_cards", {})
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
+            return
+        ended_at = utc_now()
+        card.update({
+            "status": status,
+            "ended_at": ended_at,
+            "last_progress_at": ended_at,
+            "last_card_update_at": ended_at,
+            "terminal_closed_before_final_at": ended_at,
+        })
+        save_json(STATE_PATH, latest)
+
+
+def claim_terminal_card_close(run_key: str, card_key: str) -> str:
+    """Atomically fence the poller before the pre-final Telegram edit."""
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        active = latest.get("active_cards") if isinstance(latest, dict) else {}
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
+            return "missing"
+        status = str(card.get("status") or "").lower()
+        if status in TERMINAL_CARD_STATUSES:
+            return "terminal"
+        if status == "closing-before-final":
+            started = parse_utc(card.get("terminal_close_started_at"))
+            age = (dt.datetime.now(dt.timezone.utc) - started).total_seconds() if started else None
+            if age is not None and age <= TERMINAL_CLOSE_LEASE_SECONDS:
+                return "closing"
+            # A helper can die after fencing the poller but before releasing
+            # the lease. Reclaim only an expired/malformed close claim so the
+            # exact run can finish without operator intervention.
+            card["terminal_close_recovered_at"] = utc_now()
+        card["status"] = "closing-before-final"
+        card["terminal_close_started_at"] = utc_now()
+        save_json(STATE_PATH, latest)
+        return "claimed"
+
+
+def release_terminal_card_close(run_key: str, card_key: str) -> None:
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        active = latest.get("active_cards") if isinstance(latest, dict) else {}
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if (
+            isinstance(card, dict)
+            and str(card.get("key") or "") == card_key
+            and str(card.get("status") or "") == "closing-before-final"
+        ):
+            card["status"] = "active"
+            card.pop("terminal_close_started_at", None)
+            save_json(STATE_PATH, latest)
+
+
+def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
+    """Close the existing live card before OpenCLAW may deliver its final reply."""
+    final_summary = sys.stdin.read().strip() if getattr(args, "final_from_stdin", False) else ""
+    if getattr(args, "final_from_stdin", False) and not final_summary:
+        return {"ok": False, "status": "missing-final-summary", "card_closed": False}
+    meta = terminal_request_meta(args)
+    if not exact_control_center_inbox(meta):
+        return {"ok": True, "status": "not-applicable", "card_closed": False}
+
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        if not isinstance(state, dict):
+            state = {}
+        adopt_interpreted_work_cards(state, meta=meta)
+        selected = select_terminal_card(state, args, meta)
+        save_json(STATE_PATH, state)
+
+    if not selected:
+        return {
+            "ok": False,
+            "status": "run-card-not-ready" if getattr(args, "run_id", "") else "no-active-card",
+            "card_closed": False,
+        }
+    run_key, card = selected
+    if card.get("no_card_required"):
+        return {
+            "ok": True,
+            "status": "no-card-required",
+            "card_closed": False,
+        }
+    card_key = str(card.get("key") or "")
+    if card.get("requires_objective_interpretation"):
+        return {
+            "ok": False,
+            "status": "awaiting-objective-card",
+            "card_closed": False,
+            "reason": "The agent has not created an interpreted live work card.",
+        }
+    if not card_key:
+        return {"ok": False, "status": "missing-card-key", "card_closed": False}
+
+    receipt = work_card_state_receipt(card_key)
+    receipt_terminal_status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else ""
+    if receipt_terminal_status:
+        persisted_status = receipt_terminal_status
+        persist_terminal_card_state(run_key, card_key, persisted_status)
+        if receipt["final_message_id"]:
+            return {
+                "ok": True,
+                "status": "final-already-delivered",
+                "card_closed": True,
+                "suppress_native_final": True,
+                "card_key": card_key,
+                "live_message_id": receipt["live_message_id"],
+                "final_message_id": receipt["final_message_id"],
+            }
+        if not final_summary:
+            return {
+                "ok": True,
+                "status": "already-terminal",
+                "card_closed": True,
+                "card_key": card_key,
+                "live_message_id": receipt["live_message_id"],
+                "terminal_status": persisted_status,
+            }
+    if not receipt["header_message_id"] or not receipt["live_message_id"]:
+        return {
+            "ok": False,
+            "status": "incomplete-card-surface",
+            "card_closed": False,
+            "card_key": card_key,
+        }
+
+    objective = str(card.get("objective") or "").strip()
+    if not objective or objective.lower() in {"josh 2.0 telegram task", "telegram task"}:
+        return {
+            "ok": False,
+            "status": "awaiting-objective-card",
+            "card_closed": False,
+            "card_key": card_key,
+        }
+
+    terminal_status = receipt_terminal_status or str(getattr(args, "terminal_status", "done") or "done").lower()
+    claim_status = claim_terminal_card_close(run_key, card_key)
+    if claim_status == "terminal":
+        persisted = work_card_state_receipt(card_key)
+        if persisted["status"].lower() in TERMINAL_CARD_STATUSES:
+            persist_terminal_card_state(run_key, card_key, persisted["status"].lower())
+            if final_summary and not persisted["final_message_id"]:
+                # The card-only close succeeded in an earlier attempt. It is
+                # already fenced from the poller, so retry only final delivery.
+                claim_status = "terminal-final-retry"
+            else:
+                return {
+                    "ok": True,
+                    "status": "final-already-delivered" if persisted["final_message_id"] else "already-terminal",
+                    "card_closed": True,
+                    "suppress_native_final": bool(persisted["final_message_id"]),
+                    "card_key": card_key,
+                    "live_message_id": persisted["live_message_id"],
+                    "final_message_id": persisted["final_message_id"],
+                    "terminal_status": persisted["status"].lower(),
+                }
+    if claim_status not in {"claimed", "terminal-final-retry"}:
+        return {
+            "ok": False,
+            "status": "terminal-close-in-progress" if claim_status == "closing" else "run-card-not-ready",
+            "card_closed": False,
+            "card_key": card_key,
+        }
+    outbox_path: Path | None = None
+    if final_summary:
+        try:
+            outbox_path = queue_terminal_final(
+                run_key,
+                card_key,
+                card,
+                meta,
+                terminal_status,
+                final_summary,
+            )
+        except Exception:
+            release_terminal_card_close(run_key, card_key)
+            return {
+                "ok": False,
+                "status": "terminal-outbox-unavailable",
+                "card_closed": False,
+                "card_key": card_key,
+            }
+    try:
+        if final_summary:
+            with private_terminal_final_file(final_summary) as final_path:
+                result = run_cmd(
+                    terminal_work_card_command(card_key, card, meta, terminal_status, final_path),
+                    timeout=10,
+                )
+        else:
+            result = run_cmd(
+                terminal_work_card_command(card_key, card, meta, terminal_status),
+                timeout=10,
+            )
+    except subprocess.TimeoutExpired:
+        result = {"ok": False, "returncode": -1, "stderr": "terminal card edit timed out"}
+    persisted = work_card_state_receipt(card_key)
+    final_missing = bool(final_summary and not persisted["final_message_id"])
+    delivered = bool(
+        final_summary
+        and persisted["final_message_id"]
+        and persisted["status"].lower() in TERMINAL_CARD_STATUSES
+    )
+    if (
+        persisted["status"].lower() not in TERMINAL_CARD_STATUSES
+        or (not final_summary and not result.get("ok"))
+        or (final_summary and final_missing)
+    ):
+        release_terminal_card_close(run_key, card_key)
+        if final_summary and outbox_path and outbox_path.exists():
+            return {
+                "ok": True,
+                "status": "final-queued-for-retry",
+                "card_closed": persisted["status"].lower() in TERMINAL_CARD_STATUSES,
+                "suppress_native_final": True,
+                "retry_queued": True,
+                "card_key": card_key,
+                "live_message_id": persisted["live_message_id"],
+            }
+        return {
+            "ok": False,
+            "status": "terminal-final-delivery-failed" if final_missing else "terminal-card-edit-failed",
+            "card_closed": False,
+            "card_key": card_key,
+            "helper_returncode": result.get("returncode"),
+        }
+    if delivered and outbox_path:
+        outbox_path.unlink(missing_ok=True)
+    persisted_status = persisted["status"].lower()
+    persist_terminal_card_state(run_key, card_key, persisted_status)
+    if final_summary:
+        return {
+            "ok": True,
+            "status": "closed-and-final-delivered",
+            "card_closed": True,
+            "suppress_native_final": True,
+            "card_key": card_key,
+            "live_message_id": persisted["live_message_id"],
+            "final_message_id": persisted["final_message_id"],
+            "terminal_status": persisted_status,
+        }
+    return {
+        "ok": True,
+        "status": "closed",
+        "card_closed": True,
+        "card_key": card_key,
+        "live_message_id": persisted["live_message_id"],
+        "terminal_status": persisted_status,
+    }
 
 
 def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
@@ -2540,10 +3267,19 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "header_message_id": str(result.get("header_message_id") or ""),
                     "live_message_id": str(result.get("live_message_id") or ""),
                     "session_id": session_id,
+                    "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
+                    "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
+                    "telegram_session_key": str(meta.get("telegram_session_key") or ""),
+                    "requires_objective_interpretation": bool(result.get("requires_objective_interpretation")),
+                    "no_card_required": bool(result.get("no_card_required")),
                     "started_at": result.get("last_card_update_at"),
                     "last_progress_at": result.get("last_card_update_at"),
                     "last_card_update_at": result.get("last_card_update_at"),
-                    "status": "active",
+                    "status": (
+                        "done" if result.get("no_card_required")
+                        else "pending-interpretation" if result.get("requires_objective_interpretation")
+                        else "active"
+                    ),
                 }
             sent.append({"event": event_id, "result": result})
         else:
@@ -2570,7 +3306,10 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             }
         else:
             state.pop("latest_pending_ack", None)
-    updates = update_active_cards(state, session_id, dry_run=dry_run, meta=meta)
+    stale_gate_updates = queue_stale_final_gate_recovery(state, dry_run=dry_run)
+    terminal_outbox_updates = recover_terminal_final_outbox(state, dry_run=dry_run)
+    updates = [*stale_gate_updates, *terminal_outbox_updates]
+    updates.extend(update_active_cards(state, session_id, dry_run=dry_run, meta=meta))
     orphan_updates = reconcile_orphan_work_cards(state, dry_run=dry_run, meta=meta)
     if orphan_updates:
         updates.extend(orphan_updates)
@@ -2593,15 +3332,24 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interval", type=float, default=1.5)
     parser.add_argument("--claim-inbox", action="store_true", help="Claim one Inbox event from stdin and queue its worker.")
+    parser.add_argument("--close-before-final", action="store_true", help="Close the origin live card before native final delivery.")
+    parser.add_argument("--final-from-stdin", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--run-id", default="")
+    parser.add_argument("--session-id", default="")
     parser.add_argument("--message-id", default="")
     parser.add_argument("--chat-id", default="")
     parser.add_argument("--thread-id", default="")
     parser.add_argument("--session-key", default="")
+    parser.add_argument("--terminal-status", choices=("done", "paused", "failed"), default="done")
     parser.add_argument("--effect-path", default="")
     parser.add_argument("--cancel-path", default="")
     parser.add_argument("--surface-deadline-ms", type=int, default=0)
     args = parser.parse_args()
+
+    if args.close_before_final:
+        result = close_before_final(args)
+        print(json.dumps(result, indent=2))
+        return 0 if result.get("ok") else 3
 
     if args.claim_inbox:
         print(json.dumps(claim_inbox(args), indent=2))

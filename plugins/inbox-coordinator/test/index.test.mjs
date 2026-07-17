@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import coordinator, { dispatchClaim, dispatchJaimesHandoff, effectHasIrreversibleCheckpoint, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, jaimesHandoffArgs, jaimesHandoffReady, parseTelegramTarget, rememberInboundMessage, reserveClaim, validJaimesHandoffReceipt, validJaimesIndeterminateReceipt, validJoshClaimReceipt } from "../index.js";
+import coordinator, { buildRecoveryFinalSummary, closeLiveCardBeforeFinal, dispatchClaim, dispatchJaimesHandoff, effectHasIrreversibleCheckpoint, enforceTelegramFinalDelivery, gateTelegramFinalization, handleInboxEvent, helperArgs, inboxDecision, isJaimesMention, jaimesHandoffArgs, jaimesHandoffReady, parseCanonicalFinalSummary, parseTelegramTarget, rememberInboundMessage, reserveClaim, terminalHelperArgs, validJaimesHandoffReceipt, validJaimesIndeterminateReceipt, validJoshClaimReceipt } from "../index.js";
 
 const inboxCtx = {
   channelId: "telegram",
@@ -24,6 +24,32 @@ function joshReceipt(overrides = {}) {
     job_id: "job-123",
     ...overrides,
   });
+}
+
+function canonicalFinal(overrides = {}) {
+  return [
+    `<pre>Model: ${overrides.model || "openai/gpt-5.6"}`,
+    `   | Route: ${overrides.route || "Josh 2.0 Inbox"}`,
+    `   | Why: ${overrides.why || "verified execution"}`,
+    "",
+    `Complete: ${overrides.complete || "Yes - objective completed."}`,
+    "",
+    "What was done:",
+    ...(overrides.done || [
+      "- Updated the requested behavior.",
+      "- Verified ordering and receipts.",
+      "- Preserved one final response.",
+    ]),
+    "",
+    "Issues:",
+    overrides.issues ? `- ${overrides.issues}` : "n/a",
+    "",
+    "Appropriate next steps:",
+    overrides.next || "No action needed.",
+    "",
+    "Approval needed:",
+    `${overrides.approval ? `- ${overrides.approval}` : "n/a"}</pre>`,
+  ].join("\n");
 }
 
 test("parses the exact Inbox topic target", () => {
@@ -449,9 +475,11 @@ function fakeChild(onPrompt = () => {}, { emitSpawn = true } = {}) {
   return child;
 }
 
-function fakeHandoffChild(stdout = "", code = 0, { close = true } = {}) {
+function fakeHandoffChild(stdout = "", code = 0, { close = true, onStdin = () => {} } = {}) {
   const child = new EventEmitter();
   child.stdout = new EventEmitter();
+  child.stdin = new EventEmitter();
+  child.stdin.end = (content) => onStdin(String(content || ""));
   child.killed = false;
   child.kill = () => { child.killed = true; };
   queueMicrotask(() => {
@@ -833,9 +861,314 @@ test("durable claim records never contain prompt content", () => {
   assert.equal(readFileSync(reservation.path, "utf8").includes("private prompt body"), false);
 });
 
-test("registers message correlation plus bound and global claim hooks", () => {
+test("builds a privacy-safe terminal helper request for the exact run", () => {
+  const event = {
+    runId: "run-terminal-1",
+    sessionId: "session-terminal-1",
+    sessionKey: inboxCtx.sessionKey,
+    lastAssistantMessage: "private final response",
+  };
+  const args = terminalHelperArgs(event, inboxCtx, {
+    helperPath: "/tmp/helper.py",
+    terminalStatus: "paused",
+    finalSummary: "private final response",
+  });
+  assert.equal(args[0], "/tmp/helper.py");
+  assert.equal(args.includes("--close-before-final"), true);
+  assert.equal(args[args.indexOf("--run-id") + 1], "run-terminal-1");
+  assert.equal(args[args.indexOf("--session-id") + 1], "session-terminal-1");
+  assert.equal(args[args.indexOf("--terminal-status") + 1], "paused");
+  assert.equal(args.includes("--final-from-stdin"), true);
+  assert.equal(args.includes("private final response"), false);
+});
+
+test("fails closed before helper dispatch when exact final run identity is absent", async () => {
+  let spawns = 0;
+  const ctx = { channelId: "telegram", sessionKey: inboxCtx.sessionKey };
+  const receipt = await closeLiveCardBeforeFinal({ sessionKey: inboxCtx.sessionKey }, ctx, {
+    helperPath: import.meta.filename,
+    terminalSpawn: () => { spawns += 1; return fakeHandoffChild(""); },
+  });
+  assert.equal(receipt.status, "missing-terminal-run-id");
+  assert.equal(spawns, 0);
+});
+
+test("validates one concise canonical final and derives truthful terminal status", () => {
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal()).terminalStatus, "done");
+  const approval = parseCanonicalFinalSummary(canonicalFinal({
+    complete: "No - release pending.",
+    approval: "Approve the production release.",
+  }));
+  assert.equal(approval.ok, true);
+  assert.equal(approval.terminalStatus, "paused");
+  assert.equal(parseCanonicalFinalSummary("two loose bullets").ok, false);
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal({ done: ["- Only one bullet."] })).ok, false);
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal(), { expectedModel: "openai/other-model" }).reason, "unverified-model-line");
+});
+
+test("normalizes a malformed final into the canonical mobile contract", () => {
+  const recovered = buildRecoveryFinalSummary(
+    "Completed the code change. Tests passed. Production is healthy.",
+    "openai/gpt-5.6",
+  );
+  const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "done");
+  assert.equal(recovered.startsWith("<pre>"), true);
+  assert.equal(recovered.slice(5, -6).split("\n").every((line) => [...line].length <= 38), true);
+});
+
+test("malformed-final recovery preserves incomplete and approval semantics", () => {
+  const recovered = buildRecoveryFinalSummary(
+    "Implementation is not complete. Waiting for approval to deploy.",
+    "openai/gpt-5.6",
+  );
+  const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "paused");
+  assert.match(parsed.sections.Complete, /^No\b/);
+  assert.match(parsed.sections["Approval needed"], /approve/i);
+  assert.doesNotMatch(parsed.sections["Appropriate next steps"], /^No action needed/i);
+});
+
+test("malformed-final recovery treats cannot proceed without approval as approval-required", () => {
+  const recovered = buildRecoveryFinalSummary(
+    "Implementation is complete but cannot be released without approval.",
+    "openai/gpt-5.6",
+  );
+  const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
+  assert.equal(parsed.terminalStatus, "paused");
+  assert.match(parsed.sections.Complete, /^No\b/);
+  assert.match(parsed.sections["Approval needed"], /approve/i);
+});
+
+test("closes the live card before permitting agent finalization", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:terminal-success` };
+  const event = {
+    runId: "terminal-success",
+    sessionId: "session-success",
+    sessionKey: ctx.sessionKey,
+    provider: "openai",
+    model: "gpt-5.6",
+    lastAssistantMessage: canonicalFinal(),
+  };
+  let privateFinalStdin = "";
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: () => fakeHandoffChild(JSON.stringify({
+      ok: true,
+      status: "closed-and-final-delivered",
+      card_closed: true,
+      suppress_native_final: true,
+      card_key: "interpreted-card",
+      live_message_id: "3813",
+      final_message_id: "3814",
+    }), 0, { onStdin: (content) => { privateFinalStdin = content; } }),
+  };
+  const receipt = await closeLiveCardBeforeFinal(event, ctx, config, { error() {} });
+  assert.equal(receipt.status, "closed-and-final-delivered");
+  assert.deepEqual(
+    await gateTelegramFinalization(event, ctx, config, { error() {} }),
+    { action: "continue", reason: "The existing Telegram live work card is terminal." },
+  );
+  assert.equal(privateFinalStdin, canonicalFinal());
+});
+
+test("requests a bounded revision when the interpreted card is not ready", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:terminal-revise` };
+  const event = {
+    runId: "terminal-revise",
+    sessionId: "session-revise",
+    sessionKey: ctx.sessionKey,
+    lastAssistantMessage: canonicalFinal(),
+  };
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: () => fakeHandoffChild(JSON.stringify({
+      ok: false,
+      status: "awaiting-objective-card",
+      card_closed: false,
+    }), 3),
+  };
+  const decision = await gateTelegramFinalization(event, ctx, config, { error() {} });
+  assert.equal(decision.action, "revise");
+  assert.equal(decision.retry.maxAttempts, 2);
+  assert.equal(decision.retry.idempotencyKey, "telegram-live-card-before-final:terminal-revise");
+});
+
+test("requests format revision before touching the terminal card", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:format-revise` };
+  let spawns = 0;
+  const decision = await gateTelegramFinalization({
+    runId: "format-revise",
+    sessionId: "format-session",
+    sessionKey: ctx.sessionKey,
+    lastAssistantMessage: "- first loose bullet\n- second loose bullet",
+  }, ctx, {
+    helperPath: import.meta.filename,
+    terminalSpawn: () => { spawns += 1; return fakeHandoffChild(""); },
+  }, { error() {} });
+  assert.equal(decision.action, "revise");
+  assert.equal(decision.retry.idempotencyKey, "telegram-final-format:format-revise");
+  assert.equal(spawns, 0);
+});
+
+test("cancels outbound final delivery only when no terminal or durable queue receipt exists", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:terminal-cancel` };
+  const finalizeEvent = {
+    runId: "terminal-cancel",
+    sessionId: "terminal-cancel-session",
+    sessionKey: ctx.sessionKey,
+    lastAssistantMessage: canonicalFinal(),
+  };
+  const event = { content: canonicalFinal(), threadId: "1" };
+  const helperRuns = [];
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: (_python, args) => {
+      helperRuns.push(args);
+      return fakeHandoffChild(JSON.stringify({
+        ok: false,
+        status: "terminal-card-edit-failed",
+        card_closed: false,
+      }), 3);
+    },
+  };
+  assert.equal((await gateTelegramFinalization(finalizeEvent, ctx, config, { error() {} })).action, "revise");
+  assert.deepEqual(
+    await enforceTelegramFinalDelivery(event, ctx, config, { error() {} }),
+    {
+      cancel: true,
+      cancelReason: "The live work card could not be closed before this final response.",
+    },
+  );
+  assert.equal(helperRuns.length, 2);
+  assert.equal(helperRuns[1][helperRuns[1].indexOf("--run-id") + 1], "terminal-cancel");
+});
+
+test("recovers malformed side-effecting finals and sends them through the exact-run terminal path", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:format-recovery` };
+  const malformed = "Completed the change. Tests passed. The release is healthy.";
+  const finalizeEvent = {
+    runId: "format-recovery-run",
+    sessionId: "format-recovery-session",
+    sessionKey: ctx.sessionKey,
+    provider: "openai",
+    model: "gpt-5.6",
+    lastAssistantMessage: malformed,
+  };
+  let delivered = "";
+  let helperArgsSeen = [];
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: (_python, args) => {
+      helperArgsSeen = args;
+      return fakeHandoffChild(JSON.stringify({
+        ok: true,
+        status: "closed-and-final-delivered",
+        card_closed: true,
+        suppress_native_final: true,
+        card_key: "interpreted-card",
+        live_message_id: "4100",
+        final_message_id: "4101",
+      }), 0, { onStdin: (content) => { delivered = content; } });
+    },
+  };
+  assert.equal((await gateTelegramFinalization(finalizeEvent, ctx, config, { error() {} })).action, "revise");
+  assert.deepEqual(await enforceTelegramFinalDelivery({ content: malformed }, ctx, config, { error() {} }), {
+    cancel: true,
+    cancelReason: "A structured final summary was already delivered by the terminal card path.",
+  });
+  assert.equal(parseCanonicalFinalSummary(delivered, { expectedModel: "openai/gpt-5.6" }).ok, true);
+  assert.equal(helperArgsSeen[helperArgsSeen.indexOf("--run-id") + 1], "format-recovery-run");
+});
+
+test("a durable final queue receipt suppresses native delivery without losing the result", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:durable-final-queue` };
+  const event = {
+    runId: "durable-final-queue-run",
+    sessionId: "durable-final-queue-session",
+    sessionKey: ctx.sessionKey,
+    lastAssistantMessage: canonicalFinal(),
+  };
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: () => fakeHandoffChild(JSON.stringify({
+      ok: true,
+      status: "final-queued-for-retry",
+      card_closed: false,
+      suppress_native_final: true,
+      retry_queued: true,
+      card_key: "interpreted-card",
+    })),
+  };
+  assert.equal((await gateTelegramFinalization(event, ctx, config, { error() {} })).action, "continue");
+  assert.deepEqual(await enforceTelegramFinalDelivery({ content: canonicalFinal() }, ctx, config, { error() {} }), {
+    cancel: true,
+    cancelReason: "A structured final summary was already delivered by the terminal card path.",
+  });
+});
+
+test("an interim outbound message never closes or cancels a live card", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:interim` };
+  let spawns = 0;
+  const result = await enforceTelegramFinalDelivery({ content: "Progress update" }, ctx, {
+    helperPath: import.meta.filename,
+    terminalSpawn: () => { spawns += 1; return fakeHandoffChild(""); },
+  }, { error() {} });
+  assert.equal(result, undefined);
+  assert.equal(spawns, 0);
+});
+
+test("suppresses native final when a terminal card already delivered one", async () => {
+  const ctx = { ...inboxCtx, sessionKey: `${inboxCtx.sessionKey}:existing-final` };
+  const finalizeEvent = {
+    runId: "existing-final",
+    sessionId: "existing-final-session",
+    sessionKey: ctx.sessionKey,
+    lastAssistantMessage: canonicalFinal(),
+  };
+  const config = {
+    helperPath: import.meta.filename,
+    terminalHelperTimeoutMs: 100,
+    terminalSpawn: () => fakeHandoffChild(JSON.stringify({
+      ok: true,
+      status: "final-already-delivered",
+      card_closed: true,
+      suppress_native_final: true,
+      final_message_id: "4001",
+    })),
+  };
+  assert.equal((await gateTelegramFinalization(finalizeEvent, ctx, config, { error() {} })).action, "continue");
+  assert.deepEqual(await enforceTelegramFinalDelivery({ content: canonicalFinal() }, ctx, config, { error() {} }), {
+    cancel: true,
+    cancelReason: "A structured final summary was already delivered by the terminal card path.",
+  });
+});
+
+test("terminal ordering hooks ignore every Telegram topic except Inbox", async () => {
+  const ctx = {
+    ...inboxCtx,
+    sessionKey: "agent:main:telegram:group:-1003589561528:topic:17",
+  };
+  assert.equal(await gateTelegramFinalization({ runId: "other" }, ctx), undefined);
+  assert.equal(await enforceTelegramFinalDelivery({ content: "other" }, ctx), undefined);
+});
+
+test("registers correlation, claim, and transactional final-delivery hooks", () => {
   const hooks = [];
   coordinator.register({ on: (name, handler, options) => hooks.push({ name, handler, options }), pluginConfig: {} });
-  assert.deepEqual(hooks.map(({ name }) => name), ["message_received", "inbound_claim", "before_dispatch"]);
-  assert.deepEqual(hooks.map(({ options }) => options.priority), [200, 100, 100]);
+  assert.deepEqual(hooks.map(({ name }) => name), [
+    "message_received",
+    "inbound_claim",
+    "before_dispatch",
+    "before_agent_finalize",
+    "message_sending",
+  ]);
+  assert.deepEqual(hooks.map(({ options }) => options.priority), [200, 100, 100, 300, 300]);
 });

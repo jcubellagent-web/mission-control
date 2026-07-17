@@ -60,7 +60,7 @@ STATE_PATH = Path(os.environ.get("JOSH_WORK_CARD_STATE", "memory/josh_work_cards
 LOCK_PATH = STATE_PATH.with_suffix(STATE_PATH.suffix + ".lock")
 ACK_STATE_PATH = Path(os.environ.get("JOSH_FAST_ACK_STATE", str(Path.home() / ".openclaw" / "telegram" / "fast_ack_state.json")))
 TELEGRAM_COOLDOWN_PATH = Path(os.environ.get("JOSH_TELEGRAM_COOLDOWN_STATE", "memory/josh_telegram_cooldown.json"))
-IMMUTABLE_TERMINAL_STATUSES = {"done", "failed"}
+IMMUTABLE_TERMINAL_STATUSES = {"done", "failed", "paused"}
 DEFAULT_BUTTONS = [
     [{"text": "1. Gemini review", "callback_data": "model:gemini_flash"}],
     [{"text": "2. JAIMES workhorse", "callback_data": "route:jaimes"}],
@@ -1493,7 +1493,7 @@ def load_buttons(args: argparse.Namespace, status: str) -> list | None:
         return json.loads(args.buttons)
     if args.routing_buttons and status == "running":
         return DEFAULT_BUTTONS
-    if args.approval_buttons and status in {"done", "failed"}:
+    if args.approval_buttons and status in {"done", "failed", "paused"}:
         return approval_buttons(args)
     return None
 
@@ -1506,16 +1506,41 @@ def load_final_text_file(path: str) -> str:
     text = Path(path).read_text(encoding="utf-8").strip()
     if not text:
         raise SystemExit("--final-text-file must not be empty")
-    plain = html.unescape(re.sub(r"^\s*<pre>|</pre>\s*$", "", text, flags=re.I))
+    match = re.fullmatch(r"<pre>([\s\S]*)</pre>", text, flags=re.I)
+    if not match:
+        raise SystemExit("--final-text-file must use the canonical ordered final contract inside one <pre> block")
+    plain = html.unescape(match.group(1)).strip("\n").replace("\r\n", "\n").replace("\r", "\n")
+    lines = plain.splitlines()
+    if not lines or any(len(line) > CARD_WRAP_WIDTH for line in lines):
+        raise SystemExit("--final-text-file must pre-wrap every line to the canonical 38-column geometry")
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
-    positions = [plain.find(label) for label in labels]
+    positions = [next((index for index, line in enumerate(lines) if line.startswith(label)), -1) for label in labels]
     complete_valid = bool(re.search(r"(?m)^Complete:\s+(?:Yes|No)\b", plain))
-    ordered = all(position >= 0 for position in positions) and positions == sorted(positions)
-    done_block = plain[positions[1] + len(labels[1]):positions[2]] if ordered else ""
-    done_bullets = [line for line in done_block.splitlines() if line.strip().startswith("- ")]
-    if not ordered or not complete_valid or not 3 <= len(done_bullets) <= 5:
+    ordered = all(position >= 0 for position in positions) and positions == sorted(positions) and len(set(positions)) == len(positions)
+    header_lines = [line for line in lines[:positions[0]] if line.strip()] if ordered else []
+    header = " ".join(line.strip() for line in header_lines)
+    header_valid = bool(re.fullmatch(r"Model:\s*.+?\s*\|\s*Route:\s*.+?\s*\|\s*Why:\s*.+", header, flags=re.I))
+    header_wrap_valid = bool(header_lines) and all(line.startswith("   ") for line in header_lines[1:])
+    done_lines = lines[positions[1] + 1:positions[2]] if ordered else []
+    done_bullets = [line for line in done_lines if line.startswith("- ")]
+    done_wrap_valid = all(line.startswith(("- ", "  ")) or not line.strip() for line in done_lines)
+    required_values = []
+    if ordered:
+        for index, label in enumerate(labels):
+            end = positions[index + 1] if index + 1 < len(positions) else len(lines)
+            block = [lines[positions[index]][len(label):].strip(), *[line.strip() for line in lines[positions[index] + 1:end]]]
+            required_values.append(" ".join(value for value in block if value).strip())
+    if (
+        not ordered
+        or not complete_valid
+        or not header_valid
+        or not header_wrap_valid
+        or not done_wrap_valid
+        or not 3 <= len(done_bullets) <= 5
+        or any(not value for value in required_values)
+    ):
         raise SystemExit(
-            "--final-text-file must use the canonical ordered final contract with Complete: Yes/No and 3-5 What was done bullets"
+            "--final-text-file must use the canonical ordered final contract with verified Model/Route/Why, Complete: Yes/No, and 3-5 What was done bullets"
         )
     return text
 
@@ -1537,6 +1562,25 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "final_message_id": existing.get("final_message_id"),
             }, indent=2))
             return 0
+        if (
+            status in IMMUTABLE_TERMINAL_STATUSES
+            and existing_status in IMMUTABLE_TERMINAL_STATUSES
+            and args.no_final_summary
+        ):
+            # A pre-final gate and the trajectory watcher can observe the same
+            # model completion concurrently. The first terminal edit wins;
+            # later no-summary closures must never edit the card after the
+            # native final has already been released.
+            print(json.dumps({
+                "ok": True,
+                "action": "skipped",
+                "reason": f"duplicate_terminal_after_{existing_status}",
+                "key": args.key,
+                "header_message_id": existing.get("header_message_id"),
+                "message_id": existing.get("message_id"),
+                "final_message_id": existing.get("final_message_id"),
+            }, indent=2))
+            return 0
 
         title = args.title or existing.get("title") or args.key
         new_done = parse_list(args.done)
@@ -1551,7 +1595,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         updated_at = utc_now()
         if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
             ack_message_id = claim_pending_ack(args.key)
-        terminal_status = status in {"done", "failed"}
+        terminal_status = status in {"done", "failed", "paused"}
         #JAIMES: keep the live card visible through completion, then send one distinct final card for its concise outcome.
         text = build_card(
             title=title,

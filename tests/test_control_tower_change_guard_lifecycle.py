@@ -46,6 +46,10 @@ def fake_git(*, ahead: int = 0, behind: int = 0, source_changed: bool = False):
     return run
 
 
+def test_kiosk_watchdog_is_guarded_source() -> None:
+    assert "scripts/mission_control_kiosk_watchdog.py" in GUARD.SOURCE_PATHS
+
+
 def test_successful_completion_verifies_and_releases_own_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     payload = lease(tmp_path)
     payload["pushApproval"] = {"reference": "approved test"}

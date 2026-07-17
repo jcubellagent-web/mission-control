@@ -34,6 +34,26 @@ def test_card_state_writes_are_private(tmp_path, monkeypatch):
     assert state_path.stat().st_mode & 0o777 == 0o600
 
 
+def test_duplicate_no_summary_terminal_close_is_a_noop(tmp_path, monkeypatch):
+    state_path = tmp_path / "josh_work_cards.json"
+    monkeypatch.setattr(card, "STATE_PATH", state_path)
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "josh_work_cards.lock")
+    card.save_state({
+        "cards": {
+            "terminal-once": {
+                "status": "done",
+                "header_message_id": 101,
+                "message_id": 102,
+                "final_message_id": None,
+            }
+        }
+    })
+    args = argparse.Namespace(key="terminal-once", no_final_summary=True)
+
+    assert card.upsert_card(args, "done") == 0
+    assert card.load_state()["cards"]["terminal-once"]["message_id"] == 102
+
+
 def test_pending_ack_claim_uses_shared_lock_and_preserves_concurrent_state(tmp_path, monkeypatch):
     ack_path = tmp_path / "fast_ack_state.json"
     ready_path = tmp_path / "claim-ready"
@@ -755,8 +775,10 @@ def test_final_text_file_accepts_canonical_structured_text():
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "final.html"
         value = """<pre>Model: codex/gpt-5.6-luna
+   | Route: Josh 2.0 Inbox
+   | Why: verified execution
 
-Complete: Yes
+Complete: Yes - objective complete.
 
 What was done:
 - Routed the Inbox request.
@@ -764,13 +786,13 @@ What was done:
 - Prepared the final result.
 
 Issues:
-- n/a
+n/a
 
 Appropriate next steps:
-- No action needed.
+No action needed.
 
 Approval needed:
-- n/a</pre>"""
+n/a</pre>"""
         path.write_text(value, encoding="utf-8")
         assert card.load_final_text_file(str(path)) == value
 
