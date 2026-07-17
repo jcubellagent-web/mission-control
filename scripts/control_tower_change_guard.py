@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 
@@ -105,27 +106,44 @@ def run(args: list[str], *, check: bool = True, env: dict[str, str] | None = Non
     return proc
 
 
-def read_lock() -> dict:
+def load_lock() -> dict:
     try:
-        payload = json.loads(LOCK_PATH.read_text())
+        return json.loads(LOCK_PATH.read_text())
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
+
+
+def lease_expired(payload: dict) -> bool:
     expires = payload.get("expiresAt")
     try:
-        expired = dt.datetime.fromisoformat(str(expires).replace("Z", "+00:00")) <= now()
+        return dt.datetime.fromisoformat(str(expires).replace("Z", "+00:00")) <= now()
     except (TypeError, ValueError):
-        expired = True
-    if expired:
-        LOCK_PATH.unlink(missing_ok=True)
-        return {}
-    return payload
+        return True
+
+
+def process_is_alive(pid: object) -> bool:
+    try:
+        os.kill(int(pid), 0)
+    except (TypeError, ValueError, ProcessLookupError):
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def read_lock() -> dict:
+    """Read a lease without silently deleting expired ownership evidence."""
+    #JAIMES: expired leases remain inspectable until guarded orphan recovery records evidence.
+    return load_lock()
 
 
 def public_lease(payload: dict | None) -> dict | None:
     """Return operator-visible lease metadata without the bearer token."""
     if not payload:
         return None
-    return {key: value for key, value in payload.items() if key != "token"}
+    public = {key: value for key, value in payload.items() if key != "token"}
+    public["expired"] = lease_expired(payload)
+    return public
 
 
 def source_changes() -> list[str]:
@@ -147,7 +165,8 @@ def begin(agent: str, objective: str) -> None:
     BACKUP_ROOT.mkdir(parents=True, exist_ok=True)
     existing = read_lock()
     if existing:
-        raise SystemExit(json.dumps({"ok": False, "reason": "leased", "lease": public_lease(existing)}, indent=2))
+        reason = "expired lease requires safe recovery" if lease_expired(existing) else "leased"
+        raise SystemExit(json.dumps({"ok": False, "reason": reason, "lease": public_lease(existing)}, indent=2))
     dirty = source_changes()
     if dirty:
         raise SystemExit(json.dumps({"ok": False, "reason": "canonical source already dirty", "paths": dirty}, indent=2))
@@ -171,6 +190,8 @@ def begin(agent: str, objective: str) -> None:
         "token": token,
         "startedAt": iso(),
         "expiresAt": iso(now() + dt.timedelta(minutes=LEASE_MINUTES)),
+        "ownerPid": os.getppid(),
+        "pushApproval": None,
         "baseCommit": run(["git", "rev-parse", "HEAD"]).stdout.strip(),
         "backup": str(backup),
         "source": "v2-react",
@@ -186,6 +207,8 @@ def status() -> None:
 
 def renew(token: str) -> None:
     payload = require_token(token)
+    if lease_expired(payload):
+        raise SystemExit("Expired Control Tower change lease requires safe recovery.")
     payload["expiresAt"] = iso(now() + dt.timedelta(minutes=LEASE_MINUTES))
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({"ok": True, "lease": public_lease(payload)}, indent=2))
@@ -193,6 +216,8 @@ def renew(token: str) -> None:
 
 def verify(token: str) -> None:
     payload = require_token(token)
+    if lease_expired(payload):
+        raise SystemExit("Expired Control Tower change lease requires safe recovery.")
     env = dict(os.environ)
     env["CONTROL_TOWER_ALLOW_GENERATED"] = "1"
     qa_python = str(ROOT / ".venv-qa" / "bin" / "python") if (ROOT / ".venv-qa" / "bin" / "python").exists() else sys.executable
@@ -244,18 +269,82 @@ def verify(token: str) -> None:
             print(proc.stdout)
             print(proc.stderr, file=sys.stderr)
             raise SystemExit(proc.returncode)
-    print(json.dumps({"ok": True, "agent": payload["agent"], "checks": results, "sourceChanges": source_changes()}, indent=2))
+    dirty = source_changes()
+    if dirty:
+        raise SystemExit(json.dumps({"ok": False, "reason": "intentional source must be committed before release", "paths": dirty}, indent=2))
+    print(json.dumps({"ok": True, "agent": payload["agent"], "checks": results, "sourceChanges": dirty}, indent=2))
+
+
+def release_evidence(payload: dict, outcome: str, detail: str) -> Path:
+    evidence = Path(payload["backup"]) / "lifecycle-outcome.json"
+    evidence.write_text(json.dumps({
+        "agent": payload.get("agent"),
+        "objective": payload.get("objective"),
+        "outcome": outcome,
+        "detail": detail,
+        "recordedAt": iso(),
+        "sourceChanges": source_changes(),
+    }, indent=2) + "\n")
+    return evidence
+
+
+def recovery_ready(payload: dict) -> tuple[bool, str]:
+    if not lease_expired(payload):
+        return False, "lease has not expired"
+    if process_is_alive(payload.get("ownerPid")):
+        return False, "owner process is still present"
+    if source_changes():
+        return False, "canonical source has unresolved changes"
+    return True, "expired owner is absent and source is clean"
+
+
+def recover_expired() -> None:
+    payload = read_lock()
+    if not payload:
+        print(json.dumps({"ok": True, "recovered": False, "lease": None}, indent=2))
+        return
+    allowed, reason = recovery_ready(payload)
+    if not allowed:
+        raise SystemExit(json.dumps({"ok": False, "reason": reason, "lease": public_lease(payload)}, indent=2))
+    evidence = release_evidence(payload, "expired-orphan-recovered", reason)
+    LOCK_PATH.unlink(missing_ok=True)
+    print(json.dumps({"ok": True, "recovered": True, "evidence": str(evidence)}, indent=2))
+
+
+def source_changed_since(payload: dict) -> bool:
+    base = str(payload.get("baseCommit") or "HEAD")
+    changed = run(["git", "diff", "--name-only", f"{base}..HEAD", "--", *SOURCE_PATHS], check=False).stdout.splitlines()
+    return bool(changed)
+
+
+def approve_push(token: str, approval_ref: str) -> None:
+    payload = require_token(token)
+    if lease_expired(payload):
+        raise SystemExit("Expired Control Tower change lease requires safe recovery.")
+    if not approval_ref.strip():
+        raise SystemExit("An explicit push approval reference is required.")
+    payload["pushApproval"] = {"reference": approval_ref.strip(), "recordedAt": iso()}
+    LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
+    print(json.dumps({"ok": True, "pushApprovalRecorded": True}, indent=2))
 
 
 def finish(token: str) -> None:
     payload = require_token(token)
     verify(token)
+    run(["git", "fetch", "origin"])
+    ahead, behind = (int(value) for value in run(["git", "rev-list", "--left-right", "--count", "HEAD...origin/main"]).stdout.split())
+    if ahead or behind:
+        raise SystemExit(json.dumps({"ok": False, "reason": "commit/push closure incomplete", "ahead": ahead, "behind": behind}, indent=2))
+    if source_changed_since(payload) and not payload.get("pushApproval"):
+        raise SystemExit(json.dumps({"ok": False, "reason": "explicit push approval is not recorded"}, indent=2))
+    evidence = release_evidence(payload, "finished", "verification passed and local main matches origin/main")
     LOCK_PATH.unlink(missing_ok=True)
-    print(json.dumps({"ok": True, "released": payload["agent"], "backup": payload["backup"]}, indent=2))
+    print(json.dumps({"ok": True, "released": payload["agent"], "backup": payload["backup"], "evidence": str(evidence)}, indent=2))
 
 
 def abort(token: str) -> None:
     payload = require_token(token)
+    evidence = release_evidence(payload, "aborted", "source restored from pre-edit backup")
     backup = Path(payload["backup"])
     for relative in SOURCE_PATHS:
         source = backup / relative
@@ -272,7 +361,21 @@ def abort(token: str) -> None:
         else:
             shutil.copy2(source, target)
     LOCK_PATH.unlink(missing_ok=True)
-    print(json.dumps({"ok": True, "restored": str(backup), "released": payload["agent"]}, indent=2))
+    print(json.dumps({"ok": True, "restored": str(backup), "released": payload["agent"], "evidence": str(evidence)}, indent=2))
+
+
+@contextmanager
+def leased_edit(agent: str, objective: str):
+    """Finally-style API for automation: aborts its own lease on every exception."""
+    begin(agent, objective)
+    payload = read_lock()
+    token = str(payload["token"])
+    try:
+        yield token
+    except BaseException as exc:
+        if read_lock().get("token") == token:
+            abort(token)
+        raise exc
 
 
 def main() -> None:
@@ -285,6 +388,10 @@ def main() -> None:
     for name in ("renew", "verify", "finish", "abort"):
         command = sub.add_parser(name)
         command.add_argument("--token", required=True)
+    approve = sub.add_parser("approve-push")
+    approve.add_argument("--token", required=True)
+    approve.add_argument("--approval-ref", required=True)
+    sub.add_parser("recover-expired")
     args = parser.parse_args()
     if args.command == "begin": begin(args.agent, args.objective)
     elif args.command == "status": status()
@@ -292,6 +399,8 @@ def main() -> None:
     elif args.command == "verify": verify(args.token)
     elif args.command == "finish": finish(args.token)
     elif args.command == "abort": abort(args.token)
+    elif args.command == "approve-push": approve_push(args.token, args.approval_ref)
+    elif args.command == "recover-expired": recover_expired()
 
 
 if __name__ == "__main__":

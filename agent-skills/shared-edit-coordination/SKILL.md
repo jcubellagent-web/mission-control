@@ -30,7 +30,12 @@ Use this before any shared ecosystem change. Runtime data refreshes and ordinary
 1. Run focused tests plus the canonical change-guard verification.
 2. Commit only intentional source files. Fetch/rebase before push; never force-push over another agent.
 3. If the remote advanced, reconcile both histories and rerun tests.
-4. Push the source commit or create a tracked handoff before declaring completion.
-5. Finish the lease and publish completion. Record shared-memory outcome feedback when retrieved memory materially influenced the result.
+4. Before a source push, record Josh's explicit approval with `approve-push --token <own-token> --approval-ref "<approval reference>"`; then push or create a tracked handoff before declaring completion.
+5. Call `finish --token <own-token>` only after verification passes and local `main` equals `origin/main`. It re-fetches and refuses release on pending commits, divergence, or an unrecorded source-push approval.
+6. On every failure, cancellation, or interruption, preserve the guard backup/evidence and call `abort --token <own-token>`. Automation must use a `try/finally` (or `leased_edit`) cleanup path; never leave cleanup to a later agent.
+7. Never use another owner's token or release a live lease. An expired lease is recovered only with `recover-expired` when its owner PID is absent and canonical source is clean; the command writes recovery evidence before clearing it.
+8. Publish completion only after `control_tower_change_guard.py status` reports `lease: null` and a fresh `ecosystem_edit_preflight.py --fetch` reports `ok: true`. Record shared-memory outcome feedback when retrieved memory materially influenced the result.
 
 Do not begin from a stale chat summary when current Git, lease, task, or handoff state is available.
+
+#JAIMES: shared edits now have explicit success, abort, and expired-orphan closure paths so no lease can silently wedge the canonical checkout.
