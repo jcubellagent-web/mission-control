@@ -93,6 +93,36 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(result["jobs"]["live"]["status"], "skipped_precondition")
         self.assertEqual(result["jobs"]["live"]["failureStreak"], 2)
 
+    def test_explicit_operator_run_can_verify_during_owned_change_lease(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "schedule.json"
+            config.write_text(json.dumps({
+                "timezone": "UTC",
+                "jobs": [{
+                    "id": "release-qa",
+                    "schedule": {"intervalMinutes": 1},
+                    "command": ["noop"],
+                    "skipDuringChangeLease": True,
+                }],
+            }))
+            state = root / "state.json"
+            state.write_text(json.dumps({"jobs": {}}))
+            completed = {"id": "release-qa", "status": "ok", "returncode": 0, "durationMs": 1}
+            with mock.patch.object(subject, "STATE_PATH", state), \
+                    mock.patch.object(subject, "change_lease_active", return_value=True), \
+                    mock.patch.object(subject, "run_job", return_value=completed) as run, \
+                    mock.patch.object(subject, "publish_transition"):
+                result = subject.tick(
+                    config,
+                    dt.datetime(2026, 7, 15, 12, 0, tzinfo=dt.timezone.utc),
+                    only="release-qa",
+                    allow_change_lease=True,
+                )
+
+        run.assert_called_once()
+        self.assertEqual(result["jobs"]["release-qa"]["status"], "ok")
+
     def test_clean_run_after_any_safe_skip_publishes_recovery_for_open_streak(self) -> None:
         job = {"id": "live", "owner": "josh2", "team": "Telegram QA", "severity": "p0"}
         current = {"status": "ok", "failureStreak": 0}

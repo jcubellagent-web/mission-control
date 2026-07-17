@@ -175,7 +175,13 @@ def publish_transition(job: dict[str, Any], current: dict[str, Any], previous: d
     subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=30, check=False)
 
 
-def tick(config_path: Path, now: dt.datetime, shadow: bool = False, only: str | None = None) -> dict[str, Any]:
+def tick(
+    config_path: Path,
+    now: dt.datetime,
+    shadow: bool = False,
+    only: str | None = None,
+    allow_change_lease: bool = False,
+) -> dict[str, Any]:
     config = read_json(config_path, {})
     timezone = ZoneInfo(str(config.get("timezone") or "America/New_York"))
     local_now = now.astimezone(timezone)
@@ -194,7 +200,7 @@ def tick(config_path: Path, now: dt.datetime, shadow: bool = False, only: str | 
         forced = bool(only)
         if not forced and (not is_due(job, local_now) or previous.get("lastSlot") == current_slot):
             continue
-        if job.get("skipDuringChangeLease") and change_lease_active(now):
+        if job.get("skipDuringChangeLease") and change_lease_active(now) and not allow_change_lease:
             result = {"id": job_id, "status": "skipped_change_lease", "startedAt": iso(now), "durationMs": 0}
         else:
             result = run_job(job, shadow=shadow)
@@ -228,6 +234,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--run-job")
+    parser.add_argument("--allow-change-lease", action="store_true", help="Allow an explicit operator-run job during a held Control Tower lease")
     parser.add_argument("--shadow", action="store_true")
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args()
@@ -242,7 +249,13 @@ def main() -> int:
         except BlockingIOError:
             print(json.dumps({"ok": True, "status": "skipped_locked"}))
             return 0
-        output = tick(args.config, dt.datetime.now(dt.timezone.utc), shadow=args.shadow, only=args.run_job)
+        output = tick(
+            args.config,
+            dt.datetime.now(dt.timezone.utc),
+            shadow=args.shadow,
+            only=args.run_job,
+            allow_change_lease=args.allow_change_lease,
+        )
     print(json.dumps(output, indent=2))
     return 1 if output["status"] == "attention" else 0
 
