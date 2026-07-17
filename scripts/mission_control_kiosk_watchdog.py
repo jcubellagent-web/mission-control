@@ -16,6 +16,8 @@ from control_tower_foreground import ensure_foreground
 ROOT = Path(__file__).resolve().parents[1]
 QA_PYTHON = ROOT / ".venv-qa" / "bin" / "python"
 PLAYWRIGHT_PYTHON = Path("/opt/homebrew/bin/python3")
+SHARED_EVENTS_PATH = ROOT / "data" / "shared-events.json"
+SCREEN_CHECK_FAILURE_STATUSES = {"attention", "blocked", "error", "failed"}
 
 
 def run(cmd: list[str], timeout: int = 90) -> subprocess.CompletedProcess[str]:
@@ -49,6 +51,56 @@ def publish(status: str, title: str, detail: str) -> None:
         stderr=subprocess.DEVNULL,
         check=False,
     )
+
+
+def latest_screen_check_status(path: Path = SHARED_EVENTS_PATH) -> str:
+    """Return the newest published Josh 2.0 screen-check status, if any."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return ""
+    events = payload.get("events", []) if isinstance(payload, dict) else []
+    matching = [
+        event
+        for event in events
+        if isinstance(event, dict)
+        and str(event.get("agent") or "").lower() == "josh2"
+        and "screen check"
+        in f"{event.get('tool') or ''} {event.get('title') or ''}".lower()
+    ]
+    if not matching:
+        return ""
+    latest = max(matching, key=lambda event: str(event.get("time") or ""))
+    return str(latest.get("status") or latest.get("type") or "").lower()
+
+
+def publication_for_result(
+    *,
+    ok: bool,
+    detail: str,
+    prior_status: str,
+    repaired: bool,
+    foreground_action: bool,
+) -> tuple[str, str, str] | None:
+    """Publish only incident transitions; routine healthy polls stay quiet."""
+    prior_failed = prior_status.lower() in SCREEN_CHECK_FAILURE_STATUSES
+    if not ok:
+        if prior_failed:
+            return None
+        return "blocked", "Josh 2.0 screen check needs attention", detail
+
+    actions = []
+    if repaired:
+        actions.append("reopened Chrome kiosk")
+    if foreground_action:
+        actions.append("restored the exact kiosk window to the foreground")
+    action_detail = f"{detail.rstrip().rstrip(';')}; {' and '.join(actions)}" if actions else detail
+
+    if prior_failed:
+        return "done", "Josh 2.0 screen check recovered", action_detail
+    if actions:
+        return "done", "Josh 2.0 screen restored", action_detail
+    return None
 
 
 def runtime_check() -> tuple[bool, dict[str, Any], str]:
@@ -101,17 +153,27 @@ def main() -> int:
         ok = False
         detail = f"{detail}; Control Tower refresh failed"
 
+    publication_emitted = False
     if not args.no_publish:
-        if ok and (repaired or foreground_action):
-            actions = []
-            if repaired:
-                actions.append("reopened Chrome kiosk")
-            if foreground_action:
-                actions.append("restored the exact kiosk window to the foreground")
-            publish("done", "Josh 2.0 screen restored", f"{detail}; {' and '.join(actions)}")
-        else:
-            if not ok:
-                publish("blocked", "Josh 2.0 screen check needs attention", detail)
+        publication = publication_for_result(
+            ok=ok,
+            detail=detail,
+            prior_status=latest_screen_check_status(),
+            repaired=repaired,
+            foreground_action=foreground_action,
+        )
+        if publication:
+            publish(*publication)
+            publication_emitted = True
+
+    # The first refresh validates the writer before a status transition is
+    # published. Refresh once more only on transitions so the new event is
+    # visible immediately instead of waiting for the next five-minute poll.
+    if publication_emitted:
+        update = run([sys.executable, str(ROOT / "scripts" / "update_mission_control.py")], timeout=120)
+        if update.returncode != 0:
+            ok = False
+            detail = f"{detail}; Control Tower post-publication refresh failed"
 
     result = {
         "ok": ok,

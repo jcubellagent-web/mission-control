@@ -77,3 +77,106 @@ def test_runtime_check_prefers_playwright_python_over_qa_runtime(monkeypatch, tm
     monkeypatch.setattr(watchdog, "run", fake_run)
     assert watchdog.runtime_check()[0] is True
     assert observed[0][0] == str(playwright_python)
+
+
+def test_latest_screen_check_status_uses_newest_matching_event(tmp_path):
+    events_path = tmp_path / "shared-events.json"
+    events_path.write_text(
+        json.dumps(
+            {
+                "events": [
+                    {
+                        "time": "2026-07-17T04:00:00Z",
+                        "agent": "josh2",
+                        "tool": "Control Tower screen check",
+                        "status": "blocked",
+                    },
+                    {
+                        "time": "2026-07-17T03:00:00Z",
+                        "agent": "josh2",
+                        "tool": "Control Tower screen check",
+                        "status": "done",
+                    },
+                    {
+                        "time": "2026-07-17T05:00:00Z",
+                        "agent": "jaimes",
+                        "tool": "Control Tower screen check",
+                        "status": "done",
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert watchdog.latest_screen_check_status(events_path) == "blocked"
+
+
+def test_publication_for_result_clears_prior_failure_on_clean_poll():
+    assert watchdog.publication_for_result(
+        ok=True,
+        detail="Rendered checks passed.",
+        prior_status="blocked",
+        repaired=False,
+        foreground_action=False,
+    ) == ("done", "Josh 2.0 screen check recovered", "Rendered checks passed.")
+
+
+def test_publication_for_result_deduplicates_persistent_failure():
+    assert watchdog.publication_for_result(
+        ok=False,
+        detail="Rendered checks failed.",
+        prior_status="blocked",
+        repaired=False,
+        foreground_action=False,
+    ) is None
+
+
+def test_publication_for_result_opens_new_failure_after_healthy_state():
+    assert watchdog.publication_for_result(
+        ok=False,
+        detail="Rendered checks failed.",
+        prior_status="done",
+        repaired=False,
+        foreground_action=False,
+    ) == ("blocked", "Josh 2.0 screen check needs attention", "Rendered checks failed.")
+
+
+def test_publication_for_result_keeps_routine_success_quiet():
+    assert watchdog.publication_for_result(
+        ok=True,
+        detail="Rendered checks passed.",
+        prior_status="done",
+        repaired=False,
+        foreground_action=False,
+    ) is None
+
+
+def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch):
+    actions = []
+
+    monkeypatch.setattr(
+        watchdog,
+        "runtime_check",
+        lambda: (True, {"ok": True, "summary": "Rendered checks passed."}, "Rendered checks passed."),
+    )
+    monkeypatch.setattr(
+        watchdog,
+        "ensure_foreground",
+        lambda repair=False: {"ok": True, "status": "foreground", "reason": "already-foreground"},
+    )
+    monkeypatch.setattr(watchdog, "latest_screen_check_status", lambda: "blocked")
+
+    def fake_run(cmd, timeout=90):
+        actions.append(("refresh", cmd, timeout))
+        return type("Result", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+    def fake_publish(status, title, detail):
+        actions.append(("publish", status, title, detail))
+
+    monkeypatch.setattr(watchdog, "run", fake_run)
+    monkeypatch.setattr(watchdog, "publish", fake_publish)
+    monkeypatch.setattr(sys, "argv", ["mission_control_kiosk_watchdog.py"])
+
+    assert watchdog.main() == 0
+    assert [action[0] for action in actions] == ["refresh", "publish", "refresh"]
+    assert actions[1][1:3] == ("done", "Josh 2.0 screen check recovered")
