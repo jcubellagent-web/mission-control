@@ -14314,3 +14314,20 @@ a:focus-visible,
   #finops-dashboard .activity-journal-row { min-height: 20px !important; padding: 2px 3px !important; }
   #finops-dashboard .activity-journal-row strong, #finops-dashboard .activity-journal-row small { font-size: 7px !important; }
 }
+
+/* #JAIMES: make the live transport state explicit without changing the kiosk's established geometry. */
+.mission-actions .live-chip.is-connected {
+  border-color: rgba(94, 234, 212, .42);
+  color: #8ff5df;
+  background: rgba(20, 184, 166, .08);
+}
+
+.mission-actions .live-chip.is-polling {
+  border-color: rgba(251, 191, 36, .38);
+  color: #f8d77a;
+  background: rgba(245, 158, 11, .07);
+}
+
+.brain-hero.is-flight-deck .agent-hero-card header em {
+  font-variant-numeric: tabular-nums;
+}

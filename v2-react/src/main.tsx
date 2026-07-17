@@ -421,6 +421,15 @@ function ageLabel(value?: string | null) {
   return `${Math.round(hours / 24)}d`;
 }
 
+function agentSourceLabel(value?: string | null) {
+  const source = missionText(value || "").toLowerCase();
+  if (!source) return "Local";
+  if (source.includes("local") || source.includes("sidecar")) return "Local";
+  if (source.includes("heartbeat")) return "Heartbeat";
+  if (source.includes("live work") || source.includes("brain feed")) return "Live feed";
+  return compactText(missionText(value), 18);
+}
+
 function freshnessClass(value?: string | null) {
   const minutes = ageMinutes(value);
   if (!Number.isFinite(minutes) || minutes >= 30) return "is-stale";
@@ -1115,8 +1124,13 @@ function App() {
           </span>
           <span className="source-chip"><ShieldCheck size={15} />{state.source}</span>
           <span className="source-chip">Updated {fmtTime(lastUpdate)}</span>
-          <span className="source-chip live-chip" title="Control Tower polls local live data every 10 seconds">
-            {liveMode === "connected" ? "Realtime" : "Live • 10s"}
+          <span
+            className={`source-chip live-chip is-${liveMode}`}
+            title={liveMode === "connected"
+              ? "Local event stream connected; 10-second reconciliation remains active"
+              : "Event stream reconnecting; local data refreshes every 10 seconds"}
+          >
+            {liveMode === "connected" ? "Stream live" : "Live • 10s fallback"}
           </span>
           <button
             type="button"
@@ -3662,7 +3676,9 @@ function AgentHeroCard({
           <b className="agent-role-badge">{AGENTS[agent].roleBadge}</b>
           <strong>{AGENTS[agent].label}</strong>
         </span>
-        <em>{agentOperatingState(status)} · {ageLabel(status.updated_at)}</em>
+        <em title={`Source: ${status.source || "Josh 2.0 local sidecar"}`}>
+          {agentOperatingState(status)} · {ageLabel(status.updated_at)} · {agentSourceLabel(status.source)}
+        </em>
       </header>
       <div
         className={`agent-step-trail ${showStepTrail ? "" : "is-empty"}`}

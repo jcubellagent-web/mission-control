@@ -7,10 +7,16 @@ import { join, resolve } from "node:path";
 const dataRoot = resolve(__dirname, "data");
 const configLocalPath = resolve(__dirname, "v2-react", "config.local.js");
 const liveWatchFiles = [
+  "control-tower-live.json",
   "brain-feed.json",
   "joshex-brain-feed.json",
   "jaimes-brain-feed.json",
   "jain-brain-feed.json",
+  "agent-task-queue.json",
+  "handoff-queue.json",
+  "agent-context-registry.json",
+  "memory-operations.json",
+  "model-provider-budgets.json",
   "agentic-crypto-wallet.json",
   "modelUsage.json",
   "jain-daily-signals.json",
@@ -146,7 +152,10 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-store",
       "Connection": "keep-alive",
+      "X-Accel-Buffering": "no",
     });
+    res.write("retry: 2000\n\n");
+    res.flushHeaders?.();
     let lastSignature = "";
     let lastHeartbeat = Date.now();
     const tick = () => {
@@ -162,8 +171,12 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
       }
     };
     tick();
+    // #JAIMES: one local mtime stream fans sidecar changes into the kiosk;
+    // client-side polling remains a separate reconciliation fallback.
     const interval = setInterval(tick, 1_000);
-    req.on("close", () => clearInterval(interval));
+    const close = () => clearInterval(interval);
+    req.once("close", close);
+    res.once("close", close);
     return;
   }
 

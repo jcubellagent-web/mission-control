@@ -483,10 +483,33 @@ export async function loadMissionControl(): Promise<MissionControlState> {
 }
 
 export function subscribeMissionControlRealtime(_onChange: () => void, onState?: (state: "connected" | "polling") => void) {
-  // Control Tower now uses local/shared JSON as the only live lane on JOSH2.
-  // main.tsx already refreshes every 10s, so report polling mode and no-op here.
-  onState?.("polling");
-  return () => {};
+  if (typeof window === "undefined" || typeof window.EventSource === "undefined") {
+    onState?.("polling");
+    return () => {};
+  }
+
+  // #JAIMES: the Josh 2.0 local SSE lane is the fast path; the existing 10s
+  // refresh in main.tsx remains the reconciliation/fallback path.
+  const events = new EventSource("/events/mission-control");
+  let refreshTimer: number | null = null;
+  const scheduleRefresh = () => {
+    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+    refreshTimer = window.setTimeout(() => {
+      refreshTimer = null;
+      _onChange();
+    }, 120);
+  };
+  const handleLiveUpdate = () => scheduleRefresh();
+
+  events.addEventListener("open", () => onState?.("connected"));
+  events.addEventListener("mission-control", handleLiveUpdate);
+  events.addEventListener("error", () => onState?.("polling"));
+
+  return () => {
+    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+    events.removeEventListener("mission-control", handleLiveUpdate);
+    events.close();
+  };
 }
 
 export function invalidateMissionControlSidecars() {
