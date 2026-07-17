@@ -57,6 +57,7 @@ SOURCE_PATHS = (
     "scripts/jaimes_work_card.py",
     "scripts/josh_telegram_fast_ack.py",
     "scripts/josh_work_card.py",
+    "scripts/objective_quality.py",
     "scripts/refresh_agentic_robinhood_wallet_live.py",
     "scripts/telegram_response_contract_stress.py",
     "scripts/telegram_inbox_qa_monitor.py",

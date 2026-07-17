@@ -51,6 +51,26 @@ def test_unmatched_objective_is_operator_paraphrase() -> None:
     assert len(objective.split()) <= watcher.OBJECTIVE_MAX_WORDS
 
 
+def test_objective_copy_complaint_maps_to_interpreted_intent() -> None:
+    prompt = "The Telegram and Control Tower objective is just a copy of my message. Interpret it in your own words first."
+    assert watcher.objective_from_prompt(prompt) == "Make agent task objectives reflect interpreted intent"
+
+
+def test_near_copy_gate_defers_visible_surfaces(monkeypatch) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(watcher, "send_chat_action", lambda *args, **kwargs: calls.append("typing"))
+    monkeypatch.setattr(watcher, "send_message_draft", lambda *args, **kwargs: calls.append("draft"))
+    monkeypatch.setattr(watcher, "objective_from_prompt", lambda _prompt: "Inspect JOSHeX after the update")
+    monkeypatch.setattr(watcher, "objective_is_near_copy", lambda _prompt, _objective: True)
+    monkeypatch.setattr(watcher, "semantic_reinterpretation", lambda _prompt: "")
+    monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must wait before routing")))
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not publish")))
+    result = watcher.send_ack(event(), watcher.DEFAULT_MODEL, dry_run=True, meta=inbox_meta())
+    assert result["status"] == "awaiting-objective-interpretation"
+    assert result["objective"] == ""
+    assert result["requires_objective_interpretation"] is True
+
+
 @pytest.mark.parametrize(
     ("prompt", "expected"),
     [

@@ -78,6 +78,14 @@ except Exception:  # noqa: BLE001
     write_selection = None
 
 try:
+    from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
+except Exception:  # noqa: BLE001
+    # Fail closed so an import problem cannot expose a prompt echo as an
+    # apparent agent interpretation on Telegram or Control Tower.
+    objective_is_near_copy = lambda _prompt, _objective: True
+    semantic_reinterpretation = lambda _prompt: ""
+
+try:
     from telegram_ux_helpers import (  # type: ignore
         approve_all_step as ux_approve_all_step,
         button_label as ux_button_label,
@@ -1281,7 +1289,10 @@ def verification_outcome(target: str) -> str:
         return "works as intended"
     if re.fullmatch(r"(?:the\s+)?(?:JOSHeX|JAIMES|J\.A\.I\.N|JAIN|Josh\s+2\.0|OpenCLAW|Telegram)", target, re.I):
         return "operates correctly"
-    return ""
+    # A bare "Verify <target>" merely mirrors an imperative request. Keep the
+    # target, but make the desired outcome explicit so the card states what
+    # success means in the agent's own words.
+    return "meets the intended requirements"
 
 
 def action_specific_objective(text: str) -> str:
@@ -1381,6 +1392,10 @@ def topic_objective(lowered: str) -> str:
 def summarize_objective(text: str) -> str:
     clean = " ".join(current_request_text(text).split())
     lowered = clean.lower()
+    if "objective" in lowered and any(
+        marker in lowered for marker in ("copy", "quote", "similar", "own words", "interpret", "paraphrase")
+    ):
+        return "Make agent task objectives reflect interpreted intent"
     if "correct objective" in lowered and "current task" in lowered:
         return "Fix current-task objective mapping"
     if "inbox" in lowered and any(
@@ -1766,6 +1781,26 @@ def send_ack(
     # The visible acknowledgement must be first. Route and skill probes may
     # involve remote health checks and must never delay the eyes reaction.
     objective = objective_from_prompt(prompt)
+    if objective_is_near_copy(prompt, objective):
+        objective = semantic_reinterpretation(prompt)
+    if not objective or objective_is_near_copy(prompt, objective):
+        # #JOSH2: a reaction may be immediate, but no Telegram header or
+        # Control Tower row is published until the agent supplies its own
+        # interpretation of intent, target, and desired outcome.
+        return {
+            "ok": True,
+            "status": "awaiting-objective-interpretation",
+            "reaction_ok": bool(dry_run or ack_sent),
+            "ack_message_id": ack_message_id,
+            "key": key,
+            "objective": "",
+            "requires_objective_interpretation": True,
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+            "card_start_ok": False,
+            "header_message_id": "",
+            "live_message_id": "",
+        }
     route = auto_route_for_prompt(prompt, model or DEFAULT_MODEL)
     skill = skill_for_prompt(prompt)
     display_model = route["model"]

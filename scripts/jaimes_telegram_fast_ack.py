@@ -69,6 +69,14 @@ except Exception:  # noqa: BLE001
     write_selection = None
 
 try:
+    from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
+except Exception:  # noqa: BLE001
+    # Fail closed so an import problem cannot expose a prompt echo as an
+    # apparent agent interpretation on Telegram or Control Tower.
+    objective_is_near_copy = lambda _prompt, _objective: True
+    semantic_reinterpretation = lambda _prompt: ""
+
+try:
     from telegram_ux_helpers import (  # type: ignore
         approve_all_step as ux_approve_all_step,
         button_label as ux_button_label,
@@ -1471,6 +1479,11 @@ def summarize_objective(text: str) -> str:
     intent_lower = intent.lower()
     request_context = " ".join(eligible_lines).lower()
 
+    if "objective" in request_context and any(
+        marker in request_context for marker in ("copy", "quote", "similar", "own words", "interpret", "paraphrase")
+    ):
+        return "Make agent task objectives reflect interpreted intent"
+
     if "old objective" in request_context and any(
         marker in request_context for marker in ("current task", "correct objective", "mapping", "mapped")
     ):
@@ -1491,6 +1504,14 @@ def summarize_objective(text: str) -> str:
     for markers, summary in OBJECTIVE_RULES:
         if any(marker in intent_lower for marker in markers):
             return summary
+    verification = re.match(
+        r"^(?:please\s+)?(?:test|validate|verify|confirm|check|make sure)\s+(.+)$",
+        intent,
+        re.I,
+    )
+    if verification:
+        target = verification.group(1).strip(" .?!")
+        return f"Confirm {target} meets the intended requirements"[:80]
     intent = LEADING_REQUEST_RE.sub("", intent).strip(" .?!")
     intent = re.sub(r"^please\s+(?:actually\s+)?", "", intent, flags=re.I)
     words = intent.split()
@@ -1719,6 +1740,31 @@ def send_ack(
             "skill": {},
             "objective": objective,
             "reaction_ok": False,
+            "button_triggered": is_button_prompt(prompt),
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+        }
+
+    if objective_is_near_copy(prompt, objective):
+        objective = semantic_reinterpretation(prompt)
+    if not objective or objective_is_near_copy(prompt, objective):
+        # #JAIMES: keep only the immediate reaction when deterministic intake
+        # cannot produce a genuine interpretation; the main agent must decide
+        # the objective before Telegram or Control Tower receives one.
+        if not dry_run:
+            send_chat_action(meta=meta)
+        return {
+            "ok": True,
+            "status": "awaiting-objective-interpretation",
+            "header_message_id": "",
+            "ack_message_id": "",
+            "key": key,
+            "model": model or DEFAULT_MODEL,
+            "route": "",
+            "skill": {},
+            "objective": "",
+            "requires_objective_interpretation": True,
+            "reaction_ok": reaction_ok,
             "button_triggered": is_button_prompt(prompt),
             "run_id": event.get("run_id") or "",
             "last_card_update_at": utc_now(),

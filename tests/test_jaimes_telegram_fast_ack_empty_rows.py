@@ -78,6 +78,34 @@ def test_direct_objective_summary_request_still_maps_normally():
     assert watcher.objective_from_prompt(prompt) == "Make objective cards summarize task intent"
 
 
+def test_objective_copy_complaint_maps_to_interpreted_intent():
+    watcher = load_module()
+    prompt = "The Telegram and Control Tower objective is just a copy of my message. Interpret it in your own words first."
+    assert watcher.objective_from_prompt(prompt) == "Make agent task objectives reflect interpreted intent"
+
+
+def test_near_copy_gate_defers_telegram_and_control_tower(monkeypatch):
+    watcher = load_module()
+    monkeypatch.setattr(watcher, "objective_from_prompt", lambda _prompt: "Please stabilize the live card")
+    monkeypatch.setattr(watcher, "objective_is_near_copy", lambda _prompt, _objective: True)
+    monkeypatch.setattr(watcher, "semantic_reinterpretation", lambda _prompt: "")
+    monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must wait before skill selection")))
+    monkeypatch.setattr(watcher, "publish_jaimes", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not publish")))
+    monkeypatch.setattr(watcher, "run_cmd", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not start a card")))
+    result = watcher.send_ack(
+        {"platform_message_id": "42", "db_message_id": "7", "ts": "2026-07-13T20:00:00Z", "prompt": "Please stabilize the live card", "run_id": "telegram-message-7"},
+        model="openai-codex/gpt-5.6-sol",
+        state={},
+        dry_run=True,
+        meta={"telegram_chat_id": "-1003589561528", "telegram_thread_id": "17"},
+    )
+    assert result["status"] == "awaiting-objective-interpretation"
+    assert result["objective"] == ""
+    assert result["header_message_id"] == ""
+    assert result["ack_message_id"] == ""
+    assert result["requires_objective_interpretation"] is True
+
+
 def _stable_surface_stubs(watcher, monkeypatch):
     monkeypatch.setattr(watcher, "set_eyes_reaction", lambda *args, **kwargs: True)
     monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: {})
