@@ -123,6 +123,30 @@ class SchedulerTests(unittest.TestCase):
         run.assert_called_once()
         self.assertEqual(result["jobs"]["release-qa"]["status"], "ok")
 
+    def test_scheduler_publishes_running_state_before_job_execution(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "schedule.json"
+            config.write_text(json.dumps({
+                "timezone": "UTC",
+                "jobs": [{"id": "deep-qa", "schedule": {"intervalMinutes": 1}, "command": ["noop"]}],
+            }))
+            state = root / "state.json"
+            state.write_text(json.dumps({"jobs": {"deep-qa": {"status": "failed", "failureStreak": 1}}}))
+            observed = {}
+
+            def finish_job(_job, shadow=False):
+                observed.update(json.loads(state.read_text()))
+                return {"id": "deep-qa", "status": "ok", "returncode": 0, "durationMs": 1}
+
+            with mock.patch.object(subject, "STATE_PATH", state), \
+                    mock.patch.object(subject, "run_job", side_effect=finish_job), \
+                    mock.patch.object(subject, "publish_transition"):
+                subject.tick(config, dt.datetime(2026, 7, 15, 12, 0, tzinfo=dt.timezone.utc))
+
+        self.assertEqual(observed["status"], "running")
+        self.assertEqual(observed["jobs"]["deep-qa"]["status"], "running")
+
     def test_clean_run_after_any_safe_skip_publishes_recovery_for_open_streak(self) -> None:
         job = {"id": "live", "owner": "josh2", "team": "Telegram QA", "severity": "p0"}
         current = {"status": "ok", "failureStreak": 0}

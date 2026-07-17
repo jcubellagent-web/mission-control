@@ -190,6 +190,30 @@ def tick(
     new_jobs = dict(prior_jobs)
     results = []
     current_slot = slot(local_now)
+
+    def publish_running(job: dict[str, Any], previous: dict[str, Any]) -> None:
+        running_jobs = dict(new_jobs)
+        running_jobs[str(job["id"])] = {
+            "id": str(job["id"]),
+            "owner": job.get("owner"),
+            "team": job.get("team"),
+            "severity": job.get("severity"),
+            "status": "running",
+            "startedAt": iso(now),
+            "failureStreak": int(previous.get("failureStreak") or 0),
+            "lastSlot": current_slot,
+        }
+        atomic_write(STATE_PATH, {
+            "version": 1,
+            "checkedAt": iso(now),
+            "localTime": local_now.isoformat(),
+            "timezone": str(timezone),
+            "shadow": False,
+            "jobs": running_jobs,
+            "ran": [str(job["id"])],
+            "status": "running",
+        })
+
     for job in config.get("jobs", []):
         if not isinstance(job, dict) or not job.get("id"):
             continue
@@ -203,6 +227,10 @@ def tick(
         if job.get("skipDuringChangeLease") and change_lease_active(now) and not allow_change_lease:
             result = {"id": job_id, "status": "skipped_change_lease", "startedAt": iso(now), "durationMs": 0}
         else:
+            if not shadow:
+                # #JAIMES: publish in-flight truth before long QA so health
+                # checks do not mistake the previous terminal state for now.
+                publish_running(job, previous)
             result = run_job(job, shadow=shadow)
         if result["status"] in {"failed", "timeout"}:
             result["failureStreak"] = int(previous.get("failureStreak") or 0) + 1
