@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE = ROOT / "config" / "x_intelligence_provider_state.json"
+STATE = ROOT / "config" / "x-intelligence-provider-state.json"
 HEALTH = ROOT / "data" / "x-provider-health-check.json"
 COOLDOWN = ROOT / "data" / "x-provider-health-cooldown.json"
 

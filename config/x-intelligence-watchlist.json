@@ -1,20 +1,41 @@
 {
-  "version": 1,
-  "updated": "2026-07-12",
+  "version": 2,
+  "updated": "2026-07-17",
   "identity": {
     "handle": "AgentJc11443",
     "url": "https://x.com/AgentJc11443",
-    "mode": "curated-intake",
-    "manual_account_actions_only": true
+    "mode": "agent-owned-research",
+    "standing_authority": [
+      "public-search-and-read",
+      "bounded-public-ui-collection",
+      "saved-searches",
+      "bookmarks",
+      "research-follows",
+      "private-research-lists"
+    ],
+    "approval_required": [
+      "public-engagement-or-publishing",
+      "direct-messages-or-external-contact",
+      "identity-security-recovery-or-billing",
+      "purchases-account-deletion-or-financial-execution"
+    ]
   },
   "policy": {
     "xai_api": "exhausted-disabled",
     "grok_subscription": "unavailable-until-health-reset",
-    "logged_in_x_scraping": false,
-    "automated_account_mutations": false,
+    "logged_in_x_read_only_ui": true,
+    "logged_in_x_collection_limits": {
+      "dedicated_agent_browser_only": true,
+      "session_canary_required": true,
+      "normal_query_cap": 8,
+      "unique_post_cap": 200,
+      "temporary_tabs_required": true
+    },
+    "routine_research_curation": true,
+    "automated_public_account_mutations": false,
     "purchase_credits": false,
     "auto_recharge": false,
-    "discovery": ["forwarded-x-links", "public-web-search", "primary-source-verification"],
+    "discovery": ["authenticated-x-ui", "forwarded-x-links", "public-web-search", "primary-source-verification"],
     "routine_success_delivery": "local-only"
   },
   "topic_routes": {

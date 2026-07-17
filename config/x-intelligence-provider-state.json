@@ -1,12 +1,25 @@
 {
-  "updated": "2026-07-12T20:22:00Z",
+  "updated": "2026-07-17T23:00:00Z",
   "identity": "@AgentJc11443",
   "xaiApi": {"status": "exhausted", "enabled": false, "autoRecharge": false},
   "grokSubscription": {"status": "unavailable_until_reset", "enabled": false, "healthCheck": "cooldown_only"},
   "xSignal": {
     "status": "operational",
-    "paths": ["forwarded X links", "public web discovery", "primary-source verification", "Gemini/Ollama/Codex analysis"]
+    "paths": ["bounded authenticated read-only X UI", "forwarded X links", "public web discovery", "primary-source verification", "Gemini/Ollama/Codex analysis"],
+    "collector": {
+      "dedicatedAgentBrowserOnly": true,
+      "expectedHandle": "AgentJc11443",
+      "sessionCanaryRequired": true,
+      "normalQueryCap": 8,
+      "uniquePostCap": 200,
+      "temporaryTabsRequired": true
+    }
   },
-  "accountAutomation": {"enabled": false, "manualOnly": ["follow", "unfollow", "like", "repost", "bookmark", "lists", "post", "dm"]},
+  "accountAutomation": {
+    "enabled": true,
+    "scope": "research-and-private-curation",
+    "autonomous": ["search", "read-public-posts", "collect-public-search-results", "saved-searches", "bookmark", "research-follow", "research-unfollow", "private-research-lists"],
+    "approvalRequired": ["post", "reply", "quote", "repost", "like", "poll", "space", "dm-or-external-contact", "identity-security-recovery-privacy-or-billing", "purchase-account-deletion-or-financial-execution"]
+  },
   "finops": {"incrementalApiSpendUsd": 0, "creditPurchaseAllowed": false}
 }

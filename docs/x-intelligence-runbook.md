@@ -2,28 +2,36 @@
 
 ## Purpose
 
-`@AgentJc11443` is the ecosystem-owned X research identity. It is a curated intake identity, not an automation account. X provides leads; primary sources provide confirmation.
+`@AgentJc11443` is the ecosystem-owned X operating and research identity. The agents may use its dedicated authenticated session for public research and bounded research curation. X provides leads; primary sources provide confirmation.
+
+Standing authority covers public search and reading, bounded public-result collection, saved searches, bookmarks, research follows, and private research Lists. This authority does not remove the action gates below.
 
 ## Hard boundaries
 
-- Do not automate logged-in X through Chrome, CDP, Playwright, Computer Use, or browser tools.
-- Do not follow, unfollow, like, repost, bookmark, post, DM, or modify Lists automatically.
+- Authenticated UI collection is allowed only through the dedicated agent-auth browser on Josh 2.0 and an approved bounded workflow such as `x-trading-signal-search`. Never use Josh's personal browser profile.
+- Each collection must verify the `@AgentJc11443` session canary, stay on public X surfaces, cap queries and results, use temporary tabs, and close them after collection.
+- Require task-specific approval immediately before each post, reply, quote, repost, like, poll, Space, DM, or other public/external communication.
+- Require task-specific approval immediately before identity, recovery, 2FA, security, privacy, billing, API-access, account-deletion, or similar high-impact changes.
+- Never use account ownership as authorization for a trade, transfer, wallet signature, order, subscription, or purchase.
 - Do not bypass X API pricing, authentication, quotas, or rate limits.
 - Do not purchase xAI credits or enable auto-recharge.
 - xAI API stays disabled while exhausted. Grok stays unavailable until a sparse health check confirms usable credits.
-- Never store cookies, tokens, credentials, private messages, or raw private account data.
+- Never export or publish cookies, tokens, credentials, private messages, protected content, or raw private account data.
 
 ## Collection
 
-Canonical watchlist: `config/x_intelligence_watchlist.json`.
+Canonical watchlist: `config/x-intelligence-watchlist.json`.
 
 Allowed discovery:
-1. Josh forwards an X URL, screenshot, or quoted post.
-2. Normal public web search finds indexed excerpts, account names, quoted phrases, or related reporting.
-3. Verify against official documentation, GitHub releases, company blogs, filings, status pages, or direct announcements.
-4. X-only claims remain incomplete and cannot receive high confidence.
+1. Search and read public X results through the dedicated authenticated UI session.
+2. Josh forwards an X URL, screenshot, or quoted post.
+3. Normal public web search finds indexed excerpts, account names, quoted phrases, or related reporting.
+4. Verify against official documentation, GitHub releases, company blogs, filings, status pages, explorers, or direct announcements.
+5. X-only claims remain incomplete and cannot receive high confidence.
 
-Account and List changes are proposals for Josh to perform manually in X.
+Routine research curation may maintain saved searches, bookmarks, research follows, and private Lists. Do not use those permissions for engagement campaigns, bulk growth, or public messaging.
+
+For contract-address or ticker research, use `x-trading-signal-search`. Prefer exact contract plus chain, disambiguate ticker-only matches, cap a normal run at eight searches and 200 unique public posts, deduplicate repeated promotion, and disclose partial coverage or rate limits.
 
 ## Intake contract
 
