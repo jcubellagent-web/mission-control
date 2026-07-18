@@ -1,42 +1,46 @@
-# Control Tower FinOps and Live Work legibility QA
+# Control Tower reference-shaped FinOps QA
 
 ## Scope and evidence
 
-- Source visual: `/var/folders/1w/ndj9slyx5rj80g5pn88wkp9c0000gn/T/codex-clipboard-a57cbba6-b61b-44cd-b12b-028c4cd2f03b.png`
-- Implementation capture: `/private/tmp/control-tower-legibility-final-clear.png`
-- Full before/after comparison: `/private/tmp/control-tower-legibility-full-comparison.png`
-- Focused FinOps comparison: `/private/tmp/control-tower-legibility-finops-comparison.png`
+- Source visual: `/var/folders/1w/ndj9slyx5rj80g5pn88wkp9c0000gn/T/codex-clipboard-e8afc5a8-90c3-4459-9903-b0e337563f7d.png`
+- Final live panel: `/private/tmp/control-tower-finops-simple/control-tower-finops-simple-final2-panel.png`
+- Same-input comparison: `/private/tmp/control-tower-finops-simple/control-tower-finops-simple-final-comparison.png`
 - Browser and viewport: the existing Josh 2.0 Google Chrome kiosk at 1920 x 1080, DPR 1.
-- State reviewed: live sidecars with four Live Work agents, the complete FinOps surface, Today's Jobs visible in the first viewport, and the transient black-box alert cleared by a successful verification rerun.
+- State reviewed: current local sidecars, verified route activity, current wallet freshness, twelve tracked models with nine displayed ledger rows, and the complete Control Tower first viewport.
 
-## Visual history
+## Reference match
 
-1. The source pass left about 56 px of unused space below FinOps, rendered important provider and ledger text at 6.8-9 px, reduced idle-card opacity, and forced the model ledger into cramped single-line columns.
-2. The first correction filled the FinOps body and widened its wallet rail, but older high-specificity rules still overrode provider typography and opacity.
-3. The final correction raised selector specificity, compacted repetitive metadata, changed the model ledger to a two-line hierarchy, and increased Live Work typography while preserving all four fixed-height rows.
-4. The source and final implementation were reviewed together in both full-page and focused FinOps comparisons. The final surface materially improves hierarchy, contrast, density, and use of the available panel area without changing the approved matte-blue layout.
+1. Replaced the dense wallet trade and activity feeds with one quiet wallet summary and four proposal-first action rows.
+2. Consolidated three competing telemetry areas into exactly two continuous metric bands: five primary values and four secondary values.
+3. Reduced each provider to identity, current model, utilization, one purpose line, explicit state, and one segmented meter.
+4. Replaced nested model cards with one nine-row table and a truthful shown/total count.
+5. Added one continuous four-cell health rail using live or explicitly unavailable values; no reference-only numbers were fabricated.
+6. Reviewed the source and live implementation together in the same comparison image, then corrected provider purpose and current-model overflow.
 
 ## Final measurements
 
-- Page: 1920 x 1080 with zero page overflow.
-- Live Work: four 1171 x 73 px cards; objective 24 px, agent name 19 px, description 12.5 px, completion text 12 px; no measured clipping.
-- FinOps: 1199 x 506 px panel; 1177 x 435 px body with only the intended 9 px bottom inset.
-- FinOps columns: 270 px wallet rail and 899 px model area.
-- Provider cards: four 268 x 136 px cards; heading 14 px, description 11 px, metadata 10 px; idle opacity 90%; no clipping.
-- Model ledger: 333 x 278 px; title 13 px, model name 11.5 px, metadata 10 px; no horizontal overflow; bounded vertical scrolling is available for the complete ledger.
-- Wallet: total 27 px, section headings 11.5 px, transaction and journal rows 10 px.
+- Page: 1920 x 1080 with zero horizontal or vertical overflow.
+- FinOps panel: 1199 x 506 px with zero panel overflow.
+- Wallet rail: 224 x 352 px with four action rows and no visible transaction/activity feeds.
+- Metric bands: two 946 x 45 px bands with cell counts `[5, 4]`.
+- Provider grid: four route-mapped cards, each approximately 283 x 124 px; provider name 16 px, body 11 px, metadata 10-11.5 px; no measured clipping or overflow.
+- Model ledger: 365 x 253 px with nine approximately 23.7 px rows; no horizontal or vertical overflow.
+- Health rail: 1177 x 78 px with four equal cells and no overflow.
+- Canonical route colors: Codex `#65D1D5`, Antigravity `#72D69A`, Ollama `#A8ABB3`, Grok `#1677FF`.
 
 ## Interaction and runtime checks
 
-- FinOps `Refresh wallet` was exercised in the actual kiosk Chrome. The button moved from enabled to disabled with a spinner and back to enabled.
-- FinOps, body, wallet, and model-area geometry changed by 0 px during the interaction; page overflow remained 0 px and before/after pixels were identical.
-- The public wallet publisher returned HTTP 500 because the dedicated hosts currently resolve the official Blockscout hostname through an inaccessible local DNS route. Direct execution confirmed connection refusal after three retries. This is an external data-source/DNS blocker, not a layout regression; the last successful wallet snapshot stayed visible and unchanged.
-- Rendered-browser checks passed for semantics, horizontal layout, visible-text quality, and screenshots. There were no page exceptions, failed asset requests, or internal-text leaks. The only browser console entry was the expected HTTP 500 from the unavailable wallet source.
-- Source regression check passed, runtime-layout self-test passed, the new permanent 1920 x 1080 legibility probe passed, and the repository suite passed 406 tests.
+- Read-only `Refresh wallet` issued exactly one request, entered disabled/`aria-busy=true`/`Refreshing…` immediately, recovered to enabled within nine seconds, and moved no major region by even one pixel.
+- The upstream wallet refresh returned HTTP 500. The last-known balance remained visible and the header continued to say `Wallet stale`; no false fresh state or layout shift was introduced.
+- Strict browser and visual guard passed at 1440 x 1000, 390 x 844, and 1920 x 1080 with zero console errors, page errors, failed asset requests, or internal-text leaks.
+- Permanent layout guard now fails closed on the old dense hierarchy, missing regions, wrong metric/provider counts, route-color drift, text/card overflow, ledger overflow, missing health rail, undersized rows, and wallet-width drift.
+- Build passed, regression check passed, route-contract check passed, runtime-layout self-test passed, strict runtime/visual check passed, and the repository suite passed 397 tests.
+- The in-app Browser plugin path was unavailable because its required Node REPL bridge was not exposed; verification used the user-selected, already-open Josh 2.0 Chrome kiosk through its existing CDP endpoint.
 
-## Residual P2 observations
+## Severity review
 
-- Long wallet transaction detail strings still ellipsize inside the deliberately compact 270 px rail. Full detail remains available through the linked explorer row; a future expand/tooltip treatment could improve this without enlarging the rail.
-- The smallest 9.5-10 px role and metadata text is secondary information. Primary operational text meets the distance-readability thresholds.
+- P0: none.
+- P1: none.
+- P2: none.
 
 final result: passed

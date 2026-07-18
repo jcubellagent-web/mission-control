@@ -15404,3 +15404,798 @@ body,
     font-size: 10px !important;
   }
 }
+
+/* Control Tower v10 — reference-shaped FinOps: quiet wallet rail, two metric bands, four routes, one ledger. */
+#finops-dashboard.finops-quiet-layout {
+  --finops-bg: #041827;
+  --finops-surface: #072033;
+  --finops-raised: #09263a;
+  --finops-line: rgba(192, 150, 74, 0.4);
+  --finops-cool-line: rgba(48, 132, 158, 0.32);
+  --finops-label: #c8a35d;
+  --finops-text: #f2f7fa;
+  --finops-muted: #a9bac5;
+  display: grid !important;
+  grid-template-rows: 46px minmax(0, 1fr) 78px !important;
+  gap: 6px !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  border-color: var(--finops-cool-line) !important;
+  border-radius: 10px !important;
+  background: var(--finops-bg) !important;
+  background-image: none !important;
+  padding: 8px 10px !important;
+  box-shadow: inset 0 0 0 1px rgba(101, 209, 213, 0.025) !important;
+}
+
+#finops-dashboard.finops-quiet-layout::before {
+  display: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  min-width: 0 !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  border-bottom: 1px solid rgba(48, 132, 158, 0.22) !important;
+  padding: 0 1px 5px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-header p {
+  color: #69bcd1 !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-header h2 {
+  margin-top: 3px !important;
+  color: var(--finops-text) !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-actions {
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-actions span,
+#finops-dashboard.finops-quiet-layout .finops-actions button {
+  justify-content: center !important;
+  min-height: 32px !important;
+  border: 1px solid rgba(48, 132, 158, 0.26) !important;
+  border-radius: 4px !important;
+  background: #061b2c !important;
+  color: #c8d7df !important;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-actions button {
+  min-width: 127px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-actions button:focus-visible,
+#finops-dashboard.finops-quiet-layout .finops-wallet-action:focus-visible {
+  outline: 2px solid #65d1d5 !important;
+  outline-offset: 2px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-command-grid {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-rail {
+  display: grid;
+  grid-template-rows: 139px minmax(0, 1fr);
+  gap: 5px;
+  min-width: 0;
+  min-height: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-summary,
+#finops-dashboard.finops-quiet-layout .finops-wallet-actions,
+#finops-dashboard.finops-quiet-layout .finops-metric-band,
+#finops-dashboard.finops-quiet-layout .finops-ledger-table,
+#finops-dashboard.finops-quiet-layout .finops-health-rail {
+  border: 1px solid var(--finops-line);
+  border-radius: 4px;
+  background: var(--finops-surface);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-summary {
+  display: grid;
+  grid-template-rows: 48px 50px 39px;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-summary > div {
+  min-width: 0;
+  min-height: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 6px 10px !important;
+  box-shadow: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-summary > div + div {
+  border-top: 1px solid rgba(192, 150, 74, 0.23) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total::after {
+  display: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total span,
+#finops-dashboard.finops-quiet-layout .wallet-target-head span,
+#finops-dashboard.finops-quiet-layout .finops-wallet-actions header span,
+#finops-dashboard.finops-quiet-layout .finops-metric-band article > span,
+#finops-dashboard.finops-quiet-layout .finops-provider-name p span,
+#finops-dashboard.finops-quiet-layout .finops-provider-purpose span,
+#finops-dashboard.finops-quiet-layout .finops-provider-utilization span,
+#finops-dashboard.finops-quiet-layout .finops-health-rail article span {
+  color: var(--finops-label) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.055em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total {
+  display: grid !important;
+  align-content: center !important;
+  gap: 2px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total strong {
+  color: #1ed3f1 !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
+  text-shadow: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-target {
+  display: grid !important;
+  align-content: center !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-head {
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-head > div {
+  display: grid !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-head strong {
+  overflow: hidden !important;
+  color: #dce8ed !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-head em {
+  flex: 0 0 auto !important;
+  border: 1px solid rgba(82, 215, 125, 0.45) !important;
+  border-radius: 3px !important;
+  background: rgba(82, 215, 125, 0.07) !important;
+  color: #72d69a !important;
+  padding: 3px 5px !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-progress {
+  display: grid !important;
+  align-content: center !important;
+  gap: 6px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-meta b,
+#finops-dashboard.finops-quiet-layout .wallet-target-meta small {
+  overflow: hidden !important;
+  color: #bccbd3 !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-progress {
+  height: 6px !important;
+  overflow: hidden !important;
+  border-radius: 2px !important;
+  background: rgba(169, 186, 197, 0.14) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .wallet-target-progress span {
+  width: calc(var(--pct) * 1%) !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: #1ed3f1 !important;
+  box-shadow: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-actions {
+  display: grid;
+  grid-template-rows: 28px repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  min-height: 0;
+  padding: 7px 9px 9px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-actions header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-actions header em {
+  color: #94aab6;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-action {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgba(192, 150, 74, 0.26);
+  border-radius: 3px;
+  background: #061b2c;
+  color: #cbd8df;
+  padding: 5px 10px;
+  text-align: left;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-action:disabled {
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-action svg {
+  color: #a9bac5;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-action span {
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-overview {
+  display: grid;
+  grid-template-rows: 94px minmax(0, 1fr);
+  gap: 5px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-stack {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band.is-primary {
+  grid-template-columns: 1.08fr 0.76fr 0.78fr 1.08fr 1.22fr;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band.is-secondary {
+  grid-template-columns: 0.95fr 1.28fr 1.04fr 0.9fr;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band article {
+  display: grid !important;
+  align-content: center !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 5px 10px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band article + article {
+  border-left: 1px solid rgba(192, 150, 74, 0.25) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-band article > strong,
+#finops-dashboard.finops-quiet-layout .finops-metric-value > strong,
+#finops-dashboard.finops-quiet-layout .finops-pressure-metric > div > strong {
+  overflow: hidden !important;
+  color: #e8f0f4 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-metric-value,
+#finops-dashboard.finops-quiet-layout .finops-pressure-metric > div {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-subscription-mix {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  width: 38px;
+  height: 17px;
+  flex: 0 0 auto;
+  font-style: normal;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-subscription-mix b {
+  width: 7px;
+  height: var(--bar);
+  min-height: 3px;
+  background: #52d77d;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-pressure-metric {
+  --route-color: #65d1d5;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-pressure-metric > div > strong {
+  font-size: 12px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.57fr) minmax(355px, 1fr);
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 5px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--route-color) 44%, rgba(169, 186, 197, 0.22));
+  border-radius: 4px;
+  background: var(--finops-raised);
+  padding: 8px 10px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple.is-active {
+  border-color: var(--route-color);
+  background: color-mix(in srgb, var(--route-color) 6%, var(--finops-raised));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--route-color) 16%, transparent), 0 0 10px color-mix(in srgb, var(--route-color) 10%, transparent);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple.is-risk {
+  border-color: rgba(255, 100, 95, 0.62);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-identity {
+  display: grid;
+  grid-template-columns: 43px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-glyph {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--route-color);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-name {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-name > strong {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--route-color) 60%, #f4fbff);
+  font-size: 16px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-name p {
+  display: grid !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  color: #c8d5dc !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-name p span {
+  font-size: 10px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-name p em,
+#finops-dashboard.finops-quiet-layout .finops-provider-purpose em {
+  min-width: 0;
+  overflow: hidden;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-utilization {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+  min-width: 52px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-utilization span {
+  color: #a9bac5 !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-utilization strong {
+  color: #eaf2f5;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-purpose {
+  display: flex !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  color: #b7c7cf !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-purpose span {
+  flex: 0 0 auto;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-state {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-state strong {
+  color: var(--route-color);
+  font-size: 10.5px;
+  line-height: 1;
+  letter-spacing: 0.045em;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-segment-meter {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(3px, 1fr));
+  gap: 2px;
+  min-width: 0;
+  height: 9px;
+  font-style: normal;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-segment-meter b {
+  min-width: 0;
+  border-radius: 1px;
+  background: rgba(169, 186, 197, 0.17);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-segment-meter b.is-filled {
+  background: var(--route-color, #65d1d5);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-table {
+  display: grid;
+  grid-template-rows: 38px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-table > header {
+  display: grid;
+  grid-template-rows: 21px 16px;
+  min-width: 0;
+  border-bottom: 1px solid rgba(192, 150, 74, 0.28);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px 8px 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-title strong,
+#finops-dashboard.finops-quiet-layout .finops-ledger-title em {
+  overflow: hidden;
+  color: var(--finops-label);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-columns,
+#finops-dashboard.finops-quiet-layout .finops-ledger-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(48px, 0.8fr) minmax(42px, 0.6fr) minmax(42px, 0.62fr) minmax(44px, 0.72fr);
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-columns {
+  padding: 0 8px;
+  color: #91a8b4;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-columns span:nth-child(n + 3) {
+  text-align: right;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-rows {
+  display: grid;
+  grid-auto-rows: minmax(22px, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row {
+  position: relative;
+  min-height: 22px;
+  border-bottom: 1px solid rgba(48, 132, 158, 0.16);
+  border-left: 2px solid transparent;
+  padding: 2px 6px;
+  color: #afc1ca;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row strong {
+  color: #e3ecef;
+  font-size: 10.5px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row span:nth-child(2) {
+  color: color-mix(in srgb, var(--route-color, #a9bac5) 66%, #e4edf1);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row span:nth-child(n + 3) {
+  text-align: right;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row.is-active-route {
+  border-left-color: var(--route-color);
+  background: color-mix(in srgb, var(--route-color) 8%, transparent);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-row.is-active-route strong {
+  color: color-mix(in srgb, var(--route-color) 68%, #f4fbff);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-ledger-empty {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 16px;
+  color: var(--finops-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 15px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article + article {
+  border-left: 1px solid rgba(192, 150, 74, 0.34);
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article > svg {
+  color: #52d77d;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article.is-watch > svg,
+#finops-dashboard.finops-quiet-layout .finops-health-rail article.is-neutral > svg {
+  color: #d3ad62;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article.is-risk > svg {
+  color: #ff645f;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article strong,
+#finops-dashboard.finops-quiet-layout .finops-health-rail article small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article strong {
+  color: #eaf1f4;
+  font-size: 16px;
+  line-height: 1;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-health-rail article small {
+  color: var(--finops-muted);
+  font-size: 10.5px;
+  line-height: 1;
+}
+
+@media (max-width: 980px) {
+  #finops-dashboard.finops-quiet-layout {
+    grid-template-rows: auto auto auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-header,
+  #finops-dashboard.finops-quiet-layout .finops-actions {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    max-height: none !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-header h2 {
+    white-space: normal !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-command-grid,
+  #finops-dashboard.finops-quiet-layout .finops-main-grid,
+  #finops-dashboard.finops-quiet-layout .finops-provider-grid,
+  #finops-dashboard.finops-quiet-layout .finops-health-rail {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    overflow: visible !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-wallet-rail,
+  #finops-dashboard.finops-quiet-layout .finops-overview {
+    grid-template-rows: auto !important;
+    overflow: visible !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-wallet-action {
+    min-height: 44px;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-metric-stack,
+  #finops-dashboard.finops-quiet-layout .finops-metric-band {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    height: auto;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-metric-band article + article,
+  #finops-dashboard.finops-quiet-layout .finops-health-rail article + article {
+    border-top: 1px solid rgba(192, 150, 74, 0.25) !important;
+    border-left: 0 !important;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-provider-simple {
+    min-height: 118px;
+  }
+
+  #finops-dashboard.finops-quiet-layout .finops-ledger-table {
+    min-height: 300px;
+  }
+}

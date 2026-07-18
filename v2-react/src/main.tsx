@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, ExternalLink, EyeOff, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sun, Timer, UserRoundCheck, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
@@ -2109,7 +2109,7 @@ function tradePnl(row: NonNullable<AgenticCryptoWallet["tradeLedger"]>[number]) 
   return { label, tone };
 }
 
-// #JAIMES: FinOps card now preserves CodexBar provider/model detail in bounded rows instead of hiding it in compact tiles.
+// #JAIMES: FinOps keeps the kiosk overview intentionally quiet; detailed wallet and provider telemetry stays behind drill-down surfaces.
 function FinOpsDashboard({
   wallet,
   modelUsage,
@@ -2130,22 +2130,80 @@ function FinOpsDashboard({
   const freshness = cryptoFreshness(wallet);
   const summary = wallet?.summary || {};
   const goal = walletTradingGoal(wallet);
-  const trades = walletTradeRows(wallet);
-  const activity = (((wallet as any)?.activityLedger as AgenticCryptoWallet["recentActivity"]) || wallet?.recentActivity || []);
   const providers = providerRows(modelUsage, modelRouter);
   const activeKeys = activeProviderKeys(statuses, activeModelRoutes);
   const subscriptionBaseline = subscriptionBaselineUsd(providers);
   const usagePressure = usagePressureLabel(providers);
-  const modelRows = modelUsageBreakdownRows(modelUsage);
+  const allModelRows = (modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [])
+    .filter((model: any) => model && String(model.name || "").trim());
+  const modelRows = allModelRows.slice(0, 9);
   const meteredDaily = numericOrZero((modelUsage as any)?.metered?.daily ?? modelUsage?.daily);
   const usageEquivalentWeekly = numericOrZero((modelUsage as any)?.usageEquivalent?.weekly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentWeekly);
-  const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "--";
-  const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "--";
+  const projectedEquivalentMonthly = numericOrZero(modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly ?? modelUsage?.weeklyRunRate?.projectedMonthly);
+  const routeQualityValue = Number(modelRouter?.routeQualityScore);
+  const efficiencyValue = Number(modelRouter?.efficiencyScore);
+  const routeQuality = Number.isFinite(routeQualityValue) ? `${Math.round(routeQualityValue)}%` : "--";
+  const efficiency = Number.isFinite(efficiencyValue)
+    ? efficiencyValue > 5 ? `${Math.round(efficiencyValue)}%` : `${efficiencyValue.toFixed(2)}x`
+    : "--";
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
-  const lastRoute = modelRouter?.lastRoute || {};
-  const lastRouteLabel = missionText(String(lastRoute.routeLabel || lastRoute.provider || "no active route"));
+  const codexProvider = providers.find((provider) => providerKey(provider) === "codex");
+  const codexPressurePct = providerUtilizationPct(codexProvider);
+  const modelUpdatedAt = modelUsage?.lastUpdated || modelRouter?.updatedAt;
+  const routeAlerts = Array.isArray((modelRouter as any)?.routeAlerts) ? (modelRouter as any).routeAlerts : [];
+  const walletErrors = Array.isArray((wallet as any)?.errors) ? (wallet as any).errors : [];
+  const providerRisks = providers.filter((provider) => providerTone(provider) === "risk").length;
+  const riskCount = routeAlerts.length + walletErrors.length + providerRisks;
+  const budgetWatchCount = providers.filter((provider) => providerTone(provider) !== "clear").length;
+  const modelIdentity = (value: unknown) => String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^(openai|google|xai|local|ollama)\//, "");
+  const activeModelIds = new Set(
+    activeModelRoutes
+      .filter((route) => route.routeVerified && (!route.leaseUntil || timeValue(route.leaseUntil) > Date.now()))
+      .map((route) => modelIdentity(route.modelId)),
+  );
+  const subscriptionMix = providers.map(providerSubscriptionMonthly);
+  const maxSubscription = Math.max(...subscriptionMix, 1);
+  const walletActions = [
+    { label: "Top up wallet", Icon: ArrowUp },
+    { label: "Move funds", Icon: ArrowLeftRight },
+    { label: "Wallet journal", Icon: BookOpen },
+    { label: "Export statement", Icon: Download },
+  ];
+  const healthRows = [
+    {
+      label: "Route posture",
+      value: routeAlerts.length ? "Review" : "Balanced",
+      support: `${routeQuality} route · ${efficiency} efficiency`,
+      Icon: GitBranch,
+      tone: routeAlerts.length ? "watch" : "clear",
+    },
+    {
+      label: "Cost trend (7d)",
+      value: "Not tracked",
+      support: `${fmtCurrencyExact(usageEquivalentWeekly)}/wk usage equivalent`,
+      Icon: TrendingDown,
+      tone: "neutral",
+    },
+    {
+      label: "Budget health",
+      value: budgetWatchCount ? "Review" : "On track",
+      support: codexPressurePct > 0 ? `${Math.max(0, 100 - codexPressurePct)}% Codex headroom` : "Allowance within policy",
+      Icon: Gauge,
+      tone: budgetWatchCount ? "watch" : "clear",
+    },
+    {
+      label: "Risk signals",
+      value: riskCount ? `${riskCount} active` : "None",
+      support: riskCount ? "Review live provider status" : "All systems nominal",
+      Icon: riskCount ? AlertTriangle : CheckCircle2,
+      tone: riskCount ? "risk" : "clear",
+    },
+  ];
   return (
-    <section id="finops-dashboard" className={`finops-dashboard is-${freshness.tone}`} aria-label="FinOps dashboard">
+    <section id="finops-dashboard" className={`finops-dashboard finops-quiet-layout is-${freshness.tone}`} aria-label="FinOps dashboard">
       <header className="finops-header">
         <div>
           <p>FinOps Dashboard</p>
@@ -2154,254 +2212,185 @@ function FinOpsDashboard({
         <div className="finops-actions">
           <span className={`crypto-status ${cryptoStatusClass(freshness.status)}`}><ShieldCheck size={13} />Wallet {freshness.label}</span>
           <span><Timer size={13} />Auto-refresh 5m</span>
-          <button type="button" onClick={onRefresh} disabled={loading} title="Refresh read-only wallet inventory">
-            <RefreshCw size={13} className={loading ? "spin" : ""} /> Refresh wallet
+          <button type="button" onClick={onRefresh} disabled={loading} aria-busy={loading} title="Refresh read-only wallet inventory">
+            <RefreshCw size={13} className={loading ? "spin" : ""} /> {loading ? "Refreshing…" : "Refresh wallet"}
           </button>
         </div>
       </header>
 
-      <div className="finops-body">
-        <section className="finops-wallet">
-          <div className="finops-wallet-total wallet-card-primary" aria-label="Liquid crypto wallet value">
-            <span>Liquid wallet</span>
-            <strong>{fmtCurrencyExact(summary.liquidEstimatedUsd)}</strong>
-            <p>{fmtCurrencyExact(summary.tokenLiquidUsd ?? 0)} tokens · {fmtCurrencyExact(summary.nativeLiquidUsd ?? 0)} native</p>
-          </div>
-          <div className="finops-wallet-target wallet-card-secondary">
-            <div className="wallet-target-head">
-              <div>
-                <span>Current target</span>
-                <strong>{goal.title}</strong>
+      <div className="finops-command-grid">
+        <section className="finops-wallet-rail" data-finops-region="wallet">
+          <div className="finops-wallet-summary">
+            <div className="finops-wallet-total" aria-label="Liquid crypto wallet value">
+              <span>Liquid wallet</span>
+              <strong>{fmtCurrencyExact(summary.liquidEstimatedUsd)}</strong>
+            </div>
+            <div className="finops-wallet-target">
+              <div className="wallet-target-head">
+                <div>
+                  <span>Current target</span>
+                  <strong>{goal.title}</strong>
+                </div>
+                <em>{goal.status}</em>
               </div>
-              <em>{goal.status}</em>
             </div>
-            <div className="wallet-target-progress" style={{ "--pct": goal.percent } as React.CSSProperties}>
-              <span />
-            </div>
-            <div className="wallet-target-meta">
-              <b>{amountLabel(goal.current, goal.unit)} / {amountLabel(goal.target, goal.unit)}</b>
-              <small>{goal.percent}% complete</small>
-            </div>
-            <p>{goal.description}</p>
-          </div>
-          <div className="finops-trade-ledger">
-            <header>
-              <div>
-                <span>Robinhood wallet activity</span>
-                <strong>Trades + live P&amp;L</strong>
+            <div className="finops-wallet-progress">
+              <div className="wallet-target-meta">
+                <b>{amountLabel(goal.current, goal.unit)} / {amountLabel(goal.target, goal.unit)}</b>
+                <small>{goal.percent}% complete</small>
               </div>
-              <em>{trades.length || 0} rows</em>
-            </header>
-            <div className="trade-ledger-list">
-              {trades.length ? trades.map((trade, index) => {
-                const pnl = tradePnl(trade);
-                return (
-                  <article key={`${trade.timestamp || "trade"}-${trade.explorerLabel || index}`} className="trade-ledger-row">
-                    <span className={`trade-side-pill is-${String(trade.side || "activity").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
-                      {tradeSideLabel(trade)}
-                    </span>
-                    <div className="trade-main">
-                      <strong>{missionText(trade.action || trade.pair || trade.asset || "Wallet activity")}</strong>
-                      <small>{tradeAmountLabel(trade)}</small>
-                    </div>
-                    <span className={`trade-pnl is-${pnl.tone}`}>{pnl.label}</span>
-                    {trade.explorerUrl ? (
-                      <a href={trade.explorerUrl} target="_blank" rel="noreferrer" title={trade.explorerLabel || "Open transaction"}>
-                        <ExternalLink size={12} />
-                      </a>
-                    ) : <i />}
-                  </article>
-                );
-              }) : (
-                <p className="wallet-empty-state">No trade ledger is loaded yet. Wallet activity will appear after the next refresh.</p>
-              )}
+              <div className="wallet-target-progress" style={{ "--pct": goal.percent } as React.CSSProperties} aria-label={`${goal.percent}% complete`}>
+                <span />
+              </div>
             </div>
           </div>
-          <div className="finops-activity-journal">
-            <header>
-              <div>
-                <span>Wallet activity journal</span>
-                <strong>All on-chain actions</strong>
-              </div>
-              <em>{activity.length || 0} recent</em>
-            </header>
-            <div className="activity-journal-list">
-              {activity.length ? activity.map((row, index) => (
-                <article key={`${row.timestamp || "activity"}-${row.explorerLabel || index}`} className="activity-journal-row">
-                  <div>
-                    <strong>{missionText(row.action || "Wallet activity")}</strong>
-                    <small>{missionText(row.valueSummary || row.status || "confirmed")}</small>
-                  </div>
-                  {row.explorerUrl ? (
-                    <a href={row.explorerUrl} target="_blank" rel="noreferrer" title={row.explorerLabel || "Open transaction"}>
-                      <ExternalLink size={12} />
-                    </a>
-                  ) : <i />}
-                </article>
-              )) : <p className="wallet-empty-state">No on-chain activity is loaded yet.</p>}
-            </div>
+          <div className="finops-wallet-actions" aria-label="Wallet actions">
+            <header><span>Wallet actions</span><em>Proposal first</em></header>
+            {walletActions.map(({ label, Icon }) => (
+              <button
+                key={label}
+                type="button"
+                className="finops-wallet-action"
+                disabled
+                title={`${label} requires an approved wallet workflow`}
+              >
+                <Icon size={17} />
+                <span>{label}</span>
+              </button>
+            ))}
           </div>
         </section>
 
-        <section className="finops-models">
-          <div className="finops-model-summary">
-            <article>
-              <span>Subscriptions</span>
-              <strong>{fmtCurrencyExact(subscriptionBaseline)}/mo</strong>
-            </article>
-            <article>
-              <span>Metered today</span>
-              <strong>{fmtCurrencyExact(meteredDaily)}</strong>
-            </article>
-            <article>
-              <span>Usage equivalent</span>
-              <strong>{fmtCurrencyExact(usageEquivalentWeekly)}/wk</strong>
-            </article>
-            <article>
-              <span>Route / efficiency</span>
-              <strong>{routeQuality} · {efficiency}</strong>
-            </article>
+        <section className="finops-overview">
+          <div className="finops-metric-stack" data-finops-region="metrics">
+            <div className="finops-metric-band is-primary" data-finops-metric-band="primary">
+              <article>
+                <span>Subscriptions</span>
+                <div className="finops-metric-value"><strong>{fmtCurrencyExact(subscriptionBaseline)}/mo</strong>
+                  <i className="finops-subscription-mix" aria-label="Provider subscription mix">
+                    {subscriptionMix.map((value, index) => <b key={index} style={{ "--bar": `${Math.max(18, Math.round((value / maxSubscription) * 100))}%` } as React.CSSProperties} />)}
+                  </i>
+                </div>
+              </article>
+              <article><span>Metered today</span><strong>{fmtCurrencyExact(meteredDaily)}</strong></article>
+              <article><span>Usage equivalent</span><strong>{fmtCurrencyExact(usageEquivalentWeekly)}/wk</strong></article>
+              <article><span>Route / efficiency</span><strong>{routeQuality} · {efficiency}</strong></article>
+              <article><span>Updated</span><strong>{fmtTime(modelUpdatedAt)}</strong></article>
+            </div>
+            <div className="finops-metric-band is-secondary" data-finops-metric-band="secondary">
+              <article><span>Allowance</span><strong>{missionText(codexMode)}</strong></article>
+              <article className="finops-pressure-metric">
+                <span>Codex pressure</span>
+                <div><strong>{usagePressure}</strong><i className="finops-segment-meter" aria-label={`${codexPressurePct}% utilized`}>
+                  {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(codexPressurePct / 10) ? "is-filled" : ""} />)}
+                </i></div>
+              </article>
+              <article><span>Projected equivalent</span><strong>{fmtCurrencyExact(projectedEquivalentMonthly)}/mo</strong></article>
+              <article><span>Models tracked</span><strong>{allModelRows.length}</strong></article>
+            </div>
           </div>
-          <div className="finops-route-strip" aria-label="Model route posture">
-            <span><b>Allowance</b>{missionText(codexMode)}</span>
-            <span><b>Last route</b>{lastRouteLabel}</span>
-            <span><b>Updated</b>{fmtTime(modelUsage?.lastUpdated || modelRouter?.updatedAt)}</span>
-          </div>
-          <div className="finops-usage-band">
-            <article>
-              <span>Codex pressure</span>
-              <strong>{usagePressure}</strong>
-            </article>
-            <article>
-              <span>Projected equivalent</span>
-              <strong>{fmtCurrencyExact(modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly ?? modelUsage?.weeklyRunRate?.projectedMonthly)}/mo</strong>
-            </article>
-            <article>
-              <span>Models tracked</span>
-              <strong>{modelRows.length}</strong>
-            </article>
-          </div>
-          <div className="finops-detail-grid">
+
+          <div className="finops-main-grid">
             <div className="finops-provider-grid">
-              {providers.length ? providers.map((provider) => {
+              {providers.length ? providers.slice(0, 4).map((provider) => {
                 const key = providerKey(provider);
                 const route = routeForProvider(provider) || CANONICAL_ROUTES.codex;
                 const active = Boolean(key && activeKeys.has(key));
                 const pct = providerUtilizationPct(provider);
                 const tone = providerTone(provider);
-                const limits = providerLimitRows(provider);
-                const topModels = providerTopModels(provider);
+                const topModel = providerTopModels(provider)[0];
+                const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
+                const stateLabel = tone === "risk" ? "BLOCKED" : active ? "ACTIVE" : key === "ollama" ? "LOCAL · IDLE" : "IDLE";
+                const purpose = key === "codex"
+                  ? "Code, verify, and system changes"
+                  : key === "antigravity"
+                    ? "Planning, review, and long-context work"
+                    : key === "ollama"
+                      ? "Local drafts and offline utility"
+                      : "Signals, news, and X research";
+                const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
                   <article
                     key={provider.id || key}
                     data-provider={key || undefined}
-                    className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}
+                    data-active={active ? "true" : "false"}
+                    data-finops-region="provider"
+                    className={`finops-provider-simple is-${tone} ${active ? "is-active" : "is-idle"}`}
                     style={routeCssProperties(route) as React.CSSProperties}
                   >
-                    <header className="provider-card-head">
-                      <span className="provider-glow-dot" />
-                      <div>
+                    <div className="finops-provider-identity">
+                      <span className="finops-provider-glyph" aria-hidden="true"><ProviderIcon size={39} strokeWidth={1.55} /></span>
+                      <div className="finops-provider-name">
                         <strong>{provider.label || provider.id || key}</strong>
-                        <em>{active ? "in use now" : "idle"}</em>
+                        <p><span>Current model</span><em title={currentModel}>{currentModel}</em></p>
                       </div>
-                    </header>
-                    <p className="provider-card-blurb">{providerDisplayBlurb(provider)}</p>
-                    {limits.length ? (
-                      <div className="provider-card-primary provider-limit-list" aria-label={`${provider.label || key} usage limits`}>
-                        {limits.map((window: any) => {
-                          const windowPct = Number(window?.usedPercent || 0);
-                          const meterPct = Number.isFinite(windowPct) ? Math.max(0, Math.min(100, Math.round(windowPct))) : 0;
-                          return (
-                            <div key={window.id || window.label} className={`provider-limit-row is-${window.status || "ok"}`}>
-                              <span>{missionText(String(window.label || "Limit"))}</span>
-                              <div className="provider-limit-meter" style={{ "--pct": meterPct } as React.CSSProperties}>
-                                <i />
-                              </div>
-                              <em>{providerWindowValue(window)}</em>
-                            </div>
-                          );
-                        })}
+                      <div className="finops-provider-utilization">
+                        <span>Utilization</span>
+                        <strong>{pct}%</strong>
                       </div>
-                    ) : (
-                      <div className="provider-card-primary provider-budget-meter" style={{ "--pct": pct } as React.CSSProperties}>
-                        <span />
-                      </div>
-                    )}
-                    <div className="provider-stat-strip provider-card-support">
-                      <span>{providerSummaryLabel(provider)}</span>
-                      <em>{providerUpdatedLabel(provider)}</em>
                     </div>
-                    <div className="provider-money-strip">
-                      <span>{providerUsageEquivalentLabel(provider)}</span>
-                      <em>{provider?.accountEmail || provider?.accountLabel || provider?.plan || provider?.authStatus || "route ready"}</em>
-                    </div>
-                    {topModels.length ? (
-                      <div className="provider-model-list">
-                        {topModels.map((model: any) => (
-                          <div key={String(model?.name || "model")} className="provider-model-row">
-                            <span className="provider-model-name">{providerModelLabel(model)}</span>
-                            <small className="provider-model-meta">{providerModelMeta(model)}</small>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                    <footer className="provider-card-footer provider-card-actions">
-                      <span className="provider-route-pill">{provider.lastModelUsed || "model route available"}</span>
-                      <em className="provider-billing-pill">{providerBillingLabel(provider)}</em>
+                    <p className="finops-provider-purpose"><span>Purpose</span><em title={purpose}>{purpose}</em></p>
+                    <footer className="finops-provider-state">
+                      <strong>{stateLabel}</strong>
+                      <i className="finops-segment-meter" aria-label={`${pct}% utilized`}>
+                        {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(pct / 10) ? "is-filled" : ""} />)}
+                      </i>
                     </footer>
-                    <small className="provider-evidence-line">{providerEvidenceLabel(provider)}</small>
                   </article>
                 );
               }) : (
-                <article className="finops-provider-card finops-anatomy-card is-watch">
-                  <header className="provider-card-head">
-                    <span className="provider-glow-dot" />
-                    <div>
-                      <strong>Provider budgets</strong>
-                      <em>not loaded</em>
-                    </div>
-                  </header>
-                  <p>Route telemetry will appear after the next model-usage refresh.</p>
+                <article className="finops-provider-simple is-watch">
+                  <strong>Provider telemetry unavailable</strong>
+                  <p>Route data will appear after the next model-usage refresh.</p>
                 </article>
               )}
             </div>
-            <div className="finops-model-ledger" aria-label="CodexBar model usage ledger">
+            <div className="finops-ledger-table" data-finops-region="ledger" aria-label="Model usage ledger">
               <header>
-                <div>
-                  <span>CodexBar model ledger</span>
-                  <strong>Model usage and equivalent cost</strong>
+                <div className="finops-ledger-title">
+                  <strong>Model ledger</strong>
+                  <em>{modelRows.length}/{allModelRows.length} tracked</em>
                 </div>
-                <em>{fmtTime(modelUsage?.lastUpdated)}</em>
+                <div className="finops-ledger-columns" aria-hidden="true">
+                  <span>Model</span><span>Route</span><span>Tokens</span><span>Cost</span><span>Window</span>
+                </div>
               </header>
-              <div className="model-ledger-list">
+              <div className="finops-ledger-rows">
                 {modelRows.length ? modelRows.map((model: any) => {
                   const modelRoute = routeForProvider({ id: model.source, label: model.name, model: model.name });
-                  const modelActive = Boolean(modelRoute && activeKeys.has(modelRoute.id));
+                  const modelActive = activeModelIds.has(modelIdentity(model.name));
                   return (
                     <article
                       key={`${model.source || "source"}-${model.name}`}
-                      className={`model-ledger-row${modelActive ? " is-active-route" : ""}`}
+                      data-model={providerModelLabel(model)}
+                      data-active={modelActive ? "true" : "false"}
+                      className={`finops-ledger-row${modelActive ? " is-active-route" : ""}`}
                       style={modelRoute ? routeCssProperties(modelRoute) as React.CSSProperties : undefined}
                     >
-                      <div className="model-ledger-primary">
-                        <strong>{providerModelLabel(model)}</strong>
-                        <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
-                      </div>
-                      <div className="model-ledger-secondary">
-                        <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
-                        <span>{compactInt(model.totalTokens) || "0"} tok</span>
-                        <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
-                      </div>
+                      <strong>{providerModelLabel(model)}</strong>
+                      <span>{modelRoute?.label || missionText(String(model.source || "tracked"))}</span>
+                      <span>{compactInt(model.totalTokens) || "0"}</span>
+                      <span>{fmtCurrencyExact(modelUsageCost(model))}</span>
+                      <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
                     </article>
                   );
                 }) : (
-                  <p className="wallet-empty-state">No model ledger rows are loaded yet. CodexBar data will appear after the next model-usage sync.</p>
+                  <p className="finops-ledger-empty">No model ledger rows are loaded yet.</p>
                 )}
               </div>
             </div>
           </div>
         </section>
       </div>
+
+      <section className="finops-health-rail" data-finops-region="health" aria-label="FinOps health summary">
+        {healthRows.map(({ label, value, support, Icon, tone }) => (
+          <article key={label} className={`is-${tone}`}>
+            <Icon size={24} strokeWidth={1.8} />
+            <div><span>{label}</span><strong>{value}</strong><small>{support}</small></div>
+          </article>
+        ))}
+      </section>
     </section>
   );
 }

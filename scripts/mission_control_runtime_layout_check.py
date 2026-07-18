@@ -50,10 +50,16 @@ KIOSK_LEGIBILITY_THRESHOLDS = {
     "liveDescriptionFont": 12.5,
     "liveSecondaryFont": 10.5,
     "finopsBottomDeadSpace": 10.0,
-    "finopsWalletWidth": 248.0,
-    "providerNameFont": 13.0,
+    "finopsWalletWidthMin": 220.0,
+    "finopsWalletWidthMax": 230.0,
+    "providerNameFont": 14.0,
     "providerBodyFont": 11.0,
     "providerMetadataFont": 10.0,
+    "providerCardWidth": 245.0,
+    "providerCardHeight": 108.0,
+    "ledgerRowHeight": 22.0,
+    "healthHeightMin": 76.0,
+    "healthHeightMax": 90.0,
 }
 INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("private filesystem path", re.compile(r"(?:/Users/|/home/)[^\s<]{2,}", re.I)),
@@ -93,30 +99,53 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
         || rect.top < ownerRect.top - 1
         || rect.bottom > ownerRect.bottom + 1
       );
-      // Dynamic objectives deliberately ellipsize long copy. Treat the type as
-      // clipped only when its visible line box or card containment is broken.
+      const titledEllipsis = Boolean(element.getAttribute('title'))
+        && ['ellipsis', 'clip'].includes(style.textOverflow)
+        && style.whiteSpace === 'nowrap';
       const lineBoxClipped = Number.isFinite(lineHeight) && rect.height + 1 < lineHeight;
       return {
         index,
         fontSize: round(Number.parseFloat(style.fontSize)),
         overflowX: round(overflowX),
         overflowY: round(overflowY),
-        clipped: lineBoxClipped || outsideOwner,
+        clipped: lineBoxClipped || outsideOwner || (!titledEllipsis && (overflowX > 1 || overflowY > 1)),
       };
     });
   const panel = document.querySelector('#finops-dashboard');
-  const body = document.querySelector('#finops-dashboard .finops-body');
-  const wallet = document.querySelector('#finops-dashboard .finops-wallet');
-  const ledger = document.querySelector('#finops-dashboard .finops-model-ledger');
+  const body = document.querySelector('#finops-dashboard .finops-command-grid');
+  const wallet = document.querySelector('#finops-dashboard [data-finops-region="wallet"]');
+  const ledger = document.querySelector('#finops-dashboard [data-finops-region="ledger"]');
+  const health = document.querySelector('#finops-dashboard [data-finops-region="health"]');
+  const providerCards = [...document.querySelectorAll('#finops-dashboard [data-finops-region="provider"]')].filter(visible);
+  const metricBands = [...document.querySelectorAll('#finops-dashboard [data-finops-metric-band]')].filter(visible);
+  const ledgerRows = [...document.querySelectorAll('#finops-dashboard .finops-ledger-row')].filter(visible);
   const panelRect = panel ? panel.getBoundingClientRect() : null;
   const bodyRect = body ? body.getBoundingClientRect() : null;
   const walletRect = wallet ? wallet.getBoundingClientRect() : null;
+  const healthRect = health ? health.getBoundingClientRect() : null;
   const ledgerNodes = ledger
-    ? [ledger, ...ledger.querySelectorAll('.model-ledger-list, .model-ledger-row')].filter(visible)
+    ? [ledger, ...ledger.querySelectorAll('.finops-ledger-rows, .finops-ledger-row')].filter(visible)
     : [];
   const ledgerOverflowX = ledgerNodes.length
     ? Math.max(...ledgerNodes.map((element) => Math.max(0, element.scrollWidth - element.clientWidth)))
     : null;
+  const ledgerOverflowY = ledgerNodes.length
+    ? Math.max(...ledgerNodes.map((element) => Math.max(0, element.scrollHeight - element.clientHeight)))
+    : null;
+  const visibleDetailFeeds = [...document.querySelectorAll('#finops-dashboard .finops-trade-ledger, #finops-dashboard .finops-activity-journal')]
+    .filter(visible).length;
+  const providerGeometry = providerCards.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      provider: element.getAttribute('data-provider'),
+      active: element.getAttribute('data-active'),
+      width: round(rect.width),
+      height: round(rect.height),
+      overflowX: round(Math.max(0, element.scrollWidth - element.clientWidth)),
+      overflowY: round(Math.max(0, element.scrollHeight - element.clientHeight)),
+      routeColor: getComputedStyle(element).getPropertyValue('--route-color').trim().toUpperCase(),
+    };
+  });
   return {
     viewport: {width: root.clientWidth, height: root.clientHeight},
     pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
@@ -129,20 +158,35 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     },
     finops: {
       bodyPresent: Boolean(panelRect && bodyRect),
-      bodyBottomDeadSpace: panelRect && bodyRect ? round(Math.max(0, panelRect.bottom - bodyRect.bottom)) : null,
+      bodyBottomDeadSpace: panelRect && healthRect ? round(Math.max(0, panelRect.bottom - healthRect.bottom)) : null,
       bodyBottomOvershoot: panelRect && bodyRect ? round(Math.max(0, bodyRect.bottom - panelRect.bottom)) : null,
       walletWidth: walletRect ? round(walletRect.width) : null,
-      providerNames: measurements('#finops-dashboard .finops-provider-card .provider-card-head strong'),
-      providerBodies: measurements('#finops-dashboard .finops-provider-card .provider-card-blurb'),
+      panelOverflowX: panel ? round(Math.max(0, panel.scrollWidth - panel.clientWidth)) : null,
+      panelOverflowY: panel ? round(Math.max(0, panel.scrollHeight - panel.clientHeight)) : null,
+      walletActionCount: document.querySelectorAll('#finops-dashboard .finops-wallet-action').length,
+      visibleDetailFeeds,
+      metricBandCount: metricBands.length,
+      metricCounts: metricBands.map((element) => element.children.length),
+      providerCount: providerCards.length,
+      providerGeometry,
+      providerNames: measurements('#finops-dashboard .finops-provider-name > strong', '.finops-provider-simple'),
+      providerBodies: measurements('#finops-dashboard .finops-provider-purpose', '.finops-provider-simple'),
       providerMetadata: measurements(
-        '#finops-dashboard .finops-provider-card .provider-card-head em, '
-        + '#finops-dashboard .finops-provider-card .provider-limit-row span, '
-        + '#finops-dashboard .finops-provider-card .provider-limit-row em, '
-        + '#finops-dashboard .finops-provider-card .provider-stat-strip span, '
-        + '#finops-dashboard .finops-provider-card .provider-stat-strip em'
+        '#finops-dashboard .finops-provider-name p, '
+        + '#finops-dashboard .finops-provider-state strong, '
+        + '#finops-dashboard .finops-provider-utilization span',
+        '.finops-provider-simple'
       ),
       ledgerPresent: Boolean(ledger),
       ledgerOverflowX: ledgerOverflowX === null ? null : round(ledgerOverflowX),
+      ledgerOverflowY: ledgerOverflowY === null ? null : round(ledgerOverflowY),
+      ledgerRowCount: ledgerRows.length,
+      ledgerRowMinHeight: ledgerRows.length ? round(Math.min(...ledgerRows.map((element) => element.getBoundingClientRect().height))) : null,
+      healthPresent: Boolean(health),
+      healthCount: health ? health.children.length : 0,
+      healthHeight: healthRect ? round(healthRect.height) : null,
+      healthOverflowX: health ? round(Math.max(0, health.scrollWidth - health.clientWidth)) : null,
+      healthOverflowY: health ? round(Math.max(0, health.scrollHeight - health.clientHeight)) : null,
     },
   };
 }"""
@@ -484,7 +528,7 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
 
     finops = measurements.get("finops") if isinstance(measurements.get("finops"), dict) else {}
     if not finops.get("bodyPresent"):
-        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps panel/body measurements are missing")
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps command-grid measurements are missing")
     else:
         bottom_dead_space = _number(finops.get("bodyBottomDeadSpace"))
         bottom_overshoot = _number(finops.get("bodyBottomOvershoot"), missing=0.0)
@@ -498,12 +542,65 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
             failures.append(f"{KIOSK_PROBE_LABEL}: FinOps body overshoots its panel by {_px(bottom_overshoot)}")
 
     wallet_width = _number(finops.get("walletWidth"))
-    minimum_wallet_width = KIOSK_LEGIBILITY_THRESHOLDS["finopsWalletWidth"]
+    minimum_wallet_width = KIOSK_LEGIBILITY_THRESHOLDS["finopsWalletWidthMin"]
+    maximum_wallet_width = KIOSK_LEGIBILITY_THRESHOLDS["finopsWalletWidthMax"]
     if wallet_width < minimum_wallet_width:
         failures.append(
             f"{KIOSK_PROBE_LABEL}: FinOps wallet width is {_px(wallet_width)} "
             f"(requires >= {_px(minimum_wallet_width)})"
         )
+    if wallet_width > maximum_wallet_width:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: FinOps wallet width is {_px(wallet_width)} "
+            f"(requires <= {_px(maximum_wallet_width)})"
+        )
+
+    for axis in ("panelOverflowX", "panelOverflowY"):
+        overflow = _number(finops.get(axis), missing=0.0)
+        if overflow > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps {axis} is {_px(overflow)}")
+    if finops.get("walletActionCount") != 4:
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps wallet action count is {finops.get('walletActionCount')} (requires 4)")
+    if finops.get("visibleDetailFeeds") != 0:
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps overview exposes transaction/activity detail feeds")
+    if finops.get("metricBandCount") != 2 or finops.get("metricCounts") != [5, 4]:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: FinOps metric hierarchy is {finops.get('metricBandCount')} band(s) "
+            f"with {finops.get('metricCounts')} cells (requires [5, 4])"
+        )
+    if finops.get("providerCount") != 4:
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps provider count is {finops.get('providerCount')} (requires 4)")
+
+    expected_route_colors = {
+        "codex": "#65D1D5",
+        "antigravity": "#72D69A",
+        "ollama": "#A8ABB3",
+        "grok": "#1677FF",
+    }
+    provider_geometry = finops.get("providerGeometry") if isinstance(finops.get("providerGeometry"), list) else []
+    seen_providers: set[str] = set()
+    for provider in provider_geometry:
+        if not isinstance(provider, dict):
+            continue
+        provider_id = str(provider.get("provider") or "")
+        seen_providers.add(provider_id)
+        width = _number(provider.get("width"))
+        height = _number(provider.get("height"))
+        if width < KIOSK_LEGIBILITY_THRESHOLDS["providerCardWidth"] or height < KIOSK_LEGIBILITY_THRESHOLDS["providerCardHeight"]:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: {provider_id or 'provider'} card is {_px(width)}x{_px(height)} "
+                f"(requires >= {_px(KIOSK_LEGIBILITY_THRESHOLDS['providerCardWidth'])}x{_px(KIOSK_LEGIBILITY_THRESHOLDS['providerCardHeight'])})"
+            )
+        if _number(provider.get("overflowX"), missing=0.0) > 1 or _number(provider.get("overflowY"), missing=0.0) > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: {provider_id or 'provider'} card content overflows")
+        expected_color = expected_route_colors.get(provider_id)
+        if expected_color and provider.get("routeColor") != expected_color:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: {provider_id} route color is {provider.get('routeColor')} "
+                f"(requires {expected_color})"
+            )
+    if seen_providers != set(expected_route_colors):
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps provider identities are incomplete")
 
     provider_contract = (
         ("providerNames", "FinOps provider name", KIOSK_LEGIBILITY_THRESHOLDS["providerNameFont"]),
@@ -511,26 +608,40 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
         ("providerMetadata", "FinOps provider metadata", KIOSK_LEGIBILITY_THRESHOLDS["providerMetadataFont"]),
     )
     for key, label, minimum in provider_contract:
-        # Font size is the contract here; provider cards may intentionally
-        # clamp verbose explanatory copy while preserving readable type.
-        group = finops.get(key)
-        if not isinstance(group, list) or not group:
-            failures.append(f"{KIOSK_PROBE_LABEL}: {label} measurements are missing")
-            continue
-        font_sizes = [_number(item.get("fontSize")) for item in group if isinstance(item, dict)]
-        minimum_seen = min(font_sizes) if font_sizes else -1.0
-        if minimum_seen < minimum:
-            failures.append(
-                f"{KIOSK_PROBE_LABEL}: {label} minimum font is {_px(minimum_seen)} "
-                f"(requires >= {_px(minimum)})"
-            )
+        failures.extend(_font_and_clipping_failures(finops.get(key), label=label, minimum=minimum))
 
     if not finops.get("ledgerPresent"):
         failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger is missing")
     else:
-        ledger_overflow = _number(finops.get("ledgerOverflowX"))
-        if ledger_overflow > 1:
-            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger horizontal overflow is {_px(ledger_overflow)}")
+        ledger_overflow_x = _number(finops.get("ledgerOverflowX"))
+        ledger_overflow_y = _number(finops.get("ledgerOverflowY"))
+        if ledger_overflow_x > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger horizontal overflow is {_px(ledger_overflow_x)}")
+        if ledger_overflow_y > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger vertical overflow is {_px(ledger_overflow_y)}")
+        ledger_rows = int(_number(finops.get("ledgerRowCount"), missing=0.0))
+        if not 1 <= ledger_rows <= 9:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger renders {ledger_rows} rows (requires 1-9)")
+        minimum_row_height = _number(finops.get("ledgerRowMinHeight"))
+        if minimum_row_height < KIOSK_LEGIBILITY_THRESHOLDS["ledgerRowHeight"]:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: FinOps model ledger row height is {_px(minimum_row_height)} "
+                f"(requires >= {_px(KIOSK_LEGIBILITY_THRESHOLDS['ledgerRowHeight'])})"
+            )
+
+    if not finops.get("healthPresent"):
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps health rail is missing")
+    else:
+        if finops.get("healthCount") != 4:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps health rail has {finops.get('healthCount')} cells (requires 4)")
+        health_height = _number(finops.get("healthHeight"))
+        if not KIOSK_LEGIBILITY_THRESHOLDS["healthHeightMin"] <= health_height <= KIOSK_LEGIBILITY_THRESHOLDS["healthHeightMax"]:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: FinOps health rail height is {_px(health_height)} "
+                f"(requires {_px(KIOSK_LEGIBILITY_THRESHOLDS['healthHeightMin'])}-{_px(KIOSK_LEGIBILITY_THRESHOLDS['healthHeightMax'])})"
+            )
+        if _number(finops.get("healthOverflowX"), missing=0.0) > 1 or _number(finops.get("healthOverflowY"), missing=0.0) > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps health rail content overflows")
     return failures
 
 
@@ -825,20 +936,43 @@ def self_test() -> int:
         },
         "finops": {
             "bodyPresent": True,
-            "bodyBottomDeadSpace": 10,
+            "bodyBottomDeadSpace": 9,
             "bodyBottomOvershoot": 0,
-            "walletWidth": 248,
-            "providerNames": [{"fontSize": 13}],
-            "providerBodies": [{"fontSize": 11}],
-            "providerMetadata": [{"fontSize": 10}],
+            "walletWidth": 224,
+            "panelOverflowX": 0,
+            "panelOverflowY": 0,
+            "walletActionCount": 4,
+            "visibleDetailFeeds": 0,
+            "metricBandCount": 2,
+            "metricCounts": [5, 4],
+            "providerCount": 4,
+            "providerGeometry": [
+                {"provider": "codex", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
+                {"provider": "antigravity", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
+                {"provider": "ollama", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
+                {"provider": "grok", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
+            ],
+            "providerNames": [{"fontSize": 16, "clipped": False}],
+            "providerBodies": [{"fontSize": 11, "clipped": False}],
+            "providerMetadata": [{"fontSize": 10, "clipped": False}],
             "ledgerPresent": True,
             "ledgerOverflowX": 0,
+            "ledgerOverflowY": 0,
+            "ledgerRowCount": 9,
+            "ledgerRowMinHeight": 23,
+            "healthPresent": True,
+            "healthCount": 4,
+            "healthHeight": 78,
+            "healthOverflowX": 0,
+            "healthOverflowY": 0,
         },
     }
     bad_kiosk = json.loads(json.dumps(good_kiosk))
     bad_kiosk["pageOverflowY"] = 8
     bad_kiosk["liveWork"]["objectives"][0]["clipped"] = True
-    bad_kiosk["finops"]["walletWidth"] = 220
+    bad_kiosk["finops"]["walletWidth"] = 240
+    bad_kiosk["finops"]["metricCounts"] = [5, 5]
+    bad_kiosk["finops"]["providerGeometry"][0]["routeColor"] = "#FFFFFF"
     good_kiosk_failures = validate_kiosk_legibility(good_kiosk)
     bad_kiosk_failures = validate_kiosk_legibility(bad_kiosk)
     ok = (
@@ -849,7 +983,7 @@ def self_test() -> int:
         and missing_browser_detected
         and unrelated_failure_rejected
         and not good_kiosk_failures
-        and len(bad_kiosk_failures) == 3
+        and len(bad_kiosk_failures) >= 5
     )
     print(json.dumps({
         "ok": ok,
