@@ -11,6 +11,66 @@ import ecosystem_state_reconciler as subject
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_canonical_work_ids_never_fuzzy_match_a_different_task(self) -> None:
+        now = dt.datetime(2026, 7, 15, 12, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            fixtures = {
+                "agent-task-queue.json": {
+                    "tasks": [{
+                        "id": "task-new-theme",
+                        "workId": "work-new-theme",
+                        "title": "Implement Control Tower model route theme",
+                        "status": "done",
+                        "completedAt": "2026-07-15T11:00:00Z",
+                    }]
+                },
+                "handoff-queue.json": {"handoffs": []},
+                "codex-jobs.json": {"jobs": [{
+                    "id": "job-architecture",
+                    "workId": "work-architecture",
+                    "title": "Plan Control Tower model route architecture",
+                    "status": "active",
+                    "time": "2026-07-15T11:30:00Z",
+                }]},
+                "shared-events.json": {"events": []},
+            }
+            for name, payload in fixtures.items():
+                (root / name).write_text(json.dumps(payload), encoding="utf-8")
+            result = subject.reconcile(root, now)
+            job = result["documents"][root / "codex-jobs.json"]["jobs"][0]
+            self.assertEqual(job["status"], "active")
+            self.assertNotIn("terminalTaskId", job)
+
+    def test_exact_work_id_supersedes_even_when_titles_differ(self) -> None:
+        now = dt.datetime(2026, 7, 15, 12, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            fixtures = {
+                "agent-task-queue.json": {"tasks": [{
+                    "id": "task-exact",
+                    "workId": "work-exact",
+                    "title": "Final operator wording",
+                    "status": "done",
+                    "completedAt": "2026-07-15T11:00:00Z",
+                }]},
+                "handoff-queue.json": {"handoffs": []},
+                "codex-jobs.json": {"jobs": [{
+                    "id": "job-exact",
+                    "workId": "work-exact",
+                    "title": "Completely different intake wording",
+                    "status": "active",
+                    "time": "2026-07-15T10:00:00Z",
+                }]},
+                "shared-events.json": {"events": []},
+            }
+            for name, payload in fixtures.items():
+                (root / name).write_text(json.dumps(payload), encoding="utf-8")
+            result = subject.reconcile(root, now)
+            job = result["documents"][root / "codex-jobs.json"]["jobs"][0]
+            self.assertEqual(job["status"], "superseded")
+            self.assertEqual(job["reconciliationMatch"], "workId")
+
     def test_terminal_truth_supersedes_old_activity_and_closes_handoff(self) -> None:
         now = dt.datetime(2026, 7, 15, 12, tzinfo=dt.timezone.utc)
         with tempfile.TemporaryDirectory() as raw:

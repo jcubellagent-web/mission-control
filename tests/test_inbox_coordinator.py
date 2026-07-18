@@ -180,6 +180,8 @@ class InboxCoordinatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.configure_private_state(coordinator, root)
+            published = []
+            coordinator.publish_control_tower = lambda *args, **kwargs: published.append((args, kwargs)) or True
             coordinator.spawn_worker = lambda job_id: None
             coordinator.deliver_result = lambda *args, **kwargs: True
             route = coordinator.route_prompt("Retry me", injected_health={"luna": True})
@@ -190,6 +192,7 @@ class InboxCoordinatorTests(unittest.TestCase):
             first = coordinator.run_worker(job["jobId"])
             self.assertEqual(first["outcome"], "retry")
             self.assertTrue(prompt_path.exists())
+            self.assertEqual(published[-1][0][1], "active")
 
             coordinator.execute_route = lambda *args, **kwargs: {
                 "output": "Complete: Yes\nWhat was done:\n- Finished the retry test\n- Verified delivery\n- Saved the result\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",

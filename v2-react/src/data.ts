@@ -1,5 +1,5 @@
 import { arrayValue, booleanValue, isAgentId, isRecord, recordValue, stringValue } from "./dataAdapters";
-import type { AgentEvent, AgentId, AgentJob, AgentStatus, Approval, MissionControlState, SignalItem } from "./types";
+import type { ActiveModelRoute, ActiveWork, AgentEvent, AgentId, AgentJob, AgentStatus, Approval, CanonicalModelFamily, ControlTowerHot, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 
 const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
@@ -51,11 +51,158 @@ function normalizeStatus(row: unknown, fallbackAgent: AgentId = "joshex"): Agent
     detail: stringValue(row.detail, stringValue(row.summary)),
     current_tool: stringValue(row.currentTool, stringValue(row.current_tool)),
     model: stringValue(row.model, stringValue(row.modelAuth)),
+    model_family: normalizeModelFamily(row.model_family || row.modelFamily),
+    route_verified: booleanValue(row.route_verified ?? row.routeVerified),
+    work_id: stringValue(row.work_id, stringValue(row.workId)),
+    run_id: stringValue(row.run_id, stringValue(row.runId)),
+    phase: stringValue(row.phase),
+    lease_until: stringValue(row.lease_until, stringValue(row.leaseUntil)),
+    origin_claim_hash: stringValue(row.origin_claim_hash, stringValue(row.originClaimHash)),
     source: stringValue(row.source, stringValue(row.statusSource, "Live Work Board")),
     active: booleanValue(row.active),
     updated_at: stringValue(row.updatedAt, stringValue(row.checkedAt, stringValue(row.updated_at))),
     steps: normalizeSteps(row.steps),
   };
+}
+
+function normalizeModelFamily(value: unknown): CanonicalModelFamily | undefined {
+  const family = String(value || "").toLowerCase();
+  return ["codex", "antigravity", "ollama", "grok"].includes(family)
+    ? family as CanonicalModelFamily
+    : undefined;
+}
+
+function unexpired(value?: string): boolean {
+  if (!value) return true;
+  const lease = timestampValue(value);
+  return Boolean(lease) && lease > Date.now();
+}
+
+function normalizeHotWork(row: unknown): ActiveWork | null {
+  if (!isRecord(row)) return null;
+  const ownerAgent = canonicalAgentId(row.ownerAgent);
+  const workId = stringValue(row.workId);
+  const runId = stringValue(row.runId);
+  const objective = stringValue(row.objective);
+  if (!workId || !runId || !objective) return null;
+  return {
+    workId,
+    runId,
+    generation: Number(row.generation || 1),
+    sequence: Number(row.sequence || 1),
+    status: stringValue(row.status, "active"),
+    ownerAgent,
+    ownerLabel: stringValue(row.ownerLabel),
+    objective,
+    phase: stringValue(row.phase, stringValue(row.status, "active")),
+    tool: stringValue(row.tool, "agent runtime"),
+    detail: stringValue(row.detail),
+    origin: stringValue(row.origin),
+    originClaimHash: stringValue(row.originClaimHash),
+    modelFamily: normalizeModelFamily(row.modelFamily),
+    modelId: stringValue(row.modelId) || null,
+    routeVerified: booleanValue(row.routeVerified),
+    leaseUntil: stringValue(row.leaseUntil),
+    createdAt: stringValue(row.createdAt),
+    updatedAt: stringValue(row.updatedAt),
+    lastMeaningfulAt: stringValue(row.lastMeaningfulAt),
+    stale: booleanValue(row.stale),
+  };
+}
+
+function normalizeHotProjection(value: unknown): ControlTowerHot | undefined {
+  if (!isRecord(value)) return undefined;
+  const activeWorks = arrayValue(value.activeWorks)
+    .map(normalizeHotWork)
+    .filter((row): row is ActiveWork => Boolean(row && !row.stale && unexpired(row.leaseUntil)));
+  const activeModelRoutes = arrayValue(value.activeModelRoutes)
+    .filter(isRecord)
+    .map((row): ActiveModelRoute | null => {
+      const modelFamily = normalizeModelFamily(row.modelFamily);
+      const ownerAgent = canonicalAgentId(row.ownerAgent);
+      const workId = stringValue(row.workId);
+      const runId = stringValue(row.runId);
+      const modelId = stringValue(row.modelId);
+      if (!modelFamily || !workId || !runId || !modelId || !booleanValue(row.routeVerified) || !unexpired(stringValue(row.leaseUntil))) return null;
+      return {
+        workId,
+        runId,
+        ownerAgent,
+        modelFamily,
+        modelId,
+        routeVerified: true,
+        activatedAt: stringValue(row.activatedAt),
+        updatedAt: stringValue(row.updatedAt),
+        leaseUntil: stringValue(row.leaseUntil),
+        sourceEventId: stringValue(row.sourceEventId),
+        revision: Number.isFinite(Number(row.revision)) ? Number(row.revision) : undefined,
+      };
+    })
+    .filter((row): row is ActiveModelRoute => Boolean(row));
+  return {
+    schemaVersion: Number.isFinite(Number(value.schemaVersion)) ? Number(value.schemaVersion) : undefined,
+    revision: Number.isFinite(Number(value.revision)) ? Number(value.revision) : undefined,
+    generatedAt: stringValue(value.generatedAt),
+    storeUpdatedAt: stringValue(value.storeUpdatedAt),
+    source: stringValue(value.source, "control-tower-work-store"),
+    freshness: recordValue(value.freshness),
+    counts: recordValue(value.counts),
+    activeWorks,
+    activeModelRoutes,
+  };
+}
+
+function hotStatus(work: ActiveWork): AgentStatus {
+  return {
+    agent_id: work.ownerAgent,
+    status: work.status,
+    objective: work.objective,
+    detail: work.detail || work.phase,
+    current_tool: work.tool,
+    model: work.modelId || undefined,
+    model_family: work.modelFamily || undefined,
+    route_verified: work.routeVerified,
+    work_id: work.workId,
+    run_id: work.runId,
+    phase: work.phase,
+    lease_until: work.leaseUntil,
+    origin_claim_hash: work.originClaimHash,
+    source: "Canonical work ledger",
+    active: true,
+    updated_at: work.updatedAt,
+    steps: [{ label: work.phase, status: work.status, tool: work.tool, kind: "work-ledger" }],
+  };
+}
+
+function overlayHotStatuses(hot: ControlTowerHot | undefined, fallback: AgentStatus[]): AgentStatus[] {
+  const legacyActiveStatuses = new Set(["accepted", "planned", "routed", "active", "verifying", "working", "running", "pending", "live"]);
+  const byAgent = new Map(fallback.map((row) => {
+    const legacyLooksActive = Boolean(row.active) || legacyActiveStatuses.has(String(row.status || "").toLowerCase());
+    if (!hot || !legacyLooksActive) return [row.agent_id, row] as const;
+    // Once the canonical leased ledger is available, an older Brain Feed or
+    // heartbeat row cannot independently occupy Live Work. Preserve explicit
+    // blocker/error states above, but downgrade unsupported legacy activity.
+    return [row.agent_id, {
+      ...row,
+      status: "ready",
+      active: false,
+      objective: "No active canonical work",
+      detail: "Ready; the canonical ledger has no unexpired work for this agent.",
+      route_verified: false,
+      work_id: undefined,
+      run_id: undefined,
+      phase: "ready",
+      lease_until: undefined,
+      source: "Canonical work ledger",
+    }] as const;
+  }));
+  const newestByAgent = new Map<AgentId, ActiveWork>();
+  for (const work of hot?.activeWorks || []) {
+    const current = newestByAgent.get(work.ownerAgent);
+    if (!current || timestampValue(work.updatedAt) > timestampValue(current.updatedAt)) newestByAgent.set(work.ownerAgent, work);
+  }
+  newestByAgent.forEach((work, agent) => byAgent.set(agent, hotStatus(work)));
+  return [...byAgent.values()].sort((a, b) => AGENT_STATUS_ORDER.indexOf(a.agent_id) - AGENT_STATUS_ORDER.indexOf(b.agent_id));
 }
 
 function normalizeBrainFeedRow(row: unknown): AgentStatus | null {
@@ -286,8 +433,56 @@ function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
     .slice(0, JOB_ROW_LIMIT);
 }
 
+function normalizeTodayJobOutcome(row: any): TodayJobOutcome {
+  const explicit = String(row?.outcome || "").toLowerCase();
+  if (["complete", "skipped", "broken", "pending"].includes(explicit)) return explicit as TodayJobOutcome;
+  const status = String(row?.runStatus || row?.status || row?.state || "").toLowerCase();
+  if (row?.verifiedToday || /complete|completed|success|succeeded|done|passed|ok/.test(status)) return "complete";
+  if (/skip|disabled|paused|cancel/.test(status)) return "skipped";
+  if (/broken|error|failed|missed|blocked|timeout/.test(status)) return "broken";
+  return "pending";
+}
+
+function normalizeTodayJobsProjection(dashboard: any): { todayJobs: TodayJobOccurrence[]; todayJobsMeta?: TodayJobsMeta } {
+  const projected = Array.isArray(dashboard?.todayJobs) ? dashboard.todayJobs : null;
+  const crons = Array.isArray(dashboard?.crons) ? dashboard.crons : [];
+  const relevantCrons = crons.filter((row: any) => row?.todayRelevant);
+  const sourceRows = projected || (relevantCrons.length ? relevantCrons : crons);
+  const todayJobs: TodayJobOccurrence[] = sourceRows
+    .filter((row: any) => row && (row.name || row.title))
+    .map((row: any, index: number): TodayJobOccurrence => ({
+      occurrenceId: String(row.occurrenceId || row.id || `cron-${row.definitionId || row.name || index}`),
+      definitionId: row.definitionId ? String(row.definitionId) : undefined,
+      name: String(row.name || row.title || "Scheduled job"),
+      owner: row.owner ? String(row.owner) : undefined,
+      agent: row.agent ? String(row.agent) : undefined,
+      source: row.source ? String(row.source) : undefined,
+      sourceLabel: row.sourceLabel ? String(row.sourceLabel) : undefined,
+      category: row.category ? String(row.category) : undefined,
+      description: row.description ? String(row.description) : undefined,
+      scheduledAt: row.scheduledAt || row.nextRun || undefined,
+      scheduledTime: row.scheduledTime || row.time || undefined,
+      schedule: row.schedule || undefined,
+      outcome: normalizeTodayJobOutcome(row),
+      runStatus: row.runStatus || row.status || undefined,
+      lastRun: row.lastRun || undefined,
+      durationMs: Number.isFinite(Number(row.durationMs)) ? Number(row.durationMs) : undefined,
+      duration: row.duration || undefined,
+      evidence: row.evidence || undefined,
+      rolledUp: Boolean(row.rolledUp),
+      expectedRuns: Number.isFinite(Number(row.expectedRuns)) ? Number(row.expectedRuns) : undefined,
+      completedRuns: Number.isFinite(Number(row.completedRuns)) ? Number(row.completedRuns) : undefined,
+    }))
+    .sort((a, b) => timestampValue(a.scheduledAt) - timestampValue(b.scheduledAt));
+
+  const todayJobsMeta = isRecord(dashboard?.todayJobsMeta)
+    ? dashboard.todayJobsMeta as TodayJobsMeta
+    : undefined;
+  return { todayJobs, todayJobsMeta };
+}
+
 async function loadFallback(): Promise<MissionControlState> {
-  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, codexJobs] = await Promise.all([
+  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, codexJobs, rawWorkHot] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
     loadDashboardSnapshot(),
@@ -296,7 +491,9 @@ async function loadFallback(): Promise<MissionControlState> {
     fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/jain-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/codex-jobs.json").catch(() => null),
+    fetchJson<unknown>("/data/control-tower-hot.json").catch(() => null),
   ]);
+  const workHot = normalizeHotProjection(rawWorkHot);
   const brainAgent = String(brain?.agentId || brain?.agent_id || brain?.agent || "").toLowerCase();
   const brainAgentId: AgentId = brainAgent.includes("josh") && !brainAgent.includes("joshex")
     ? "josh2"
@@ -305,7 +502,7 @@ async function loadFallback(): Promise<MissionControlState> {
     : brainAgent.includes("jain")
     ? "jain"
     : "joshex";
-  const statuses = dedupeStatus([
+  const legacyStatuses = dedupeStatus([
     normalizeStatus(brain, brainAgentId),
     normalizeStatus(joshexFeed, "joshex"),
     normalizeStatus({
@@ -327,6 +524,7 @@ async function loadFallback(): Promise<MissionControlState> {
     normalizeStatus(dashboard?.jaimesBrainFeed && { ...dashboard.jaimesBrainFeed, agent_id: "jaimes" }, "jaimes"),
     normalizeStatus(dashboard?.jainBrainFeed && { ...dashboard.jainBrainFeed, agent_id: "jain" }, "jain"),
   ]);
+  const statuses = overlayHotStatuses(workHot, legacyStatuses);
   const statusEvents = statuses
     .filter((status) => timestampValue(status.updated_at))
     .sort((a, b) => timestampValue(b.updated_at) - timestampValue(a.updated_at))
@@ -364,11 +562,16 @@ async function loadFallback(): Promise<MissionControlState> {
     risk_tier: "dashboard-safe",
     created_at: dashboard?.generatedAt || "",
   }));
+  const { todayJobs, todayJobsMeta } = normalizeTodayJobsProjection(dashboard);
   return {
     source: "Local live sidecars",
     statuses,
     events,
     jobs: buildFallbackJobs(dashboard, codexJobs),
+    todayJobs,
+    todayJobsMeta,
+    workHot,
+    activeModelRoutes: workHot?.activeModelRoutes || [],
     approvals,
     agenticCrypto: sidecars.agenticCrypto,
     modelUsage: dashboard?.modelUsage || sidecars.modelUsage,

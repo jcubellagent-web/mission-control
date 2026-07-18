@@ -485,7 +485,28 @@ def append_telemetry(record: dict[str, Any]) -> None:
         os.close(fd)
 
 
-def publish_control_tower(title: str, status: str, detail: str) -> None:
+def canonical_model_family(value: str) -> str:
+    lowered = str(value or "").lower()
+    if any(token in lowered for token in ("gemini", "google", "antigravity")):
+        return "antigravity"
+    if any(token in lowered for token in ("grok", "xai", "x.ai")):
+        return "grok"
+    if any(token in lowered for token in ("ollama", "llama", "qwen", "gemma", "glm")):
+        return "ollama"
+    return "codex"
+
+
+def publish_control_tower(
+    title: str,
+    status: str,
+    detail: str,
+    *,
+    job: dict[str, Any] | None = None,
+    phase: str = "",
+    route_verified: bool | None = None,
+    brain_feed: bool = True,
+    work_event: str = "",
+) -> bool:
     cmd = [
         sys.executable,
         str(ROOT / "scripts" / "agent_publish.py"),
@@ -503,19 +524,44 @@ def publish_control_tower(title: str, status: str, detail: str) -> None:
         detail[:260],
         "--privacy",
         "dashboard-safe",
-        "--brain-feed",
     ]
+    if brain_feed:
+        cmd.append("--brain-feed")
+    if work_event:
+        cmd += ["--work-event", work_event]
+    snapshot = job or {}
+    route = snapshot.get("route") if isinstance(snapshot.get("route"), dict) else {}
+    actual = snapshot.get("actual") if isinstance(snapshot.get("actual"), dict) else {}
+    work_id = str(snapshot.get("workId") or "")
+    run_id = str(snapshot.get("ledgerRunId") or "")
+    model_id = str(actual.get("actualModel") or route.get("model") or "")
+    if work_id:
+        cmd += ["--work-id", work_id]
+    if run_id:
+        cmd += ["--run-id", run_id]
+    if phase:
+        cmd += ["--phase", phase]
+    if model_id:
+        cmd += ["--model-family", canonical_model_family(model_id), "--model-id", model_id[:120]]
+    if route_verified:
+        cmd.append("--route-verified")
+    elif route_verified is False:
+        cmd.append("--route-unverified")
+    if snapshot.get("originClaimHash"):
+        cmd += ["--origin-claim-hash", str(snapshot["originClaimHash"])[:128]]
     try:
-        subprocess.Popen(
+        result = subprocess.run(
             cmd,
             cwd=ROOT,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            start_new_session=True,
+            timeout=12,
+            check=False,
         )
+        return result.returncode == 0
     except Exception:
-        pass
+        return False
 
 
 def parse_utc(value: Any) -> dt.datetime | None:
@@ -659,7 +705,13 @@ def dedupe_key(prompt: str, origin: dict[str, str], sensitive: bool = False) -> 
     return hashlib.sha256(f"{material}\x1f{prompt_signature(prompt)}".encode("utf-8")).hexdigest()
 
 
-def make_job(prompt: str, route: dict[str, Any], origin: dict[str, str], timeout: int) -> tuple[dict[str, Any], bool]:
+def make_job(
+    prompt: str,
+    route: dict[str, Any],
+    origin: dict[str, str],
+    timeout: int,
+    work_context: dict[str, str] | None = None,
+) -> tuple[dict[str, Any], bool]:
     ensure_private_dir()
     sensitive = route.get("privacy") != "dashboard-safe" or contains_sensitive_terms(prompt)
     key = dedupe_key(prompt, origin, sensitive=sensitive)
@@ -674,6 +726,22 @@ def make_job(prompt: str, route: dict[str, Any], origin: dict[str, str], timeout
             recent = created is not None and (now - created).total_seconds() <= DEDUPE_WINDOW_SECONDS
             status = existing.get("status")
             if status in {"queued", "running"} or (recent and status == "done"):
+                safe_context = work_context or {}
+                changed = False
+                if not existing.get("workId"):
+                    existing["workId"] = str(safe_context.get("workId") or f"work-inbox-{existing.get('jobId') or key[:20]}")
+                    changed = True
+                if not existing.get("ledgerRunId"):
+                    existing["ledgerRunId"] = str(safe_context.get("ledgerRunId") or f"run-inbox-{existing.get('jobId') or key[:20]}")
+                    changed = True
+                if not existing.get("originClaimHash"):
+                    existing["originClaimHash"] = str(safe_context.get("originClaimHash") or hashlib.sha256(key.encode("utf-8")).hexdigest())
+                    changed = True
+                if "ledgerPrestarted" not in existing:
+                    existing["ledgerPrestarted"] = bool(safe_context.get("workId"))
+                    changed = True
+                if changed:
+                    save_json(STATE_PATH, state)
                 return existing, True
 
         job_id = uuid.uuid4().hex[:20]
@@ -707,6 +775,11 @@ def make_job(prompt: str, route: dict[str, Any], origin: dict[str, str], timeout
             "promptSignature": "" if sensitive else prompt_signature(prompt),
             "dedupeKey": key,
         }
+        safe_context = work_context or {}
+        job["workId"] = str(safe_context.get("workId") or f"work-inbox-{job_id}")
+        job["ledgerRunId"] = str(safe_context.get("ledgerRunId") or f"run-inbox-{job_id}")
+        job["originClaimHash"] = str(safe_context.get("originClaimHash") or hashlib.sha256(key.encode("utf-8")).hexdigest())
+        job["ledgerPrestarted"] = bool(safe_context.get("workId"))
         jobs[job_id] = job
         save_json(STATE_PATH, state)
         return job, False
@@ -886,7 +959,12 @@ def submit_job(args: argparse.Namespace) -> dict[str, Any]:
             },
             "route": route,
         }
-    job, deduplicated = make_job(prompt, route, origin, args.timeout)
+    work_context = {
+        "workId": str(getattr(args, "work_id", "") or ""),
+        "ledgerRunId": str(getattr(args, "work_run_id", "") or ""),
+        "originClaimHash": str(getattr(args, "origin_claim_hash", "") or ""),
+    }
+    job, deduplicated = make_job(prompt, route, origin, args.timeout, work_context)
     telemetry = {
         **route,
         "jobId": job["jobId"],
@@ -898,7 +976,15 @@ def submit_job(args: argparse.Namespace) -> dict[str, Any]:
     append_telemetry(telemetry)
     if not deduplicated:
         spawn_worker(job["jobId"], prompt if job.get("promptEphemeral") else None)
-    publish_control_tower("Josh 2.0 Inbox worker queued", "active", f"{route['worker']} on {route['host']}; {route['routingReason']}")
+    publish_control_tower(
+        "Josh 2.0 Inbox worker queued",
+        "active",
+        f"{route['worker']} on {route['host']}; {route['routingReason']}",
+        job=job,
+        phase="active",
+        route_verified=False,
+        work_event="" if job.get("ledgerPrestarted") else "start",
+    )
     return {
         "ok": True,
         "deduplicated": deduplicated,
@@ -1116,9 +1202,16 @@ def run_worker(job_id: str) -> dict[str, Any]:
     if outcome == "retry":
         spawn_worker(job_id)
     publish_control_tower(
-        "Josh 2.0 Inbox worker finished" if outcome == "done" else "Josh 2.0 Inbox worker issue",
-        "done" if outcome == "done" else "error",
+        "Josh 2.0 Inbox worker finished"
+        if outcome == "done"
+        else "Josh 2.0 Inbox worker retrying"
+        if outcome == "retry"
+        else "Josh 2.0 Inbox worker issue",
+        "done" if outcome == "done" else "active" if outcome == "retry" else "error",
         f"{route.get('worker')} outcome={outcome}; executed={model_executed}; delivered={delivered}; latency={latency_ms}ms",
+        job=job,
+        phase="done" if outcome == "done" else "error" if outcome == "failed" else "active",
+        route_verified=bool(execution.get("executionVerified")),
     )
     return {"ok": outcome in {"done", "retry"}, "jobId": job_id, "outcome": outcome, "latencyMs": latency_ms}
 
@@ -1802,6 +1895,9 @@ def recover(job_id: str = "") -> dict[str, Any]:
             "Josh 2.0 Inbox result delivery recovered" if delivered else "Josh 2.0 Inbox result delivery retry failed",
             "done" if delivered else "error",
             f"{route.get('worker')} reused the verified saved result and existing Inbox card",
+            job=job,
+            phase="done" if delivered and complete else "error",
+            route_verified=True,
         )
 
     return {
@@ -1986,6 +2082,9 @@ def main() -> int:
     submit_p.add_argument("--chat-id", default="")
     submit_p.add_argument("--thread-id", default="")
     submit_p.add_argument("--route-plan-json", default="")
+    submit_p.add_argument("--work-id", default="")
+    submit_p.add_argument("--work-run-id", default="")
+    submit_p.add_argument("--origin-claim-hash", default="")
     submit_p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     submit_p.add_argument("--dry-run", action="store_true")
 

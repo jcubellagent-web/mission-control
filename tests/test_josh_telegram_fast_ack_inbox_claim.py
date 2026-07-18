@@ -485,6 +485,37 @@ def test_coordinator_worker_gets_heartbeat_while_running():
     assert state["active_cards"]["run-1"]["last_card_update_at"] != old
 
 
+def test_coordinator_worker_heartbeat_cannot_claim_verified_route():
+    old = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=watcher.HEARTBEAT_SECONDS + 5)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    state = {
+        "active_cards": {
+            "run-1": {
+                "key": "card-1",
+                "objective": "Long Inbox worker",
+                "model": "codex/gpt-5.6-luna",
+                "route": "route=luna; owner=josh2",
+                "job_id": "job-1",
+                "coordinator_owned": True,
+                "work_id": "work-1",
+                "ledger_run_id": "ledger-run-1",
+                "origin_claim_hash": "a" * 64,
+                "started_at": old,
+                "last_card_update_at": old,
+                "status": "active",
+            }
+        }
+    }
+    published = []
+    with patch.object(watcher, "recent_progress_events", return_value=[]), \
+         patch.object(watcher, "coordinator_job_snapshot", return_value={"status": "running"}), \
+         patch.object(watcher, "run_cmd", return_value={"ok": True}), \
+         patch.object(watcher, "publish_josh", side_effect=lambda *args, **kwargs: published.append((args, kwargs)) or True):
+        watcher.update_active_cards(state, "session", dry_run=False, meta={"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"})
+    assert published
+    assert published[-1][1]["work_event"] == "heartbeat"
+    assert published[-1][1]["route_verified"] is False
+
+
 def test_failed_coordinator_card_is_terminal_and_not_refreshed():
     old = "2026-07-01T00:00:00Z"
     state = {"active_cards": {"run-1": {"key": "card-1", "status": "failed", "last_card_update_at": old}}}

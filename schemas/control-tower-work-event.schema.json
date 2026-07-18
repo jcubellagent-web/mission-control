@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://control-tower.local/schemas/control-tower-work-event.schema.json",
+  "title": "Control Tower Work Event",
+  "description": "Dashboard-safe, identity-based lifecycle event accepted by the Josh 2.0 work ledger.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "workId",
+    "runId",
+    "generation",
+    "sequence",
+    "kind",
+    "status",
+    "ownerAgent",
+    "objective",
+    "phase",
+    "origin",
+    "originClaimHash",
+    "privacy",
+    "routeVerified",
+    "occurredAt"
+  ],
+  "properties": {
+    "eventId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "workId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "runId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "generation": {"type": "integer", "minimum": 1},
+    "sequence": {"type": "integer", "minimum": 1},
+    "kind": {"type": "string", "enum": ["start", "update", "heartbeat", "terminal"]},
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "planned", "routed", "active", "verifying", "done", "blocked", "error", "cancelled"]
+    },
+    "ownerAgent": {"type": "string", "enum": ["josh2", "jaimes", "jain", "joshex"]},
+    "objective": {"type": "string", "minLength": 1, "maxLength": 220},
+    "phase": {"type": "string", "maxLength": 120},
+    "tool": {"type": "string", "maxLength": 80},
+    "detail": {"type": "string", "maxLength": 500},
+    "origin": {"type": "string", "maxLength": 80},
+    "originClaimHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "privacy": {"const": "dashboard-safe"},
+    "modelFamily": {
+      "type": ["string", "null"],
+      "enum": ["codex", "antigravity", "ollama", "grok", null]
+    },
+    "modelId": {"type": ["string", "null"], "maxLength": 120},
+    "routeVerified": {"type": "boolean"},
+    "leaseUntil": {"type": ["string", "null"], "format": "date-time"},
+    "occurredAt": {"type": "string", "format": "date-time"}
+  }
+}

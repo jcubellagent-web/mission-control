@@ -14331,3 +14331,639 @@ a:focus-visible,
 .brain-hero.is-flight-deck .agent-hero-card header em {
   font-variant-numeric: tabular-nums;
 }
+
+/* Control Tower v8 — matte navy command surface, one shared route identity, and the hot daily occurrence projection. */
+:root {
+  --bg: #050f1c;
+  --panel: #071726;
+  --panel-2: #061321;
+  --panel-3: #0a1c2d;
+  --module-fill: #071827;
+  --module-blue-flat: #081a2b;
+  --module-blue-fill: #081a2b;
+  --module-blue-deep: #061421;
+}
+
+body,
+.hero-shell,
+.app-shell {
+  background: #050f1c !important;
+}
+
+.mission-header,
+.kiosk-pulse-strip,
+.brain-hero-panel,
+.right-rail,
+.brain-hero,
+.jobs-rail,
+.finops-dashboard {
+  background-image: none !important;
+  background-color: #071726 !important;
+  box-shadow: inset 0 0 0 1px rgba(101, 209, 213, 0.035) !important;
+}
+
+.kiosk-grid {
+  grid-template-columns: minmax(0, 1.72fr) minmax(500px, 0.98fr) !important;
+}
+
+.brain-hero.is-flight-deck .brain-agent-stage {
+  grid-template-columns: minmax(0, 1fr) !important;
+  background: #061421 !important;
+}
+
+.brain-hero.is-flight-deck .brain-agent-grid {
+  grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card {
+  grid-template-columns: minmax(160px, 0.24fr) minmax(0, 1fr) minmax(138px, 0.18fr) !important;
+  grid-template-rows: minmax(0, 1fr) 18px !important;
+  grid-template-areas:
+    "agent objective route"
+    "agent note route" !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  column-gap: 14px !important;
+  row-gap: 4px !important;
+  overflow: hidden !important;
+  border-color: rgba(101, 209, 213, 0.14) !important;
+  border-left: 3px solid var(--route-color) !important;
+  background: #081a2b !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card header {
+  grid-area: agent !important;
+  min-width: 0 !important;
+}
+
+.brain-hero.is-flight-deck .agent-step-trail {
+  display: none !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective {
+  grid-area: objective !important;
+  min-width: 0 !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective-main,
+.brain-hero.is-flight-deck .agent-hero-card.is-working-focus .agent-objective-main {
+  color: #edf8ff !important;
+  text-shadow: none !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-objective-main,
+.brain-hero.is-flight-deck .agent-hero-card.has-verified-route.is-working-focus .agent-objective-main {
+  color: var(--route-color) !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--route-color) 22%, transparent) !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective-description {
+  color: #9db5c3 !important;
+  opacity: 0.82 !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-objective-description {
+  color: var(--route-color) !important;
+  opacity: 0.78 !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card > p {
+  grid-area: note !important;
+  min-width: 0 !important;
+}
+
+.agent-route-label {
+  grid-area: route;
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr);
+  align-items: center;
+  align-content: center;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 13px;
+  border-left: 1px solid color-mix(in srgb, var(--route-color) 28%, transparent);
+}
+
+.agent-route-label > span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--route-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--route-color) 64%, transparent);
+}
+
+.agent-route-label > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.agent-route-label strong,
+.agent-route-label em {
+  overflow: hidden;
+  color: var(--route-color);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-route-label strong {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.agent-route-label em {
+  font-size: 8px;
+  font-weight: 800;
+  opacity: 0.66;
+}
+
+#finops-dashboard.finops-dashboard {
+  background: #071726 !important;
+}
+
+#finops-dashboard .finops-body,
+#finops-dashboard .finops-wallet,
+#finops-dashboard .finops-models,
+#finops-dashboard .finops-detail-grid,
+#finops-dashboard .finops-provider-grid,
+#finops-dashboard .finops-model-ledger,
+#finops-dashboard .model-ledger-list {
+  min-height: 0 !important;
+}
+
+#finops-dashboard .finops-wallet,
+#finops-dashboard .finops-models,
+#finops-dashboard .finops-provider-card,
+#finops-dashboard .finops-model-ledger,
+#finops-dashboard .finops-model-summary article,
+#finops-dashboard .finops-wallet-total,
+#finops-dashboard .finops-wallet-target,
+#finops-dashboard .finops-trade-ledger,
+#finops-dashboard .finops-activity-journal {
+  background: #081a2b !important;
+}
+
+#finops-dashboard .finops-wallet {
+  grid-template-rows: 48px 58px repeat(2, minmax(0, 1fr)) !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+#finops-dashboard .finops-models {
+  grid-template-rows: 40px 24px 32px minmax(0, 1fr) !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+}
+
+#finops-dashboard .finops-detail-grid {
+  grid-template-columns: minmax(0, 1.24fr) minmax(280px, 0.76fr) !important;
+  gap: 6px !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+#finops-dashboard .finops-provider-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: unset !important;
+  align-content: stretch !important;
+  gap: 5px !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+#finops-dashboard .finops-provider-card {
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  gap: 3px !important;
+  padding: 6px 7px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(101, 209, 213, 0.12) !important;
+  opacity: 0.58 !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease !important;
+}
+
+#finops-dashboard .finops-provider-card.is-active {
+  border-color: var(--route-color) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--route-color) 34%, transparent), 0 0 14px color-mix(in srgb, var(--route-color) 18%, transparent) !important;
+  opacity: 1 !important;
+}
+
+#finops-dashboard .finops-provider-card.is-active .provider-card-head strong,
+#finops-dashboard .finops-provider-card.is-active .provider-card-head em,
+#finops-dashboard .finops-provider-card.is-active .provider-glow-dot {
+  color: var(--route-color) !important;
+}
+
+#finops-dashboard .finops-provider-card.is-active .provider-glow-dot {
+  background: var(--route-color) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--route-color) 72%, transparent) !important;
+}
+
+#finops-dashboard .provider-card-blurb {
+  display: -webkit-box !important;
+  max-height: 19px !important;
+  overflow: hidden !important;
+  font-size: 7.5px !important;
+  line-height: 1.15 !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+#finops-dashboard .provider-money-strip,
+#finops-dashboard .provider-model-list,
+#finops-dashboard .finops-provider-card footer,
+#finops-dashboard .provider-evidence-line {
+  display: none !important;
+}
+
+#finops-dashboard .model-ledger-row {
+  border-left: 2px solid transparent !important;
+}
+
+#finops-dashboard .model-ledger-row.is-active-route {
+  border-left-color: var(--route-color) !important;
+  background: color-mix(in srgb, var(--route-color) 10%, #071726) !important;
+}
+
+#finops-dashboard .model-ledger-row.is-active-route strong {
+  color: var(--route-color) !important;
+}
+
+.jobs-occurrence-rail {
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 10px !important;
+  overflow: hidden !important;
+  background: #071726 !important;
+}
+
+.today-jobs-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.today-jobs-head > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.today-jobs-head p {
+  margin: 0;
+  color: #65d1d5;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.today-jobs-head h2 {
+  margin: 0;
+  color: #f2f8fc;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.today-jobs-sync {
+  display: grid;
+  grid-template-columns: 7px auto;
+  align-items: center;
+  gap: 2px 6px;
+  min-width: 0;
+  text-align: right;
+}
+
+.today-jobs-sync > span {
+  grid-row: 1 / span 2;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #72d69a;
+  box-shadow: 0 0 9px rgba(114, 214, 154, 0.55);
+}
+
+.today-jobs-sync strong {
+  color: #72d69a;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.today-jobs-sync em {
+  color: #70899a;
+  font-size: 7px;
+  font-style: normal;
+}
+
+.today-jobs-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.today-jobs-summary article {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 8px;
+  border: 1px solid rgba(101, 209, 213, 0.14);
+  border-radius: 5px;
+  background: #081a2b;
+}
+
+.today-jobs-summary article > span {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.today-jobs-summary article > div {
+  display: grid;
+  gap: 2px;
+}
+
+.today-jobs-summary article em {
+  color: currentColor;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.today-jobs-summary article strong {
+  color: #f2f8fc;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.today-jobs-summary .is-complete { color: #72d69a; border-color: rgba(114, 214, 154, 0.35); }
+.today-jobs-summary .is-skipped { color: #a8abb3; border-color: rgba(168, 171, 179, 0.28); }
+.today-jobs-summary .is-broken { color: #ff645f; border-color: rgba(255, 100, 95, 0.42); }
+.today-jobs-summary .is-pending { color: #419cff; border-color: rgba(65, 156, 255, 0.4); }
+
+.today-jobs-table {
+  display: grid;
+  grid-template-rows: 27px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(101, 209, 213, 0.16);
+  border-radius: 5px;
+  background: #061421;
+}
+
+.today-jobs-table-head,
+.today-job-row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1.46fr) minmax(84px, 0.72fr) 82px minmax(98px, 0.8fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.today-jobs-table-head {
+  padding: 0 9px;
+  border-bottom: 1px solid rgba(101, 209, 213, 0.15);
+  color: #7892a3;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.today-jobs-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.today-job-row {
+  position: relative;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-bottom: 1px solid rgba(101, 209, 213, 0.07);
+  border-left: 3px solid currentColor;
+  color: #89a1b1;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-job-row > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-job-row time,
+.today-job-name strong,
+.today-job-status {
+  color: currentColor;
+  font-weight: 850;
+}
+
+.today-job-name {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.today-job-name em,
+.today-job-last em {
+  color: #7892a3;
+  font-size: 7px;
+  font-style: normal;
+}
+
+.today-job-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: capitalize;
+}
+
+.today-job-status i {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.today-job-row.is-complete { color: #72d69a; background: rgba(114, 214, 154, 0.085); }
+.today-job-row.is-skipped { color: #a8abb3; background: rgba(168, 171, 179, 0.055); }
+.today-job-row.is-broken { color: #ff645f; background: rgba(255, 100, 95, 0.09); }
+.today-job-row.is-pending { color: #419cff; background: rgba(65, 156, 255, 0.055); }
+.today-job-row.is-complete .today-job-status i { background: #72d69a; }
+.today-job-row.is-skipped .today-job-status i { background: #a8abb3; }
+.today-job-row.is-broken .today-job-status i { background: #ff645f; }
+
+.today-jobs-now-divider {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 21px;
+  padding: 0 10px;
+  color: #65d1d5;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.today-jobs-now-divider i {
+  height: 1px;
+  background: #65d1d5;
+  box-shadow: 0 0 7px rgba(101, 209, 213, 0.48);
+}
+
+.today-jobs-now-divider strong {
+  text-transform: uppercase;
+}
+
+.today-jobs-empty {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  padding: 20px;
+  color: #7892a3;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (min-width: 1361px) and (min-height: 850px) {
+  .brain-hero.is-flight-deck .brain-agent-stage {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card {
+    grid-template-columns: minmax(160px, 0.24fr) minmax(0, 1fr) minmax(138px, 0.18fr) !important;
+    grid-template-rows: minmax(0, 1fr) 18px !important;
+  }
+
+  #finops-dashboard .finops-wallet {
+    grid-template-rows: 48px 58px repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #finops-dashboard .finops-provider-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .kiosk-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    grid-template-areas: "agent" "objective" "note" "route" !important;
+  }
+
+  .agent-route-label {
+    padding: 8px 0 0;
+    border-top: 1px solid color-mix(in srgb, var(--route-color) 28%, transparent);
+    border-left: 0;
+  }
+}
+
+/* #JAIMES: final visual QA locks the approved 44/56 Work Board-to-FinOps balance and kiosk-distance density. */
+@media (min-width: 1361px) and (min-height: 850px) {
+  .brain-hero-panel {
+    grid-template-rows: minmax(0, 44fr) minmax(0, 56fr) !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card {
+    grid-template-columns: minmax(150px, 0.22fr) minmax(0, 1fr) minmax(142px, 0.17fr) !important;
+    grid-template-rows: minmax(0, 1fr) 14px !important;
+    padding: 6px 10px !important;
+    column-gap: 12px !important;
+    row-gap: 2px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-name-lockup strong {
+    font-size: 15px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-role-badge {
+    font-size: 7.5px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card header em {
+    font-size: 8px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-main {
+    max-height: 24px !important;
+    font-size: clamp(17px, 1.1vw, 20px) !important;
+    line-height: 1.08 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-description {
+    max-height: 15px !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card > p {
+    height: 14px !important;
+    min-height: 14px !important;
+    font-size: 8.5px !important;
+  }
+
+  .agent-route-label {
+    gap: 6px;
+    padding-left: 9px;
+  }
+
+  .agent-route-label strong {
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .agent-route-label em {
+    font-size: 7px;
+  }
+
+  #finops-dashboard .finops-body {
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+  }
+}
+
+.today-job-row {
+  min-height: 29px;
+  font-size: 9.5px;
+}
+
+.today-jobs-table-head {
+  font-size: 8px;
+}
+
+.today-job-name em,
+.today-job-last em {
+  font-size: 7.5px;
+}

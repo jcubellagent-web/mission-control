@@ -13,19 +13,27 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Any
 
+from control_tower_work_store import (
+    TERMINAL_STATUSES as WORK_TERMINAL_STATUSES,
+    WorkStoreError,
+    new_id as new_work_id,
+    publish_work_event,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data"
+DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
 INDEX = ROOT / "index.html"
 EVENTS_PATH = DATA_DIR / "shared-events.json"
 CODEX_JOBS_PATH = DATA_DIR / "codex-jobs.json"
 DECISIONS_PATH = DATA_DIR / "decisions.json"
 HANDOFF_QUEUE_PATH = DATA_DIR / "handoff-queue.json"
 DAILY_ROLLUP_PATH = DATA_DIR / "daily-rollup.json"
-HANDOFF_DIR = ROOT / "docs" / "handoffs"
+HANDOFF_DIR = Path(os.environ.get("CONTROL_TOWER_HANDOFF_DIR", ROOT / "docs" / "handoffs"))
 BRAIN_FEED_PATHS = {
     "josh": DATA_DIR / "brain-feed.json",
     "josh2": DATA_DIR / "brain-feed.json",
@@ -34,6 +42,8 @@ BRAIN_FEED_PATHS = {
     "jain": DATA_DIR / "jain-brain-feed.json",
 }
 HEARTBEATS_PATH = DATA_DIR / "agent-heartbeats.json"
+WORK_DB_PATH = Path(os.environ.get("CONTROL_TOWER_WORK_DB", DATA_DIR / "control-tower-work.sqlite3"))
+WORK_HOT_PATH = Path(os.environ.get("CONTROL_TOWER_HOT_JSON", DATA_DIR / "control-tower-hot.json"))
 
 AGENTS = {
     "josh": "JOSH 2.0",
@@ -55,14 +65,19 @@ AGENT_IDS = {
     "joshex": "joshex",
     "codex": "joshex",
 }
-STATUS_TO_ACTIVE = {"active", "running", "working", "pending", "live"}
+STATUS_TO_ACTIVE = {"accepted", "planned", "routed", "active", "verifying", "running", "working", "pending", "live"}
 STATUS_TO_HEARTBEAT = {
+    "accepted": "active",
+    "planned": "active",
+    "routed": "active",
     "active": "active",
+    "verifying": "active",
     "ready": "ok",
     "done": "ok",
     "info": "ok",
     "blocked": "blocked",
     "error": "error",
+    "cancelled": "ok",
 }
 SECRET_PATTERNS = [
     re.compile(r"(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{16,}"),
@@ -136,6 +151,15 @@ def humanize_token(token: str) -> str:
 
 def dashboard_text(value: Any, limit: int = 220) -> str:
     text = compact(value, limit * 2)
+    if re.search(r'Traceback \(most recent call last\)|(?:^|\n)\s*File "[^"]+", line \d+', text, flags=re.IGNORECASE):
+        return "Internal runtime error; details remain in host-local logs."
+    text = re.sub(r"(?:/Users/|/home/)[^\s<]+", "host-local path", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"(?:node_modules/|(?:src|scripts)/)[^\s:]+:\d+",
+        "host-local implementation detail",
+        text,
+        flags=re.IGNORECASE,
+    )
     for raw, plain in PLAIN_TEXT_REPLACEMENTS.items():
         text = re.sub(re.escape(raw), plain, text, flags=re.IGNORECASE)
     text = re.sub(
@@ -360,7 +384,9 @@ def agent_label(agent: str) -> str:
 
 def ensure_safe(*values: str, privacy: str) -> None:
     if privacy != "dashboard-safe":
-        return
+        raise SystemExit(
+            "agent_publish.py writes Control Tower surfaces and accepts dashboard-safe content only."
+        )
     blob = "\n".join(str(v or "") for v in values)
     for pattern in SECRET_PATTERNS:
         if pattern.search(blob):
@@ -370,7 +396,73 @@ def ensure_safe(*values: str, privacy: str) -> None:
 def event_id(agent: str, event_type: str, now: str, title: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:48] or "event"
     stamp = now.replace("-", "").replace(":", "").replace("Z", "").replace("T", "-")
-    return f"{agent}-{event_type}-{stamp}-{slug}"
+    return f"{agent}-{event_type}-{stamp}-{slug}-{uuid.uuid4().hex[:8]}"
+
+
+def work_status(status: str) -> str:
+    return {
+        "ready": "done",
+        "info": "done",
+    }.get(status, status)
+
+
+def work_event_kind(args: argparse.Namespace, lifecycle_status: str) -> str:
+    if args.work_event != "auto":
+        return args.work_event
+    if lifecycle_status in WORK_TERMINAL_STATUSES:
+        return "terminal"
+    if args.work_id:
+        return "update"
+    return "start"
+
+
+def publish_canonical_work(
+    args: argparse.Namespace,
+    *,
+    agent: str,
+    now: str,
+    event_id_value: str,
+) -> dict[str, Any]:
+    """Write one exact lifecycle event before updating compatibility sidecars."""
+    supplied_work_id = str(args.work_id or "").strip()
+    work_id = supplied_work_id or new_work_id("work-adhoc")
+    run_id = str(args.run_id or "").strip() or new_work_id("run")
+    lifecycle_status = work_status(args.status)
+    kind = work_event_kind(args, lifecycle_status)
+    origin = args.origin or ("agent-publish" if supplied_work_id else "legacy-agent-publish")
+    phase = args.phase or (
+        "complete" if lifecycle_status == "done" else lifecycle_status
+    )
+    try:
+        result = publish_work_event(
+            db_path=WORK_DB_PATH,
+            hot_path=WORK_HOT_PATH,
+            work_id=work_id,
+            run_id=run_id,
+            generation=args.generation,
+            sequence=args.sequence,
+            event_id=event_id_value,
+            kind=kind,
+            status=lifecycle_status,
+            agent=agent,
+            objective=agent_dashboard_text(agent, args.title, 220),
+            phase=agent_dashboard_text(agent, phase, 120),
+            tool=agent_dashboard_text(agent, args.tool, 80),
+            detail=agent_dashboard_text(agent, args.detail, 500),
+            origin=agent_dashboard_text(agent, origin, 80),
+            origin_claim=args.origin_claim,
+            origin_claim_hash=args.origin_claim_hash,
+            model_family=args.model_family,
+            model_id=args.model_id,
+            route_verified=args.route_verified,
+            clear_route=args.clear_route,
+            lease_seconds=args.lease_seconds,
+            occurred_at=now,
+            privacy=args.privacy,
+        )
+    except WorkStoreError as exc:
+        raise SystemExit(f"Canonical work event rejected: {exc}") from exc
+    return result
 
 
 def shared_event_dedupe_key(event: dict[str, Any]) -> tuple[str, str, str, str, str, str]:
@@ -420,6 +512,10 @@ def append_codex_job(event: dict[str, Any]) -> None:
         jobs = jobs_data.get("jobs", []) if isinstance(jobs_data, dict) else []
         job = {
             "id": event["id"],
+            "workId": event["workId"],
+            "runId": event["runId"],
+            "generation": event["generation"],
+            "sequence": event["sequence"],
             "time": event["time"],
             "title": event["title"],
             "status": event["status"],
@@ -449,6 +545,8 @@ def locked_update(path: Path, key: str, record: dict[str, Any], limit: int = 300
 def append_decision(event: dict[str, Any], tags: list[str]) -> None:
     record = {
         "id": event["id"],
+        "workId": event["workId"],
+        "runId": event["runId"],
         "time": event["time"],
         "agent": event["agent"],
         "agentLabel": event["agentLabel"],
@@ -464,6 +562,8 @@ def append_decision(event: dict[str, Any], tags: list[str]) -> None:
 def append_handoff_record(event: dict[str, Any], target: str, path: Path | None = None) -> None:
     record = {
         "id": event["id"],
+        "workId": event["workId"],
+        "runId": event["runId"],
         "time": event["time"],
         "from": event["agent"],
         "fromLabel": event["agentLabel"],
@@ -471,10 +571,20 @@ def append_handoff_record(event: dict[str, Any], target: str, path: Path | None 
         "title": event["title"],
         "status": "done" if event["status"] == "done" else "open",
         "detail": event.get("detail") or "",
-        "path": str(path.relative_to(ROOT)) if path else "",
+        "path": dashboard_handoff_path(path),
         "privacy": event["privacy"],
     }
     locked_update(HANDOFF_QUEUE_PATH, "handoffs", record)
+
+
+def dashboard_handoff_path(path: Path | None) -> str:
+    """Return a repo-relative reference without leaking an absolute test/private path."""
+    if not path:
+        return ""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return path.name
 
 
 def frontend_supabase_config() -> tuple[str, str] | None:
@@ -545,6 +655,16 @@ def publish_brain_feed(event: dict[str, Any]) -> None:
         "currentTool": agent_dashboard_text(agent, existing.get("currentTool") if preserve_top else (event.get("tool") or "agent_publish.py"), 44),
         "steps": merge_brain_feed_steps(agent, [step] + brain_feed_step_history(existing.get("steps"), event, preserve_active=preserve_top)),
         "source": "shared-agent-event-ledger",
+        "workId": event["workId"],
+        "runId": event["runId"],
+        "generation": event["generation"],
+        "sequence": event["sequence"],
+        "phase": event.get("phase") or event["status"],
+        "originClaimHash": event["originClaimHash"],
+        "modelFamily": event.get("modelFamily"),
+        "modelId": event.get("modelId"),
+        "routeVerified": bool(event.get("routeVerified")),
+        "leaseUntil": event.get("leaseUntil"),
         "supabaseBacked": True,
     }
     payload = scrub_blocked_public_x_payload(agent, payload)
@@ -593,6 +713,16 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
         "updatedAt": existing.get("updatedAt") if preserve_top else event["time"],
         "checkedAt": event["time"],
         "source": "josh2-local-live-feed",
+        "workId": event["workId"],
+        "runId": event["runId"],
+        "generation": event["generation"],
+        "sequence": event["sequence"],
+        "phase": event.get("phase") or event["status"],
+        "originClaimHash": event["originClaimHash"],
+        "modelFamily": event.get("modelFamily"),
+        "modelId": event.get("modelId"),
+        "routeVerified": bool(event.get("routeVerified")),
+        "leaseUntil": event.get("leaseUntil"),
         "supabaseBacked": False,
         "localLiveFeed": True,
     }
@@ -610,6 +740,10 @@ def mirror_publish_heartbeat(event: dict[str, Any]) -> None:
         "updatedAt": event["time"],
         "stale": False,
         "source": "agent_publish.py",
+        "workId": event["workId"],
+        "runId": event["runId"],
+        "generation": event["generation"],
+        "sequence": event["sequence"],
     }
     lock_path = HEARTBEATS_PATH.with_suffix(".lock")
     with lock_path.open("w") as lock:
@@ -743,7 +877,7 @@ def main() -> int:
     parser.add_argument("--agent", required=True, help="josh2, jaimes, jain, or joshex")
     parser.add_argument("--type", default="status", choices=["status", "job", "decision", "handoff", "blocked", "complete", "note"])
     parser.add_argument("--title", required=True, help="Short dashboard-safe title/objective")
-    parser.add_argument("--status", default="done", choices=["active", "ready", "done", "blocked", "error", "info"])
+    parser.add_argument("--status", default="done", choices=["accepted", "planned", "routed", "active", "verifying", "ready", "done", "blocked", "error", "cancelled", "info"])
     parser.add_argument("--tool", default="agent_publish.py")
     parser.add_argument("--detail", default="")
     parser.add_argument("--privacy", default="dashboard-safe", choices=["dashboard-safe", "agent-private", "josh-only"])
@@ -753,13 +887,51 @@ def main() -> int:
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
     parser.add_argument("--v2", action="store_true", help="Retired compatibility flag; local Control Tower sidecars remain the source of truth")
+    parser.add_argument("--work-id", default="", help="Stable objective id. Omit only for an explicit ad hoc event.")
+    parser.add_argument("--run-id", default="", help="Stable execution-attempt id.")
+    parser.add_argument("--event-id", default="", help="Idempotency key for retrying this exact lifecycle event.")
+    parser.add_argument("--generation", type=int, default=None, help="Increment only when reopening the stable work id for a new run.")
+    parser.add_argument("--sequence", type=int, default=None, help="Monotonic sequence within one generation; allocated atomically when omitted.")
+    parser.add_argument("--work-event", choices=["auto", "start", "update", "heartbeat", "terminal"], default="auto")
+    parser.add_argument("--phase", default="", help="Dashboard-safe current phase, distinct from a heartbeat.")
+    parser.add_argument("--origin", default="", help="Dashboard-safe intake/runtime label, never a raw message or chat id.")
+    origin_group = parser.add_mutually_exclusive_group()
+    origin_group.add_argument("--origin-claim", default="", help="Private dedupe claim; SHA-256 hashed before storage.")
+    origin_group.add_argument("--origin-claim-hash", default="", help="Pre-hashed lowercase SHA-256 origin claim.")
+    parser.add_argument("--model-family", default=None, help="codex, antigravity, ollama, or grok")
+    parser.add_argument("--model-id", default=None, help="Verified runtime model id, not a requested route.")
+    route_group = parser.add_mutually_exclusive_group()
+    route_group.add_argument("--route-verified", action="store_true", default=None)
+    route_group.add_argument("--route-unverified", action="store_false", dest="route_verified")
+    parser.add_argument("--clear-route", action="store_true", help="Clear an inherited active model route.")
+    parser.add_argument("--lease-seconds", type=int, default=180, help="Active lease duration; refresh with heartbeat.")
     args = parser.parse_args()
 
     agent = canonical_agent(args.agent)
     now = utc_now()
     ensure_safe(args.title, args.detail, args.tool, privacy=args.privacy)
+    requested_event_id = args.event_id or event_id(agent, args.type, now, args.title)
+    work_result = publish_canonical_work(
+        args,
+        agent=agent,
+        now=now,
+        event_id_value=requested_event_id,
+    )
+    if work_result.get("duplicateClaim"):
+        print(json.dumps({
+            "ok": True,
+            "deduplicated": True,
+            "event": work_result["event"],
+            "workLedger": work_result,
+        }, indent=2))
+        return 0
+    work = work_result["work"]
     event = {
-        "id": event_id(agent, args.type, now, args.title),
+        "id": work_result["event"]["eventId"],
+        "workId": work["workId"],
+        "runId": work["runId"],
+        "generation": work["generation"],
+        "sequence": work["sequence"],
         "time": now,
         "agent": agent,
         "agentLabel": agent_label(agent),
@@ -769,6 +941,13 @@ def main() -> int:
         "tool": agent_dashboard_text(agent, args.tool, 80),
         "detail": agent_dashboard_text(agent, args.detail, 500),
         "privacy": args.privacy,
+        "phase": work["phase"],
+        "origin": work["origin"],
+        "originClaimHash": work["originClaimHash"],
+        "modelFamily": work["modelFamily"],
+        "modelId": work["modelId"],
+        "routeVerified": work["routeVerified"],
+        "leaseUntil": work["leaseUntil"],
     }
 
     append_event(event)
@@ -779,7 +958,7 @@ def main() -> int:
     if args.handoff_to or args.type == "handoff":
         target = args.handoff_to or "agent"
         handoff = write_handoff(event, target)
-        event.setdefault("links", []).append({"label": "handoff", "url": str(handoff.relative_to(ROOT))})
+        event.setdefault("links", []).append({"label": "handoff", "url": dashboard_handoff_path(handoff)})
         append_event(event)
         append_handoff_record(event, target, handoff)
     if args.brain_feed:
@@ -791,7 +970,7 @@ def main() -> int:
     if should_publish_v2(args):
         v2_result = retired_v2_result()
 
-    response = {"ok": True, "event": event}
+    response = {"ok": True, "event": event, "workLedger": work_result}
     if v2_result is not None:
         response["v2"] = v2_result
     print(json.dumps(response, indent=2))

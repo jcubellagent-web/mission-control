@@ -4,12 +4,41 @@
   "title": "Shared Agent Event",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "time", "agent", "type", "title", "status", "privacy"],
+  "required": [
+    "id",
+    "workId",
+    "runId",
+    "generation",
+    "sequence",
+    "time",
+    "agent",
+    "type",
+    "title",
+    "status",
+    "privacy",
+    "originClaimHash"
+  ],
   "properties": {
     "id": {
       "type": "string",
       "minLength": 8,
       "maxLength": 120
+    },
+    "workId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
     },
     "time": {
       "type": "string",
@@ -17,7 +46,7 @@
     },
     "agent": {
       "type": "string",
-      "enum": ["josh", "jaimes", "jain", "joshex"]
+      "enum": ["josh", "josh2", "jaimes", "jain", "joshex"]
     },
     "agentLabel": {
       "type": "string",
@@ -34,7 +63,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["active", "done", "blocked", "error", "info"]
+      "enum": ["accepted", "planned", "routed", "active", "verifying", "ready", "done", "blocked", "error", "cancelled", "info"]
     },
     "tool": {
       "type": "string",
@@ -43,6 +72,33 @@
     "detail": {
       "type": "string",
       "maxLength": 500
+    },
+    "phase": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "origin": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "originClaimHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "modelFamily": {
+      "type": ["string", "null"],
+      "enum": ["codex", "antigravity", "ollama", "grok", null]
+    },
+    "modelId": {
+      "type": ["string", "null"],
+      "maxLength": 120
+    },
+    "routeVerified": {
+      "type": "boolean"
+    },
+    "leaseUntil": {
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "privacy": {
       "type": "string",

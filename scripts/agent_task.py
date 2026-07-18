@@ -6,15 +6,23 @@ import argparse
 import datetime as dt
 import fcntl
 import json
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
+from control_tower_work_store import (
+    canonical_model_family,
+    new_id,
+    origin_digest,
+    safe_identifier,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data"
+DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
 TASKS_PATH = DATA_DIR / "agent-task-queue.json"
 CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 
@@ -131,12 +139,30 @@ def add_note(task: dict[str, Any], agent: str, note: str, status: str | None = N
     del rows[50:]
 
 
-def publish_event(agent: str, event_type: str, status: str, title: str, detail: str, brain_feed: bool, job: bool = False) -> None:
+def publish_event(
+    agent: str,
+    event_type: str,
+    status: str,
+    title: str,
+    detail: str,
+    brain_feed: bool,
+    job: bool = False,
+    *,
+    task: dict[str, Any] | None = None,
+    phase: str = "",
+    work_event: str = "auto",
+) -> None:
     publish_status = (
-        "active"
-        if status in {"queued", "accepted", "active"}
+        "planned"
+        if status == "queued"
+        else "accepted"
+        if status == "accepted"
+        else "active"
+        if status == "active"
         else status
         if status in {"done", "blocked", "error"}
+        else "cancelled"
+        if status == "cancelled"
         else "info"
     )
     cmd = [
@@ -149,12 +175,34 @@ def publish_event(agent: str, event_type: str, status: str, title: str, detail: 
         "--tool", "agent_task.py",
         "--detail", compact(detail, 500),
         "--rollup",
+        "--phase", compact(phase or status, 120),
+        "--work-event", work_event,
     ]
+    if task:
+        cmd.extend([
+            "--work-id", str(task["workId"]),
+            "--run-id", str(task["runId"]),
+            "--generation", str(task.get("generation") or 1),
+            "--origin", str(task.get("origin") or "agent-task"),
+            "--origin-claim-hash", str(task["originClaimHash"]),
+        ])
+        if task.get("modelFamily"):
+            cmd.extend(["--model-family", str(task["modelFamily"])])
+        if task.get("modelId"):
+            cmd.extend(["--model-id", str(task["modelId"])])
+        if task.get("routeVerified"):
+            cmd.append("--route-verified")
+        else:
+            cmd.append("--route-unverified")
     if brain_feed:
         cmd.append("--brain-feed")
     if job:
         cmd.append("--job")
-    subprocess.run(cmd, cwd=ROOT, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    result = subprocess.run(cmd, cwd=ROOT, check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise SystemExit(
+            compact(result.stderr.strip() or result.stdout.strip() or "Canonical work publish failed", 500)
+        )
 
 
 def publish_to_brain_feed(args: argparse.Namespace) -> bool:
@@ -176,8 +224,31 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
     if privacy == "destructive" and approval != "approved":
         raise SystemExit("Destructive tasks require --approval approved.")
     now = utc_now()
+    identity = args.id or task_id(owner, args.title, now)
+    work_id = safe_identifier(args.work_id or identity, "work_id")
+    run_id = safe_identifier(args.run_id or new_id("run"), "run_id")
+    generation = int(args.generation or 1)
+    if generation < 1:
+        raise SystemExit("generation must be positive.")
+    origin = compact(args.origin or "agent-task", 80)
+    claim_hash = origin_digest(
+        origin_claim=args.origin_claim,
+        origin_claim_hash=args.origin_claim_hash,
+        fallback=f"{origin}|{work_id}|{run_id}|{generation}",
+    )
+    model_family = canonical_model_family(args.model_family) if args.model_family else ""
+    if args.route_verified and (not model_family or not args.model_id):
+        raise SystemExit("--route-verified requires --model-family and --model-id.")
     task = {
-        "id": args.id or task_id(owner, args.title, now),
+        "id": identity,
+        "workId": work_id,
+        "runId": run_id,
+        "generation": generation,
+        "origin": origin,
+        "originClaimHash": claim_hash,
+        "modelFamily": model_family or None,
+        "modelId": compact(args.model_id, 120) or None,
+        "routeVerified": bool(args.route_verified),
         "title": compact(args.title, 160),
         "objective": compact(args.objective, 600),
         "owner": owner,
@@ -215,8 +286,22 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
             f"Created task {task['id']} for {AGENT_LABELS[owner]}: {task['objective']}",
             publish_to_brain_feed(args),
             args.job,
+            task=task,
+            phase="delegating",
+            work_event="start",
         )
-    publish_event(owner, "status", "queued", f"Task queued: {task['title']}", task["objective"], publish_to_brain_feed(args), args.job)
+    publish_event(
+        owner,
+        "status",
+        "queued",
+        f"Task queued: {task['title']}",
+        task["objective"],
+        publish_to_brain_feed(args),
+        args.job,
+        task=task,
+        phase="queued",
+        work_event="update" if requester != owner else "start",
+    )
     return result
 
 
@@ -226,10 +311,27 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
 
     def mutate(data: dict[str, Any]) -> dict[str, Any]:
         task = find_task(data, args.id)
-        task["status"] = status
+        task.setdefault("workId", task.get("id") or new_id("work-task"))
+        task.setdefault("runId", new_id("run"))
+        task.setdefault("generation", 1)
+        task.setdefault("origin", "legacy-agent-task")
+        task.setdefault(
+            "originClaimHash",
+            origin_digest(
+                fallback=f"{task['origin']}|{task['workId']}|{task['runId']}|{task['generation']}"
+            ),
+        )
+        previous_status = str(task.get("status") or "queued")
+        effective_status = previous_status if getattr(args, "work_event", "") == "heartbeat" else status
+        if previous_status in {"done", "blocked", "error", "cancelled"} and effective_status not in {"done", "blocked", "error", "cancelled"}:
+            task["generation"] = int(task.get("generation") or 1) + 1
+            task["runId"] = new_id("run")
+        task["status"] = effective_status
         task["updatedAt"] = now
-        if status in {"done", "cancelled", "error"}:
+        if effective_status in {"done", "cancelled", "error", "blocked"}:
             task["completedAt"] = now
+        else:
+            task["completedAt"] = None
         if args.owner:
             task["owner"] = validate_agent(args.owner)
         if args.artifact:
@@ -239,13 +341,35 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
                     task["artifacts"].append(item)
         if args.summary:
             task["summary"] = compact(args.summary, 800)
-        add_note(task, agent, args.note or args.summary or status, status)
+        if getattr(args, "phase", ""):
+            task["phase"] = compact(args.phase, 120)
+        if getattr(args, "model_family", None):
+            task["modelFamily"] = canonical_model_family(args.model_family)
+        if getattr(args, "model_id", None):
+            task["modelId"] = compact(args.model_id, 120)
+        if getattr(args, "route_verified", None) is not None:
+            task["routeVerified"] = bool(args.route_verified)
+        if task.get("routeVerified") and (not task.get("modelFamily") or not task.get("modelId")):
+            raise SystemExit("A verified route requires modelFamily and modelId.")
+        add_note(task, agent, args.note or args.summary or effective_status, effective_status)
         return task
 
     result = locked_tasks(mutate)
-    title = f"Task {status}: {result['title']}"
+    effective_status = result["status"]
+    title = f"Task {effective_status}: {result['title']}"
     detail = args.summary or args.note or result.get("objective") or title
-    publish_event(result["owner"], "complete" if status == "done" else "blocked" if status in {"blocked", "error"} else "status", status, title, detail, publish_to_brain_feed(args), args.job)
+    publish_event(
+        result["owner"],
+        "complete" if effective_status == "done" else "blocked" if effective_status in {"blocked", "error"} else "status",
+        effective_status,
+        title,
+        detail,
+        publish_to_brain_feed(args),
+        args.job,
+        task=result,
+        phase=getattr(args, "phase", "") or effective_status,
+        work_event=getattr(args, "work_event", "update"),
+    )
     return result
 
 
@@ -281,10 +405,27 @@ def main() -> int:
     create_p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
     create_p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
     create_p.add_argument("--job", action="store_true")
+    create_p.add_argument("--work-id", default="")
+    create_p.add_argument("--run-id", default="")
+    create_p.add_argument("--generation", type=int, default=1)
+    create_p.add_argument("--origin", default="agent-task")
+    create_origin = create_p.add_mutually_exclusive_group()
+    create_origin.add_argument("--origin-claim", default="")
+    create_origin.add_argument("--origin-claim-hash", default="")
+    create_p.add_argument("--model-family", default="")
+    create_p.add_argument("--model-id", default="")
+    create_p.add_argument("--route-verified", action="store_true")
 
-    for name, status in [("accept", "accepted"), ("start", "active"), ("block", "blocked"), ("complete", "done"), ("error", "error"), ("cancel", "cancelled")]:
+    for name, status in [("accept", "accepted"), ("start", "active"), ("heartbeat", "active"), ("block", "blocked"), ("complete", "done"), ("error", "error"), ("cancel", "cancelled")]:
         p = sub.add_parser(name)
         p.set_defaults(status=status)
+        p.set_defaults(
+            work_event="heartbeat"
+            if name == "heartbeat"
+            else "terminal"
+            if status in {"done", "blocked", "error", "cancelled"}
+            else "update"
+        )
         p.add_argument("--id", required=True)
         p.add_argument("--agent", required=True)
         p.add_argument("--owner", default="")
@@ -294,6 +435,12 @@ def main() -> int:
         p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
         p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
         p.add_argument("--job", action="store_true")
+        p.add_argument("--phase", default="")
+        p.add_argument("--model-family", default=None)
+        p.add_argument("--model-id", default=None)
+        route = p.add_mutually_exclusive_group()
+        route.add_argument("--route-verified", action="store_true", default=None)
+        route.add_argument("--route-unverified", action="store_false", dest="route_verified")
 
     handoff_p = sub.add_parser("handoff")
     handoff_p.set_defaults(status="accepted")
@@ -306,6 +453,13 @@ def main() -> int:
     handoff_p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
     handoff_p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
     handoff_p.add_argument("--job", action="store_true")
+    handoff_p.add_argument("--phase", default="handoff")
+    handoff_p.add_argument("--model-family", default=None)
+    handoff_p.add_argument("--model-id", default=None)
+    handoff_route = handoff_p.add_mutually_exclusive_group()
+    handoff_route.add_argument("--route-verified", action="store_true", default=None)
+    handoff_route.add_argument("--route-unverified", action="store_false", dest="route_verified")
+    handoff_p.set_defaults(work_event="update")
 
     list_p = sub.add_parser("list")
     list_p.add_argument("--owner", default="")

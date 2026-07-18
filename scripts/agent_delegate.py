@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -14,7 +15,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = ROOT / "data"
+DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
 TASK_QUEUE = DATA_DIR / "agent-task-queue.json"
 
 AGENT_LABELS = {
@@ -96,7 +97,17 @@ def run(cmd: list[str], *, check: bool = True, retries: int = 1, retry_delay: fl
     return proc
 
 
-def publish(agent: str, event_type: str, status: str, title: str, detail: str, job: bool) -> None:
+def publish(
+    agent: str,
+    event_type: str,
+    status: str,
+    title: str,
+    detail: str,
+    job: bool,
+    *,
+    task: dict[str, Any] | None = None,
+    phase: str = "handoff",
+) -> None:
     cmd = [
         sys.executable,
         str(ROOT / "scripts" / "agent_publish.py"),
@@ -107,10 +118,28 @@ def publish(agent: str, event_type: str, status: str, title: str, detail: str, j
         "--tool", "agent_delegate.py",
         "--detail", compact(detail, 500),
         "--brain-feed",
+        "--phase", phase,
     ]
+    if task:
+        cmd.extend([
+            "--work-id", str(task["workId"]),
+            "--run-id", str(task["runId"]),
+            "--generation", str(task.get("generation") or 1),
+            "--origin", str(task.get("origin") or "agent-delegate"),
+            "--origin-claim-hash", str(task["originClaimHash"]),
+            "--work-event", "update",
+        ])
+        if task.get("modelFamily"):
+            cmd.extend(["--model-family", str(task["modelFamily"])])
+        if task.get("modelId"):
+            cmd.extend(["--model-id", str(task["modelId"])])
+        if task.get("routeVerified"):
+            cmd.append("--route-verified")
+        else:
+            cmd.append("--route-unverified")
     if job:
         cmd.append("--job")
-    run(cmd, check=False)
+    run(cmd, check=True)
 
 
 def create_task(args: argparse.Namespace) -> dict[str, Any]:
@@ -127,7 +156,18 @@ def create_task(args: argparse.Namespace) -> dict[str, Any]:
         "--approval", args.approval,
         "--note", compact(f"Delegated through agent_delegate.py. Type={args.task_type}", 400),
         "--brain-feed",
+        "--origin", args.origin,
     ]
+    if args.origin_claim:
+        cmd.extend(["--origin-claim", args.origin_claim])
+    elif args.origin_claim_hash:
+        cmd.extend(["--origin-claim-hash", args.origin_claim_hash])
+    if args.model_family:
+        cmd.extend(["--model-family", args.model_family])
+    if args.model_id:
+        cmd.extend(["--model-id", args.model_id])
+    if args.route_verified:
+        cmd.append("--route-verified")
     if args.job:
         cmd.append("--job")
     for cap in args.capability or []:
@@ -149,6 +189,20 @@ def sync_task_queue(remote: dict[str, str]) -> None:
     run(["scp", str(TASK_QUEUE), destination])
 
 
+def block_task_receipt(task: dict[str, Any], requester: str, error: str) -> None:
+    """Keep queue and canonical work truth on the same terminal generation."""
+    run([
+        sys.executable,
+        str(ROOT / "scripts" / "agent_task.py"),
+        "block",
+        "--id", str(task["id"]),
+        "--agent", requester,
+        "--note", compact(f"Remote receipt not confirmed: {error}", 400),
+        "--phase", "receipt-blocked",
+        "--brain-feed",
+    ])
+
+
 def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
     remote = REMOTE_HOSTS.get(agent)
     if not remote:
@@ -156,7 +210,6 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
     title = f"Instruction received: {task['title']}"
     detail = f"Received JOSHeX request. Task id: {task['id']}. Objective: {task.get('objective') or task['title']}"
     if is_local_remote(remote):
-        publish(agent, "handoff", "active", title, detail, True)
         return title, detail
     base_args = [
         remote["python"],
@@ -167,7 +220,22 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
         "--title", compact(title, 180),
         "--tool", "agent_delegate.py",
         "--detail", compact(detail, 500),
+        "--work-id", str(task["workId"]),
+        "--run-id", str(task["runId"]),
+        "--generation", str(task.get("generation") or 1),
+        "--origin", str(task.get("origin") or "agent-delegate"),
+        "--origin-claim-hash", str(task["originClaimHash"]),
+        "--work-event", "update",
+        "--phase", "instruction-received",
     ]
+    if task.get("modelFamily"):
+        base_args.extend(["--model-family", str(task["modelFamily"])])
+    if task.get("modelId"):
+        base_args.extend(["--model-id", str(task["modelId"])])
+    if task.get("routeVerified"):
+        base_args.append("--route-verified")
+    else:
+        base_args.append("--route-unverified")
     brain_args = [
         *base_args,
         "--brain-feed",
@@ -200,19 +268,17 @@ def main() -> int:
     parser.add_argument("--job", action="store_true")
     parser.add_argument("--no-remote-receipt", action="store_true")
     parser.add_argument("--allow-offline", action="store_true")
+    parser.add_argument("--origin", default="agent-delegate")
+    origin = parser.add_mutually_exclusive_group()
+    origin.add_argument("--origin-claim", default="")
+    origin.add_argument("--origin-claim-hash", default="")
+    parser.add_argument("--model-family", default="")
+    parser.add_argument("--model-id", default="")
+    parser.add_argument("--route-verified", action="store_true")
     args = parser.parse_args()
     args.to = canonical_agent(args.to)
     args.requester = canonical_agent(args.requester)
 
-    target_label = AGENT_LABELS[args.to]
-    publish(
-        args.requester,
-        "handoff",
-        "active",
-        f"Requesting {target_label}: {args.title}",
-        f"Sending {target_label} a dashboard-safe task: {args.objective}",
-        args.job,
-    )
     task = create_task(args)
 
     receipt = {"attempted": False, "ok": False, "error": ""}
@@ -222,18 +288,11 @@ def main() -> int:
             sync_task_queue(REMOTE_HOSTS[args.to])
             receipt_title, receipt_detail = publish_remote_receipt(args.to, task)
             if receipt_title:
-                publish(args.to, "handoff", "active", receipt_title, receipt_detail, True)
+                publish(args.to, "handoff", "active", receipt_title, receipt_detail, True, task=task, phase="instruction-received")
             receipt["ok"] = True
         except SystemExit as exc:
             receipt["error"] = str(exc)
-            publish(
-                args.requester,
-                "blocked",
-                "blocked",
-                f"{target_label} receipt not confirmed",
-                f"Task {task['id']} was queued locally, but remote receipt failed: {receipt['error']}",
-                True,
-            )
+            block_task_receipt(task, args.requester, receipt["error"])
             if not args.allow_offline:
                 raise
 

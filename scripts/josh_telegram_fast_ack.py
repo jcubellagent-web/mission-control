@@ -65,6 +65,7 @@ CONVERSATION_INFO_BLOCK_RE = re.compile(r"Conversation info \(untrusted metadata
 CARD_KEY_TS_PATTERN = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{6})")
 CARD_KEY_SESSION_PATTERN = re.compile(r"^fast-ack-(.*)-\d{4}-\d{2}-\d{2}T\d{6}")
 CURRENT_USER_REQUEST_PATTERN = re.compile(r"(?:^|\n)Current user request:\s*(.*?)\s*$", re.S)
+JAIMES_MENTION_RE = re.compile(r"(?:^|[\s,.:;!?()\[\]{}])@jaimes(?=$|[\s,.:;!?()\[\]{}])", re.I)
 
 if str(WORKSPACE / "scripts") not in sys.path:
     sys.path.insert(0, str(WORKSPACE / "scripts"))
@@ -82,6 +83,15 @@ try:
 except Exception:  # noqa: BLE001
     select_skill = None
     write_selection = None
+
+try:
+    from telegram_channel_registry import owner_accepts, topics_for_owner  # type: ignore
+    JOSH_CONTROL_CENTER_TOPICS = topics_for_owner("josh2", CONTROL_CENTER_CHAT_ID) or JOSH_CONTROL_CENTER_TOPICS
+except Exception:  # noqa: BLE001
+    owner_accepts = lambda owner, chat_id, thread_id, direct=False: (  # type: ignore
+        owner == "josh2"
+        and (direct or (str(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id) in JOSH_CONTROL_CENTER_TOPICS))
+    )
 
 try:
     from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
@@ -865,10 +875,10 @@ def adopt_interpreted_work_cards(
     return adopted
 
 
-def session_metadata() -> dict[str, Any]:
+def session_metadatas() -> list[dict[str, Any]]:
     sessions = load_json(SESSIONS_PATH, {})
     if not isinstance(sessions, dict):
-        return {}
+        return []
 
     candidates: list[dict[str, Any]] = []
     for key, value in sessions.items():
@@ -883,7 +893,12 @@ def session_metadata() -> dict[str, Any]:
         target = parse_telegram_target_from_key(key)
         topic = str(target.get("telegram_thread_id") or "")
         is_direct = "telegram:direct:" in key or "telegram:dm:" in key
-        if not is_direct and not (target.get("telegram_chat_id") == CONTROL_CENTER_CHAT_ID and topic in JOSH_CONTROL_CENTER_TOPICS):
+        if not is_direct and not owner_accepts(
+            "josh2",
+            target.get("telegram_chat_id"),
+            topic,
+            direct=False,
+        ):
             continue
         normalized = dict(value)
         normalized["sessionId"] = session_id
@@ -895,9 +910,13 @@ def session_metadata() -> dict[str, Any]:
         except Exception:
             normalized["_sort_updated_at"] = 0
         candidates.append(normalized)
-    if candidates:
-        return max(candidates, key=lambda item: item.get("_sort_updated_at") or 0)
-    return {}
+    return sorted(candidates, key=lambda item: item.get("_sort_updated_at") or 0, reverse=True)
+
+
+def session_metadata() -> dict[str, Any]:
+    """Compatibility accessor for callers that need only the freshest lane."""
+    candidates = session_metadatas()
+    return candidates[0] if candidates else {}
 
 
 def session_paths_for(session_id: str, meta: dict[str, Any] | None = None) -> list[Path]:
@@ -1794,7 +1813,41 @@ def with_work_card_target(cmd: list[str], meta: dict[str, Any] | None = None) ->
     return routed
 
 
-def publish_josh(title: str, status: str, detail: str) -> None:
+def telegram_work_identity(key: str, run_id: str) -> tuple[str, str, str]:
+    stable = f"{key}|{run_id}".encode("utf-8")
+    digest = hashlib.sha256(stable).hexdigest()
+    return (
+        f"work-telegram-{digest[:24]}",
+        f"run-telegram-{digest[24:48]}",
+        hashlib.sha256(b"telegram-origin|" + stable).hexdigest(),
+    )
+
+
+def canonical_model_family(value: str) -> str:
+    lowered = str(value or "").lower()
+    if "gemini" in lowered or "google" in lowered or "antigravity" in lowered:
+        return "antigravity"
+    if "grok" in lowered or "xai" in lowered or "x.ai" in lowered:
+        return "grok"
+    if any(token in lowered for token in ("ollama", "llama", "qwen", "gemma", "glm")):
+        return "ollama"
+    return "codex"
+
+
+def publish_josh(
+    title: str,
+    status: str,
+    detail: str,
+    *,
+    work_id: str = "",
+    run_id: str = "",
+    phase: str = "",
+    model_id: str = "",
+    route_verified: bool | None = None,
+    origin_claim_hash: str = "",
+    brain_feed: bool = True,
+    work_event: str = "",
+) -> bool:
     cmd = [
         "python3",
         "mission-control/scripts/agent_publish.py",
@@ -1812,12 +1865,30 @@ def publish_josh(title: str, status: str, detail: str) -> None:
         detail[:260],
         "--privacy",
         "dashboard-safe",
-        "--brain-feed",
     ]
+    if brain_feed:
+        cmd.append("--brain-feed")
+    if work_event:
+        cmd += ["--work-event", work_event]
+    if work_id:
+        cmd += ["--work-id", work_id]
+    if run_id:
+        cmd += ["--run-id", run_id]
+    if phase:
+        cmd += ["--phase", phase]
+    if model_id:
+        cmd += ["--model-family", canonical_model_family(model_id), "--model-id", model_id[:120]]
+    if route_verified:
+        cmd.append("--route-verified")
+    elif route_verified is False:
+        cmd.append("--route-unverified")
+    if origin_claim_hash:
+        cmd += ["--origin-claim-hash", origin_claim_hash]
     try:
-        subprocess.run(cmd, cwd=WORKSPACE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
+        result = subprocess.run(cmd, cwd=WORKSPACE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
+        return result.returncode == 0
     except Exception:
-        return
+        return False
 
 
 def event_age_seconds(ts: str) -> float | None:
@@ -1869,6 +1940,10 @@ def send_ack(
         key = f"fast-ack-run-{stable_identity}"
     else:
         key = f"fast-ack-{event['session_id']}-{event['ts'].replace(':', '').replace('.', '-')}"
+    work_id, work_run_id, origin_claim_hash = telegram_work_identity(
+        key,
+        str(event.get("run_id") or message_id or event.get("ts") or "run"),
+    )
     prompt = event.get("prompt", "")
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
     ack_message_id = ""
@@ -1946,7 +2021,16 @@ def send_ack(
         display_route = f"{display_route}; runbook={skill['id']}"
     if is_hold_request(prompt):
         if not dry_run:
-            publish_josh(objective, "done", "Hold requested; no live work card started.")
+            publish_josh(
+                objective,
+                "cancelled",
+                "Hold requested; no live work card started.",
+                work_id=work_id,
+                run_id=work_run_id,
+                phase="cancelled",
+                model_id=str(route.get("model") or model),
+                origin_claim_hash=origin_claim_hash,
+            )
         return {
             "ok": True,
             "reaction_ok": bool(dry_run or ack_sent),
@@ -1956,6 +2040,9 @@ def send_ack(
             "route": display_route,
             "skill": skill,
             "objective": objective,
+            "work_id": work_id,
+            "ledger_run_id": work_run_id,
+            "origin_claim_hash": origin_claim_hash,
             "run_id": event.get("run_id") or "",
             "no_card_required": True,
             "last_card_update_at": utc_now(),
@@ -2060,17 +2147,32 @@ def send_ack(
             "card_start_receipt": str(card_start.get("stdout") or ""),
         }
     if not dry_run:
-        publish_josh(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
+        publish_josh(
+            objective,
+            "active",
+            f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
+            work_id=work_id,
+            run_id=work_run_id,
+            phase="active",
+            model_id=str(model or DEFAULT_MODEL),
+            route_verified=True,
+            origin_claim_hash=origin_claim_hash,
+            work_event="start",
+        )
     return {
         "ok": True,
         "reaction_ok": bool(dry_run or ack_sent),
         "ack_message_id": ack_message_id,
         "key": key,
         "model": display_model,
+        "runtime_model": str(model or DEFAULT_MODEL),
         "route": display_route,
         "route_plan": route.get("route_plan"),
         "skill": skill,
         "objective": objective,
+        "work_id": work_id,
+        "ledger_run_id": work_run_id,
+        "origin_claim_hash": origin_claim_hash,
         "run_id": event.get("run_id") or "",
         "last_card_update_at": utc_now(),
         "card_start_ok": card_start_ok,
@@ -2180,7 +2282,17 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             ]
             if not dry_run:
                 result = run_cmd(with_work_card_target(cmd, meta))
-                publish_josh(objective, "active", event["summary"])
+                publish_josh(
+                    objective,
+                    "active",
+                    event["summary"],
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="active",
+                    model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                    route_verified=not bool(card.get("coordinator_owned")),
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             else:
                 result = {"ok": True, "dry_run": True}
             card["status"] = "active"
@@ -2240,6 +2352,18 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 card["status"] = "failed"
                 card["ended_at"] = utc_now()
                 card["last_card_update_at"] = card["ended_at"]
+                if not dry_run:
+                    publish_josh(
+                        objective,
+                        "error",
+                        "The selected worker exhausted its safe delivery path.",
+                        work_id=str(card.get("work_id") or ""),
+                        run_id=str(card.get("ledger_run_id") or ""),
+                        phase="error",
+                        model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                        route_verified=not bool(card.get("coordinator_owned")),
+                        origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                    )
             else:
                 card["final_delivery_status"] = "retry"
                 card["last_card_update_at"] = utc_now()
@@ -2269,7 +2393,16 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             ]
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, meta))
             if not dry_run:
-                publish_josh("Josh 2.0 standing by", "done", summary)
+                publish_josh(
+                    objective,
+                    "cancelled",
+                    summary,
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="cancelled",
+                    model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             card["status"] = "done"
             card["ended_at"] = utc_now()
             card["last_card_update_at"] = card["ended_at"]
@@ -2298,7 +2431,16 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             ]
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, meta))
             if not dry_run:
-                publish_josh("Josh 2.0 standing by", "done", summary)
+                publish_josh(
+                    objective,
+                    "cancelled",
+                    summary,
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="cancelled",
+                    model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             card["status"] = "done"
             card["ended_at"] = utc_now()
             card["last_card_update_at"] = card["ended_at"]
@@ -2328,6 +2470,20 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, meta))
         # Do not keep re-publishing heartbeat-only work-card text to
         # Brain Feed; it makes stale cards look like current truth.
+        if not dry_run:
+            publish_josh(
+                objective,
+                "active",
+                summary,
+                work_id=str(card.get("work_id") or ""),
+                run_id=str(card.get("ledger_run_id") or ""),
+                phase="heartbeat",
+                model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                route_verified=not coordinator_owned,
+                origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                brain_feed=False,
+                work_event="heartbeat",
+            )
         card["last_card_update_at"] = utc_now()
         updates.append({"event": f"heartbeat:{run_id}:{card['last_card_update_at']}", "result": result})
     state["processed_progress_events"] = sorted(processed)[-300:]
@@ -2641,6 +2797,7 @@ def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False
         if receipt["final_message_id"]:
             status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else "done"
             card.update({"status": status, "ended_at": utc_now(), "last_card_update_at": utc_now()})
+            publish_terminal_once(str(run_key), card_key, status)
             queued.append({"event": f"stale-final-gate:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
             continue
         outbox = terminal_outbox_path(str(run_key), card_key)
@@ -2697,6 +2854,7 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
             if run_key in active:
                 ended_at = utc_now()
                 active[run_key].update({"status": status, "ended_at": ended_at, "last_card_update_at": ended_at})
+            publish_terminal_once(run_key, card_key, status)
             path.unlink(missing_ok=True)
             recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
             continue
@@ -2727,6 +2885,7 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
                     "last_card_update_at": ended_at,
                     "terminal_closed_before_final_at": ended_at,
                 })
+            publish_terminal_once(run_key, card_key, persisted["status"].lower())
             path.unlink(missing_ok=True)
             recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "delivered"}})
             continue
@@ -2769,6 +2928,58 @@ def persist_terminal_card_state(run_key: str, card_key: str, status: str = "done
             "terminal_closed_before_final_at": ended_at,
         })
         save_json(STATE_PATH, latest)
+
+
+def publish_terminal_once(run_key: str, card_key: str, status: str) -> bool:
+    """Publish one canonical terminal event for an exact Telegram work card."""
+    claimed_at = utc_now()
+    snapshot: dict[str, Any] = {}
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        active = latest.get("active_cards") if isinstance(latest, dict) else {}
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
+            return False
+        if card.get("ledger_terminal_published_at"):
+            return True
+        prior_claim = parse_utc(card.get("ledger_terminal_claimed_at"))
+        if prior_claim and (dt.datetime.now(dt.timezone.utc) - prior_claim).total_seconds() < 120:
+            return False
+        if not card.get("work_id") or not card.get("ledger_run_id"):
+            return False
+        card["ledger_terminal_claimed_at"] = claimed_at
+        snapshot = dict(card)
+        save_json(STATE_PATH, latest)
+
+    canonical_status = {
+        "failed": "error",
+        "error": "error",
+        "blocked": "blocked",
+        "paused": "cancelled",
+        "cancelled": "cancelled",
+    }.get(str(status or "").lower(), "done")
+    published = publish_josh(
+        str(snapshot.get("objective") or "Josh 2.0 Telegram task"),
+        canonical_status,
+        "Verified Telegram final delivered and live work closed.",
+        work_id=str(snapshot.get("work_id") or ""),
+        run_id=str(snapshot.get("ledger_run_id") or ""),
+        phase=canonical_status,
+        model_id=str(snapshot.get("runtime_model") or snapshot.get("model") or DEFAULT_MODEL),
+        route_verified=not bool(snapshot.get("coordinator_owned")),
+        origin_claim_hash=str(snapshot.get("origin_claim_hash") or ""),
+        work_event="terminal",
+    )
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        active = latest.get("active_cards") if isinstance(latest, dict) else {}
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if isinstance(card, dict) and str(card.get("key") or "") == card_key:
+            if published:
+                card["ledger_terminal_published_at"] = utc_now()
+            card.pop("ledger_terminal_claimed_at", None)
+            save_json(STATE_PATH, latest)
+    return published
 
 
 def claim_terminal_card_close(run_key: str, card_key: str) -> str:
@@ -2858,6 +3069,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
     if receipt_terminal_status:
         persisted_status = receipt_terminal_status
         persist_terminal_card_state(run_key, card_key, persisted_status)
+        publish_terminal_once(run_key, card_key, persisted_status)
         if receipt["final_message_id"]:
             return {
                 "ok": True,
@@ -2900,6 +3112,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
         persisted = work_card_state_receipt(card_key)
         if persisted["status"].lower() in TERMINAL_CARD_STATUSES:
             persist_terminal_card_state(run_key, card_key, persisted["status"].lower())
+            publish_terminal_once(run_key, card_key, persisted["status"].lower())
             if final_summary and not persisted["final_message_id"]:
                 # The card-only close succeeded in an earlier attempt. It is
                 # already fenced from the poller, so retry only final delivery.
@@ -2989,6 +3202,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
         outbox_path.unlink(missing_ok=True)
     persisted_status = persisted["status"].lower()
     persist_terminal_card_state(run_key, card_key, persisted_status)
+    publish_terminal_once(run_key, card_key, persisted_status)
     if final_summary:
         return {
             "ok": True,
@@ -3093,6 +3307,12 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
     route_plan = ack.get("route_plan")
     if isinstance(route_plan, dict) and route_plan.get("routeId"):
         cmd.extend(["--route-plan-json", json.dumps(route_plan, separators=(",", ":"), sort_keys=True)])
+    if ack.get("work_id"):
+        cmd.extend(["--work-id", str(ack["work_id"])])
+    if ack.get("ledger_run_id"):
+        cmd.extend(["--work-run-id", str(ack["ledger_run_id"])])
+    if ack.get("origin_claim_hash"):
+        cmd.extend(["--origin-claim-hash", str(ack["origin_claim_hash"])])
     if args.dry_run:
         cmd.append("--dry-run")
 
@@ -3154,10 +3374,14 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "key": ack.get("key"),
         "objective": ack.get("objective"),
         "model": ack.get("model"),
+        "runtime_model": ack.get("runtime_model"),
         "route": ack.get("route"),
         "session_id": session_id,
         "message_id": str(args.message_id or ""),
         "job_id": str((job or {}).get("jobId") or ""),
+        "work_id": str(ack.get("work_id") or ""),
+        "ledger_run_id": str(ack.get("ledger_run_id") or ""),
+        "origin_claim_hash": str(ack.get("origin_claim_hash") or ""),
         "coordinator_owned": True,
         "telegram_chat_id": str(meta["telegram_chat_id"]),
         "telegram_thread_id": str(meta["telegram_thread_id"]),
@@ -3224,13 +3448,12 @@ def coordinator_maintenance() -> None:
 def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state, base_state = load_fast_ack_state_snapshot()
     acked = set(state.get("acked_prompt_events") or [])
-    meta = session_metadata()
-    session_id = str(meta.get("sessionId") or "")
-    model = str(meta.get("model") or DEFAULT_MODEL)
-    if not session_id:
+    metas = session_metadatas()
+    if not metas:
         state["last_checked_at"] = utc_now()
         state["direct_session_id"] = ""
-        state["model"] = model
+        state["owned_session_ids"] = []
+        state["model"] = DEFAULT_MODEL
         state["last_result"] = {"ok": False, "status": "no-direct-session"}
         state["status"] = "no-direct-session"
         if not dry_run:
@@ -3238,58 +3461,78 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         return {"ok": False, "status": "no-direct-session"}
 
     sent: list[dict[str, Any]] = []
+    updates: list[dict[str, Any]] = []
+    session_ids: list[str] = []
     state.setdefault("active_cards", {})
-    events = recent_prompt_events(session_id, meta=meta)
     first_bootstrap = not acked and not state.get("last_checked_at")
-    for event in events:
-        event_id = f"{event['session_id']}:{event['ts']}"
-        if event_id in acked:
+    for meta in metas:
+        session_id = str(meta.get("sessionId") or "")
+        if not session_id:
             continue
-        if internal_replay_prompt(event.get("prompt") or ""):
-            # Continuation plumbing is not a new Telegram task. Leave the
-            # existing live card in place and wait for the real final summary.
-            acked.add(event_id)
-            continue
-        if should_skip_stale_prompt_event(event["ts"], first_bootstrap):
-            acked.add(event_id)
-            continue
-        result = send_ack(event, model=model, dry_run=dry_run, meta=meta)
-        if result.get("ok"):
-            acked.add(event_id)
-            if result.get("run_id"):
-                state["active_cards"][result["run_id"]] = {
-                    "key": result.get("key"),
-                    "objective": result.get("objective"),
-                    "model": result.get("model"),
-                    "route": result.get("route"),
-                    "ack_message_id": result.get("ack_message_id"),
-                    "card_start_ok": bool(result.get("card_start_ok")),
-                    "header_message_id": str(result.get("header_message_id") or ""),
-                    "live_message_id": str(result.get("live_message_id") or ""),
-                    "session_id": session_id,
-                    "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
-                    "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
-                    "telegram_session_key": str(meta.get("telegram_session_key") or ""),
-                    "requires_objective_interpretation": bool(result.get("requires_objective_interpretation")),
-                    "no_card_required": bool(result.get("no_card_required")),
-                    "started_at": result.get("last_card_update_at"),
-                    "last_progress_at": result.get("last_card_update_at"),
-                    "last_card_update_at": result.get("last_card_update_at"),
-                    "status": (
-                        "done" if result.get("no_card_required")
-                        else "pending-interpretation" if result.get("requires_objective_interpretation")
-                        else "active"
-                    ),
-                }
-            sent.append({"event": event_id, "result": result})
-        else:
-            sent.append({"event": event_id, "result": result})
-            break
+        session_ids.append(session_id)
+        model = str(meta.get("model") or DEFAULT_MODEL)
+        events = recent_prompt_events(session_id, meta=meta)
+        for event in events:
+            event_id = f"{event['session_id']}:{event['ts']}"
+            if event_id in acked:
+                continue
+            if internal_replay_prompt(event.get("prompt") or ""):
+                acked.add(event_id)
+                continue
+            if JAIMES_MENTION_RE.search(event.get("prompt") or ""):
+                # JAIMES scans every authorized Control Center topic and owns
+                # directly mentioned turns through the shared origin claim.
+                acked.add(event_id)
+                continue
+            if should_skip_stale_prompt_event(event["ts"], first_bootstrap):
+                acked.add(event_id)
+                continue
+            result = send_ack(event, model=model, dry_run=dry_run, meta=meta)
+            if result.get("ok"):
+                acked.add(event_id)
+                if result.get("run_id"):
+                    state["active_cards"][result["run_id"]] = {
+                        "key": result.get("key"),
+                        "work_id": result.get("work_id"),
+                        "ledger_run_id": result.get("ledger_run_id"),
+                        "origin_claim_hash": result.get("origin_claim_hash"),
+                        "objective": result.get("objective"),
+                        "model": result.get("model"),
+                        "runtime_model": result.get("runtime_model"),
+                        "route": result.get("route"),
+                        "ack_message_id": result.get("ack_message_id"),
+                        "card_start_ok": bool(result.get("card_start_ok")),
+                        "header_message_id": str(result.get("header_message_id") or ""),
+                        "live_message_id": str(result.get("live_message_id") or ""),
+                        "session_id": session_id,
+                        "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
+                        "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
+                        "telegram_session_key": str(meta.get("telegram_session_key") or ""),
+                        "requires_objective_interpretation": bool(result.get("requires_objective_interpretation")),
+                        "no_card_required": bool(result.get("no_card_required")),
+                        "started_at": result.get("last_card_update_at"),
+                        "last_progress_at": result.get("last_card_update_at"),
+                        "last_card_update_at": result.get("last_card_update_at"),
+                        "status": (
+                            "done" if result.get("no_card_required")
+                            else "pending-interpretation" if result.get("requires_objective_interpretation")
+                            else "active"
+                        ),
+                    }
+                sent.append({"event": event_id, "result": result})
+            else:
+                sent.append({"event": event_id, "result": result})
+                break
+        updates.extend(update_active_cards(state, session_id, dry_run=dry_run, meta=meta))
+        orphan_updates = reconcile_orphan_work_cards(state, dry_run=dry_run, meta=meta)
+        if orphan_updates:
+            updates.extend(orphan_updates)
 
     state["acked_prompt_events"] = sorted(acked)[-200:]
     state["last_checked_at"] = utc_now()
-    state["direct_session_id"] = session_id
-    state["model"] = model
+    state["direct_session_id"] = session_ids[0] if session_ids else ""
+    state["owned_session_ids"] = session_ids
+    state["model"] = str(metas[0].get("model") or DEFAULT_MODEL)
     state["status"] = "ok"
     state.pop("last_error", None)
     state.pop("last_error_at", None)
@@ -3302,23 +3545,20 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 "key": sent[-1]["result"].get("key"),
                 "event": sent[-1]["event"],
                 "created_at": utc_now(),
-                "model": model,
+                "model": sent[-1]["result"].get("model") or DEFAULT_MODEL,
             }
         else:
             state.pop("latest_pending_ack", None)
     stale_gate_updates = queue_stale_final_gate_recovery(state, dry_run=dry_run)
     terminal_outbox_updates = recover_terminal_final_outbox(state, dry_run=dry_run)
-    updates = [*stale_gate_updates, *terminal_outbox_updates]
-    updates.extend(update_active_cards(state, session_id, dry_run=dry_run, meta=meta))
-    orphan_updates = reconcile_orphan_work_cards(state, dry_run=dry_run, meta=meta)
-    if orphan_updates:
-        updates.extend(orphan_updates)
+    updates = [*stale_gate_updates, *terminal_outbox_updates, *updates]
     pruned_terminal_cards = prune_terminal_cards(state)
     if not dry_run:
         merge_poll_state(state, base_state)
     return {
         "ok": True,
-        "session_id": session_id,
+        "session_id": session_ids[0] if session_ids else "",
+        "session_ids": session_ids,
         "sent": sent,
         "updates": updates,
         "pruned_terminal_cards": pruned_terminal_cards,

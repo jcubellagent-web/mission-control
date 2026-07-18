@@ -7,6 +7,13 @@ export type AgentStatus = {
   detail: string;
   current_tool: string;
   model?: string;
+  model_family?: CanonicalModelFamily;
+  route_verified?: boolean;
+  work_id?: string;
+  run_id?: string;
+  phase?: string;
+  lease_until?: string;
+  origin_claim_hash?: string;
   source?: string;
   active: boolean;
   updated_at: string;
@@ -17,6 +24,58 @@ export type AgentStatus = {
     tool?: string;
     kind?: string;
   }>;
+};
+
+export type CanonicalModelFamily = "codex" | "antigravity" | "ollama" | "grok";
+
+export type ActiveModelRoute = {
+  workId: string;
+  runId: string;
+  ownerAgent: AgentId;
+  modelFamily: CanonicalModelFamily;
+  modelId: string;
+  routeVerified: true;
+  activatedAt?: string;
+  updatedAt: string;
+  leaseUntil?: string;
+  sourceEventId?: string;
+  revision?: number;
+};
+
+export type ActiveWork = {
+  workId: string;
+  runId: string;
+  generation: number;
+  sequence: number;
+  status: string;
+  ownerAgent: AgentId;
+  ownerLabel?: string;
+  objective: string;
+  phase: string;
+  tool: string;
+  detail: string;
+  origin?: string;
+  originClaimHash?: string;
+  modelFamily?: CanonicalModelFamily | null;
+  modelId?: string | null;
+  routeVerified: boolean;
+  leaseUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+  lastMeaningfulAt?: string;
+  stale?: boolean;
+};
+
+export type ControlTowerHot = {
+  schemaVersion?: number;
+  revision?: number;
+  generatedAt?: string;
+  storeUpdatedAt?: string;
+  source?: string;
+  freshness?: Record<string, unknown>;
+  counts?: Record<string, unknown>;
+  activeWorks: ActiveWork[];
+  activeModelRoutes: ActiveModelRoute[];
 };
 
 export type AgentEvent = {
@@ -52,6 +111,46 @@ export type AgentJob = {
   todayRelevant?: boolean;
 };
 
+export type TodayJobOutcome = "complete" | "skipped" | "broken" | "pending";
+
+export type TodayJobOccurrence = {
+  occurrenceId: string;
+  definitionId?: string;
+  name: string;
+  owner?: string;
+  agent?: string;
+  source?: string;
+  sourceLabel?: string;
+  category?: string;
+  description?: string;
+  scheduledAt?: string;
+  scheduledTime?: string;
+  schedule?: string;
+  outcome: TodayJobOutcome;
+  runStatus?: string;
+  lastRun?: string;
+  durationMs?: number;
+  duration?: string;
+  evidence?: string;
+  rolledUp?: boolean;
+  expectedRuns?: number;
+  completedRuns?: number;
+};
+
+export type TodayJobsMeta = {
+  version?: number | string;
+  timezone?: string;
+  date?: string;
+  generatedAt?: string;
+  now?: string;
+  nowIndex?: number;
+  nextOccurrenceId?: string;
+  counts?: Partial<Record<TodayJobOutcome, number>>;
+  definitionCount?: number;
+  occurrenceCount?: number;
+  rolledUpDefinitionCount?: number;
+};
+
 export type Approval = {
   id: string;
   agent_id: AgentId;
@@ -68,6 +167,10 @@ export type MissionControlState = {
   statuses: AgentStatus[];
   events: AgentEvent[];
   jobs: AgentJob[];
+  todayJobs?: TodayJobOccurrence[];
+  todayJobsMeta?: TodayJobsMeta;
+  workHot?: ControlTowerHot;
+  activeModelRoutes?: ActiveModelRoute[];
   approvals: Approval[];
   agenticCrypto?: AgenticCryptoWallet;
   modelUsage?: ModelUsage;

@@ -13,6 +13,7 @@ import json
 import os
 import re
 import secrets
+import shlex
 import sqlite3
 import subprocess
 import sys
@@ -49,6 +50,15 @@ BOT_IDENTITY_CHECK_SECONDS = 5 * 60
 EXPECTED_BOT_USERNAME = os.environ.get("JAIMES_TELEGRAM_BOT_USERNAME", "Jaimes_claw_bot")
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 45 * 60
+CONTROL_TOWER_SSH_HOST = os.environ.get("CONTROL_TOWER_SSH_HOST", "josh2.0@josh2")
+CONTROL_TOWER_REMOTE_ROOT = os.environ.get(
+    "CONTROL_TOWER_REMOTE_ROOT",
+    "/Users/josh2.0/.openclaw/workspace/mission-control",
+)
+CONTROL_TOWER_REMOTE_PYTHON = os.environ.get(
+    "CONTROL_TOWER_REMOTE_PYTHON",
+    "/opt/homebrew/bin/python3",
+)
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
 X_INTELLIGENCE_QUEUE = WORKSPACE / "memory" / "x_intelligence_intake_queue.jsonl"
 X_STATUS_URL_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/[A-Za-z0-9_]{1,15}/status/\d+", re.I)
@@ -67,6 +77,15 @@ try:
 except Exception:  # noqa: BLE001
     select_skill = None
     write_selection = None
+
+try:
+    from telegram_channel_registry import owner_accepts, topics_for_owner  # type: ignore
+    JAIMES_CONTROL_CENTER_TOPICS = topics_for_owner("jaimes", CONTROL_CENTER_CHAT_ID) or JAIMES_CONTROL_CENTER_TOPICS
+except Exception:  # noqa: BLE001
+    owner_accepts = lambda owner, chat_id, thread_id, direct=False: (  # type: ignore
+        owner == "jaimes"
+        and (direct or (str(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id) in JAIMES_CONTROL_CENTER_TOPICS))
+    )
 
 try:
     from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
@@ -518,8 +537,12 @@ def recover_accepted_handoff_card(
     if run_id in cards:
         return
     key = f"jaimes-fast-ack-{meta.get('telegram_chat_id') or 'telegram'}-{message_id}"
+    work_id, ledger_run_id, origin_claim_hash = telegram_work_identity(key, run_id)
     cards[run_id] = {
         "key": key,
+        "work_id": work_id,
+        "ledger_run_id": ledger_run_id,
+        "origin_claim_hash": origin_claim_hash,
         "objective": objective_from_prompt(str(event.get("prompt") or "")),
         "model": str(meta.get("model") or DEFAULT_MODEL),
         "route": "Recovered from durable JAIMES Inbox acceptance",
@@ -702,8 +725,8 @@ def session_metadata() -> dict[str, Any]:
             chat_id = str(target.get("telegram_chat_id") or "")
             thread_id = str(target.get("telegram_thread_id") or "")
             is_direct = str(key) in DIRECT_SESSION_KEYS
-            is_owned_group_topic = chat_id == CONTROL_CENTER_CHAT_ID and thread_id in (JAIMES_CONTROL_CENTER_TOPICS | JAIMES_DIRECT_MENTION_TOPICS)
-            if not is_direct and not is_owned_group_topic:
+            is_authorized_group_topic = chat_id == CONTROL_CENTER_CHAT_ID and bool(thread_id)
+            if not is_direct and not is_authorized_group_topic:
                 continue
             normalized = normalize_session_metadata(value, assume_telegram=True)
             if not normalized:
@@ -736,10 +759,7 @@ def active_hermes_sessions_metadata() -> list[dict[str, Any]]:
                   FROM sessions
                  WHERE source = 'telegram'
                    AND ended_at IS NULL
-                   AND (
-                        chat_id = '6218150306'
-                        OR (chat_id = ? AND thread_id IN ('1','17','19','20','56'))
-                   )
+                   AND (chat_id = '6218150306' OR chat_id = ?)
               ORDER BY started_at DESC
                 """,
                 (CONTROL_CENTER_CHAT_ID,),
@@ -1636,24 +1656,42 @@ def run_cmd(cmd: list[str], timeout: int = 20) -> dict[str, str | int | bool]:
     return {"ok": proc.returncode == 0, "returncode": proc.returncode, "stdout": proc.stdout.strip(), "stderr": proc.stderr.strip()}
 
 
-def publish_jaimes(title: str, status: str, detail: str) -> None:
-    # Fast path first: update the physical Control Tower via JOSH 2.0 local
-    # kiosk/SSE. Keep it non-blocking so Telegram ack latency is not held by SSH.
-    bf_state = "idle" if status in {"done", "idle", "ok", "complete"} else "active"
-    try:
-        subprocess.Popen(
-            [str(HOME / "scripts" / "jaimes_bf_push.sh"), title, bf_state, "JAIMES Telegram", detail[:260]],
-            cwd=str(HOME),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-    except Exception:
-        pass
+def telegram_work_identity(key: str, run_id: str) -> tuple[str, str, str]:
+    stable = f"{key}|{run_id}".encode("utf-8")
+    digest = hashlib.sha256(stable).hexdigest()
+    return (
+        f"work-telegram-{digest[:24]}",
+        f"run-telegram-{digest[24:48]}",
+        hashlib.sha256(b"telegram-origin|" + stable).hexdigest(),
+    )
 
-    cmd = [
-        "python3",
-        "mission-control/scripts/agent_publish.py",
+
+def canonical_model_family(value: str) -> str:
+    lowered = str(value or "").lower()
+    if any(token in lowered for token in ("gemini", "google", "antigravity")):
+        return "antigravity"
+    if any(token in lowered for token in ("grok", "xai", "x.ai")):
+        return "grok"
+    if any(token in lowered for token in ("ollama", "llama", "qwen", "gemma", "glm")):
+        return "ollama"
+    return "codex"
+
+
+def publish_jaimes(
+    title: str,
+    status: str,
+    detail: str,
+    *,
+    work_id: str = "",
+    run_id: str = "",
+    phase: str = "",
+    model_id: str = "",
+    route_verified: bool | None = None,
+    origin_claim_hash: str = "",
+    brain_feed: bool = True,
+    work_event: str = "",
+) -> bool:
+    publish_args = [
         "--agent",
         "jaimes",
         "--type",
@@ -1668,12 +1706,54 @@ def publish_jaimes(title: str, status: str, detail: str) -> None:
         detail[:260],
         "--privacy",
         "dashboard-safe",
-        "--brain-feed",
     ]
+    if brain_feed:
+        publish_args.append("--brain-feed")
+    if work_event:
+        publish_args += ["--work-event", work_event]
+    if work_id:
+        publish_args += ["--work-id", work_id]
+    if run_id:
+        publish_args += ["--run-id", run_id]
+    if phase:
+        publish_args += ["--phase", phase]
+    if model_id:
+        publish_args += ["--model-family", canonical_model_family(model_id), "--model-id", model_id[:120]]
+    if route_verified:
+        publish_args.append("--route-verified")
+    elif route_verified is False:
+        publish_args.append("--route-unverified")
+    if origin_claim_hash:
+        publish_args += ["--origin-claim-hash", origin_claim_hash]
+    # JAIMES runs on a different host. The local checkout is not the
+    # operational ledger: submit the identity-bearing event to Josh 2.0 so
+    # Control Tower, SSE, and FinOps observe one canonical transaction.
+    remote_command = "cd {} && {}".format(
+        shlex.quote(CONTROL_TOWER_REMOTE_ROOT),
+        shlex.join([
+            CONTROL_TOWER_REMOTE_PYTHON,
+            f"{CONTROL_TOWER_REMOTE_ROOT}/scripts/agent_publish.py",
+            *publish_args,
+        ]),
+    )
     try:
-        subprocess.run(cmd, cwd=WORKSPACE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
+        result = subprocess.run(
+            [
+                "ssh",
+                "-o", "BatchMode=yes",
+                "-o", "ConnectTimeout=4",
+                CONTROL_TOWER_SSH_HOST,
+                remote_command,
+            ],
+            cwd=WORKSPACE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=12,
+            check=False,
+        )
+        return result.returncode == 0
     except Exception:
-        return
+        return False
 
 
 def event_age_seconds(ts: str) -> float | None:
@@ -1699,6 +1779,10 @@ def send_ack(
 ) -> dict[str, Any]:
     task_identity = event.get("platform_message_id") or event.get("db_message_id") or event["ts"].replace(":", "").replace(".", "-")
     key = f"jaimes-fast-ack-{(meta or {}).get('telegram_chat_id') or 'telegram'}-{task_identity}"
+    work_id, work_run_id, origin_claim_hash = telegram_work_identity(
+        key,
+        str(event.get("run_id") or task_identity or "run"),
+    )
     if key in set(state.get("processed_task_keys") or []):
         #JAIMES: a replayed state-db row with the same stable task key must not
         # create a second acknowledgement or work-card lifecycle.
@@ -1877,7 +1961,18 @@ def send_ack(
         record_api_result(state, "sendMessage", {"ok": False, "error": "No message_id returned by initial Telegram surface"})
     if not dry_run:
         send_chat_action(meta=meta)
-        publish_jaimes(objective, "active", f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}")
+        publish_jaimes(
+            objective,
+            "active",
+            f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
+            work_id=work_id,
+            run_id=work_run_id,
+            phase="active",
+            model_id=display_model,
+            route_verified=True,
+            origin_claim_hash=origin_claim_hash,
+            work_event="start",
+        )
 
     surface_ok = bool(ack_message_id and (not handoff_topic or header_message_id))
     return {
@@ -1889,6 +1984,9 @@ def send_ack(
         "route": display_route,
         "skill": skill,
         "objective": objective,
+        "work_id": work_id,
+        "ledger_run_id": work_run_id,
+        "origin_claim_hash": origin_claim_hash,
         "reaction_ok": reaction_ok,
         "button_triggered": is_button_prompt(prompt),
         "run_id": event.get("run_id") or "",
@@ -1969,6 +2067,18 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             card["final_db_message_id"] = final_record.get("id")
             card["final_contract_status"] = "canonical"
             card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
+            if not dry_run:
+                publish_jaimes(
+                    str(card.get("objective") or "JAIMES Telegram task"),
+                    "cancelled",
+                    "Verified final response delivered in JAIMES Telegram.",
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="done",
+                    model_id=str(card.get("model") or DEFAULT_MODEL),
+                    route_verified=True,
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             completed += 1
     return completed
 
@@ -2032,7 +2142,17 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             ] + work_card_target_args(card)
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
-                publish_jaimes(objective, "done", "Final response sent in JAIMES Telegram.")
+                publish_jaimes(
+                    objective,
+                    "done",
+                    "Final response sent in JAIMES Telegram.",
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="done",
+                    model_id=str(card.get("model") or DEFAULT_MODEL),
+                    route_verified=True,
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
                 if (
                     event.get("final_text")
                     and event_id not in approval_sent
@@ -2068,7 +2188,17 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             cmd += work_card_target_args(card)
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
-                publish_jaimes(objective, "active", event["summary"])
+                publish_jaimes(
+                    objective,
+                    "active",
+                    event["summary"],
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="active",
+                    model_id=str(card.get("model") or DEFAULT_MODEL),
+                    route_verified=True,
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             card["status"] = "active"
             card["current_summary"] = event["summary"]
             card["last_card_update_at"] = utc_now()
@@ -2114,7 +2244,16 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             ] + work_card_target_args(card)
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
-                publish_jaimes("JAIMES standing by", "done", summary)
+                publish_jaimes(
+                    objective,
+                    "cancelled",
+                    summary,
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="cancelled",
+                    model_id=str(card.get("model") or DEFAULT_MODEL),
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
             card["status"] = "done"
             card["ended_at"] = utc_now()
             card["last_card_update_at"] = card["ended_at"]
@@ -2126,6 +2265,20 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         # made active work look stalled and polluted Completed/progress. Tool and
         # model events are the only sources allowed to move the visible card.
         card["heartbeat_checked_at"] = utc_now()
+        if not dry_run:
+            publish_jaimes(
+                objective,
+                "active",
+                str(card.get("current_summary") or "Work remains active on the verified JAIMES route."),
+                work_id=str(card.get("work_id") or ""),
+                run_id=str(card.get("ledger_run_id") or ""),
+                phase="heartbeat",
+                model_id=str(card.get("model") or DEFAULT_MODEL),
+                route_verified=True,
+                origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                brain_feed=False,
+                work_event="heartbeat",
+            )
     state["processed_progress_events"] = sorted(processed)[-300:]
     state["approval_buttons_sent"] = sorted(approval_sent)[-200:]
     return updates
@@ -2517,10 +2670,16 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             event_db_id = int(event.get("db_message_id") or 0)
             if (
                 str(session_meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
-                and str(session_meta.get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
+                and not owner_accepts(
+                    "jaimes",
+                    session_meta.get("telegram_chat_id"),
+                    session_meta.get("telegram_thread_id"),
+                    direct=False,
+                )
                 and not direct_jaimes_mention(event.get("prompt") or "")
             ):
-                # Topic 1 remains Josh-owned unless JAIMES is directly tagged.
+                # Any Josh-owned or newly authorized topic remains Josh-owned
+                # unless JAIMES is directly tagged.
                 acked.add(event_id)
                 state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
                 continue
@@ -2594,6 +2753,9 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             if result.get("run_id"):
                 state["active_cards"][result["run_id"]] = {
                     "key": result.get("key"),
+                    "work_id": result.get("work_id"),
+                    "ledger_run_id": result.get("ledger_run_id"),
+                    "origin_claim_hash": result.get("origin_claim_hash"),
                     "objective": result.get("objective"),
                     "model": result.get("model"),
                     "route": result.get("route"),

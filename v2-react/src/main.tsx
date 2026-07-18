@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { AlertTriangle, CheckCircle2, ClipboardList, Coins, DollarSign, ExternalLink, EyeOff, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sun, Timer, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
-import type { AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem } from "./types";
+import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
+import type { ActiveModelRoute, AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
@@ -35,7 +36,6 @@ type AgentIdleContext = {
 };
 type AgentBriefRow = { label: string; text: string };
 type AgentInsightRow = { label: string; text: string; tone?: "default" | "good" | "watch" | "active" };
-type RouteLadderStep = { key: string; label: string; model: string; note: string; active: boolean };
 type AttentionItem = {
   id: string;
   label: string;
@@ -120,7 +120,13 @@ function missionText(value?: string | null) {
     const stem = name.split("/").pop()?.replace(/\.(py|sh|js|ts|tsx)$/i, "") || name;
     return scriptLabels[stem] || stem.replace(/[_-]/g, " ");
   };
-  return String(value || "")
+  const raw = String(value || "");
+  if (/Traceback \(most recent call last\)|(?:^|\n)\s*File "[^"]+", line \d+/i.test(raw)) {
+    return "Internal runtime error; details remain in host-local logs.";
+  }
+  return raw
+    .replace(/(?:\/Users\/|\/home\/)[^\s<]+/gi, "host-local path")
+    .replace(/(?:node_modules\/|(?:src|scripts)\/)[^\s:]+:\d+/gi, "host-local implementation detail")
     .replace(/Heartbeat:\s*josh2-lan/gi, "Josh 2.0 is online and ready")
     .replace(/Heartbeat:\s*jaimes-via-josh/gi, "JAIMES is online and ready")
     .replace(/Heartbeat:\s*macbook-codex/gi, "JOSHeX is online and ready")
@@ -192,7 +198,12 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
   const wallet = state.agenticCrypto;
   const finopsFresh = cryptoFreshness(wallet);
   const tone = focusCount || freshTone === "risk" ? "risk" : freshTone === "watch" || String(finopsFresh.tone) === "watch" ? "watch" : "clear";
-  const activeWorkstreams = activeAgents + workingJobs;
+  // #JAIMES: The canonical leased work ledger is authoritative when present. Legacy
+  // status rows and recurring daemon coverage are readiness signals, not
+  // additional concurrently active workstreams.
+  const activeWorkstreams = state.workHot
+    ? state.workHot.activeWorks.length
+    : activeAgents + workingJobs;
   const headline = freshTone === "risk"
     ? "Dashboard data stale"
     : freshTone === "watch"
@@ -605,43 +616,6 @@ function agentSla(status: AgentStatus) {
   return { tone: "ok", label: `On time · last ${age} ago`, detail: "Expected every 2h" };
 }
 
-function agentRouteText(status: AgentStatus) {
-  const stepText = (status.steps || [])
-    .map((step) => [step.label, step.title, step.tool, step.kind, step.status].filter(Boolean).join(" "))
-    .join(" ");
-  return [
-    status.agent_id,
-    status.status,
-    status.objective,
-    status.detail,
-    status.current_tool,
-    stepText,
-  ].filter(Boolean).join(" ").toLowerCase();
-}
-
-function activeRouteStep(agent: AgentId, status: AgentStatus) {
-  const text = agentRouteText(status);
-  if (/approval|approve|josh approval|external action|irreversible/.test(text)) return "approve";
-  if (/j\.?a\.?i\.?n|jain|fallback|staging|disaster|dr\b/.test(text) || agent === "jain") return "fallback";
-  if (/jaimes|hermes|codex|openclaw|terminal|bash|file edit|execution|tool/.test(text) || agent === "jaimes") return "execute";
-  if (/gemini pro|judge|escalat|deep review|long context/.test(text)) return "judge";
-  if (/gemini|flash|front[- ]?desk|triage|summary|digest/.test(text) || agent === "josh2") return "frontdesk";
-  if (agent === "joshex") return "execute";
-  return "frontdesk";
-}
-
-function routeLadderSteps(agent: AgentId, status: AgentStatus): RouteLadderStep[] {
-  const active = activeRouteStep(agent, status);
-  return [
-    { key: "lite", label: "Lite", model: "Worker", note: "never routes", active: false },
-    { key: "frontdesk", label: "Flash", model: "Front desk", note: "default", active: active === "frontdesk" },
-    { key: "judge", label: "Pro", model: "Judge", note: "escalate", active: active === "judge" },
-    { key: "execute", label: "JAIMES", model: "Execute", note: "tools", active: active === "execute" },
-    { key: "fallback", label: "J.A.I.N", model: "Fallback", note: "DR", active: active === "fallback" },
-    { key: "approve", label: "Josh", model: "Approve", note: "gate", active: active === "approve" },
-  ];
-}
-
 function agentClass(agent: AgentId) {
   return `agent-${agent}`;
 }
@@ -726,21 +700,32 @@ function compactSignature(value: unknown) {
 function sectionSignatures(state: MissionControlState): Record<SectionCueKey, string> {
   return {
     brain: compactSignature({
-      statuses: state.statuses.map((row) => [row.agent_id, row.status, row.active, row.objective, row.detail, row.updated_at]),
+      statuses: state.statuses.map((row) => [row.agent_id, row.work_id, row.run_id, row.status, row.phase, row.active, row.objective, row.detail, row.model_family, row.route_verified, row.updated_at]),
+      workRevision: state.workHot?.revision,
       events: state.events.slice(0, 8).map((row) => [row.id, row.status, row.title, row.created_at]),
       approvals: state.approvals.filter((row) => row.status === "pending").map((row) => [row.id, row.title, row.created_at]),
     }),
-    jobs: compactSignature(state.jobs.map((row) => [
-      row.id,
-      row.status,
-      row.runStatus,
-      row.title,
-      row.updated_at,
-      row.lastRun,
-      row.nextRun,
-      row.started_at,
-      row.finished_at,
-    ])),
+    jobs: compactSignature({
+      projection: state.todayJobs?.map((row) => [
+        row.occurrenceId,
+        row.outcome,
+        row.runStatus,
+        row.lastRun,
+        row.durationMs,
+      ]),
+      generatedAt: state.todayJobsMeta?.generatedAt,
+      fallback: state.jobs.map((row) => [
+        row.id,
+        row.status,
+        row.runStatus,
+        row.title,
+        row.updated_at,
+        row.lastRun,
+        row.nextRun,
+        row.started_at,
+        row.finished_at,
+      ]),
+    }),
     system: compactSignature({
       reliability: state.reliabilityUpgrades?.items?.map((row) => [row.id, row.status, row.signal, row.next]),
       source: state.source,
@@ -751,10 +736,13 @@ function sectionSignatures(state: MissionControlState): Record<SectionCueKey, st
 function rowSignatures(state: MissionControlState) {
   const rows: Record<string, string> = {};
   state.statuses.forEach((row) => {
-    rows[cueRowKey("agent", row.agent_id)] = compactSignature([row.status, row.active, row.objective, row.detail, row.updated_at]);
+    rows[cueRowKey("agent", row.agent_id)] = compactSignature([row.work_id, row.run_id, row.status, row.phase, row.active, row.objective, row.detail, row.model_family, row.route_verified, row.updated_at]);
   });
   state.jobs.forEach((row) => {
     rows[cueRowKey("job", row.id || row.title)] = compactSignature([row.status, row.runStatus, row.updated_at, row.lastRun, row.nextRun, row.detail]);
+  });
+  state.todayJobs?.forEach((row) => {
+    rows[cueRowKey("today-job", row.occurrenceId)] = compactSignature([row.outcome, row.runStatus, row.lastRun, row.durationMs, row.evidence]);
   });
   state.events.slice(0, 10).forEach((row) => {
     rows[cueRowKey("work", row.id || row.title)] = compactSignature([row.status, row.title, row.detail, row.created_at]);
@@ -1169,13 +1157,21 @@ function App() {
               modelUsage={state.modelUsage}
               modelRouter={state.modelRouter}
               statuses={state.statuses}
+              activeModelRoutes={state.activeModelRoutes || []}
               loading={loading}
               onRefresh={() => refreshAgenticCrypto(true)}
             />
           </section>
         </section>
         <aside className="right-rail">
-          <JobsRail jobs={state.jobs} statuses={state.statuses} quietMode={quietMode} liveCues={liveCues} />
+          <JobsRail
+            jobs={state.jobs}
+            todayJobs={state.todayJobs}
+            todayJobsMeta={state.todayJobsMeta}
+            statuses={state.statuses}
+            quietMode={quietMode}
+            liveCues={liveCues}
+          />
         </aside>
       </section>
     </main>
@@ -1260,11 +1256,6 @@ function BrainHero({
             );
           })}
         </div>
-        <SystemRouteLadder
-          statuses={heroAgents.map((agent) => statuses.get(agent) || offlineStatus(agent))}
-          modelRouter={state.modelRouter}
-          modelUsage={state.modelUsage}
-        />
       </div>
 
       {showDetails ? (
@@ -1440,90 +1431,6 @@ function MemoryOperationsPanel({ state }: { state: MissionControlState }) {
         </article>
       </div>
     </section>
-  );
-}
-
-function systemRouteLadderSteps(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]): RouteLadderStep[] {
-  const lastRoute = modelRouter?.lastRoute || {};
-  const routeText = [
-    lastRoute.provider,
-    lastRoute.model,
-    lastRoute.routeLabel,
-    (modelRouter as Record<string, unknown> | undefined)?.activeLane,
-    ...statuses.map((status) => agentRouteText(status)),
-  ].filter(Boolean).join(" ").toLowerCase();
-  const hasActive = statuses.some((status) => {
-    const value = String(status.status || "").toLowerCase();
-    return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
-  });
-  return [
-    { key: "lite", label: "Lite", model: "Gemini Flash Lite", note: "Tiny worker only; never routes escalation decisions", active: /flash[- ]?lite|lite_worker/.test(routeText) },
-    { key: "frontdesk", label: "Flash", model: "Gemini Flash", note: "Fast front desk, summaries, triage, safe review", active: /gemini|flash|front[- ]?desk|triage|summary|digest/.test(routeText) && !/flash[- ]?lite/.test(routeText) },
-    { key: "judge", label: "Pro", model: "Gemini Pro", note: "Judgment, long context, escalation checks", active: /gemini pro|judge|escalat|deep review|long context/.test(routeText) },
-    { key: "execute", label: "JAIMES", model: "Codex/OpenAI", note: "Verified tools, code, crons, Sorare, heavy execution", active: /jaimes|hermes|backend|execution|terminal|bash|file edit|tool/.test(routeText) },
-    { key: "fallback", label: "J.A.I.N", model: "OpenCLAW fallback", note: "Staging, support, recovery, disaster response", active: /j\.?a\.?i\.?n|jain|fallback|staging|disaster|dr\b/.test(routeText) },
-    { key: "approve", label: "Josh", model: "Approval gate", note: "External, irreversible, or account-affecting actions", active: /approval|approve|external action|irreversible/.test(routeText) },
-  ].map((step) => ({
-    ...step,
-    active: step.active || (!hasActive && step.key === "frontdesk" && !routeText.trim()),
-  }));
-}
-
-function routeOwnerLabel(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]) {
-  const live = statuses.find((status) => {
-    const value = String(status.status || "").toLowerCase();
-    return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
-  });
-  if (live) return `${AGENTS[live.agent_id as AgentId]?.label || missionText(live.agent_id)} active`;
-  const lastRoute = modelRouter?.lastRoute || {};
-  return missionText(String(lastRoute.routeLabel || lastRoute.provider || "standby"));
-}
-
-function SystemRouteLadder({
-  statuses,
-  modelRouter,
-  modelUsage,
-}: {
-  statuses: AgentStatus[];
-  modelRouter?: MissionControlState["modelRouter"];
-  modelUsage?: MissionControlState["modelUsage"];
-}) {
-  const steps = systemRouteLadderSteps(statuses, modelRouter);
-  const active = steps.find((step) => step.active) || steps[1];
-  const lastRoute = modelRouter?.lastRoute || {};
-  const codexMode = missionText(String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "conserve"));
-  const routeQuality = typeof modelRouter?.routeQualityScore === "number" ? `${modelRouter.routeQualityScore}/100` : "tracked";
-  const efficiency = typeof modelRouter?.efficiencyScore === "number" ? `${modelRouter.efficiencyScore}/100` : "tracked";
-  return (
-    <aside className="system-route-ladder" aria-label="Model routing ladder">
-      <header>
-        <p>Model routing ladder</p>
-        <h3>{active.label}: {active.model}</h3>
-        <span>{routeOwnerLabel(statuses, modelRouter)}</span>
-      </header>
-      <div className="system-route-current">
-        <span>Current route</span>
-        <strong>{missionText(String(lastRoute.provider || active.model || "auto"))}</strong>
-        <em>{missionText(String(lastRoute.model || active.note))}</em>
-      </div>
-      <ol className="system-route-steps">
-        {steps.map((step, index) => (
-          <li key={step.key} className={step.active ? "is-active" : ""}>
-            <i>{index + 1}</i>
-            <div className="route-step-copy">
-              <span>{step.label}</span>
-              <strong>{step.model}</strong>
-              <em>{step.note}</em>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <footer>
-        <span>Codex allowance: {codexMode}</span>
-        <span>Route quality: {routeQuality}</span>
-        <span>Efficiency: {efficiency}</span>
-      </footer>
-    </aside>
   );
 }
 
@@ -1797,23 +1704,15 @@ function SignalFeedRows({ rows, liveCues, emptyLabel, newsletter = false }: { ro
 }
 
 function providerKey(provider: any) {
-  const text = `${provider?.id || ""} ${provider?.label || ""} ${provider?.role || ""} ${provider?.lastModelUsed || ""}`.toLowerCase();
-  if (/gemini|google/.test(text)) return "gemini";
-  if (/ollama|local/.test(text)) return "ollama";
-  if (/xai|grok/.test(text)) return "xai";
-  if (/openrouter/.test(text)) return "openrouter";
-  if (/anthropic|claude/.test(text)) return "anthropic";
-  if (/openai|codex|gpt/.test(text)) return "openai";
-  return String(provider?.id || provider?.label || "provider").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return routeForProvider(provider || {})?.id || null;
 }
 
 function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRouter?: MissionControlState["modelRouter"]) {
   const lastRoute = modelRouter?.lastRoute || {};
-  const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "conserve");
   const defaults = [
     {
-      id: "openai",
-      label: "Codex / OpenAI",
+      id: "codex",
+      label: CANONICAL_ROUTES.codex.label,
       role: "Trusted execution, code edits, private connectors, terminal work, and final integration.",
       whyChosen: "Default when the task needs system access, code changes, approvals, or high-confidence execution.",
       lastModelUsed: /openai|codex|gpt/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "openai/gpt-5.5",
@@ -1825,8 +1724,8 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       status: "ready",
     },
     {
-      id: "gemini",
-      label: "Gemini",
+      id: "antigravity",
+      label: CANONICAL_ROUTES.antigravity.label,
       role: "Low-cost front-desk review, large-context reading, summaries, and secondary checks.",
       whyChosen: "Use Flash when safe for dashboard-safe synthesis; use Pro for judgment and escalation.",
       lastModelUsed: /gemini|google/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "gemini flash / pro",
@@ -1838,7 +1737,7 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
     },
     {
       id: "ollama",
-      label: "Ollama Pro",
+      label: CANONICAL_ROUTES.ollama.label,
       role: "Local/private helper lane for drafts, compression, and low-risk offline utility work.",
       whyChosen: "Use when local model quality is sufficient and cloud subscription quota should be preserved.",
       lastModelUsed: /ollama|local/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "local/ollama",
@@ -1851,26 +1750,16 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       status: "ready",
     },
     {
-      id: "xai",
-      label: "xAI / Grok",
-      role: "Grok is disabled while credits are exhausted; X Signal continues through forwarded links, public web, and primary-source verification.",
-      whyChosen: "No-cost X intake routes analysis through Gemini, Ollama, or Codex without logged-in X scraping.",
-      lastModelUsed: "disabled — credits exhausted",
+      id: "grok",
+      label: CANONICAL_ROUTES.grok.label,
+      role: "X-native current-events research, social signal work, and primary-source verification.",
+      whyChosen: "Use for X-native signal discovery and current social context.",
+      lastModelUsed: /xai|grok/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "grok",
       budgetType: "subscription",
       plan: "X Premium",
       subscriptionMonthlyUsd: 8,
       billingLabel: "$8/mo",
-      billingNote: "Existing subscription baseline only; no incremental API spend, credit purchases, or auto-recharge.",
-      status: "blocked",
-    },
-    {
-      id: "openrouter",
-      label: "OpenRouter",
-      role: "Fallback and specialist reserve when primary lanes are unavailable or a niche model is needed.",
-      whyChosen: "Keep dim unless actively selected by failover or a specialist workflow.",
-      lastModelUsed: /openrouter/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "fallback pool",
-      budgetType: "fallback cap",
-      status: "reserve",
+      status: "ready",
     },
   ];
 
@@ -1893,12 +1782,13 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
   const byKey = new Map<string, any>();
   rows.forEach((row) => {
     const key = providerKey(row);
+    if (!key) return;
     const existing = byKey.get(key);
     const next = existing ? {
       ...existing,
       ...row,
       id: row?.id || existing.id,
-      label: row?.label || existing.label,
+      label: CANONICAL_ROUTES[key].label,
       role: row?.role || existing.role,
       whyChosen: row?.whyChosen || existing.whyChosen,
       lastModelUsed: row?.lastModelUsed || existing.lastModelUsed,
@@ -1919,42 +1809,30 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       totalTokens: row?.totalTokens ?? existing.totalTokens,
       inputTokens: row?.inputTokens ?? existing.inputTokens,
       outputTokens: row?.outputTokens ?? existing.outputTokens,
-    } : row;
+    } : { ...row, id: key, label: CANONICAL_ROUTES[key].label };
     byKey.set(key, next);
   });
-  const preferred = ["openai", "gemini", "ollama", "xai", "openrouter"];
-  const ordered = preferred.map((key) => byKey.get(key)).filter(Boolean);
-  const extras = [...byKey.entries()].filter(([key]) => !preferred.includes(key)).map(([, row]) => row);
-  return [...ordered, ...extras];
+  return CANONICAL_ROUTE_ORDER.map((key) => byKey.get(key)).filter(Boolean);
 }
 
-function activeProviderKeys(statuses: AgentStatus[], modelRouter?: MissionControlState["modelRouter"]) {
+function activeProviderKeys(statuses: AgentStatus[], routes: ActiveModelRoute[]) {
   const keys = new Set<string>();
+  routes
+    .filter((route) => route.routeVerified && (!route.leaseUntil || timeValue(route.leaseUntil) > Date.now()))
+    .forEach((route) => keys.add(route.modelFamily));
+  if (keys.size) return keys;
   statuses
     .filter((status) => {
       const value = String(status.status || "").toLowerCase();
-      return (status.active || value === "active" || value === "working") && isFreshActiveTimestamp(status.updated_at);
+      return Boolean(status.route_verified)
+        && (status.active || value === "active" || value === "working")
+        && isFreshActiveTimestamp(status.updated_at)
+        && (!status.lease_until || timeValue(status.lease_until) > Date.now());
     })
     .forEach((status) => {
-    const text = `${status.objective} ${status.detail} ${status.current_tool} ${status.steps?.map((step) => `${step.tool || ""} ${step.label || ""}`).join(" ")}`.toLowerCase();
-    if (/gemini|google/.test(text)) keys.add("gemini");
-    if (/ollama|local model|local\/ollama/.test(text)) keys.add("ollama");
-    if (/xai|grok/.test(text)) keys.add("xai");
-      if (/openrouter/.test(text)) keys.add("openrouter");
-      if (/anthropic|claude/.test(text)) keys.add("anthropic");
-      if (/openai|codex|gpt/.test(text)) keys.add("openai");
+      const route = verifiedRouteForAgentStatus(status);
+      if (route) keys.add(route.id);
     });
-  const lastRoute = modelRouter?.lastRoute || {};
-  const routeFresh = isFreshActiveTimestamp(String(lastRoute.updatedAt || modelRouter?.updatedAt || ""));
-  if (routeFresh) {
-    const text = `${lastRoute.provider || ""} ${lastRoute.model || ""} ${lastRoute.routeLabel || ""}`.toLowerCase();
-    if (/gemini|google/.test(text)) keys.add("gemini");
-    if (/ollama|local/.test(text)) keys.add("ollama");
-    if (/xai|grok/.test(text)) keys.add("xai");
-    if (/openrouter/.test(text)) keys.add("openrouter");
-    if (/anthropic|claude/.test(text)) keys.add("anthropic");
-    if (/openai|codex|gpt/.test(text)) keys.add("openai");
-  }
   return keys;
 }
 
@@ -2001,11 +1879,10 @@ function providerSpendLabel(provider: any) {
 
 function providerDisplayBlurb(provider: any) {
   const key = providerKey(provider);
-  if (key === "openai") return "Execution lane for code, tools, auth, private connectors, and final changes.";
-  if (key === "gemini") return "Low-cost reading, review, summaries, and judgment escalation.";
+  if (key === "codex") return "Execution lane for code, tools, auth, private connectors, and final changes.";
+  if (key === "antigravity") return "Gemini reading, review, summaries, and judgment escalation.";
   if (key === "ollama") return "Local drafts, compression, and low-risk offline utility.";
-  if (key === "xai") return "X Signal operational via forwarded links, public web, and primary verification; Grok disabled.";
-  if (key === "openrouter") return "Fallback or specialist reserve when primary lanes are unavailable.";
+  if (key === "grok") return "X-native current-events research, social signal discovery, and verification.";
   const raw = missionText(String(provider?.whyChosen || provider?.role || "Available when route policy selects it."));
   return raw.length > 84 ? `${raw.slice(0, 81).trim()}...` : raw;
 }
@@ -2036,7 +1913,7 @@ function subscriptionBaselineUsd(providers: any[]) {
 }
 
 function usagePressureLabel(providers: any[]) {
-  const codex = providers.find((provider) => providerKey(provider) === "openai");
+  const codex = providers.find((provider) => providerKey(provider) === "codex");
   const windows = providerLimitRows(codex);
   const weekly = windows.find((window: any) => /week/i.test(String(window?.label || window?.id || "")));
   const session = windows.find((window: any) => /session/i.test(String(window?.label || window?.id || "")));
@@ -2093,10 +1970,10 @@ function providerTopModels(provider: any) {
   const belongs = (model: any) => {
     const name = String(model?.name || "").toLowerCase();
     const source = String(model?.source || "").toLowerCase();
-    if (key === "openai") return /codex|openai|gpt/.test(`${name} ${source}`) && !/ollama|gemma|llama|glm/.test(`${name} ${source}`);
-    if (key === "gemini") return /gemini|google|flash|pro/.test(`${name} ${source}`);
+    if (key === "codex") return /codex|openai|gpt/.test(`${name} ${source}`) && !/ollama|gemma|llama|glm/.test(`${name} ${source}`);
+    if (key === "antigravity") return /antigravity|gemini|google|flash|pro/.test(`${name} ${source}`);
     if (key === "ollama") return /ollama|local|gemma|llama|glm|qwen/.test(`${name} ${source}`);
-    if (key === "xai") return /xai|grok/.test(`${name} ${source}`);
+    if (key === "grok") return /xai|grok/.test(`${name} ${source}`);
     return true;
   };
   const normalized = new Set<string>();
@@ -2237,6 +2114,7 @@ function FinOpsDashboard({
   modelUsage,
   modelRouter,
   statuses,
+  activeModelRoutes,
   loading,
   onRefresh,
 }: {
@@ -2244,6 +2122,7 @@ function FinOpsDashboard({
   modelUsage?: MissionControlState["modelUsage"];
   modelRouter?: MissionControlState["modelRouter"];
   statuses: AgentStatus[];
+  activeModelRoutes: ActiveModelRoute[];
   loading: boolean;
   onRefresh: () => void;
 }) {
@@ -2253,7 +2132,7 @@ function FinOpsDashboard({
   const trades = walletTradeRows(wallet);
   const activity = (((wallet as any)?.activityLedger as AgenticCryptoWallet["recentActivity"]) || wallet?.recentActivity || []);
   const providers = providerRows(modelUsage, modelRouter);
-  const activeKeys = activeProviderKeys(statuses, modelRouter);
+  const activeKeys = activeProviderKeys(statuses, activeModelRoutes);
   const subscriptionBaseline = subscriptionBaselineUsd(providers);
   const usagePressure = usagePressureLabel(providers);
   const modelRows = modelUsageBreakdownRows(modelUsage);
@@ -2405,13 +2284,19 @@ function FinOpsDashboard({
             <div className="finops-provider-grid">
               {providers.length ? providers.map((provider) => {
                 const key = providerKey(provider);
-                const active = activeKeys.has(key);
+                const route = routeForProvider(provider) || CANONICAL_ROUTES.codex;
+                const active = Boolean(key && activeKeys.has(key));
                 const pct = providerUtilizationPct(provider);
                 const tone = providerTone(provider);
                 const limits = providerLimitRows(provider);
                 const topModels = providerTopModels(provider);
                 return (
-                  <article key={provider.id || key} data-provider={key} className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}>
+                  <article
+                    key={provider.id || key}
+                    data-provider={key || undefined}
+                    className={`finops-provider-card finops-anatomy-card is-${tone} ${active ? "is-active" : "is-idle"}`}
+                    style={routeCssProperties(route) as React.CSSProperties}
+                  >
                     <header className="provider-card-head">
                       <span className="provider-glow-dot" />
                       <div>
@@ -2488,15 +2373,23 @@ function FinOpsDashboard({
                 <em>{fmtTime(modelUsage?.lastUpdated)}</em>
               </header>
               <div className="model-ledger-list">
-                {modelRows.length ? modelRows.map((model: any) => (
-                  <article key={`${model.source || "source"}-${model.name}`} className="model-ledger-row">
-                    <strong>{providerModelLabel(model)}</strong>
-                    <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
-                    <span>{compactInt(model.totalTokens) || "0"} tok</span>
-                    <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
-                    <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
-                  </article>
-                )) : (
+                {modelRows.length ? modelRows.map((model: any) => {
+                  const modelRoute = routeForProvider({ id: model.source, label: model.name, model: model.name });
+                  const modelActive = Boolean(modelRoute && activeKeys.has(modelRoute.id));
+                  return (
+                    <article
+                      key={`${model.source || "source"}-${model.name}`}
+                      className={`model-ledger-row${modelActive ? " is-active-route" : ""}`}
+                      style={modelRoute ? routeCssProperties(modelRoute) as React.CSSProperties : undefined}
+                    >
+                      <strong>{providerModelLabel(model)}</strong>
+                      <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
+                      <span>{compactInt(model.totalTokens) || "0"} tok</span>
+                      <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
+                      <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
+                    </article>
+                  );
+                }) : (
                   <p className="wallet-empty-state">No model ledger rows are loaded yet. CodexBar data will appear after the next model-usage sync.</p>
                 )}
               </div>
@@ -3611,6 +3504,8 @@ function AgentHeroCard({
   const [objectiveScroll, setObjectiveScroll] = useState({ active: false, distance: 0, duration: 18 });
   const freshness = freshnessClass(status.updated_at);
   const objectiveText = missionText(status.objective);
+  const verifiedRoute = verifiedRouteForAgentStatus(status);
+  const route = verifiedRoute || routeForAgentStatus(status);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase()) && isFreshActiveTimestamp(status.updated_at);
   const activeFocus = activeWorkFresh || statusWorkingFresh;
@@ -3661,10 +3556,11 @@ function AgentHeroCard({
   }, [headline.title, headline.description]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,
+        "--route-color": verifiedRoute?.color || "#7892a3",
       } as React.CSSProperties}
     >
       <span className="row-change-dot" aria-hidden="true" />
@@ -3706,6 +3602,13 @@ function AgentHeroCard({
         </span>
       </h3>
       <p title={supportNote}>{supportNote}</p>
+      <div className="agent-route-label" title={verifiedRoute ? `${route.providerLabel}: ${route.description}` : "No verified runtime route is active for this work item."}>
+        <span aria-hidden="true" />
+        <div>
+          <strong>{verifiedRoute ? route.label : "Route pending"}</strong>
+          <em>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "Awaiting verified runtime")}</em>
+        </div>
+      </div>
     </article>
   );
 }
@@ -4312,66 +4215,211 @@ function AgentOpsHealth({ statuses }: { statuses: AgentStatus[] }) {
   );
 }
 
+function todayJobOutcome(value: unknown): TodayJobOutcome {
+  const status = String(value || "").toLowerCase();
+  if (/complete|completed|success|succeeded|done|passed|\bok\b/.test(status)) return "complete";
+  if (/skip|disabled|paused|cancel/.test(status)) return "skipped";
+  if (/broken|error|failed|missed|blocked|timeout/.test(status)) return "broken";
+  return "pending";
+}
+
+function jobsFallbackOccurrences(jobs: MissionControlState["jobs"]): TodayJobOccurrence[] {
+  return jobs
+    .filter((job) => job.todayRelevant || job.schedule || job.nextRun || job.lastRun)
+    .map((job) => ({
+      occurrenceId: job.id,
+      definitionId: job.id,
+      name: job.title,
+      owner: AGENTS[job.agent_id]?.label,
+      agent: job.agent_id,
+      sourceLabel: job.sourceLabel || job.tool,
+      description: job.detail,
+      scheduledAt: job.nextRun || undefined,
+      schedule: job.schedule,
+      outcome: todayJobOutcome(job.runStatus || job.status),
+      runStatus: job.runStatus || job.status,
+      lastRun: job.lastRun || job.completed_at || undefined,
+    }));
+}
+
+function scheduledMinutesEt(job: TodayJobOccurrence): number | null {
+  const source = String(job.scheduledTime || "").trim();
+  const match = source.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  const meridiem = String(match[3] || "").toUpperCase();
+  if (meridiem === "AM" && hour === 12) hour = 0;
+  if (meridiem === "PM" && hour !== 12) hour += 12;
+  return hour * 60 + minute;
+}
+
+function scheduledSortValue(job: TodayJobOccurrence): number {
+  const timestamp = job.scheduledAt ? Date.parse(job.scheduledAt) : NaN;
+  if (Number.isFinite(timestamp)) return timestamp;
+  const minutes = scheduledMinutesEt(job);
+  return minutes == null ? Number.MAX_SAFE_INTEGER : minutes;
+}
+
+function currentEtMinutes(): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
+  const minute = Number(parts.find((part) => part.type === "minute")?.value || 0);
+  return hour * 60 + minute;
+}
+
+function isFutureTodayJob(job: TodayJobOccurrence): boolean {
+  const timestamp = job.scheduledAt ? Date.parse(job.scheduledAt) : NaN;
+  if (Number.isFinite(timestamp)) return timestamp > Date.now();
+  const minutes = scheduledMinutesEt(job);
+  return minutes != null && minutes > currentEtMinutes();
+}
+
+function todayJobTime(job: TodayJobOccurrence): string {
+  if (job.rolledUp && (!job.scheduledTime || /^coverage$/i.test(job.scheduledTime))) return "All day";
+  if (job.scheduledTime) return missionText(job.scheduledTime);
+  if (job.scheduledAt) {
+    const parsed = new Date(job.scheduledAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(parsed);
+    }
+  }
+  return missionText(job.schedule || "—");
+}
+
+function todayJobDuration(job: TodayJobOccurrence): string {
+  if (job.duration) return missionText(job.duration);
+  if (Number.isFinite(job.durationMs) && Number(job.durationMs) >= 0) {
+    const seconds = Math.round(Number(job.durationMs) / 1000);
+    if (seconds < 60) return `${seconds}s`;
+    return `${Math.round(seconds / 60)}m`;
+  }
+  return "—";
+}
+
+function todayJobOwner(job: TodayJobOccurrence): string {
+  const raw = String(job.owner || job.agent || "System");
+  const lower = raw.toLowerCase();
+  if (lower === "joshex") return "JOSHeX";
+  if (lower === "josh2" || lower.includes("josh 2")) return "Josh 2.0";
+  if (lower === "jaimes") return "JAIMES";
+  if (lower === "jain" || lower.includes("j.a.i.n")) return "J.A.I.N";
+  return missionText(raw);
+}
+
 function JobsRail({
   jobs,
+  todayJobs,
+  todayJobsMeta,
   statuses,
   quietMode,
   liveCues,
 }: {
   jobs: MissionControlState["jobs"];
+  todayJobs?: TodayJobOccurrence[];
+  todayJobsMeta?: TodayJobsMeta;
   statuses: AgentStatus[];
   quietMode: boolean;
   liveCues: LiveCueState;
 }) {
-  const trackedJobs = operatorTrackedJobs(jobs);
-  const visibleJobs = quietMode
-    ? trackedJobs.filter((job) => jobIsActiveOrNeedsAttention(job, trackedJobs) || priorityJobKey(job) !== "general")
-    : trackedJobs;
-  const inventoryGroups = groupedJobs(trackedJobs, "category");
-  const attentionJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
-  const focusCount = visibleJobs.length;
-  const quietInventoryCount = Math.max(0, trackedJobs.length - focusCount);
-  const workingCount = trackedJobs.filter((job) => jobWorkState(job, trackedJobs) === "working").length;
-  const nextJob = upcomingTodayJobs(trackedJobs, 1)[0];
-  const nextRunValue = nextJob ? jobRunCells(nextJob).next : "None";
-  const railSummary = attentionJobs
-    ? `${attentionJobs} need attention now`
-    : workingCount
-      ? `${workingCount} running now`
-      : `Next window ${nextRunValue}`;
+  void statuses;
+  void quietMode;
+  const sourceRows = Array.isArray(todayJobs) ? todayJobs : jobsFallbackOccurrences(jobs);
+  const rows = [...sourceRows].sort((a, b) => scheduledSortValue(a) - scheduledSortValue(b));
+  const counts = rows.reduce<Record<TodayJobOutcome, number>>((totals, job) => {
+    totals[job.outcome] += 1;
+    return totals;
+  }, { complete: 0, skipped: 0, broken: 0, pending: 0 });
+  const computedNowIndex = rows.findIndex(isFutureTodayJob);
+  const metaNowIndex = Number(todayJobsMeta?.nowIndex);
+  const nowIndex = computedNowIndex >= 0
+    ? computedNowIndex
+    : Number.isFinite(metaNowIndex)
+      ? Math.max(0, Math.min(rows.length, metaNowIndex))
+      : rows.length;
+  const nowLabel = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date());
   return (
-    <aside id="today-jobs" className={`jobs-rail${sectionCueClass("jobs", liveCues)}`}>
+    <aside id="today-jobs" className={`jobs-rail jobs-occurrence-rail${sectionCueClass("jobs", liveCues)}`}>
       <SectionCue label={liveCues.focus === "jobs" ? "focus" : "updated"} />
-      <div className="panel-title compact calendar-title">
-        <h2>Today's Jobs</h2>
-        <span>{quietMode ? "Quiet focus view" : railSummary}</span>
+      <header className="today-jobs-head">
+        <div>
+          <p>Daily execution ledger</p>
+          <h2>Today's Jobs</h2>
+        </div>
+        <div className="today-jobs-sync" title={`Projection refreshed ${fmtTime(todayJobsMeta?.generatedAt)}`}>
+          <span aria-hidden="true" />
+          <strong>Live auto-sync</strong>
+          <em>{todayJobsMeta?.date || "ET"}</em>
+        </div>
+      </header>
+      <div className="today-jobs-summary" aria-label={`${rows.length} job occurrences today`}>
+        {(["complete", "skipped", "broken", "pending"] as TodayJobOutcome[]).map((outcome) => (
+          <article key={outcome} className={`is-${outcome}`}>
+            <span aria-hidden="true" />
+            <div>
+              <em>{outcome}</em>
+              <strong>{counts[outcome]}</strong>
+            </div>
+          </article>
+        ))}
       </div>
-      <AgentOpsHealth statuses={statuses} />
-      <div className="jobs-stats-strip" aria-label="Agent Ops & Jobs summary">
-        <article className={attentionJobs ? "is-risk" : "is-clear"}>
-          <span>Action</span>
-          <strong>{attentionJobs ? String(attentionJobs) : "None"}</strong>
-        </article>
-        <article>
-          <span>Running</span>
-          <strong>{workingCount ? String(workingCount) : "Idle"}</strong>
-        </article>
-        <article>
-          <span>Next</span>
-          <strong>{nextRunValue}</strong>
-        </article>
-        <article>
-          <span>Inventory</span>
-          <strong>{trackedJobs.length}</strong>
-        </article>
-      </div>
-      <div className="jobs-operator-note" aria-label="Today jobs display policy">
-        <strong>First screen</strong>
-        <span>{focusCount} surfaced now · {quietInventoryCount} quiet in scheduler</span>
-      </div>
-      <div className="job-list">
-        <JobFocusView jobs={visibleJobs} allJobs={trackedJobs} quietMode={quietMode} liveCues={liveCues} />
-        <SchedulerInventoryDisclosure groups={inventoryGroups} total={trackedJobs.length} surfaced={focusCount} liveCues={liveCues} />
+      <div className="today-jobs-table" role="table" aria-label="Today's recurring job occurrences">
+        <div className="today-jobs-table-head" role="row">
+          <span role="columnheader">Time (ET)</span>
+          <span role="columnheader">Job</span>
+          <span role="columnheader">Owner / agent</span>
+          <span role="columnheader">Status</span>
+          <span role="columnheader">Last run / duration</span>
+        </div>
+        <div className="today-jobs-scroll" role="rowgroup">
+          {rows.length ? rows.map((job, index) => (
+            <React.Fragment key={job.occurrenceId}>
+              {index === nowIndex ? (
+                <div className="today-jobs-now-divider" role="separator">
+                  <span>{nowLabel}</span><i /><strong>Now</strong>
+                </div>
+              ) : null}
+              <article
+                className={`today-job-row is-${job.outcome}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
+                role="row"
+                title={missionText(job.evidence || job.description || job.name)}
+              >
+                <time role="cell">{todayJobTime(job)}</time>
+                <div className="today-job-name" role="cell">
+                  <strong>{missionText(job.name)}</strong>
+                  {job.rolledUp ? <em>{job.completedRuns || 0}/{job.expectedRuns || 0} runs</em> : null}
+                </div>
+                <span role="cell">{todayJobOwner(job)}</span>
+                <span className="today-job-status" role="cell">
+                  <i aria-hidden="true" />{job.runStatus === "running" ? "Running" : job.outcome}
+                </span>
+                <span className="today-job-last" role="cell">
+                  {job.lastRun ? fmtTime(job.lastRun) : "—"}<em>/ {todayJobDuration(job)}</em>
+                </span>
+              </article>
+            </React.Fragment>
+          )) : (
+            <div className="today-jobs-empty">No recurring job occurrences are published for today yet.</div>
+          )}
+          {rows.length && nowIndex === rows.length ? (
+            <div className="today-jobs-now-divider" role="separator">
+              <span>{nowLabel}</span><i /><strong>Now</strong>
+            </div>
+          ) : null}
+        </div>
       </div>
     </aside>
   );

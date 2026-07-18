@@ -1,12 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync, statSync, watch } from "node:fs";
 import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
 
 const dataRoot = resolve(__dirname, "data");
 const configLocalPath = resolve(__dirname, "v2-react", "config.local.js");
 const liveWatchFiles = [
+  "control-tower-hot.json",
   "control-tower-live.json",
   "brain-feed.json",
   "joshex-brain-feed.json",
@@ -96,20 +97,41 @@ function liveSourcePayload() {
       files[file] = { mtime: null, size: null };
     }
   }
+  let hotRevision = 0;
+  let changedDomains: string[] = [];
+  let nextExpiryAt: string | null = null;
+  try {
+    const hot = JSON.parse(readFileSync(join(dataRoot, "control-tower-hot.json"), "utf8"));
+    hotRevision = Number(hot?.revision || 0);
+    nextExpiryAt = typeof hot?.freshness?.nextExpiryAt === "string" ? hot.freshness.nextExpiryAt : null;
+    changedDomains = Array.isArray(hot?.changedDomains)
+      ? hot.changedDomains.filter((item: unknown): item is string => typeof item === "string").slice(0, 12)
+      : [];
+  } catch {
+    // Compatibility: the hot projection is introduced behind the existing
+    // sidecar/SSE lane and may not exist during the first migration build.
+  }
   return {
     ok: true,
     source: "Josh 2.0 local live feed",
     updatedAt: new Date(newest || Date.now()).toISOString(),
+    revision: hotRevision,
+    changedDomains,
+    nextExpiryAt,
+    workLeaseState: nextExpiryAt && Date.now() >= Date.parse(nextExpiryAt) ? `expired:${nextExpiryAt}` : `active:${nextExpiryAt || "none"}`,
     files,
   };
 }
 
 function liveSourceSignature() {
-  return JSON.stringify(liveSourcePayload().files);
+  const payload = liveSourcePayload();
+  return JSON.stringify({ files: payload.files, workLeaseState: payload.workLeaseState });
 }
 
 function writeLocalLiveEvent(res: any) {
-  res.write(`event: mission-control\ndata: ${JSON.stringify(liveSourcePayload())}\n\n`);
+  const payload = liveSourcePayload();
+  if (payload.revision) res.write(`id: ${payload.revision}\n`);
+  res.write(`event: mission-control\ndata: ${JSON.stringify(payload)}\n\n`);
 }
 
 function serveMissionControlFiles(req: any, res: any, next: any) {
@@ -171,10 +193,20 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
       }
     };
     tick();
+    let watchTimer: ReturnType<typeof setTimeout> | undefined;
+    const watcher = watch(dataRoot, { persistent: false }, (_eventType, filename) => {
+      if (!filename || !liveWatchFiles.includes(String(filename))) return;
+      if (watchTimer) clearTimeout(watchTimer);
+      watchTimer = setTimeout(tick, 35);
+    });
     // #JAIMES: one local mtime stream fans sidecar changes into the kiosk;
     // client-side polling remains a separate reconciliation fallback.
     const interval = setInterval(tick, 1_000);
-    const close = () => clearInterval(interval);
+    const close = () => {
+      clearInterval(interval);
+      if (watchTimer) clearTimeout(watchTimer);
+      watcher.close();
+    };
     req.once("close", close);
     res.once("close", close);
     return;

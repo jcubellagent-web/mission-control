@@ -5,6 +5,7 @@ import contextlib
 import json
 import sqlite3
 import stat
+import subprocess
 import sys
 import tempfile
 import threading
@@ -68,6 +69,33 @@ class MultiSessionWatcherTests(unittest.TestCase):
             )
             assert cur.lastrowid is not None
             return int(cur.lastrowid)
+
+    def test_identity_publish_targets_josh2_canonical_ledger(self) -> None:
+        completed = subprocess.CompletedProcess([], 0, stdout="", stderr="")
+        with patch.object(watcher.subprocess, "run", return_value=completed) as run:
+            ok = watcher.publish_jaimes(
+                "Review current market signals",
+                "active",
+                "Executing a dashboard-safe research pass",
+                work_id="work-telegram-safe",
+                run_id="run-telegram-safe",
+                phase="research",
+                model_id="gemini-2.5-pro",
+                route_verified=True,
+                origin_claim_hash="a" * 64,
+                work_event="start",
+            )
+        self.assertTrue(ok)
+        command = run.call_args.args[0]
+        self.assertEqual(command[0], "ssh")
+        self.assertEqual(watcher.CONTROL_TOWER_SSH_HOST, "josh2.0@josh2")
+        self.assertIn(watcher.CONTROL_TOWER_SSH_HOST, command)
+        remote = command[-1]
+        self.assertIn("/Users/josh2.0/.openclaw/workspace/mission-control", remote)
+        self.assertIn("--work-id work-telegram-safe", remote)
+        self.assertIn("--run-id run-telegram-safe", remote)
+        self.assertIn("--origin-claim-hash", remote)
+        self.assertIn("--route-verified", remote)
 
     @staticmethod
     def fake_ack(event, model, state, dry_run, meta):

@@ -16,6 +16,20 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+if str(_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPT_DIR))
+
+from todays_jobs_projection import (  # noqa: E402
+    default_launchd_plist_paths,
+    discover_codex_automations,
+    discover_hermes_definitions,
+    discover_launchd_definitions,
+    discover_qa_definitions,
+    materialize_today_jobs,
+    parse_crontab_definitions,
+)
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
@@ -143,6 +157,7 @@ LIVE_DASHBOARD_KEYS = {
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
     "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
+    "todayJobs", "todayJobsMeta",
 }
 
 
@@ -247,6 +262,11 @@ def load_env_file_values(paths: List[Path], env: Dict[str, str]) -> Dict[str, st
                 merged[key] = value.strip().strip('"').strip("'")
     return merged
 
+# Legacy name retained for compatibility with downstream policy checks.  These
+# rows are presentation/evidence overrides only: they never create a scheduled
+# job.  `fetch_crons()` discovers the inventory from native Codex, launchd,
+# crontab, Hermes, J.A.I.N, and canonical QA definitions, then applies matching
+# metadata from this list.
 CRON_TARGETS = [
     # ── Codex automations ───────────────────────────────────────────────────
     {"name": "Gmail Morning Inbox Triage", "pattern": "gmail-morning-inbox-triage", "schedule": "Daily 8:30 AM ET", "description": "Reviews the last 24 hours of Personal Gmail, quiets low-signal mail, and surfaces anything that needs attention", "category": "Personal Inbox", "agent": "JOSHeX", "source": "codex_automation", "automationId": "gmail-morning-inbox-triage", "assumePresent": True},
@@ -3267,16 +3287,55 @@ PY"""
             }
         return {"todayRelevant": True, "kind": "unknown"}
 
+    # Native definitions own inclusion.  CRON_TARGETS is deliberately used
+    # only as a metadata/evidence overlay so source add/delete/disable changes
+    # flow into Control Tower without a React or Python allowlist edit.
+    active_launch_labels = {
+        line.split()[-1]
+        for line in josh_launch_listing.splitlines()
+        if line.split()
+    }
+    codex_status = load_json_file(CODEX_AUTOMATION_STATUS_PATH, {"automations": {}})
+    discovered_targets: List[Dict[str, Any]] = []
+    discovered_targets.extend(parse_crontab_definitions(
+        josh_listing,
+        owner="josh2",
+        agent="JOSH 2.0",
+        overrides=CRON_TARGETS,
+    ))
+    discovered_targets.extend(parse_crontab_definitions(
+        jain_listing,
+        owner="jain",
+        agent="J.A.I.N",
+        overrides=CRON_TARGETS,
+    ))
+    discovered_targets.extend(discover_launchd_definitions(
+        default_launchd_plist_paths(ROOT.parent),
+        active_labels=active_launch_labels,
+        overrides=CRON_TARGETS,
+    ))
+    discovered_targets.extend(discover_codex_automations(
+        CODEX_AUTOMATIONS_DIR,
+        status_payload=codex_status,
+        overrides=CRON_TARGETS,
+    ))
+    discovered_targets.extend(discover_hermes_definitions(
+        hermes_jobs.values(),
+        overrides=CRON_TARGETS,
+    ))
+
     rows = []
-    for target in CRON_TARGETS:
-        is_jain = target.get('jain', False)
+    for target in discovered_targets:
+        is_jain = target.get('ownerKey') == 'jain'
         listing = jain_listing if is_jain else josh_listing
         source = target.get('source', 'cron')
         codex_state = codex_automation_state(target) if source == 'codex_automation' else None
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
         jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
         josh_verified = josh_verified_runs.get(target['name']) if not is_jain else None
-        if source == 'hermes':
+        if target.get('present') is not None:
+            present = bool(target.get('present'))
+        elif source == 'hermes':
             present = bool(hermes_job)
         elif source == 'launchd':
             present = target['pattern'] in josh_launch_listing
@@ -3286,12 +3345,12 @@ PY"""
             present = target['pattern'] in listing
         sched_meta = schedule_today_meta(target.get('schedule', ''))
         today_relevant = bool(sched_meta.get('todayRelevant', True))
-        source_label = 'Codex Automation' if source == 'codex_automation' else 'Josh LaunchAgent' if source == 'launchd' else 'Hermes' if source == 'hermes' else 'J.A.I.N Cron' if is_jain else 'Josh Local Cron'
+        source_label = target.get('sourceLabel') or ('Codex Automation' if source == 'codex_automation' else 'Josh LaunchAgent' if source == 'launchd' else 'Hermes' if source == 'hermes' else 'J.A.I.N Cron' if is_jain else 'Josh Local Cron')
 
         # Compute runStatus for daily jobs
         sched = target.get('schedule', '')
         run_status = None  # 'done' | 'missed' | 'upcoming' | None
-        last_run = x_log_runs.get(target['name'])
+        last_run = x_log_runs.get(target['name']) or target.get('lastRun')
         if not last_run and codex_state and codex_state.get("lastRun"):
             last_run = str(codex_state.get("lastRun"))
         if not last_run and hermes_job:
@@ -3360,7 +3419,9 @@ PY"""
             elif now_et.hour >= 9:
                 run_status = 'upcoming'
 
-        if source == 'codex_automation' and codex_state and not codex_state.get('active'):
+        if not bool(target.get('enabled', True)):
+            row_status = 'paused'
+        elif source == 'codex_automation' and codex_state and not codex_state.get('active'):
             row_status = 'paused'
         elif source == 'hermes' and hermes_job and not hermes_job.get('enabled', True):
             row_status = 'paused'
@@ -3388,8 +3449,10 @@ PY"""
             and last_run_today
         )
         row = {
+            'definitionId': target.get('definitionId'),
             'name': target['name'],
             'schedule': target['schedule'],
+            'scheduleSpec': target.get('scheduleSpec'),
             'description': target.get('description', ''),
             'category': target.get('category', 'Other'),
             'agent': target.get('agent', 'JOSH 2.0'),
@@ -3397,8 +3460,22 @@ PY"""
             'source': source,
             'sourceLabel': source_label,
             'todayRelevant': today_relevant,
-            'errors': 1 if hermes_error_is_current else 0,
-            'lastError': hermes_job.get('last_error') if hermes_error_is_current and hermes_job else None,
+            'errors': (
+                1
+                if hermes_error_is_current
+                else 0
+                if source == 'hermes'
+                else int(target.get('errors') or 0)
+            ),
+            'lastError': (
+                f"Latest Hermes run reported {str(hermes_job.get('last_status')).lower()}."
+                if hermes_error_is_current and hermes_job
+                else None
+                if source == 'hermes'
+                else target.get('lastError')
+            ),
+            'enabled': bool(target.get('enabled', True)),
+            'present': present,
         }
         if hermes_last_failed and not hermes_error_is_current and hermes_job:
             row['lastHistoricalError'] = hermes_job.get('last_error')
@@ -3409,6 +3486,10 @@ PY"""
             row['lastRun'] = last_run
         if hermes_next_run:
             row['nextRun'] = hermes_next_run
+        if target.get('durationMs') is not None:
+            row['durationMs'] = target.get('durationMs')
+        if target.get('rawRunStatus'):
+            row['rawRunStatus'] = target.get('rawRunStatus')
 
         if target.get('multiRun'):
             multi = target['multiRun']
@@ -3506,56 +3587,7 @@ PY"""
 
     qa_config = load_json_file(ECOSYSTEM_QA_SCHEDULE_PATH, {})
     qa_state = load_json_file(ECOSYSTEM_QA_STATE_PATH, {})
-    qa_runs = qa_state.get("jobs") if isinstance(qa_state.get("jobs"), dict) else {}
-    owner_labels = {"josh2": "JOSH 2.0", "jaimes": "JAIMES", "jain": "J.A.I.N", "joshex": "JOSHeX"}
-
-    def qa_schedule_label(schedule: Dict[str, Any]) -> str:
-        interval = int(schedule.get("intervalMinutes") or 0)
-        if interval:
-            return f"Every {interval} min"
-        minutes = ",".join(f"{int(value):02d}" for value in schedule.get("minutes", [])) or "00"
-        hours = schedule.get("hours", [])
-        weekdays = schedule.get("weekdays", [])
-        hour_text = ",".join(f"{int(value):02d}:{minutes} ET" for value in hours) if hours else f":{minutes} each hour ET"
-        if weekdays:
-            day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-            hour_text = ",".join(day_names[int(value)] for value in weekdays) + " " + hour_text
-        return hour_text
-
-    for job in qa_config.get("jobs", []):
-        if not isinstance(job, dict) or not job.get("id"):
-            continue
-        job_id = str(job["id"])
-        run = qa_runs.get(job_id) if isinstance(qa_runs.get(job_id), dict) else {}
-        run_state = str(run.get("status") or "scheduled")
-        failure_streak = int(run.get("failureStreak") or 0)
-        failed = qa_run_needs_attention(run_state, failure_streak)
-        schedule = job.get("schedule") if isinstance(job.get("schedule"), dict) else {}
-        weekdays = schedule.get("weekdays", [])
-        today_relevant = not weekdays or now_et.weekday() in weekdays
-        rows.append({
-            "name": str(job.get("team") or job_id),
-            "id": f"ecosystem-qa-{job_id}",
-            "schedule": qa_schedule_label(schedule),
-            "description": job_id.replace("-", " ").capitalize(),
-            "category": "QA & Product Support",
-            "agent": owner_labels.get(str(job.get("owner") or "josh2"), "JOSH 2.0"),
-            "status": "error" if failed else "ok",
-            "source": "ecosystem_qa_scheduler",
-            "sourceLabel": "Canonical QA Scheduler",
-            "todayRelevant": today_relevant,
-            "runStatus": "missed" if failed else ("done" if run_state == "ok" else "upcoming"),
-            "errors": 1 if failed else 0,
-            "lastError": (
-                "Prior QA failure remains open; the latest canary skipped because a safe precondition was not met."
-                if run_state.startswith("skipped_") and failed
-                else plain_dashboard_text(run.get("stderr") or run.get("stdout"), 180) if failed else None
-            ),
-            "lastRun": run.get("completedAt") or run.get("startedAt"),
-            "durationMs": run.get("durationMs"),
-            "failureStreak": failure_streak,
-            "rawRunStatus": run_state,
-        })
+    rows.extend(discover_qa_definitions(qa_config, qa_state))
     return rows
 
 def build_devices() -> List[Dict[str, str]]:
@@ -4643,7 +4675,7 @@ DEFAULT_BRAIN_FEED: Dict[str, Any] = {
 
 REQUIRED_DASHBOARD_FIELDS = [
     "actionRequired", "activeNow", "upcomingEvents", "focus",
-    "brainFeed", "contextWindow", "devices", "products", "crons", "recentActivity", "lastUpdated",
+    "brainFeed", "contextWindow", "devices", "products", "crons", "todayJobs", "todayJobsMeta", "recentActivity", "lastUpdated",
 ]
 
 
@@ -4663,6 +4695,8 @@ def validate_dashboard(dashboard: Dict[str, Any], now_iso: str) -> None:
         "devices": [],
         "products": [],
         "crons": [],
+        "todayJobs": [],
+        "todayJobsMeta": {},
         "codexJobs": [],
         "sharedEvents": [],
         "sharedOperatingLayer": {},
@@ -4757,6 +4791,11 @@ def main() -> None:
     dashboard["devices"]        = _f_devices.result()
     dashboard["products"]       = _f_products.result()
     dashboard["crons"]          = _f_crons.result()
+    projection_now = dt.datetime.fromisoformat(now_iso.replace("Z", "+00:00"))
+    dashboard["todayJobs"], dashboard["todayJobsMeta"] = materialize_today_jobs(
+        dashboard["crons"],
+        now=projection_now,
+    )
     dashboard["codexJobs"]      = fetch_codex_jobs(now_iso)
     dashboard["sharedEvents"]   = fetch_shared_events(now_iso)
     dashboard["sharedOperatingLayer"] = fetch_shared_operating_layer(now_iso)

@@ -20,7 +20,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 TERMINAL = {"done", "complete", "completed", "cancelled", "canceled", "failed", "error"}
-ACTIVE = {"active", "running", "in_progress", "in-progress", "claimed", "queued", "open"}
+ACTIVE = {
+    "accepted", "planned", "routed", "active", "verifying", "running",
+    "in_progress", "in-progress", "claimed", "queued", "open",
+}
 BLOCKED = {"blocked", "error"}
 NOISE = {
     "task", "active", "queued", "instruction", "received", "requesting", "josh", "josh2",
@@ -78,6 +81,48 @@ def same_topic(left: Any, right: Any) -> bool:
     return len(shared) >= min(2, len(a), len(b)) or (len(shared) >= 3 and len(shared) / min(len(a), len(b)) >= 0.5)
 
 
+def exact_work_id(row: dict[str, Any]) -> str:
+    return str(row.get("workId") or row.get("work_id") or "").strip()
+
+
+def exact_task_id(row: dict[str, Any]) -> str:
+    return str(
+        row.get("taskId")
+        or row.get("receivingTaskId")
+        or row.get("terminalTaskId")
+        or ""
+    ).strip()
+
+
+def matching_task(
+    row: dict[str, Any],
+    tasks: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, str]:
+    """Match canonical rows by identity; use title similarity only for legacy rows.
+
+    Once a publication has a ``workId`` it must never be associated with a
+    different lifecycle merely because their words look similar.  Rows created
+    before stable identity existed may still be reconciled by the old heuristic
+    and are explicitly counted as legacy fuzzy matches.
+    """
+    work_id = exact_work_id(row)
+    task_id = exact_task_id(row)
+    if work_id:
+        for task in tasks:
+            if exact_work_id(task) == work_id:
+                return task, "workId"
+        return None, ""
+    if task_id:
+        for task in tasks:
+            if str(task.get("id") or "") == task_id:
+                return task, "taskId"
+        return None, ""
+    for task in tasks:
+        if same_topic(row.get("title"), task.get("title")):
+            return task, "legacy-fuzzy-title"
+    return None, ""
+
+
 def row_stamp(row: dict[str, Any]) -> dt.datetime | None:
     for key in ("updatedAt", "completedAt", "time", "createdAt", "startedAt"):
         stamp = parse_ts(row.get(key))
@@ -110,7 +155,7 @@ def reconcile(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
     events = [row for row in events_doc.get("events", []) if isinstance(row, dict)]
     terminal_tasks = [row for row in tasks if str(row.get("status") or "").lower() in TERMINAL]
     open_tasks = [row for row in tasks if str(row.get("status") or "").lower() not in TERMINAL]
-    changes = {"tasksAttention": 0, "handoffsClosed": 0, "handoffsBlocked": 0, "jobsSuperseded": 0, "jobsStale": 0, "eventsSuperseded": 0, "eventsStale": 0}
+    changes = {"tasksAttention": 0, "handoffsClosed": 0, "handoffsBlocked": 0, "jobsSuperseded": 0, "jobsStale": 0, "eventsSuperseded": 0, "eventsStale": 0, "legacyFuzzyMatches": 0}
 
     for task in tasks:
         status = str(task.get("status") or "").lower()
@@ -125,44 +170,56 @@ def reconcile(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
     for handoff in handoffs:
         if str(handoff.get("status") or "").lower() not in {"open", "active", "queued"}:
             continue
-        matching_terminal = next((task for task in terminal_tasks if same_topic(handoff.get("title"), task.get("title"))), None)
+        matching_terminal, match_kind = matching_task(handoff, terminal_tasks)
         if matching_terminal:
-            mark(handoff, "done", f"Receiving topic is terminal in {matching_terminal.get('id')}", now_iso)
+            mark(handoff, "done", f"Receiving work is terminal in {matching_terminal.get('id')} ({match_kind}).", now_iso)
             handoff["receivingTaskId"] = matching_terminal.get("id")
+            handoff["reconciliationMatch"] = match_kind
             changes["handoffsClosed"] += 1
+            if match_kind == "legacy-fuzzy-title":
+                changes["legacyFuzzyMatches"] += 1
             continue
-        matching_open = any(same_topic(handoff.get("title"), task.get("title")) for task in open_tasks)
+        matching_open, open_match_kind = matching_task(handoff, open_tasks)
         stamp = row_stamp(handoff)
         if not matching_open and stamp and now - stamp > dt.timedelta(hours=6):
             mark(handoff, "blocked", "No receiving task or fresh execution evidence for more than 6 hours.", now_iso)
             changes["handoffsBlocked"] += 1
+        elif matching_open and open_match_kind == "legacy-fuzzy-title":
+            changes["legacyFuzzyMatches"] += 1
 
     def reconcile_activity(rows: list[dict[str, Any]], kind: str) -> None:
         for row in rows:
             status = str(row.get("status") or "").lower()
             if status not in ACTIVE | BLOCKED:
                 continue
-            matching_terminal = next((task for task in terminal_tasks if same_topic(row.get("title"), task.get("title"))), None)
+            matching_terminal, match_kind = matching_task(row, terminal_tasks)
             if matching_terminal:
-                mark(row, "superseded", f"Terminal task {matching_terminal.get('id')} supersedes this publication.", now_iso)
+                mark(row, "superseded", f"Terminal task {matching_terminal.get('id')} supersedes this publication ({match_kind}).", now_iso)
                 row["terminalTaskId"] = matching_terminal.get("id")
+                row["reconciliationMatch"] = match_kind
                 changes[f"{kind}Superseded"] += 1
+                if match_kind == "legacy-fuzzy-title":
+                    changes["legacyFuzzyMatches"] += 1
                 continue
             # Unresolved blocked/error publications remain visible until a
             # terminal task explicitly closes the same topic.  Age alone must
             # never hide a blocker that may still require operator action.
             if status in BLOCKED:
                 continue
-            matching_open = any(same_topic(row.get("title"), task.get("title")) for task in open_tasks)
+            matching_open, open_match_kind = matching_task(row, open_tasks)
             stamp = row_stamp(row)
             if not matching_open and stamp and now - stamp > dt.timedelta(hours=6):
                 mark(row, "stale", "No nonterminal task or fresh execution evidence for more than 6 hours.", now_iso)
                 changes[f"{kind}Stale"] += 1
+            elif matching_open and open_match_kind == "legacy-fuzzy-title":
+                changes["legacyFuzzyMatches"] += 1
 
     reconcile_activity(jobs, "jobs")
     reconcile_activity(events, "events")
     tasks_doc["tasks"], handoffs_doc["handoffs"] = tasks, handoffs
-    jobs_doc["jobs"], events_doc["events"] = jobs[-1000:], events[-500:]
+    # Publishers keep newest records first; retain the fresh head, not the old
+    # tail, when bounding compatibility ledgers.
+    jobs_doc["jobs"], events_doc["events"] = jobs[:1000], events[:500]
     for document in (tasks_doc, handoffs_doc, jobs_doc, events_doc):
         document["reconciledAt"] = now_iso
     return {
