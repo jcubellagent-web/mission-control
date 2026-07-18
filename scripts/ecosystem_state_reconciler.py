@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 TERMINAL = {"done", "complete", "completed", "cancelled", "canceled", "failed", "error"}
 ACTIVE = {"active", "running", "in_progress", "in-progress", "claimed", "queued", "open"}
+BLOCKED = {"blocked", "error"}
 NOISE = {
     "task", "active", "queued", "instruction", "received", "requesting", "josh", "josh2",
     "jaimes", "joshex", "agent", "ecosystem", "status", "handoff",
@@ -138,13 +139,19 @@ def reconcile(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
 
     def reconcile_activity(rows: list[dict[str, Any]], kind: str) -> None:
         for row in rows:
-            if str(row.get("status") or "").lower() not in ACTIVE:
+            status = str(row.get("status") or "").lower()
+            if status not in ACTIVE | BLOCKED:
                 continue
             matching_terminal = next((task for task in terminal_tasks if same_topic(row.get("title"), task.get("title"))), None)
             if matching_terminal:
                 mark(row, "superseded", f"Terminal task {matching_terminal.get('id')} supersedes this publication.", now_iso)
                 row["terminalTaskId"] = matching_terminal.get("id")
                 changes[f"{kind}Superseded"] += 1
+                continue
+            # Unresolved blocked/error publications remain visible until a
+            # terminal task explicitly closes the same topic.  Age alone must
+            # never hide a blocker that may still require operator action.
+            if status in BLOCKED:
                 continue
             matching_open = any(same_topic(row.get("title"), task.get("title")) for task in open_tasks)
             stamp = row_stamp(row)

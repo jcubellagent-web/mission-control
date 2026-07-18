@@ -40,6 +40,49 @@ class ReconcilerTests(unittest.TestCase):
             result = subject.reconcile(root, now)
             self.assertEqual(result["documents"][root / "codex-jobs.json"]["jobs"][0]["status"], "stale")
 
+    def test_terminal_truth_supersedes_matching_blocker_without_hiding_unresolved_blocker(self) -> None:
+        now = dt.datetime(2026, 7, 15, 12, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            fixtures = {
+                "agent-task-queue.json": {
+                    "tasks": [
+                        {
+                            "id": "task-credentials",
+                            "title": "Store dedicated Mac administrator credentials in 1Password",
+                            "status": "done",
+                            "completedAt": "2026-07-15T11:00:00Z",
+                        }
+                    ]
+                },
+                "handoff-queue.json": {"handoffs": []},
+                "codex-jobs.json": {
+                    "jobs": [
+                        {
+                            "id": "job-resolved",
+                            "title": "Task blocked: Store dedicated Mac administrator credentials in 1Password",
+                            "status": "blocked",
+                            "time": "2026-07-15T09:00:00Z",
+                        },
+                        {
+                            "id": "job-open",
+                            "title": "Unrelated production authorization",
+                            "status": "blocked",
+                            "time": "2026-07-14T01:00:00Z",
+                        },
+                    ]
+                },
+                "shared-events.json": {"events": []},
+            }
+            for name, payload in fixtures.items():
+                (root / name).write_text(json.dumps(payload), encoding="utf-8")
+
+            result = subject.reconcile(root, now)
+            jobs = result["documents"][root / "codex-jobs.json"]["jobs"]
+            self.assertEqual(jobs[0]["status"], "superseded")
+            self.assertEqual(jobs[0]["terminalTaskId"], "task-credentials")
+            self.assertEqual(jobs[1]["status"], "blocked")
+
 
 if __name__ == "__main__":
     unittest.main()
