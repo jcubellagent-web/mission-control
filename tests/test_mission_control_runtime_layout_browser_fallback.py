@@ -41,6 +41,30 @@ def missing_browser_error() -> RuntimeError:
     )
 
 
+def valid_kiosk_legibility_measurements() -> dict[str, object]:
+    return {
+        "pageOverflowX": 0,
+        "pageOverflowY": 0,
+        "liveWork": {
+            "objectives": [{"fontSize": 24, "clipped": False}],
+            "names": [{"fontSize": 17, "clipped": False}],
+            "descriptions": [{"fontSize": 12.5, "clipped": False}],
+            "secondary": [{"fontSize": 10.5, "clipped": False}],
+        },
+        "finops": {
+            "bodyPresent": True,
+            "bodyBottomDeadSpace": 10,
+            "bodyBottomOvershoot": 0,
+            "walletWidth": 248,
+            "providerNames": [{"fontSize": 13}],
+            "providerBodies": [{"fontSize": 11}],
+            "providerMetadata": [{"fontSize": 10}],
+            "ledgerPresent": True,
+            "ledgerOverflowX": 0,
+        },
+    }
+
+
 def test_ci_live_data_fixture_satisfies_canonical_contract() -> None:
     result = runtime_layout.check_control_tower_json(FIXTURE_PATH)
 
@@ -153,3 +177,91 @@ def test_missing_bundled_and_system_browsers_remains_fatal(monkeypatch: pytest.M
         {"headless": True},
         {"headless": True, "channel": "chrome"},
     ]
+
+
+def test_playwright_probes_preserve_desktop_mobile_and_add_kiosk_1920() -> None:
+    screenshot = Path("/tmp/control-tower-layout.png")
+
+    probes = runtime_layout.playwright_probe_specs(screenshot)
+
+    assert [(label, viewport) for label, viewport, _ in probes] == [
+        ("desktop", {"width": 1440, "height": 1000}),
+        ("mobile", {"width": 390, "height": 844}),
+        ("kiosk-1920", {"width": 1920, "height": 1080}),
+    ]
+    assert [path.name for _, _, path in probes if path] == [
+        "control-tower-layout.png",
+        "control-tower-layout-mobile.png",
+        "control-tower-layout-kiosk-1920.png",
+    ]
+
+
+def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
+    assert runtime_layout.validate_kiosk_legibility(valid_kiosk_legibility_measurements()) == []
+
+
+def test_kiosk_legibility_reports_every_regression() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    measurements["pageOverflowX"] = 6
+    measurements["pageOverflowY"] = 7
+    live_work = measurements["liveWork"]
+    assert isinstance(live_work, dict)
+    live_work["objectives"] = [{"fontSize": 23.5, "clipped": True}]
+    live_work["names"] = [{"fontSize": 16.5, "clipped": True}]
+    live_work["descriptions"] = [{"fontSize": 12, "clipped": True}]
+    live_work["secondary"] = [{"fontSize": 10, "clipped": True}]
+    finops = measurements["finops"]
+    assert isinstance(finops, dict)
+    finops["bodyBottomDeadSpace"] = 11
+    finops["bodyBottomOvershoot"] = 3
+    finops["walletWidth"] = 247
+    finops["providerNames"] = [{"fontSize": 12.5}]
+    finops["providerBodies"] = [{"fontSize": 10.5}]
+    finops["providerMetadata"] = [{"fontSize": 9.5}]
+    finops["ledgerOverflowX"] = 2
+
+    failures = runtime_layout.validate_kiosk_legibility(measurements)
+
+    expected_fragments = (
+        "horizontal page overflow",
+        "vertical page overflow",
+        "Live Work objective minimum font",
+        "Live Work objective has 1 clipped",
+        "Live Work name minimum font",
+        "Live Work name has 1 clipped",
+        "Live Work description minimum font",
+        "Live Work description has 1 clipped",
+        "Live Work secondary text minimum font",
+        "Live Work secondary text has 1 clipped",
+        "FinOps bottom dead space",
+        "FinOps body overshoots",
+        "FinOps wallet width",
+        "FinOps provider name minimum font",
+        "FinOps provider body minimum font",
+        "FinOps provider metadata minimum font",
+        "FinOps model ledger horizontal overflow",
+    )
+    assert all(any(fragment in failure for failure in failures) for fragment in expected_fragments)
+    assert len(failures) == len(expected_fragments)
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        (("liveWork", "objectives"), "Live Work objective measurements are missing"),
+        (("finops", "providerMetadata"), "FinOps provider metadata measurements are missing"),
+        (("finops", "ledgerPresent"), "FinOps model ledger is missing"),
+    ],
+)
+def test_kiosk_legibility_fails_closed_when_required_measurements_are_missing(
+    path: tuple[str, str],
+    expected: str,
+) -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    section = measurements[path[0]]
+    assert isinstance(section, dict)
+    section.pop(path[1])
+
+    failures = runtime_layout.validate_kiosk_legibility(measurements)
+
+    assert any(expected in failure for failure in failures)

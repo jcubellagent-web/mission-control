@@ -14967,3 +14967,440 @@ body,
 .today-job-last em {
   font-size: 7.5px;
 }
+
+/* Control Tower v9 — kiosk-distance legibility for Live Work and FinOps. */
+@media (min-width: 1361px) and (min-height: 850px) {
+  .brain-hero.is-flight-deck .agent-hero-card {
+    grid-template-columns: minmax(190px, 0.24fr) minmax(0, 1fr) minmax(150px, 0.17fr) !important;
+    grid-template-rows: minmax(0, 1fr) 15px !important;
+    padding: 5px 10px !important;
+    column-gap: 12px !important;
+    row-gap: 2px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card header {
+    padding-top: 1px !important;
+    row-gap: 2px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-name-lockup {
+    gap: 3px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-role-badge {
+    min-height: 16px !important;
+    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+    line-height: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-name-lockup strong {
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card header em {
+    margin-top: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.05 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-text {
+    gap: 3px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-main,
+  .brain-hero.is-flight-deck .agent-hero-card.is-working-focus .agent-objective-main {
+    max-height: 26px !important;
+    font-size: 24px !important;
+    line-height: 1.05 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-objective-description {
+    max-height: 15px !important;
+    font-size: 12.5px !important;
+    line-height: 1.1 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-objective-main,
+  .brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-objective-description,
+  .brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-route-label strong,
+  .brain-hero.is-flight-deck .agent-hero-card.has-verified-route .agent-route-label em {
+    color: color-mix(in srgb, var(--route-color) 68%, #f4fbff) !important;
+    opacity: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card > p {
+    height: 15px !important;
+    min-height: 15px !important;
+    color: #afc3ce !important;
+    font-size: 12px !important;
+    font-weight: 750 !important;
+    line-height: 1.1 !important;
+    opacity: 0.88 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-route-label {
+    grid-template-columns: 8px minmax(0, 1fr) !important;
+    gap: 7px !important;
+    padding-left: 8px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-route-label > div {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 2px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-route-label strong {
+    font-size: 11.5px !important;
+    line-height: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-route-label em {
+    grid-column: 1 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-hero-card.is-route-pending .agent-route-label strong,
+  .brain-hero.is-flight-deck .agent-hero-card.is-route-pending .agent-route-label em {
+    color: #a9bdc9 !important;
+    opacity: 0.82 !important;
+  }
+
+  #finops-dashboard.finops-dashboard {
+    gap: 7px !important;
+    padding: 8px 10px !important;
+  }
+
+  #finops-dashboard.finops-dashboard::before {
+    display: none !important;
+  }
+
+  #finops-dashboard .finops-header {
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding-bottom: 6px !important;
+  }
+
+  #finops-dashboard .finops-header p {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-header h2 {
+    font-size: 22px !important;
+  }
+
+  #finops-dashboard .finops-actions span,
+  #finops-dashboard .finops-actions button {
+    min-height: 30px !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  #finops-dashboard .finops-body {
+    grid-template-columns: clamp(248px, 14.1vw, 270px) minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-self: stretch !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  #finops-dashboard .finops-wallet,
+  #finops-dashboard .finops-models {
+    height: 100% !important;
+    padding: 7px !important;
+  }
+
+  #finops-dashboard .finops-wallet {
+    grid-template-rows: 62px 68px minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total,
+  #finops-dashboard .finops-wallet-target,
+  #finops-dashboard .finops-trade-ledger,
+  #finops-dashboard .finops-activity-journal {
+    min-height: 0 !important;
+    padding: 6px 8px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total {
+    display: grid !important;
+    align-content: center !important;
+  }
+
+  #finops-dashboard .finops-wallet-total span,
+  #finops-dashboard .wallet-target-head span,
+  #finops-dashboard .finops-trade-ledger header span,
+  #finops-dashboard .finops-activity-journal > header span,
+  #finops-dashboard .finops-activity-journal > header em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total strong {
+    font-size: 27px !important;
+  }
+
+  #finops-dashboard .finops-wallet-total p {
+    display: none !important;
+  }
+
+  #finops-dashboard .finops-wallet-target {
+    gap: 4px !important;
+  }
+
+  #finops-dashboard .wallet-target-head strong,
+  #finops-dashboard .finops-trade-ledger header strong,
+  #finops-dashboard .finops-activity-journal > header strong {
+    font-size: 11.5px !important;
+  }
+
+  #finops-dashboard .wallet-target-head em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .wallet-target-meta b,
+  #finops-dashboard .wallet-target-meta small {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-wallet-target > p {
+    display: none !important;
+  }
+
+  #finops-dashboard .wallet-target-progress {
+    height: 4px !important;
+  }
+
+  #finops-dashboard .finops-trade-ledger header,
+  #finops-dashboard .finops-activity-journal > header {
+    min-height: 19px !important;
+    margin: 0 0 3px !important;
+    padding: 0 0 3px !important;
+  }
+
+  #finops-dashboard .trade-ledger-list,
+  #finops-dashboard .activity-journal-list {
+    max-height: none !important;
+    gap: 3px !important;
+    overflow-y: auto !important;
+  }
+
+  #finops-dashboard .trade-ledger-row,
+  #finops-dashboard .activity-journal-row {
+    min-height: 22px !important;
+    padding: 3px 4px !important;
+  }
+
+  #finops-dashboard .trade-side-pill,
+  #finops-dashboard .trade-main strong,
+  #finops-dashboard .trade-main small,
+  #finops-dashboard .trade-pnl,
+  #finops-dashboard .activity-journal-row strong,
+  #finops-dashboard .activity-journal-row small {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-models {
+    grid-template-rows: 52px 32px 42px minmax(0, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  #finops-dashboard .finops-model-summary {
+    gap: 5px !important;
+  }
+
+  #finops-dashboard .finops-model-summary article {
+    min-height: 52px !important;
+    padding: 6px 8px !important;
+  }
+
+  #finops-dashboard .finops-model-summary span {
+    color: #9fb6c5 !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-model-summary strong {
+    font-size: 16px !important;
+  }
+
+  #finops-dashboard .finops-route-strip {
+    gap: 5px !important;
+  }
+
+  #finops-dashboard .finops-route-strip span {
+    min-height: 32px !important;
+    color: #a9bdc9 !important;
+    padding: 4px 7px !important;
+    font-size: 10.5px !important;
+  }
+
+  #finops-dashboard .finops-route-strip b {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-usage-band {
+    gap: 5px !important;
+  }
+
+  #finops-dashboard .finops-usage-band article {
+    padding: 5px 8px !important;
+  }
+
+  #finops-dashboard .finops-usage-band span {
+    color: #9fb6c5 !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-usage-band strong {
+    font-size: 15px !important;
+  }
+
+  #finops-dashboard .finops-detail-grid {
+    grid-template-columns: minmax(0, 1.24fr) minmax(300px, 0.76fr) !important;
+    gap: 7px !important;
+    height: 100% !important;
+  }
+
+  #finops-dashboard .finops-provider-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  #finops-dashboard .finops-provider-card {
+    grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+    gap: 4px !important;
+    padding: 7px 8px !important;
+    background: #0a2032 !important;
+    opacity: 0.9 !important;
+  }
+
+  #finops-dashboard .finops-provider-card.is-idle {
+    opacity: 0.9 !important;
+    filter: none !important;
+  }
+
+  #finops-dashboard .finops-provider-card.is-active {
+    opacity: 1 !important;
+  }
+
+  #finops-dashboard .finops-provider-card.is-active .provider-card-head strong,
+  #finops-dashboard .finops-provider-card.is-active .provider-card-head em,
+  #finops-dashboard .model-ledger-row.is-active-route strong {
+    color: color-mix(in srgb, var(--route-color) 68%, #f4fbff) !important;
+  }
+
+  #finops-dashboard .finops-provider-card .provider-card-head strong {
+    font-size: 14px !important;
+  }
+
+  #finops-dashboard .finops-provider-card .provider-card-head em {
+    display: block !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-provider-card .provider-card-blurb {
+    display: -webkit-box !important;
+    max-height: 22px !important;
+    color: #a8bdca !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #finops-dashboard .provider-limit-list {
+    gap: 3px !important;
+  }
+
+  #finops-dashboard .provider-limit-row {
+    min-height: 20px !important;
+    padding: 2px 4px !important;
+  }
+
+  #finops-dashboard .provider-limit-row span,
+  #finops-dashboard .provider-limit-row em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .provider-stat-strip span {
+    color: #d9e7ee !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .provider-stat-strip em {
+    color: #92aebb !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-model-ledger {
+    gap: 5px !important;
+    padding: 7px !important;
+    background: #081d2f !important;
+  }
+
+  #finops-dashboard .finops-model-ledger header span {
+    color: #9fb6c5 !important;
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-model-ledger header strong {
+    font-size: 13px !important;
+  }
+
+  #finops-dashboard .finops-model-ledger header em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .finops-trade-ledger header em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .model-ledger-list {
+    gap: 4px !important;
+    overflow-y: auto !important;
+  }
+
+  #finops-dashboard .model-ledger-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 2px !important;
+    min-height: 38px !important;
+    padding: 4px 7px !important;
+    background: #0a2032 !important;
+  }
+
+  #finops-dashboard .model-ledger-primary,
+  #finops-dashboard .model-ledger-secondary {
+    display: grid;
+    align-items: center;
+    min-width: 0;
+  }
+
+  #finops-dashboard .model-ledger-primary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  #finops-dashboard .model-ledger-secondary {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 7px;
+  }
+
+  #finops-dashboard .model-ledger-primary strong {
+    font-size: 11.5px !important;
+  }
+
+  #finops-dashboard .model-ledger-primary em {
+    font-size: 10px !important;
+  }
+
+  #finops-dashboard .model-ledger-secondary span {
+    color: #9fb6c5 !important;
+    font-size: 10px !important;
+  }
+}

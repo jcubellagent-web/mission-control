@@ -1950,17 +1950,18 @@ function compactInt(value: unknown) {
 
 function providerSummaryLabel(provider: any) {
   const explicit = missionText(String(provider?.summary || provider?.usageSummary || "")).trim();
-  if (explicit) return explicit;
   const parts = [
     Number(provider?.callsWeekly) > 0 ? `${provider.callsWeekly} calls/wk` : null,
-    Number(provider?.sessions) > 0 ? `${provider.sessions} sessions` : null,
-    compactInt(provider?.totalTokens) ? `${compactInt(provider?.totalTokens)} tokens` : null,
+    Number(provider?.sessions) > 0 ? `${provider.sessions} sess` : null,
+    compactInt(provider?.totalTokens) ? `${compactInt(provider?.totalTokens)} tok` : null,
   ].filter(Boolean);
-  return parts.length ? parts.join(" · ") : "usage tracked live";
+  if (parts.length) return parts.join(" · ");
+  if (explicit) return explicit.replace(/\bsessions?\b/gi, "sess").replace(/\btokens?\b/gi, "tok");
+  return "usage tracked live";
 }
 
 function providerUpdatedLabel(provider: any) {
-  if (provider?.codexbarUpdatedAt) return `Updated ${fmtTime(provider.codexbarUpdatedAt)}`;
+  if (provider?.codexbarUpdatedAt) return fmtTime(provider.codexbarUpdatedAt);
   return provider?.codexbarSource ? `Source ${missionText(String(provider.codexbarSource))}` : "Route telemetry";
 }
 
@@ -2201,7 +2202,7 @@ function FinOpsDashboard({
                     </span>
                     <div className="trade-main">
                       <strong>{missionText(trade.action || trade.pair || trade.asset || "Wallet activity")}</strong>
-                      <small>{chainLabel(trade.chain)} · {tradeAmountLabel(trade)}</small>
+                      <small>{tradeAmountLabel(trade)}</small>
                     </div>
                     <span className={`trade-pnl is-${pnl.tone}`}>{pnl.label}</span>
                     {trade.explorerUrl ? (
@@ -2229,7 +2230,7 @@ function FinOpsDashboard({
                 <article key={`${row.timestamp || "activity"}-${row.explorerLabel || index}`} className="activity-journal-row">
                   <div>
                     <strong>{missionText(row.action || "Wallet activity")}</strong>
-                    <small>{chainLabel(row.chain)} · {missionText(row.valueSummary || row.status || "confirmed")}</small>
+                    <small>{missionText(row.valueSummary || row.status || "confirmed")}</small>
                   </div>
                   {row.explorerUrl ? (
                     <a href={row.explorerUrl} target="_blank" rel="noreferrer" title={row.explorerLabel || "Open transaction"}>
@@ -2368,7 +2369,7 @@ function FinOpsDashboard({
               <header>
                 <div>
                   <span>CodexBar model ledger</span>
-                  <strong>Provider, tokens, sessions, and usage-equivalent cost</strong>
+                  <strong>Model usage and equivalent cost</strong>
                 </div>
                 <em>{fmtTime(modelUsage?.lastUpdated)}</em>
               </header>
@@ -2382,11 +2383,15 @@ function FinOpsDashboard({
                       className={`model-ledger-row${modelActive ? " is-active-route" : ""}`}
                       style={modelRoute ? routeCssProperties(modelRoute) as React.CSSProperties : undefined}
                     >
-                      <strong>{providerModelLabel(model)}</strong>
-                      <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
-                      <span>{compactInt(model.totalTokens) || "0"} tok</span>
-                      <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
-                      <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
+                      <div className="model-ledger-primary">
+                        <strong>{providerModelLabel(model)}</strong>
+                        <em>{fmtCurrencyExact(modelUsageCost(model))}</em>
+                      </div>
+                      <div className="model-ledger-secondary">
+                        <span>{missionText(String(model.source || model.billingMode || "tracked"))}</span>
+                        <span>{compactInt(model.totalTokens) || "0"} tok</span>
+                        <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
+                      </div>
                     </article>
                   );
                 }) : (
@@ -3573,7 +3578,7 @@ function AgentHeroCard({
           <strong>{AGENTS[agent].label}</strong>
         </span>
         <em title={`Source: ${status.source || "Josh 2.0 local sidecar"}`}>
-          {agentOperatingState(status)} · {ageLabel(status.updated_at)} · {agentSourceLabel(status.source)}
+          {agentOperatingState(status)} · {ageLabel(status.updated_at)}
         </em>
       </header>
       <div
@@ -3606,7 +3611,7 @@ function AgentHeroCard({
         <span aria-hidden="true" />
         <div>
           <strong>{verifiedRoute ? route.label : "Route pending"}</strong>
-          <em>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "Awaiting verified runtime")}</em>
+          <em>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "Awaiting route")}</em>
         </div>
       </div>
     </article>

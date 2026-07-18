@@ -40,6 +40,21 @@ DEFAULT_KIOSK_URL = "http://127.0.0.1:5174/"
 REQUIRED_TEXT = ("Josh 2.0 | Control Tower", "Live Work Board", "Today's Jobs")
 REQUIRED_IDS = ("brain-feed", "today-jobs")
 REQUIRED_ARIA_LABELS = ("Control Tower summary", "Live Work Board")
+#JAIMES: Keep kiosk-distance typography and FinOps geometry in the permanent
+# 1920x1080 runtime guard so compact desktop/mobile checks cannot mask a regression.
+KIOSK_PROBE_LABEL = "kiosk-1920"
+KIOSK_VIEWPORT = {"width": 1920, "height": 1080}
+KIOSK_LEGIBILITY_THRESHOLDS = {
+    "liveObjectiveFont": 24.0,
+    "liveNameFont": 17.0,
+    "liveDescriptionFont": 12.5,
+    "liveSecondaryFont": 10.5,
+    "finopsBottomDeadSpace": 10.0,
+    "finopsWalletWidth": 248.0,
+    "providerNameFont": 13.0,
+    "providerBodyFont": 11.0,
+    "providerMetadataFont": 10.0,
+}
 INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("private filesystem path", re.compile(r"(?:/Users/|/home/)[^\s<]{2,}", re.I)),
     ("Python traceback", re.compile(r"Traceback \(most recent call last\)", re.I)),
@@ -47,6 +62,90 @@ INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("legacy product label", re.compile(r"(?:React v2 Mission Control|Mission Control v2|Local legacy fallback)", re.I)),
     ("secret-shaped text", re.compile(r"(?:Bearer\s+[A-Za-z0-9._~-]{12,}|\bsk-[A-Za-z0-9_-]{12,}|(?:api[_ -]?key|client_secret|refresh_token)\s*[:=]\s*\S+)", re.I)),
 )
+
+
+KIOSK_LEGIBILITY_EVALUATION = r"""() => {
+  const root = document.documentElement;
+  const visible = (element) => {
+    if (!element) return false;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== 'none'
+      && style.visibility !== 'hidden'
+      && Number.parseFloat(style.opacity || '1') > 0
+      && rect.width > 0
+      && rect.height > 0;
+  };
+  const round = (value) => Math.round(Number(value || 0) * 100) / 100;
+  const measurements = (selector, ownerSelector = '') => [...document.querySelectorAll(selector)]
+    .filter(visible)
+    .map((element, index) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      const owner = ownerSelector ? element.closest(ownerSelector) : null;
+      const ownerRect = owner ? owner.getBoundingClientRect() : null;
+      const overflowX = Math.max(0, element.scrollWidth - element.clientWidth);
+      const overflowY = Math.max(0, element.scrollHeight - element.clientHeight);
+      const lineHeight = Number.parseFloat(style.lineHeight);
+      const outsideOwner = Boolean(ownerRect) && (
+        rect.left < ownerRect.left - 1
+        || rect.right > ownerRect.right + 1
+        || rect.top < ownerRect.top - 1
+        || rect.bottom > ownerRect.bottom + 1
+      );
+      // Dynamic objectives deliberately ellipsize long copy. Treat the type as
+      // clipped only when its visible line box or card containment is broken.
+      const lineBoxClipped = Number.isFinite(lineHeight) && rect.height + 1 < lineHeight;
+      return {
+        index,
+        fontSize: round(Number.parseFloat(style.fontSize)),
+        overflowX: round(overflowX),
+        overflowY: round(overflowY),
+        clipped: lineBoxClipped || outsideOwner,
+      };
+    });
+  const panel = document.querySelector('#finops-dashboard');
+  const body = document.querySelector('#finops-dashboard .finops-body');
+  const wallet = document.querySelector('#finops-dashboard .finops-wallet');
+  const ledger = document.querySelector('#finops-dashboard .finops-model-ledger');
+  const panelRect = panel ? panel.getBoundingClientRect() : null;
+  const bodyRect = body ? body.getBoundingClientRect() : null;
+  const walletRect = wallet ? wallet.getBoundingClientRect() : null;
+  const ledgerNodes = ledger
+    ? [ledger, ...ledger.querySelectorAll('.model-ledger-list, .model-ledger-row')].filter(visible)
+    : [];
+  const ledgerOverflowX = ledgerNodes.length
+    ? Math.max(...ledgerNodes.map((element) => Math.max(0, element.scrollWidth - element.clientWidth)))
+    : null;
+  return {
+    viewport: {width: root.clientWidth, height: root.clientHeight},
+    pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
+    pageOverflowY: round(Math.max(0, root.scrollHeight - root.clientHeight)),
+    liveWork: {
+      objectives: measurements('.brain-hero.is-flight-deck .agent-objective-main', '.agent-hero-card'),
+      names: measurements('.brain-hero.is-flight-deck .agent-name-lockup strong', '.agent-hero-card'),
+      descriptions: measurements('.brain-hero.is-flight-deck .agent-objective-description', '.agent-hero-card'),
+      secondary: measurements('.brain-hero.is-flight-deck .agent-hero-card > p', '.agent-hero-card'),
+    },
+    finops: {
+      bodyPresent: Boolean(panelRect && bodyRect),
+      bodyBottomDeadSpace: panelRect && bodyRect ? round(Math.max(0, panelRect.bottom - bodyRect.bottom)) : null,
+      bodyBottomOvershoot: panelRect && bodyRect ? round(Math.max(0, bodyRect.bottom - panelRect.bottom)) : null,
+      walletWidth: walletRect ? round(walletRect.width) : null,
+      providerNames: measurements('#finops-dashboard .finops-provider-card .provider-card-head strong'),
+      providerBodies: measurements('#finops-dashboard .finops-provider-card .provider-card-blurb'),
+      providerMetadata: measurements(
+        '#finops-dashboard .finops-provider-card .provider-card-head em, '
+        + '#finops-dashboard .finops-provider-card .provider-limit-row span, '
+        + '#finops-dashboard .finops-provider-card .provider-limit-row em, '
+        + '#finops-dashboard .finops-provider-card .provider-stat-strip span, '
+        + '#finops-dashboard .finops-provider-card .provider-stat-strip em'
+      ),
+      ledgerPresent: Boolean(ledger),
+      ledgerOverflowX: ledgerOverflowX === null ? null : round(ledgerOverflowX),
+    },
+  };
+}"""
 
 
 def utc_now() -> str:
@@ -309,6 +408,132 @@ def launch_playwright_browser(playwright: Any) -> tuple[Any, dict[str, Any]]:
     ) from bundled_error
 
 
+def playwright_probe_specs(screenshot_path: Path | None) -> tuple[tuple[str, dict[str, int], Path | None], ...]:
+    """Return the stable responsive probes plus the physical-kiosk viewport."""
+    return (
+        ("desktop", {"width": 1440, "height": 1000}, screenshot_path),
+        (
+            "mobile",
+            {"width": 390, "height": 844},
+            screenshot_path.with_name(f"{screenshot_path.stem}-mobile{screenshot_path.suffix}") if screenshot_path else None,
+        ),
+        (
+            KIOSK_PROBE_LABEL,
+            dict(KIOSK_VIEWPORT),
+            screenshot_path.with_name(f"{screenshot_path.stem}-{KIOSK_PROBE_LABEL}{screenshot_path.suffix}") if screenshot_path else None,
+        ),
+    )
+
+
+def _number(value: Any, *, missing: float = -1.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return missing
+
+
+def _px(value: float) -> str:
+    return f"{value:g}px"
+
+
+def _font_and_clipping_failures(
+    measurements: Any,
+    *,
+    label: str,
+    minimum: float,
+) -> list[str]:
+    if not isinstance(measurements, list) or not measurements:
+        return [f"{KIOSK_PROBE_LABEL}: {label} measurements are missing"]
+    font_sizes = [_number(item.get("fontSize")) for item in measurements if isinstance(item, dict)]
+    if not font_sizes:
+        return [f"{KIOSK_PROBE_LABEL}: {label} measurements are invalid"]
+    failures: list[str] = []
+    minimum_seen = min(font_sizes)
+    if minimum_seen < minimum:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: {label} minimum font is {_px(minimum_seen)} "
+            f"(requires >= {_px(minimum)})"
+        )
+    clipped = sum(1 for item in measurements if isinstance(item, dict) and item.get("clipped") is True)
+    if clipped:
+        failures.append(f"{KIOSK_PROBE_LABEL}: {label} has {clipped} clipped element(s)")
+    return failures
+
+
+def validate_kiosk_legibility(measurements: Any) -> list[str]:
+    """Validate the permanent 1920x1080 distance-legibility contract."""
+    if not isinstance(measurements, dict):
+        return [f"{KIOSK_PROBE_LABEL}: legibility measurements are missing"]
+    failures: list[str] = []
+    page_overflow_x = _number(measurements.get("pageOverflowX"))
+    page_overflow_y = _number(measurements.get("pageOverflowY"))
+    if page_overflow_x > 2:
+        failures.append(f"{KIOSK_PROBE_LABEL}: horizontal page overflow is {_px(page_overflow_x)}")
+    if page_overflow_y > 2:
+        failures.append(f"{KIOSK_PROBE_LABEL}: vertical page overflow is {_px(page_overflow_y)}")
+
+    live_work = measurements.get("liveWork") if isinstance(measurements.get("liveWork"), dict) else {}
+    live_contract = (
+        ("objectives", "Live Work objective", KIOSK_LEGIBILITY_THRESHOLDS["liveObjectiveFont"]),
+        ("names", "Live Work name", KIOSK_LEGIBILITY_THRESHOLDS["liveNameFont"]),
+        ("descriptions", "Live Work description", KIOSK_LEGIBILITY_THRESHOLDS["liveDescriptionFont"]),
+        ("secondary", "Live Work secondary text", KIOSK_LEGIBILITY_THRESHOLDS["liveSecondaryFont"]),
+    )
+    for key, label, minimum in live_contract:
+        failures.extend(_font_and_clipping_failures(live_work.get(key), label=label, minimum=minimum))
+
+    finops = measurements.get("finops") if isinstance(measurements.get("finops"), dict) else {}
+    if not finops.get("bodyPresent"):
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps panel/body measurements are missing")
+    else:
+        bottom_dead_space = _number(finops.get("bodyBottomDeadSpace"))
+        bottom_overshoot = _number(finops.get("bodyBottomOvershoot"), missing=0.0)
+        maximum_dead_space = KIOSK_LEGIBILITY_THRESHOLDS["finopsBottomDeadSpace"]
+        if bottom_dead_space > maximum_dead_space:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: FinOps bottom dead space is {_px(bottom_dead_space)} "
+                f"(requires <= {_px(maximum_dead_space)})"
+            )
+        if bottom_overshoot > 2:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps body overshoots its panel by {_px(bottom_overshoot)}")
+
+    wallet_width = _number(finops.get("walletWidth"))
+    minimum_wallet_width = KIOSK_LEGIBILITY_THRESHOLDS["finopsWalletWidth"]
+    if wallet_width < minimum_wallet_width:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: FinOps wallet width is {_px(wallet_width)} "
+            f"(requires >= {_px(minimum_wallet_width)})"
+        )
+
+    provider_contract = (
+        ("providerNames", "FinOps provider name", KIOSK_LEGIBILITY_THRESHOLDS["providerNameFont"]),
+        ("providerBodies", "FinOps provider body", KIOSK_LEGIBILITY_THRESHOLDS["providerBodyFont"]),
+        ("providerMetadata", "FinOps provider metadata", KIOSK_LEGIBILITY_THRESHOLDS["providerMetadataFont"]),
+    )
+    for key, label, minimum in provider_contract:
+        # Font size is the contract here; provider cards may intentionally
+        # clamp verbose explanatory copy while preserving readable type.
+        group = finops.get(key)
+        if not isinstance(group, list) or not group:
+            failures.append(f"{KIOSK_PROBE_LABEL}: {label} measurements are missing")
+            continue
+        font_sizes = [_number(item.get("fontSize")) for item in group if isinstance(item, dict)]
+        minimum_seen = min(font_sizes) if font_sizes else -1.0
+        if minimum_seen < minimum:
+            failures.append(
+                f"{KIOSK_PROBE_LABEL}: {label} minimum font is {_px(minimum_seen)} "
+                f"(requires >= {_px(minimum)})"
+            )
+
+    if not finops.get("ledgerPresent"):
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger is missing")
+    else:
+        ledger_overflow = _number(finops.get("ledgerOverflowX"))
+        if ledger_overflow > 1:
+            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger horizontal overflow is {_px(ledger_overflow)}")
+    return failures
+
+
 def playwright_render(url: str, timeout: float, screenshot_path: Path | None) -> tuple[dict[str, Any], list[dict[str, str]], bool]:
     try:
         from playwright.sync_api import sync_playwright
@@ -326,14 +551,7 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
     try:
         with sync_playwright() as playwright:
             browser, browser_evidence = launch_playwright_browser(playwright)
-            probes = (
-                ("desktop", {"width": 1440, "height": 1000}, screenshot_path),
-                (
-                    "mobile",
-                    {"width": 390, "height": 844},
-                    screenshot_path.with_name(f"{screenshot_path.stem}-mobile{screenshot_path.suffix}") if screenshot_path else None,
-                ),
-            )
+            probes = playwright_probe_specs(screenshot_path)
             for label, viewport, probe_screenshot in probes:
                 page = browser.new_page(viewport=viewport, device_scale_factor=1)
 
@@ -389,14 +607,24 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
                 )
                 if overflow.get("pageOverflow", 0) > 2:
                     failures.append(f"{label}: horizontal page overflow is {overflow['pageOverflow']}px")
-                viewport_evidence.append({
+                kiosk_legibility = None
+                if label == KIOSK_PROBE_LABEL:
+                    kiosk_legibility = page.evaluate(KIOSK_LEGIBILITY_EVALUATION)
+                    # The kiosk-specific validator supersedes the generic
+                    # horizontal message and also covers vertical overflow.
+                    failures = [failure for failure in failures if failure != f"{label}: horizontal page overflow is {overflow['pageOverflow']}px"]
+                    failures.extend(validate_kiosk_legibility(kiosk_legibility))
+                probe_evidence = {
                     "name": label,
                     "width": viewport["width"],
                     "height": viewport["height"],
                     "httpStatus": response.status if response else None,
                     "semantics": semantics,
                     "overflow": overflow,
-                })
+                }
+                if kiosk_legibility is not None:
+                    probe_evidence["legibility"] = kiosk_legibility
+                viewport_evidence.append(probe_evidence)
                 if probe_screenshot:
                     probe_screenshot.parent.mkdir(parents=True, exist_ok=True)
                     page.screenshot(path=str(probe_screenshot), full_page=True)
@@ -427,7 +655,12 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
     }
     if failures:
         return row("rendered-react", "fail", "; ".join(failures), evidence=evidence), leaks, screenshot_written
-    return row("rendered-react", "pass", "Desktop and mobile React semantics, console, network, and horizontal layout verified", evidence=evidence), leaks, screenshot_written
+    return row(
+        "rendered-react",
+        "pass",
+        "Desktop, mobile, and 1920x1080 kiosk semantics, console, network, overflow, and legibility verified",
+        evidence=evidence,
+    ), leaks, screenshot_written
 
 
 def browser_candidates() -> list[str]:
@@ -581,6 +814,33 @@ def self_test() -> int:
     unrelated_failure_rejected = not bundled_playwright_browser_missing(
         RuntimeError("BrowserType.launch: browser process crashed")
     )
+    good_kiosk = {
+        "pageOverflowX": 0,
+        "pageOverflowY": 0,
+        "liveWork": {
+            "objectives": [{"fontSize": 24, "clipped": False}],
+            "names": [{"fontSize": 17, "clipped": False}],
+            "descriptions": [{"fontSize": 12.5, "clipped": False}],
+            "secondary": [{"fontSize": 10.5, "clipped": False}],
+        },
+        "finops": {
+            "bodyPresent": True,
+            "bodyBottomDeadSpace": 10,
+            "bodyBottomOvershoot": 0,
+            "walletWidth": 248,
+            "providerNames": [{"fontSize": 13}],
+            "providerBodies": [{"fontSize": 11}],
+            "providerMetadata": [{"fontSize": 10}],
+            "ledgerPresent": True,
+            "ledgerOverflowX": 0,
+        },
+    }
+    bad_kiosk = json.loads(json.dumps(good_kiosk))
+    bad_kiosk["pageOverflowY"] = 8
+    bad_kiosk["liveWork"]["objectives"][0]["clipped"] = True
+    bad_kiosk["finops"]["walletWidth"] = 220
+    good_kiosk_failures = validate_kiosk_legibility(good_kiosk)
+    bad_kiosk_failures = validate_kiosk_legibility(bad_kiosk)
     ok = (
         not failures
         and not leaks
@@ -588,6 +848,8 @@ def self_test() -> int:
         and bool(bad_leaks)
         and missing_browser_detected
         and unrelated_failure_rejected
+        and not good_kiosk_failures
+        and len(bad_kiosk_failures) == 3
     )
     print(json.dumps({
         "ok": ok,
@@ -596,6 +858,8 @@ def self_test() -> int:
         "badLeaks": bad_leaks,
         "missingBrowserDetected": missing_browser_detected,
         "unrelatedFailureRejected": unrelated_failure_rejected,
+        "goodKioskFailures": good_kiosk_failures,
+        "badKioskFailures": bad_kiosk_failures,
     }, indent=2))
     return 0 if ok else 1
 
