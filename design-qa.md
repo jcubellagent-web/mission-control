@@ -47,6 +47,49 @@ final result: passed
 
 ---
 
+# Control Tower alert truth and matte-blue FinOps QA
+
+## Scope and evidence
+
+- User-reported source capture: `/tmp/control-tower-alert-finops-reference.png`
+- Final live kiosk capture: `/tmp/control-tower-alert-finops-audited-kiosk-1920.png`
+- Same-input before/after comparison: `/tmp/control-tower-alert-finops-comparison.png`
+- Browser and viewport: the existing Josh 2.0 Google Chrome kiosk at 1920 x 1080, DPR 1, plus strict checks at 1440 x 1000 and 390 x 844.
+- State reviewed: fresh local sidecars after Wi-Fi recovery, successful QA status and Deep release QA runs, one real nonblocking inbox-system item, active Codex route telemetry, current wallet data, and the full first viewport.
+
+## Alert truth corrections
+
+1. Traced the original red `Decision` to two Wi-Fi/DNS-era JAIMES job failures plus recursively aggregated QA state. Both real jobs were rerun successfully before any alert was cleared.
+2. Marked aggregate QA jobs with stable IDs and separated QA evidence from operational failures, preserving the audit trail without allowing the QA rollup to fail itself recursively.
+3. Limited `Decision` to explicit approval metadata. Operational items now render through a separate `System` lane with watch/risk severity and never silently disappear.
+4. Preserved Personal Codex `kind` and `requiresApproval` metadata end to end so validation and system issues cannot be promoted into false approvals.
+5. Made the health sweep authoritative in the release benchmark when the live projection is missing or between refreshes.
+
+## FinOps palette review
+
+1. Replaced decorative amber panel borders, dividers, controls, labels, and neutral icons with the existing matte-blue/cyan/slate Control Tower palette.
+2. Preserved semantic green for healthy/wallet state, red for true risk, purple for watch state, and the canonical provider colors: Codex `#65D1D5`, Antigravity `#72D69A`, Ollama `#A8ABB3`, and Grok `#1677FF`.
+3. The final comparison shows no remaining amber cast in the FinOps dashboard and no loss of hierarchy, provider identity, or health semantics.
+
+## Runtime and release checks
+
+- QA status and Deep release QA both completed `ok` with failure streaks cleared.
+- Live payload uses production serialization and measured below the 250 KB hard limit.
+- Strict browser/visual verification passed at desktop, mobile, and 1920 kiosk widths with zero page overflow, console errors, page errors, failed requests, clipped Live Work text, FinOps overflow, or internal-text leaks.
+- FinOps measured four provider cards, two metric bands with `[5, 4]` cells, a nine-row model ledger, four health cells, and zero panel overflow.
+- Today’s Jobs retained a centered current-time marker and a reason target for every non-green summary and row.
+- React build passed, regression checker passed, runtime-layout self-test passed, full Deep release QA passed, and the repository suite passed 432 tests.
+
+## Severity review
+
+- P0: none.
+- P1: none.
+- P2: none.
+
+final result: passed
+
+---
+
 # Control Tower Today’s Jobs outcome-clarity QA
 
 ## Scope and evidence

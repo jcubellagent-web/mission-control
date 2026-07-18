@@ -545,6 +545,8 @@ def discover_qa_definitions(
         failed = state_name in {"failed", "timeout"} or (state_name.startswith("skipped_") and failure_streak > 0)
         definitions.append({
             "definitionId": _stable_id("ecosystem_qa_scheduler", owner, job_id),
+            "qaJobId": job_id,
+            "qaMeta": bool(job.get("aggregateHealth", False)),
             "name": _text(job.get("team") or job_id.replace("-", " ").title(), 90),
             "schedule": qa_schedule_label(schedule),
             "scheduleSpec": {"kind": "qa", **dict(schedule), "timezone": str(ET)},

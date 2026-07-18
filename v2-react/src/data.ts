@@ -406,6 +406,11 @@ function isLowSignalApproval(row: Approval): boolean {
   return /smoke|test|v2 handoff/.test(text);
 }
 
+function actionItemRequiresApproval(item: any): boolean {
+  const kind = String(item?.kind || item?.type || "").trim().toLowerCase();
+  return item?.requiresApproval === true || kind === "approval";
+}
+
 function mergeJobs(primary: AgentJob[], fallback: AgentJob[]): AgentJob[] {
   const rows = new Map<string, AgentJob>();
   const now = Date.now();
@@ -563,7 +568,8 @@ async function loadFallback(): Promise<MissionControlState> {
   const events = [...statusEvents, ...dashboardEvents]
     .sort((a, b) => timestampValue(b.created_at) - timestampValue(a.created_at))
     .slice(0, 16);
-  const approvals = (dashboard?.actionRequired || []).slice(0, 8).map((item: any, index: number) => ({
+  const actionItems = Array.isArray(dashboard?.actionRequired) ? dashboard.actionRequired : [];
+  const approvals = actionItems.filter(actionItemRequiresApproval).slice(0, 8).map((item: any, index: number) => ({
     id: `fallback-approval-${index}`,
     agent_id: "joshex",
     title: item.title,
@@ -572,6 +578,15 @@ async function loadFallback(): Promise<MissionControlState> {
     status: "pending",
     risk_tier: "dashboard-safe",
     created_at: dashboard?.generatedAt || "",
+  }));
+  const operationalAlerts = actionItems.filter((item: any) => !actionItemRequiresApproval(item)).slice(0, 8).map((item: any, index: number) => ({
+    id: `fallback-system-alert-${index}`,
+    title: item.title || "System attention",
+    detail: item.detail || item.priority || "Inspect the related Control Tower source.",
+    priority: String(item.priority || "medium").toLowerCase(),
+    kind: String(item.kind || item.type || "system").toLowerCase(),
+    url: item.url || "#brain-feed",
+    created_at: item.created_at || item.updatedAt || dashboard?.generatedAt || "",
   }));
   const { todayJobs, todayJobsMeta } = normalizeTodayJobsProjection(dashboard);
   return {
@@ -584,6 +599,7 @@ async function loadFallback(): Promise<MissionControlState> {
     workHot,
     activeModelRoutes: workHot?.activeModelRoutes || [],
     approvals,
+    operationalAlerts,
     agenticCrypto: sidecars.agenticCrypto,
     modelUsage: dashboard?.modelUsage || sidecars.modelUsage,
     modelRouter: dashboard?.modelRouter,

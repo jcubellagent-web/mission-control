@@ -9503,7 +9503,7 @@ body {
 }
 
 .finops-provider-card.is-watch {
-  border-color: rgba(255, 204, 102, 0.32);
+  border-color: color-mix(in srgb, var(--watch) 42%, transparent);
 }
 
 .finops-provider-card.is-risk {
@@ -9663,7 +9663,7 @@ body {
 
 .provider-limit-row.is-watch em,
 .provider-limit-row.is-watch span {
-  color: rgba(255, 214, 126, 0.94);
+  color: color-mix(in srgb, var(--watch) 76%, white);
 }
 
 .provider-limit-row.is-limited em,
@@ -11130,9 +11130,9 @@ body {
 }
 
 .trade-side-pill.is-close {
-  color: #ffd36e !important;
-  border-color: rgba(255, 211, 110, 0.34) !important;
-  background: rgba(255, 211, 110, 0.09) !important;
+  color: #76b7ff !important;
+  border-color: rgba(45, 140, 255, 0.34) !important;
+  background: rgba(45, 140, 255, 0.09) !important;
 }
 
 .trade-main {
@@ -15529,9 +15529,13 @@ body,
   --finops-bg: #041827;
   --finops-surface: #072033;
   --finops-raised: #09263a;
-  --finops-line: rgba(192, 150, 74, 0.4);
+  --finops-line: rgba(48, 132, 158, 0.32);
+  --finops-divider: rgba(48, 132, 158, 0.24);
+  --finops-control-line: rgba(101, 209, 213, 0.26);
   --finops-cool-line: rgba(48, 132, 158, 0.32);
-  --finops-label: #c8a35d;
+  --finops-label: #69bcd1;
+  --finops-neutral-icon: #8ca8b8;
+  --finops-watch-icon: var(--watch);
   --finops-text: #f2f7fa;
   --finops-muted: #a9bac5;
   display: grid !important;
@@ -15650,7 +15654,7 @@ body,
 }
 
 #finops-dashboard.finops-quiet-layout .finops-wallet-summary > div + div {
-  border-top: 1px solid rgba(192, 150, 74, 0.23) !important;
+  border-top: 1px solid var(--finops-divider) !important;
 }
 
 #finops-dashboard.finops-quiet-layout .finops-wallet-total::after {
@@ -15793,7 +15797,7 @@ body,
   gap: 9px;
   width: 100%;
   min-height: 34px;
-  border: 1px solid rgba(192, 150, 74, 0.26);
+  border: 1px solid var(--finops-control-line);
   border-radius: 3px;
   background: #061b2c;
   color: #cbd8df;
@@ -15862,7 +15866,7 @@ body,
 }
 
 #finops-dashboard.finops-quiet-layout .finops-metric-band article + article {
-  border-left: 1px solid rgba(192, 150, 74, 0.25) !important;
+  border-left: 1px solid var(--finops-divider) !important;
 }
 
 #finops-dashboard.finops-quiet-layout .finops-metric-band article > strong,
@@ -16091,7 +16095,7 @@ body,
   display: grid;
   grid-template-rows: 21px 16px;
   min-width: 0;
-  border-bottom: 1px solid rgba(192, 150, 74, 0.28);
+  border-bottom: 1px solid var(--finops-divider);
 }
 
 #finops-dashboard.finops-quiet-layout .finops-ledger-title {
@@ -16217,16 +16221,19 @@ body,
 }
 
 #finops-dashboard.finops-quiet-layout .finops-health-rail article + article {
-  border-left: 1px solid rgba(192, 150, 74, 0.34);
+  border-left: 1px solid var(--finops-divider);
 }
 
 #finops-dashboard.finops-quiet-layout .finops-health-rail article > svg {
   color: #52d77d;
 }
 
-#finops-dashboard.finops-quiet-layout .finops-health-rail article.is-watch > svg,
+#finops-dashboard.finops-quiet-layout .finops-health-rail article.is-watch > svg {
+  color: var(--finops-watch-icon);
+}
+
 #finops-dashboard.finops-quiet-layout .finops-health-rail article.is-neutral > svg {
-  color: #d3ad62;
+  color: var(--finops-neutral-icon);
 }
 
 #finops-dashboard.finops-quiet-layout .finops-health-rail article.is-risk > svg {
@@ -16306,7 +16313,7 @@ body,
 
   #finops-dashboard.finops-quiet-layout .finops-metric-band article + article,
   #finops-dashboard.finops-quiet-layout .finops-health-rail article + article {
-    border-top: 1px solid rgba(192, 150, 74, 0.25) !important;
+    border-top: 1px solid var(--finops-divider) !important;
     border-left: 0 !important;
   }
 

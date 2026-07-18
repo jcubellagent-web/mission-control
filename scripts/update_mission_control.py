@@ -160,10 +160,69 @@ LIVE_DASHBOARD_KEYS = {
     "todayJobs", "todayJobsMeta",
 }
 
+CRON_LIVE_FIELDS = frozenset({
+    "name", "agent", "status", "runStatus", "description", "schedule",
+    "sourceLabel", "source", "lastRun", "nextRun", "verifiedToday", "todayRelevant",
+    "qaJobId", "qaMeta",
+})
+TODAY_JOB_LIVE_FIELDS = frozenset({
+    "occurrenceId", "name", "owner", "agent", "sourceLabel", "scheduledAt",
+    "scheduledTime", "outcome", "runStatus", "lastRun", "durationMs", "duration",
+    "evidence", "rolledUp", "expectedRuns", "completedRuns",
+})
+SHARED_OPERATING_LAYER_LIVE_FIELDS = frozenset({
+    "status", "updatedAt", "counts", "openHandoffs",
+})
+RUNTIME_LAYOUT_LIVE_FIELDS = frozenset({
+    "ok", "status", "checkedAt", "summary",
+})
+CAPABILITY_NODE_IDENTITY_FIELDS = frozenset({"id", "name", "host", "agent"})
+CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "codexCli")
+
+
+def _project_mapping(value: Any, fields: frozenset[str]) -> Dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    return {key: value[key] for key in fields if key in value}
+
+
+def _project_rows(value: Any, fields: frozenset[str]) -> List[Dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [_project_mapping(row, fields) for row in value if isinstance(row, dict)]
+
+
+def _project_capability_inventory(value: Any) -> Dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    projected: Dict[str, Any] = {}
+    if "updatedAt" in value:
+        projected["updatedAt"] = value["updatedAt"]
+    nodes: List[Dict[str, Any]] = []
+    for raw_node in value.get("nodes", []) if isinstance(value.get("nodes"), list) else []:
+        if not isinstance(raw_node, dict):
+            continue
+        node = _project_mapping(raw_node, CAPABILITY_NODE_IDENTITY_FIELDS)
+        for runtime_key in CAPABILITY_NODE_RUNTIME_FIELDS:
+            runtime = raw_node.get(runtime_key)
+            if isinstance(runtime, dict) and "available" in runtime:
+                node[runtime_key] = {"available": bool(runtime["available"])}
+        nodes.append(node)
+    projected["nodes"] = nodes
+    return projected
+
 
 def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
-    """Keep the kiosk hot path compact while preserving every rendered field."""
-    return {key: value for key, value in dashboard.items() if key in LIVE_DASHBOARD_KEYS}
+    """Project rendered kiosk fields while retaining the full audit payload separately."""
+    live = {key: value for key, value in dashboard.items() if key in LIVE_DASHBOARD_KEYS}
+    live["crons"] = _project_rows(dashboard.get("crons"), CRON_LIVE_FIELDS)
+    live["todayJobs"] = _project_rows(dashboard.get("todayJobs"), TODAY_JOB_LIVE_FIELDS)
+    live["sharedOperatingLayer"] = _project_mapping(
+        dashboard.get("sharedOperatingLayer"), SHARED_OPERATING_LAYER_LIVE_FIELDS
+    )
+    live["runtimeLayout"] = _project_mapping(dashboard.get("runtimeLayout"), RUNTIME_LAYOUT_LIVE_FIELDS)
+    live["capabilityInventory"] = _project_capability_inventory(dashboard.get("capabilityInventory"))
+    return live
 
 
 def _default_control_tower_base() -> str:
@@ -3777,17 +3836,22 @@ def normalize_personal_codex(raw: Any, now_iso: str) -> Dict[str, Any]:
     metrics = raw.get("metrics") if isinstance(raw.get("metrics"), dict) else {}
     links = raw.get("links") if isinstance(raw.get("links"), list) else []
 
-    action_items: List[Dict[str, str]] = []
+    action_items: List[Dict[str, Any]] = []
     for item in raw.get("actionRequired", []) if isinstance(raw.get("actionRequired"), list) else []:
         if not isinstance(item, dict):
             continue
         title = str(item.get("title") or "").strip()
         if not title:
             continue
+        kind = str(item.get("kind") or item.get("type") or "").strip().lower()
+        requires_approval = item.get("requiresApproval") is True or kind == "approval"
         action_items.append({
             "priority": normalize_priority(item.get("priority")),
             "title": title,
+            "detail": str(item.get("detail") or ""),
             "url": str(item.get("url") or "#personal-codex"),
+            "kind": kind or ("approval" if requires_approval else "system"),
+            "requiresApproval": requires_approval,
         })
 
     recent_items: List[Dict[str, str]] = []
@@ -4316,14 +4380,22 @@ def build_visibility_agents(
         })
     return rows[:6]
 
+def _qa_action_metadata(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    qa_job_ids = sorted({str(row.get("qaJobId")) for row in rows if row.get("qaJobId")})
+    return {
+        "qaJobIds": qa_job_ids,
+        "qaMetaOnly": bool(rows) and all(bool(row.get("qaMeta")) for row in rows),
+    }
+
+
 def build_action_required(
     now_iso: str,
     calendar_health: Dict[str, Any] | None,
     crons: List[Dict[str, Any]],
     moltworld_data: Dict[str, Any] | None,
-) -> List[Dict[str, str]]:
+) -> List[Dict[str, Any]]:
     """High-signal one-stop-shop alerts for Josh-facing ops health."""
-    items: List[Dict[str, str]] = []
+    items: List[Dict[str, Any]] = []
 
     cal = calendar_health or {}
     cal_status = str(cal.get("status") or "unknown").lower()
@@ -4348,10 +4420,20 @@ def build_action_required(
     errored = [c for c in crons if c.get("status") != "paused" and ((c.get("errors") or 0) > 0 or c.get("status") == "error")]
     if missed:
         sample = ", ".join(c.get("name", "job") for c in missed[:3])
-        items.append({"priority": "high", "title": f"{len(missed)} scheduled job(s) missed: {sample}", "url": "#jobs"})
+        items.append({
+            "priority": "high",
+            "title": f"{len(missed)} scheduled job(s) missed: {sample}",
+            "url": "#jobs",
+            **_qa_action_metadata(missed),
+        })
     if errored:
         sample = ", ".join(c.get("name", "job") for c in errored[:3])
-        items.append({"priority": "high", "title": f"{len(errored)} job error(s): {sample}", "url": "#jobs"})
+        items.append({
+            "priority": "high",
+            "title": f"{len(errored)} job error(s): {sample}",
+            "url": "#jobs",
+            **_qa_action_metadata(errored),
+        })
     stale_verified: List[Dict[str, Any]] = []
     now_dt = dt.datetime.now(dt.timezone.utc)
     for cron in crons:
@@ -4902,7 +4984,10 @@ def main() -> None:
         dashboard["actionRequired"].append({
             "priority": item.get("priority", "medium"),
             "title": f"Personal Codex: {item.get('title')}",
+            "detail": item.get("detail") or "",
             "url": item.get("url") or "#personal-codex",
+            "kind": item.get("kind") or "system",
+            "requiresApproval": item.get("requiresApproval") is True,
         })
     dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     if visual_canary_requires_action(dashboard["visualCanaries"]):
@@ -4921,6 +5006,11 @@ def main() -> None:
     shared_layer = dashboard.get("sharedOperatingLayer", {})
     if shared_layer.get("status") == "attention":
         dashboard["actionRequired"].insert(0, shared_layer_attention_item(shared_layer))
+    for item in dashboard["actionRequired"]:
+        if not isinstance(item, dict):
+            continue
+        item.setdefault("kind", "system")
+        item.setdefault("requiresApproval", False)
     dashboard["actionRequired"] = dashboard["actionRequired"][:8]
     dashboard["trackedTasks"]   = fetch_tracked_tasks()
     dashboard["activeAgents"]   = _f_agents.result() + build_visibility_agents(agent_bus_tasks, coding_visibility, context_watchdog)

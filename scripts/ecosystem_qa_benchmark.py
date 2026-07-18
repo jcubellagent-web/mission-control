@@ -19,6 +19,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+QA_META_JOB_IDS = frozenset({"nightly-control-tower-suite", "daily-qa-rollup"})
 OUTPUT = ROOT / "data" / "ecosystem-qa-benchmark.json"
 SLO_PATH = ROOT / "config" / "ecosystem-qa-slo.json"
 QA_PYTHON = ROOT / ".venv-qa" / "bin" / "python"
@@ -132,39 +133,56 @@ def ecosystem_health_check(env: dict[str, str] | None = None) -> dict[str, Any]:
     scheduler_jobs = scheduler_jobs if isinstance(scheduler_jobs, dict) else {}
     deep_release = scheduler_jobs.get("nightly-control-tower-suite")
     deep_release_running = isinstance(deep_release, dict) and deep_release.get("status") == "running"
-    if deep_release_running:
-        # #JAIMES: live scheduler state supersedes the prior generated alert
-        # while Deep release QA is actively replacing that terminal result.
-        actions = [
-            item for item in actions
-            if not (isinstance(item, dict) and "deep release qa" in str(item.get("title") or "").lower())
-        ]
-    blocking_actions = [
+    def is_qa_meta_action(item: Any) -> bool:
+        if not isinstance(item, dict):
+            return False
+        if "qaMetaOnly" in item:
+            return item.get("qaMetaOnly") is True
+        job_ids = item.get("qaJobIds")
+        return bool(job_ids) and isinstance(job_ids, list) and all(str(job_id) in QA_META_JOB_IDS for job_id in job_ids)
+
+    qa_meta_actions = [
         item for item in actions
-        if isinstance(item, dict)
-        and str(item.get("priority") or "").strip().lower() in {"critical", "high", "p0", "p1"}
+        if is_qa_meta_action(item)
+    ]
+    operational_actions = [
+        item for item in actions
+        if isinstance(item, dict) and not is_qa_meta_action(item)
+    ]
+    blocking_actions = [
+        item for item in operational_actions
+        if str(item.get("priority") or "").strip().lower() in {"critical", "high", "p0", "p1"}
     ]
     agents = payload.get("agents") if isinstance(payload, dict) else []
     agents = agents if isinstance(agents, list) else []
-    raw_cron_attention = payload.get("cronAttention") if isinstance(payload, dict) else None
+    raw_cron_attention = payload.get("operationalCronAttention") if isinstance(payload, dict) else None
+    if not isinstance(raw_cron_attention, list):
+        raw_cron_attention = payload.get("cronAttention") if isinstance(payload, dict) else None
     cron_attention = raw_cron_attention if isinstance(raw_cron_attention, list) else []
-    if deep_release_running:
-        cron_attention = [
-            item for item in cron_attention
-            if not (isinstance(item, dict) and "deep release qa" in str(item.get("name") or "").lower())
-        ]
+    qa_meta_attention = payload.get("qaMetaAttention") if isinstance(payload, dict) else []
+    qa_meta_attention = qa_meta_attention if isinstance(qa_meta_attention, list) else []
+    payload_blocking_actions = int(payload.get("blockingActionRequiredCount") or 0)
+    payload_non_blocking_actions = int(payload.get("nonBlockingActionRequiredCount") or 0)
+    blocking_action_count = max(payload_blocking_actions, len(blocking_actions))
+    non_blocking_action_count = max(payload_non_blocking_actions, len(operational_actions) - len(blocking_actions))
+    try:
+        control_tower_age = float(payload.get("controlTowerAgeMinutes"))
+    except (TypeError, ValueError):
+        control_tower_age = 9999.0
     operational_ok = bool(
         agents
         and all(isinstance(agent, dict) and agent.get("ok") and not agent.get("stale") for agent in agents)
         and payload.get("modelRoutesOk") is True
         and (not cron_attention if isinstance(raw_cron_attention, list) else int(payload.get("cronAttentionCount") or 0) == 0)
-        and float(payload.get("controlTowerAgeMinutes") or 9999) <= 5
-        and not blocking_actions
+        and control_tower_age <= 5
+        and blocking_action_count == 0
     )
     row["ok"] = operational_ok
     row["reportedStatus"] = payload.get("status")
-    row["nonBlockingActionRequired"] = max(0, len(actions) - len(blocking_actions))
-    row["blockingActionRequired"] = len(blocking_actions)
+    row["nonBlockingActionRequired"] = non_blocking_action_count
+    row["blockingActionRequired"] = blocking_action_count
+    row["qaMetaActionRequired"] = qa_meta_actions
+    row["qaMetaAttention"] = qa_meta_attention
     row["inFlightDeepReleaseQa"] = deep_release_running
     return row
 

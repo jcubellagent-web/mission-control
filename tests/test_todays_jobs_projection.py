@@ -126,6 +126,7 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
         "owner": "josh2",
         "team": "Runtime UI QA",
         "schedule": {"minutes": [7], "hours": [6]},
+        "aggregateHealth": True,
     }]}, {"jobs": {"layout-check": {
         "status": "ok",
         "completedAt": "2026-07-17T10:08:00Z",
@@ -135,6 +136,8 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
     assert hermes[0]["definitionId"].startswith("hermes:jaimes:")
     assert hermes[0]["lastRun"] == "2026-07-17T10:59:00Z"
     assert qa[0]["definitionId"].startswith("ecosystem-qa-scheduler:josh2:")
+    assert qa[0]["qaJobId"] == "layout-check"
+    assert qa[0]["qaMeta"] is True
     assert qa[0]["runStatus"] == "done"
 
 

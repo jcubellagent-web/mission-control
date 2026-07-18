@@ -18,6 +18,7 @@ HEALTH_PATH = DATA_DIR / "ecosystem-health-sweep.json"
 HEARTBEATS_PATH = DATA_DIR / "agent-heartbeats.json"
 DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
 REQUIRED_AGENTS = ("josh2", "jaimes", "jain")
+QA_META_JOB_IDS = frozenset({"nightly-control-tower-suite", "daily-qa-rollup"})
 SIDECAR_PATHS = {
     "josh2": DATA_DIR / "brain-feed.json",
     "jaimes": DATA_DIR / "jaimes-brain-feed.json",
@@ -143,8 +144,20 @@ def cron_attention(dashboard: dict[str, Any]) -> list[dict[str, Any]]:
                 "status": row.get("status"),
                 "runStatus": run_status,
                 "errors": errors,
+                "qaJobId": row.get("qaJobId"),
+                "qaMeta": bool(row.get("qaMeta")) or row.get("qaJobId") in QA_META_JOB_IDS,
             })
     return attention
+
+
+def is_qa_meta_attention(row: dict[str, Any]) -> bool:
+    return bool(row.get("qaMeta")) or str(row.get("qaJobId") or "") in QA_META_JOB_IDS
+
+
+def is_blocking_action(row: dict[str, Any]) -> bool:
+    if row.get("qaMetaOnly") is True:
+        return False
+    return str(row.get("priority") or "").strip().lower() in {"critical", "high", "p0", "p1"}
 
 
 def publish(status: str, detail: str, *, job: bool) -> None:
@@ -192,7 +205,14 @@ def main() -> int:
     dashboard = read_json(DASHBOARD_PATH, {})
     agent_rows, stale_after = latest_agent_rows(heartbeats, now_dt)
     action_required = dashboard.get("actionRequired", []) if isinstance(dashboard.get("actionRequired"), list) else []
-    cron_issues = cron_attention(dashboard)
+    action_required = [row for row in action_required if isinstance(row, dict)]
+    qa_meta_actions = [row for row in action_required if row.get("qaMetaOnly") is True]
+    operational_actions = [row for row in action_required if row.get("qaMetaOnly") is not True]
+    blocking_actions = [row for row in operational_actions if is_blocking_action(row)]
+    non_blocking_actions = [row for row in operational_actions if not is_blocking_action(row)]
+    all_cron_issues = cron_attention(dashboard)
+    qa_meta_attention = [row for row in all_cron_issues if is_qa_meta_attention(row)]
+    operational_cron_attention = [row for row in all_cron_issues if not is_qa_meta_attention(row)]
     model_ok = model_status_ok()
     dashboard_age = None
     dashboard_updated = parse_ts(dashboard.get("sourceUpdatedAt") or dashboard.get("lastUpdated"))
@@ -202,15 +222,16 @@ def main() -> int:
     ok_agents = sum(1 for row in agent_rows if row["ok"])
     ok = (
         ok_agents == len(REQUIRED_AGENTS)
-        and not action_required
-        and not cron_issues
+        and not blocking_actions
+        and not operational_cron_attention
         and model_ok
         and (dashboard_age is None or dashboard_age <= 30)
     )
     detail = (
         f"Daily health sweep completed: {ok_agents}/{len(REQUIRED_AGENTS)} host rows ok; "
         f"Control Tower age {dashboard_age if dashboard_age is not None else 'unknown'} min; "
-        f"cron attention {len(cron_issues)}; action items {len(action_required)}."
+        f"operational cron attention {len(operational_cron_attention)}; "
+        f"blocking action items {len(blocking_actions)}; QA aggregate evidence {len(qa_meta_attention)}."
     )
     result = {
         "ok": ok,
@@ -222,8 +243,14 @@ def main() -> int:
         "modelRoutesOk": model_ok,
         "controlTowerAgeMinutes": dashboard_age,
         "actionRequiredCount": len(action_required),
-        "cronAttentionCount": len(cron_issues),
-        "cronAttention": cron_issues[:8],
+        "operationalActionRequiredCount": len(operational_actions),
+        "blockingActionRequiredCount": len(blocking_actions),
+        "nonBlockingActionRequiredCount": len(non_blocking_actions),
+        "qaMetaActionRequired": qa_meta_actions[:8],
+        "cronAttentionCount": len(operational_cron_attention),
+        "cronAttention": operational_cron_attention[:8],
+        "operationalCronAttention": operational_cron_attention[:8],
+        "qaMetaAttention": qa_meta_attention[:8],
     }
     write_json(HEALTH_PATH, result)
     if args.brain_feed:

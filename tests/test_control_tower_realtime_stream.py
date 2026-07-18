@@ -32,3 +32,16 @@ def test_server_stream_watches_rendered_snapshot_and_support_sidecars() -> None:
         assert f'"{filename}"' in source
     assert '"X-Accel-Buffering": "no"' in source
     assert 'res.write("retry: 2000\\n\\n")' in source
+
+
+def test_system_alerts_are_visible_without_becoming_decisions() -> None:
+    data = (ROOT / "v2-react" / "src" / "data.ts").read_text(encoding="utf-8")
+    main = (ROOT / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+    types = (ROOT / "v2-react" / "src" / "types.ts").read_text(encoding="utf-8")
+
+    assert "operationalAlerts: OperationalAlert[]" in types
+    assert "!actionItemRequiresApproval(item)" in data
+    assert "operationalAlerts," in data
+    assert 'label: "System"' in main
+    assert "operationalAlertTone" in main
+    assert "operationalAlertReason" in main

@@ -59,6 +59,14 @@ class SchedulerTests(unittest.TestCase):
         self.assertTrue(stress["skipDuringChangeLease"])
         self.assertNotIn("telegram-inbox-live-canary", jobs)
 
+    def test_aggregate_qa_jobs_are_marked_and_change_lease_aware(self) -> None:
+        config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
+        jobs = {row["id"]: row for row in config["jobs"]}
+
+        for job_id in ("nightly-control-tower-suite", "daily-qa-rollup"):
+            self.assertTrue(jobs[job_id]["aggregateHealth"])
+            self.assertTrue(jobs[job_id]["skipDuringChangeLease"])
+
     def test_configured_precondition_exit_maps_to_skip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with mock.patch.object(subject, "LOCK_DIR", Path(directory)):

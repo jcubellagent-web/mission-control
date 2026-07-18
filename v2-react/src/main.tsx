@@ -95,6 +95,7 @@ const EMPTY_STATE: MissionControlState = {
   events: [],
   jobs: [],
   approvals: [],
+  operationalAlerts: [],
   signals: [],
 };
 
@@ -186,6 +187,9 @@ function freshnessTone(minutes: number) {
 function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdate?: string | null): KioskPulse {
   const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
   const focusCount = missionFocusCount(state);
+  const operationalAlerts = state.operationalAlerts || [];
+  const riskOperationalAlerts = operationalAlerts.filter((row) => operationalAlertTone(row) === "risk").length;
+  const nonOperationalFocusCount = Math.max(0, focusCount - operationalAlerts.length);
   const activeAgents = state.statuses.filter((row) => row.active || String(row.status).toLowerCase() === "active").length;
   const reportingAgents = new Set(
     state.statuses.filter((row) => agentIsReporting(row)).map((row) => row.agent_id),
@@ -198,7 +202,11 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
   const freshTone = freshnessTone(minutes);
   const wallet = state.agenticCrypto;
   const finopsFresh = cryptoFreshness(wallet);
-  const tone = focusCount || freshTone === "risk" ? "risk" : freshTone === "watch" || String(finopsFresh.tone) === "watch" ? "watch" : "clear";
+  const tone = nonOperationalFocusCount || riskOperationalAlerts || freshTone === "risk"
+    ? "risk"
+    : operationalAlerts.length || freshTone === "watch" || String(finopsFresh.tone) === "watch"
+      ? "watch"
+      : "clear";
   // #JAIMES: The canonical leased work ledger is authoritative when present. Legacy
   // status rows and recurring daemon coverage are readiness signals, not
   // additional concurrently active workstreams.
@@ -213,6 +221,8 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
         ? `${pendingApprovals} decision${pendingApprovals === 1 ? "" : "s"} waiting`
         : blockedJobs
           ? `${blockedJobs} job${blockedJobs === 1 ? "" : "s"} need focus`
+          : operationalAlerts.length
+            ? `${operationalAlerts.length} system item${operationalAlerts.length === 1 ? "" : "s"} need review`
           : activeWorkstreams
             ? `${activeWorkstreams} active workstream${activeWorkstreams === 1 ? "" : "s"}`
             : "Control Tower clear";
@@ -224,7 +234,9 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
       : freshTone === "watch"
         ? "Live source is slower than expected."
         : focusCount
-          ? "Open the highlighted rail first."
+          ? operationalAlerts.length && !nonOperationalFocusCount
+            ? missionText(operationalAlerts[0]?.title || "Open the highlighted system item.")
+            : "Open the highlighted rail first."
           : "Glance mode is safe: nothing urgent is waiting.",
     agentLine: `${reportingAgents}/${Math.max(HERO_AGENT_ORDER.length, state.statuses.length)} agents reporting`,
     jobsLine: nextJob ? `Next: ${compactJobTitle(nextJob)} · ${jobRunCells(nextJob).next}` : `${trackedJobs.length} jobs tracked`,
@@ -527,13 +539,28 @@ function agentNeedsFocus(status?: AgentStatus) {
   return ageMinutes(status.updated_at) <= ACTIVE_JOB_FRESH_MINUTES * 2;
 }
 
+function operationalAlertTone(alert?: MissionControlState["operationalAlerts"][number]): "risk" | "watch" {
+  const priority = String(alert?.priority || "medium").trim().toLowerCase();
+  return ["critical", "high", "p0", "p1"].includes(priority) ? "risk" : "watch";
+}
+
+function operationalAlertTarget(alert?: MissionControlState["operationalAlerts"][number]): AttentionTarget {
+  const target = String(alert?.url || "").toLowerCase();
+  return target.includes("job") ? "today-jobs" : "brain-feed";
+}
+
+function operationalAlertReason(alert?: MissionControlState["operationalAlerts"][number]) {
+  if (!alert) return "Why: Control Tower reported a system item that needs review.";
+  return `Why: ${missionText(alert.detail || alert.title || "A system check needs review.")}`;
+}
+
 function missionFocusCount(state: MissionControlState) {
   const trackedJobs = operatorTrackedJobs(state.jobs);
   const dataIssues = dataQualityIssues(state).filter((issue) => issue.tone === "risk").length;
   const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
   const riskJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const blockedAgents = state.statuses.filter(agentNeedsFocus).length;
-  return dataIssues + pendingApprovals + riskJobs + blockedAgents;
+  return dataIssues + pendingApprovals + riskJobs + blockedAgents + (state.operationalAlerts || []).length;
 }
 
 function controlTowerTruth(state: MissionControlState): { tone: MetricTone; label: string; detail: string } {
@@ -541,18 +568,21 @@ function controlTowerTruth(state: MissionControlState): { tone: MetricTone; labe
   const dataIssues = dataQualityIssues(state);
   const riskDataIssues = dataIssues.filter((issue) => issue.tone === "risk");
   const pendingApprovals = state.approvals.filter((row) => row.status === "pending").length;
+  const operationalAlerts = state.operationalAlerts || [];
+  const riskOperationalAlerts = operationalAlerts.filter((row) => operationalAlertTone(row) === "risk");
   const riskJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const blockedAgents = state.statuses.filter(agentNeedsFocus).length;
-  const latestTimestamp = [...state.statuses.map((row) => row.updated_at), ...trackedJobs.map((job) => job.updated_at || job.lastRun)]
+  const latestTimestamp = [...state.statuses.map((row) => row.updated_at), ...trackedJobs.map((job) => job.updated_at || job.lastRun), ...operationalAlerts.map((row) => row.created_at)]
     .filter(Boolean)
     .sort()
     .pop();
 
-  if (riskDataIssues.length || pendingApprovals || riskJobs || blockedAgents) {
+  if (riskDataIssues.length || pendingApprovals || riskJobs || blockedAgents || riskOperationalAlerts.length) {
     const reasons = [
       pendingApprovals ? `${pendingApprovals} decision${pendingApprovals === 1 ? "" : "s"}` : "",
       riskJobs ? `${riskJobs} job${riskJobs === 1 ? "" : "s"} need focus` : "",
       blockedAgents ? `${blockedAgents} agent${blockedAgents === 1 ? "" : "s"} blocked` : "",
+      riskOperationalAlerts[0]?.title || "",
       riskDataIssues[0]?.title || "",
     ].filter(Boolean);
     return {
@@ -562,11 +592,11 @@ function controlTowerTruth(state: MissionControlState): { tone: MetricTone; labe
     };
   }
 
-  if (dataIssues.length) {
+  if (dataIssues.length || operationalAlerts.length) {
     return {
       tone: "watch",
       label: "Watching",
-      detail: dataIssues[0]?.title || "A non-blocking data layer looks thin.",
+      detail: operationalAlerts[0]?.title || dataIssues[0]?.title || "A non-blocking data layer looks thin.",
     };
   }
 
@@ -729,6 +759,7 @@ function sectionSignatures(state: MissionControlState): Record<SectionCueKey, st
     }),
     system: compactSignature({
       reliability: state.reliabilityUpgrades?.items?.map((row) => [row.id, row.status, row.signal, row.next]),
+      operationalAlerts: (state.operationalAlerts || []).map((row) => [row.id, row.priority, row.title, row.detail, row.created_at]),
       source: state.source,
     }),
   };
@@ -756,6 +787,7 @@ function rowSignatures(state: MissionControlState) {
 
 function focusSection(state: MissionControlState): SectionCueKey | null {
   if (state.approvals.some((row) => row.status === "pending") || state.jobs.some((job) => jobNeedsAttention(job, state.jobs))) return "jobs";
+  if ((state.operationalAlerts || []).length) return "system";
   const activeAgent = state.statuses.some((row) => ["active", "working"].includes(String(row.status || "").toLowerCase()) && isFreshActiveTimestamp(row.updated_at));
   const activeWork = buildWorkItems(state).some((item) => item.state === "working" && isFreshActiveTimestamp(item.updated_at));
   if (activeAgent || activeWork) return "brain";
@@ -2418,6 +2450,22 @@ function BrainAttentionStrip({ state, quietMode, onNavigate }: { state: MissionC
       target: "today-jobs",
     });
   });
+  (state.operationalAlerts || []).slice(0, 2).forEach((alert) => {
+    const tone = operationalAlertTone(alert);
+    items.push({
+      id: `system-${alert.id}`,
+      label: "System",
+      title: missionText(alert.title),
+      detail: operationalAlertReason(alert),
+      why: operationalAlertReason(alert),
+      means: tone === "risk"
+        ? "A high-priority system check reported a real problem. It needs investigation, but it is not a Josh approval request."
+        : "A non-blocking system check needs review. It remains visible without being promoted to a red Decision.",
+      action: "Open the related section and inspect the source evidence before changing or dismissing anything.",
+      tone,
+      target: operationalAlertTarget(alert),
+    });
+  });
   if (riskJobs.length) {
     const firstJob = riskJobs[0];
     items.push({
@@ -2732,6 +2780,8 @@ function BrainOperationsSummary({
   const trackedJobs = operatorTrackedJobs(state.jobs);
   const riskJobs = trackedJobs.filter((job) => jobNeedsAttention(job, trackedJobs)).length;
   const firstRiskJob = trackedJobs.find((job) => jobNeedsAttention(job, trackedJobs));
+  const operationalAlerts = state.operationalAlerts || [];
+  const firstOperationalAlert = operationalAlerts[0];
   const dataIssues = dataQualityIssues(state);
   const firstDataIssue = dataIssues[0];
   const readyAgents = state.statuses.filter((row) => agentIsReady(row)).length;
@@ -2755,13 +2805,16 @@ function BrainOperationsSummary({
     ? `${reliabilityAttention ? "Attention" : "Watch"}: ${missionText(reliabilityFocus.label)} - ${missionText(reliabilityFocus.signal)}`
     : "Reliability: all tracked probes ready";
   const dataScore = dataIssues.some((issue) => issue.tone === "risk") ? 58 : dataIssues.length ? 82 : 100;
+  const operationalScore = operationalAlerts.some((alert) => operationalAlertTone(alert) === "risk") ? 58 : operationalAlerts.length ? 82 : 100;
   const agentScore = Math.min(100, Math.round((readyAgents / trackedAgents) * 100));
   const freshnessLabelText = freshness >= 100 ? "Fresh" : freshness >= 82 ? "Aging" : "Stale";
-  const overall = Math.round((freshness + dataScore + agentScore + (riskJobs ? 58 : 100) + (pendingApprovals ? 70 : 100)) / 5);
+  const overall = Math.round((freshness + dataScore + operationalScore + agentScore + (riskJobs ? 58 : 100) + (pendingApprovals ? 70 : 100)) / 6);
   const confidenceReason = riskJobs
     ? "Lower because a job is blocked."
     : pendingApprovals
       ? "Lower because a decision is waiting."
+      : firstOperationalAlert
+        ? operationalAlertReason(firstOperationalAlert).replace(/^Why:\s*/i, "")
       : firstDataIssue
         ? firstDataIssue.detail
       : freshnessNeedsWatch
@@ -2778,6 +2831,13 @@ function BrainOperationsSummary({
         detail: firstDataIssue.detail,
         icon: <AlertTriangle size={22} />,
       }
+    : firstOperationalAlert
+      ? {
+          tone: operationalAlertTone(firstOperationalAlert),
+          title: missionText(firstOperationalAlert.title),
+          detail: operationalAlertReason(firstOperationalAlert),
+          icon: <AlertTriangle size={22} />,
+        }
     : riskJobs
     ? {
         tone: "risk",
@@ -2814,6 +2874,8 @@ function BrainOperationsSummary({
           };
   const focusReason = firstDataIssue
     ? firstDataIssue.why.replace(/^Why:\s*/i, "")
+    : firstOperationalAlert
+      ? operationalAlertReason(firstOperationalAlert).replace(/^Why:\s*/i, "")
     : pendingApprovals
     ? approvalAlertReason(state.approvals.find((row) => row.status === "pending")!).replace(/^Why:\s*/i, "")
     : firstRiskJob
@@ -2825,7 +2887,13 @@ function BrainOperationsSummary({
   const nextItem = workItems.find((item) => item.state === "ready")
     || workItems.find((item) => item.state === "working")
     || workItems.find((item) => item.state === "done");
-  const focusTarget: AttentionTarget = firstDataIssue ? firstDataIssue.target : riskJobs || pendingApprovals ? "today-jobs" : "brain-feed";
+  const focusTarget: AttentionTarget = firstDataIssue
+    ? firstDataIssue.target
+    : firstOperationalAlert
+      ? operationalAlertTarget(firstOperationalAlert)
+      : riskJobs || pendingApprovals
+        ? "today-jobs"
+        : "brain-feed";
   return (
     <section className={`brain-summary-strip is-${decision.tone}${sectionCueClass("system", liveCues)}`} aria-label="Live Work Board mission snapshot">
       <SectionCue label={liveCues.focus === "system" ? "focus" : "updated"} />

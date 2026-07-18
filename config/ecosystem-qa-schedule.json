@@ -85,6 +85,7 @@
       "command": ["python3", "scripts/ecosystem_qa_benchmark.py", "--full"],
       "timeoutSeconds": 900,
       "severity": "p1",
+      "aggregateHealth": true,
       "skipDuringChangeLease": true
     },
     {
@@ -129,7 +130,9 @@
       "schedule": {"minutes": [43], "hours": [6]},
       "command": ["python3", "scripts/ecosystem_health_sweep.py"],
       "timeoutSeconds": 120,
-      "severity": "p2"
+      "severity": "p2",
+      "aggregateHealth": true,
+      "skipDuringChangeLease": true
     },
     {
       "id": "weekly-recovery-drill",

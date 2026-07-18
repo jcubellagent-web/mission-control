@@ -169,6 +169,16 @@ export type Approval = {
   created_at: string;
 };
 
+export type OperationalAlert = {
+  id: string;
+  title: string;
+  detail: string;
+  priority: string;
+  kind: string;
+  url: string;
+  created_at: string;
+};
+
 export type MissionControlState = {
   source: string;
   statuses: AgentStatus[];
@@ -179,6 +189,7 @@ export type MissionControlState = {
   workHot?: ControlTowerHot;
   activeModelRoutes?: ActiveModelRoute[];
   approvals: Approval[];
+  operationalAlerts: OperationalAlert[];
   agenticCrypto?: AgenticCryptoWallet;
   modelUsage?: ModelUsage;
   modelRouter?: ModelRouter;
