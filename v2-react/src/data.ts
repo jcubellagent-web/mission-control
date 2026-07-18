@@ -1,5 +1,5 @@
 import { arrayValue, booleanValue, isAgentId, isRecord, recordValue, stringValue } from "./dataAdapters";
-import type { ActiveModelRoute, ActiveWork, AgentEvent, AgentId, AgentJob, AgentStatus, Approval, CanonicalModelFamily, ControlTowerHot, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, ActiveWork, AgentEvent, AgentId, AgentJob, AgentStatus, Approval, CanonicalModelFamily, ControlTowerHot, MissionControlState, SignalItem, TodayJobEvidence, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 
 const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
@@ -443,6 +443,17 @@ function normalizeTodayJobOutcome(row: any): TodayJobOutcome {
   return "pending";
 }
 
+function normalizeTodayJobEvidence(value: unknown): string | TodayJobEvidence | undefined {
+  if (typeof value === "string") return value || undefined;
+  if (!isRecord(value)) return undefined;
+  return {
+    source: stringValue(value.source) || undefined,
+    status: stringValue(value.status) || undefined,
+    at: stringValue(value.at) || null,
+    summary: stringValue(value.summary) || null,
+  };
+}
+
 function normalizeTodayJobsProjection(dashboard: any): { todayJobs: TodayJobOccurrence[]; todayJobsMeta?: TodayJobsMeta } {
   const projected = Array.isArray(dashboard?.todayJobs) ? dashboard.todayJobs : null;
   const crons = Array.isArray(dashboard?.crons) ? dashboard.crons : [];
@@ -468,12 +479,12 @@ function normalizeTodayJobsProjection(dashboard: any): { todayJobs: TodayJobOccu
       lastRun: row.lastRun || undefined,
       durationMs: Number.isFinite(Number(row.durationMs)) ? Number(row.durationMs) : undefined,
       duration: row.duration || undefined,
-      evidence: row.evidence || undefined,
+      evidence: normalizeTodayJobEvidence(row.evidence),
       rolledUp: Boolean(row.rolledUp),
       expectedRuns: Number.isFinite(Number(row.expectedRuns)) ? Number(row.expectedRuns) : undefined,
       completedRuns: Number.isFinite(Number(row.completedRuns)) ? Number(row.completedRuns) : undefined,
     }))
-    .sort((a, b) => timestampValue(a.scheduledAt) - timestampValue(b.scheduledAt));
+    .sort((a: TodayJobOccurrence, b: TodayJobOccurrence) => timestampValue(a.scheduledAt) - timestampValue(b.scheduledAt));
 
   const todayJobsMeta = isRecord(dashboard?.todayJobsMeta)
     ? dashboard.todayJobsMeta as TodayJobsMeta

@@ -146,6 +146,17 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       routeColor: getComputedStyle(element).getPropertyValue('--route-color').trim().toUpperCase(),
     };
   });
+  const jobsScroller = document.querySelector('#today-jobs .today-jobs-scroll');
+  const nowMarker = document.querySelector('#today-jobs [data-now-marker="current"]');
+  const nonGreenRows = [...document.querySelectorAll('#today-jobs .today-job-row:not(.is-complete)')];
+  const nonGreenSummaries = [...document.querySelectorAll('#today-jobs .today-jobs-summary [data-reason-trigger="true"]')];
+  const reasonTriggers = [...document.querySelectorAll('#today-jobs [data-reason-trigger="true"]')];
+  const reasonText = reasonTriggers.map((element) => String(element.getAttribute('data-reason') || '').trim());
+  const jobsRect = jobsScroller ? jobsScroller.getBoundingClientRect() : null;
+  const nowRect = nowMarker ? nowMarker.getBoundingClientRect() : null;
+  const directChildrenValid = jobsScroller
+    ? [...jobsScroller.children].every((element) => element.getAttribute('role') === 'row' || element.classList.contains('today-jobs-empty'))
+    : false;
   return {
     viewport: {width: root.clientWidth, height: root.clientHeight},
     pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
@@ -187,6 +198,23 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       healthHeight: healthRect ? round(healthRect.height) : null,
       healthOverflowX: health ? round(Math.max(0, health.scrollWidth - health.clientWidth)) : null,
       healthOverflowY: health ? round(Math.max(0, health.scrollHeight - health.clientHeight)) : null,
+    },
+    todayJobs: {
+      rowCount: document.querySelectorAll('#today-jobs .today-job-row').length,
+      nonGreenRowCount: nonGreenRows.length,
+      nonGreenSummaryCount: nonGreenSummaries.length,
+      reasonTriggerCount: reasonTriggers.length,
+      missingReasonCount: reasonText.filter((value) => !value).length,
+      objectReasonCount: reasonText.filter((value) => /\[object Object\]|undefined/i.test(value)).length,
+      pendingSummaryReason: document.querySelector('#today-jobs [data-summary="pending"]')?.getAttribute('data-reason') || '',
+      nowMarkerPresent: Boolean(nowMarker),
+      nowMarkerLabel: nowMarker?.getAttribute('aria-label') || '',
+      scrollOverflowY: jobsScroller ? round(Math.max(0, jobsScroller.scrollHeight - jobsScroller.clientHeight)) : null,
+      nowCenterDelta: jobsRect && nowRect
+        ? round(Math.abs((nowRect.top + nowRect.height / 2) - (jobsRect.top + jobsRect.height / 2)))
+        : null,
+      followNowState: jobsScroller?.getAttribute('data-follow-now-state') || '',
+      directChildrenValid,
     },
   };
 }"""
@@ -642,6 +670,35 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
             )
         if _number(finops.get("healthOverflowX"), missing=0.0) > 1 or _number(finops.get("healthOverflowY"), missing=0.0) > 1:
             failures.append(f"{KIOSK_PROBE_LABEL}: FinOps health rail content overflows")
+
+    today_jobs = measurements.get("todayJobs") if isinstance(measurements.get("todayJobs"), dict) else {}
+    non_green_rows = int(_number(today_jobs.get("nonGreenRowCount"), missing=-1.0))
+    non_green_summaries = int(_number(today_jobs.get("nonGreenSummaryCount"), missing=-1.0))
+    reason_triggers = int(_number(today_jobs.get("reasonTriggerCount"), missing=-1.0))
+    if non_green_rows < 0 or non_green_summaries != 3:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs non-green reason targets are incomplete")
+    elif reason_triggers != non_green_rows + non_green_summaries:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: Today's Jobs exposes {reason_triggers} reason trigger(s) "
+            f"for {non_green_rows + non_green_summaries} non-green target(s)"
+        )
+    if int(_number(today_jobs.get("missingReasonCount"), missing=-1.0)) != 0:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs has missing non-green explanations")
+    if int(_number(today_jobs.get("objectReasonCount"), missing=-1.0)) != 0:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs exposes an invalid object/undefined explanation")
+    pending_reason = str(today_jobs.get("pendingSummaryReason") or "").lower()
+    if "scheduled later today" not in pending_reason or "does not mean failed" not in pending_reason:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs pending summary does not explain future versus failed")
+    if not today_jobs.get("nowMarkerPresent") or "current time" not in str(today_jobs.get("nowMarkerLabel") or "").lower():
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is missing or unlabeled")
+    if today_jobs.get("followNowState") not in {"centered", "all-visible"}:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs auto-follow state is {today_jobs.get('followNowState')}")
+    if _number(today_jobs.get("scrollOverflowY"), missing=0.0) > 1 and _number(today_jobs.get("nowCenterDelta")) > 32:
+        failures.append(
+            f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is {_px(_number(today_jobs.get('nowCenterDelta')))} from center"
+        )
+    if today_jobs.get("directChildrenValid") is not True:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs rowgroup contains a non-row timeline child")
     return failures
 
 

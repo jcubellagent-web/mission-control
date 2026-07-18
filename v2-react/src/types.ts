@@ -113,6 +113,13 @@ export type AgentJob = {
 
 export type TodayJobOutcome = "complete" | "skipped" | "broken" | "pending";
 
+export type TodayJobEvidence = {
+  source?: string;
+  status?: string;
+  at?: string | null;
+  summary?: string | null;
+};
+
 export type TodayJobOccurrence = {
   occurrenceId: string;
   definitionId?: string;
@@ -131,7 +138,7 @@ export type TodayJobOccurrence = {
   lastRun?: string;
   durationMs?: number;
   duration?: string;
-  evidence?: string;
+  evidence?: string | TodayJobEvidence;
   rolledUp?: boolean;
   expectedRuns?: number;
   completedRuns?: number;

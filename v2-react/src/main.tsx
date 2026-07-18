@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
@@ -4255,23 +4256,46 @@ function scheduledSortValue(job: TodayJobOccurrence): number {
   return minutes == null ? Number.MAX_SAFE_INTEGER : minutes;
 }
 
-function currentEtMinutes(): number {
+function currentEtMinutes(now = new Date()): number {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(new Date());
+  }).formatToParts(now);
   const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
   const minute = Number(parts.find((part) => part.type === "minute")?.value || 0);
   return hour * 60 + minute;
 }
 
-function isFutureTodayJob(job: TodayJobOccurrence): boolean {
+function isFutureTodayJob(job: TodayJobOccurrence, nowMs = Date.now()): boolean {
   const timestamp = job.scheduledAt ? Date.parse(job.scheduledAt) : NaN;
-  if (Number.isFinite(timestamp)) return timestamp > Date.now();
+  if (Number.isFinite(timestamp)) return timestamp > nowMs;
   const minutes = scheduledMinutesEt(job);
-  return minutes != null && minutes > currentEtMinutes();
+  return minutes != null && minutes > currentEtMinutes(new Date(nowMs));
+}
+
+function etDateKey(now: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const year = parts.find((part) => part.type === "year")?.value || "0000";
+  const month = parts.find((part) => part.type === "month")?.value || "00";
+  const day = parts.find((part) => part.type === "day")?.value || "00";
+  return `${year}-${month}-${day}`;
+}
+
+function etClock(value: string | number | Date): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "scheduled time";
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 function todayJobTime(job: TodayJobOccurrence): string {
@@ -4310,6 +4334,179 @@ function todayJobOwner(job: TodayJobOccurrence): string {
   return missionText(raw);
 }
 
+type TodayJobReasonKind = "future" | "running" | "active" | "coverage" | "awaiting" | "paused" | "skipped" | "broken" | "complete";
+type TodayJobReason = { kind: TodayJobReasonKind; label: string; detail: string };
+type TodayJobsTooltipState = {
+  anchorKey: string;
+  eyebrow: string;
+  heading: string;
+  detail: string;
+  tone: TodayJobOutcome;
+  bounds: { top: number; right: number; bottom: number; left: number };
+};
+
+function todayJobEvidence(job: TodayJobOccurrence): { source: string; status: string; summary: string } {
+  const raw = job.evidence;
+  if (typeof raw === "string") {
+    return { source: "", status: "", summary: missionText(raw) };
+  }
+  if (raw && typeof raw === "object") {
+    return {
+      source: missionText(raw.source || ""),
+      status: missionText(raw.status || ""),
+      summary: missionText(raw.summary || ""),
+    };
+  }
+  return { source: "", status: "", summary: "" };
+}
+
+function todayJobScheduledClock(job: TodayJobOccurrence): string {
+  if (job.scheduledAt && Number.isFinite(Date.parse(job.scheduledAt))) return etClock(job.scheduledAt);
+  const label = missionText(job.scheduledTime || job.schedule || "");
+  return label && !/^coverage$/i.test(label) ? label.replace(/\s+ET$/i, "") : "its scheduled window";
+}
+
+function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason {
+  const runStatus = String(job.runStatus || "").toLowerCase();
+  const evidence = todayJobEvidence(job);
+  const source = missionText(job.sourceLabel || evidence.source || "the scheduler");
+  const scheduledClock = todayJobScheduledClock(job);
+  const completed = Math.max(0, Number(job.completedRuns || 0));
+  const expected = Math.max(0, Number(job.expectedRuns || 0));
+
+  if (job.outcome === "complete") {
+    return { kind: "complete", label: "Complete", detail: "A successful run was recorded today." };
+  }
+
+  if (job.outcome === "skipped") {
+    const coverage = job.rolledUp && expected
+      ? ` This all-day schedule represents ${expected} expected occurrences.`
+      : "";
+    if (/pause|disabled|cancel/.test(`${runStatus} ${evidence.status}`)) {
+      return {
+        kind: "paused",
+        label: "Intentionally paused",
+        detail: `Paused or disabled at ${source}; no run was expected.${coverage}`,
+      };
+    }
+    return {
+      kind: "skipped",
+      label: "Intentionally skipped",
+      detail: `${source} reported this schedule as skipped; no failure was reported.${coverage}`,
+    };
+  }
+
+  if (job.outcome === "broken") {
+    const failureStatus = missionText(job.runStatus || evidence.status || "failed");
+    const safeSummary = evidence.summary && !/^\[object Object\]$/i.test(evidence.summary)
+      ? ` ${evidence.summary}`
+      : "";
+    return {
+      kind: "broken",
+      label: "Needs attention",
+      detail: `${source} reported ${failureStatus}.${safeSummary || " No successful current-day run is available."}`,
+    };
+  }
+
+  if (isFutureTodayJob(job, nowMs)) {
+    const priorRun = job.lastRun ? ` A prior occurrence completed at ${etClock(job.lastRun)} ET.` : "";
+    return {
+      kind: "future",
+      label: "Scheduled later",
+      detail: `Scheduled for ${scheduledClock} ET; it is not due yet.${priorRun}`,
+    };
+  }
+
+  if (job.rolledUp) {
+    const progress = expected ? `${completed}/${expected} checks have reported today.` : "No current run has reported yet.";
+    return {
+      kind: "coverage",
+      label: "Coverage still open",
+      detail: `All-day coverage is still ${runStatus === "upcoming" ? "reported upcoming" : "open"}; ${progress} Awaiting the next scheduler update.`,
+    };
+  }
+
+  if (/running|working/.test(runStatus)) {
+    return {
+      kind: "running",
+      label: "Running now",
+      detail: `Execution is underway at ${source}; waiting for completion confirmation.`,
+    };
+  }
+
+  if (runStatus === "active") {
+    return {
+      kind: "active",
+      label: "Active, awaiting evidence",
+      detail: `${source} is active, but the ${scheduledClock} ET checkpoint has no completion timestamp yet.`,
+    };
+  }
+
+  return {
+    kind: "awaiting",
+    label: "Due, awaiting evidence",
+    detail: `Scheduled for ${scheduledClock} ET; no completion or failure evidence has been published yet.`,
+  };
+}
+
+function todayJobStatusLabel(job: TodayJobOccurrence, reason: TodayJobReason): string {
+  if (job.outcome === "complete") return "Complete";
+  if (job.outcome === "broken") return "Broken";
+  if (job.outcome === "skipped") return reason.kind === "paused" ? "Paused" : "Skipped";
+  if (reason.kind === "future") return "Scheduled";
+  if (reason.kind === "running") return "Running";
+  if (reason.kind === "active") return "Active";
+  if (reason.kind === "coverage") return "Coverage";
+  return "Awaiting";
+}
+
+function pluralOccurrences(count: number): string {
+  return `${count} occurrence${count === 1 ? "" : "s"}`;
+}
+
+function TodayJobsTooltip({ tooltip }: { tooltip: TodayJobsTooltipState | null }) {
+  if (!tooltip || typeof document === "undefined") return null;
+  const width = Math.min(340, Math.max(240, window.innerWidth - 24));
+  const left = Math.max(12, Math.min(tooltip.bounds.right - width, window.innerWidth - width - 12));
+  const above = tooltip.bounds.top > window.innerHeight * 0.56;
+  const top = above ? tooltip.bounds.top - 8 : tooltip.bounds.bottom + 8;
+  const style: React.CSSProperties = {
+    left,
+    top,
+    width,
+    transform: above ? "translateY(-100%)" : undefined,
+  };
+  return createPortal(
+    <div id="today-jobs-tooltip" className={`today-jobs-tooltip is-${tooltip.tone}`} role="tooltip" style={style}>
+      <span>{tooltip.eyebrow}</span>
+      <strong>{tooltip.heading}</strong>
+      <p>{tooltip.detail}</p>
+    </div>,
+    document.body,
+  );
+}
+
+const TodayJobsNowMarker = React.forwardRef<HTMLDivElement, { label: string; stale?: boolean }>(function TodayJobsNowMarker(
+  { label, stale = false },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      className={`today-jobs-now-divider${stale ? " is-stale" : ""}`}
+      role="row"
+      aria-label={stale ? "Today timeline is awaiting a fresh schedule" : `Current time, ${label} Eastern Time`}
+      data-now-marker={stale ? "stale" : "current"}
+    >
+      <div role="cell">
+        <span>{stale ? "Sync" : "Now"}</span>
+        <i aria-hidden="true" />
+        <strong>{stale ? "Refreshing today's timeline" : `${label} ET`}</strong>
+      </div>
+    </div>
+  );
+});
+
 function JobsRail({
   jobs,
   todayJobs,
@@ -4327,13 +4524,28 @@ function JobsRail({
 }) {
   void statuses;
   void quietMode;
+  const [clockNow, setClockNow] = useState(() => new Date());
+  const [tooltip, setTooltip] = useState<TodayJobsTooltipState | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const nowDividerRef = useRef<HTMLDivElement | null>(null);
+  const lastManualNavigationRef = useRef(0);
+  const tooltipOpenRef = useRef(false);
+  const hasCenteredRef = useRef(false);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(new Date()), 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const sourceRows = Array.isArray(todayJobs) ? todayJobs : jobsFallbackOccurrences(jobs);
   const rows = [...sourceRows].sort((a, b) => scheduledSortValue(a) - scheduledSortValue(b));
+  const nowMs = clockNow.getTime();
+  const projectionIsToday = !todayJobsMeta?.date || todayJobsMeta.date === etDateKey(clockNow);
   const counts = rows.reduce<Record<TodayJobOutcome, number>>((totals, job) => {
     totals[job.outcome] += 1;
     return totals;
   }, { complete: 0, skipped: 0, broken: 0, pending: 0 });
-  const computedNowIndex = rows.findIndex(isFutureTodayJob);
+  const computedNowIndex = rows.findIndex((job) => isFutureTodayJob(job, nowMs));
   const metaNowIndex = Number(todayJobsMeta?.nowIndex);
   const nowIndex = computedNowIndex >= 0
     ? computedNowIndex
@@ -4344,7 +4556,114 @@ function JobsRail({
     timeZone: "America/New_York",
     hour: "numeric",
     minute: "2-digit",
-  }).format(new Date());
+  }).format(clockNow);
+  const pendingRows = rows.filter((job) => job.outcome === "pending");
+  const pendingLater = pendingRows.filter((job) => isFutureTodayJob(job, nowMs)).length;
+  const pendingCoverage = pendingRows.filter((job) => !isFutureTodayJob(job, nowMs) && job.rolledUp).length;
+  const pendingActive = pendingRows.filter((job) => {
+    if (isFutureTodayJob(job, nowMs) || job.rolledUp) return false;
+    return /active|running|working|upcoming/.test(String(job.runStatus || "").toLowerCase());
+  }).length;
+  const pendingAwaiting = Math.max(0, pendingRows.length - pendingLater - pendingCoverage - pendingActive);
+  const pendingOpen = pendingRows.length - pendingLater;
+  const summaryReason = (outcome: TodayJobOutcome): string => {
+    if (outcome === "skipped") {
+      return `${pluralOccurrences(counts.skipped)} intentionally paused, disabled, or skipped at the source. No failure is implied.`;
+    }
+    if (outcome === "broken") {
+      return counts.broken
+        ? `${pluralOccurrences(counts.broken)} reported a failure, missed run, timeout, or blocker and need attention.`
+        : "No source-reported failures, missed runs, timeouts, or blockers.";
+    }
+    if (!counts.pending) return "No occurrences are waiting for a terminal result.";
+    return `${pendingLater} scheduled later today · ${pendingCoverage + pendingActive} active or all-day coverage · ${pendingAwaiting} past due awaiting evidence. Pending means no terminal result yet; it does not mean failed.`;
+  };
+  const summarySublabel = (outcome: TodayJobOutcome): string => {
+    if (outcome === "complete") return "verified";
+    if (outcome === "skipped") return "intentional";
+    if (outcome === "broken") return counts.broken ? "needs attention" : "none";
+    if (!counts.pending) return "none";
+    return `${pendingLater} later · ${pendingOpen} open`;
+  };
+
+  const revealTooltip = useCallback((
+    anchor: HTMLElement,
+    anchorKey: string,
+    eyebrow: string,
+    heading: string,
+    detail: string,
+    tone: TodayJobOutcome,
+  ) => {
+    const rect = anchor.getBoundingClientRect();
+    tooltipOpenRef.current = true;
+    setTooltip({
+      anchorKey,
+      eyebrow,
+      heading,
+      detail,
+      tone,
+      bounds: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+    });
+  }, []);
+
+  const dismissTooltip = useCallback((anchorKey?: string) => {
+    setTooltip((current) => {
+      if (anchorKey && current?.anchorKey !== anchorKey) return current;
+      tooltipOpenRef.current = false;
+      return null;
+    });
+  }, []);
+
+  const pauseAutoFollow = useCallback(() => {
+    lastManualNavigationRef.current = Date.now();
+    if (scrollRef.current) scrollRef.current.dataset.followNowState = "paused";
+    dismissTooltip();
+  }, [dismissTooltip]);
+
+  const centerNow = useCallback((behavior: ScrollBehavior) => {
+    const scroller = scrollRef.current;
+    const marker = nowDividerRef.current;
+    if (!scroller || !marker) return false;
+    scroller.style.setProperty("--today-jobs-edge-pad", "0px");
+    const overflowing = scroller.scrollHeight > scroller.clientHeight + 2;
+    scroller.dataset.overflowing = String(overflowing);
+    if (!overflowing) {
+      scroller.dataset.followNowState = "all-visible";
+      return false;
+    }
+    const edgePad = Math.max(0, (scroller.clientHeight - marker.offsetHeight) / 2);
+    scroller.style.setProperty("--today-jobs-edge-pad", `${edgePad}px`);
+    const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    const scrollerRect = scroller.getBoundingClientRect();
+    const markerRect = marker.getBoundingClientRect();
+    const markerTopInScroller = markerRect.top - scrollerRect.top + scroller.scrollTop;
+    const target = Math.max(0, Math.min(maxScrollTop, markerTopInScroller + markerRect.height / 2 - scroller.clientHeight / 2));
+    if (Math.abs(scroller.scrollTop - target) <= 10) {
+      scroller.dataset.followNowState = "centered";
+      return true;
+    }
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scroller.scrollTo({ top: target, behavior: reduceMotion ? "auto" : behavior });
+    scroller.dataset.followNowState = "centered";
+    return true;
+  }, []);
+
+  const minuteKey = Math.floor(nowMs / 60_000);
+  const followKey = `${todayJobsMeta?.date || "fallback"}|${todayJobsMeta?.nextOccurrenceId || nowIndex}|${rows.length}|${nowIndex}`;
+  useEffect(() => {
+    if (!projectionIsToday) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const scroller = scrollRef.current;
+      if (!scroller) return;
+      const firstCenter = !hasCenteredRef.current;
+      const manuallyReviewing = Date.now() - lastManualNavigationRef.current < 55_000;
+      const focusInside = scroller.contains(document.activeElement);
+      if (!firstCenter && (manuallyReviewing || tooltipOpenRef.current || focusInside)) return;
+      if (centerNow(firstCenter ? "auto" : "smooth")) hasCenteredRef.current = true;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [centerNow, followKey, minuteKey, projectionIsToday]);
+
   return (
     <aside id="today-jobs" className={`jobs-rail jobs-occurrence-rail${sectionCueClass("jobs", liveCues)}`}>
       <SectionCue label={liveCues.focus === "jobs" ? "focus" : "updated"} />
@@ -4360,15 +4679,38 @@ function JobsRail({
         </div>
       </header>
       <div className="today-jobs-summary" aria-label={`${rows.length} job occurrences today`}>
-        {(["complete", "skipped", "broken", "pending"] as TodayJobOutcome[]).map((outcome) => (
-          <article key={outcome} className={`is-${outcome}`}>
-            <span aria-hidden="true" />
-            <div>
-              <em>{outcome}</em>
-              <strong>{counts[outcome]}</strong>
-            </div>
-          </article>
-        ))}
+        {(["complete", "skipped", "broken", "pending"] as TodayJobOutcome[]).map((outcome) => {
+          const interactive = outcome !== "complete";
+          const tooltipKey = `summary-${outcome}`;
+          const reason = interactive ? summaryReason(outcome) : "";
+          return (
+            <article
+              key={outcome}
+              className={`is-${outcome}${interactive ? " has-reason" : ""}`}
+              data-summary={outcome}
+              data-outcome={outcome}
+              data-reason={interactive ? reason : undefined}
+              data-reason-trigger={interactive ? "true" : undefined}
+              tabIndex={interactive ? 0 : undefined}
+              aria-label={`${outcome}, ${pluralOccurrences(counts[outcome])}${interactive ? `. ${reason}` : ""}`}
+              aria-describedby={tooltip?.anchorKey === tooltipKey ? "today-jobs-tooltip" : undefined}
+              onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${outcome} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onMouseLeave={interactive ? () => dismissTooltip(tooltipKey) : undefined}
+              onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${outcome} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onBlur={interactive ? () => dismissTooltip(tooltipKey) : undefined}
+              onKeyDown={interactive ? (event) => {
+                if (event.key === "Escape") dismissTooltip(tooltipKey);
+              } : undefined}
+            >
+              <span aria-hidden="true" />
+              <div>
+                <em>{outcome}</em>
+                <strong>{counts[outcome]}</strong>
+                <small>{summarySublabel(outcome)}</small>
+              </div>
+            </article>
+          );
+        })}
       </div>
       <div className="today-jobs-table" role="table" aria-label="Today's recurring job occurrences">
         <div className="today-jobs-table-head" role="row">
@@ -4378,43 +4720,67 @@ function JobsRail({
           <span role="columnheader">Status</span>
           <span role="columnheader">Last run / duration</span>
         </div>
-        <div className="today-jobs-scroll" role="rowgroup">
-          {rows.length ? rows.map((job, index) => (
-            <React.Fragment key={job.occurrenceId}>
-              {index === nowIndex ? (
-                <div className="today-jobs-now-divider" role="separator">
-                  <span>{nowLabel}</span><i /><strong>Now</strong>
-                </div>
-              ) : null}
-              <article
-                className={`today-job-row is-${job.outcome}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
-                role="row"
-                title={missionText(job.evidence || job.description || job.name)}
-              >
-                <time role="cell">{todayJobTime(job)}</time>
-                <div className="today-job-name" role="cell">
-                  <strong>{missionText(job.name)}</strong>
-                  {job.rolledUp ? <em>{job.completedRuns || 0}/{job.expectedRuns || 0} runs</em> : null}
-                </div>
-                <span role="cell">{todayJobOwner(job)}</span>
-                <span className="today-job-status" role="cell">
-                  <i aria-hidden="true" />{job.runStatus === "running" ? "Running" : job.outcome}
-                </span>
-                <span className="today-job-last" role="cell">
-                  {job.lastRun ? fmtTime(job.lastRun) : "—"}<em>/ {todayJobDuration(job)}</em>
-                </span>
-              </article>
-            </React.Fragment>
-          )) : (
+        <div
+          ref={scrollRef}
+          className="today-jobs-scroll"
+          role="rowgroup"
+          data-follow-now-state="ready"
+          onWheel={pauseAutoFollow}
+          onTouchStart={pauseAutoFollow}
+          onPointerDown={pauseAutoFollow}
+          onKeyDownCapture={(event) => {
+            if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) pauseAutoFollow();
+          }}
+        >
+          {!projectionIsToday ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} stale /> : null}
+          {rows.length ? rows.map((job, index) => {
+            const reason = todayJobReason(job, nowMs);
+            const interactive = job.outcome !== "complete";
+            const tooltipKey = `row-${job.occurrenceId}`;
+            return (
+              <React.Fragment key={job.occurrenceId}>
+                {projectionIsToday && index === nowIndex ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
+                <article
+                  className={`today-job-row is-${job.outcome}${interactive ? " has-reason" : ""}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
+                  role="row"
+                  data-outcome={job.outcome}
+                  data-reason-kind={interactive ? reason.kind : undefined}
+                  data-reason={interactive ? reason.detail : undefined}
+                  data-reason-trigger={interactive ? "true" : undefined}
+                  data-scheduled-at={job.scheduledAt}
+                  tabIndex={interactive ? 0 : undefined}
+                  aria-label={`${todayJobTime(job)}, ${missionText(job.name)}, ${todayJobOwner(job)}, ${todayJobStatusLabel(job, reason)}${interactive ? `. ${reason.detail}` : ""}`}
+                  aria-describedby={tooltip?.anchorKey === tooltipKey ? "today-jobs-tooltip" : undefined}
+                  onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, reason.label, missionText(job.name), reason.detail, job.outcome) : undefined}
+                  onMouseLeave={interactive ? () => dismissTooltip(tooltipKey) : undefined}
+                  onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, reason.label, missionText(job.name), reason.detail, job.outcome) : undefined}
+                  onBlur={interactive ? () => dismissTooltip(tooltipKey) : undefined}
+                  onKeyDown={interactive ? (event) => {
+                    if (event.key === "Escape") dismissTooltip(tooltipKey);
+                  } : undefined}
+                >
+                  <time role="cell">{todayJobTime(job)}</time>
+                  <div className="today-job-name" role="cell">
+                    <strong>{missionText(job.name)}</strong>
+                    {job.rolledUp ? <em>{job.completedRuns || 0}/{job.expectedRuns || 0} runs</em> : null}
+                  </div>
+                  <span role="cell">{todayJobOwner(job)}</span>
+                  <span className="today-job-status" role="cell">
+                    <i aria-hidden="true" />{todayJobStatusLabel(job, reason)}
+                  </span>
+                  <span className="today-job-last" role="cell">
+                    {job.lastRun ? fmtTime(job.lastRun) : "—"}<em>/ {todayJobDuration(job)}</em>
+                  </span>
+                </article>
+              </React.Fragment>
+            );
+          }) : (
             <div className="today-jobs-empty">No recurring job occurrences are published for today yet.</div>
           )}
-          {rows.length && nowIndex === rows.length ? (
-            <div className="today-jobs-now-divider" role="separator">
-              <span>{nowLabel}</span><i /><strong>Now</strong>
-            </div>
-          ) : null}
+          {projectionIsToday && rows.length && nowIndex === rows.length ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
         </div>
       </div>
+      <TodayJobsTooltip tooltip={tooltip} />
     </aside>
   );
 }

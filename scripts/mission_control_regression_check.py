@@ -99,6 +99,10 @@ def check_react_surface() -> None:
         "BrainAttentionStrip",
         "AgenticCryptoPanel",
         "JobsRail",
+        "TodayJobsTooltip",
+        "TodayJobsNowMarker",
+        "todayJobReason",
+        "data-follow-now-state",
         "SignalFeed",
         "agentNeedsFocus",
         "RuntimeCapabilityPanel",
@@ -114,6 +118,8 @@ def check_react_surface() -> None:
     require("brain-feed.json" in data_src and "dashboard-data.json" in data_src, "React data layer must read Brain Feed and dashboard sidecars")
     require("recordValue" in adapters_src and "arrayValue" in adapters_src, "React data adapters must expose sidecar normalizers")
     require("MissionControlState" in types_src, "React types must expose the Control Tower state contract")
+    require("TodayJobEvidence" in types_src, "Today's Jobs evidence must keep its structured source contract")
+    require("normalizeTodayJobEvidence" in data_src, "Today's Jobs evidence must be normalized before rendering")
 
     change_guard = ROOT / "scripts" / "control_tower_change_guard.py"
     require(change_guard.exists(), "missing Control Tower change-control guard")
@@ -147,6 +153,17 @@ def check_dashboard_shape() -> None:
     cron_text = json.dumps(crons).lower()
     for lane in ("sorare", "gmail", "maintenance", "breaking"):
         require(lane in cron_text, f"tracked jobs missing ecosystem lane: {lane}")
+
+    today_jobs = dashboard.get("todayJobs")
+    today_jobs_meta = dashboard.get("todayJobsMeta")
+    require(isinstance(today_jobs, list), "dashboard todayJobs payload must be a list")
+    require(isinstance(today_jobs_meta, dict), "dashboard todayJobsMeta payload must be an object")
+    outcomes = {"complete", "skipped", "broken", "pending"}
+    require(all(isinstance(row, dict) and row.get("outcome") in outcomes for row in today_jobs), "todayJobs rows must use canonical outcomes")
+    meta_counts = today_jobs_meta.get("counts") if isinstance(today_jobs_meta.get("counts"), dict) else {}
+    for outcome in outcomes:
+        actual = sum(row.get("outcome") == outcome for row in today_jobs)
+        require(meta_counts.get(outcome) == actual, f"todayJobsMeta count mismatch for {outcome}")
 
     feeds = dashboard.get("agentBrainFeeds")
     require(isinstance(feeds, dict), "agentBrainFeeds must be an object")
