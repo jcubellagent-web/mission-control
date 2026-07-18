@@ -708,12 +708,12 @@ def occurrence_times(definition: Mapping[str, Any], day: dt.date) -> list[dt.dat
         if seconds <= 0:
             return []
         midnight = dt.datetime.combine(day, dt.time(0), ET)
-        anchor = _parse_timestamp(definition.get("nextRun")) or _parse_timestamp(definition.get("lastRun"))
-        if anchor:
-            anchor_seconds = int((anchor - midnight).total_seconds()) % seconds
-            start = midnight + dt.timedelta(seconds=anchor_seconds)
-        else:
-            start = midnight
+        # Never anchor a day's schedule to mutable run evidence. Doing so
+        # rewrites every earlier occurrence (and its ID) whenever nextRun or
+        # lastRun advances. Native interval sources may publish a stable
+        # offset; otherwise midnight ET is the deterministic daily anchor.
+        offset_seconds = int(spec.get("offsetSeconds") or 0) % seconds
+        start = midnight + dt.timedelta(seconds=offset_seconds)
         return [
             candidate
             for offset in range(0, 86400, seconds)
@@ -783,6 +783,55 @@ def _duration_label(duration_ms: Any) -> str | None:
     return f"{minutes}m {seconds}s" if seconds else f"{minutes}m"
 
 
+def _schedule_interval_seconds(definition: Mapping[str, Any]) -> int:
+    spec = definition.get("scheduleSpec") if isinstance(definition.get("scheduleSpec"), Mapping) else {}
+    seconds = int(spec.get("seconds") or 0)
+    if not seconds:
+        seconds = int(spec.get("intervalMinutes") or 0) * 60
+    if seconds:
+        return max(1, seconds)
+    expression = str(spec.get("expression") or "").strip()
+    parts = expression.split()
+    if len(parts) == 5:
+        minute, hour = parts[:2]
+        if minute.startswith("*/") and minute[2:].isdigit() and hour == "*":
+            return max(60, int(minute[2:]) * 60)
+        if minute == "*" and hour == "*":
+            return 60
+        if minute.isdigit() and hour == "*":
+            return 3600
+    return 0
+
+
+def _occurrence_tolerance(definition: Mapping[str, Any]) -> dt.timedelta:
+    interval_seconds = _schedule_interval_seconds(definition)
+    if interval_seconds:
+        return min(dt.timedelta(minutes=15), dt.timedelta(seconds=max(60, interval_seconds // 2)))
+    return dt.timedelta(minutes=15)
+
+
+def _coverage_freshness(definition: Mapping[str, Any]) -> dt.timedelta:
+    interval_seconds = _schedule_interval_seconds(definition)
+    if not interval_seconds:
+        return dt.timedelta(minutes=30)
+    tolerance_seconds = min(15 * 60, max(60, interval_seconds // 2))
+    return dt.timedelta(seconds=max(15 * 60, interval_seconds + tolerance_seconds))
+
+
+def _can_verify_occurrence(definition: Mapping[str, Any]) -> bool:
+    explicit = definition.get("canVerifyRun")
+    if explicit is not None:
+        return bool(explicit)
+    multi_run = definition.get("multiRun")
+    if isinstance(multi_run, Mapping) and isinstance(multi_run.get("runs"), list):
+        return True
+    return bool(
+        definition.get("lastRun")
+        or definition.get("rawRunStatus")
+        or int(definition.get("errors") or 0)
+    )
+
+
 def _base_outcome(
     definition: Mapping[str, Any], *, day: dt.date
 ) -> tuple[str | None, str]:
@@ -791,26 +840,33 @@ def _base_outcome(
     raw_run_status = str(definition.get("rawRunStatus") or "").lower()
     last_run = _parse_timestamp(definition.get("lastRun"))
     evidence_today = bool(last_run and last_run.date() == day)
+    if not bool(definition.get("enabled", True)) or row_status in {"paused", "disabled", "skipped"}:
+        return "skipped", "paused" if row_status in {"paused", "disabled"} or not bool(definition.get("enabled", True)) else "skipped"
+    if run_status in {"paused", "cancelled"}:
+        return "skipped", run_status
+    if run_status.startswith("skipped") and evidence_today:
+        return "skipped", run_status
+    if raw_run_status.startswith("skipped") and evidence_today:
+        return "skipped", raw_run_status
+
     current_failure = bool(
         (int(definition.get("errors") or 0) > 0 or row_status in {"error", "failed", "broken"})
         and evidence_today
     )
-    scheduled_failure = (
-        run_status == "missed" and (evidence_today or last_run is None)
-    ) or (
-        run_status in {"failed", "error", "timeout"} and evidence_today
-    )
-    raw_failure = raw_run_status in {"failed", "error", "timeout", "missed"} and evidence_today
-    if current_failure or scheduled_failure or raw_failure:
-        return "broken", run_status or "failed"
-    if not bool(definition.get("enabled", True)) or row_status in {"paused", "disabled", "skipped"} or run_status in {"paused", "cancelled"}:
-        return "skipped", run_status or "skipped"
-    if (run_status.startswith("skipped") or raw_run_status.startswith("skipped")) and evidence_today:
-        return "skipped", run_status or raw_run_status
+    if run_status in {"missed", "blocked"}:
+        return "broken", run_status
+    if run_status in {"failed", "error", "timeout"} and evidence_today:
+        return "broken", run_status
+    if raw_run_status in {"failed", "error", "timeout", "missed", "blocked"} and evidence_today:
+        return "broken", raw_run_status
+    if current_failure:
+        if row_status in {"error", "failed", "broken"}:
+            return "broken", row_status
+        return "broken", "failed"
     if run_status in {"running", "working"}:
         return "pending", "running"
-    if run_status == "active":
-        return "pending", "active"
+    if run_status in {"active", "loaded"}:
+        return "pending", run_status
     return None, run_status or "scheduled"
 
 
@@ -835,26 +891,44 @@ def _occurrence_outcome(
     *,
     now: dt.datetime,
     occurrence_count: int,
+    latest_due: dt.datetime | None,
+    evidence_target: dt.datetime | None,
 ) -> tuple[str, str]:
     fixed, run_status = _base_outcome(definition, day=scheduled.date())
-    if fixed:
+    if fixed == "skipped":
         return fixed, run_status
+    if scheduled > now:
+        return "pending", "scheduled"
     multi_done = _multi_run_evidence(definition, scheduled)
     if multi_done is True:
         return "complete", "done"
-    if scheduled > now:
-        return "pending", "scheduled"
+    # Definition-level status describes only the latest due occurrence. It
+    # must not repaint every earlier slot red when the source exposes only its
+    # latest result.
+    if fixed == "broken" and (occurrence_count == 1 or scheduled == latest_due):
+        return fixed, run_status
+    if fixed == "pending" and run_status in {"running", "working"} and (occurrence_count == 1 or scheduled == latest_due):
+        return "pending", "running"
+    tolerance = _occurrence_tolerance(definition)
+    if multi_done is False:
+        if now <= scheduled + tolerance:
+            return "pending", "due"
+        return "broken", run_status if run_status in {"missed", "failed", "error", "timeout", "blocked"} else "overdue"
     last_run = _parse_timestamp(definition.get("lastRun"))
     if last_run and last_run.date() == scheduled.date():
-        interval_seconds = int((definition.get("scheduleSpec") or {}).get("seconds") or 0)
-        tolerance = (
-            min(dt.timedelta(minutes=15), dt.timedelta(seconds=max(1, interval_seconds // 2)))
-            if interval_seconds
-            else dt.timedelta(minutes=15)
-        )
-        if abs(last_run - scheduled) <= tolerance:
+        if occurrence_count > 1 and scheduled == evidence_target:
             return "complete", "done"
-    return "pending", run_status
+        if occurrence_count == 1 and last_run >= scheduled - tolerance:
+            return "complete", "done"
+    if occurrence_count > 1 and scheduled not in {latest_due, evidence_target}:
+        return "pending", "unverified"
+    if now <= scheduled + tolerance:
+        return "pending", run_status if run_status in {"active", "loaded", "running", "working"} else "due"
+    if run_status in {"missed", "failed", "error", "timeout", "blocked"}:
+        return "broken", run_status
+    if not _can_verify_occurrence(definition):
+        return "pending", "unverified"
+    return "broken", "overdue"
 
 
 def materialize_today_jobs(
@@ -874,27 +948,60 @@ def materialize_today_jobs(
         times = occurrence_times(definition, day)
         if not times:
             continue
-        rolled = len(times) > rollup_threshold
+        spec = definition.get("scheduleSpec") if isinstance(definition.get("scheduleSpec"), Mapping) else {}
+        # Interval schedulers generally expose only their latest result, not a
+        # durable per-slot history. Keep one stable coverage row instead of
+        # inventing or retroactively shifting individual occurrences.
+        rolled = str(spec.get("kind") or "") == "interval" or len(times) > rollup_threshold
         if rolled:
             rolled_count += 1
             fixed, run_status = _base_outcome(definition, day=day)
             last_run = _parse_timestamp(definition.get("lastRun"))
-            completed = 1 if last_run and last_run.date() == day else 0
-            if fixed == "pending" and run_status == "active" and definition.get("present"):
-                outcome, run_status, completed = "complete", "coverage-current", len(times)
-            elif fixed:
+            completed = 1 if last_run and last_run.date() == day and fixed != "broken" else 0
+            first_scheduled = times[0]
+            if fixed == "skipped":
                 outcome = fixed
-            elif completed:
-                outcome, run_status = "complete", "done"
+            elif first_scheduled > now_et:
+                outcome, run_status = "pending", "scheduled"
+            elif fixed == "broken":
+                outcome = fixed
+            elif fixed == "pending" and run_status in {"running", "working"}:
+                outcome, run_status = "pending", "running"
+            elif completed and last_run:
+                freshness = _coverage_freshness(definition)
+                if now_et - last_run <= freshness:
+                    outcome, run_status = "complete", "coverage-current"
+                else:
+                    outcome, run_status = "broken", "stale"
+            elif fixed == "pending" and run_status in {"active", "loaded"}:
+                outcome, run_status = "pending", "coverage-loaded"
+            elif not _can_verify_occurrence(definition):
+                outcome, run_status = "pending", "unverified"
+            elif now_et <= first_scheduled + _coverage_freshness(definition):
+                outcome, run_status = "pending", "coverage-due"
             else:
-                outcome = "pending"
+                outcome, run_status = "broken", "overdue"
             scheduled_rows = [(times[0], outcome, run_status or "scheduled")]
         else:
             completed = 0
             scheduled_rows = []
+            due_times = [scheduled for scheduled in times if scheduled <= now_et]
+            latest_due = due_times[-1] if due_times else None
+            last_run = _parse_timestamp(definition.get("lastRun"))
+            evidence_candidates = [
+                scheduled
+                for scheduled in times
+                if last_run and last_run.date() == day and scheduled <= last_run
+            ]
+            evidence_target = evidence_candidates[-1] if evidence_candidates else None
             for scheduled in times:
                 outcome, run_status = _occurrence_outcome(
-                    definition, scheduled, now=now_et, occurrence_count=len(times)
+                    definition,
+                    scheduled,
+                    now=now_et,
+                    occurrence_count=len(times),
+                    latest_due=latest_due,
+                    evidence_target=evidence_target,
                 )
                 completed += outcome == "complete"
                 scheduled_rows.append((scheduled, outcome, run_status))
@@ -909,7 +1016,16 @@ def materialize_today_jobs(
             raw_last_run = definition.get("lastRun")
             last_run_dt = _parse_timestamp(raw_last_run)
             current_last_run = raw_last_run if last_run_dt and last_run_dt.date() == day else None
-            evidence_status = str(definition.get("rawRunStatus") or definition.get("runStatus") or outcome) if current_last_run else outcome
+            evidence_status = run_status or outcome
+            evidence_summary = _text(definition.get("lastError") or "", 140) or None
+            if run_status == "overdue":
+                evidence_summary = "No completion signal arrived within the schedule grace window."
+            elif run_status == "stale":
+                evidence_summary = "The latest completion signal is older than the expected coverage cadence."
+            elif run_status == "coverage-loaded":
+                evidence_summary = "The service is loaded, but no fresh completion or heartbeat timestamp is available."
+            elif run_status == "unverified":
+                evidence_summary = "The scheduler publishes this job but does not provide per-run outcome evidence."
             row = {
                 "occurrenceId": f"{definition_id}@{suffix}",
                 "definitionId": definition_id,
@@ -934,7 +1050,7 @@ def materialize_today_jobs(
                     "source": str(definition.get("source") or "scheduler"),
                     "status": evidence_status,
                     "at": current_last_run,
-                    "summary": _text(definition.get("lastError") or "", 140) or None if current_last_run else None,
+                    "summary": evidence_summary,
                 },
                 "rolledUp": rolled,
                 "expectedRuns": len(times),

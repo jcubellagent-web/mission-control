@@ -14703,12 +14703,24 @@ body,
 }
 
 .today-jobs-summary article em {
+  display: flex;
+  align-items: center;
+  gap: 3px;
   color: currentColor;
   font-size: 7px;
   font-style: normal;
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.today-jobs-summary article em svg,
+.today-job-status svg {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  opacity: 0.78;
+  stroke-width: 2.2;
 }
 
 .today-jobs-summary article strong {

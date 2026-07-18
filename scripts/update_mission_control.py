@@ -3412,7 +3412,20 @@ PY"""
                 else:
                     run_status = 'due'
             else:
-                run_status = 'active' if present else 'due'
+                source_loaded = bool(
+                    target.get('active')
+                    if source == 'launchd'
+                    else codex_state.get('active')
+                    if source == 'codex_automation' and codex_state
+                    else False
+                )
+                if last_run_today or verified_today:
+                    run_status = 'done'
+                else:
+                    # Presence proves inventory only. launchctl/Codex active
+                    # state proves the definition is loaded, not that today's
+                    # occurrences completed successfully.
+                    run_status = 'loaded' if source_loaded else 'due'
         elif target['name'] == 'X Strategic Replies':
             if last_run_today:
                 run_status = 'done'
@@ -3476,6 +3489,7 @@ PY"""
             ),
             'enabled': bool(target.get('enabled', True)),
             'present': present,
+            'canVerifyRun': can_verify_run,
         }
         if hermes_last_failed and not hermes_error_is_current and hermes_job:
             row['lastHistoricalError'] = hermes_job.get('last_error')

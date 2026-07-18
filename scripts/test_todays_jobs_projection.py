@@ -129,10 +129,12 @@ class TodaysJobsProjectionTests(unittest.TestCase):
         self.assertNotIn("JAIMES Cron Brain Feed Audit", {row["name"] for row in projected})
         self.assertNotIn("Monthly cleanup", {row["name"] for row in projected})
         watchdog = [row for row in projected if row["name"] == "Agent Account Auth Watchdog"]
-        self.assertEqual([row["scheduledTime"] for row in watchdog], ["12:45 AM", "6:45 AM", "12:45 PM", "6:45 PM"])
-        self.assertEqual([row["outcome"] for row in watchdog], ["pending", "pending", "pending", "complete"])
+        self.assertEqual(len(watchdog), 1)
+        self.assertEqual(watchdog[0]["scheduledTime"], "Coverage")
+        self.assertEqual(watchdog[0]["outcome"], "complete")
+        self.assertEqual(watchdog[0]["runStatus"], "coverage-current")
 
-    def test_historical_failure_cannot_color_today_broken(self) -> None:
+    def test_historical_failure_is_not_reused_but_missing_today_becomes_overdue(self) -> None:
         historical = {
             "definitionId": "hermes:jaimes:daily-audit",
             "name": "Daily audit",
@@ -152,7 +154,8 @@ class TodaysJobsProjectionTests(unittest.TestCase):
             now=dt.datetime(2026, 7, 17, 22, 30, tzinfo=ET),
         )
         by_name = {row["name"]: row for row in rows}
-        self.assertEqual(by_name["Daily audit"]["outcome"], "pending")
+        self.assertEqual(by_name["Daily audit"]["outcome"], "broken")
+        self.assertEqual(by_name["Daily audit"]["runStatus"], "overdue")
         self.assertIsNone(by_name["Daily audit"]["lastRun"])
         self.assertEqual(by_name["Daily audit"]["previousRun"], "2026-07-13T06:12:54-04:00")
         self.assertEqual(by_name["Current failure"]["outcome"], "broken")

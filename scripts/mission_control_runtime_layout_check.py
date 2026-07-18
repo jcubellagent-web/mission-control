@@ -677,7 +677,7 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     reason_triggers = int(_number(today_jobs.get("reasonTriggerCount"), missing=-1.0))
     if non_green_rows < 0 or non_green_summaries != 3:
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs non-green reason targets are incomplete")
-    elif reason_triggers != non_green_rows + non_green_summaries:
+    if reason_triggers != non_green_rows + non_green_summaries:
         failures.append(
             f"{KIOSK_PROBE_LABEL}: Today's Jobs exposes {reason_triggers} reason trigger(s) "
             f"for {non_green_rows + non_green_summaries} non-green target(s)"
@@ -1022,6 +1022,21 @@ def self_test() -> int:
             "healthHeight": 78,
             "healthOverflowX": 0,
             "healthOverflowY": 0,
+        },
+        "todayJobs": {
+            "rowCount": 113,
+            "nonGreenRowCount": 64,
+            "nonGreenSummaryCount": 3,
+            "reasonTriggerCount": 67,
+            "missingReasonCount": 0,
+            "objectReasonCount": 0,
+            "pendingSummaryReason": "23 scheduled later today · 0 running or active · 28 outcome unverified · 0 inside the grace window awaiting evidence. Open means no terminal result yet; it does not mean failed.",
+            "nowMarkerPresent": True,
+            "nowMarkerLabel": "Current time, 11:03 AM Eastern Time",
+            "scrollOverflowY": 3277,
+            "nowCenterDelta": 0,
+            "followNowState": "centered",
+            "directChildrenValid": True,
         },
     }
     bad_kiosk = json.loads(json.dumps(good_kiosk))

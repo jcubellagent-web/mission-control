@@ -83,6 +83,21 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "healthOverflowX": 0,
             "healthOverflowY": 0,
         },
+        "todayJobs": {
+            "rowCount": 139,
+            "nonGreenRowCount": 94,
+            "nonGreenSummaryCount": 3,
+            "reasonTriggerCount": 97,
+            "missingReasonCount": 0,
+            "objectReasonCount": 0,
+            "pendingSummaryReason": "85 scheduled later today · 1 running or active · 2 outcome unverified · 1 inside the grace window awaiting evidence. Open means no terminal result yet; it does not mean failed.",
+            "nowMarkerPresent": True,
+            "nowMarkerLabel": "Current time, 12:36 AM Eastern Time",
+            "scrollOverflowY": 4000,
+            "nowCenterDelta": 0,
+            "followNowState": "centered",
+            "directChildrenValid": True,
+        },
     }
 
 
@@ -257,6 +272,18 @@ def test_kiosk_legibility_reports_every_regression() -> None:
     finops["healthCount"] = 3
     finops["healthHeight"] = 91
     finops["healthOverflowY"] = 2
+    today_jobs = measurements["todayJobs"]
+    assert isinstance(today_jobs, dict)
+    today_jobs["nonGreenSummaryCount"] = 2
+    today_jobs["reasonTriggerCount"] = 4
+    today_jobs["missingReasonCount"] = 1
+    today_jobs["objectReasonCount"] = 1
+    today_jobs["pendingSummaryReason"] = "Pending jobs"
+    today_jobs["nowMarkerPresent"] = False
+    today_jobs["nowMarkerLabel"] = ""
+    today_jobs["followNowState"] = "ready"
+    today_jobs["nowCenterDelta"] = 50
+    today_jobs["directChildrenValid"] = False
 
     failures = runtime_layout.validate_kiosk_legibility(measurements)
 
@@ -295,6 +322,15 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         "FinOps health rail has 3 cells",
         "FinOps health rail height",
         "FinOps health rail content overflows",
+        "Today's Jobs non-green reason targets are incomplete",
+        "Today's Jobs exposes 4 reason trigger",
+        "Today's Jobs has missing non-green explanations",
+        "Today's Jobs exposes an invalid object/undefined explanation",
+        "Today's Jobs pending summary does not explain future versus failed",
+        "Today's Jobs current-time marker is missing or unlabeled",
+        "Today's Jobs auto-follow state is ready",
+        "Today's Jobs current-time marker is 50px from center",
+        "Today's Jobs rowgroup contains a non-row timeline child",
     )
     assert all(any(fragment in failure for failure in failures) for fragment in expected_fragments)
     assert len(failures) >= len(expected_fragments)
@@ -308,6 +344,7 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         (("finops", "ledgerPresent"), "FinOps model ledger is missing"),
         (("finops", "healthPresent"), "FinOps health rail is missing"),
         (("finops", "providerGeometry"), "FinOps provider identities are incomplete"),
+        (("todayJobs", "pendingSummaryReason"), "Today's Jobs pending summary does not explain future versus failed"),
     ],
 )
 def test_kiosk_legibility_fails_closed_when_required_measurements_are_missing(

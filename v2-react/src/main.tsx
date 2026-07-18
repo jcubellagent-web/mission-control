@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, CircleHelp, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
@@ -4334,7 +4334,7 @@ function todayJobOwner(job: TodayJobOccurrence): string {
   return missionText(raw);
 }
 
-type TodayJobReasonKind = "future" | "running" | "active" | "coverage" | "awaiting" | "paused" | "skipped" | "broken" | "complete";
+type TodayJobReasonKind = "future" | "running" | "active" | "loaded" | "unverified" | "coverage" | "awaiting" | "paused" | "skipped" | "broken" | "complete";
 type TodayJobReason = { kind: TodayJobReasonKind; label: string; detail: string };
 type TodayJobsTooltipState = {
   anchorKey: string;
@@ -4375,7 +4375,9 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
   const expected = Math.max(0, Number(job.expectedRuns || 0));
 
   if (job.outcome === "complete") {
-    return { kind: "complete", label: "Complete", detail: "A successful run was recorded today." };
+    return job.rolledUp
+      ? { kind: "complete", label: "Coverage current", detail: "A fresh successful signal was recorded within this job's expected cadence." }
+      : { kind: "complete", label: "Complete", detail: "A successful run was recorded for this occurrence today." };
   }
 
   if (job.outcome === "skipped") {
@@ -4401,6 +4403,27 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
     const safeSummary = evidence.summary && !/^\[object Object\]$/i.test(evidence.summary)
       ? ` ${evidence.summary}`
       : "";
+    if (runStatus === "overdue") {
+      return {
+        kind: "broken",
+        label: "Missed schedule",
+        detail: `${source} can report run outcomes but did not publish a completion signal within the grace window after ${scheduledClock} ET.${safeSummary}`,
+      };
+    }
+    if (runStatus === "stale") {
+      return {
+        kind: "broken",
+        label: "Coverage signal stale",
+        detail: `${source}'s latest coverage signal is older than its expected cadence. This occurrence needs attention.${safeSummary}`,
+      };
+    }
+    if (runStatus === "missed") {
+      return {
+        kind: "broken",
+        label: "Missed run",
+        detail: `${source} reported that the ${scheduledClock} ET occurrence was missed.${safeSummary}`,
+      };
+    }
     return {
       kind: "broken",
       label: "Needs attention",
@@ -4417,15 +4440,6 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
     };
   }
 
-  if (job.rolledUp) {
-    const progress = expected ? `${completed}/${expected} checks have reported today.` : "No current run has reported yet.";
-    return {
-      kind: "coverage",
-      label: "Coverage still open",
-      detail: `All-day coverage is still ${runStatus === "upcoming" ? "reported upcoming" : "open"}; ${progress} Awaiting the next scheduler update.`,
-    };
-  }
-
   if (/running|working/.test(runStatus)) {
     return {
       kind: "running",
@@ -4434,11 +4448,36 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
     };
   }
 
-  if (runStatus === "active") {
+  if (runStatus === "coverage-loaded") {
+    return {
+      kind: "loaded",
+      label: "Loaded, not verified",
+      detail: `${source} reports the service definition is loaded, but no fresh completion or heartbeat timestamp is available. Loaded does not count as complete.`,
+    };
+  }
+
+  if (runStatus === "unverified") {
+    return {
+      kind: "unverified",
+      label: "Outcome unverified",
+      detail: `${source} publishes this schedule but does not provide enough per-run evidence to label the occurrence complete or broken.`,
+    };
+  }
+
+  if (job.rolledUp) {
+    const progress = expected ? `${completed}/${expected} checks have reported today.` : "No current run has reported yet.";
+    return {
+      kind: "coverage",
+      label: "Coverage awaiting evidence",
+      detail: `This recurring coverage window is still open; ${progress} It remains inside its evidence window.`,
+    };
+  }
+
+  if (runStatus === "active" || runStatus === "loaded") {
     return {
       kind: "active",
-      label: "Active, awaiting evidence",
-      detail: `${source} is active, but the ${scheduledClock} ET checkpoint has no completion timestamp yet.`,
+      label: "Loaded, awaiting evidence",
+      detail: `${source} reports the job is loaded, but the ${scheduledClock} ET checkpoint has no completion timestamp yet.`,
     };
   }
 
@@ -4450,11 +4489,22 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
 }
 
 function todayJobStatusLabel(job: TodayJobOccurrence, reason: TodayJobReason): string {
-  if (job.outcome === "complete") return "Complete";
-  if (job.outcome === "broken") return "Broken";
+  if (job.outcome === "complete") return job.rolledUp && job.runStatus === "coverage-current" ? "Live" : "Complete";
+  if (job.outcome === "broken") {
+    const failureState = `${String(job.runStatus || "").toLowerCase()} ${todayJobEvidence(job).status.toLowerCase()}`;
+    if (/stale/.test(failureState)) return "Stale";
+    if (/overdue/.test(failureState)) return "Overdue";
+    if (/missed/.test(failureState)) return "Missed";
+    if (/timeout/.test(failureState)) return "Timeout";
+    if (/blocked/.test(failureState)) return "Blocked";
+    if (/failed|error/.test(failureState)) return "Failed";
+    return "Broken";
+  }
   if (job.outcome === "skipped") return reason.kind === "paused" ? "Paused" : "Skipped";
   if (reason.kind === "future") return "Scheduled";
   if (reason.kind === "running") return "Running";
+  if (reason.kind === "loaded") return "Loaded";
+  if (reason.kind === "unverified") return "Unverified";
   if (reason.kind === "active") return "Active";
   if (reason.kind === "coverage") return "Coverage";
   return "Awaiting";
@@ -4559,31 +4609,48 @@ function JobsRail({
   }).format(clockNow);
   const pendingRows = rows.filter((job) => job.outcome === "pending");
   const pendingLater = pendingRows.filter((job) => isFutureTodayJob(job, nowMs)).length;
-  const pendingCoverage = pendingRows.filter((job) => !isFutureTodayJob(job, nowMs) && job.rolledUp).length;
-  const pendingActive = pendingRows.filter((job) => {
-    if (isFutureTodayJob(job, nowMs) || job.rolledUp) return false;
-    return /active|running|working|upcoming/.test(String(job.runStatus || "").toLowerCase());
+  const pendingUnverified = pendingRows.filter((job) => {
+    if (isFutureTodayJob(job, nowMs)) return false;
+    return /unverified|coverage-loaded/.test(String(job.runStatus || "").toLowerCase());
   }).length;
-  const pendingAwaiting = Math.max(0, pendingRows.length - pendingLater - pendingCoverage - pendingActive);
-  const pendingOpen = pendingRows.length - pendingLater;
+  const pendingActive = pendingRows.filter((job) => {
+    if (isFutureTodayJob(job, nowMs)) return false;
+    return /active|loaded|running|working/.test(String(job.runStatus || "").toLowerCase())
+      && !/coverage-loaded/.test(String(job.runStatus || "").toLowerCase());
+  }).length;
+  const pendingAwaiting = Math.max(0, pendingRows.length - pendingLater - pendingUnverified - pendingActive);
   const summaryReason = (outcome: TodayJobOutcome): string => {
     if (outcome === "skipped") {
       return `${pluralOccurrences(counts.skipped)} intentionally paused, disabled, or skipped at the source. No failure is implied.`;
     }
     if (outcome === "broken") {
       return counts.broken
-        ? `${pluralOccurrences(counts.broken)} reported a failure, missed run, timeout, or blocker and need attention.`
-        : "No source-reported failures, missed runs, timeouts, or blockers.";
+        ? `${pluralOccurrences(counts.broken)} have a source-reported failure or miss, or an overdue/stale signal from a scheduler capable of reporting outcomes.`
+        : "No failed, missed, overdue, stale, timed-out, or blocked occurrences.";
     }
     if (!counts.pending) return "No occurrences are waiting for a terminal result.";
-    return `${pendingLater} scheduled later today · ${pendingCoverage + pendingActive} active or all-day coverage · ${pendingAwaiting} past due awaiting evidence. Pending means no terminal result yet; it does not mean failed.`;
+    return `${pendingLater} scheduled later today · ${pendingActive} running or active · ${pendingUnverified} outcome unverified · ${pendingAwaiting} inside the grace window awaiting evidence. Open means no terminal result yet; it does not mean failed.`;
   };
   const summarySublabel = (outcome: TodayJobOutcome): string => {
     if (outcome === "complete") return "verified";
     if (outcome === "skipped") return "intentional";
     if (outcome === "broken") return counts.broken ? "needs attention" : "none";
     if (!counts.pending) return "none";
-    return `${pendingLater} later · ${pendingOpen} open`;
+    const openParts = [
+      pendingLater ? `${pendingLater} scheduled` : "",
+      pendingActive ? `${pendingActive} active` : "",
+      pendingUnverified ? `${pendingUnverified} unverified` : "",
+      pendingAwaiting ? `${pendingAwaiting} awaiting` : "",
+    ].filter(Boolean);
+    return openParts.join(" · ");
+  };
+  const summaryLabel = (outcome: TodayJobOutcome): string => outcome === "pending" ? "open" : outcome;
+  const rolledUpProgress = (job: TodayJobOccurrence): string => {
+    if (job.runStatus === "coverage-current") return "coverage live";
+    if (job.runStatus === "coverage-loaded") return "loaded · unverified";
+    if (job.runStatus === "unverified") return "outcome unverified";
+    if (job.outcome === "skipped") return "coverage paused";
+    return `${job.completedRuns || 0}/${job.expectedRuns || 0} verified`;
   };
 
   const revealTooltip = useCallback((
@@ -4692,11 +4759,11 @@ function JobsRail({
               data-reason={interactive ? reason : undefined}
               data-reason-trigger={interactive ? "true" : undefined}
               tabIndex={interactive ? 0 : undefined}
-              aria-label={`${outcome}, ${pluralOccurrences(counts[outcome])}${interactive ? `. ${reason}` : ""}`}
+              aria-label={`${summaryLabel(outcome)}, ${pluralOccurrences(counts[outcome])}${interactive ? `. ${reason}` : ""}`}
               aria-describedby={tooltip?.anchorKey === tooltipKey ? "today-jobs-tooltip" : undefined}
-              onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${outcome} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(outcome)} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
               onMouseLeave={interactive ? () => dismissTooltip(tooltipKey) : undefined}
-              onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${outcome} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(outcome)} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
               onBlur={interactive ? () => dismissTooltip(tooltipKey) : undefined}
               onKeyDown={interactive ? (event) => {
                 if (event.key === "Escape") dismissTooltip(tooltipKey);
@@ -4704,7 +4771,7 @@ function JobsRail({
             >
               <span aria-hidden="true" />
               <div>
-                <em>{outcome}</em>
+                <em>{summaryLabel(outcome)}{interactive ? <CircleHelp aria-hidden="true" /> : null}</em>
                 <strong>{counts[outcome]}</strong>
                 <small>{summarySublabel(outcome)}</small>
               </div>
@@ -4762,11 +4829,11 @@ function JobsRail({
                   <time role="cell">{todayJobTime(job)}</time>
                   <div className="today-job-name" role="cell">
                     <strong>{missionText(job.name)}</strong>
-                    {job.rolledUp ? <em>{job.completedRuns || 0}/{job.expectedRuns || 0} runs</em> : null}
+                    {job.rolledUp ? <em>{rolledUpProgress(job)}</em> : null}
                   </div>
                   <span role="cell">{todayJobOwner(job)}</span>
                   <span className="today-job-status" role="cell">
-                    <i aria-hidden="true" />{todayJobStatusLabel(job, reason)}
+                    <i aria-hidden="true" />{todayJobStatusLabel(job, reason)}{interactive ? <CircleHelp aria-hidden="true" /> : null}
                   </span>
                   <span className="today-job-last" role="cell">
                     {job.lastRun ? fmtTime(job.lastRun) : "—"}<em>/ {todayJobDuration(job)}</em>

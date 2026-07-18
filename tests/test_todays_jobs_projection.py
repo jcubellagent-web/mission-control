@@ -12,6 +12,7 @@ from scripts.todays_jobs_projection import (
     discover_launchd_definitions,
     discover_qa_definitions,
     materialize_today_jobs,
+    occurrence_times,
     parse_crontab_definitions,
 )
 
@@ -146,8 +147,9 @@ def _definition(
     last_run: str | None = None,
     errors: int = 0,
     enabled: bool = True,
+    can_verify_run: bool | None = None,
 ) -> dict:
-    return {
+    definition = {
         "definitionId": f"test:josh2:{name.lower()}",
         "name": name,
         "agent": "JOSH 2.0",
@@ -161,6 +163,9 @@ def _definition(
         "errors": errors,
         "enabled": enabled,
     }
+    if can_verify_run is not None:
+        definition["canVerifyRun"] = can_verify_run
+    return definition
 
 
 def test_materialized_occurrences_are_chronological_and_use_exact_outcomes() -> None:
@@ -187,6 +192,194 @@ def test_materialized_occurrences_are_chronological_and_use_exact_outcomes() -> 
     assert meta["nowIndex"] == 4
     assert meta["nextOccurrenceId"] == rows[4]["occurrenceId"]
     assert meta["counts"] == {"complete": 1, "skipped": 1, "broken": 1, "pending": 2}
+
+
+def test_due_occurrences_stop_looking_pending_after_the_grace_window() -> None:
+    now = dt.datetime(2026, 7, 17, 10, 10, tzinfo=ET)
+    definitions = [
+        _definition("Source missed", 8, run_status="missed", last_run="2026-07-16T08:01:00-04:00"),
+        _definition("No signal", 9, run_status="scheduled"),
+        _definition("Inside grace", 10, run_status="scheduled"),
+        _definition("Future error", 11, status="error", run_status="missed", errors=1),
+        _definition("Late success", 7, run_status="done", last_run="2026-07-17T07:39:00-04:00"),
+    ]
+
+    rows, meta = materialize_today_jobs(definitions, now=now)
+    by_name = {row["name"]: row for row in rows}
+
+    assert by_name["Source missed"]["outcome"] == "broken"
+    assert by_name["Source missed"]["runStatus"] == "missed"
+    assert by_name["No signal"]["outcome"] == "pending"
+    assert by_name["No signal"]["runStatus"] == "unverified"
+    assert by_name["Inside grace"]["outcome"] == "pending"
+    assert by_name["Inside grace"]["runStatus"] == "due"
+    assert by_name["Future error"]["outcome"] == "pending"
+    assert by_name["Future error"]["runStatus"] == "scheduled"
+    assert by_name["Late success"]["outcome"] == "complete"
+    assert meta["counts"] == {"complete": 1, "skipped": 0, "broken": 1, "pending": 3}
+
+
+def test_rolled_coverage_uses_cadence_freshness_instead_of_one_daily_success() -> None:
+    now = dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET)
+
+    def coverage(name: str, last_run: str | None) -> dict:
+        return {
+            "definitionId": f"test:josh2:{name.lower().replace(' ', '-')}",
+            "name": name,
+            "agent": "JOSH 2.0",
+            "source": "cron",
+            "sourceLabel": "Josh Local Cron",
+            "schedule": "Every 5 min",
+            "scheduleSpec": {"kind": "interval", "seconds": 300},
+            "status": "ok",
+            "runStatus": "done" if last_run else "scheduled",
+            "lastRun": last_run,
+            "enabled": True,
+            "canVerifyRun": True,
+        }
+
+    rows, _ = materialize_today_jobs([
+        coverage("Fresh coverage", "2026-07-17T10:15:00-04:00"),
+        coverage("Stale coverage", "2026-07-17T04:00:00-04:00"),
+        coverage("Missing coverage", None),
+    ], now=now)
+    by_name = {row["name"]: row for row in rows}
+
+    assert by_name["Fresh coverage"]["outcome"] == "complete"
+    assert by_name["Fresh coverage"]["runStatus"] == "coverage-current"
+    assert by_name["Stale coverage"]["outcome"] == "broken"
+    assert by_name["Stale coverage"]["runStatus"] == "stale"
+    assert by_name["Missing coverage"]["outcome"] == "broken"
+    assert by_name["Missing coverage"]["runStatus"] == "overdue"
+
+
+def test_loaded_coverage_without_fresh_evidence_is_not_green() -> None:
+    rows, _ = materialize_today_jobs([{
+        "definitionId": "launchd:josh2:loaded",
+        "name": "Loaded service",
+        "agent": "JOSH 2.0",
+        "source": "launchd",
+        "schedule": "Every 5 min",
+        "scheduleSpec": {"kind": "interval", "seconds": 300},
+        "status": "ok",
+        "runStatus": "loaded",
+        "lastRun": None,
+        "present": True,
+        "enabled": True,
+        "canVerifyRun": False,
+    }], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET))
+
+    assert len(rows) == 1
+    assert rows[0]["outcome"] == "pending"
+    assert rows[0]["runStatus"] == "coverage-loaded"
+    assert rows[0]["completedRuns"] == 0
+
+
+def test_blocked_status_wins_over_matching_timestamp() -> None:
+    rows, _ = materialize_today_jobs([
+        _definition(
+            "Blocked",
+            10,
+            run_status="blocked",
+            last_run="2026-07-17T10:00:00-04:00",
+            can_verify_run=True,
+        )
+    ], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET))
+
+    assert rows[0]["outcome"] == "broken"
+    assert rows[0]["runStatus"] == "blocked"
+    assert rows[0]["evidence"]["status"] == "blocked"
+
+
+def test_exact_multi_run_success_wins_over_latest_definition_miss() -> None:
+    definition = {
+        **_definition("Multi", 8, run_status="missed", can_verify_run=True),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,9,10 * * *"},
+        "multiRun": {"runs": [
+            {"time": "8:00 AM", "done": True},
+            {"time": "9:00 AM", "done": True},
+            {"time": "10:00 AM", "done": False},
+        ]},
+    }
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET)
+    )
+
+    assert [(row["scheduledTime"], row["outcome"], row["runStatus"]) for row in rows] == [
+        ("8:00 AM", "complete", "done"),
+        ("9:00 AM", "complete", "done"),
+        ("10:00 AM", "broken", "missed"),
+    ]
+
+
+def test_latest_only_source_status_does_not_repaint_earlier_slots() -> None:
+    definition = {
+        **_definition(
+            "Latest only",
+            0,
+            run_status="missed",
+            last_run="2026-07-17T08:01:00-04:00",
+            can_verify_run=True,
+        ),
+        "scheduleSpec": {"kind": "cron", "expression": "0 */2 * * *"},
+    }
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET)
+    )
+    by_time = {row["scheduledTime"]: row for row in rows}
+
+    assert by_time["8:00 AM"]["outcome"] == "complete"
+    assert by_time["10:00 AM"]["outcome"] == "broken"
+    assert by_time["10:00 AM"]["runStatus"] == "missed"
+    assert all(by_time[label]["runStatus"] == "unverified" for label in [
+        "12:00 AM", "2:00 AM", "4:00 AM", "6:00 AM",
+    ])
+    assert by_time["12:00 PM"]["runStatus"] == "scheduled"
+
+
+def test_disabled_state_wins_over_stale_missed_status() -> None:
+    rows, _ = materialize_today_jobs([
+        _definition(
+            "Paused",
+            8,
+            status="paused",
+            run_status="missed",
+            enabled=False,
+            can_verify_run=True,
+        )
+    ], now=NOW)
+
+    assert rows[0]["outcome"] == "skipped"
+    assert rows[0]["runStatus"] == "paused"
+
+
+def test_interval_projection_is_stable_and_rolls_up_without_rewriting_history() -> None:
+    day = NOW.date()
+    definition = {
+        "definitionId": "hermes:jaimes:stable-interval",
+        "name": "Stable interval",
+        "agent": "JAIMES",
+        "source": "hermes",
+        "schedule": "Every 2 hours",
+        "scheduleSpec": {"kind": "interval", "seconds": 7200},
+        "status": "ok",
+        "runStatus": "done",
+        "lastRun": "2026-07-17T10:27:00-04:00",
+        "nextRun": "2026-07-17T12:27:00-04:00",
+        "canVerifyRun": True,
+    }
+    shifted = {
+        **definition,
+        "lastRun": "2026-07-17T10:35:00-04:00",
+        "nextRun": "2026-07-17T12:35:00-04:00",
+    }
+
+    assert occurrence_times(definition, day) == occurrence_times(shifted, day)
+    first, _ = materialize_today_jobs([definition], now=NOW)
+    second, _ = materialize_today_jobs([shifted], now=NOW)
+    assert len(first) == len(second) == 1
+    assert first[0]["occurrenceId"] == second[0]["occurrenceId"]
+    assert first[0]["scheduledTime"] == second[0]["scheduledTime"] == "Coverage"
 
 
 def test_high_frequency_jobs_roll_up_but_normal_rows_have_no_silent_cap() -> None:
